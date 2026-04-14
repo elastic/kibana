@@ -39,25 +39,13 @@ export function Summary({ count }: { count: number }) {
   } = useKibana();
   const { euiTheme } = useEuiTheme();
 
-  const {
-    scheduleInsightsDiscoveryTask,
-    getInsightsDiscoveryTaskStatus,
-    acknowledgeInsightsDiscoveryTask,
-    cancelInsightsDiscoveryTask,
-  } = useInsightsDiscoveryApi();
+  const { getInsightsDiscoveryTaskStatus, cancelInsightsDiscoveryTask } =
+    useInsightsDiscoveryApi();
 
   const [insights, setInsights] = useState<Insight[] | null>(null);
   const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null);
 
   const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
-  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async () => {
-    /**
-     * Combining scheduling and immediate status update to prevent
-     * React updating the UI in between states causing flickering
-     */
-    await scheduleInsightsDiscoveryTask();
-    await getTaskStatus();
-  }, [scheduleInsightsDiscoveryTask, getTaskStatus]);
 
   useEffect(() => {
     getTaskStatus();
@@ -71,7 +59,7 @@ export function Summary({ count }: { count: number }) {
 
     if (task?.status === TaskStatus.InProgress && previousStatus !== TaskStatus.InProgress) {
       setInsights(null);
-      setSelectedInsight(null); // <-- add this
+      setSelectedInsight(null);
       return;
     }
 
@@ -109,14 +97,6 @@ export function Summary({ count }: { count: number }) {
 
   const handleSelectInsight = useCallback((insight: Insight) => setSelectedInsight(insight), []);
   const handleCloseFlyout = useCallback(() => setSelectedInsight(null), []);
-
-  const onRunDiscoveryClick = async () => {
-    await acknowledgeInsightsDiscoveryTask();
-    await scheduleTask();
-  };
-
-  const isTaskPending =
-    task?.status === TaskStatus.InProgress || isCancellingTask || isSchedulingTask;
 
   const columns = useMemo<Array<EuiBasicTableColumn<Insight>>>(
     () => [
@@ -223,44 +203,22 @@ export function Summary({ count }: { count: number }) {
   if (insights && insights.length > 0) {
     return (
       <>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  iconType="sparkles"
-                  onClick={onRunDiscoveryClick}
-                  isDisabled={isSchedulingTask}
-                  isLoading={isSchedulingTask}
-                  data-test-subj="significant_events_run_discovery_button"
-                >
-                  {i18n.translate('xpack.streams.insights.runDiscoveryButtonLabel', {
-                    defaultMessage: 'Run a discovery',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBasicTable
-              data-test-subj="streamsInsightsTable"
-              columns={columns}
-              items={insights}
-              itemId="id"
-              tableLayout="fixed"
-              rowProps={(insight: Insight) => ({
-                style: {
-                  height: '68px',
-                  background:
-                    selectedInsight?.id === insight.id
-                      ? euiTheme.colors.backgroundBaseInteractiveSelect
-                      : undefined,
-                },
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiBasicTable
+          data-test-subj="streamsInsightsTable"
+          columns={columns}
+          items={insights}
+          itemId="id"
+          tableLayout="fixed"
+          rowProps={(insight: Insight) => ({
+            style: {
+              height: '68px',
+              background:
+                selectedInsight?.id === insight.id
+                  ? euiTheme.colors.backgroundBaseInteractiveSelect
+                  : undefined,
+            },
+          })}
+        />
         {selectedInsight && <InsightFlyout insight={selectedInsight} onClose={handleCloseFlyout} />}
       </>
     );
@@ -295,40 +253,21 @@ export function Summary({ count }: { count: number }) {
         </p>
       }
       actions={
-        <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="center">
+        task?.status === TaskStatus.InProgress || isCancellingTask ? (
           <EuiButton
-            fill
-            size="m"
-            iconType="sparkles"
-            onClick={() => scheduleTask()}
-            isDisabled={isTaskPending}
-            isLoading={isTaskPending}
-            data-test-subj="significant_events_generate_insights_button"
+            onClick={cancelTask}
+            isDisabled={isCancellingTask}
+            data-test-subj="significant_events_cancel_insights_generation_button"
           >
-            {task?.status === TaskStatus.InProgress
-              ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
-                  defaultMessage: 'Discovering Significant Events',
+            {isCancellingTask
+              ? i18n.translate('xpack.streams.insights.cancellingTaskButtonLabel', {
+                  defaultMessage: 'Cancelling',
                 })
-              : i18n.translate('xpack.streams.insights.generateButtonLabel', {
-                  defaultMessage: 'Discover Significant Events',
+              : i18n.translate('xpack.streams.insights.cancelTaskButtonLabel', {
+                  defaultMessage: 'Cancel',
                 })}
           </EuiButton>
-          {(task?.status === TaskStatus.InProgress || isCancellingTask) && (
-            <EuiButton
-              onClick={cancelTask}
-              isDisabled={isCancellingTask}
-              data-test-subj="significant_events_cancel_insights_generation_button"
-            >
-              {isCancellingTask
-                ? i18n.translate('xpack.streams.insights.cancellingTaskButtonLabel', {
-                    defaultMessage: 'Cancelling',
-                  })
-                : i18n.translate('xpack.streams.insights.cancelTaskButtonLabel', {
-                    defaultMessage: 'Cancel',
-                  })}
-            </EuiButton>
-          )}
-        </EuiFlexGroup>
+        ) : undefined
       }
     />
   );

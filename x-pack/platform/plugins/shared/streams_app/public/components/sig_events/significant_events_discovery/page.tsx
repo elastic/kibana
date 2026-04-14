@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingElastic,
-  EuiLoadingSpinner,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiLoadingElastic, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -21,12 +14,14 @@ import { useStreamsAppBreadcrumbs } from '../../../hooks/use_streams_app_breadcr
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { useConnectorConfig } from '../../../hooks/sig_events/use_connector_config';
 import { useUnbackedQueriesCount } from '../../../hooks/sig_events/use_unbacked_queries_count';
 import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { FeaturesTable } from './components/features_table/features_table';
 import { QueriesTable } from './components/queries_table/queries_table';
+import { SignificantEventsDiscoveryDiscoverButton } from './components/significant_events_discovery_discover_button';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
 import { SettingsTab } from './components/settings/tab';
@@ -57,6 +52,7 @@ export function SignificantEventsDiscoveryPage() {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
+  const connectorConfig = useConnectorConfig();
   const { count: unbackedQueriesCount, refetch } = useUnbackedQueriesCount();
 
   const { isMemoryEnabled, isLoading: isSettingsLoading } = useDiscoverySettings();
@@ -164,26 +160,21 @@ export function SignificantEventsDiscoveryPage() {
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
-        pageTitle={
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-            alignItems="center"
-          >
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                {i18n.translate('xpack.streams.significantEventsDiscovery.pageHeaderTitle', {
-                  defaultMessage: 'Significant Events',
-                })}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+        pageTitle={i18n.translate('xpack.streams.significantEventsDiscovery.pageHeaderTitle', {
+          defaultMessage: 'Significant Events',
+        })}
+        rightSideItems={[
+          <SignificantEventsDiscoveryDiscoverButton
+            key="significantEventsDiscoveryDiscover"
+            connectorConfig={connectorConfig}
+          />,
+        ]}
         tabs={tabs}
       />
       <StreamsAppPageTemplate.Body grow>
-        {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
+        {tab === 'streams' && (
+          <StreamsView refreshUnbackedQueriesCount={refetch} connectorConfig={connectorConfig} />
+        )}
         {tab === 'knowledge_indicators' && <FeaturesTable />}
         {tab === 'queries' && <QueriesTable />}
         {tab === 'significant_events' && <InsightsTab />}

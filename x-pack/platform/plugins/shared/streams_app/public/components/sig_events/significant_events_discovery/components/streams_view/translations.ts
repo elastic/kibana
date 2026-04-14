@@ -110,7 +110,14 @@ export const ONBOARDING_SCHEDULING_FAILURE_TITLE = i18n.translate(
 export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsButtonLabel',
   {
-    defaultMessage: 'Discover Significant Events',
+    defaultMessage: 'Run Discovery',
+  }
+);
+
+export const STOP_DISCOVERING_INSIGHTS_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.stopDiscoveringInsightsButtonLabel',
+  {
+    defaultMessage: 'Stop discovering',
   }
 );
 

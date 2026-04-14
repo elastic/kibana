@@ -73,3 +73,5 @@ export function useConnectorConfig() {
     setOnboardingConfig,
   };
 }
+
+export type UseConnectorConfigResult = ReturnType<typeof useConnectorConfig>;
