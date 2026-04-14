@@ -38,6 +38,7 @@ export enum ServiceProviderKeys {
   llama = 'llama',
   contextualai = 'contextualai',
   fireworksai = 'fireworksai',
+  microsoft = 'microsoft',
   nvidia = 'nvidia',
 }
 

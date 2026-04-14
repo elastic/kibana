@@ -138,7 +138,7 @@ describe('utils', () => {
       ['Google', 'googleaistudio'],
       ['OpenAI', 'openai'],
       ['Jina', 'jinaai'],
-      ['Microsoft', 'azureopenai'],
+      ['Microsoft', 'microsoft'],
     ])('%s → %s', (creator, expectedKey) => {
       expect(getProviderKeyForCreator(creator)).toBe(expectedKey);
     });

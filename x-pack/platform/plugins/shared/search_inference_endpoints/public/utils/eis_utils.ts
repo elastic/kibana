@@ -83,7 +83,7 @@ const CREATOR_TO_PROVIDER_KEY: Record<string, ServiceProviderKeys> = {
   Google: ServiceProviderKeys.googleaistudio,
   Jina: ServiceProviderKeys.jinaai,
   OpenAI: ServiceProviderKeys.openai,
-  Microsoft: ServiceProviderKeys.azureopenai,
+  Microsoft: ServiceProviderKeys.microsoft,
 };
 
 export const getProviderKeyForCreator = (creator: string): ServiceProviderKeys | undefined =>
