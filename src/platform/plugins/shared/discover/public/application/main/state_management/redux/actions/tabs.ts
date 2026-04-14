@@ -563,6 +563,7 @@ export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> 
     tabRuntimeState.dataStateContainer$.getValue()?.cancel();
     dispatch(stopSyncing({ tabId }));
     tabRuntimeState.customizationService$.getValue()?.cleanup();
+    dispatch(internalStateSlice.actions.disconnectTab({ tabId }));
   };
 
 function differenceIterateeByTabId(tab: TabState) {
