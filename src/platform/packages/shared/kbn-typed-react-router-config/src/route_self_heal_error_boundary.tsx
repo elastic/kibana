@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 import { InvalidRouteParamsException } from './errors';
@@ -49,10 +49,7 @@ class ErrorBoundary extends React.Component<{
  *
  * When an `InvalidRouteParamsException` is caught, the component calls
  * `history.replace` with the corrected query string carried in the exception's
- * `patched` payload, triggering a re-render with valid params. A `retried` flag
- * prevents infinite redirect loops — if the re-render still fails, the error is
- * re-thrown so an ancestor error boundary can handle it. The flag resets whenever
- * `location.pathname` or `location.search` changes.
+ * `patched` payload, triggering a re-render with valid params.
  *
  * Errors that are **not** `InvalidRouteParamsException` (including unrecoverable
  * decode failures) are always re-thrown upward.
@@ -60,12 +57,10 @@ class ErrorBoundary extends React.Component<{
 export function RouteSelfHealErrorBoundary({ children }: { children: React.ReactNode }) {
   const history = useHistory();
   const location = useLocation();
-  const [retried, setRetried] = useState(false);
 
   const handleError = useCallback(
     (error: Error) => {
-      if (error instanceof InvalidRouteParamsException && !retried) {
-        setRetried(true);
+      if (error instanceof InvalidRouteParamsException) {
         history.replace({
           ...location,
           search: qs.stringify(error.patched.query),
@@ -74,12 +69,8 @@ export function RouteSelfHealErrorBoundary({ children }: { children: React.React
         throw error;
       }
     },
-    [history, location, retried]
+    [history, location]
   );
-
-  useEffect(() => {
-    setRetried(false);
-  }, [location.pathname, location.search]);
 
   return (
     <ErrorBoundary onError={handleError} pathname={location.pathname} search={location.search}>
