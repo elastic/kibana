@@ -128,31 +128,29 @@ export const CrowdstrikeRunscriptOutput = memo<CrowdstrikeRunscriptOutputProps>(
     const hasStdOutput = stdout && stdout.length > 0;
 
     return (
-      <>
-        <EuiFlexItem>
-          {hasErrorOutput && (
+      <EuiFlexItem>
+        {hasErrorOutput && (
+          <CrowdstrikeRunscriptAccordion
+            content={stderr}
+            data-test-subj={`${dataTestSubj}-stderr`}
+            initialIsOpen
+            textSize={textSize}
+            type="error"
+          />
+        )}
+        {hasStdOutput && (
+          <>
+            {hasErrorOutput && <EuiSpacer size="m" />}
             <CrowdstrikeRunscriptAccordion
-              content={stderr}
-              data-test-subj={`${dataTestSubj}-stderr`}
+              content={stdout}
+              data-test-subj={`${dataTestSubj}-stdout`}
               initialIsOpen
               textSize={textSize}
-              type="error"
+              type="output"
             />
-          )}
-          {hasStdOutput && (
-            <>
-              {hasErrorOutput && <EuiSpacer size="m" />}
-              <CrowdstrikeRunscriptAccordion
-                content={stdout}
-                data-test-subj={`${dataTestSubj}-stdout`}
-                initialIsOpen
-                textSize={textSize}
-                type="output"
-              />
-            </>
-          )}
-        </EuiFlexItem>
-      </>
+          </>
+        )}
+      </EuiFlexItem>
     );
   }
 );
