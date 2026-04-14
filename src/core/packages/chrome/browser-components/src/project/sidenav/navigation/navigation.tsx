@@ -28,6 +28,7 @@ export interface ChromeNavigationProps {
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
+  const isNextChrome = useIsNextChrome();
 
   if (!state) {
     return null;
@@ -44,6 +45,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
+        showTopSeparator={isNextChrome}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
@@ -71,7 +73,8 @@ const useNavigationItems = (): NavigationState | null => {
         const { navItems, logoItem, activeItemId } = toNavigationItems(
           nav.navigationTree,
           nav.activeNodes,
-          panelStateManager
+          panelStateManager,
+          isNextChrome
         );
         return {
           solutionId: nav.solutionId,

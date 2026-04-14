@@ -96,7 +96,7 @@ const useGlobalHeaderStyles = () => {
 
     const separator = css`
       width: 1px;
-      height: 20px;
+      height: 24px;
       flex-shrink: 0;
       background: ${euiTheme.colors.borderBaseSubdued};
     `;

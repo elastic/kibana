@@ -28,7 +28,7 @@ import { isActiveFromUrl } from './utils/is_active_from_url';
 const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
 
 export interface NavigationItems {
-  logoItem: SideNavLogo;
+  logoItem?: SideNavLogo;
   navItems: NavigationStructure;
   activeItemId?: string;
 }
@@ -58,12 +58,11 @@ export interface NavigationItems {
 export const toNavigationItems = (
   navigationTree: NavigationTreeDefinitionUI,
   activeNodes: ChromeProjectNavigationNode[][],
-  panelStateManager: PanelStateManager
+  panelStateManager: PanelStateManager,
+  isNextChrome: boolean = false
 ): NavigationItems => {
-  // HACK: extract the logo, primary and footer nodes from the navigation tree
-  let logoNode: ChromeProjectNavigationNode | null = null;
-  let primaryNodes: ChromeProjectNavigationNode[] = [];
-  let footerNodes: ChromeProjectNavigationNode[] = [];
+  let primaryNodes: ChromeProjectNavigationNode[] = navigationTree.body;
+  const footerNodes: ChromeProjectNavigationNode[] = navigationTree.footer ?? [];
 
   let deepestActiveItemId: string | undefined;
   let currentActiveItemIdLevel = -1;
@@ -102,27 +101,30 @@ export const toNavigationItems = (
     );
   };
 
-  primaryNodes = navigationTree.body;
-  footerNodes = navigationTree.footer ?? [];
+  let logoItem: SideNavLogo | undefined;
 
   const homeNodeIndex = primaryNodes.findIndex((node) => node.renderAs === 'home');
   if (homeNodeIndex !== -1) {
-    logoNode = primaryNodes[homeNodeIndex];
-    primaryNodes = primaryNodes.filter((_, index) => index !== homeNodeIndex); // Remove the logo node from primary items
-    maybeMarkActive(logoNode, 0);
+    const homeNode = primaryNodes[homeNodeIndex];
+    maybeMarkActive(homeNode, 0);
+
+    if (isNextChrome) {
+      primaryNodes[homeNodeIndex] = { ...homeNode, title: 'Home', icon: 'home' };
+    } else {
+      primaryNodes = primaryNodes.filter((_, i) => i !== homeNodeIndex);
+      logoItem = {
+        href: warnIfMissing(homeNode, 'href', '/missing-href-😭'),
+        iconType: getIcon(homeNode),
+        id: warnIfMissing(homeNode, 'id', 'kibana'),
+        label: warnIfMissing(homeNode, 'title', 'Kibana'),
+        'data-test-subj': getTestSubj(homeNode, ['nav-item-home']),
+      };
+    }
   } else {
     warnOnce(
       `No "home" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: "home" is expected.`
     );
   }
-
-  const logoItem: SideNavLogo = {
-    href: warnIfMissing(logoNode, 'href', '/missing-href-😭'),
-    iconType: getIcon(logoNode),
-    id: warnIfMissing(logoNode, 'id', 'kibana'),
-    label: warnIfMissing(logoNode, 'title', 'Kibana'),
-    'data-test-subj': logoNode ? getTestSubj(logoNode, ['nav-item-home']) : undefined,
-  };
 
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
     if (!navNode) return null;
@@ -358,13 +360,12 @@ function warnAboutDuplicates(
 }
 
 function warnAboutDuplicateIcons(
-  logoItem: SideNavLogo,
+  logoItem: SideNavLogo | undefined,
   primaryItems: MenuItem[],
   footerItems: MenuItem[]
 ) {
   if (SKIP_WARNINGS) return;
-  // Collect all items with icons (only logo + primary items, excluding fallback)
-  const icons = [logoItem, ...primaryItems, ...footerItems]
+  const icons = [...(logoItem ? [logoItem] : []), ...primaryItems, ...footerItems]
     .filter(
       (item) =>
         item.iconType && item.iconType !== FALLBACK_ICON && typeof item.iconType === 'string'
@@ -379,13 +380,12 @@ function warnAboutDuplicateIcons(
 }
 
 function warnAboutDuplicateIds(
-  logoItem: SideNavLogo,
+  logoItem: SideNavLogo | undefined,
   primaryItems: MenuItem[],
   footerItems: MenuItem[]
 ) {
   if (SKIP_WARNINGS) return;
-  // Collect all IDs from all items, including secondary menu items
-  let allIds: string[] = [logoItem.id];
+  let allIds: string[] = logoItem ? [logoItem.id] : [];
 
   // Helper to extract IDs from menu items including their secondary sections
   const collectIds = (items: MenuItem[]) => {

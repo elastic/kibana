@@ -118,6 +118,8 @@ export interface NavigationProps {
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /** Callback fired when the collapse button is toggled. Omit to hide the toggle button. */
   onToggleCollapsed?: (isCollapsed: boolean) => void;
+  /** When true, renders a centered horizontal separator at the top of the side nav. */
+  showTopSeparator?: boolean;
   /** Content to display inside the side panel footer. */
   sidePanelFooter?: ReactNode;
   /** Optional `data-test-subj` attribute for testing purposes. */
