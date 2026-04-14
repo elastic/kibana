@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
 import { CONTROL_WIDTH_SMALL } from '@kbn/controls-constants';
 import type { DashboardState } from '../../types';
 import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
@@ -74,49 +73,28 @@ describe('transformPinnedPanelsIn', () => {
 });
 
 describe('validation', () => {
-  const TestEmbeddableSchema = schema.object({
-    boo: schema.literal('bear'),
-  });
-
   beforeAll(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../../../kibana_services').embeddableService = {
-      getTransforms: () => ({ schema: TestEmbeddableSchema }),
+      getTransforms: () => ({
+        transformIn: () => {
+          throw new Error('Transform in error.');
+        },
+      }),
     };
   });
 
-  it('should throw badRequest error when panel config fails validation', () => {
+  it('should throw when transform in fails', () => {
     const pinnedPanels = [
       {
         type: 'type2',
         grow: true,
         width: CONTROL_WIDTH_SMALL,
-        config: { boo: 'boop' },
+        config: { boo: 'bear' },
       } as unknown as Required<DashboardState>['pinned_panels'][number],
     ];
-    expect(() => transformPinnedPanelsIn(pinnedPanels, true)).toThrowErrorMatchingInlineSnapshot(
+    expect(() => transformPinnedPanelsIn(pinnedPanels)).toThrowErrorMatchingInlineSnapshot(
       `"Unable to transform 1 pinned panels"`
     );
-  });
-
-  it('should not throw when panel config passes validation', () => {
-    const pinnedPanels = [
-      {
-        type: 'type2',
-        grow: true,
-        width: CONTROL_WIDTH_SMALL,
-        config: { boo: 'bear' },
-      } as unknown as Required<DashboardState>['pinned_panels'][number],
-    ];
-    const result = transformPinnedPanelsIn(pinnedPanels, true);
-    expect(result.pinnedPanels).toEqual({
-      'mock-uuid': {
-        order: 0,
-        type: 'type2',
-        width: 'small',
-        grow: true,
-        config: { boo: 'bear' },
-      },
-    });
   });
 });

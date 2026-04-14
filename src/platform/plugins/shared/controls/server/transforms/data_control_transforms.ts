@@ -13,15 +13,6 @@ import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
-const handleRequiredFields = (state: DataControlState) => {
-  if (!state.data_view_id.length) {
-    throw new Error('Must include a non-empty data view ID');
-  } else if (!state.field_name.length) {
-    throw new Error('Must include a non-empty field name ID');
-  }
-  return;
-};
-
 export function transformDataControlIn(
   state: DataControlState,
   referenceName: string
@@ -29,11 +20,6 @@ export function transformDataControlIn(
   state: Omit<DataControlState, 'data_view_id'> & { dataViewRefName: string };
   references?: Reference[];
 } {
-  try {
-    handleRequiredFields(state);
-  } catch (e) {
-    throw e;
-  }
   const { data_view_id, ...rest } = state;
   return {
     state: {
@@ -92,14 +78,21 @@ export function transformDataControlOut<
     field_name: field_name ?? '',
   };
 
-  try {
-    handleRequiredFields(convertedState);
-  } catch (e) {
-    throw e;
-  }
+  // will throw if one of the required fields is the empty string
+  ensureRequiredFields(convertedState);
+
   return convertedState;
 }
 
 function getLegacyReferenceName(controlId: string, refName: string) {
   return `controlGroup_${controlId}:${refName}`;
 }
+
+const ensureRequiredFields = (state: DataControlState) => {
+  if (!state.data_view_id.length) {
+    throw new Error('Must include a non-empty data view ID');
+  } else if (!state.field_name.length) {
+    throw new Error('Must include a non-empty field name ID');
+  }
+  return;
+};

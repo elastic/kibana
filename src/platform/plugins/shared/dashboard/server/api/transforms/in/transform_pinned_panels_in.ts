@@ -21,10 +21,7 @@ import { TransformPanelInError, TransformPanelsInError } from './transform_panel
 
 type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 
-export function transformPinnedPanelsIn(
-  pinnedPanels: PinnedPanelsState,
-  isDashboardAppRequest: boolean = false
-): {
+export function transformPinnedPanelsIn(pinnedPanels: PinnedPanelsState): {
   pinnedPanels: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
   references: Reference[];
 } {
@@ -36,26 +33,12 @@ export function transformPinnedPanelsIn(
       const { id = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
-      const panelSchema = transforms?.schema;
-      if (isDashboardAppRequest && panelSchema) {
-        try {
-          panelSchema.validate(controlState.config);
-        } catch (error) {
-          panelErrors.push(
-            new TransformPanelInError(
-              `Validation error: ${error.message}`,
-              type,
-              controlState.config
-            )
-          );
-        }
-      }
       let transformedControlState = { ...controlState } as Partial<
         Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'][number]
       >;
 
-      if (transforms?.transformIn) {
-        try {
+      try {
+        if (transforms?.transformIn) {
           const transformed = transforms.transformIn(controlState.config);
           // prefix all the reference names with their IDs so that they are unique
           references = [
@@ -72,26 +55,21 @@ export function transformPinnedPanelsIn(
                 dataViewRefName: `${id}:${transformedState.dataViewRefName}`,
               },
             };
-          } else {
-            transformedControlState = {
-              ...transformedControlState,
-              config: transformedState,
-            };
           }
-        } catch (e) {
-          panelErrors.push(
-            new TransformPanelInError(
-              `Transform error: ${e.message}`,
-              controlState.type,
-              controlState.config
-            )
-          );
+        } else {
+          transformedControlState = {
+            ...transformedControlState,
+            config: controlState.config,
+          };
         }
-      } else {
-        transformedControlState = {
-          ...transformedControlState,
-          config: controlState.config,
-        };
+      } catch (e) {
+        panelErrors.push(
+          new TransformPanelInError(
+            `Transform error: ${e.message}`,
+            controlState.type,
+            controlState.config
+          )
+        );
       }
 
       const { width, grow, config } = transformedControlState;
