@@ -39,7 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .send({
           kind: 'alert',
-          metadata: { name: 'get-test-rule', owner: 'team-a', labels: ['test'] },
+          metadata: { name: 'get-test-rule', owner: 'team-a', tags: ['test'] },
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
           evaluation: {
@@ -62,7 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.metadata).to.eql({
         name: 'get-test-rule',
         owner: 'team-a',
-        labels: ['test'],
+        tags: ['test'],
       });
       expect(response.body.time_field).to.be('@timestamp');
       expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });

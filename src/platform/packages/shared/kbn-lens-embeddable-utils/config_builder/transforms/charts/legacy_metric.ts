@@ -20,7 +20,7 @@ import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
   addLayerColumn,
-  buildDatasetState,
+  buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
@@ -43,11 +43,14 @@ import {
   getDatasourceLayers,
 } from './utils';
 import {
+  AUTO_COLOR,
   fromColorByValueAPIToLensState,
   fromColorByValueLensStateToAPI,
+  isAutoColor,
   isColorByValueAbsolute,
 } from '../coloring';
-import { isEsqlTableTypeDataset } from '../../utils';
+import { isEsqlTableTypeDataSource } from '../../utils';
+import { stripUndefined } from './utils';
 
 const ACCESSOR = 'legacy_metric_accessor';
 
@@ -61,11 +64,14 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
     size: layer.metric.size,
     titlePosition: layer.metric.labels?.alignment,
     textAlign: layer.metric.values?.alignment,
-    ...(layer.metric.apply_color_to && layer.metric.color
-      ? {
+    ...(layer.metric.apply_color_to
+      ? stripUndefined({
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
-          palette: fromColorByValueAPIToLensState(layer.metric.color),
-        }
+          palette:
+            layer.metric.color && !isAutoColor(layer.metric.color)
+              ? fromColorByValueAPIToLensState(layer.metric.color)
+              : undefined,
+        })
       : { colorMode: 'None' }),
   };
 }
@@ -82,15 +88,21 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
+  const dataSource = buildDataSourceState(
+    layer,
+    layerId,
+    adHocDataViews,
+    references,
+    adhocReferences
+  );
 
-  if (!dataset || dataset.type == null) {
-    throw new Error('Unsupported dataset type');
+  if (!dataSource || dataSource.type == null || isEsqlTableTypeDataSource(dataSource)) {
+    throw new Error('Unsupported DataSource type');
   }
 
   const props: DeepPartial<DeepMutable<LegacyMetricState>> = {
     ...generateApiLayer(layer),
-    metric: isEsqlTableTypeDataset(dataset)
+    metric: isEsqlTableTypeDataSource(dataSource)
       ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
       : operationFromColumn(visualization.accessor, layer as FormBasedLayer),
   } as LegacyMetricState;
@@ -113,20 +125,20 @@ function reverseBuildVisualizationState(
       }
     }
 
-    if (visualization.colorMode && visualization.colorMode !== 'None' && visualization.palette) {
+    if (visualization.colorMode && visualization.colorMode !== 'None') {
       props.metric.apply_color_to =
         visualization.colorMode === 'Background' ? 'background' : 'value';
 
-      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      if (isColorByValueAbsolute(colorByValue)) {
-        props.metric.color = colorByValue;
+      const color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
+      if (isColorByValueAbsolute(color) || isAutoColor(color)) {
+        props.metric.color = color;
       }
     }
   }
 
   return {
     type: 'legacy_metric',
-    dataset: dataset satisfies LegacyMetricState['dataset'],
+    data_source: dataSource satisfies LegacyMetricState['data_source'],
     ...props,
   } as LegacyMetricState;
 }

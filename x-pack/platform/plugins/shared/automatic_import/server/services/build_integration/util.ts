@@ -108,13 +108,7 @@ const buildNestedFieldStructure = (flatFields: FieldMappingEntry[]): FieldYamlEn
       }
 
       if (!isLeaf) {
-        let children = existing.fields;
-        if (!children) {
-          existing.type = 'group';
-          children = [];
-          existing.fields = children;
-        }
-        currentLevel = children;
+        currentLevel = existing.fields ?? [];
       }
     }
   }
@@ -196,4 +190,9 @@ export const addChangelogToZip = (
 
 export const addReadmeToZip = (zip: AdmZip, rootDir: string, readmeContent: string): void => {
   zip.addFile(path.join(rootDir, 'docs', 'README.md'), Buffer.from(readmeContent));
+};
+
+export const addLogoToZip = (zip: AdmZip, rootDir: string, logoBase64: string): void => {
+  const logoBuffer = Buffer.from(logoBase64, 'base64');
+  zip.addFile(path.join(rootDir, 'img', 'logo.svg'), logoBuffer);
 };

@@ -16,6 +16,7 @@ import type {
   WorkflowAiChatEventTypes,
 } from './ai_chat/types';
 import type {
+  ReportWorkflowExecutionsCancelledActionParams,
   ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
@@ -107,6 +108,7 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: ReportWorkflowStepTestRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: ReportWorkflowRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: ReportWorkflowRunCancelledActionParams;
+  [WorkflowExecutionEventTypes.WorkflowExecutionsCancelled]: ReportWorkflowExecutionsCancelledActionParams;
   [WorkflowUIEventTypes.WorkflowListViewed]: ReportWorkflowListViewedActionParams;
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
   [WorkflowUIEventTypes.WorkflowCreateOpened]: ReportWorkflowCreateOpenedActionParams;

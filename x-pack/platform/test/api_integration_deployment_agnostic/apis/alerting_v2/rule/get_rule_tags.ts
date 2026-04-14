@@ -18,14 +18,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
-  async function createRule(roleAuthc: RoleCredentials, name: string, labels?: string[]) {
+  async function createRule(roleAuthc: RoleCredentials, name: string, tags?: string[]) {
     return supertestWithoutAuth
       .post(RULE_API_PATH)
       .set(roleAuthc.apiKeyHeader)
       .set(samlAuth.getInternalRequestHeader())
       .send({
         kind: 'alert',
-        metadata: { name, ...(labels ? { labels } : {}) },
+        metadata: { name, ...(tags ? { tags } : {}) },
         time_field: '@timestamp',
         schedule: { every: '5m' },
         evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
@@ -58,7 +58,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should deduplicate tags shared across many rules', async () => {
-      const rulesWithLabels: Array<[string, string[]]> = [
+      const rulesWithTags: Array<[string, string[]]> = [
         ['tags-rule-1', ['prod', 'infra', 'us-east-1']],
         ['tags-rule-2', ['prod', 'security', 'eu-west-1']],
         ['tags-rule-3', ['staging', 'infra', 'us-west-2']],
@@ -69,8 +69,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ['tags-rule-8', ['dev', 'infra', 'ap-northeast-1']],
       ];
 
-      for (const [name, labels] of rulesWithLabels) {
-        const r = await createRule(roleAuthc, name, labels);
+      for (const [name, tags] of rulesWithTags) {
+        const r = await createRule(roleAuthc, name, tags);
         expect(r.status).to.be(200);
       }
 
@@ -103,7 +103,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    it('should include tags from a rule with no overlapping labels', async () => {
+    it('should include tags from a rule with no overlapping tag sets', async () => {
       const r = await createRule(roleAuthc, 'tags-rule-unique', ['custom-team', 'nightly']);
       expect(r.status).to.be(200);
 
@@ -117,8 +117,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.tags).to.contain('nightly');
     });
 
-    it('should not include tags for rules without labels', async () => {
-      const r = await createRule(roleAuthc, 'tags-rule-no-labels');
+    it('should not include tags for rules without tags', async () => {
+      const r = await createRule(roleAuthc, 'tags-rule-no-tags');
       expect(r.status).to.be(200);
 
       const response = await supertestWithoutAuth
