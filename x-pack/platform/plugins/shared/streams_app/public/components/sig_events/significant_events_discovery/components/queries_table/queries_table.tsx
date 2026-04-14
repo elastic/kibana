@@ -80,7 +80,7 @@ import {
   PROMOTE_ALL_ERROR_TOAST_TITLE,
   PROMOTE_QUERY_ACTION_DESCRIPTION,
   PROMOTE_QUERY_ACTION_TITLE,
-  RULE_COUNT_LABEL,
+  getRuleCountLabel,
   SAVE_QUERY_ERROR_TOAST_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
@@ -464,7 +464,7 @@ export function QueriesTable() {
                       id="xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutMessage"
                       defaultMessage="Based on severity, we recommend creating {ruleCount} based on the last run."
                       values={{
-                        ruleCount: <strong>{RULE_COUNT_LABEL(unbackedCount)}</strong>,
+                        ruleCount: <strong>{getRuleCountLabel(unbackedCount)}</strong>,
                       }}
                     />
                   </p>

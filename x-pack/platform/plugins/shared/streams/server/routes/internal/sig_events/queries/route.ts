@@ -61,7 +61,7 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
 
     const queryClient = await getQueryClient();
     const minSeverityScore = params?.query?.minSeverityScore;
-    const count = await queryClient.getUnbackedQueriesCount(minSeverityScore);
+    const count = await queryClient.getUnbackedQueriesCount({ minSeverityScore });
     return { count };
   },
 });
@@ -112,7 +112,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
 
     const queryClient = await getQueryClient();
     const minSeverityScore = params?.body?.minSeverityScore;
-    const all = await queryClient.getAllUnbackedQueries(minSeverityScore);
+    const all = await queryClient.getAllUnbackedQueries({ minSeverityScore });
     const requestedQueryIds = params?.body?.queryIds ?? [];
 
     let toPromote = all;

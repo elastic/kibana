@@ -30,7 +30,7 @@ interface QueriesApi {
   }) => Promise<void>;
   getUnbackedQueriesCount: (
     signal?: AbortSignal | null,
-    minSeverityScore?: number
+    opts?: { minSeverityScore?: number }
   ) => Promise<{ count: number }>;
   abort: () => void;
 }
@@ -119,10 +119,10 @@ export function useQueriesApi(): QueriesApi {
       },
       getUnbackedQueriesCount: async (
         requestSignal?: AbortSignal | null,
-        minSeverityScore?: number
+        opts?: { minSeverityScore?: number }
       ) => {
         return streamsRepositoryClient.fetch('GET /internal/streams/queries/_unbacked_count', {
-          params: { query: { minSeverityScore } },
+          params: { query: { minSeverityScore: opts?.minSeverityScore } },
           signal: requestSignal ?? signal,
         });
       },

@@ -17,7 +17,10 @@ import { useQueriesApi } from './use_queries_api';
  */
 export const HIGH_SEVERITY_THRESHOLD = 60;
 
-export const UNBACKED_QUERIES_COUNT_QUERY_KEY = ['unbackedQueriesCount'] as const;
+export const UNBACKED_QUERIES_COUNT_QUERY_KEY = [
+  'unbackedQueriesCount',
+  HIGH_SEVERITY_THRESHOLD,
+] as const;
 
 export function useUnbackedQueriesCount() {
   const showFetchErrorToast = useFetchErrorToast();
@@ -26,7 +29,7 @@ export function useUnbackedQueriesCount() {
   const query = useQuery({
     queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY,
     queryFn: async ({ signal }: QueryFunctionContext) => {
-      return getUnbackedQueriesCount(signal ?? null, HIGH_SEVERITY_THRESHOLD);
+      return getUnbackedQueriesCount(signal ?? null, { minSeverityScore: HIGH_SEVERITY_THRESHOLD });
     },
     onError: showFetchErrorToast,
   });

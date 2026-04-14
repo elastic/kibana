@@ -521,7 +521,7 @@ describe('QueryClient backward compatibility', () => {
         });
         const { client } = createQueryClient({ storageClient });
 
-        const count = await client.getUnbackedQueriesCount(60);
+        const count = await client.getUnbackedQueriesCount({ minSeverityScore: 60 });
 
         const searchArgs = storageClient.search.mock.calls[0][0];
         const filter: unknown[] = searchArgs.query.bool.filter;
@@ -557,7 +557,7 @@ describe('QueryClient backward compatibility', () => {
         storageClient.search.mockResolvedValue({ hits: { hits: [] } });
         const { client } = createQueryClient({ storageClient });
 
-        await client.getAllUnbackedQueries(60);
+        await client.getAllUnbackedQueries({ minSeverityScore: 60 });
 
         const searchArgs = storageClient.search.mock.calls[0][0];
         const filter: unknown[] = searchArgs.query.bool.filter;

@@ -168,7 +168,7 @@ export const CREATE_RULES_BUTTON = i18n.translate(
   { defaultMessage: 'Create rules' }
 );
 
-export const RULE_COUNT_LABEL = (count: number) =>
+export const getRuleCountLabel = (count: number) =>
   i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.ruleCountLabel', {
     defaultMessage: '{count, plural, one {# new rule} other {# new rules}}',
     values: { count },
