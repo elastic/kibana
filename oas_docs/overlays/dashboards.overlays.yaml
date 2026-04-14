@@ -1116,7 +1116,7 @@ actions:
         Creates a new dashboard with the given ID if none exists, or replaces the complete state of an
         existing one.
 
-        > warning
+        > warn
         > This is a full replacement. Any panels not included in the request body are permanently
         > removed. To make targeted changes, retrieve the current state first with
         > GET /api/dashboards/{id}, apply your changes, and submit the full updated object.
