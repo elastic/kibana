@@ -15,7 +15,7 @@ import {
 import { getSourcererScopeId } from '../../../helpers';
 
 export interface CellActionRendererProps {
-  children: React.ReactNode;
+  children: NonNullable<React.ReactNode>;
   field: string;
   scopeId: string;
   value: CellActionFieldValue;

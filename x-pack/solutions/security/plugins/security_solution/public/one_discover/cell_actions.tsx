@@ -5,93 +5,63 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { copyToClipboard, EuiButtonIcon, EuiFlexGroup, EuiPopover, EuiToolTip } from '@elastic/eui';
-import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { CellActionFieldValue } from '../common/components/cell_actions';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   CellActionRenderer,
   CellActionRendererProps,
 } from '../flyout_v2/shared/components/cell_actions';
 
-interface DiscoverCellActionRendererDeps {
-  columns?: string[];
-  filter?: DocViewFilterFn;
-  onAddColumn?: (columnName: string) => void;
-  onRemoveColumn?: (columnName: string) => void;
-}
+type DiscoverCellActionRendererDeps = Pick<
+  DocViewRenderProps,
+  'columns' | 'filter' | 'onAddColumn' | 'onRemoveColumn'
+>;
 
-interface DiscoverCellAction {
-  id: string;
-  iconType: IconType;
-  label: string;
-  onClick: () => void;
-}
-
-interface DiscoverCellActionsProps
-  extends CellActionRendererProps,
-    DiscoverCellActionRendererDeps {}
-
-const FILTER_FOR_VALUE_LABEL = i18n.translate(
+const filterForValueLabel = i18n.translate(
   'xpack.securitySolution.oneDiscover.flyoutCellActions.filterForValue',
   {
     defaultMessage: 'Filter for value',
   }
 );
 
-const FILTER_OUT_VALUE_LABEL = i18n.translate(
+const filterOutValueLabel = i18n.translate(
   'xpack.securitySolution.oneDiscover.flyoutCellActions.filterOutValue',
   {
     defaultMessage: 'Filter out value',
   }
 );
 
-const FILTER_FOR_FIELD_PRESENT_LABEL = i18n.translate(
+const filterForFieldPresentLabel = i18n.translate(
   'xpack.securitySolution.oneDiscover.flyoutCellActions.filterForFieldPresent',
   {
     defaultMessage: 'Filter for field present',
   }
 );
 
-const TOGGLE_COLUMN_LABEL = i18n.translate(
+const toggleColumnLabel = i18n.translate(
   'xpack.securitySolution.oneDiscover.flyoutCellActions.toggleColumn',
   {
     defaultMessage: 'Toggle column in table',
   }
 );
 
-const COPY_TO_CLIPBOARD_LABEL = i18n.translate(
+const copyToClipboardLabel = i18n.translate(
   'xpack.securitySolution.oneDiscover.flyoutCellActions.copyToClipboard',
   {
     defaultMessage: 'Copy to clipboard',
   }
 );
 
-const getCopyValue = (value: CellActionFieldValue): string => {
-  if (Array.isArray(value)) {
-    return value.map((item) => (item == null ? '' : String(item))).join(', ');
+const fieldValueActionsLabel = i18n.translate(
+  'xpack.securitySolution.oneDiscover.flyoutCellActions.ariaLabel',
+  {
+    defaultMessage: 'Field value actions',
   }
+);
 
-  if (value == null) {
-    return '';
-  }
-
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-
-  return String(value);
-};
-
-const hasFilterableValue = (value: CellActionFieldValue): boolean => {
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-
-  return value !== null && value !== undefined && value !== '';
-};
+const closePopoverPlaceholder = () => {};
 
 const DiscoverCellActions = ({
   children,
@@ -101,69 +71,52 @@ const DiscoverCellActions = ({
   filter,
   onAddColumn,
   onRemoveColumn,
-}: DiscoverCellActionsProps) => {
+}: CellActionRendererProps & DiscoverCellActionRendererDeps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isColumnAdded = columns?.includes(field) ?? false;
-  const shouldShowToggleColumn =
-    columns != null &&
-    ((isColumnAdded && onRemoveColumn != null) || (!isColumnAdded && onAddColumn != null));
+  const copyValue = typeof value === 'string' ? value : JSON.stringify(value) ?? '';
 
-  const actions = useMemo<DiscoverCellAction[]>(() => {
-    const nextActions: DiscoverCellAction[] = [];
+  const actions = [];
 
-    if (filter && hasFilterableValue(value)) {
-      nextActions.push(
-        {
-          id: 'filterIn',
-          iconType: 'plusCircle',
-          label: FILTER_FOR_VALUE_LABEL,
-          onClick: () => filter(field, value, '+'),
-        },
-        {
-          id: 'filterOut',
-          iconType: 'minusCircle',
-          label: FILTER_OUT_VALUE_LABEL,
-          onClick: () => filter(field, value, '-'),
-        }
-      );
-    }
-
-    if (filter) {
-      nextActions.push({
+  if (filter) {
+    actions.push(
+      {
+        id: 'filterIn',
+        iconType: 'plusCircle',
+        label: filterForValueLabel,
+        onClick: () => filter(field, value, '+'),
+      },
+      {
+        id: 'filterOut',
+        iconType: 'minusCircle',
+        label: filterOutValueLabel,
+        onClick: () => filter(field, value, '-'),
+      },
+      {
         id: 'filterExists',
         iconType: 'filter',
-        label: FILTER_FOR_FIELD_PRESENT_LABEL,
+        label: filterForFieldPresentLabel,
         onClick: () => filter('_exists_', field, '+'),
-      });
-    }
+      }
+    );
+  }
 
-    if (shouldShowToggleColumn) {
-      nextActions.push({
-        id: 'toggleColumn',
-        iconType: isColumnAdded ? 'cross' : 'plusCircle',
-        label: TOGGLE_COLUMN_LABEL,
-        onClick: () => {
-          if (isColumnAdded) {
-            onRemoveColumn?.(field);
-          } else {
-            onAddColumn?.(field);
-          }
-        },
-      });
-    }
+  if (onAddColumn || onRemoveColumn) {
+    actions.push({
+      id: 'toggleColumn',
+      iconType: isColumnAdded ? 'cross' : 'plusCircle',
+      label: toggleColumnLabel,
+      onClick: () => (isColumnAdded ? onRemoveColumn?.(field) : onAddColumn?.(field)),
+    });
+  }
 
-    if (hasFilterableValue(value)) {
-      nextActions.push({
-        id: 'copyToClipboard',
-        iconType: 'copy',
-        label: COPY_TO_CLIPBOARD_LABEL,
-        onClick: () => copyToClipboard(getCopyValue(value)),
-      });
-    }
-
-    return nextActions;
-  }, [field, filter, isColumnAdded, onAddColumn, onRemoveColumn, shouldShowToggleColumn, value]);
+  actions.push({
+    id: 'copyToClipboard',
+    iconType: 'copy',
+    label: copyToClipboardLabel,
+    onClick: () => copyToClipboard(copyValue),
+  });
 
   if (actions.length === 0) {
     return <>{children}</>;
@@ -188,19 +141,14 @@ const DiscoverCellActions = ({
       data-test-subj="securitySolutionOneDiscoverCellActions"
     >
       <EuiPopover
-        button={React.isValidElement(children) ? children : <span>{children}</span>}
+        button={children}
         isOpen={isPopoverOpen}
         anchorPosition="downCenter"
         closePopover={closePopoverPlaceholder}
         panelPaddingSize="s"
         panelStyle={{ minWidth: '24px' }}
         display="inline-block"
-        aria-label={i18n.translate(
-          'xpack.securitySolution.oneDiscover.flyoutCellActions.ariaLabel',
-          {
-            defaultMessage: 'Field value actions',
-          }
-        )}
+        aria-label={fieldValueActionsLabel}
       >
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
           {actions.map((action) => (
@@ -223,15 +171,13 @@ const DiscoverCellActions = ({
   );
 };
 
-const closePopoverPlaceholder = () => {};
-
 export const createDiscoverCellActionRenderer = ({
   columns,
   filter,
   onAddColumn,
   onRemoveColumn,
 }: DiscoverCellActionRendererDeps): CellActionRenderer => {
-  const DiscoverCellActionRenderer = (props: CellActionRendererProps) => (
+  const Renderer: CellActionRenderer = (props) => (
     <DiscoverCellActions
       {...props}
       columns={columns}
@@ -240,10 +186,6 @@ export const createDiscoverCellActionRenderer = ({
       onRemoveColumn={onRemoveColumn}
     />
   );
-
-  DiscoverCellActionRenderer.displayName = 'DiscoverCellActionRenderer';
-
-  return DiscoverCellActionRenderer;
+  Renderer.displayName = 'DiscoverCellActionRenderer';
+  return Renderer;
 };
-
-DiscoverCellActions.displayName = 'DiscoverCellActions';
