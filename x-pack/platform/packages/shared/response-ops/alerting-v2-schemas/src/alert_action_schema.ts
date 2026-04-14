@@ -6,6 +6,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  ackActionType,
+  unackActionType,
+  tagActionType,
+  snoozeActionType,
+  unsnoozeActionType,
+  activateActionType,
+  deactivateActionType,
+  alertActionFullSchemas,
+} from '@kbn/alerting-v2-alert-actions';
 
 export enum ALERT_EPISODE_STATUS {
   INACTIVE = 'inactive',
@@ -29,87 +39,29 @@ export enum ALERT_EPISODE_ACTION_TYPE {
 export type AlertEpisodeActionType =
   (typeof ALERT_EPISODE_ACTION_TYPE)[keyof typeof ALERT_EPISODE_ACTION_TYPE];
 
-const ackActionSchema = z.object({
-  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACK).describe('Acknowledges an alert.'),
-  episode_id: z.string().describe('The episode identifier for the alert to acknowledge.'),
-});
-
-const unackActionSchema = z.object({
-  action_type: z
-    .literal(ALERT_EPISODE_ACTION_TYPE.UNACK)
-    .describe('Removes acknowledgement from an alert.'),
-  episode_id: z.string().describe('The episode identifier for the alert to unacknowledge.'),
-});
-
-const tagActionSchema = z.object({
-  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.TAG).describe('Adds tags to an alert.'),
-  tags: z.array(z.string()).describe('List of tags to add to the alert.'),
-});
-
-const snoozeActionSchema = z.object({
-  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
-  expiry: z.string().optional().describe('ISO datetime when snooze should expire.'),
-});
-
-const unsnoozeActionSchema = z.object({
-  action_type: z
-    .literal(ALERT_EPISODE_ACTION_TYPE.UNSNOOZE)
-    .describe('Removes snooze from an alert.'),
-});
-
-const activateActionSchema = z.object({
-  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACTIVATE).describe('Activates an alert.'),
-  reason: z.string().describe('Reason for activating the alert.'),
-});
-
-const deactivateActionSchema = z.object({
-  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.DEACTIVATE).describe('Deactivates an alert.'),
-  reason: z.string().describe('Reason for deactivating the alert.'),
-});
-
-export const createAckAlertActionBodySchema = ackActionSchema.omit({ action_type: true }).strict();
+export const createAckAlertActionBodySchema = ackActionType.routeBodySchema;
 export type CreateAckAlertActionBody = z.infer<typeof createAckAlertActionBodySchema>;
 
-export const createUnackAlertActionBodySchema = unackActionSchema
-  .omit({ action_type: true })
-  .strict();
+export const createUnackAlertActionBodySchema = unackActionType.routeBodySchema;
 export type CreateUnackAlertActionBody = z.infer<typeof createUnackAlertActionBodySchema>;
 
-export const createTagAlertActionBodySchema = tagActionSchema.omit({ action_type: true }).strict();
+export const createTagAlertActionBodySchema = tagActionType.routeBodySchema;
 export type CreateTagAlertActionBody = z.infer<typeof createTagAlertActionBodySchema>;
 
-export const createSnoozeAlertActionBodySchema = snoozeActionSchema
-  .omit({ action_type: true })
-  .strict();
+export const createSnoozeAlertActionBodySchema = snoozeActionType.routeBodySchema;
 export type CreateSnoozeAlertActionBody = z.infer<typeof createSnoozeAlertActionBodySchema>;
 
-export const createUnsnoozeAlertActionBodySchema = unsnoozeActionSchema
-  .omit({ action_type: true })
-  .strict();
+export const createUnsnoozeAlertActionBodySchema = unsnoozeActionType.routeBodySchema;
 export type CreateUnsnoozeAlertActionBody = z.infer<typeof createUnsnoozeAlertActionBodySchema>;
 
-export const createActivateAlertActionBodySchema = activateActionSchema
-  .omit({ action_type: true })
-  .strict();
+export const createActivateAlertActionBodySchema = activateActionType.routeBodySchema;
 export type CreateActivateAlertActionBody = z.infer<typeof createActivateAlertActionBodySchema>;
 
-export const createDeactivateAlertActionBodySchema = deactivateActionSchema
-  .omit({
-    action_type: true,
-  })
-  .strict();
+export const createDeactivateAlertActionBodySchema = deactivateActionType.routeBodySchema;
 export type CreateDeactivateAlertActionBody = z.infer<typeof createDeactivateAlertActionBodySchema>;
 
 export const createAlertActionBodySchema = z
-  .discriminatedUnion('action_type', [
-    ackActionSchema,
-    unackActionSchema,
-    tagActionSchema,
-    snoozeActionSchema,
-    unsnoozeActionSchema,
-    activateActionSchema,
-    deactivateActionSchema,
-  ])
+  .discriminatedUnion('action_type', alertActionFullSchemas)
   .describe(
     'Request body for creating a single alert action. One of: ack, unack, tag, snooze, unsnooze, activate, deactivate.'
   );

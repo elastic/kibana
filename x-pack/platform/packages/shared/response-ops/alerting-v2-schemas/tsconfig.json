@@ -11,6 +11,7 @@
   ],
   "kbn_references": [
     "@kbn/zod",
-    "@kbn/alerting-v2-constants"
+    "@kbn/alerting-v2-constants",
+    "@kbn/alerting-v2-alert-actions"
   ]
 }
