@@ -174,6 +174,12 @@ const PROVIDER_SCHEMA: Record<ServiceProviderKeys, ProviderTelemetryField> = {
       description: 'The number of inference connectors created using the Groq provider.',
     },
   },
+  microsoft: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Microsoft provider.',
+    },
+  },
 };
 
 export function registerInferenceConnectorsUsageCollector(
