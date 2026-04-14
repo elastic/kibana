@@ -271,7 +271,7 @@ describe('createFiltersFromClickEvent', () => {
           expect.objectContaining({
             query: expect.objectContaining({
               match_phrase: expect.objectContaining({
-                '1-1': 'test message',
+                message: 'test message',
               }),
             }),
           })
@@ -298,17 +298,17 @@ describe('createFiltersFromClickEvent', () => {
                 should: expect.arrayContaining([
                   expect.objectContaining({
                     match_phrase: expect.objectContaining({
-                      '1-1': 'tag1',
+                      tags: 'tag1',
                     }),
                   }),
                   expect.objectContaining({
                     match_phrase: expect.objectContaining({
-                      '1-1': 'tag2',
+                      tags: 'tag2',
                     }),
                   }),
                   expect.objectContaining({
                     match_phrase: expect.objectContaining({
-                      '1-1': 'tag3',
+                      tags: 'tag3',
                     }),
                   }),
                 ]),
