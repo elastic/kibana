@@ -61,11 +61,7 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
 
   const performCancelNavigation = useCallback(() => {
     reportCancelButtonClicked();
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      navigateToManage();
-    }
+    navigateToManage();
   }, [navigateToManage, reportCancelButtonClicked]);
 
   const handleCancel = useCallback(() => {
