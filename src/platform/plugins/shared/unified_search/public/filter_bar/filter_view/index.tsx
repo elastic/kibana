@@ -114,8 +114,6 @@ export const FilterView: FC<Props> = ({
       </span>
     </EuiToolTip>
   ) : (
-    <span ref={ref}>
-      {filterBadge}
-    </span>
+    <span ref={ref}>{filterBadge}</span>
   );
 };
