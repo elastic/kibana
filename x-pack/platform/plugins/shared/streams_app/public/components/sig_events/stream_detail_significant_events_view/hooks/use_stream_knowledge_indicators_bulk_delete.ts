@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
@@ -14,22 +13,22 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
 
-interface UseKnowledgeIndicatorsBulkDeleteParams {
-  definition: Streams.all.Definition;
+interface UseStreamKnowledgeIndicatorsBulkDeleteParams {
+  streamName: string;
   onSuccess?: () => void;
 }
 
-export function useKnowledgeIndicatorsBulkDelete({
-  definition,
+export function useStreamKnowledgeIndicatorsBulkDelete({
+  streamName,
   onSuccess,
-}: UseKnowledgeIndicatorsBulkDeleteParams) {
+}: UseStreamKnowledgeIndicatorsBulkDeleteParams) {
   const {
     core: {
       notifications: { toasts },
     },
   } = useKibana();
   const queryClient = useQueryClient();
-  const { deleteFeaturesInBulk } = useStreamFeaturesApi(definition);
+  const { deleteFeaturesInBulk } = useStreamFeaturesApi(streamName);
   const { deleteQueriesInBulk } = useQueriesApi();
 
   const mutation = useMutation<void, Error, KnowledgeIndicator[]>({
@@ -49,7 +48,7 @@ export function useKnowledgeIndicatorsBulkDelete({
       }
 
       if (queryIds.length > 0) {
-        requests.push(deleteQueriesInBulk({ queryIds, streamName: definition.name }));
+        requests.push(deleteQueriesInBulk({ queryIds, streamName }));
       }
 
       await Promise.all(requests);
@@ -69,7 +68,8 @@ export function useKnowledgeIndicatorsBulkDelete({
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: ['features', definition.name] }),
+        queryClient.invalidateQueries({ queryKey: ['features', streamName] }),
+        queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
       ]);
     },
   });

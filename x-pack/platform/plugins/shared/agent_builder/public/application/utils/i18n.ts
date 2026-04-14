@@ -43,6 +43,9 @@ export const labels = {
   },
   tools: {
     // Landing page
+    libraryTitle: i18n.translate('xpack.agentBuilder.tools.libraryTitle', {
+      defaultMessage: 'Tools library',
+    }),
     title: i18n.translate('xpack.agentBuilder.tools.title', { defaultMessage: 'Tools' }),
     newToolButton: i18n.translate('xpack.agentBuilder.tools.newToolButton', {
       defaultMessage: 'New tool',
@@ -513,6 +516,9 @@ export const labels = {
       values: { author },
     }),
   skills: {
+    libraryTitle: i18n.translate('xpack.agentBuilder.skills.libraryTitle', {
+      defaultMessage: 'Skills library',
+    }),
     title: i18n.translate('xpack.agentBuilder.skills.title', { defaultMessage: 'Skills' }),
     newSkillButton: i18n.translate('xpack.agentBuilder.skills.newSkillButton', {
       defaultMessage: 'New skill',
@@ -1402,6 +1408,9 @@ export const labels = {
     }),
   },
   plugins: {
+    libraryTitle: i18n.translate('xpack.agentBuilder.plugins.libraryTitle', {
+      defaultMessage: 'Plugins library',
+    }),
     title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),
     pluginsTableCaption: (pluginsCount: number) =>
       i18n.translate('xpack.agentBuilder.plugins.pluginsTableCaption', {
@@ -1625,6 +1634,9 @@ export const labels = {
       }),
   },
   connectors: {
+    libraryTitle: i18n.translate('xpack.agentBuilder.connectors.libraryTitle', {
+      defaultMessage: 'Connectors library',
+    }),
     title: i18n.translate('xpack.agentBuilder.connectors.title', {
       defaultMessage: 'Connectors',
     }),
