@@ -28,13 +28,14 @@ import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
 /**
-  * One value in a `search_after` array (string, number, boolean).
+  * One value in a `search_after` array. Elasticsearch sort values may be a
+string, number, boolean, or null.
 
   */
 export const FindRulesWithFacetsSearchAfterItemInternal = z.union([
-  z.string(),
-  z.number(),
-  z.boolean(),
+  z.string().nullable(),
+  z.number().nullable(),
+  z.boolean().nullable(),
 ]);
 
 export type FindRulesWithFacetsSearchAfterItem = z.infer<

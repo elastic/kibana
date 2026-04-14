@@ -126,7 +126,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
   it('rejects duplicate entries in aggregations.counts', () => {
     const errors = validateFindRulesWithFacetsRequestBody({
       ...defaultInput,
-      aggregations: { counts: ['tags', 'name', 'tags'] },
+      aggregations: { counts: ['tags', 'tags'] },
     });
     expect(errors).toContain('aggregations.counts must not contain duplicate facet categories');
   });
@@ -135,7 +135,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
     expect(
       validateFindRulesWithFacetsRequestBody({
         ...defaultInput,
-        aggregations: { counts: ['tags', 'name'] },
+        aggregations: { counts: ['tags'] },
       })
     ).toEqual([]);
   });

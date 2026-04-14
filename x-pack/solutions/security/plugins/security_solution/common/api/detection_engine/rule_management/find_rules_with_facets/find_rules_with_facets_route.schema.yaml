@@ -101,9 +101,13 @@ components:
   schemas:
     FindRulesWithFacetsSearchAfterItem:
       description: |
-        One value in a `search_after` array (string, number, boolean).
+        One value in a `search_after` array. Elasticsearch sort values may be a
+        string, number, boolean, or null.
       oneOf:
         - type: string
+          nullable: true
         - type: number
+          nullable: true
         - type: boolean
+          nullable: true
 

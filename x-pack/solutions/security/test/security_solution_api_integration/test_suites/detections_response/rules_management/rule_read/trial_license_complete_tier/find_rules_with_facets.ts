@@ -44,24 +44,112 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('filters with KQL and intersects legacy search', async () => {
-      await createRule(supertest, log, getSimpleRule('facets-kql-search', true));
+      await createRule(supertest, log, {
+        ...getSimpleRule('match-rule', true),
+        name: 'Simple Rule Match',
+        tags: ['match'],
+      });
+      await createRule(supertest, log, {
+        ...getSimpleRule('no-match-tag', true),
+        name: 'Simple Rule No Tag',
+        tags: ['other'],
+      });
+      await createRule(supertest, log, {
+        ...getSimpleRule('no-match-name', true),
+        name: 'Unrelated Detection Rule',
+        tags: ['match'],
+      });
+
       const { body } = await findRulesWithFacets({
-        filter: 'alert.attributes.enabled: true',
+        filter: 'tags: match',
         search: { term: 'Simple', mode: 'legacy' },
       }).expect(200);
+
       expect(body.total).to.be(1);
+      expect(body.data[0].name).to.be('Simple Rule Match');
     });
 
-    it('returns facet counts when aggregations.counts is set', async () => {
-      await createRule(supertest, log, getSimpleRule());
+    it('accepts both friendly and full-path KQL field names', async () => {
+      await createRule(supertest, log, {
+        ...getSimpleRule('friendly-test', true),
+        name: 'Friendly Field Test',
+      });
+
+      const friendly = await findRulesWithFacets({
+        filter: 'enabled: true',
+      }).expect(200);
+      expect(friendly.body.total).to.be(1);
+      expect(friendly.body.data[0].name).to.be('Friendly Field Test');
+
+      const fullPath = await findRulesWithFacets({
+        filter: 'alert.attributes.enabled: true',
+      }).expect(200);
+      expect(fullPath.body.total).to.be(1);
+      expect(fullPath.body.data[0].name).to.be('Friendly Field Test');
+    });
+
+    it('returns facet counts of filtered rules when aggregations.counts is set', async () => {
+      await createRule(supertest, log, { ...getSimpleRule('enabled-rule'), enabled: true });
+      await createRule(supertest, log, { ...getSimpleRule('enabled-rule-2'), enabled: true });
+      await createRule(supertest, log, { ...getSimpleRule('disabled-rule'), enabled: false });
       const { body } = await findRulesWithFacets({
         aggregations: { counts: ['enabled'] },
       }).expect(200);
-      expect(body.total).to.be(1);
+      expect(body.total).to.be(3);
       expect(body.counts).to.be.an('object');
       expect(body.counts.enabled).to.be.an('object');
       const enabledBuckets = body.counts.enabled as Record<string, number>;
-      expect(Object.keys(enabledBuckets).length).to.be.equal(2);
+      const bucketValues = Object.values(enabledBuckets);
+      expect(bucketValues).to.have.length(2);
+      expect(bucketValues['0']).to.be(1);
+      expect(bucketValues['1']).to.be(2);
+
+      const { body: filteredBody } = await findRulesWithFacets({
+        filter: 'enabled: true',
+        aggregations: { counts: ['enabled'] },
+      }).expect(200);
+      expect(filteredBody.counts.enabled).to.be.an('object');
+      const filteredEnabledBuckets = filteredBody.counts.enabled as Record<string, number>;
+      expect(filteredEnabledBuckets['1']).to.be(2);
+      expect(filteredEnabledBuckets['0']).to.be(undefined);
+    });
+
+    it('returns only requested fields when fields parameter is provided', async () => {
+      await createRule(supertest, log, {
+        ...getSimpleRule('fields-test', true),
+        name: 'Fields Test Rule',
+        tags: ['field-test-tag'],
+      });
+
+      const { body } = await findRulesWithFacets({
+        fields: ['name', 'tags', 'enabled'],
+      }).expect(200);
+
+      expect(body.total).to.be(1);
+      const rule = body.data[0] as Record<string, unknown>;
+
+      expect(rule.name).to.be('Fields Test Rule');
+      expect(rule.tags).to.eql(['field-test-tag']);
+      expect(rule.enabled).to.be(true);
+
+      expect(rule.revision).to.be(undefined);
+      expect(rule.execution_summary).to.be(undefined);
+    });
+
+    it('returns all fields when fields parameter is omitted', async () => {
+      await createRule(supertest, log, getSimpleRule('all-fields-test', true));
+
+      const { body } = await findRulesWithFacets({}).expect(200);
+
+      expect(body.total).to.be(1);
+      const rule = body.data[0] as Record<string, unknown>;
+
+      // Core fields present without a fields filter.
+      // Note: the RuleResponse uses `interval` (not `schedule`) for the schedule.
+      expect(rule.name).not.to.be(undefined);
+      expect(rule.enabled).not.to.be(undefined);
+      expect(rule.interval).not.to.be(undefined);
+      expect(rule.actions).not.to.be(undefined);
     });
 
     it('returns 400 for invalid KQL filter', async () => {
@@ -74,11 +162,10 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns 400 for unsupported sort_field', async () => {
-      const { body } = await findRulesWithFacets({
+      await findRulesWithFacets({
         sort_field: 'not_a_supported_field',
         sort_order: 'asc',
       }).expect(400);
-      expect(body.status_code).to.be(400);
     });
 
     it('returns 400 when search_after is provided without sort_field and sort_order', async () => {
@@ -86,10 +173,15 @@ export default ({ getService }: FtrProviderContext): void => {
         search_after: ['nonsense-sort-token'],
       }).expect(400);
       expect(body.status_code).to.be(400);
-      expect(String(body.message)).to.contain('sort_field and sort_order');
+      expect(body.message).to.be.an('array');
+      expect(
+        (body.message as string[]).some((m) =>
+          m.includes('when search_after is provided, sort_field and sort_order must be set')
+        )
+      ).to.be(true);
     });
 
-    it('paginates with page under the max result window without response search_after', async () => {
+    it('paginates with page and returns results in sort order without a search_after cursor', async () => {
       await createRule(supertest, log, {
         ...getSimpleRule('cursor-rule-a'),
         name: 'Aaa facets cursor rule',
@@ -128,13 +220,15 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await findRulesWithFacets({
         search: { term: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1) },
       }).expect(400);
-      const status = body.status_code ?? body.statusCode;
-      expect(status).to.be(400);
-      const messageText = Array.isArray(body.message)
-        ? body.message.join(' ')
-        : String(body.message);
-      expect(messageText.toLowerCase()).to.match(/search\.term/);
-      expect(messageText.toLowerCase()).to.contain('length');
+      expect(body.status_code).to.be(400);
+      expect(body.message).to.be.an('array');
+      expect(
+        (body.message as string[]).some((m) =>
+          m.includes(
+            `search.term exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
+          )
+        )
+      ).to.be(true);
     });
   });
 };

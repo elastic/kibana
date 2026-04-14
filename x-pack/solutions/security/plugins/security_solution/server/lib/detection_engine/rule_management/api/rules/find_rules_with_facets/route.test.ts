@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+jest.mock('../../../../../../usage/constants', () => {
+  const actual = jest.requireActual('../../../../../../usage/constants');
+  return { ...actual, MAX_RESULTS_WINDOW: 2 };
+});
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '../../../../../../../common/constants';
@@ -34,7 +39,10 @@ describe('Find rules with facets route', () => {
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue({
+      ...getFindResultWithSingleHit(),
+      searchAfter: [1234567890, 'abc'],
+    });
 
     findRulesWithFacetsRoute(server.router, logger);
   });
@@ -129,11 +137,57 @@ describe('Find rules with facets route', () => {
       );
     });
 
-    it('does not set response search_after under max result window without request search_after', async () => {
+    it('returns search_after when page * per_page reaches the max result window', async () => {
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
-        body: { per_page: 20, page: 1 },
+        // page(1) * per_page(2) == MAX_RESULTS_WINDOW(2)
+        body: { ...defaultInput, page: 1, per_page: 2 },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
+      expect(response.body.search_after).toEqual([1234567890, 'abc']);
+    });
+
+    it('returns search_after when the request includes search_after (continuation)', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
+        body: {
+          ...defaultInput,
+          search_after: [1234567890, 'prev-cursor'],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
+      expect(response.body.search_after).toEqual([1234567890, 'abc']);
+    });
+
+    it('does not return search_after when sort_field and sort_order are missing even at max window', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
+        // page(1) * per_page(2) == MAX_RESULTS_WINDOW(2) but no sort
+        body: { page: 1, per_page: 2 },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
+      expect(response.body.search_after).toBeUndefined();
+    });
+
+    it('does not return search_after when the underlying client returns no cursor', async () => {
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
+        body: { ...defaultInput, page: 1, per_page: 2 },
       });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));

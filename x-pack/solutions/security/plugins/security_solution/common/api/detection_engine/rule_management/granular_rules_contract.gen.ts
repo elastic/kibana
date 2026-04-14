@@ -51,32 +51,23 @@ export const GranularRulesFacetCategory = z.enum([
   'type',
   'enabled',
   'gapFillStatuses',
-  'updatedAt',
   'updatedBy',
-  'createdAt',
   'createdBy',
   'lastRunOutcome',
-  'lastRunDuration',
-  'lastRunError',
-  'lastRunWarning',
   'lastRunStatus',
-  'lastRunStatusReason',
   'lastRunStatusReasonType',
-  'lastRunStatusReasonMessage',
-  'lastRunStatusReasonCode',
-  'name',
 ]);
 export type GranularRulesFacetCategoryEnum = typeof GranularRulesFacetCategory.enum;
 export const GranularRulesFacetCategoryEnum = GranularRulesFacetCategory.enum;
 
 /**
   * A rule attribute that can be requested via the `fields` parameter on `_find_with_facets`.
-When `fields` is provided, only the listed attributes are returned in each rule object,
-reducing response size for performance.
+When provided, only the listed attributes are returned in each rule object.
 
   */
 export type FindRulesWithFacetsField = z.infer<typeof FindRulesWithFacetsField>;
 export const FindRulesWithFacetsField = z.enum([
+  'id',
   'name',
   'tags',
   'enabled',
@@ -101,17 +92,31 @@ export type FindRulesWithFacetsFieldEnum = typeof FindRulesWithFacetsField.enum;
 export const FindRulesWithFacetsFieldEnum = FindRulesWithFacetsField.enum;
 
 /**
-  * Common first path segment when writing KQL for the `_find_with_facets` request `filter` field.
-Filters use full paths such as `enabled: true` or `name: "My rule"`.
+  * Friendly field names accepted in the KQL `filter` on `_find_with_facets`.
 
   */
 export type FindRulesWithFacetsKqlFilterField = z.infer<typeof FindRulesWithFacetsKqlFilterField>;
 export const FindRulesWithFacetsKqlFilterField = z.enum([
-  'enabled',
   'name',
+  'enabled',
   'tags',
-  'updatedAt',
+  'type',
+  'ruleType',
+  'immutable',
+  'isCustomized',
+  'createdBy',
   'updatedBy',
+  'createdAt',
+  'updatedAt',
+  'lastRunOutcome',
+  'lastRunStatus',
+  'index',
+  'tacticId',
+  'tacticName',
+  'techniqueId',
+  'techniqueName',
+  'subtechniqueId',
+  'subtechniqueName',
 ]);
 export type FindRulesWithFacetsKqlFilterFieldEnum = typeof FindRulesWithFacetsKqlFilterField.enum;
 export const FindRulesWithFacetsKqlFilterFieldEnum = FindRulesWithFacetsKqlFilterField.enum;

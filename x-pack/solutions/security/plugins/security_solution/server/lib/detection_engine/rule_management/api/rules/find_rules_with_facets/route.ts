@@ -12,7 +12,10 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { MAX_RESULTS_WINDOW } from '../../../../../../usage/constants';
 import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '../../../../../../../common/constants';
-import type { FindRulesWithFacetsResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import type {
+  FindRulesWithFacetsField,
+  FindRulesWithFacetsResponse,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   FindRulesWithFacetsRequestBody,
   validateFindRulesWithFacetsRequestBody,
@@ -27,6 +30,15 @@ import {
 import { buildSiemResponse } from '../../../../routes/utils';
 import { transformFindAlerts } from '../../../utils/utils';
 import { enrichFilterWithRuleTypeMapping } from '../../../logic/search/enrich_filter_with_rule_type_mappings';
+import { expandFriendlyKqlFields } from '../../../../../../../common/api/detection_engine/rule_management/find_rules_with_facets/expand_friendly_kql_fields';
+
+// Fields required for the rule transformation process.
+const REQUIRED_TRANSFORM_FIELDS: readonly FindRulesWithFacetsField[] = [
+  'schedule',
+  'params',
+  'updatedAt',
+  'createdAt',
+];
 
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
@@ -75,8 +87,10 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = await ctx.alerting.getRulesClient();
 
+          const expandedFilter = filter ? expandFriendlyKqlFields(filter) : undefined;
+
           const combinedKql = buildGranularRulesKql({
-            filter,
+            filter: expandedFilter,
             search,
           });
 
@@ -96,6 +110,11 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
 
           const enrichedFilter = enrichFilterWithRuleTypeMapping(combinedKql);
 
+          // When the caller requests a subset of fields we add in the ones required for the rule transformation pipeline.
+          const effectiveFields = fields?.length
+            ? Array.from(new Set([...fields, ...REQUIRED_TRANSFORM_FIELDS]))
+            : undefined;
+
           const rules = await findRules({
             rulesClient,
             perPage: per_page,
@@ -103,7 +122,7 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
             sortField,
             sortOrder,
             filter: enrichedFilter,
-            fields,
+            fields: effectiveFields,
             searchAfter,
             aggregations: aggs,
           });
@@ -112,22 +131,18 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
             ? expandRawAggregationResult(rules.aggregations, categoryCounts)
             : undefined;
 
-          const base = transformFindAlerts(rules);
+          const transformedRules = transformFindAlerts(rules);
 
           const shouldReturnSearchAfter =
             sortField != null &&
             sortOrder != null &&
-            rules.searchAfter != null &&
-            rules.searchAfter.length > 0 &&
-            (page * per_page >= MAX_RESULTS_WINDOW || searchAfter != null);
+            (page * per_page >= MAX_RESULTS_WINDOW || searchAfter);
 
           const responseSearchAfter =
-            shouldReturnSearchAfter && rules.searchAfter != null
-              ? ([...rules.searchAfter] as FindRulesWithFacetsResponse['search_after'])
-              : undefined;
+            shouldReturnSearchAfter && rules.searchAfter ? rules.searchAfter : undefined;
 
           const responseBody: FindRulesWithFacetsResponse = {
-            ...base,
+            ...transformedRules,
             ...(counts !== undefined ? { counts } : {}),
             ...(responseSearchAfter !== undefined ? { search_after: responseSearchAfter } : {}),
           };

@@ -42,20 +42,11 @@ components:
         - type
         - enabled
         - gapFillStatuses
-        - updatedAt
         - updatedBy
-        - createdAt
         - createdBy
         - lastRunOutcome
-        - lastRunDuration
-        - lastRunError
-        - lastRunWarning
         - lastRunStatus
-        - lastRunStatusReason
         - lastRunStatusReasonType
-        - lastRunStatusReasonMessage
-        - lastRunStatusReasonCode
-        - name
 
     FindRulesWithFacetsField:
       type: string
@@ -63,6 +54,7 @@ components:
         A rule attribute that can be requested via the `fields` parameter on `_find_with_facets`.
         When provided, only the listed attributes are returned in each rule object.
       enum:
+        - id
         - name
         - tags
         - enabled
@@ -86,14 +78,28 @@ components:
     FindRulesWithFacetsKqlFilterField:
       type: string
       description: |
-        Common first path segment when writing KQL for the `_find_with_facets` request `filter` field.
-        Filters use full paths such as `enabled: true` or `name: "My rule"`.
+        Friendly field names accepted in the KQL `filter` on `_find_with_facets`.
       enum:
-        - enabled
         - name
+        - enabled
         - tags
-        - updatedAt
+        - type
+        - ruleType
+        - immutable
+        - isCustomized
+        - createdBy
         - updatedBy
+        - createdAt
+        - updatedAt
+        - lastRunOutcome
+        - lastRunStatus
+        - index
+        - tacticId
+        - tacticName
+        - techniqueId
+        - techniqueName
+        - subtechniqueId
+        - subtechniqueName
 
     FindRulesWithFacetsAggregations:
       type: object
