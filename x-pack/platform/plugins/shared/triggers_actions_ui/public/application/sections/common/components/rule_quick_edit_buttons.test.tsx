@@ -63,8 +63,8 @@ describe('rule_quick_edit_buttons', () => {
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(() => {
         expect(onDisable).toHaveBeenCalledTimes(1);
-        expect(onDisable).toHaveBeenCalledWith(false);
       });
+      expect(onDisable).toHaveBeenCalledWith(false);
     });
 
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
@@ -77,8 +77,8 @@ describe('rule_quick_edit_buttons', () => {
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(() => {
         expect(onDisable).toHaveBeenCalledTimes(1);
-        expect(onDisable).toHaveBeenCalledWith(false);
       });
+      expect(onDisable).toHaveBeenCalledWith(false);
     });
 
     it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {

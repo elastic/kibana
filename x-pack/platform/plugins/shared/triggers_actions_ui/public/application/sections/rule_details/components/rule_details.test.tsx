@@ -185,10 +185,10 @@ describe('rule_details', () => {
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(async () => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
-          expect.objectContaining({ untrack: false })
-        );
       });
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+        expect.objectContaining({ untrack: false })
+      );
     });
 
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
@@ -206,10 +206,10 @@ describe('rule_details', () => {
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(async () => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
-          expect.objectContaining({ untrack: false })
-        );
       });
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+        expect.objectContaining({ untrack: false })
+      );
     });
 
     it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
@@ -673,8 +673,8 @@ describe('rule_details', () => {
 
       await waitFor(() => {
         expect(bulkUpdateAPIKey).toHaveBeenCalledTimes(1);
-        expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: [rule.id] }));
       });
+      expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: [rule.id] }));
     });
   });
 
@@ -713,8 +713,8 @@ describe('rule_details', () => {
 
       await waitFor(() => {
         expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledTimes(1);
-        expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledWith({ ids: [rule.id] });
       });
+      expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
   });
 
@@ -748,10 +748,10 @@ describe('rule_details', () => {
 
       await waitFor(() => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
-          ids: [rule.id],
-          untrack: false,
-        });
+      });
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
+        ids: [rule.id],
+        untrack: false,
       });
     });
 
@@ -780,8 +780,8 @@ describe('rule_details', () => {
 
       await waitFor(() => {
         expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
-        expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
       });
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
 
     it('should not show untrack alerts modal if rule type does not track alerts life cycle', async () => {
@@ -811,10 +811,10 @@ describe('rule_details', () => {
 
       await waitFor(() => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
-          ids: [rule.id],
-          untrack: false,
-        });
+      });
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
+        ids: [rule.id],
+        untrack: false,
       });
     });
   });
