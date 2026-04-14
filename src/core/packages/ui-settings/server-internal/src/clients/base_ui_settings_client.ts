@@ -47,36 +47,56 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   async get<T = any>(key: string, context?: GetUiSettingsContext): Promise<T> {
+    this.log.info(`[UiSettings] get("${key}")`);
     // Check for user-provided override first
     const userProvided = await this.getUserProvided();
     if (userProvided[key]?.userValue !== undefined) {
-      return userProvided[key].userValue as T;
+      const value = userProvided[key].userValue as T;
+      this.log.info(`[UiSettings] get("${key}") = ${JSON.stringify(value)} (user override)`);
+      return value;
     }
 
     // Fall back to default value
     const definition = this.defaults[key];
     if (definition?.getValue) {
       try {
-        return (await definition.getValue(context)) as T;
+        const value = (await definition.getValue(context)) as T;
+        this.log.info(`[UiSettings] get("${key}") = ${JSON.stringify(value)} (dynamic default)`);
+        return value;
       } catch (error) {
         this.log.error(`[UiSettingsClient] Failed to get value for key "${key}": ${error}`);
         // Fallback to `value` prop if `getValue()` fails
-        return definition.value as T;
+        const fallback = definition.value as T;
+        this.log.info(
+          `[UiSettings] get("${key}") = ${JSON.stringify(fallback)} (fallback after error)`
+        );
+        return fallback;
       }
     }
-    return definition?.value as T;
+    const defaultValue = definition?.value as T;
+    this.log.info(`[UiSettings] get("${key}") = ${JSON.stringify(defaultValue)} (static default)`);
+    return defaultValue;
   }
 
   async getAll<T = any>(context?: GetUiSettingsContext) {
+    this.log.info(`[UiSettings] getAll START`);
     const defaultValues = await this.getDefaultValues(context);
     const result = { ...defaultValues };
 
     const userProvided = await this.getUserProvided();
+    const userOverrideKeys: string[] = [];
     Object.keys(userProvided).forEach((key) => {
       if (userProvided[key].userValue !== undefined) {
         result[key] = userProvided[key].userValue;
+        userOverrideKeys.push(key);
       }
     });
+
+    this.log.info(
+      `[UiSettings] getAll COMPLETED - user overrides: ${JSON.stringify(
+        userOverrideKeys.reduce((acc, k) => ({ ...acc, [k]: result[k] }), {})
+      )}`
+    );
 
     return Object.freeze(result) as Record<string, T>;
   }
