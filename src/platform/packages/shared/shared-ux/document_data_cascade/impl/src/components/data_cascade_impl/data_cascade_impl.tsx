@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
   useGeneratedHtmlId,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { CascadeHeaderPrimitive } from './data_cascade_header';
 import { CascadeRowPrimitive } from './data_cascade_row';
@@ -26,6 +27,7 @@ import {
   calculateActiveStickyIndex,
   type VirtualizedCascadeListProps,
 } from '../../lib/core/virtualizer';
+import { useExposePublicApi } from '../../lib/core/api';
 import {
   useRegisterCascadeAccessibilityHelpers,
   useTreeGridContainerARIAAttributes,
@@ -63,6 +65,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   enableRowSelection = false,
   enableStickyGroupHeader = true,
   allowMultipleRowToggle = false,
+  initialScrollOffset,
+  initialRect,
+  cascadeRef,
 }: DataCascadeImplProps<G, L>) {
   const rowElement = Children.only(children);
 
@@ -84,6 +89,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
   const virtualizerInstance = useRef<ReturnType<typeof useCascadeVirtualizer>>();
 
+  const isMobile = useIsWithinMaxBreakpoint('m');
   const getScrollElement = useCallback(() => scrollElementRef.current, []);
 
   // create stable callback we can use to retrieve the current value of the virtualizer elsewhere
@@ -132,6 +138,11 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     rowCell: cascadeRowCell,
   });
 
+  const { collectVirtualizerStateChanges } = useExposePublicApi<G, L>(cascadeRef, {
+    rows,
+    enableStickyGroupHeader,
+  });
+
   // persist the virtualizer instance to ref, so that invocations of getVirtualizer will always return the latest instance
   virtualizerInstance.current = useCascadeVirtualizer<G>({
     rows,
@@ -139,6 +150,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     getScrollElement,
     enableStickyGroupHeader,
     estimatedRowHeight: size === 's' ? 32 : size === 'm' ? 40 : 48,
+    onStateChange: collectVirtualizerStateChanges,
+    initialOffset: initialScrollOffset,
+    initialRect,
   });
 
   const {
@@ -176,29 +190,22 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
           rowInstance: row,
           virtualRow: virtualItem,
           virtualRowStyle,
+          isMobile,
           innerRef: measureElement,
           activeStickyRenderSlotRef,
           ...rowElement.props,
         }}
       />
     ),
-    [size, enableRowSelection, rowElement.props, measureElement]
+    [size, enableRowSelection, isMobile, measureElement, rowElement.props]
   );
 
   const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes(headerId);
 
-  const shouldRenderStickyHeader = useMemo(() => {
-    return (
-      enableStickyGroupHeader &&
-      activeStickyIndex !== null &&
-      (virtualizerScrollOffset ?? 0) > (virtualizedRowComputedTranslateValue.get(0) ?? 0)
-    );
-  }, [
-    activeStickyIndex,
-    enableStickyGroupHeader,
-    virtualizerScrollOffset,
-    virtualizedRowComputedTranslateValue,
-  ]);
+  const shouldRenderStickyHeader =
+    activeStickyIndex !== null &&
+    (virtualizerScrollOffset ?? 0) >
+      (virtualizerInstance.current?.virtualizedRowComputedTranslateValue.get(0) ?? 0);
 
   return (
     <div ref={cascadeWrapperRef} data-test-subj="data-cascade" css={styles.container}>

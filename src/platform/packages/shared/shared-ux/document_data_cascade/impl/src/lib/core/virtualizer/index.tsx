@@ -13,7 +13,57 @@ import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tansta
 import type { GroupNode } from '../../../store_provider';
 
 type UseVirtualizerOptions = Parameters<typeof useVirtualizer>[0];
-type UseVirtualizerReturnType = ReturnType<typeof useVirtualizer>;
+export type UseVirtualizerReturnType = ReturnType<typeof useVirtualizer>;
+
+export interface CascadeVirtualizerProps<G extends GroupNode>
+  extends Pick<
+    UseVirtualizerOptions,
+    'getScrollElement' | 'overscan' | 'initialOffset' | 'initialRect'
+  > {
+  rows: Row<G>[];
+  /**
+   * setting a value of true causes the active group root row
+   * to stick right under the header
+   */
+  enableStickyGroupHeader: boolean;
+  estimatedRowHeight?: number;
+  /**
+   * Called whenever the virtualizer updates (scroll, range, size, etc.).
+   * Used to conduit values into external state (e.g. public API store).
+   */
+  onStateChange?: (instance: UseVirtualizerReturnType) => void;
+}
+
+export interface UseVirtualizedRowScrollStateStoreOptions {
+  /**
+   * Function to get the parent virtualizer instance
+   */
+  getVirtualizer: () => ReturnType<typeof useCascadeVirtualizer>;
+  /**
+   * The index of the current row in the parent virtualizer
+   */
+  rowIndex: number;
+}
+
+export interface VirtualizedRowScrollState {
+  scrollOffset: number;
+  scrollMargin: number;
+}
+
+export interface VirtualizedCascadeListProps<G extends GroupNode>
+  extends Pick<
+    CascadeVirtualizerReturnValue,
+    'virtualizedRowComputedTranslateValue' | 'getVirtualItems'
+  > {
+  rows: Row<G>[];
+  activeStickyIndex: number | null;
+  listItemRenderer: (props: {
+    isActiveSticky: boolean;
+    virtualItem: VirtualItem;
+    virtualRowStyle: React.CSSProperties;
+    row: Row<G>;
+  }) => React.ReactNode;
+}
 
 /**
  * Calculates the active sticky index from the current visible range.
@@ -127,6 +177,9 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
   estimatedRowHeight = 0,
   rows,
   getScrollElement,
+  onStateChange,
+  initialOffset,
+  initialRect,
 }: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
   const virtualizedRowsSizeCacheRef = useRef<Map<number, number>>(new Map());
   const rangeExtractor = useCascadeVirtualizerRangeExtractor<G>({
@@ -146,15 +199,27 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
       getScrollElement,
       overscan,
       rangeExtractor,
-      useAnimationFrameWithResizeObserver: true,
+      initialOffset,
+      initialRect,
       onChange: (rowVirtualizerInstance) => {
         // @ts-expect-error -- the itemsSizeCache property does exist,
         // but it not included in the type definition because it is marked as a private property,
         // see {@link https://github.com/TanStack/virtual/blob/v3.13.2/packages/virtual-core/src/index.ts#L360}
         virtualizedRowsSizeCacheRef.current = rowVirtualizerInstance.itemSizeCache;
+        // propagate virtualizer state changes
+        onStateChange?.(rowVirtualizerInstance);
       },
     }),
-    [estimatedRowHeight, getScrollElement, overscan, rangeExtractor, rows.length]
+    [
+      estimatedRowHeight,
+      getScrollElement,
+      initialOffset,
+      initialRect,
+      overscan,
+      rangeExtractor,
+      rows.length,
+      onStateChange,
+    ]
   );
 
   const virtualizerImpl = useVirtualizer(virtualizerOptions);

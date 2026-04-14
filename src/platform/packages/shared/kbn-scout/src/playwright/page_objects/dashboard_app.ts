@@ -942,7 +942,7 @@ export class DashboardApp {
 
   /** Selects a drilldown trigger and submits the drilldown wizard. */
   async selectDrilldownTriggerAndSubmit(
-    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu'
+    trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER' | 'CONTEXT_MENU_TRIGGER'
   ) {
     await this.page.testSubj.click(`triggerPicker-${trigger}`);
     await expect(this.drilldownWizardSubmit).toBeEnabled();
@@ -1010,9 +1010,12 @@ export class DashboardApp {
   async createUrlDrilldown(
     name: string,
     url: string,
-    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu' = 'on_click_value'
+    trigger:
+      | 'VALUE_CLICK_TRIGGER'
+      | 'SELECT_RANGE_TRIGGER'
+      | 'CONTEXT_MENU_TRIGGER' = 'VALUE_CLICK_TRIGGER'
   ) {
-    await this.page.testSubj.click('drilldownFactoryItem-url_drilldown');
+    await this.page.testSubj.click('actionFactoryItem-URL_DRILLDOWN');
     await this.page.testSubj.locator('drilldownNameInput').fill(name);
 
     const selectAll = process.platform === 'darwin' ? 'Meta+a' : 'Control+a';
