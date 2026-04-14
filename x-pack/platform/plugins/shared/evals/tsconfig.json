@@ -29,6 +29,7 @@
     "@kbn/workflows",
     "@kbn/workflows-management-plugin",
     "@kbn/workflows-extensions",
+    "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/zod",
     "@kbn/react-kibana-mount",

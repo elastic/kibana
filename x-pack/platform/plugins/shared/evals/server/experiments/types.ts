@@ -8,16 +8,16 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import type { BoundInferenceClient, Model } from '@kbn/inference-common';
-import type { EvalsExecutorClient } from '@kbn/evals-runner';
+import type { EvaluationDataset, EvalsExecutorClient } from '@kbn/evals-runner';
 
-export interface OnlineSuiteLogger {
+export interface ExperimentSuiteLogger {
   debug(message: string, meta?: object): void;
   info(message: string, meta?: object): void;
   warn(message: string, meta?: object): void;
   error(message: string, error?: Error): void;
 }
 
-export interface OnlineSuiteRunContext<TSuiteParams = unknown> {
+export interface ExperimentSuiteRunContext<TSuiteParams = unknown> {
   runId: string;
   spaceId: string;
   suiteParams: TSuiteParams;
@@ -28,20 +28,23 @@ export interface OnlineSuiteRunContext<TSuiteParams = unknown> {
   executorClient: EvalsExecutorClient;
   taskModel: Model;
   judgeModel: Model;
-  logger: OnlineSuiteLogger;
+  logger: ExperimentSuiteLogger;
   abortSignal: AbortSignal;
+  getDatasetByName: (name: string) => Promise<EvaluationDataset | null>;
 }
 
-export interface OnlineSuiteDefinition<TSuiteParams = unknown> {
+export interface ExperimentSuiteDefinition<TSuiteParams = unknown> {
   id: string;
   name: string;
   description?: string;
+  tags?: string[];
   inputSchema: z.ZodType<TSuiteParams>;
-  run: (ctx: OnlineSuiteRunContext<TSuiteParams>) => Promise<void>;
+  run: (ctx: ExperimentSuiteRunContext<TSuiteParams>) => Promise<void>;
 }
 
-export interface OnlineSuiteListItem {
+export interface ExperimentSuiteListItem {
   id: string;
   name: string;
   description?: string;
+  tags?: string[];
 }

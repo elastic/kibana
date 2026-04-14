@@ -12,39 +12,39 @@ import { z } from '@kbn/zod';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-const GetOnlineRunLogsParams = z.object({
+const GetExperimentRunLogsParams = z.object({
   workflowExecutionId: z.string().min(1),
 });
 
-const GetOnlineRunLogsQuery = z.object({
+const GetExperimentRunLogsQuery = z.object({
   page: z.coerce.number().int().min(1).optional(),
   size: z.coerce.number().int().min(1).max(200).optional(),
   sort_order: z.enum(['asc', 'desc']).optional(),
 });
 
-export const registerGetOnlineRunLogsRoute = ({
+export const registerGetExperimentRunLogsRoute = ({
   router,
   logger,
   workflowsManagement,
 }: RouteDependencies) => {
   router.versioned
     .get({
-      path: '/internal/evals/online/runs/{workflowExecutionId}/logs',
+      path: '/internal/evals/experiments/runs/{workflowExecutionId}/logs',
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
           requiredPrivileges: [PLUGIN_ID, WorkflowsManagementApiActions.readExecution],
         },
       },
-      summary: 'Get logs for an online evaluation run (workflow execution)',
+      summary: 'Get logs for an experiment run (workflow execution)',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(GetOnlineRunLogsParams),
-            query: buildRouteValidationWithZod(GetOnlineRunLogsQuery),
+            params: buildRouteValidationWithZod(GetExperimentRunLogsParams),
+            query: buildRouteValidationWithZod(GetExperimentRunLogsQuery),
           },
         },
       },
@@ -73,10 +73,10 @@ export const registerGetOnlineRunLogsRoute = ({
 
           return response.ok({ body: logs });
         } catch (error) {
-          logger.error(`Failed to get online evaluation run logs: ${error}`);
+          logger.error(`Failed to get experiment run logs: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to get online evaluation run logs' },
+            body: { message: 'Failed to get experiment run logs' },
           });
         }
       }

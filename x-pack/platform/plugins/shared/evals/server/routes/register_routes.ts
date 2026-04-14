@@ -10,7 +10,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EvalsRouter } from '../types';
-import type { OnlineSuiteRegistry } from '../online_suites/registry';
+import type { ExperimentSuiteRegistry } from '../experiments/registry';
 import { registerGetRunsRoute } from './runs/get_runs';
 import { registerGetRunRoute } from './runs/get_run';
 import { registerGetRunScoresRoute } from './runs/get_run_scores';
@@ -29,17 +29,17 @@ import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
 import { registerRemoteConfigsRoutes } from './remotes/register_routes';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
-import { registerGetOnlineSuitesRoute } from './online/get_suites';
-import { registerRunOnlineSuiteRoute } from './online/post_run';
-import { registerRunOnlineSuiteNowRoute } from './online/post_run_now';
-import { registerCancelOnlineRunRoute } from './online/post_cancel_run';
-import { registerGetOnlineRunRoute } from './online/get_workflow_execution';
-import { registerGetOnlineRunLogsRoute } from './online/get_workflow_execution_logs';
+import { registerGetExperimentSuitesRoute } from './experiments/get_suites';
+import { registerRunExperimentSuiteRoute } from './experiments/post_run';
+import { registerRunExperimentSuiteNowRoute } from './experiments/post_run_now';
+import { registerCancelExperimentRunRoute } from './experiments/post_cancel_run';
+import { registerGetExperimentRunRoute } from './experiments/get_workflow_execution';
+import { registerGetExperimentRunLogsRoute } from './experiments/get_workflow_execution_logs';
 
 export interface RouteDependencies {
   router: EvalsRouter;
   logger: Logger;
-  onlineSuiteRegistry?: OnlineSuiteRegistry;
+  experimentSuiteRegistry?: ExperimentSuiteRegistry;
   workflowsManagement?: WorkflowsServerPluginSetup;
   canEncrypt: boolean;
   getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
@@ -66,10 +66,10 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpsertDatasetRoute(dependencies);
   registerRemoteConfigsRoutes(dependencies);
 
-  registerGetOnlineSuitesRoute(dependencies);
-  registerRunOnlineSuiteRoute(dependencies);
-  registerRunOnlineSuiteNowRoute(dependencies);
-  registerCancelOnlineRunRoute(dependencies);
-  registerGetOnlineRunRoute(dependencies);
-  registerGetOnlineRunLogsRoute(dependencies);
+  registerGetExperimentSuitesRoute(dependencies);
+  registerRunExperimentSuiteRoute(dependencies);
+  registerRunExperimentSuiteNowRoute(dependencies);
+  registerCancelExperimentRunRoute(dependencies);
+  registerGetExperimentRunRoute(dependencies);
+  registerGetExperimentRunLogsRoute(dependencies);
 };

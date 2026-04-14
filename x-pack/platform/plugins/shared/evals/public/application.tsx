@@ -47,9 +47,9 @@ const TracingProjectDetailPage = React.lazy(async () => {
   return { default: mod.TracingProjectDetailPage };
 });
 
-const OnlineEvaluationsPage = React.lazy(async () => {
-  const mod = await import('./pages/online_evaluations');
-  return { default: mod.OnlineEvaluationsPage };
+const ExperimentsPage = React.lazy(async () => {
+  const mod = await import('./pages/experiments');
+  return { default: mod.ExperimentsPage };
 });
 
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
@@ -72,14 +72,14 @@ const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
   defaultMessage: 'Tracing',
 });
 
-const onlineTabLabel = i18n.translate('xpack.evals.navigation.onlineEvaluations', {
-  defaultMessage: 'Online evaluations',
+const experimentsTabLabel = i18n.translate('xpack.evals.navigation.experiments', {
+  defaultMessage: 'Experiments',
 });
 
 const ROOT_PATH = '/' as const;
 const DATASETS_PATH = '/datasets' as const;
 const TRACING_PATH = '/tracing' as const;
-const ONLINE_PATH = '/online' as const;
+const EXPERIMENTS_PATH = '/experiments' as const;
 const REMOTES_PATH = '/remotes' as const;
 
 const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
@@ -149,8 +149,8 @@ const getBreadcrumbs = ({
     return [{ text: runsTabLabel, href: runsHref }, { text: runDetailBreadcrumbLabel }];
   }
 
-  if (pathname === ONLINE_PATH) {
-    return [{ text: onlineTabLabel }];
+  if (pathname === EXPERIMENTS_PATH) {
+    return [{ text: experimentsTabLabel }];
   }
 
   return [{ text: runsTabLabel }];
@@ -161,10 +161,10 @@ const EvalsNavigation: React.FC = () => {
   const { pathname } = useLocation();
   const isTracingSelected = pathname.startsWith(TRACING_PATH);
   const isDatasetsSelected = pathname.startsWith(DATASETS_PATH);
-  const isOnlineSelected = pathname.startsWith(ONLINE_PATH);
+  const isExperimentsSelected = pathname.startsWith(EXPERIMENTS_PATH);
   const isRemotesSelected = pathname.startsWith(REMOTES_PATH);
   const isRunsSelected =
-    !isTracingSelected && !isDatasetsSelected && !isOnlineSelected && !isRemotesSelected;
+    !isTracingSelected && !isDatasetsSelected && !isExperimentsSelected && !isRemotesSelected;
 
   return (
     <div style={{ flex: '0 0 auto' }}>
@@ -178,8 +178,8 @@ const EvalsNavigation: React.FC = () => {
         <EuiTab isSelected={isTracingSelected} onClick={() => history.push(TRACING_PATH)}>
           {tracingTabLabel}
         </EuiTab>
-        <EuiTab isSelected={isOnlineSelected} onClick={() => history.push(ONLINE_PATH)}>
-          {onlineTabLabel}
+        <EuiTab isSelected={isExperimentsSelected} onClick={() => history.push(EXPERIMENTS_PATH)}>
+          {experimentsTabLabel}
         </EuiTab>
         <EuiTab isSelected={isRemotesSelected} onClick={() => history.push(REMOTES_PATH)}>
           {remotesTabLabel}
@@ -229,7 +229,7 @@ export const EvalsApp: React.FC<{
               <Route path="/runs/:runId" component={RunDetailPage} />
               <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
               <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
-              <Route exact path={ONLINE_PATH} component={OnlineEvaluationsPage} />
+              <Route exact path={EXPERIMENTS_PATH} component={ExperimentsPage} />
             </Routes>
           </Suspense>
         </div>

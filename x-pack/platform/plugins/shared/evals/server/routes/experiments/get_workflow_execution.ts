@@ -12,32 +12,32 @@ import { z } from '@kbn/zod';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-const GetOnlineRunParams = z.object({
+const GetExperimentRunParams = z.object({
   workflowExecutionId: z.string().min(1),
 });
 
-export const registerGetOnlineRunRoute = ({
+export const registerGetExperimentRunRoute = ({
   router,
   logger,
   workflowsManagement,
 }: RouteDependencies) => {
   router.versioned
     .get({
-      path: '/internal/evals/online/runs/{workflowExecutionId}',
+      path: '/internal/evals/experiments/runs/{workflowExecutionId}',
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
           requiredPrivileges: [PLUGIN_ID, WorkflowsManagementApiActions.readExecution],
         },
       },
-      summary: 'Get an online evaluation run (workflow execution)',
+      summary: 'Get an experiment run (workflow execution)',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(GetOnlineRunParams),
+            params: buildRouteValidationWithZod(GetExperimentRunParams),
           },
         },
       },
@@ -67,10 +67,10 @@ export const registerGetOnlineRunRoute = ({
 
           return response.ok({ body: { execution } });
         } catch (error) {
-          logger.error(`Failed to get online evaluation run: ${error}`);
+          logger.error(`Failed to get experiment run: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to get online evaluation run' },
+            body: { message: 'Failed to get experiment run' },
           });
         }
       }

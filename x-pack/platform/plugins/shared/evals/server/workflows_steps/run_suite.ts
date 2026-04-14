@@ -13,11 +13,12 @@ import {
   exportEvaluationScoreDocuments,
   mapToEvaluationScoreDocuments,
 } from '@kbn/evals-runner';
-import type { EvalsLogger } from '@kbn/evals-runner';
+import type { EvaluationDataset, EvalsLogger } from '@kbn/evals-runner';
 import type { ScoreExporterClient } from '@kbn/evals-runner';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { OnlineSuiteRegistry } from '../online_suites/registry';
+import type { ExperimentSuiteRegistry } from '../experiments/registry';
+import type { DatasetService } from '../storage/dataset_service';
 import { evalsRunSuiteCommonStepDefinition } from '../../common/workflows_steps/run_suite';
 
 function toEvalsLogger(logger: {
@@ -44,9 +45,10 @@ function toModelFromConnector(connector: InferenceConnector): Model {
 
 export const getEvalsRunSuiteStepDefinition = (options: {
   coreSetup: CoreSetup<{ inference?: InferenceServerStart }>;
-  onlineSuiteRegistry: OnlineSuiteRegistry;
+  experimentSuiteRegistry: ExperimentSuiteRegistry;
+  datasetService: DatasetService;
 }) => {
-  const { coreSetup, onlineSuiteRegistry } = options;
+  const { coreSetup, experimentSuiteRegistry, datasetService } = options;
 
   return createServerStepDefinition({
     ...evalsRunSuiteCommonStepDefinition,
@@ -63,7 +65,7 @@ export const getEvalsRunSuiteStepDefinition = (options: {
         }
 
         const suiteId = context.input.suite_id;
-        const suite = onlineSuiteRegistry.getById(suiteId);
+        const suite = experimentSuiteRegistry.getById(suiteId);
         if (!suite) {
           return { error: new Error(`Unknown suite_id: ${suiteId}`) };
         }
@@ -103,11 +105,42 @@ export const getEvalsRunSuiteStepDefinition = (options: {
           bindTo: { connectorId: context.input.judge_connector_id },
         });
 
+        const datasetClient = datasetService.getClient(esClient);
+
+        const getDatasetByName = async (name: string): Promise<EvaluationDataset | null> => {
+          const result = await datasetClient.getByName(name);
+          if (!result) return null;
+          return {
+            name: result.name,
+            description: result.description ?? '',
+            examples: result.examples.map((ex) => ({
+              id: ex.id,
+              input: ex.input,
+              output: ex.output,
+              metadata: ex.metadata,
+            })),
+          };
+        };
+
+        const upsertDataset = async (dataset: EvaluationDataset): Promise<void> => {
+          await datasetClient.upsert(
+            dataset.name,
+            dataset.description,
+            dataset.examples.map((ex) => ({
+              input: ex.input,
+              output: ex.output,
+              metadata: ex.metadata,
+            }))
+          );
+        };
+
         const executorClient = new KibanaEvalsClient({
           log: toEvalsLogger(context.logger),
           model: taskModel,
           runId,
           repetitions,
+          getDatasetByName,
+          upsertDataset,
         });
 
         await suite.run({
@@ -123,6 +156,7 @@ export const getEvalsRunSuiteStepDefinition = (options: {
           judgeModel,
           logger: context.logger,
           abortSignal: context.abortSignal,
+          getDatasetByName,
         });
 
         const experiments = await executorClient.getRanExperiments();

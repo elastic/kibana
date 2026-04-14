@@ -13,10 +13,10 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
-import type { OnlineSuiteDefinition } from './online_suites/types';
+import type { ExperimentSuiteDefinition } from './experiments/types';
 
 export interface EvalsPluginSetup {
-  registerOnlineSuite: (definition: OnlineSuiteDefinition) => void;
+  registerExperimentSuite: (definition: ExperimentSuiteDefinition) => void;
 }
 export interface EvalsPluginStart {
   datasetService?: DatasetService;

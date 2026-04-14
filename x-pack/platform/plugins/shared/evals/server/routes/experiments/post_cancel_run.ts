@@ -12,32 +12,32 @@ import { z } from '@kbn/zod';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-const CancelOnlineRunParams = z.object({
+const CancelExperimentRunParams = z.object({
   workflowExecutionId: z.string().min(1),
 });
 
-export const registerCancelOnlineRunRoute = ({
+export const registerCancelExperimentRunRoute = ({
   router,
   logger,
   workflowsManagement,
 }: RouteDependencies) => {
   router.versioned
     .post({
-      path: '/internal/evals/online/runs/{workflowExecutionId}/cancel',
+      path: '/internal/evals/experiments/runs/{workflowExecutionId}/cancel',
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
           requiredPrivileges: [PLUGIN_ID, WorkflowsManagementApiActions.cancelExecution],
         },
       },
-      summary: 'Cancel an online evaluation run',
+      summary: 'Cancel an experiment run',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(CancelOnlineRunParams),
+            params: buildRouteValidationWithZod(CancelExperimentRunParams),
           },
         },
       },
@@ -61,10 +61,10 @@ export const registerCancelOnlineRunRoute = ({
             body: { workflow_execution_id: request.params.workflowExecutionId },
           });
         } catch (error) {
-          logger.error(`Failed to cancel online evaluation run: ${error}`);
+          logger.error(`Failed to cancel experiment run: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to cancel online evaluation run' },
+            body: { message: 'Failed to cancel experiment run' },
           });
         }
       }

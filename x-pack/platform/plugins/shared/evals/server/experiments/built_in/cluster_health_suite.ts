@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { MessageRole } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
 import type { EvaluationDataset, Evaluator } from '@kbn/evals-runner';
-import type { OnlineSuiteDefinition, OnlineSuiteRunContext } from '../types';
+import type { ExperimentSuiteDefinition, ExperimentSuiteRunContext } from '../types';
 
-const SUITE_ID = 'builtIn.clusterHealth';
+const SUITE_ID = 'builtin.clusterHealth';
 
 const SUITE_NAME = i18n.translate('xpack.evals.onlineSuites.clusterHealth.name', {
   defaultMessage: 'Cluster health (built-in)',
@@ -30,12 +30,12 @@ function normalizeStatus(value: unknown): string | null {
   return null;
 }
 
-export const clusterHealthOnlineSuite: OnlineSuiteDefinition = {
+export const clusterHealthExperimentSuite: ExperimentSuiteDefinition = {
   id: SUITE_ID,
   name: SUITE_NAME,
   description: SUITE_DESCRIPTION,
   inputSchema: z.unknown(),
-  run: async (ctx: OnlineSuiteRunContext) => {
+  run: async (ctx: ExperimentSuiteRunContext) => {
     const health = await ctx.esClient.cluster.health();
     const expectedStatus = String(health.status);
 

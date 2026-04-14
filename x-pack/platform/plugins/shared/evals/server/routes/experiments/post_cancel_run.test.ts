@@ -11,26 +11,34 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { API_VERSIONS } from '@kbn/evals-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { OnlineSuiteRegistry } from '../../online_suites/registry';
-import { registerCancelOnlineRunRoute } from './post_cancel_run';
+import { ExperimentSuiteRegistry } from '../../experiments/registry';
+import { registerCancelExperimentRunRoute } from './post_cancel_run';
 
-describe('POST /internal/evals/online/runs/{workflowExecutionId}/cancel', () => {
+describe('POST /internal/evals/experiments/runs/{workflowExecutionId}/cancel', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    const onlineSuiteRegistry = new OnlineSuiteRegistry();
+    const experimentSuiteRegistry = new ExperimentSuiteRegistry();
     const workflowsManagement: WorkflowsServerPluginSetup = {
       management: {
         cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
       } as any,
     };
 
-    registerCancelOnlineRunRoute({ router, logger, onlineSuiteRegistry, workflowsManagement });
+    registerCancelExperimentRunRoute({
+      router,
+      logger,
+      experimentSuiteRegistry,
+      workflowsManagement,
+      canEncrypt: true,
+      getEncryptedSavedObjectsStart: jest.fn(),
+      getInternalRemoteConfigsSoClient: jest.fn(),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute(
       'post',
-      '/internal/evals/online/runs/{workflowExecutionId}/cancel'
+      '/internal/evals/experiments/runs/{workflowExecutionId}/cancel'
     ).versions[API_VERSIONS.internal.v1];
 
     const mockCoreContext = coreMock.createRequestHandlerContext();
@@ -48,7 +56,7 @@ describe('POST /internal/evals/online/runs/{workflowExecutionId}/cancel', () => 
     const { handler, context, workflowsManagement } = setup();
     const request = httpServerMock.createKibanaRequest({
       method: 'post',
-      path: '/internal/evals/online/runs/exec-123/cancel',
+      path: '/internal/evals/experiments/runs/exec-123/cancel',
       params: { workflowExecutionId: 'exec-123' },
     });
 

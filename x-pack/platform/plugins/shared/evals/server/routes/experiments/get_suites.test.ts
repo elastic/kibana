@@ -11,15 +11,15 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { API_VERSIONS } from '@kbn/evals-common';
 import { z } from '@kbn/zod';
-import { OnlineSuiteRegistry } from '../../online_suites/registry';
-import { registerGetOnlineSuitesRoute } from './get_suites';
+import { ExperimentSuiteRegistry } from '../../experiments/registry';
+import { registerGetExperimentSuitesRoute } from './get_suites';
 
-describe('GET /internal/evals/online/suites', () => {
+describe('GET /internal/evals/experiments/suites', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    const onlineSuiteRegistry = new OnlineSuiteRegistry();
-    onlineSuiteRegistry.register({
+    const experimentSuiteRegistry = new ExperimentSuiteRegistry();
+    experimentSuiteRegistry.register({
       id: 'suite-1',
       name: 'Suite 1',
       description: 'desc',
@@ -27,12 +27,18 @@ describe('GET /internal/evals/online/suites', () => {
       run: async () => undefined,
     });
 
-    registerGetOnlineSuitesRoute({ router, logger, onlineSuiteRegistry });
+    registerGetExperimentSuitesRoute({
+      router,
+      logger,
+      experimentSuiteRegistry,
+      canEncrypt: true,
+      getEncryptedSavedObjectsStart: jest.fn(),
+      getInternalRemoteConfigsSoClient: jest.fn(),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
-    const { handler } = versionedRouter.getRoute('get', '/internal/evals/online/suites').versions[
-      API_VERSIONS.internal.v1
-    ];
+    const { handler } = versionedRouter.getRoute('get', '/internal/evals/experiments/suites')
+      .versions[API_VERSIONS.internal.v1];
 
     const mockCoreContext = coreMock.createRequestHandlerContext();
     const context = coreMock.createCustomRequestHandlerContext({ core: mockCoreContext });
@@ -45,7 +51,7 @@ describe('GET /internal/evals/online/suites', () => {
 
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
-      path: '/internal/evals/online/suites',
+      path: '/internal/evals/experiments/suites',
     });
 
     const res = await handler(context, request, kibanaResponseFactory);

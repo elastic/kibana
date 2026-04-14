@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 export const EVALS_RUN_SUITE_STEP_TYPE = 'evals.runSuite' as const;
 
 export const EvalsRunSuiteStepInputSchema = z.object({
-  suite_id: z.string().describe('The online suite ID to run.'),
+  suite_id: z.string().describe('The experiment suite ID to run.'),
   task_connector_id: z.string().describe('The inference connector ID used by the suite tasks.'),
   judge_connector_id: z
     .string()
@@ -48,15 +48,15 @@ export const evalsRunSuiteCommonStepDefinition: CommonStepDefinition<
     defaultMessage: 'Run evaluation suite',
   }),
   description: i18n.translate('xpack.evals.workflowsSteps.runSuite.description', {
-    defaultMessage: 'Execute a registered online evaluation suite inside Kibana and export scores.',
+    defaultMessage: 'Execute a registered experiment suite inside Kibana and export scores.',
   }),
   documentation: {
     details: i18n.translate('xpack.evals.workflowsSteps.runSuite.documentation.details', {
       defaultMessage:
-        'The evals.runSuite step runs an online evaluation suite registered with the Evals plugin. It executes suite logic inside the Kibana server process and exports score documents to the `kibana-evaluations*` data stream.',
+        'The evals.runSuite step runs an experiment suite registered with the Evals plugin. It executes suite logic inside the Kibana server process and exports score documents to the `kibana-evaluations*` data stream.',
     }),
     examples: [
-      `## Run an online suite
+      `## Run an experiment suite
 \`\`\`yaml
 - name: run_eval_suite
   type: ${EVALS_RUN_SUITE_STEP_TYPE}

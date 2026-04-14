@@ -7,12 +7,15 @@
 
 import React, { useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
   EuiCodeBlock,
+  EuiComboBox,
   EuiFieldNumber,
-  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
@@ -29,16 +32,18 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
   type EuiBasicTableColumn,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import {
-  useCancelOnlineRun,
-  useOnlineRun,
-  useOnlineRunLogs,
-  useOnlineSuites,
-  useRunOnlineSuiteNow,
-  type OnlineSuiteListItem,
-} from '../../hooks/use_online_evals_api';
+  useCancelExperimentRun,
+  useExperimentRun,
+  useExperimentRunLogs,
+  useExperimentSuites,
+  useRunExperimentSuiteNow,
+  type ExperimentSuiteListItem,
+} from '../../hooks/use_experiments_api';
+import { useInferenceConnectors } from '../../hooks/use_inference_connectors';
 import * as i18n from './translations';
 
 interface LatestRunState {
@@ -47,30 +52,45 @@ interface LatestRunState {
   workflowExecutionId: string;
 }
 
-export const OnlineEvaluationsPage: React.FC = () => {
+export const ExperimentsPage: React.FC = () => {
   const history = useHistory();
-  const { data, isLoading, error } = useOnlineSuites();
-  const runNow = useRunOnlineSuiteNow();
-  const cancelRun = useCancelOnlineRun();
-  const modalTitleId = useGeneratedHtmlId({ prefix: 'evalsOnlineRunModalTitle' });
+  const { data, isLoading, error } = useExperimentSuites();
+  const runNow = useRunExperimentSuiteNow();
+  const cancelRun = useCancelExperimentRun();
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'evalsExperimentRunModalTitle' });
 
-  const [selectedSuite, setSelectedSuite] = useState<OnlineSuiteListItem | null>(null);
+  const { data: connectors, isLoading: isLoadingConnectors } = useInferenceConnectors();
+
+  const [selectedSuite, setSelectedSuite] = useState<ExperimentSuiteListItem | null>(null);
   const [isRunModalOpen, setIsRunModalOpen] = useState(false);
-  const [taskConnectorId, setTaskConnectorId] = useState('');
-  const [judgeConnectorId, setJudgeConnectorId] = useState('');
+  const [selectedTaskConnector, setSelectedTaskConnector] = useState<EuiComboBoxOptionOption[]>([]);
+  const [selectedJudgeConnector, setSelectedJudgeConnector] = useState<EuiComboBoxOptionOption[]>(
+    []
+  );
   const [repetitions, setRepetitions] = useState<number>(3);
   const [suiteParamsText, setSuiteParamsText] = useState('{}');
   const [suiteParamsError, setSuiteParamsError] = useState<string | null>(null);
   const [latestRun, setLatestRun] = useState<LatestRunState | null>(null);
 
-  const { data: executionData } = useOnlineRun(latestRun?.workflowExecutionId, { pollMs: 2000 });
-  const { data: logsData } = useOnlineRunLogs(latestRun?.workflowExecutionId, {
+  const connectorOptions: EuiComboBoxOptionOption[] = useMemo(
+    () =>
+      (connectors ?? []).map((c) => ({
+        label: `${c.name} (${c.type})`,
+        value: c.connectorId,
+      })),
+    [connectors]
+  );
+
+  const { data: executionData } = useExperimentRun(latestRun?.workflowExecutionId, {
+    pollMs: 2000,
+  });
+  const { data: logsData } = useExperimentRunLogs(latestRun?.workflowExecutionId, {
     pollMs: 4000,
     size: 50,
     page: 1,
   });
 
-  const openRunModal = (suite: OnlineSuiteListItem) => {
+  const openRunModal = (suite: ExperimentSuiteListItem) => {
     setSelectedSuite(suite);
     setSuiteParamsError(null);
     setIsRunModalOpen(true);
@@ -80,21 +100,35 @@ export const OnlineEvaluationsPage: React.FC = () => {
     setIsRunModalOpen(false);
   };
 
-  const columns: Array<EuiBasicTableColumn<OnlineSuiteListItem>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<ExperimentSuiteListItem>> = useMemo(
     () => [
       {
         field: 'name',
         name: i18n.COLUMN_SUITE,
-        width: '240px',
-        render: (_name: string, suite: OnlineSuiteListItem) => (
+        width: '220px',
+        render: (_name: string, suite: ExperimentSuiteListItem) => (
           <EuiLink onClick={() => openRunModal(suite)}>{suite.name}</EuiLink>
         ),
       },
       {
         field: 'id',
         name: i18n.COLUMN_SUITE_ID,
-        width: '240px',
+        width: '200px',
         truncateText: true,
+      },
+      {
+        field: 'tags',
+        name: i18n.COLUMN_TAGS,
+        width: '200px',
+        render: (tags?: string[]) => (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {(tags ?? []).map((tag) => (
+              <EuiFlexItem grow={false} key={tag}>
+                <EuiBadge color="hollow">{tag}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ),
       },
       {
         field: 'description',
@@ -111,16 +145,20 @@ export const OnlineEvaluationsPage: React.FC = () => {
             description: i18n.RUN_NOW_BUTTON,
             type: 'icon',
             icon: 'play',
-            onClick: (suite: OnlineSuiteListItem) => openRunModal(suite),
+            onClick: (suite: ExperimentSuiteListItem) => openRunModal(suite),
           },
         ],
       },
     ],
+
     []
   );
 
+  const taskConnectorId = (selectedTaskConnector[0]?.value as string) ?? '';
+  const judgeConnectorId = (selectedJudgeConnector[0]?.value as string) ?? '';
+
   const onStartRun = async () => {
-    if (!selectedSuite) return;
+    if (!selectedSuite || !taskConnectorId || !judgeConnectorId) return;
 
     let suiteParams: Record<string, unknown> | undefined;
     try {
@@ -176,7 +214,7 @@ export const OnlineEvaluationsPage: React.FC = () => {
               <EuiButton
                 size="s"
                 onClick={() => history.push(`/runs/${latestRun.runId}`)}
-                data-test-subj="evalsOnlineViewRunDetailsButton"
+                data-test-subj="evalsExperimentViewRunDetailsButton"
               >
                 {i18n.VIEW_RUN_DETAILS_BUTTON}
               </EuiButton>{' '}
@@ -187,7 +225,7 @@ export const OnlineEvaluationsPage: React.FC = () => {
                   cancelRun.mutate({ workflowExecutionId: latestRun.workflowExecutionId })
                 }
                 isLoading={cancelRun.isLoading}
-                data-test-subj="evalsOnlineCancelRunButton"
+                data-test-subj="evalsExperimentCancelRunButton"
               >
                 {i18n.CANCEL_RUN_BUTTON}
               </EuiButton>
@@ -201,7 +239,7 @@ export const OnlineEvaluationsPage: React.FC = () => {
                 paddingSize="s"
                 isCopyable
                 overflowHeight={240}
-                data-test-subj="evalsOnlineExecutionLogs"
+                data-test-subj="evalsExperimentExecutionLogs"
               >
                 {(logsData?.logs ?? [])
                   .slice()
@@ -219,6 +257,20 @@ export const OnlineEvaluationsPage: React.FC = () => {
         <EuiText size="s">
           <p>{i18n.PAGE_DESCRIPTION}</p>
         </EuiText>
+        <EuiSpacer size="s" />
+        <EuiCallOut title={i18n.RUNS_TAB_CALLOUT_TITLE} iconType="inspect" size="s">
+          <EuiText size="xs">
+            <p>{i18n.RUNS_TAB_CALLOUT_DESCRIPTION}</p>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiButton
+            size="s"
+            onClick={() => history.push('/')}
+            data-test-subj="evalsExperimentViewRunsButton"
+          >
+            {i18n.VIEW_RUNS_BUTTON}
+          </EuiButton>
+        </EuiCallOut>
         <EuiSpacer size="m" />
 
         <EuiBasicTable
@@ -248,21 +300,25 @@ export const OnlineEvaluationsPage: React.FC = () => {
             <EuiSpacer size="m" />
             <EuiForm component="form">
               <EuiFormRow label={i18n.TASK_CONNECTOR_LABEL} fullWidth>
-                <EuiFieldText
-                  name="taskConnectorId"
-                  value={taskConnectorId}
-                  onChange={(e) => setTaskConnectorId(e.target.value)}
+                <EuiComboBox
+                  singleSelection={{ asPlainText: true }}
+                  options={connectorOptions}
+                  selectedOptions={selectedTaskConnector}
+                  onChange={setSelectedTaskConnector}
+                  isLoading={isLoadingConnectors}
                   fullWidth
-                  data-test-subj="evalsOnlineTaskConnectorId"
+                  data-test-subj="evalsExperimentTaskConnectorId"
                 />
               </EuiFormRow>
               <EuiFormRow label={i18n.JUDGE_CONNECTOR_LABEL} fullWidth>
-                <EuiFieldText
-                  name="judgeConnectorId"
-                  value={judgeConnectorId}
-                  onChange={(e) => setJudgeConnectorId(e.target.value)}
+                <EuiComboBox
+                  singleSelection={{ asPlainText: true }}
+                  options={connectorOptions}
+                  selectedOptions={selectedJudgeConnector}
+                  onChange={setSelectedJudgeConnector}
+                  isLoading={isLoadingConnectors}
                   fullWidth
-                  data-test-subj="evalsOnlineJudgeConnectorId"
+                  data-test-subj="evalsExperimentJudgeConnectorId"
                 />
               </EuiFormRow>
               <EuiFormRow label={i18n.REPETITIONS_LABEL} fullWidth>
@@ -271,7 +327,7 @@ export const OnlineEvaluationsPage: React.FC = () => {
                   onChange={(e) => setRepetitions(Number(e.target.value))}
                   min={1}
                   fullWidth
-                  data-test-subj="evalsOnlineRepetitions"
+                  data-test-subj="evalsExperimentRepetitions"
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -286,7 +342,7 @@ export const OnlineEvaluationsPage: React.FC = () => {
                   isInvalid={Boolean(suiteParamsError)}
                   fullWidth
                   rows={6}
-                  data-test-subj="evalsOnlineSuiteParams"
+                  data-test-subj="evalsExperimentSuiteParams"
                 />
               </EuiFormRow>
             </EuiForm>
@@ -297,7 +353,8 @@ export const OnlineEvaluationsPage: React.FC = () => {
               fill
               onClick={onStartRun}
               isLoading={runNow.isLoading}
-              data-test-subj="evalsOnlineStartRunButton"
+              isDisabled={!taskConnectorId || !judgeConnectorId}
+              data-test-subj="evalsExperimentStartRunButton"
             >
               {i18n.START_RUN_BUTTON}
             </EuiButton>

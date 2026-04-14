@@ -5,35 +5,33 @@
  * 2.0.
  */
 
-import type { OnlineSuiteDefinition, OnlineSuiteListItem } from './types';
+import type { ExperimentSuiteDefinition, ExperimentSuiteListItem } from './types';
 
-export class OnlineSuiteRegistry {
-  private readonly suites = new Map<string, OnlineSuiteDefinition>();
+export class ExperimentSuiteRegistry {
+  private readonly suites = new Map<string, ExperimentSuiteDefinition>();
 
-  register(definition: OnlineSuiteDefinition): void {
+  register(definition: ExperimentSuiteDefinition): void {
     if (!definition.id) {
-      throw new Error('Online suite id is required');
-    }
-    if (this.suites.has(definition.id)) {
-      throw new Error(`Online suite with id "${definition.id}" is already registered`);
+      throw new Error('Experiment suite id is required');
     }
 
     this.suites.set(definition.id, definition);
   }
 
-  getAll(): OnlineSuiteDefinition[] {
+  getAll(): ExperimentSuiteDefinition[] {
     return Array.from(this.suites.values()).sort((a, b) => a.id.localeCompare(b.id));
   }
 
-  getById(id: string): OnlineSuiteDefinition | undefined {
+  getById(id: string): ExperimentSuiteDefinition | undefined {
     return this.suites.get(id);
   }
 
-  list(): OnlineSuiteListItem[] {
+  list(): ExperimentSuiteListItem[] {
     return this.getAll().map((s) => ({
       id: s.id,
       name: s.name,
       description: s.description,
+      tags: s.tags,
     }));
   }
 }

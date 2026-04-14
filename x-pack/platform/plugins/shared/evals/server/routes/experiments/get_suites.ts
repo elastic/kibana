@@ -9,18 +9,18 @@ import { API_VERSIONS, INTERNAL_API_ACCESS } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-export const registerGetOnlineSuitesRoute = ({
+export const registerGetExperimentSuitesRoute = ({
   router,
-  onlineSuiteRegistry,
+  experimentSuiteRegistry,
 }: RouteDependencies) => {
   router.versioned
     .get({
-      path: '/internal/evals/online/suites',
+      path: '/internal/evals/experiments/suites',
       access: INTERNAL_API_ACCESS,
       security: {
         authz: { requiredPrivileges: [PLUGIN_ID] },
       },
-      summary: 'List online evaluation suites',
+      summary: 'List experiment suites',
     })
     .addVersion(
       {
@@ -30,7 +30,7 @@ export const registerGetOnlineSuitesRoute = ({
       async (_context, _request, response) => {
         return response.ok({
           body: {
-            suites: onlineSuiteRegistry?.list() ?? [],
+            suites: experimentSuiteRegistry?.list() ?? [],
           },
         });
       }

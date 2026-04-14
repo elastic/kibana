@@ -12,15 +12,15 @@ import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { API_VERSIONS } from '@kbn/evals-common';
 import { z } from '@kbn/zod';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { OnlineSuiteRegistry } from '../../online_suites/registry';
-import { registerRunOnlineSuiteRoute } from './post_run';
+import { ExperimentSuiteRegistry } from '../../experiments/registry';
+import { registerRunExperimentSuiteRoute } from './post_run';
 
-describe('POST /internal/evals/online/runs', () => {
+describe('POST /internal/evals/experiments/runs', () => {
   const setup = (opts?: { withWorkflows?: boolean }) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    const onlineSuiteRegistry = new OnlineSuiteRegistry();
-    onlineSuiteRegistry.register({
+    const experimentSuiteRegistry = new ExperimentSuiteRegistry();
+    experimentSuiteRegistry.register({
       id: 'suite-1',
       name: 'Suite 1',
       inputSchema: z.object({}),
@@ -43,12 +43,19 @@ describe('POST /internal/evals/online/runs', () => {
         } as any)
       : undefined;
 
-    registerRunOnlineSuiteRoute({ router, logger, onlineSuiteRegistry, workflowsManagement });
+    registerRunExperimentSuiteRoute({
+      router,
+      logger,
+      experimentSuiteRegistry,
+      workflowsManagement,
+      canEncrypt: true,
+      getEncryptedSavedObjectsStart: jest.fn(),
+      getInternalRemoteConfigsSoClient: jest.fn(),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
-    const { handler } = versionedRouter.getRoute('post', '/internal/evals/online/runs').versions[
-      API_VERSIONS.internal.v1
-    ];
+    const { handler } = versionedRouter.getRoute('post', '/internal/evals/experiments/runs')
+      .versions[API_VERSIONS.internal.v1];
 
     const mockCoreContext = coreMock.createRequestHandlerContext();
     (mockCoreContext as any).http = {
@@ -65,7 +72,7 @@ describe('POST /internal/evals/online/runs', () => {
     const { handler, context } = setup({ withWorkflows: false });
     const request = httpServerMock.createKibanaRequest({
       method: 'post',
-      path: '/internal/evals/online/runs',
+      path: '/internal/evals/experiments/runs',
       body: {
         workflow_id: 'wf-1',
         suite_id: 'suite-1',
@@ -83,7 +90,7 @@ describe('POST /internal/evals/online/runs', () => {
     const { handler, context, workflowsManagement } = setup({ withWorkflows: true });
     const request = httpServerMock.createKibanaRequest({
       method: 'post',
-      path: '/internal/evals/online/runs',
+      path: '/internal/evals/experiments/runs',
       body: {
         workflow_id: 'wf-1',
         suite_id: 'suite-1',
@@ -115,7 +122,7 @@ describe('POST /internal/evals/online/runs', () => {
       expect.objectContaining({
         run_id: res.payload.run_id,
         suite_id: 'suite-1',
-        source: 'online',
+        source: 'experiment',
       })
     );
   });

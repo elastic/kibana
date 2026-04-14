@@ -28,9 +28,10 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
-import { OnlineSuiteRegistry } from './online_suites/registry';
+import { ExperimentSuiteRegistry } from './experiments/registry';
 import { getEvalsRunSuiteStepDefinition } from './workflows_steps/run_suite';
-import { clusterHealthOnlineSuite } from './online_suites/built_in/cluster_health_suite';
+import { clusterHealthExperimentSuite } from './experiments/built_in/cluster_health_suite';
+import { experimentSuiteDefinitions } from './experiments/suite_definitions';
 
 export class EvalsPlugin
   implements
@@ -39,7 +40,7 @@ export class EvalsPlugin
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
   private datasetService?: DatasetService;
-  private onlineSuiteRegistry?: OnlineSuiteRegistry;
+  private experimentSuiteRegistry?: ExperimentSuiteRegistry;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -58,20 +59,24 @@ export class EvalsPlugin
     if (!this.config.enabled) {
       this.logger.info('Evals plugin is disabled');
       return {
-        registerOnlineSuite: () => undefined,
+        registerExperimentSuite: () => undefined,
       };
     }
 
     this.logger.info('Setting up Evals plugin');
     this.datasetService = new DatasetService(this.logger);
-    this.onlineSuiteRegistry = new OnlineSuiteRegistry();
-    this.onlineSuiteRegistry.register(clusterHealthOnlineSuite);
+    this.experimentSuiteRegistry = new ExperimentSuiteRegistry();
+    for (const suite of experimentSuiteDefinitions) {
+      this.experimentSuiteRegistry.register(suite);
+    }
+    this.experimentSuiteRegistry.register(clusterHealthExperimentSuite);
 
     if (workflowsExtensions) {
       workflowsExtensions.registerStepDefinition(
         getEvalsRunSuiteStepDefinition({
           coreSetup,
-          onlineSuiteRegistry: this.onlineSuiteRegistry,
+          experimentSuiteRegistry: this.experimentSuiteRegistry,
+          datasetService: this.datasetService,
         })
       );
     }
@@ -137,7 +142,7 @@ export class EvalsPlugin
     registerRoutes({
       router,
       logger: this.logger,
-      onlineSuiteRegistry: this.onlineSuiteRegistry,
+      experimentSuiteRegistry: this.experimentSuiteRegistry,
       workflowsManagement,
       canEncrypt: encryptedSavedObjects.canEncrypt,
       getEncryptedSavedObjectsStart: () =>
@@ -146,7 +151,7 @@ export class EvalsPlugin
     });
 
     return {
-      registerOnlineSuite: (definition) => this.onlineSuiteRegistry?.register(definition),
+      registerExperimentSuite: (definition) => this.experimentSuiteRegistry?.register(definition),
     };
   }
 

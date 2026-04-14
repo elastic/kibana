@@ -11,32 +11,35 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { API_VERSIONS } from '@kbn/evals-common';
 import { queryKeys } from '../query_keys';
 
-const EVALS_ONLINE_SUITES_URL = '/internal/evals/online/suites';
-const EVALS_ONLINE_RUN_NOW_URL = '/internal/evals/online/runs/run_now';
-const EVALS_ONLINE_RUN_URL = '/internal/evals/online/runs/{workflowExecutionId}';
-const EVALS_ONLINE_RUN_LOGS_URL = '/internal/evals/online/runs/{workflowExecutionId}/logs';
-const EVALS_ONLINE_RUN_CANCEL_URL = '/internal/evals/online/runs/{workflowExecutionId}/cancel';
+const EVALS_EXPERIMENTS_SUITES_URL = '/internal/evals/experiments/suites';
+const EVALS_EXPERIMENTS_RUN_NOW_URL = '/internal/evals/experiments/runs/run_now';
+const EVALS_EXPERIMENTS_RUN_URL = '/internal/evals/experiments/runs/{workflowExecutionId}';
+const EVALS_EXPERIMENTS_RUN_LOGS_URL =
+  '/internal/evals/experiments/runs/{workflowExecutionId}/logs';
+const EVALS_EXPERIMENTS_RUN_CANCEL_URL =
+  '/internal/evals/experiments/runs/{workflowExecutionId}/cancel';
 
-const getOnlineRunUrl = (workflowExecutionId: string) =>
-  EVALS_ONLINE_RUN_URL.replace('{workflowExecutionId}', workflowExecutionId);
+const getExperimentRunUrl = (workflowExecutionId: string) =>
+  EVALS_EXPERIMENTS_RUN_URL.replace('{workflowExecutionId}', workflowExecutionId);
 
-const getOnlineRunLogsUrl = (workflowExecutionId: string) =>
-  EVALS_ONLINE_RUN_LOGS_URL.replace('{workflowExecutionId}', workflowExecutionId);
+const getExperimentRunLogsUrl = (workflowExecutionId: string) =>
+  EVALS_EXPERIMENTS_RUN_LOGS_URL.replace('{workflowExecutionId}', workflowExecutionId);
 
-const getOnlineRunCancelUrl = (workflowExecutionId: string) =>
-  EVALS_ONLINE_RUN_CANCEL_URL.replace('{workflowExecutionId}', workflowExecutionId);
+const getExperimentRunCancelUrl = (workflowExecutionId: string) =>
+  EVALS_EXPERIMENTS_RUN_CANCEL_URL.replace('{workflowExecutionId}', workflowExecutionId);
 
-export interface OnlineSuiteListItem {
+export interface ExperimentSuiteListItem {
   id: string;
   name: string;
   description?: string;
+  tags?: string[];
 }
 
-export interface GetOnlineSuitesResponse {
-  suites: OnlineSuiteListItem[];
+export interface GetExperimentSuitesResponse {
+  suites: ExperimentSuiteListItem[];
 }
 
-export interface RunOnlineSuiteNowRequestBody {
+export interface RunExperimentSuiteNowRequestBody {
   suite_id: string;
   task_connector_id: string;
   judge_connector_id: string;
@@ -44,17 +47,17 @@ export interface RunOnlineSuiteNowRequestBody {
   repetitions?: number;
 }
 
-export interface RunOnlineSuiteNowResponse {
+export interface RunExperimentSuiteNowResponse {
   run_id: string;
   suite_id: string;
   workflow_execution_id: string;
 }
 
-export interface GetOnlineRunResponse {
+export interface GetExperimentRunResponse {
   execution: WorkflowExecutionDto;
 }
 
-export interface OnlineRunLogEntry {
+export interface ExperimentRunLogEntry {
   id: string;
   timestamp: string;
   level?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
@@ -66,44 +69,46 @@ export interface OnlineRunLogEntry {
   additionalData?: Record<string, unknown>;
 }
 
-export interface GetOnlineRunLogsResponse {
-  logs: OnlineRunLogEntry[];
+export interface GetExperimentRunLogsResponse {
+  logs: ExperimentRunLogEntry[];
   total: number;
   size: number;
   page: number;
 }
 
-export const useOnlineSuites = () => {
+export const useExperimentSuites = () => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.online.suites(),
-    queryFn: async (): Promise<GetOnlineSuitesResponse> => {
-      return services.http!.get<GetOnlineSuitesResponse>(EVALS_ONLINE_SUITES_URL, {
+    queryKey: queryKeys.experiments.suites(),
+    queryFn: async (): Promise<GetExperimentSuitesResponse> => {
+      return services.http!.get<GetExperimentSuitesResponse>(EVALS_EXPERIMENTS_SUITES_URL, {
         version: API_VERSIONS.internal.v1,
       });
     },
   });
 };
 
-export const useRunOnlineSuiteNow = () => {
+export const useRunExperimentSuiteNow = () => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (body: RunOnlineSuiteNowRequestBody): Promise<RunOnlineSuiteNowResponse> => {
-      return services.http!.post<RunOnlineSuiteNowResponse>(EVALS_ONLINE_RUN_NOW_URL, {
+    mutationFn: async (
+      body: RunExperimentSuiteNowRequestBody
+    ): Promise<RunExperimentSuiteNowResponse> => {
+      return services.http!.post<RunExperimentSuiteNowResponse>(EVALS_EXPERIMENTS_RUN_NOW_URL, {
         body: JSON.stringify(body),
         version: API_VERSIONS.internal.v1,
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.online.all });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.experiments.all });
     },
   });
 };
 
-export const useCancelOnlineRun = () => {
+export const useCancelExperimentRun = () => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
 
@@ -114,7 +119,7 @@ export const useCancelOnlineRun = () => {
       workflowExecutionId: string;
     }): Promise<{ workflow_execution_id: string }> => {
       return services.http!.post<{ workflow_execution_id: string }>(
-        getOnlineRunCancelUrl(workflowExecutionId),
+        getExperimentRunCancelUrl(workflowExecutionId),
         {
           body: JSON.stringify({}),
           version: API_VERSIONS.internal.v1,
@@ -123,14 +128,18 @@ export const useCancelOnlineRun = () => {
     },
     onSuccess: async (_response, { workflowExecutionId }) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.online.run(workflowExecutionId) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.online.logs(workflowExecutionId) }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.experiments.run(workflowExecutionId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.experiments.logs(workflowExecutionId),
+        }),
       ]);
     },
   });
 };
 
-export const useOnlineRun = (
+export const useExperimentRun = (
   workflowExecutionId: string | undefined,
   options?: { pollMs?: number }
 ) => {
@@ -138,23 +147,26 @@ export const useOnlineRun = (
 
   return useQuery({
     queryKey: workflowExecutionId
-      ? queryKeys.online.run(workflowExecutionId)
-      : queryKeys.online.all,
+      ? queryKeys.experiments.run(workflowExecutionId)
+      : queryKeys.experiments.all,
     enabled: Boolean(workflowExecutionId),
-    queryFn: async (): Promise<GetOnlineRunResponse> => {
+    queryFn: async (): Promise<GetExperimentRunResponse> => {
       if (!workflowExecutionId) {
         throw new Error('workflowExecutionId is required');
       }
 
-      return services.http!.get<GetOnlineRunResponse>(getOnlineRunUrl(workflowExecutionId), {
-        version: API_VERSIONS.internal.v1,
-      });
+      return services.http!.get<GetExperimentRunResponse>(
+        getExperimentRunUrl(workflowExecutionId),
+        {
+          version: API_VERSIONS.internal.v1,
+        }
+      );
     },
     refetchInterval: options?.pollMs,
   });
 };
 
-export const useOnlineRunLogs = (
+export const useExperimentRunLogs = (
   workflowExecutionId: string | undefined,
   options?: { page?: number; size?: number; pollMs?: number }
 ) => {
@@ -164,16 +176,16 @@ export const useOnlineRunLogs = (
 
   return useQuery({
     queryKey: workflowExecutionId
-      ? queryKeys.online.logs(workflowExecutionId, { page, size })
-      : queryKeys.online.all,
+      ? queryKeys.experiments.logs(workflowExecutionId, { page, size })
+      : queryKeys.experiments.all,
     enabled: Boolean(workflowExecutionId),
-    queryFn: async (): Promise<GetOnlineRunLogsResponse> => {
+    queryFn: async (): Promise<GetExperimentRunLogsResponse> => {
       if (!workflowExecutionId) {
         throw new Error('workflowExecutionId is required');
       }
 
-      return services.http!.get<GetOnlineRunLogsResponse>(
-        getOnlineRunLogsUrl(workflowExecutionId),
+      return services.http!.get<GetExperimentRunLogsResponse>(
+        getExperimentRunLogsUrl(workflowExecutionId),
         {
           query: { page, size, sort_order: 'desc' },
           version: API_VERSIONS.internal.v1,
