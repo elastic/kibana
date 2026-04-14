@@ -12,6 +12,7 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { catchError, from as fromRxjs, map } from 'rxjs';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/prompts_config_service';
 import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
@@ -22,6 +23,8 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { MemoryServiceImpl } from '../../../../lib/memory';
+import { createMemoryDiscoveryTools } from '../../../../lib/sig_events/memory_discovery_tools';
 import { searchModeSchema } from '../../../utils/search_mode';
 
 // Make sure strings are expected for input, but still converted to a
@@ -125,7 +128,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { streamsClient, getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -135,6 +138,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize, query, searchMode } = params.query;
 
+    const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
         streamNames: [name],
@@ -201,7 +205,7 @@ const generateSignificantEventsRoute = createServerRoute({
       inferenceClient,
       uiSettingsClient,
       soClient,
-      featureClient,
+      getFeatureClient,
       scopedClusterClient,
     } = await getScopedClients({ request });
 
@@ -214,12 +218,24 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
+    const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+    const memoryTools = useMemory
+      ? createMemoryDiscoveryTools({
+          memoryService: new MemoryServiceImpl({
+            logger: logger.get('memory'),
+            esClient: scopedClusterClient.asCurrentUser,
+          }),
+        })
+      : undefined;
+
     // Get connector info for error enrichment
-    const [connector, definition, { significantEventsPromptOverride }] = await Promise.all([
-      inferenceClient.getConnectorById(connectorId),
-      streamsClient.getStream(params.path.name),
-      new PromptsConfigService({ soClient, logger }).getPrompt(),
-    ]);
+    const [connector, definition, { significantEventsPromptOverride }, featureClient] =
+      await Promise.all([
+        inferenceClient.getConnectorById(connectorId),
+        streamsClient.getStream(params.path.name),
+        new PromptsConfigService({ soClient, logger }).getPrompt(),
+        getFeatureClient(),
+      ]);
 
     return fromRxjs(
       generateSignificantEventDefinitions(
@@ -236,6 +252,7 @@ const generateSignificantEventsRoute = createServerRoute({
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
           esClient: scopedClusterClient.asCurrentUser,
+          memoryTools,
         }
       )
     ).pipe(
