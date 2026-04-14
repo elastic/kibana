@@ -96,6 +96,7 @@ export const createGetStreamTool = ({
         }
       } else if (Streams.QueryStream.Definition.is(definition)) {
         result.type = 'query';
+        result.query = definition.query;
       }
 
       return {

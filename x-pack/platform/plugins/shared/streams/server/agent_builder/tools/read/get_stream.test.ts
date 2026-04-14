@@ -34,7 +34,7 @@ describe('createGetStreamTool handler', () => {
             },
           ],
         },
-        processing: [],
+        processing: { steps: [], updated_at: '2024-01-01T00:00:00Z' },
         lifecycle: { dsl: { data_retention: '7d' } },
         failure_store: { enabled: {} },
       },
@@ -65,7 +65,7 @@ describe('createGetStreamTool handler', () => {
       description: 'A classic stream',
       ingest: {
         classic: { field_overrides: { msg: { type: 'text' } } },
-        processing: [],
+        processing: { steps: [], updated_at: '2024-01-01T00:00:00Z' },
         lifecycle: { inherit: {} },
         failure_store: { disabled: {} },
       },
