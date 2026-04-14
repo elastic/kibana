@@ -7,20 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Type definitions have been moved to @kbn/core-saved-objects-api-server.
-// Re-exported here for backwards compatibility within the package.
 export type {
   ModelVersionIdentifier,
   SavedObjectsModelVersion,
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
   SavedObjectsFullModelVersion,
+} from './model_version';
+
+export type {
   SavedObjectsModelChange,
   SavedObjectsModelMappingsAdditionChange,
   SavedObjectsModelMappingsDeprecationChange,
   SavedObjectsModelDataBackfillChange,
   SavedObjectsModelDataRemovalChange,
   SavedObjectsModelUnsafeTransformChange,
+} from './model_change';
+
+export type {
   SavedObjectModelTransformationDoc,
   SavedObjectModelTransformationContext,
   SavedObjectModelTransformationFn,
@@ -28,9 +32,12 @@ export type {
   SavedObjectModelDataBackfillFn,
   SavedObjectModelDataBackfillResult,
   SavedObjectModelUnsafeTransformFn,
+} from './transformations';
+
+export type {
   SavedObjectsModelVersionSchemaDefinitions,
   SavedObjectModelVersionForwardCompatibilitySchema,
   SavedObjectModelVersionForwardCompatibilityObjectSchema,
   SavedObjectModelVersionForwardCompatibilityFn,
   SavedObjectsFullModelVersionSchemaDefinitions,
-} from '@kbn/core-saved-objects-api-server';
+} from './schemas';

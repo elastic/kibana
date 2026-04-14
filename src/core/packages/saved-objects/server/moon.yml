@@ -44,7 +44,6 @@ dependsOn:
   - '@kbn/core-saved-objects-common'
   - '@kbn/core-security-common'
   - '@kbn/core-status-common'
-  - '@kbn/core-usage-data-base-server-internal'
   - '@kbn/core-usage-data-server'
   - '@kbn/doc-links'
   - '@kbn/es-errors'

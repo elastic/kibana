@@ -32,6 +32,46 @@ export interface SavedObjectsModelVersion {
    * @remark Having multiple changes of the same type in a version's list of change is supported
    *         by design to allow merging different sources.
    *
+   * @example Adding a new indexed field with a default value
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *     {
+   *       type: 'data_backfill',
+   *       backfillFn: (doc) => {
+   *         return { attributes: { someNewField: 'some default value' } };
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
+   * @example A version with multiple mappings addition coming from different changes
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *    {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         anotherNewField: { type: 'text' },
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
    * See {@link SavedObjectsModelChange | changes} for more information and examples.
    */
   changes: SavedObjectsModelChange[];
@@ -60,6 +100,46 @@ export interface SavedObjectsFullModelVersion {
    *
    * @remark Having multiple changes of the same type in a version's list of change is supported
    *         by design to allow merging different sources.
+   *
+   * @example Adding a new indexed field with a default value
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *     {
+   *       type: 'data_backfill',
+   *       backfillFn: (doc) => {
+   *         return { attributes: { someNewField: 'some default value' } };
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
+   * @example A version with multiple mappings addition coming from different changes
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *    {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         anotherNewField: { type: 'text' },
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
    *
    * See {@link SavedObjectsModelChange | changes} for more information and examples.
    */

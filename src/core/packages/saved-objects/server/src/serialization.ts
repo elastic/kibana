@@ -7,18 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  SavedObjectDoc as _SavedObjectDoc,
-  SavedObjectUnsanitizedDoc as _SavedObjectUnsanitizedDoc,
-  SavedObjectSanitizedDoc as _SavedObjectSanitizedDoc,
-} from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsRawDocSource } from '..';
-
-// Doc types are now defined in @kbn/core-saved-objects-api-server.
-// Re-exported here for backwards compatibility within the package.
-export type SavedObjectDoc<T = unknown> = _SavedObjectDoc<T>;
-export type SavedObjectUnsanitizedDoc<T = unknown> = _SavedObjectUnsanitizedDoc<T>;
-export type SavedObjectSanitizedDoc<T = unknown> = _SavedObjectSanitizedDoc<T>;
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectReference, SavedObjectsRawDocSource } from '..';
 
 /**
  * A serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or
@@ -84,8 +75,50 @@ export interface SavedObjectsRawDoc {
   _primary_term?: number;
 }
 
-// SavedObjectDoc, SavedObjectUnsanitizedDoc, and SavedObjectSanitizedDoc
-// are now defined in @kbn/core-saved-objects-api-server and re-exported above.
+/**
+ * Saved Object base document
+ *
+ * @public
+ */
+export interface SavedObjectDoc<T = unknown> {
+  attributes: T;
+  id: string;
+  type: string;
+  namespace?: string;
+  namespaces?: string[];
+  migrationVersion?: SavedObjectsMigrationVersion;
+  coreMigrationVersion?: string;
+  typeMigrationVersion?: string;
+  version?: string;
+  updated_at?: string;
+  updated_by?: string;
+  created_at?: string;
+  created_by?: string;
+  originId?: string;
+  managed?: boolean;
+  accessControl?: SavedObjectAccessControl;
+}
+
+/**
+ * Describes Saved Object documents from Kibana < 7.0.0 which don't have a
+ * `references` root property defined. This type should only be used in
+ * migrations.
+ *
+ * @public
+ */
+export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & {
+  references?: SavedObjectReference[];
+};
+
+/**
+ * Describes Saved Object documents that have passed through the migration
+ * framework and are guaranteed to have a `references` root property.
+ *
+ * @public
+ */
+export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & {
+  references: SavedObjectReference[];
+};
 
 /**
  * Options that can be specified when using the saved objects serializer to parse a raw document.

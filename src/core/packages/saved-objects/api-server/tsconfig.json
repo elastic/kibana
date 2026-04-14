@@ -11,12 +11,7 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/core-http-server",
     "@kbn/core-saved-objects-common",
-    "@kbn/logging",
-    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

@@ -10,6 +10,7 @@
 import type { Readable, Transform } from 'stream';
 import type {
   SavedObjectsImportRetry,
+  SavedObjectsImportWarning,
   SavedObjectsImportResponse,
   SavedObjectsImportFailure,
 } from '@kbn/core-saved-objects-common';
@@ -110,12 +111,33 @@ export interface SavedObjectsResolveImportErrorsOptions {
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
 
-// SavedObjectsImportHookResult and SavedObjectsImportHook are now defined
-// in @kbn/core-saved-objects-api-server. Re-exported here for backwards compatibility.
-export type {
-  SavedObjectsImportHookResult,
-  SavedObjectsImportHook,
-} from '@kbn/core-saved-objects-api-server';
+/**
+ * Result from a {@link SavedObjectsImportHook | import hook}
+ *
+ * @public
+ */
+export interface SavedObjectsImportHookResult {
+  /**
+   * An optional list of warnings to display in the UI when the import succeeds.
+   */
+  warnings?: SavedObjectsImportWarning[];
+}
+
+/**
+ * A hook associated with a specific saved object type, that will be invoked during
+ * the import process. The hook will have access to the objects of the registered type.
+ *
+ * Currently, the only supported feature for import hooks is to return warnings to be displayed
+ * in the UI when the import succeeds.
+ *
+ * @remark The only interactions the hook can have with the import process is via the hook's
+ *         response. Mutating the objects inside the hook's code will have no effect.
+ *
+ * @public
+ */
+export type SavedObjectsImportHook<T = unknown> = (
+  objects: Array<SavedObject<T>>
+) => SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult>;
 
 export interface AccessControlImportTransforms {
   filterStream: Transform;
