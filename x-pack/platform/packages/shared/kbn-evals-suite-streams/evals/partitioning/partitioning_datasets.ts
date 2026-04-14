@@ -46,7 +46,7 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
   {
     name: 'Multi-System Logs - Partition Suggestion',
     description:
-      'Diverse log systems (Hadoop, Proxifier, Android, OpenStack) that should naturally form separate partitions',
+      'Diverse log systems (Hadoop, Proxifier, Android, OpenStack) with filepath removed. The LLM must analyze log content and field patterns to identify distinct partitions.',
     examples: [
       {
         input: {
@@ -56,23 +56,27 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
           expected_partitions: [
             {
               name: 'hadoop',
-              description: 'Hadoop MapReduce job logs',
-              key_fields: ['attributes.filepath'],
+              description:
+                'Hadoop MapReduce job logs with Java stack traces and org.apache.hadoop class names',
+              key_fields: ['body.text', 'resource.attributes.process.name'],
             },
             {
               name: 'proxifier',
-              description: 'Proxifier proxy software logs',
-              key_fields: ['attributes.filepath'],
+              description:
+                'Proxifier proxy software logs with chrome.exe and proxy connection details',
+              key_fields: ['body.text', 'resource.attributes.host.name'],
             },
             {
               name: 'android',
-              description: 'Android framework logs',
-              key_fields: ['attributes.filepath'],
+              description:
+                'Android framework logs with com.android.* class names and PowerManagerService',
+              key_fields: ['body.text', 'resource.attributes.process.name'],
             },
             {
               name: 'openstack',
-              description: 'OpenStack infrastructure logs',
-              key_fields: ['attributes.filepath'],
+              description:
+                'OpenStack infrastructure logs with nova.* class names and HTTP API requests',
+              key_fields: ['body.text', 'resource.attributes.kubernetes.namespace'],
             },
           ],
           min_partitions: 2,
@@ -83,7 +87,7 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
         metadata: {
           difficulty: 'easy',
           notes:
-            'Four distinct LogHub systems with different log formats and schemas. Each system writes to a different filepath, making them easily separable.',
+            'Four distinct LogHub systems with different log content and schemas. attributes.filepath is removed so the LLM must rely on body.text patterns and field values.',
         },
       },
     ],
@@ -91,7 +95,7 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
   {
     name: 'Existing Partition Refinement - Partition Suggestion',
     description:
-      'Same diverse data but with an existing partition already defined for Hadoop. The LLM should suggest partitions for the remaining unrouted data.',
+      'Same diverse data but with an existing partition already defined. The LLM should suggest partitions for the remaining unrouted data.',
     examples: [
       {
         input: {
@@ -99,7 +103,12 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
           existing_partitions: [
             {
               name: 'hadoop',
-              condition: { field: 'attributes.filepath', eq: 'Hadoop.log' },
+              condition: {
+                and: [
+                  { field: 'body.text', contains: 'hadoop' },
+                  { field: 'resource.attributes.process.name', exists: true },
+                ],
+              },
             },
           ],
         },
@@ -107,18 +116,19 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
           expected_partitions: [
             {
               name: 'proxifier',
-              description: 'Proxifier proxy software logs',
-              key_fields: ['attributes.filepath'],
+              description:
+                'Proxifier proxy software logs with chrome.exe and proxy connection details',
+              key_fields: ['body.text'],
             },
             {
               name: 'android',
-              description: 'Android framework logs',
-              key_fields: ['attributes.filepath'],
+              description: 'Android framework logs with com.android.* class names',
+              key_fields: ['body.text', 'resource.attributes.process.name'],
             },
             {
               name: 'openstack',
-              description: 'OpenStack infrastructure logs',
-              key_fields: ['attributes.filepath'],
+              description: 'OpenStack infrastructure logs with nova.* class names',
+              key_fields: ['body.text'],
             },
           ],
           min_partitions: 1,
@@ -137,34 +147,34 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
   {
     name: 'User-Guided Partitioning - Partition Suggestion',
     description:
-      'Same diverse data with a user prompt requesting partitioning by a specific field.',
+      'Same diverse data with a user prompt requesting partitioning by a specific approach.',
     examples: [
       {
         input: {
           stream_name: 'logs.otel.partition-eval',
-          user_prompt: 'Partition by filepath',
+          user_prompt: 'Group logs by their source system or service',
         },
         output: {
           expected_partitions: [
             {
               name: 'hadoop',
-              description: 'Logs from Hadoop.log',
-              key_fields: ['attributes.filepath'],
+              description: 'Hadoop MapReduce job logs',
+              key_fields: ['body.text'],
             },
             {
               name: 'proxifier',
-              description: 'Logs from Proxifier.log',
-              key_fields: ['attributes.filepath'],
+              description: 'Proxifier proxy software logs',
+              key_fields: ['body.text'],
             },
             {
               name: 'android',
-              description: 'Logs from Android.log',
-              key_fields: ['attributes.filepath'],
+              description: 'Android framework logs',
+              key_fields: ['body.text'],
             },
             {
               name: 'openstack',
-              description: 'Logs from OpenStack.log',
-              key_fields: ['attributes.filepath'],
+              description: 'OpenStack infrastructure logs',
+              key_fields: ['body.text'],
             },
           ],
           min_partitions: 3,
@@ -175,7 +185,59 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
         metadata: {
           difficulty: 'medium',
           notes:
-            'Tests that the LLM follows user guidance to partition by the filepath field, creating one partition per distinct filepath value.',
+            'Tests that the LLM follows user guidance to group logs by source system, using body.text content patterns.',
+        },
+      },
+    ],
+  },
+  {
+    name: 'Overlapping Metadata - Content-Based Partitioning',
+    description:
+      'Systems with overlapping field schemas (Hadoop+Mac share host/user/process fields; Linux+HPC share process.id) that can only be distinguished by body.text content analysis.',
+    examples: [
+      {
+        input: {
+          stream_name: 'logs.otel.partition-hard',
+        },
+        output: {
+          expected_partitions: [
+            {
+              name: 'hadoop',
+              description:
+                'Java/MapReduce logs with org.apache.hadoop class names and YARN references',
+              key_fields: ['body.text'],
+            },
+            {
+              name: 'mac',
+              description:
+                'macOS kernel logs with com.apple.* framework names and IOThunderbolt/AirPort references',
+              key_fields: ['body.text'],
+            },
+            {
+              name: 'linux',
+              description:
+                'Linux syslog with sshd/pam_unix authentication messages and rhost IP addresses',
+              key_fields: ['body.text'],
+            },
+            {
+              name: 'hpc',
+              description:
+                'HPC cluster logs with node IDs, unix.hw state_change, and boot/halt commands',
+              key_fields: ['body.text'],
+            },
+          ],
+          min_partitions: 2,
+          max_partitions: 6,
+          coverage_threshold: 0.8,
+          max_overlap_threshold: 0.2,
+        },
+        metadata: {
+          difficulty: 'hard',
+          notes:
+            'Hadoop and Mac share identical metadata schemas (host.name, user.name, process.name, process.pid). ' +
+            'Linux and HPC both use process.id instead of process.pid. ' +
+            'attributes.filepath is removed. The LLM must analyze body.text content to distinguish systems — ' +
+            'Hadoop has Java/MapReduce patterns, Mac has macOS kernel/IO patterns, Linux has syslog auth patterns, HPC has cluster node patterns.',
         },
       },
     ],

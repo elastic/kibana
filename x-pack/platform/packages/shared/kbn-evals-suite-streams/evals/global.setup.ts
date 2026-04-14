@@ -13,6 +13,7 @@ import { indexSynthtraceScenario } from './synthtrace_helpers';
 
 const PARTITIONING_EVAL_SYSTEMS = ['Hadoop', 'Proxifier', 'Android', 'OpenStack'] as const;
 const PARTITIONING_HOMOG_SYSTEMS = ['Linux'] as const;
+const PARTITIONING_HARD_SYSTEMS = ['Hadoop', 'Mac', 'Linux', 'HPC'] as const;
 
 /** Must match `sample_logs` scenario `range.interval('5s')` in kbn-synthtrace. */
 const SAMPLE_LOGS_STEP_MS = 5000;
@@ -86,9 +87,21 @@ globalSetupHookWithSynthtrace(
       eq: `${PARTITIONING_HOMOG_SYSTEMS[0]}.log`,
     });
 
+    // Fork child stream for partitioning evaluation: overlapping metadata (hard)
+    await apiServices.streams.forkStream('logs.otel', 'logs.otel.partition-hard', {
+      or: PARTITIONING_HARD_SYSTEMS.map((system) => ({
+        field: 'attributes.filepath',
+        eq: `${system}.log`,
+      })),
+    });
+
     // Collect all systems needed across pipeline + partitioning tests
     const pipelineSystems = indexModeExamples.map((e) => e.input.system);
-    const partitioningSystems = [...PARTITIONING_EVAL_SYSTEMS, ...PARTITIONING_HOMOG_SYSTEMS];
+    const partitioningSystems = [
+      ...PARTITIONING_EVAL_SYSTEMS,
+      ...PARTITIONING_HOMOG_SYSTEMS,
+      ...PARTITIONING_HARD_SYSTEMS,
+    ];
     const allSystems = [...pipelineSystems, ...partitioningSystems].join(',');
 
     const from = kbnDatemath.parse('now-5m')!;
@@ -147,6 +160,20 @@ globalSetupHookWithSynthtrace(
       log.info(
         `[streams eval setup] ${example.input.stream_name}: ${count} documents (>= ${needed})`
       );
+    }
+
+    // Remove attributes.filepath from partitioning streams so the LLM must analyze
+    // log content rather than relying on the filepath as a discriminator.
+    const partitioningStreams = [
+      'logs.otel.partition-eval',
+      'logs.otel.partition-homog',
+      'logs.otel.partition-hard',
+    ];
+    for (const stream of partitioningStreams) {
+      await apiServices.streams.updateStreamProcessors(stream, (prev) => ({
+        ...prev,
+        steps: [...(prev.steps ?? []), { action: 'remove', from: 'attributes.filepath' }],
+      }));
     }
 
     log.info('[streams eval setup] done');
