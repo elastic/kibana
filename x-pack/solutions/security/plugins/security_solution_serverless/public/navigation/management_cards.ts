@@ -9,10 +9,12 @@ import type { Services } from '../common/services';
 export const enableManagementCardsLanding = (services: Services) => {
   const { management } = services;
 
-  management.setupCardsNavigation({
-    enabled: true,
-    extendCardNavDefinitions: services.serverless.getNavigationCards(
-      services.security.authz.isRoleManagementEnabled()
-    ),
-  });
+  services.serverless
+    .getNavigationCards$(services.security.authz.isRoleManagementEnabled())
+    .subscribe((extendCardNavDefinitions) => {
+      management.setupCardsNavigation({
+        enabled: true,
+        extendCardNavDefinitions,
+      });
+    });
 };

@@ -145,33 +145,35 @@ export class ServerlessSearchPlugin
     );
     serverless.initNavigation('es', navigationTree$);
 
-    const extendCardNavDefinitions = serverless.getNavigationCards(
-      security.authz.isRoleManagementEnabled(),
-      aiAssistantIsEnabled
-        ? {
-            observabilityAiAssistantManagement: {
-              category: appCategories.OTHER,
-              title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
-                defaultMessage: 'AI Assistant',
-              }),
-              description: i18n.translate(
-                'xpack.serverlessSearch.aiAssistantManagementDescription',
-                {
-                  defaultMessage:
-                    'Manage knowledge base and control assistant behavior, including response language.',
-                }
-              ),
-              icon: 'sparkles',
-            },
-          }
-        : undefined
-    );
-
-    management.setupCardsNavigation({
-      enabled: true,
-      hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
-      extendCardNavDefinitions,
-    });
+    serverless
+      .getNavigationCards$(
+        security.authz.isRoleManagementEnabled(),
+        aiAssistantIsEnabled
+          ? {
+              observabilityAiAssistantManagement: {
+                category: appCategories.OTHER,
+                title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
+                  defaultMessage: 'AI Assistant',
+                }),
+                description: i18n.translate(
+                  'xpack.serverlessSearch.aiAssistantManagementDescription',
+                  {
+                    defaultMessage:
+                      'Manage knowledge base and control assistant behavior, including response language.',
+                  }
+                ),
+                icon: 'sparkles',
+              },
+            }
+          : undefined
+      )
+      .subscribe((extendCardNavDefinitions) => {
+        management.setupCardsNavigation({
+          enabled: true,
+          hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
+          extendCardNavDefinitions,
+        });
+      });
 
     return {};
   }

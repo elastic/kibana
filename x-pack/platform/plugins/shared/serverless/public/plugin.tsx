@@ -7,6 +7,7 @@
 
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { from, map } from 'rxjs';
 import { generateManageOrgMembersNavCard, manageOrgMembersNavCardName } from './navigation';
 import type {
   ServerlessPluginSetup,
@@ -50,11 +51,9 @@ export class ServerlessPlugin
     }
 
     project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
+    const privilegedUrls$ = from(cloud.getPrivilegedUrls());
 
-    let privilegedUsersAndRolesUrl: string | undefined;
-    cloud.getPrivilegedUrls().then((privilegedUrls) => {
-      privilegedUsersAndRolesUrl = privilegedUrls.usersAndRolesUrl;
-
+    privilegedUrls$.subscribe((privilegedUrls) => {
       if (Object.keys(privilegedUrls).length === 0) return;
 
       project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
@@ -65,17 +64,24 @@ export class ServerlessPlugin
         project.initNavigation(id, navigationTree$);
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
-      getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
-        if (!roleManagementEnabled) return extendCardNavDefinitions;
+      getNavigationCards$: (roleManagementEnabled, extendCardNavDefinitions) => {
+        return privilegedUrls$.pipe(
+          map((privilegedUrls) => {
+            if (!roleManagementEnabled) return extendCardNavDefinitions;
 
-        if (!privilegedUsersAndRolesUrl) return extendCardNavDefinitions;
+            const { usersAndRolesUrl } = privilegedUrls;
+            if (!usersAndRolesUrl) return extendCardNavDefinitions;
 
-        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(privilegedUsersAndRolesUrl);
-        if (extendCardNavDefinitions) {
-          extendCardNavDefinitions[manageOrgMembersNavCardName] = manageOrgMembersNavCard;
-          return extendCardNavDefinitions;
-        }
-        return { [manageOrgMembersNavCardName]: manageOrgMembersNavCard };
+            const manageOrgMembersNavCard = generateManageOrgMembersNavCard(usersAndRolesUrl);
+            if (extendCardNavDefinitions) {
+              return {
+                ...extendCardNavDefinitions,
+                [manageOrgMembersNavCardName]: manageOrgMembersNavCard,
+              };
+            }
+            return { [manageOrgMembersNavCardName]: manageOrgMembersNavCard };
+          })
+        );
       },
     };
   }
