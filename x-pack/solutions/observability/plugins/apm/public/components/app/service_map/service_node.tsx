@@ -25,6 +25,7 @@ import {
 import { NodeLabel } from './node_label';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { SloStatusBadge } from '../../shared/slo_status_badge';
+import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
 
@@ -34,6 +35,7 @@ export const ServiceNode = memo(
     const { core } = useApmPluginContext();
     const { capabilities } = core.application;
     const canReadSlos = !!capabilities.slo?.read;
+    const { onSloBadgeClick } = useServiceMapSloFlyout();
     const isDarkMode = colorMode === 'DARK';
 
     const borderColor = useMemo(() => {
@@ -155,7 +157,7 @@ export const ServiceNode = memo(
     // `alerting:show` is enforced when opening linked views; badge is display-only here).
     const showAlertsBadge = data.alertsCount !== undefined && data.alertsCount > 0;
 
-    // Map: only surface SLOs that need attention (inventory still shows full status, including healthy).
+    // Map: only violated/degrading (inventory & header show all SLO statuses).
     const showSloBadge =
       canReadSlos && (data.sloStatus === 'violated' || data.sloStatus === 'degrading');
 
@@ -211,12 +213,23 @@ export const ServiceNode = memo(
                 </span>
               )}
               {showSloBadge && data.sloStatus && (
-                <span css={badgePointerEventsStyles}>
+                <span
+                  css={badgePointerEventsStyles}
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                >
                   <SloStatusBadge
                     sloStatus={data.sloStatus}
                     sloCount={data.sloCount}
                     serviceName={data.label}
-                    hideTooltip
+                    {...(onSloBadgeClick
+                      ? {
+                          onClick: (e) => {
+                            e.stopPropagation();
+                            onSloBadgeClick(data.label, data.agentName);
+                          },
+                        }
+                      : { hideTooltip: true })}
                   />
                 </span>
               )}
