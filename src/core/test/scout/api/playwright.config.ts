@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('core', () => {
-    loadTestFile(require.resolve('./translations'));
-    loadTestFile(require.resolve('./capabilities'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
