@@ -20,7 +20,7 @@ if (!BUMP_TYPE) {
 
 (async () => {
   const pipeline: string[] = [];
-
+  // TODO: Introduce dry run
   try {
     if (BUMP_TYPE === 'patch') {
       // Step 1: Trigger ES build and promote (synchronous)
@@ -53,9 +53,11 @@ if (!BUMP_TYPE) {
 
     if (BUMP_TYPE === 'minor') {
       // Step 1: Trigger ES build and promote
-      // TODO: On what branch does this run??
       pipeline.push(
-        getPipeline('.buildkite/pipelines/version_bump/trigger_es_build_and_promote.yml', false)
+        getPipeline(
+          '.buildkite/pipelines/version_bump/trigger_es_build_and_promote_on_main.yml',
+          false
+        )
       );
 
       // Step 2: Wait for ES build to complete, then bump package.json and other files on the main branch.
@@ -69,11 +71,13 @@ if (!BUMP_TYPE) {
       pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/create_new_branch.yml'));
 
-      // Step 4: Wait, then trigger DRA snapshot on main,
+      // Step 4: Wait, then trigger DRA snapshot and staging on the new release branch,
+      // If branch is main, we only run DRA snapshot, otherwise we run them both.
       pipeline.push('  - wait');
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot_on_main.yml')
-      );
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
+      if (process.env.BRANCH !== 'main') {
+        pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
+      }
 
       // Step 5: Wait, and then do a bunch of file changes in the new branch.
       pipeline.push('  - wait');
@@ -83,7 +87,7 @@ if (!BUMP_TYPE) {
       pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/notify_branch_created.yml'));
 
-      // TODO: Send email
+      // TODO: Send email (ask tyler)
       // Missing Step: Send email
 
       // Step 7: Update pipeline resource definitions on main.
@@ -91,11 +95,11 @@ if (!BUMP_TYPE) {
         getPipeline('.buildkite/pipelines/version_bump/update_pipeline_resource_definitions.yml')
       );
 
-      // Step 8: Wait, then trigger DRA snapshot and staging on the new release branch,
-      // If branch is main, we only run DRA snapshot, otherwise we run them both.
+      // Step 8: Wait, then trigger DRA snapshot on main,
       pipeline.push('  - wait');
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot_on_main.yml')
+      );
 
       // Step 9: Wait, then ensure the version label exists for the new version and reconcile labels
       pipeline.push('  - wait');

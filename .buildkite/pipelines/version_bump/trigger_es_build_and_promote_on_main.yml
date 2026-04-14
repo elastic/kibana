@@ -1,0 +1,23 @@
+steps:
+  - key: build-es-snapshot
+    label: Build ES Snapshot
+    trigger: kibana-elasticsearch-snapshot-build
+    async: false
+    build:
+      branch: main
+
+  - name: 'Upload promote step'
+    command: |
+      buildkite-agent artifact download "snapshot_info-$${BUILDKITE_BUILD_ID}.env" .
+      source "snapshot_info-${BUILDKITE_BUILD_ID}.env"
+
+      buildkite-agent pipeline upload << PIPELINE
+      steps:
+        - name: 'Promote ES Snapshot'
+          trigger: kibana-elasticsearch-snapshot-promote
+          async: false
+          build:
+            branch: 'main'
+            env:
+              ES_SNAPSHOT_MANIFEST: '$${ES_SNAPSHOT_MANIFEST}'
+      PIPELINE
