@@ -8,13 +8,20 @@
 import { schema } from '@kbn/config-schema';
 import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
 
-import { lensCMCreateOptionsSchema } from '../../../../content_management';
-import { pickFromObjectSchema } from '../../../../utils';
 import { lensResponseItemSchema } from './common';
 
+// Inline schema so that the description renders in the generated OAS.
+// The shared lensCMCreateOptionsSchema doesn't carry descriptions.
 export const lensCreateRequestQuerySchema = schema.object(
   {
-    ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),
+    overwrite: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'When `true`, replaces an existing visualization that has the same ID. Defaults to `false`.',
+        },
+      })
+    ),
   },
   { unknowns: 'forbid' }
 );
