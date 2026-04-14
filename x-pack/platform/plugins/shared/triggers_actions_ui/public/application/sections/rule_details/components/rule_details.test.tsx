@@ -251,14 +251,6 @@ describe('rule_details', () => {
       expect(screen.getByText(rule.name)).toBeInTheDocument();
     });
 
-    // NOTE: ruleType.name is not directly rendered in the RuleDetails header — it is rendered
-    // inside RuleRouteWithApi which is mocked in this test file. This test is skipped.
-    it.skip('renders the rule type badge', () => {
-      const rule = mockRule();
-      renderPage(rule);
-      expect(screen.getByText(ruleType.name)).toBeInTheDocument();
-    });
-
     it('renders the API key owner badge when user can manage API keys', () => {
       const rule = mockRule({ apiKeyOwner: 'elastic' });
       renderPage(rule);
@@ -270,12 +262,6 @@ describe('rule_details', () => {
       renderPage(rule);
       expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('elastic');
     });
-    // 'renders the user-managed icon when apiKeyCreatedByUser is true' is tested above via renderPage
-    /* REMOVED_ENZYME_DEAD:
-      expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe(
-        'elastic Info'
-      );
-    */
 
     it(`doesn't render the API key owner badge when user can't manage API keys`, () => {
       const { hasManageApiKeysCapability } = jest.requireMock('../../../lib/capabilities');
@@ -368,101 +354,7 @@ describe('rule_details', () => {
       });
     });
 
-    describe('actions', () => {
-      // NOTE: actionConnectorName elements are rendered inside RuleDefinition/RuleActions which
-      // are inside RuleRouteWithApi — that component is mocked in this test file. Skipped.
-      it.skip('renders an rule action', () => {
-        const rule = mockRule({
-          actions: [
-            {
-              group: 'default',
-              id: uuidv4(),
-              params: {},
-              actionTypeId: '.server-log',
-            },
-          ],
-        });
-
-        const actionTypes: ActionType[] = [
-          createMockConnectorType({
-            id: '.server-log',
-            name: 'Server log',
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-          }),
-        ];
-
-        render(
-          <QueryClientProvider client={queryClient}>
-            <IntlProvider locale="en">
-              <RuleDetails
-                rule={rule}
-                ruleType={ruleType}
-                actionTypes={actionTypes}
-                {...mockRuleApis}
-              />
-            </IntlProvider>
-          </QueryClientProvider>
-        );
-
-        expect(screen.getByTestId('actionConnectorName-0-Server log')).toBeInTheDocument();
-      });
-
-      it.skip('renders a counter for multiple rule action', () => {
-        const rule = mockRule({
-          actions: [
-            {
-              group: 'default',
-              id: uuidv4(),
-              params: {},
-              actionTypeId: '.server-log',
-            },
-            {
-              group: 'default',
-              id: uuidv4(),
-              params: {},
-              actionTypeId: '.email',
-            },
-          ],
-        });
-        const actionTypes: ActionType[] = [
-          createMockConnectorType({
-            id: '.server-log',
-            name: 'Server log',
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-          }),
-          createMockConnectorType({
-            id: '.email',
-            name: 'Send email',
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-          }),
-        ];
-
-        render(
-          <QueryClientProvider client={queryClient}>
-            <IntlProvider locale="en">
-              <RuleDetails
-                rule={rule}
-                ruleType={ruleType}
-                actionTypes={actionTypes}
-                {...mockRuleApis}
-              />
-            </IntlProvider>
-          </QueryClientProvider>
-        );
-
-        expect(screen.getByTestId('actionConnectorName-0-Server log')).toBeInTheDocument();
-        expect(screen.getByTestId('actionConnectorName-0-Send email')).toBeInTheDocument();
-      });
-    });
-
     describe('links', () => {
-      // 'renders view in app button in management context' and 'renders view linked object button
-      // in rules app context' relied on shallow rendering to find child component instances by
-      // display name ('ViewInApp', 'ViewLinkedObject'). This pattern is not applicable in RTL
-      // full rendering. The functionality is covered by integration tests.
 
       it('links to the Edit flyout', async () => {
         const rule = mockRule();
