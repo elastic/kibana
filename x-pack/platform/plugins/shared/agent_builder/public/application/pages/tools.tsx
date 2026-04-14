@@ -13,7 +13,7 @@ import { labels } from '../utils/i18n';
 import { ToolsProvider } from '../context/tools_provider';
 
 export const AgentBuilderToolsPage = () => {
-  useBreadcrumb([{ text: labels.tools.title, path: appPaths.tools.list }]);
+  useBreadcrumb([{ text: labels.tools.libraryTitle, path: appPaths.tools.list }]);
   return (
     <ToolsProvider>
       <AgentBuilderTools />
