@@ -258,6 +258,101 @@ describe('Card utils', () => {
 
       expect(cardItem).toMatchObject({ isDeprecated: true });
     });
+
+    describe('agentless release', () => {
+      const agentlessOnlyItem = {
+        id: 'test',
+        name: 'test',
+        title: 'Test',
+        version: '1.0.0',
+        type: 'integration',
+        policy_templates: [
+          {
+            name: 'test',
+            title: 'Test',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true },
+              default: { enabled: false },
+            },
+          },
+        ],
+      };
+
+      const dualModeItem = {
+        ...agentlessOnlyItem,
+        policy_templates: [
+          {
+            name: 'test',
+            title: 'Test',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true },
+              default: { enabled: true },
+            },
+          },
+        ],
+      };
+
+      const dualModeDefaultAgentlessItem = {
+        ...agentlessOnlyItem,
+        policy_templates: [
+          {
+            name: 'test',
+            title: 'Test',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true, is_default: true },
+              default: { enabled: true },
+            },
+          },
+        ],
+      };
+
+      it('should use agentless release (beta) for an only-agentless package', () => {
+        const card = mapToCard({ item: agentlessOnlyItem as any, addBasePath, getHref });
+        expect(card.release).toBe('beta');
+      });
+
+      it('should use agentless release for a package where agentless is the default deployment', () => {
+        const card = mapToCard({ item: dualModeDefaultAgentlessItem as any, addBasePath, getHref });
+        expect(card.release).toBe('beta');
+      });
+
+      it('should use semver release for a dual-mode package without agentless filter', () => {
+        const card = mapToCard({ item: dualModeItem as any, addBasePath, getHref });
+        expect(card.release).toBe('ga'); // 1.0.0 is ga
+      });
+
+      it('should use agentless release for a dual-mode package when onlyAgentless filter is active', () => {
+        const card = mapToCard({
+          item: dualModeItem as any,
+          addBasePath,
+          getHref,
+          filterState: { onlyAgentless: true },
+        });
+        expect(card.release).toBe('beta');
+      });
+
+      it('should not override release when agentless release is GA', () => {
+        const gaItem = {
+          ...agentlessOnlyItem,
+          policy_templates: [
+            {
+              name: 'test',
+              title: 'Test',
+              description: '',
+              deployment_modes: {
+                agentless: { enabled: true, release: 'ga' },
+                default: { enabled: false },
+              },
+            },
+          ],
+        };
+        const card = mapToCard({ item: gaItem as any, addBasePath, getHref });
+        expect(card.release).toBe('ga'); // falls back to semver-derived 'ga' for 1.0.0
+      });
+    });
   });
   describe('getIntegrationLabels', () => {
     it('should return an empty list for an integration without errors', () => {

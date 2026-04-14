@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AgentlessDeploymentReleaseStatus } from '../types';
 import type { RegistryPolicyTemplate } from '../types';
 
 import {
@@ -14,6 +15,8 @@ import {
   isOnlyAgentlessPolicyTemplate,
   isInputAllowedForDeploymentMode,
   validateDeploymentModesForInputs,
+  getAgentlessRelease,
+  isDefaultAgentlessIntegration,
 } from './agentless_policy_helper';
 
 describe('agentless_policy_helper', () => {
@@ -370,6 +373,168 @@ describe('agentless_policy_helper', () => {
       const result = isOnlyAgentlessPolicyTemplate(policyTemplate);
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('getAgentlessRelease', () => {
+    it('should default to Beta when agentless is enabled but release is not specified', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo)).toBe(AgentlessDeploymentReleaseStatus.Beta);
+    });
+
+    it('should return GA when release is explicitly set to GA', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.GA },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo)).toBe(AgentlessDeploymentReleaseStatus.GA);
+    });
+
+    it('should return Beta for a specific integration when release is not specified', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo, 'template1')).toBe(
+        AgentlessDeploymentReleaseStatus.Beta
+      );
+    });
+
+    it('should return undefined for a specific integration with no agentless support', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: { default: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo, 'template1')).toBeUndefined();
+    });
+
+    it('should return the least mature release across multiple agentless templates', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.GA },
+            },
+          },
+          {
+            name: 'template2',
+            title: 'Template 2',
+            description: '',
+            deployment_modes: { agentless: { enabled: true } }, // defaults to Beta
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo)).toBe(AgentlessDeploymentReleaseStatus.Beta);
+    });
+
+    it('should return GA when all agentless templates are explicitly GA', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.GA },
+            },
+          },
+          {
+            name: 'template2',
+            title: 'Template 2',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.GA },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo)).toBe(AgentlessDeploymentReleaseStatus.GA);
+    });
+  });
+
+  describe('isDefaultAgentlessIntegration', () => {
+    it('should return true when any template has agentless is_default true', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              default: { enabled: true },
+              agentless: { enabled: true, is_default: true },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(isDefaultAgentlessIntegration(packageInfo)).toBe(true);
+    });
+
+    it('should return false when no template has agentless is_default true', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(isDefaultAgentlessIntegration(packageInfo)).toBe(false);
+    });
+
+    it('should return true for a specific integration with is_default true', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: { agentless: { enabled: true, is_default: true } },
+          },
+          {
+            name: 'template2',
+            title: 'Template 2',
+            description: '',
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(isDefaultAgentlessIntegration(packageInfo, 'template1')).toBe(true);
+      expect(isDefaultAgentlessIntegration(packageInfo, 'template2')).toBe(false);
     });
   });
 
