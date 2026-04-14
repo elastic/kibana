@@ -23,6 +23,7 @@ import type {
   ESQLControlsContext,
   ESQLCallbacks,
   ESQLTelemetryCallbacks,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
 
 export interface DataErrorsControl {
@@ -104,6 +105,7 @@ export interface EsqlPluginStartBase {
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
   isServerless: boolean;
+  enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
 }
 
 export interface ESQLEditorDeps {

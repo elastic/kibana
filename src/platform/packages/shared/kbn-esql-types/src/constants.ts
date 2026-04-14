@@ -27,4 +27,6 @@ export enum SOURCES_TYPES {
   ALIAS = 'Alias',
   DATA_STREAM = 'Data Stream',
   LOOKUP = 'Lookup',
+  WIRED_STREAM = 'Wired Stream',
+  CLASSIC_STREAM = 'Classic Stream',
 }

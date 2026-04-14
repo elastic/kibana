@@ -58,7 +58,14 @@ function getSafeInsertSourceText(text: string) {
 }
 
 export const buildSourcesDefinitions = (
-  sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>,
+  sources: Array<{
+    name: string;
+    isIntegration: boolean;
+    title?: string;
+    description?: string;
+    links?: Array<{ label: string; url: string }>;
+    type?: string;
+  }>,
   sourceReplacementContext?: {
     textBeforeCursor: string;
     commandStart: number;
@@ -71,7 +78,7 @@ export const buildSourcesDefinitions = (
       }
     : undefined;
 
-  return sources.map(({ name, isIntegration, title, type }) => {
+  return sources.map(({ name, isIntegration, title, description, links, type }) => {
     const text = getSafeInsertSourceText(name);
     const isTimeseries = type === SOURCES_TYPES.TIMESERIES;
     let command: ISuggestionItem['command'];
@@ -95,11 +102,31 @@ export const buildSourcesDefinitions = (
       };
     }
 
+    // Build markdown documentation from description and links (shown in detail popup)
+    const linkParts = links?.length ? links.map(({ label, url }) => `[${label}](${url})`) : [];
+    const parts = [
+      ...linkParts,
+      ...(description && linkParts.length > 0 ? [''] : []),
+      ...(description ? [description] : []),
+    ];
+
+    const documentation = parts.length > 0 ? { value: parts.join('\n') } : undefined;
+
+    // Map type to Monaco CompletionItemKind for visual differentiation
+    let kind: ISuggestionItem['kind'];
+    if (type === SOURCES_TYPES.WIRED_STREAM) {
+      kind = 'Folder';
+    } else if (type === SOURCES_TYPES.CLASSIC_STREAM || isIntegration) {
+      kind = 'Class';
+    } else {
+      kind = 'Issue';
+    }
+
     return withAutoSuggest({
       label: title ?? name,
       text,
       asSnippet: isIntegration,
-      kind: isIntegration ? 'Class' : 'Issue',
+      kind,
       detail: isIntegration
         ? i18n.translate('kbn-esql-language.esql.autocomplete.integrationDefinition', {
             defaultMessage: SOURCES_TYPES.INTEGRATION,
@@ -110,6 +137,7 @@ export const buildSourcesDefinitions = (
               type: type ?? SOURCES_TYPES.INDEX,
             },
           }),
+      documentation,
       ...(command && { command }),
     });
   });
@@ -238,8 +266,15 @@ export function getSourceSuggestions(
   return buildSourcesDefinitions(
     sources
       .filter(({ hidden, name }) => !hidden && !alreadyUsed.includes(name))
-      .map(({ name, dataStreams, title, type }) => {
-        return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
+      .map(({ name, dataStreams, title, description, links, type }) => {
+        return {
+          name,
+          isIntegration: Boolean(dataStreams && dataStreams.length),
+          title,
+          description,
+          links,
+          type,
+        };
       }),
     sourceReplacementContext
   );

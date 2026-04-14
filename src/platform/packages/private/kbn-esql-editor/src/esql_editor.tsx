@@ -39,6 +39,7 @@ import type {
   ESQLTelemetryCallbacks,
   ESQLControlVariable,
   ESQLCallbacks,
+  ESQLSourceResult,
   TelemetryQuerySubmittedProps,
   ESQLRegistrySolutionId,
 } from '@kbn/esql-types';
@@ -615,9 +616,19 @@ const ESQLEditorInternal = function ESQLEditor({
     // Keying on effectiveProjectRouting ensures a fresh cache (and therefore a fresh fetch)
     // whenever either the SET statement or the picker selection changes.
     const fn = memoize(
-      (...args: [CoreStart, (() => Promise<ILicense | undefined>) | undefined]) => ({
+      (
+        coreServices: CoreStart,
+        getLicense: (() => Promise<ILicense | undefined>) | undefined,
+        enrichSources: ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+      ) => ({
         timestamp: Date.now(),
-        result: getESQLSources(...args, undefined, effectiveProjectRouting),
+        result: getESQLSources(
+          coreServices,
+          getLicense,
+          enrichSources,
+          undefined,
+          effectiveProjectRouting
+        ),
       })
     );
 

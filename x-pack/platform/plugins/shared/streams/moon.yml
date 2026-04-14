@@ -77,6 +77,8 @@ dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/scout'
   - '@kbn/esql-language'
+  - '@kbn/esql-types'
+  - '@kbn/esql'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/logging-mocks'
