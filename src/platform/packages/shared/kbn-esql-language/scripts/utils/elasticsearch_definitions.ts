@@ -60,6 +60,13 @@ export function readElasticsearchDefinitions<T extends Record<string, any>>(
   return definitions;
 }
 
+/**
+ * Gets all JSON files from the given directories and merges them into a single array of definitions.
+ * This array is sorted by definition name.
+ * @param definitionDirectories
+ * @param definitionCategory
+ * @returns
+ */
 export function mergeJsonDefinitionsFromDirectories<T extends Record<string, any>>(
   definitionDirectories: string[],
   definitionCategory: EsqlDefinitionType
