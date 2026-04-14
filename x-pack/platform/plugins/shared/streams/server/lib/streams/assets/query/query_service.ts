@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
-import { ensureMetadata } from '@kbn/streams-schema';
+import {
+  ensureMetadata,
+  deriveQueryType,
+  QUERY_TYPE_MATCH,
+  QUERY_TYPE_STATS,
+} from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../../types';
@@ -18,27 +29,38 @@ import {
   QUERY_KQL_BODY,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
+  QUERY_TYPE,
   STREAM_NAME,
   RULE_ID,
   RULE_BACKED,
   ASSET_UUID,
 } from '../fields';
-import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
+import { getQueryStorageSettings } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
+import type { InferenceResolver } from './helpers/inference_availability';
+import {
+  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+  type SigEventsTuningConfig,
+} from '../../../../../common/sig_events_tuning_config';
 
 export class QueryService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
+    private readonly resolveInference: InferenceResolver,
     private readonly logger: Logger
   ) {}
 
   async getClient({
+    esClient,
     soClient,
     rulesClient,
+    config = DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   }: {
+    esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     rulesClient: RulesClient;
+    config?: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant'>;
   }): Promise<QueryClient> {
     const [core] = await this.coreSetup.getStartServices();
 
@@ -46,10 +68,14 @@ export class QueryService {
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
 
-    const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
-      core.elasticsearch.client.asInternalUser,
+    const { inferenceId, available: inferenceAvailable } = await this.resolveInference(esClient);
+
+    const settings = getQueryStorageSettings(inferenceId);
+
+    const adapter = new StorageIndexAdapter<IndexStorageSettings, StoredQueryLink>(
+      esClient,
       this.logger.get('queries'),
-      queryStorageSettings,
+      settings,
       {
         migrateSource: (source) => {
           let migrated = source as Record<string, unknown>;
@@ -65,7 +91,12 @@ export class QueryService {
             ) {
               try {
                 featureFilter = JSON.parse(featureFilterJson) as Condition;
-              } catch {
+              } catch (parseError) {
+                this.logger.warn(
+                  `Failed to parse featureFilter JSON during migration for stream "${
+                    migrated[STREAM_NAME]
+                  }": ${parseError instanceof Error ? parseError.message : String(parseError)}`
+                );
                 featureFilter = undefined;
               }
             }
@@ -88,12 +119,31 @@ export class QueryService {
             migrated = { ...migrated, [QUERY_ESQL_QUERY]: esqlQuery };
           }
 
-          // Ensure METADATA _id, _source is present on all stored queries —
-          // covers documents written before METADATA was mandatory.
-          migrated = {
-            ...migrated,
-            [QUERY_ESQL_QUERY]: ensureMetadata(migrated[QUERY_ESQL_QUERY] as string),
-          };
+          const esqlQuery = migrated[QUERY_ESQL_QUERY] as string;
+          // Derive type first — all subsequent migration steps depend on this.
+          // Guard against corrupt/empty ES|QL: treat unparseable queries as
+          // match (safe default) and force rule_backed=false so no alerting
+          // rule is created for a broken query.
+          const isCorruptEsql = !esqlQuery || !esqlQuery.trim();
+          const derivedType = isCorruptEsql ? QUERY_TYPE_MATCH : deriveQueryType(esqlQuery);
+
+          migrated = { ...migrated, [QUERY_TYPE]: derivedType };
+
+          let metadataFailed = false;
+          if (derivedType !== QUERY_TYPE_STATS) {
+            try {
+              migrated = { ...migrated, [QUERY_ESQL_QUERY]: ensureMetadata(esqlQuery) };
+            } catch (metadataError) {
+              metadataFailed = true;
+              this.logger.warn(
+                `ensureMetadata failed during migration for stream "${
+                  migrated[STREAM_NAME]
+                }", asset "${migrated[ASSET_UUID] ?? 'unknown'}": ${
+                  metadataError instanceof Error ? metadataError.message : String(metadataError)
+                }. Forcing rule_backed=false to prevent orphaned rule state.`
+              );
+            }
+          }
 
           // Back-fill rule_id for pre-existing documents using the KQL query as the hash
           // input — this preserves the IDs of rules that were already created before rule_id
@@ -104,9 +154,16 @@ export class QueryService {
             migrated = { ...migrated, [RULE_ID]: computeRuleId(uuid, kqlQuery) };
           }
 
-          // Pre-existing queries were all rule-backed; back-fill the flag so it is persisted.
+          // Pre-existing queries were all rule-backed; back-fill the flag.
+          // STATS queries (introduced alongside the type field) are never
+          // rule-backed, so force false to avoid orphaned rule state.
+          // Corrupt/empty ES|QL or failed metadata also gets rule_backed=false
+          // since the alerting rule can't function without metadata.
           if (!(RULE_BACKED in migrated)) {
-            migrated = { ...migrated, [RULE_BACKED]: true };
+            migrated = {
+              ...migrated,
+              [RULE_BACKED]: !isCorruptEsql && !metadataFailed && derivedType !== QUERY_TYPE_STATS,
+            };
           }
 
           // Back-fill description for queries created before the field was introduced.
@@ -126,7 +183,9 @@ export class QueryService {
         rulesClient,
         logger: this.logger,
       },
-      isSignificantEventsEnabled
+      isSignificantEventsEnabled,
+      inferenceAvailable,
+      config
     );
   }
 }

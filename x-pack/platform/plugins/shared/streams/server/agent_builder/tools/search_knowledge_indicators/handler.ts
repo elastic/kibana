@@ -33,24 +33,30 @@ export async function searchKnowledgeIndicatorsToolHandler({
     onFeatureFetchError: (streamName, error) => {
       const errorMessage =
         error instanceof Error ? error.stack ?? error.message : String(error ?? 'Unknown error');
-      logger.debug(`search_kis: failed to fetch features for ${streamName}: ${errorMessage}`);
+      logger.warn(
+        `search_kis: failed to fetch features for stream "${streamName}": ${errorMessage}`
+      );
     },
     getStreamNames: async () => {
       const streams = await streamsClient.listStreams();
       return streams.map((stream) => stream.name);
     },
-    getFeatures: async (streamName, { limit }) => {
-      // TODO: add support for semantic search to consume the search_text parameter
-      const result = await featureClient.getFeatures(streamName, {
-        limit,
-      });
+    getFeatures: async (streamName, { searchText, limit }) => {
+      const result = searchText
+        ? await featureClient.findFeatures(streamName, searchText, { limit })
+        : await featureClient.getFeatures(streamName, { limit });
       return result.hits;
     },
     getQueries: async (streamNames, search_text) => {
-      // TODO: add support for semantic search
+      // Include all queries regardless of rule-backing status so the agent
+      // sees freshly generated and STATS queries that haven't been promoted.
+      const filters = { ruleUnbacked: 'include' as const };
+
+      // findQueries uses the default search mode (hybrid when ELSER is available,
+      // keyword otherwise), giving the agent the best-available ranking.
       const links = search_text
-        ? await queryClient.findQueries(streamNames, search_text)
-        : await queryClient.getQueryLinks(streamNames);
+        ? await queryClient.findQueries(streamNames, search_text, filters)
+        : await queryClient.getQueryLinks(streamNames, filters);
 
       return links;
     },

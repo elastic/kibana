@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils';
 import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -37,7 +38,7 @@ import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
 import type { SkillRegistry } from './services/skills/skill_registry';
 import type { AgentExecutionService } from './services/execution';
-import type { ModelProviderFactoryFn } from './services/runner/model_provider';
+import type { ModelProviderFactoryFn } from './services/execution/runner/model_provider';
 import type { SmlTypeDefinition, SmlIndexAttachmentParams } from './services/sml';
 import type { PluginsServiceSetup, PluginRegistry } from './services/plugins';
 import type { ConversationListOptions } from './services/conversation/client/types';
@@ -182,6 +183,8 @@ export interface PluginsSetup {
 /**
  * Setup contract of the agentBuilder plugin.
  */
+export type { TopSnippetsConfig };
+
 export interface AgentBuilderPluginSetup {
   /**
    * Agents setup contract, which can be used to register built-in agents.
@@ -212,6 +215,11 @@ export interface AgentBuilderPluginSetup {
    * Used to register content types for discovery and search.
    */
   sml: SmlSetup;
+  /**
+   * TOP_SNIPPETS configuration (numSnippets, numWords) from `xpack.agentBuilder.topSnippets`.
+   * Exposed so that dependent plugins can pass these values to search utilities.
+   */
+  topSnippets: TopSnippetsConfig;
 }
 
 /**

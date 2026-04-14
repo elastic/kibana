@@ -21,10 +21,16 @@
     "@kbn/deeplinks-analytics",
     "@kbn/share-plugin",
     "@kbn/css-utils",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
-    "@kbn/presentation-publishing"
+    "@kbn/lens-common",
+    "@kbn/presentation-publishing",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/es-query",
+    "@kbn/data-plugin",
+    "@kbn/as-code-filters-transforms",
+    "@kbn/as-code-shared-transforms",
+    "@kbn/data-views-plugin"
   ],
   "exclude": ["target/**/*"]
 }

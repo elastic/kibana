@@ -13,10 +13,11 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { searchModeSchema } from '../../../utils/search_mode';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
-const requestParamsSchema = z.object({
+const baseRequestParamsSchema = z.object({
   from: dateFromString.describe('Start of the time range'),
   to: dateFromString.describe('End of the time range'),
   bucketSize: z.string().describe('Size of time buckets for aggregation'),
@@ -25,6 +26,10 @@ const requestParamsSchema = z.object({
     .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()))
     .optional()
     .describe('Stream names to filter significant events'),
+});
+
+const requestParamsSchema = baseRequestParamsSchema.extend({
+  searchMode: searchModeSchema,
 });
 
 export const getUnbackedQueriesCountRoute = createServerRoute({
@@ -42,17 +47,28 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
   },
   params: z.object({}),
   handler: async ({ request, getScopedClients, server }): Promise<{ count: number }> => {
-    const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
+    const { getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const queryClient = await getQueryClient();
     const count = await queryClient.getUnbackedQueriesCount();
     return { count };
   },
 });
 
+/**
+ * Promotes unbacked queries to rule-backed status.
+ *
+ * Returns `{ promoted, skipped_stats }`:
+ * - `promoted`: number of queries that were successfully backed by a new rule.
+ * - `skipped_stats`: number of STATS-type queries that were skipped because
+ *    they cannot produce document-level alerts required by the rule executor.
+ *
+ * Clients should branch on these values for accurate user feedback.
+ */
 export const promoteUnbackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_promote',
   options: {
@@ -79,13 +95,14 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<{ promoted: number }> => {
-    const { queryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+  }): Promise<{ promoted: number; skipped_stats: number }> => {
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const queryClient = await getQueryClient();
     const all = await queryClient.getAllUnbackedQueries();
     const requestedQueryIds = params?.body?.queryIds ?? [];
 
@@ -110,6 +127,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     );
 
     let promoted = 0;
+    let skippedStats = 0;
     for (const [streamName, queryIds] of Object.entries(byStream)) {
       const definition = streamDefinitionsByName.get(streamName);
       if (!definition) {
@@ -118,8 +136,78 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
       }
       const result = await queryClient.promoteQueries(definition, queryIds);
       promoted += result.promoted;
+      skippedStats += result.skipped_stats;
     }
-    return { promoted };
+    return { promoted, skipped_stats: skippedStats };
+  },
+});
+
+export const demoteBackedQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/queries/_demote',
+  options: {
+    access: 'internal',
+    summary: 'Demote backed queries',
+    description:
+      'Removes Kibana rules for the provided stored significant-events queries and marks them as unbacked.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      queryIds: z.array(z.string()).min(1),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ demoted: number }> => {
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const queryClient = await getQueryClient();
+    const toDemote = await queryClient.getQueryLinks([], {
+      ruleUnbacked: 'exclude',
+      queryIds: params.body.queryIds,
+    });
+
+    const byStream = toDemote.reduce<Record<string, string[]>>((acc, link) => {
+      const stream = link.stream_name;
+
+      if (!acc[stream]) {
+        acc[stream] = [];
+      }
+
+      acc[stream].push(link.query.id);
+      return acc;
+    }, {});
+
+    const streamDefinitions = await streamsClient.listStreams();
+    const streamDefinitionsByName = new Map(
+      streamDefinitions.map((streamDefinition) => [streamDefinition.name, streamDefinition])
+    );
+
+    let demoted = 0;
+
+    for (const [streamName, queryIds] of Object.entries(byStream)) {
+      const definition = streamDefinitionsByName.get(streamName);
+      if (!definition) {
+        logger.warn(`Skipping demotion for missing stream ${streamName}`);
+        continue;
+      }
+      const result = await queryClient.demoteQueries(definition, queryIds);
+      demoted += result.demoted;
+    }
+
+    return { demoted };
   },
 });
 
@@ -149,7 +237,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     },
   },
   handler: async ({ params, request, getScopedClients, server }): Promise<QueriesGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -165,8 +253,10 @@ const getDiscoveryQueriesRoute = createServerRoute({
       page = 1,
       perPage = 10,
       status,
+      searchMode,
     } = params.query;
 
+    const queryClient = await getQueryClient();
     const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
       {
         from,
@@ -175,6 +265,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
         query,
         streamNames,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
+        searchMode,
       },
       { queryClient, scopedClusterClient }
     );
@@ -188,10 +279,13 @@ const getDiscoveryQueriesRoute = createServerRoute({
   },
 });
 
+// Uses baseRequestParamsSchema (no searchMode) intentionally: the histogram
+// is an aggregate summary, not a list of individual queries. It always uses
+// the default search mode so occurrences reflect the best-available ranking.
 const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries/_occurrences',
   params: z.object({
-    query: requestParamsSchema,
+    query: baseRequestParamsSchema,
   }),
   options: {
     access: 'internal',
@@ -210,7 +304,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<QueriesOccurrencesGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -219,6 +313,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 
     const { from, to, bucketSize, query, streamNames } = params.query;
 
+    const queryClient = await getQueryClient();
     const { aggregated_occurrences: aggregatedOccurrenceBuckets } =
       await readSignificantEventsFromAlertsIndices(
         {
@@ -248,6 +343,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 export const internalQueriesRoutes = {
   ...getUnbackedQueriesCountRoute,
   ...promoteUnbackedQueriesRoute,
+  ...demoteBackedQueriesRoute,
   ...getDiscoveryQueriesRoute,
   ...getDiscoveryQueriesOccurrencesRoute,
 };

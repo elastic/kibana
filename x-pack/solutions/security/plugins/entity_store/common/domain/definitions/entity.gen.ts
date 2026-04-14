@@ -16,10 +16,38 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * One relationship direction: `raw_identifiers` holds ECS-style dotted keys → keyword arrays (aligned with ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS plus entity.id), and canonical target EUIDs under `ids`.
+ */
+export type EntityRelationship = z.infer<typeof EntityRelationship>;
+export const EntityRelationship = z
+  .object({
+    /**
+     * Raw identifier dimensions for graph / resolution hints. Keys match the entity store relationship identifier field set (see ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS in code).
+     */
+    raw_identifiers: z
+      .object({
+        'entity.id': z.array(z.string()).optional(),
+        'host.id': z.array(z.string()).optional(),
+        'host.name': z.array(z.string()).optional(),
+        'user.email': z.array(z.string()).optional(),
+        'user.id': z.array(z.string()).optional(),
+        'user.name': z.array(z.string()).optional(),
+        'service.name': z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    /**
+     * Target entity EUIDs for this relationship; used for graph LOOKUP JOIN and DSL filters.
+     */
+    ids: z.array(z.string()).optional(),
+  })
+  .strict();
+
 export type EngineMetadata = z.infer<typeof EngineMetadata>;
 export const EngineMetadata = z
   .object({
-    Type: z.string(),
+    Type: z.string().optional(),
   })
   .strict();
 
@@ -36,6 +64,8 @@ export const EntityField = z
     type: z.string().optional(),
     sub_type: z.string().optional(),
     source: z.array(z.string()).optional(),
+    schema_version: z.string().optional(),
+    url: z.string().optional(),
     EngineMetadata: EngineMetadata.optional(),
     attributes: z
       .object({
@@ -46,6 +76,22 @@ export const EntityField = z
         asset: z.boolean().optional(),
         managed: z.boolean().optional(),
         mfa_enabled: z.boolean().optional(),
+        /**
+         * Storage tier or class assigned to a storage resource (e.g. hot, warm, cold, standard, archive).
+         */
+        storage_class: z.string().optional(),
+        /**
+         * Action-level permissions granted to this entity (not roles or groups).
+         */
+        permissions: z.array(z.string()).optional(),
+        /**
+         * Known redirect URIs or URLs (e.g. OAuth application callbacks).
+         */
+        known_redirects: z.array(z.string()).optional(),
+        /**
+         * OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
+         */
+        oauth_consent_restriction: z.string().optional(),
       })
       .strict()
       .optional(),
@@ -72,11 +118,14 @@ export const EntityField = z
       .optional(),
     relationships: z
       .object({
-        communicates_with: z.array(z.string()).optional(),
-        depends_on: z.array(z.string()).optional(),
-        owns: z.array(z.string()).optional(),
-        accesses_frequently: z.array(z.string()).optional(),
-        supervises: z.array(z.string()).optional(),
+        administers: EntityRelationship.optional(),
+        communicates_with: EntityRelationship.optional(),
+        depends_on: EntityRelationship.optional(),
+        owns_inferred: EntityRelationship.optional(),
+        accesses_infrequently: EntityRelationship.optional(),
+        accesses_frequently: EntityRelationship.optional(),
+        owns: EntityRelationship.optional(),
+        supervises: EntityRelationship.optional(),
         resolution: z
           .object({
             /**
@@ -149,101 +198,31 @@ export const Asset = z
     model: z.string().optional(),
     vendor: z.string().optional(),
     environment: z.string().optional(),
-    criticality: AssetCriticalityLevel.optional(),
+    criticality: AssetCriticalityLevel.nullable().optional(),
     business_unit: z.string().optional(),
   })
   .strict();
 
 /**
- * A generic representation of a document contributing to a Risk Score.
+ * A summary of the entity's risk score containing only the calculated level and scores.
  */
-export type RiskScoreInput = z.infer<typeof RiskScoreInput>;
-export const RiskScoreInput = z.object({
-  /**
-   * The unique identifier (`_id`) of the original source document
-   */
-  id: z.string(),
-  /**
-   * The unique index (`_index`) of the original source document
-   */
-  index: z.string(),
-  /**
-   * The risk category of the risk input document.
-   */
-  category: z.string(),
-  /**
-   * A human-readable description of the risk input document.
-   */
-  description: z.string(),
-  /**
-   * The weighted risk score of the risk input document.
-   */
-  risk_score: z.number().min(0).max(100).optional(),
-  /**
-   * The @timestamp of the risk input document.
-   */
-  timestamp: z.string().optional(),
-  contribution_score: z.number().optional(),
-});
-
-export type EntityRiskScoreRecord = z.infer<typeof EntityRiskScoreRecord>;
-export const EntityRiskScoreRecord = z.object({
-  /**
-   * The time at which the risk score was calculated.
-   */
-  '@timestamp': z.string().datetime(),
-  /**
-   * The identifier field defining this risk score. Coupled with `id_value`, uniquely identifies the entity being scored.
-   */
-  id_field: z.string(),
-  /**
-   * The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
-   */
-  id_value: z.string(),
-  /**
-   * Lexical description of the entity's risk.
-   */
-  calculated_level: EntityRiskLevels,
-  /**
-   * The raw numeric value of the given entity's risk score.
-   */
-  calculated_score: z.number(),
-  /**
-   * The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
-   */
-  calculated_score_norm: z.number().min(0).max(100),
-  /**
-   * The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
-   */
-  category_1_score: z.number(),
-  /**
-   * The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
-   */
-  category_1_count: z.number().int(),
-  /**
-   * A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
-   */
-  inputs: z.array(RiskScoreInput),
-  category_2_score: z.number().optional(),
-  category_2_count: z.number().int().optional(),
-  notes: z.array(z.string()),
-  criticality_modifier: z.number().optional(),
-  criticality_level: AssetCriticalityLevel.optional(),
-  /**
-   * A list of modifiers that were applied to the risk score calculation.
-   */
-  modifiers: z
-    .array(
-      z.object({
-        type: z.string(),
-        subtype: z.string().optional(),
-        modifier_value: z.number().optional(),
-        contribution: z.number(),
-        metadata: z.object({}).catchall(z.unknown()).optional(),
-      })
-    )
-    .optional(),
-});
+export type EntityRiskSummary = z.infer<typeof EntityRiskSummary>;
+export const EntityRiskSummary = z
+  .object({
+    /**
+     * Lexical description of the entity's risk.
+     */
+    calculated_level: EntityRiskLevels.optional(),
+    /**
+     * The raw numeric value of the given entity's risk score.
+     */
+    calculated_score: z.number().optional(),
+    /**
+     * The normalized numeric value of the given entity's risk score.
+     */
+    calculated_score_norm: z.number().min(0).max(100).optional(),
+  })
+  .strict();
 
 export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z
@@ -259,11 +238,13 @@ export const UserEntity = z
         id: z.array(z.string()).optional(),
         email: z.array(z.string()).optional(),
         hash: z.array(z.string()).optional(),
-        risk: EntityRiskScoreRecord.optional(),
+        risk: EntityRiskSummary.optional(),
       })
       .strict()
       .optional(),
     asset: Asset.optional(),
+    labels: z.object({}).catchall(z.unknown()).optional(),
+    tags: z.array(z.string()).optional(),
     event: z
       .object({
         ingested: z.string().datetime().optional(),
@@ -303,12 +284,13 @@ export const HostEntity = z
           })
           .strict()
           .optional(),
-        risk: EntityRiskScoreRecord.optional(),
-        entity: EntityField.optional(),
+        risk: EntityRiskSummary.optional(),
       })
       .strict()
       .optional(),
     asset: Asset.optional(),
+    labels: z.object({}).catchall(z.unknown()).optional(),
+    tags: z.array(z.string()).optional(),
     event: z
       .object({
         ingested: z.string().datetime().optional(),
@@ -326,12 +308,28 @@ export const ServiceEntity = z
     service: z
       .object({
         name: z.string().optional(),
-        risk: EntityRiskScoreRecord.optional(),
-        entity: EntityField.optional(),
+        address: z.string().optional(),
+        environment: z.string().optional(),
+        ephemeral_id: z.string().optional(),
+        id: z.string().optional(),
+        node: z
+          .object({
+            name: z.string().optional(),
+            role: z.string().optional(),
+            roles: z.array(z.string()).optional(),
+          })
+          .strict()
+          .optional(),
+        state: z.string().optional(),
+        type: z.string().optional(),
+        version: z.string().optional(),
+        risk: EntityRiskSummary.optional(),
       })
       .strict()
       .optional(),
     asset: Asset.optional(),
+    labels: z.object({}).catchall(z.unknown()).optional(),
+    tags: z.array(z.string()).optional(),
     event: z
       .object({
         ingested: z.string().datetime().optional(),
@@ -347,6 +345,90 @@ export const GenericEntity = z
     '@timestamp': z.string().datetime().optional(),
     entity: EntityField.optional(),
     asset: Asset.optional(),
+    cloud: z
+      .object({
+        account: z
+          .object({
+            id: z.string().optional(),
+            name: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        availability_zone: z.string().optional(),
+        instance: z
+          .object({
+            id: z.string().optional(),
+            name: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        machine: z
+          .object({
+            type: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        project: z
+          .object({
+            id: z.string().optional(),
+            name: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        provider: z.string().optional(),
+        region: z.string().optional(),
+        service: z
+          .object({
+            name: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+      })
+      .strict()
+      .optional(),
+    orchestrator: z
+      .object({
+        api_version: z.string().optional(),
+        cluster: z
+          .object({
+            id: z.string().optional(),
+            name: z.string().optional(),
+            url: z.string().optional(),
+            version: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        namespace: z.string().optional(),
+        organization: z.string().optional(),
+        resource: z
+          .object({
+            annotation: z.string().optional(),
+            id: z.string().optional(),
+            ip: z.string().optional(),
+            label: z.string().optional(),
+            name: z.string().optional(),
+            parent: z
+              .object({
+                type: z.string().optional(),
+              })
+              .strict()
+              .optional(),
+            type: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        type: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+    labels: z.object({}).catchall(z.unknown()).optional(),
+    tags: z.array(z.string()).optional(),
+    event: z
+      .object({
+        ingested: z.string().datetime().optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 
