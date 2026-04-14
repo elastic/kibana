@@ -176,6 +176,7 @@ describe('EntityMaintainersClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSavedObjectsErrorHelpers.isNotFoundError.mockReturnValue(false);
+    entityMaintainersRegistry.hasId.mockReturnValue(true);
     entityMaintainersRegistry.get.mockReturnValue({
       id: 'maintainer-a',
       interval: '5m',
@@ -283,14 +284,15 @@ describe('EntityMaintainersClient', () => {
       mockRun.mockClear();
     });
 
-    it('should throw when id is not registered', async () => {
-      entityMaintainersRegistry.getLifecycle.mockImplementation(() => {
-        throw new Error('Entity maintainer not found: unknown-id');
-      });
+    it('should return without running when id is not in registry', async () => {
+      entityMaintainersRegistry.hasId.mockReturnValue(false);
       const client = createClient();
-      await expect(client.runSync('unknown-id', createMockRequest())).rejects.toThrow(
-        'Entity maintainer not found: unknown-id'
-      );
+      const request = createMockRequest();
+
+      await client.runSync('unknown-id', request);
+
+      expect(entityMaintainersRegistry.hasId).toHaveBeenCalledWith('unknown-id');
+      expect(entityMaintainersRegistry.getLifecycle).not.toHaveBeenCalled();
     });
 
     it('should run registered callbacks and persist returned state', async () => {

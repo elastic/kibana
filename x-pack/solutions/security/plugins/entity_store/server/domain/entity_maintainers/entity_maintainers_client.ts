@@ -174,6 +174,10 @@ export class EntityMaintainersClient {
 
   public async runSync(id: string, request: KibanaRequest): Promise<void> {
     try {
+      if (!entityMaintainersRegistry.hasId(id)) {
+        this.logger.debug(`Maintainer not found, skipping run sync: ${id}`);
+        return;
+      }
       const { run, setup, initialState } = entityMaintainersRegistry.getLifecycle(id);
       const { minLicense } = entityMaintainersRegistry.get(id);
       const hasValidLicense = await canRunMaintainerWithLicense({
