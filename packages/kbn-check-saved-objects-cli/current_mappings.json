@@ -2843,6 +2843,9 @@
       "name": {
         "type": "keyword"
       },
+      "otel_disable_beatsauth": {
+        "type": "boolean"
+      },
       "otel_exporter_config_yaml": {
         "type": "text"
       },
