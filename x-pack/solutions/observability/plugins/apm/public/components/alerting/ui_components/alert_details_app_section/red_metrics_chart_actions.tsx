@@ -50,7 +50,7 @@ export function RedMetricsChartActions({
   } = useKibana<ApmPluginStartDeps>();
 
   const { data, status: indexSettingsStatus } = useFetcher(
-    (_, signal) => apmSourcesAccess.getApmIndexSettings({ signal }),
+    (_, signal) => apmSourcesAccess?.getApmIndexSettings({ signal }),
     [apmSourcesAccess]
   );
 
@@ -118,8 +118,7 @@ export function RedMetricsChartActions({
           disabled={!apmLink}
           data-test-subj="apmAlertDetailsOpenInApmAction"
           data-action="openInApm"
-          data-source="apmAlertDetails"
-          data-alert-type={ruleTypeId}
+          data-source={ruleTypeId ? `apmAlertDetails-${ruleTypeId}` : 'apmAlertDetails'}
         >
           {inApmLabel}
         </EuiContextMenuItem>
@@ -128,8 +127,7 @@ export function RedMetricsChartActions({
           disabled={!discoverLink}
           data-test-subj="apmAlertDetailsTracesOpenInDiscoverAction"
           data-action="openTracesInDiscover"
-          data-source="apmAlertDetails"
-          data-alert-type={ruleTypeId}
+          data-source={ruleTypeId ? `apmAlertDetails-${ruleTypeId}` : 'apmAlertDetails'}
         >
           {tracesInDiscoverLabel}
         </EuiContextMenuItem>

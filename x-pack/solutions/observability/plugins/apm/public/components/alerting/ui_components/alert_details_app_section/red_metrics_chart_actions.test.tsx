@@ -116,19 +116,19 @@ describe('RedMetricsChartActions', () => {
     expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).toBeInTheDocument();
   });
 
-  it('includes ruleTypeId in data-alert-type attributes', () => {
+  it('includes ruleTypeId in data-source attributes', () => {
     setupMocks();
     const { getByTestId } = render(<RedMetricsChartActions {...defaultProps} />);
 
     fireEvent.click(getByTestId('apmAlertDetailsOpenActionsDropdown'));
 
     expect(getByTestId('apmAlertDetailsOpenInApmAction')).toHaveAttribute(
-      'data-alert-type',
-      'apm.transaction_duration'
+      'data-source',
+      'apmAlertDetails-apm.transaction_duration'
     );
     expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).toHaveAttribute(
-      'data-alert-type',
-      'apm.transaction_duration'
+      'data-source',
+      'apmAlertDetails-apm.transaction_duration'
     );
   });
 
@@ -172,6 +172,7 @@ describe('RedMetricsChartActions', () => {
             transactionType: 'testTransactionType',
           }}
           timeRange={{ from: 'now-15m', to: 'now' }}
+          ruleTypeId="apm.transaction_duration"
         />
       );
 
