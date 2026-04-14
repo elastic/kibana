@@ -51,7 +51,7 @@ const noopFs: FS = {
     );
   },
   resolve: (_dir: string, file: string, _ext: string) => file,
-  contains: (root: string, file: string) => Promise.resolve(false),
+  contains: async () => false,
 };
 
 /**
