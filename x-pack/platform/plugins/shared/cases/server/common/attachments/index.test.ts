@@ -6,7 +6,11 @@
  */
 
 import { AttachmentType } from '../../../common/types/domain';
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  LEGACY_LENS_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { getAttachmentTypeFromAttributes, getAttachmentTypeTransformers } from '.';
 import { commentAttachmentTransformer } from './comment';
 
@@ -40,6 +44,15 @@ describe('common/attachments', () => {
       expect(getAttachmentTypeFromAttributes({ comment: 'hello', type: 'user' })).toBe(
         AttachmentType.user
       );
+    });
+
+    it('returns persistableStateAttachmentTypeId for persistable state attachments', () => {
+      expect(
+        getAttachmentTypeFromAttributes({
+          type: AttachmentType.persistableState,
+          persistableStateAttachmentTypeId: LEGACY_LENS_ATTACHMENT_TYPE,
+        })
+      ).toBe(LEGACY_LENS_ATTACHMENT_TYPE);
     });
 
     it('throws when attributes have no recognizable attachment type', () => {
@@ -80,6 +93,19 @@ describe('common/attachments', () => {
       const transformer = getAttachmentTypeTransformers(AttachmentType.alert, owner);
       expect(transformer).not.toBe(commentAttachmentTransformer);
       expect(transformer.isType({ type: AttachmentType.alert } as never)).toBe(false);
+    });
+
+    it('returns configured persistable state transformer for known visualization types', () => {
+      const lensTransformer = getAttachmentTypeTransformers(LENS_ATTACHMENT_TYPE, owner);
+      expect(lensTransformer).not.toBe(commentAttachmentTransformer);
+      expect(
+        lensTransformer.isLegacyType({
+          type: AttachmentType.persistableState,
+          persistableStateAttachmentTypeId: LEGACY_LENS_ATTACHMENT_TYPE,
+          persistableStateAttachmentState: {},
+          owner: 'securitySolution',
+        })
+      ).toBe(true);
     });
   });
 });

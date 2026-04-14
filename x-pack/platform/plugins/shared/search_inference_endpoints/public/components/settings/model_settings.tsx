@@ -9,14 +9,15 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
 import { DefaultModelSection } from './default_model_section';
@@ -34,6 +35,7 @@ export const ModelSettings: React.FC = () => {
     isDirty: isFeatureDirty,
     assignments,
     sections,
+    invalidEndpointIds,
     updateEndpoints,
     save: saveFeatures,
     resetSection,
@@ -160,6 +162,37 @@ export const ModelSettings: React.FC = () => {
         <DefaultModelSection defaultModelSettings={defaultModelSettings} />
         {disallowOtherModels ? null : (
           <>
+            {invalidEndpointIds.size > 0 && (
+              <>
+                <EuiSpacer size="l" />
+                <EuiCallOut
+                  title={i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.invalidEndpoints.title',
+                    {
+                      defaultMessage: 'Some assigned inference endpoints are no longer available',
+                    }
+                  )}
+                  color="warning"
+                  iconType="warning"
+                  data-test-subj="invalidEndpointsCallout"
+                  announceOnMount
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
+                      {
+                        defaultMessage:
+                          'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
+                        values: {
+                          endpointList: [...invalidEndpointIds].join(', '),
+                        },
+                      }
+                    )}
+                  </p>
+                </EuiCallOut>
+              </>
+            )}
+
             <EuiSpacer size="xl" />
 
             {sections.length === 0 ? (
@@ -197,6 +230,7 @@ export const ModelSettings: React.FC = () => {
                     }))}
                     onReset={() => setResetParentKey(section.featureId)}
                     onEndpointsChange={updateEndpoints}
+                    invalidEndpointIds={invalidEndpointIds}
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
                   />
