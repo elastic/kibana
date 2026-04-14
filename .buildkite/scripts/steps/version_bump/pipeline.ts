@@ -28,86 +28,86 @@ if (!BUMP_TYPE) {
         getPipeline('.buildkite/pipelines/version_bump/trigger_es_build_and_promote.yml', false)
       );
 
-      // Step 2: Wait for ES build to complete, then bump package.json and other files on the release branch
-      pipeline.push('  - wait');
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions.yml')
-      );
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
-
-      // Step 3: Wait, then trigger DRA builds for both snapshot and staging (async).
-      // If branch is main, we only run DRA snapshot, otherwise we run them both.
-      pipeline.push('  - wait');
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
-
-      if (process.env.BRANCH !== 'main') {
-        pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
-      }
-
-      // Step 4: Update the labels for PRs and the color of the label itself
-      pipeline.push('  - wait');
-
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_label_color.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
+      // // Step 2: Wait for ES build to complete, then bump package.json and other files on the release branch
+      // pipeline.push('  - wait');
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions.yml')
+      // );
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
+      //
+      // // Step 3: Wait, then trigger DRA builds for both snapshot and staging (async).
+      // // If branch is main, we only run DRA snapshot, otherwise we run them both.
+      // pipeline.push('  - wait');
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
+      //
+      // if (process.env.BRANCH !== 'main') {
+      //   pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
+      // }
+      //
+      // // Step 4: Update the labels for PRs and the color of the label itself
+      // pipeline.push('  - wait');
+      //
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_label_color.yml'));
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
     }
 
     if (BUMP_TYPE === 'minor') {
       // Step 1: Trigger ES build and promote
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/version_bump/trigger_es_build_and_promote_on_main.yml',
-          false
-        )
-      );
-
-      // Step 2: Wait for ES build to complete, then bump package.json and other files on the main branch.
-      pipeline.push('  - wait');
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions_to_main.yml')
-      );
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
-
-      // Step 3: Wait, then create the new release branch off main
-      pipeline.push('  - wait');
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/create_new_branch.yml'));
-
-      // Step 4: Wait, then trigger DRA snapshot and staging on the new release branch,
-      // If branch is main, we only run DRA snapshot, otherwise we run them both.
-      pipeline.push('  - wait');
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
-      if (process.env.BRANCH !== 'main') {
-        pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
-      }
-
-      // Step 5: Wait, and then do a bunch of file changes in the new branch.
-      pipeline.push('  - wait');
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_release_branch.yml'));
-
-      // Step 6: Wait for branch creation, then notify Slack that branching happened but version bump is pending
-      pipeline.push('  - wait');
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/notify_branch_created.yml'));
-
-      // TODO: Send email (ask tyler)
-      // Missing Step: Send email
-
-      // Step 7: Update pipeline resource definitions on main.
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/version_bump/update_pipeline_resource_definitions.yml')
-      );
-
-      // Step 8: Wait, then trigger DRA snapshot on main,
-      pipeline.push('  - wait');
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot_on_main.yml')
-      );
-
-      // Step 9: Wait, then ensure the version label exists for the new version and reconcile labels
-      pipeline.push('  - wait');
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/ensure_version_label.yml'));
-
-      // Step 10: Wait, then reconcile labels
-      pipeline.push('  - wait');
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
+      // pipeline.push(
+      //   getPipeline(
+      //     '.buildkite/pipelines/version_bump/trigger_es_build_and_promote_on_main.yml',
+      //     false
+      //   )
+      // );
+      //
+      // // Step 2: Wait for ES build to complete, then bump package.json and other files on the main branch.
+      // pipeline.push('  - wait');
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/version_bump/bump_package_json_versions_to_main.yml')
+      // );
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/bump_versions_json.yml'));
+      //
+      // // Step 3: Wait, then create the new release branch off main
+      // pipeline.push('  - wait');
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/create_new_branch.yml'));
+      //
+      // // Step 4: Wait, then trigger DRA snapshot and staging on the new release branch,
+      // // If branch is main, we only run DRA snapshot, otherwise we run them both.
+      // pipeline.push('  - wait');
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot.yml'));
+      // if (process.env.BRANCH !== 'main') {
+      //   pipeline.push(getPipeline('.buildkite/pipelines/version_bump/trigger_dra_staging.yml'));
+      // }
+      //
+      // // Step 5: Wait, and then do a bunch of file changes in the new branch.
+      // pipeline.push('  - wait');
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_release_branch.yml'));
+      //
+      // // Step 6: Wait for branch creation, then notify Slack that branching happened but version bump is pending
+      // pipeline.push('  - wait');
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/notify_branch_created.yml'));
+      //
+      // // TODO: Send email (ask tyler)
+      // // Missing Step: Send email
+      //
+      // // Step 7: Update pipeline resource definitions on main.
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/version_bump/update_pipeline_resource_definitions.yml')
+      // );
+      //
+      // // Step 8: Wait, then trigger DRA snapshot on main,
+      // pipeline.push('  - wait');
+      // pipeline.push(
+      //   getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot_on_main.yml')
+      // );
+      //
+      // // Step 9: Wait, then ensure the version label exists for the new version and reconcile labels
+      // pipeline.push('  - wait');
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/ensure_version_label.yml'));
+      //
+      // // Step 10: Wait, then reconcile labels
+      // pipeline.push('  - wait');
+      // pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
     }
 
     emitPipeline(pipeline);
