@@ -31,9 +31,16 @@ export interface AccessDeniedProps {
   description: ReactNode;
   footer?: ReactNode;
   actions?: ReactNode[];
+  'data-test-subj'?: string;
 }
 
-export const AccessDenied = ({ title, description, footer, actions }: AccessDeniedProps) => {
+export const AccessDenied = ({
+  title,
+  description,
+  footer,
+  actions,
+  'data-test-subj': dataTestSubj,
+}: AccessDeniedProps) => {
   const { colorMode } = useEuiTheme();
   const emptyPromptStyles = useEmptyPromptStyles();
 
@@ -46,6 +53,7 @@ export const AccessDenied = ({ title, description, footer, actions }: AccessDeni
           alignItems: 'center',
           justifyContent: 'center',
         }}
+        data-test-subj={dataTestSubj}
       >
         <EuiEmptyPrompt
           data-test-subj="workflowsAccessDeniedEmptyState"

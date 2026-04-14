@@ -103,7 +103,7 @@ spaceTest.describe('Workflows management API availability (serverless tiers)', (
       const created = await workflowsApi.create(SIMPLE_WORKFLOW_YAML);
       createdWorkflowIds.push(created.id);
       const response = await workflowsApi.rawGetWorkflow(created.id);
-      expect(response.data).toBe(200);
+      expect(response.status).toBe(200);
       expect(response.data.id).toBe(created.id);
     }
   );

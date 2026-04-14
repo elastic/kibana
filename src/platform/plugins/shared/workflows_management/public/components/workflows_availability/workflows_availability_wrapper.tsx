@@ -85,6 +85,7 @@ const LicenseAccessDenied = React.memo(() => {
 
   return (
     <AccessDenied
+      data-test-subj="workflowsLicenseAccessDenied"
       title={i18n.translate(
         'platform.plugins.shared.workflows_management.ui.upgradeLicense.title',
         { defaultMessage: 'Upgrade your license' }
@@ -171,6 +172,7 @@ const ServerlessTierAccessDenied = React.memo<{
 
   return (
     <AccessDenied
+      data-test-subj="workflowsServerlessTierAccessDenied"
       title={i18n.translate(
         'platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.title',
         { defaultMessage: 'Upgrade your subscription' }
