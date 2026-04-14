@@ -8,7 +8,6 @@
  */
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { useEffect } from 'react';
@@ -151,36 +150,7 @@ describe('Dashboard App', () => {
       (DashboardRenderer as jest.Mock).mockImplementation(DefaultDashboardRendererMock);
     });
 
-    it('strips locator dashboard keys from history.state but keeps passThroughContext', async () => {
-      const locatorHistory = createMemoryHistory();
-      locatorHistory.replace({
-        pathname: '/',
-        search: '',
-        hash: '',
-        state: {
-          title: 'From locator',
-          viewMode: 'edit',
-          passThroughContext: { preserved: true } as SerializableRecord,
-        },
-      });
-
-      renderWithMountContext(
-        <DashboardApp
-          redirectTo={jest.fn()}
-          history={locatorHistory}
-          setDashboardAppApi={jest.fn()}
-        />,
-        locatorHistory
-      );
-
-      await waitFor(() => {
-        expect(locatorHistory.location.state).toEqual({
-          passThroughContext: { preserved: true },
-        });
-      });
-    });
-
-    it('clears history.state entirely when locator payload had no passThroughContext', async () => {
+    it('clears history.state after merging locator dashboard payload', async () => {
       const locatorHistory = createMemoryHistory();
       locatorHistory.replace({
         pathname: '/',
@@ -207,22 +177,22 @@ describe('Dashboard App', () => {
     });
 
     it('does not clear history.state when there is no locator dashboard payload', async () => {
-      const historyOnlyPassThrough = createMemoryHistory();
-      historyOnlyPassThrough.replace({
+      const historyWithUnknownKeys = createMemoryHistory();
+      historyWithUnknownKeys.replace({
         pathname: '/',
         search: '',
         hash: '',
-        state: { passThroughContext: { only: true } as SerializableRecord },
+        state: { notConsumedByDashboardExtract: true },
       });
-      const replaceSpy = jest.spyOn(historyOnlyPassThrough, 'replace');
+      const replaceSpy = jest.spyOn(historyWithUnknownKeys, 'replace');
 
       renderWithMountContext(
         <DashboardApp
           redirectTo={jest.fn()}
-          history={historyOnlyPassThrough}
+          history={historyWithUnknownKeys}
           setDashboardAppApi={jest.fn()}
         />,
-        historyOnlyPassThrough
+        historyWithUnknownKeys
       );
 
       await waitFor(() => {
@@ -237,8 +207,8 @@ describe('Dashboard App', () => {
           (call[0] as { state?: unknown }).state === undefined
       );
       expect(clearedStateCalls).toHaveLength(0);
-      expect(historyOnlyPassThrough.location.state).toEqual({
-        passThroughContext: { only: true },
+      expect(historyWithUnknownKeys.location.state).toEqual({
+        notConsumedByDashboardExtract: true,
       });
     });
   });
