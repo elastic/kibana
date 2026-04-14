@@ -814,6 +814,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       isOverriddenThemeDarkMode={isOverriddenThemeDarkMode}
                     />
                   )}
+                  {/* Cloud users change language via the Language modal in the user menu */}
                   {isCloudUser ? null : <UserLocaleEditor formik={formik} />}
                 </Form>
               </KibanaPageTemplate.Section>
