@@ -274,7 +274,7 @@ describe('ContentListClientProvider', () => {
       expect(() => {
         renderHook(() => useContentListConfig(), {
           wrapper: createWrapper({
-            services: { favorites: mockClient },
+            services: { ...createMockServices(), favorites: mockClient },
             features: { starred: false },
           }),
         });
@@ -286,7 +286,7 @@ describe('ContentListClientProvider', () => {
 
       const { result } = renderHook(() => useContentListConfig(), {
         wrapper: createWrapper({
-          services: { favorites: mockClient },
+          services: { ...createMockServices(), favorites: mockClient },
           features: { starred: false },
         }),
       });
@@ -299,7 +299,7 @@ describe('ContentListClientProvider', () => {
 
       const { result } = renderHook(() => useContentListConfig(), {
         wrapper: createWrapper({
-          services: { favorites: mockClient },
+          services: { ...createMockServices(), favorites: mockClient },
         }),
       });
 
