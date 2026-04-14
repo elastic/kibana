@@ -11,11 +11,7 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { PublicAppInfo } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import {
-  ObservabilitySharedPlugin,
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_SESSION_TAG,
-} from './plugin';
+import { ObservabilitySharedPlugin, OBSERVABILITY_SESSION_TAG } from './plugin';
 
 describe('ObservabilitySharedPlugin', () => {
   const createMockApp = (id: string, categoryId?: string): PublicAppInfo =>
@@ -67,7 +63,6 @@ describe('ObservabilitySharedPlugin', () => {
       currentAppId$.next('apm');
 
       expect(mockAgentBuilder.setChatConfig).toHaveBeenCalledWith({
-        agentId: OBSERVABILITY_AGENT_ID,
         sessionTag: OBSERVABILITY_SESSION_TAG,
         newConversation: false,
       });
@@ -166,7 +161,6 @@ describe('ObservabilitySharedPlugin', () => {
       currentAppId$.next('slo');
 
       expect(mockAgentBuilder.setChatConfig).toHaveBeenLastCalledWith({
-        agentId: OBSERVABILITY_AGENT_ID,
         sessionTag: OBSERVABILITY_SESSION_TAG,
         newConversation: false,
       });

@@ -64,7 +64,6 @@
  * ```
  * POST kbn:///api/agent_builder/converse
  * {
- *   "agent_id": "observability.agent",
  *   "input": "Something is wrong with checkout. Can you investigate the logs?"
  * }
  * ```

@@ -115,7 +115,6 @@ Create `.scout/servers/local.json` with the following content:
 ```bash
 EVALUATION_REPETITIONS=1 \
 EVALUATION_CLIENT="agent_builder" \
-AGENT_BUILDER_AGENT_ID="observability.agent" \
 EVALUATION_CONNECTOR_ID="your-connector-id" \
   node scripts/playwright test \
   --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \

@@ -47,7 +47,6 @@ import {
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
 
-export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 export const OBSERVABILITY_SESSION_TAG = 'observability';
 
 export interface ObservabilitySharedSetup {
@@ -172,7 +171,6 @@ export class ObservabilitySharedPlugin implements Plugin {
 
       if (isObservabilityApp) {
         agentBuilder.setChatConfig({
-          agentId: OBSERVABILITY_AGENT_ID,
           sessionTag: OBSERVABILITY_SESSION_TAG,
           newConversation: false,
         });

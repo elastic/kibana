@@ -235,7 +235,6 @@ curl -X POST http://localhost:5601/api/agent_builder/converse \
   -H 'Content-Type: application/json' \
   -d '{
     "input": "What services are experiencing issues?",
-    "agent_id": "observability.agent"
   }'
 ```
 
