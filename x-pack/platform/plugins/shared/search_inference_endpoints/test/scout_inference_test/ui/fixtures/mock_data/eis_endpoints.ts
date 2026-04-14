@@ -76,4 +76,14 @@ export const eisEndpointsMockData = [
       display: { name: 'Google Gemini 2.5 Pro', model_creator: 'Google' },
     },
   },
+  {
+    inference_id: '.mock-elastic-elser-text_embedding',
+    task_type: 'text_embedding',
+    service: 'elastic',
+    service_settings: { model_id: 'elastic-elser-v2' },
+    metadata: {
+      heuristics: { properties: ['multilingual'], status: 'ga' },
+      display: { name: 'Elastic ELSER v2', model_creator: 'Elastic' },
+    },
+  },
 ];

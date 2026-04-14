@@ -33,13 +33,14 @@ test.describe(
       const { eisModels } = pageObjects;
 
       await test.step('correct number of model cards are displayed', async () => {
-        await expect(eisModels.allModelCards).toHaveCount(3);
+        await expect(eisModels.allModelCards).toHaveCount(4);
       });
 
       await test.step('each model card is visible with expected name', async () => {
         await expect(eisModels.modelCard('Anthropic Claude Sonnet 3.7')).toBeVisible();
         await expect(eisModels.modelCard('OpenAI GPT-4.1')).toBeVisible();
         await expect(eisModels.modelCard('Google Gemini 2.5 Pro')).toBeVisible();
+        await expect(eisModels.modelCard('Elastic ELSER v2')).toBeVisible();
       });
     });
 
@@ -47,7 +48,7 @@ test.describe(
       const { eisModels } = pageObjects;
 
       await test.step('all model cards are visible before search', async () => {
-        await expect(eisModels.allModelCards).toHaveCount(3);
+        await expect(eisModels.allModelCards).toHaveCount(4);
       });
 
       await test.step('typing a search term reduces the card count', async () => {
@@ -58,7 +59,7 @@ test.describe(
 
       await test.step('clearing search restores all cards', async () => {
         await eisModels.searchBar.clear();
-        await expect(eisModels.allModelCards).toHaveCount(3);
+        await expect(eisModels.allModelCards).toHaveCount(4);
       });
     });
 
@@ -66,17 +67,18 @@ test.describe(
       const { eisModels } = pageObjects;
 
       await test.step('all model cards visible before filtering', async () => {
-        await expect(eisModels.allModelCards).toHaveCount(3);
+        await expect(eisModels.allModelCards).toHaveCount(4);
       });
 
-      await test.step('clicking LLM filter shows only LLM models', async () => {
+      await test.step('clicking LLM filter excludes embedding-only model', async () => {
         await eisModels.taskTypeFilter('LLM').click();
-        await expect(eisModels.allModelCards).not.toHaveCount(0);
+        await expect(eisModels.allModelCards).toHaveCount(3);
+        await expect(eisModels.modelCard('Elastic ELSER v2')).toBeHidden();
       });
 
       await test.step('clicking LLM filter again deselects and restores all cards', async () => {
         await eisModels.taskTypeFilter('LLM').click();
-        await expect(eisModels.allModelCards).toHaveCount(3);
+        await expect(eisModels.allModelCards).toHaveCount(4);
       });
     });
 
