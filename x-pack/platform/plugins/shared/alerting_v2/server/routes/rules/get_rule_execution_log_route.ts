@@ -10,14 +10,12 @@ import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
+import { executionLogResponseSchema } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import {
-  ExecutionLogServiceToken,
-  type ExecutionLogServiceContract,
-} from '../../lib/services/execution_log_service';
+import { ExecutionLogService } from '../../lib/services/execution_log_service';
 import { ruleIdParamsSchema } from './route_schemas';
 
 const executionLogQuerySchema = z.object({
@@ -27,17 +25,6 @@ const executionLogQuerySchema = z.object({
   status_filter: z.enum(['success', 'failure']).optional().describe('Filter by execution outcome.'),
   search: z.string().optional().describe('Full-text search on execution messages.'),
 });
-
-const executionLogEntrySchema = z.object({
-  timestamp: z.string(),
-  scheduled_at: z.string(),
-  duration_ms: z.number(),
-  outcome: z.string(),
-  message: z.string(),
-  active_alerts: z.number(),
-});
-
-const executionLogResponseSchema = z.array(executionLogEntrySchema);
 
 @injectable()
 export class GetRuleExecutionLogRoute extends BaseAlertingRoute {
@@ -74,8 +61,8 @@ export class GetRuleExecutionLogRoute extends BaseAlertingRoute {
       z.infer<typeof executionLogQuerySchema>,
       unknown
     >,
-    @inject(ExecutionLogServiceToken)
-    private readonly executionLogService: ExecutionLogServiceContract
+    @inject(ExecutionLogService)
+    private readonly executionLogService: ExecutionLogService
   ) {
     super(ctx);
   }

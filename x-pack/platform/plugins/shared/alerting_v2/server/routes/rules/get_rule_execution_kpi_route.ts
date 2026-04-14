@@ -10,24 +10,17 @@ import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
+import { executionKpiResponseSchema } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import {
-  ExecutionLogServiceToken,
-  type ExecutionLogServiceContract,
-} from '../../lib/services/execution_log_service';
+import { ExecutionLogService } from '../../lib/services/execution_log_service';
 import { ruleIdParamsSchema } from './route_schemas';
 
 const executionKpiQuerySchema = z.object({
   date_start: z.string().describe('Start of the time range (ISO 8601).'),
   date_end: z.string().describe('End of the time range (ISO 8601).'),
-});
-
-const executionKpiResponseSchema = z.object({
-  succeeded: z.number(),
-  failed: z.number(),
 });
 
 @injectable()
@@ -65,8 +58,8 @@ export class GetRuleExecutionKpiRoute extends BaseAlertingRoute {
       z.infer<typeof executionKpiQuerySchema>,
       unknown
     >,
-    @inject(ExecutionLogServiceToken)
-    private readonly executionLogService: ExecutionLogServiceContract
+    @inject(ExecutionLogService)
+    private readonly executionLogService: ExecutionLogService
   ) {
     super(ctx);
   }

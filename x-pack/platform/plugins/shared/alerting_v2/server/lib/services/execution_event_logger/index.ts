@@ -17,4 +17,4 @@ export type {
   ExecutionMetrics,
   ExecutionOutcome,
   LogExecutionParams,
-} from './execution_event_logger';
+} from './types';

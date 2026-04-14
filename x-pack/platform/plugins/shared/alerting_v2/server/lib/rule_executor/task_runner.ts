@@ -52,9 +52,9 @@ export class RuleExecutorTaskRunner {
       };
     }
 
-    const durationMs = Date.now() - startTime;
+    const endTime = Date.now();
 
-    this.logExecutionEvent(pipelineInput, result, durationMs, executionError);
+    this.logExecutionEvent(pipelineInput, result, startTime, endTime, executionError);
 
     if (executionError) {
       throw executionError;
@@ -66,7 +66,8 @@ export class RuleExecutorTaskRunner {
   private logExecutionEvent(
     input: RuleExecutionPipelineInput,
     result: RuleExecutionPipelineResult,
-    durationMs: number,
+    startMs: number,
+    endMs: number,
     error?: Error
   ): void {
     const { activeEpisodeCount } = result.finalState;
@@ -77,7 +78,8 @@ export class RuleExecutorTaskRunner {
       spaceId: input.spaceId,
       scheduledAt: input.scheduledAt,
       outcome,
-      durationMs,
+      startMs,
+      endMs,
       message: error ? `rule execution failed: ${error.message}` : `rule executed: ${input.ruleId}`,
       errorMessage: error?.message,
       metrics: result.completed && activeEpisodeCount != null ? { activeEpisodeCount } : null,

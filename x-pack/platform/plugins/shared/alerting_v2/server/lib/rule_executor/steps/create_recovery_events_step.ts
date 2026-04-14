@@ -143,6 +143,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
     const request = getActiveAlertGroupHashesQuery({ ruleId }).toRequest();
     return this.internalQueryService.executeQueryRows<ActiveAlertGroupHash>({
       query: request.query,
+
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client

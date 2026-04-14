@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ExecutionLogService, ExecutionLogServiceToken } from './execution_log_service';
+export { ExecutionLogService } from './execution_log_service';
 export type {
   ExecutionLogServiceContract,
   ExecutionLogEntry,
@@ -14,4 +14,4 @@ export type {
   GetExecutionKpiParams,
   ExecutionBreakdownBucket,
   GetExecutionBreakdownParams,
-} from './execution_log_service';
+} from './types';

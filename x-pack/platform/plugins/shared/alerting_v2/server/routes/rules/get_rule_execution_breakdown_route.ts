@@ -10,14 +10,12 @@ import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
+import { executionBreakdownResponseSchema } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import {
-  ExecutionLogServiceToken,
-  type ExecutionLogServiceContract,
-} from '../../lib/services/execution_log_service';
+import { ExecutionLogService } from '../../lib/services/execution_log_service';
 import { ruleIdParamsSchema } from './route_schemas';
 
 const executionBreakdownQuerySchema = z.object({
@@ -27,14 +25,6 @@ const executionBreakdownQuerySchema = z.object({
     .string()
     .describe('Bucket interval for time grouping (e.g. "1 hour", "30 minutes", "1 day").'),
 });
-
-const executionBreakdownResponseSchema = z.array(
-  z.object({
-    bucket: z.string(),
-    succeeded: z.number(),
-    failed: z.number(),
-  })
-);
 
 @injectable()
 export class GetRuleExecutionBreakdownRoute extends BaseAlertingRoute {
@@ -71,8 +61,8 @@ export class GetRuleExecutionBreakdownRoute extends BaseAlertingRoute {
       z.infer<typeof executionBreakdownQuerySchema>,
       unknown
     >,
-    @inject(ExecutionLogServiceToken)
-    private readonly executionLogService: ExecutionLogServiceContract
+    @inject(ExecutionLogService)
+    private readonly executionLogService: ExecutionLogService
   ) {
     super(ctx);
   }

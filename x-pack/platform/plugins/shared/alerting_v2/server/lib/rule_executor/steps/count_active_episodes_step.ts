@@ -6,6 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { esql } from '@elastic/esql';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import {
   LoggerServiceToken,
@@ -55,13 +56,18 @@ export class CountActiveEpisodesStep implements RuleExecutionStep {
 
   private async getActiveEpisodeCount(ruleId: string, abortSignal: AbortSignal): Promise<number> {
     try {
+      const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`rule.id == ${{
+        ruleId,
+      }} AND type == "alert" AND episode.status IN ("pending", "active", "recovering")`
+        .pipe`STATS active_count = COUNT_DISTINCT(episode.id)`;
+
+      const request = query.toRequest();
       const rows = await this.queryService.executeQueryRows<ActiveEpisodeCountRow>({
-        query: `FROM ${ALERT_EVENTS_DATA_STREAM}
-          | WHERE rule.id == ?
-            AND type == "alert"
-            AND episode.status IN ("pending", "active")
-          | STATS active_count = COUNT_DISTINCT(episode.id)`,
-        params: [ruleId],
+        query: request.query,
+        // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
+        params: request.params,
+        // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
+        filter: request.filter,
         abortSignal,
       });
 

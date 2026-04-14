@@ -7,80 +7,18 @@
 
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { ServiceIdentifier } from 'inversify';
+import type { ExecutionEventLoggerContract, LogExecutionParams } from './types';
 
 export const EVENT_LOG_PROVIDER = 'alertingV2';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
 } as const;
 
-export interface ExecutionMetrics {
-  readonly activeEpisodeCount: number;
-}
-
-export type ExecutionOutcome = 'success' | 'failure';
-
-export interface LogExecutionParams {
-  readonly ruleId: string;
-  readonly spaceId: string;
-  readonly scheduledAt: string;
-  readonly outcome: ExecutionOutcome;
-  readonly durationMs: number;
-  readonly message: string;
-  readonly errorMessage?: string;
-  readonly metrics: ExecutionMetrics | null;
-}
-
-export interface ExecutionEventLoggerContract {
-  logExecution(params: LogExecutionParams): void;
-}
-
 export const ExecutionEventLoggerToken = Symbol.for(
   'alerting_v2.ExecutionEventLogger'
 ) as ServiceIdentifier<ExecutionEventLoggerContract>;
 
 const MS_TO_NS = 1_000_000;
-
-/**
- * Shape of the event log documents written by ExecutionEventLogger.
- * Used by ExecutionLogService to read execution history with type safety.
- */
-export interface ExecutionEventSource {
-  '@timestamp': string;
-  event: {
-    provider: string;
-    action: string;
-    outcome: string;
-    duration: number;
-    start: string;
-    end: string;
-  };
-  kibana: {
-    alert: {
-      rule: {
-        execution: {
-          metrics?: {
-            alert_counts?: {
-              active?: number;
-              new?: number;
-              recovered?: number;
-            };
-          };
-        };
-      };
-    };
-    alerting: {
-      instance_id: string;
-    };
-    space_ids: string[];
-    task: {
-      scheduled: string;
-    };
-  };
-  message: string;
-  error?: {
-    message?: string;
-  };
-}
 
 export class ExecutionEventLogger implements ExecutionEventLoggerContract {
   constructor(private readonly eventLogger: IEventLogger) {}
@@ -90,23 +28,23 @@ export class ExecutionEventLogger implements ExecutionEventLoggerContract {
     spaceId,
     scheduledAt,
     outcome,
-    durationMs,
+    startMs,
+    endMs,
     message,
     errorMessage,
     metrics,
   }: LogExecutionParams): void {
-    const now = Date.now();
-    const startMs = now - durationMs;
+    const durationMs = endMs - startMs;
 
     this.eventLogger.logEvent({
-      '@timestamp': new Date(now).toISOString(),
+      '@timestamp': new Date(endMs).toISOString(),
       event: {
         action: EVENT_LOG_ACTIONS.execute,
         provider: EVENT_LOG_PROVIDER,
         outcome,
         duration: durationMs * MS_TO_NS,
         start: new Date(startMs).toISOString(),
-        end: new Date(now).toISOString(),
+        end: new Date(endMs).toISOString(),
       },
       kibana: {
         alert: {
