@@ -21,6 +21,8 @@ export const MAP_EMBEDDABLE_NAME = i18n.translate('xpack.maps.embeddableDisplayN
 
 export const INITIAL_LAYERS_KEY = 'initialLayers';
 
+// trigger selective testing
+
 export const MAPS_APP_PATH = `app/${APP_ID}`;
 export const MAP_PATH = 'map';
 const GIS_INTERNAL_PATH = `internal/${APP_ID}`;
