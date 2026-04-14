@@ -110,21 +110,5 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 1);
     });
-
-    it('can favorite a dashboard from the dashboard view', async () => {
-      await listingTable.clickItemLink('dashboard', 'A-Dashboard');
-      await dashboard.waitForRenderComplete();
-      await testSubjects.click('favoriteButton');
-      await testSubjects.exists('unfavoriteButton');
-
-      await dashboard.gotoDashboardListingURL({
-        args: {
-          basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        },
-      });
-      await listingTable.expectItemsCount('dashboard', 1);
-    });
   });
 }

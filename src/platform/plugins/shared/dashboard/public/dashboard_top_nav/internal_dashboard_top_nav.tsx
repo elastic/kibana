@@ -57,7 +57,6 @@ import {
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
-import { DashboardFavoriteButton } from './dashboard_favorite_button';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
 export interface InternalDashboardTopNavProps {
@@ -432,8 +431,8 @@ export function InternalDashboardTopNav({
     if (!visibilityProps.showTopNavMenu) {
       return undefined;
     }
-    const base =
-      viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
+    const base = viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
+
     if (!managedHeaderBadge) {
       return base;
     }
@@ -456,13 +455,6 @@ export function InternalDashboardTopNav({
     };
   }, [badges]);
 
-  useEffect(() => {
-    return coreServices.chrome.setBreadcrumbsAppendExtension({
-      content: <DashboardFavoriteButton dashboardId={lastSavedId} />,
-      order: 0,
-    });
-  }, [lastSavedId]);
-
   return (
     <div css={styles.container}>
       <EuiScreenReaderOnly>
@@ -471,10 +463,7 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      <AppMenu
-        setAppMenu={coreServices.chrome.setAppMenu}
-        config={appMenuConfigWithHeaderBadges}
-      />
+      <AppMenu setAppMenu={coreServices.chrome.setAppMenu} config={appMenuConfigWithHeaderBadges} />
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
