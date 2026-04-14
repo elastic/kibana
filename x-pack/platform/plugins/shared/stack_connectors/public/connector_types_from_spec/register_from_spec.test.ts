@@ -372,6 +372,20 @@ describe('registerConnectorTypesFromSpecs', () => {
         const result = model.connectorForm!.deserializer!(apiData);
         expect(result.authMode).toBe('per-user');
       });
+
+      it('round-trips authType: deserialize API shape then serialize for save', async () => {
+        const model = await getRegisteredModel();
+        const apiData = {
+          actionTypeId: '.test-connector-auth',
+          isDeprecated: false,
+          config: { authType: 'bearer', url: 'https://example.com' },
+          secrets: {},
+        };
+        const forForm = model.connectorForm!.deserializer!(apiData);
+        expect(forForm.secrets).toEqual({ authType: 'bearer' });
+        const forSave = model.connectorForm!.serializer!(forForm);
+        expect(forSave.config.authType).toBe('bearer');
+      });
     });
   });
 });

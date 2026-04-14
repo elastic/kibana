@@ -19,6 +19,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   is_deprecated: isDeprecated,
   allow_multiple_system_actions: allowMultipleSystemActions,
   select_message: selectMessage,
+  is_experimental: isExperimental,
   ...res
 }: AsApiContract<ActionType>) => ({
   enabledInConfig,
@@ -30,6 +31,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   isDeprecated,
   allowMultipleSystemActions,
   selectMessage,
+  isExperimental,
   ...res,
 });
 

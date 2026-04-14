@@ -28,4 +28,5 @@ export const connectorTypeSchema = schema.object({
   subFeature: schema.maybe(schema.oneOf([schema.literal('endpointSecurity')])),
   allowMultipleSystemActions: schema.maybe(schema.boolean()),
   selectMessage: schema.maybe(schema.string()),
+  isExperimental: schema.maybe(schema.boolean()),
 });

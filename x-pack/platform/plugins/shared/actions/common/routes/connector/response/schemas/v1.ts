@@ -141,6 +141,13 @@ export const connectorTypeResponseSchema = schema.object({
       },
     })
   ),
+  is_experimental: schema.maybe(
+    schema.boolean({
+      meta: {
+        description: 'When true, the connector type is a technical preview in the UI.',
+      },
+    })
+  ),
 });
 
 export const getAllConnectorTypesResponseSchema = schema.arrayOf(connectorTypeResponseSchema);

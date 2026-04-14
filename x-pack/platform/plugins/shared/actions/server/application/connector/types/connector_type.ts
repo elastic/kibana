@@ -24,4 +24,5 @@ export interface ConnectorType {
   isDeprecated: ConnectorTypeSchemaType['isDeprecated'];
   allowMultipleSystemActions?: ConnectorTypeSchemaType['allowMultipleSystemActions'];
   selectMessage?: ConnectorTypeSchemaType['selectMessage'];
+  isExperimental?: ConnectorTypeSchemaType['isExperimental'];
 }

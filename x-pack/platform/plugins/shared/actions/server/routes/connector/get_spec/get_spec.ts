@@ -11,6 +11,7 @@ import { connectorsSpecs, serializeConnectorSpec } from '@kbn/connector-specs';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
+import type { ActionsConfigurationUtilities } from '../../../actions_config';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
@@ -20,7 +21,7 @@ const specsByIdMap = new Map(
 );
 
 /**
- * GET /api/actions/connector_types/{id}/spec
+ * GET /internal/actions/connector_types/{id}/spec
  *
  * Returns the serialized connector spec as JSON Schema for client-side
  * form generation and validation.
@@ -29,14 +30,15 @@ const specsByIdMap = new Map(
  */
 export const getConnectorSpecRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  configurationUtilities: ActionsConfigurationUtilities
 ) => {
   router.get(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector_types/{id}/spec`,
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
-        access: 'public',
+        access: 'internal',
         summary: 'Get connector type specification',
         description:
           'Returns metadata and JSON Schema for a connector type form (config + secrets). Only available for spec-based connectors.',
@@ -53,8 +55,6 @@ export const getConnectorSpecRoute = (
           200: {
             description: 'Connector specification returned successfully.',
             body: () =>
-              // TODO: version this
-              // TODO: what about hideInUi and other fields available in the registry?
               schema.object({
                 metadata: schema.object({
                   id: schema.string(),
@@ -64,6 +64,7 @@ export const getConnectorSpecRoute = (
                   supportedFeatureIds: schema.arrayOf(schema.string()),
                   icon: schema.maybe(schema.string()),
                   docsUrl: schema.maybe(schema.string()),
+                  isTechnicalPreview: schema.maybe(schema.boolean()),
                 }),
                 schema: schema.recordOf(schema.string(), schema.any()),
               }),
@@ -90,8 +91,12 @@ export const getConnectorSpecRoute = (
         }
 
         try {
-          // TODO: version this
-          return res.ok({ body: serializeConnectorSpec(spec) });
+          const webhookSettings = configurationUtilities.getWebhookSettings();
+          const isPfxEnabled = webhookSettings.ssl.pfx.enabled;
+          const isEarsEnabled = configurationUtilities.isEarsEnabled();
+          return res.ok({
+            body: serializeConnectorSpec(spec, { isPfxEnabled, isEarsEnabled }),
+          });
         } catch (error) {
           return res.customError({
             statusCode: 500,

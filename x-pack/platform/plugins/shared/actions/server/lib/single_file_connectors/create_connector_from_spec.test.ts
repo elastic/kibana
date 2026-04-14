@@ -64,6 +64,22 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.executor).toBeDefined();
     expect(connectorType.validate.params).toBeDefined();
     expect(connectorType.source).toBe(ACTION_TYPE_SOURCES.spec);
+    expect(connectorType.isExperimental).toBeUndefined();
+  });
+
+  it('sets isExperimental from metadata.isTechnicalPreview', () => {
+    const spec = createMockSpec({
+      metadata: {
+        id: 'preview-connector',
+        displayName: 'Preview',
+        description: 'd',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['alerting'],
+        isTechnicalPreview: true,
+      },
+    });
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+    expect(connectorType.isExperimental).toBe(true);
   });
 
   it('creates connector type with executor and params for workflows connectors with multiple feature IDs', () => {

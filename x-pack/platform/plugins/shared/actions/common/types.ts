@@ -34,6 +34,7 @@ export interface ActionType {
     params: PublicValidatorType;
   };
   selectMessage?: string;
+  isExperimental?: boolean;
 }
 
 export enum InvalidEmailReason {

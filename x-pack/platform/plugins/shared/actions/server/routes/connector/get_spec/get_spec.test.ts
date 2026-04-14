@@ -7,9 +7,10 @@
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
-import { mockHandlerArguments, mockResponseFactory } from '../../_mock_handler_arguments';
+import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { getConnectorSpecRoute } from './get_spec';
+import type { ActionsConfigurationUtilities } from '../../../actions_config';
 
 // Mock the connector specs module
 jest.mock('@kbn/connector-specs', () => {
@@ -20,6 +21,7 @@ jest.mock('@kbn/connector-specs', () => {
       description: 'A test connector',
       minimumLicense: 'basic',
       supportedFeatureIds: ['alerting'],
+      isTechnicalPreview: true,
     },
     schema: {
       config: { type: 'object', properties: {} },
@@ -50,31 +52,53 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
+const createActionsConfigUtilsMock = (
+  overrides: Partial<{
+    pfxEnabled: boolean;
+    earsEnabled: boolean;
+  }> = {}
+): ActionsConfigurationUtilities =>
+  ({
+    getWebhookSettings: jest.fn(() => ({
+      ssl: { pfx: { enabled: overrides.pfxEnabled ?? true } },
+    })),
+    isEarsEnabled: jest.fn(() => overrides.earsEnabled ?? false),
+  } as unknown as ActionsConfigurationUtilities);
+
 describe('getConnectorSpecRoute', () => {
   it('registers the route with correct path', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
 
     expect(router.get).toHaveBeenCalledTimes(1);
     const [config] = router.get.mock.calls[0];
     expect(config.path).toBe('/internal/actions/connector_types/{id}/spec');
   });
 
+  it('registers the route with access internal', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
+
+    const [config] = router.get.mock.calls[0];
+    expect(config.options?.access).toBe('internal');
+  });
+
   it('returns 200 with serialized spec for valid connector ID', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments(
-      {},
-      { params: { id: 'test-connector' } },
-      ['ok', 'notFound']
-    );
+    const [context, req, res] = mockHandlerArguments({}, { params: { id: 'test-connector' } }, [
+      'ok',
+      'notFound',
+    ]);
 
     const result = await handler(context, req, res);
 
@@ -86,6 +110,7 @@ describe('getConnectorSpecRoute', () => {
           description: 'A test connector',
           minimumLicense: 'basic',
           supportedFeatureIds: ['alerting'],
+          isTechnicalPreview: true,
         },
         schema: {
           type: 'object',
@@ -98,22 +123,49 @@ describe('getConnectorSpecRoute', () => {
     });
 
     expect(res.ok).toHaveBeenCalled();
-    expect(serializeConnectorSpec).toHaveBeenCalled();
+    expect(serializeConnectorSpec).toHaveBeenCalledWith(expect.any(Object), {
+      isPfxEnabled: true,
+      isEarsEnabled: false,
+    });
+  });
+
+  it('passes isPfxEnabled and isEarsEnabled from configuration utilities to serializeConnectorSpec', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const actionsConfigUtils = createActionsConfigUtilsMock({
+      pfxEnabled: false,
+      earsEnabled: true,
+    });
+
+    getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments({}, { params: { id: 'test-connector' } }, [
+      'ok',
+      'notFound',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(serializeConnectorSpec).toHaveBeenCalledWith(expect.any(Object), {
+      isPfxEnabled: false,
+      isEarsEnabled: true,
+    });
   });
 
   it('returns 404 for unknown connector ID', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments(
-      {},
-      { params: { id: 'unknown-connector' } },
-      ['ok', 'notFound']
-    );
+    const [context, req, res] = mockHandlerArguments({}, { params: { id: 'unknown-connector' } }, [
+      'ok',
+      'notFound',
+    ]);
 
     await handler(context, req, res);
 
@@ -126,15 +178,13 @@ describe('getConnectorSpecRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments(
-      {},
-      { params: { id: 'test-connector' } },
-      ['ok']
-    );
+    const [context, req, res] = mockHandlerArguments({}, { params: { id: 'test-connector' } }, [
+      'ok',
+    ]);
 
     await handler(context, req, res);
 
@@ -149,15 +199,13 @@ describe('getConnectorSpecRoute', () => {
       throw new Error('License check failed');
     });
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments(
-      {},
-      { params: { id: 'test-connector' } },
-      ['ok']
-    );
+    const [context, req, res] = mockHandlerArguments({}, { params: { id: 'test-connector' } }, [
+      'ok',
+    ]);
 
     await expect(handler(context, req, res)).rejects.toThrow('License check failed');
 
@@ -173,15 +221,14 @@ describe('getConnectorSpecRoute', () => {
       throw new Error('Serialization error');
     });
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments(
-      {},
-      { params: { id: 'test-connector' } },
-      ['ok', 'customError']
-    );
+    const [context, req, res] = mockHandlerArguments({}, { params: { id: 'test-connector' } }, [
+      'ok',
+      'customError',
+    ]);
 
     await handler(context, req, res);
 
@@ -197,26 +244,28 @@ describe('getConnectorSpecRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
 
     const [config] = router.get.mock.calls[0];
 
     // Check that request validation is configured
     expect(config.validate).toBeDefined();
-    expect(config.validate?.request?.params).toBeDefined();
+    const validateConfig = config.validate as { request?: { params?: unknown } };
+    expect(validateConfig.request?.params).toBeDefined();
   });
 
   it('has proper response schema validation', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
 
     const [config] = router.get.mock.calls[0];
 
     // Check that response validation is configured for 200, 404, and 500
-    expect(config.validate?.response?.[200]).toBeDefined();
-    expect(config.validate?.response?.[404]).toBeDefined();
-    expect(config.validate?.response?.[500]).toBeDefined();
+    const validateConfig = config.validate as { response?: Record<number, unknown> };
+    expect(validateConfig.response?.[200]).toBeDefined();
+    expect(validateConfig.response?.[404]).toBeDefined();
+    expect(validateConfig.response?.[500]).toBeDefined();
   });
 });

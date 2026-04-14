@@ -61,5 +61,5 @@ export function defineRoutes(opts: RouteOptions) {
   getAllConnectorsIncludingSystemRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
 
-  getConnectorSpecRoute(router, licenseState);
+  getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
 }

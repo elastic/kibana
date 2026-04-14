@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { fromConnectorSpecSchema } from '@kbn/connector-specs';
 import type { ActionType, ActionTypeModel, ActionTypeRegistryContract } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
 import { fetchConnectorSpec, transformSpecToActionTypeModel } from './use_action_type_model_utils';
@@ -58,7 +59,13 @@ export function useActionTypeModel(
     error,
   } = useQuery({
     queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionType?.id],
-    queryFn: ({ signal }) => fetchConnectorSpec(http, actionType!.id, signal),
+    queryFn: async ({ signal }) => {
+      const spec = await fetchConnectorSpec(http, actionType!.id, signal);
+      if (!fromConnectorSpecSchema(spec.schema)) {
+        throw new Error(`Failed to parse connector spec schema for "${actionType!.id}"`);
+      }
+      return spec;
+    },
     enabled: shouldFetchSpec,
     staleTime: Infinity, // Specs don't change during a session
     refetchOnWindowFocus: false,

@@ -130,7 +130,7 @@ export const ActionTypeMenu = ({
           supportedFeatureIds.length === 1 &&
           supportedFeatureIds[0] === WorkflowsConnectorFeatureId
         ) {
-          const isWorkflowsUiEnabled = uiSettings.get<boolean>('workflows:ui:enabled');
+          const isWorkflowsUiEnabled = uiSettings.get<boolean>('workflows:ui:enabled', true);
           return isWorkflowsUiEnabled;
         }
 
@@ -154,7 +154,7 @@ export const ActionTypeMenu = ({
           selectMessage: actionType.selectMessage ?? '',
           actionType,
           name: actionType.name,
-          isExperimental: false,
+          isExperimental: actionType.isExperimental ?? false,
           isDeprecated: actionType.isDeprecated,
         };
       }

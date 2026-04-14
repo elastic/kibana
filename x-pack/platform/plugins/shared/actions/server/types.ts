@@ -247,6 +247,10 @@ export interface ActionTypeCoreFields<
    */
   selectMessage?: string;
   /**
+   * When true, the connector type is shown as technical preview in the UI.
+   */
+  isExperimental?: boolean;
+  /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
    * For example, you can define the privileges a users needs to have to execute

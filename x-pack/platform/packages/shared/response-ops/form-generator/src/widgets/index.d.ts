@@ -1,0 +1,1 @@
+export { getWidgetComponent } from './registry';

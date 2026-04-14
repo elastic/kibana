@@ -14,14 +14,16 @@ import { fromConnectorSpecSchema, getMeta, setMeta } from '@kbn/connector-specs'
 import { generateFormFields } from '@kbn/response-ops-form-generator';
 import type { ActionTypeModel } from '../../types';
 
-/** Response from GET /api/actions/connector_types/{id}/spec */
+/** Response from GET /internal/actions/connector_types/{id}/spec */
 export interface ConnectorSpecResponse {
   metadata: {
     id: string;
     displayName: string;
     description: string;
     icon?: string;
+    docsUrl?: string;
     minimumLicense: string;
+    isTechnicalPreview?: boolean;
     supportedFeatureIds: string[];
   };
   schema: Record<string, unknown>;
@@ -71,14 +73,14 @@ export function transformSpecToActionTypeModel(spec: ConnectorSpecResponse): Act
     selectMessage: spec.metadata.description,
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
-    isExperimental: false,
+    isExperimental: spec.metadata.isTechnicalPreview ?? false,
     actionConnectorFields: lazy(() => {
       const zodSchema = fromConnectorSpecSchema(spec.schema);
+      if (!zodSchema) {
+        throw new Error(`Invalid connector spec schema for "${spec.metadata.id}"`);
+      }
       return Promise.resolve({
         default: (props: { readOnly?: boolean; isEdit?: boolean }) => {
-          if (!zodSchema) {
-            return null;
-          }
           return generateFormFields({
             schema: zodSchema,
             formConfig: { disabled: props.readOnly, isEdit: props.isEdit },

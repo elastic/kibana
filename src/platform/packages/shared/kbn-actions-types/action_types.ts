@@ -35,4 +35,5 @@ export interface ActionType {
   isDeprecated: boolean;
   allowMultipleSystemActions?: boolean;
   selectMessage?: string;
+  isExperimental?: boolean;
 }

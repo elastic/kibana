@@ -10,6 +10,7 @@ import type { FC, PropsWithChildren } from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { connectorsSpecs, serializeConnectorSpec } from '@kbn/connector-specs';
 import { useKibana } from '../../common/lib/kibana';
 import { useActionTypeModel } from './use_action_type_model';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
@@ -35,13 +36,10 @@ describe('useActionTypeModel', () => {
       minimumLicense: 'basic',
       supportedFeatureIds: ['alerting'],
     },
-    schema: {
-      type: 'object',
-      properties: {
-        config: { type: 'object', properties: {} },
-        secrets: { type: 'object', properties: {} },
-      },
-    },
+    schema: serializeConnectorSpec(connectorsSpecs.AlienVaultOTXConnector).schema as Record<
+      string,
+      unknown
+    >,
   };
 
   const createWrapper = (): FC<PropsWithChildren<unknown>> => {
@@ -72,10 +70,9 @@ describe('useActionTypeModel', () => {
   });
 
   it('returns null when actionType is null', async () => {
-    const { result } = renderHook(
-      () => useActionTypeModel(actionTypeRegistry, null),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, null), {
+      wrapper: createWrapper(),
+    });
 
     expect(result.current).toEqual({
       actionTypeModel: null,
@@ -99,10 +96,9 @@ describe('useActionTypeModel', () => {
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(mockActionTypeModel);
 
-    const { result } = renderHook(
-      () => useActionTypeModel(actionTypeRegistry, stackActionType),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, stackActionType), {
+      wrapper: createWrapper(),
+    });
 
     // Should return immediately without loading
     expect(result.current.actionTypeModel).toBe(mockActionTypeModel);
@@ -129,10 +125,9 @@ describe('useActionTypeModel', () => {
     actionTypeRegistry.has.mockReturnValue(false);
     useKibanaMock().services.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
 
-    const { result } = renderHook(
-      () => useActionTypeModel(actionTypeRegistry, specActionType),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
+      wrapper: createWrapper(),
+    });
 
     // Initially loading
     expect(result.current.isLoading).toBe(true);
@@ -177,10 +172,9 @@ describe('useActionTypeModel', () => {
     });
     useKibanaMock().services.http.get = jest.fn().mockReturnValue(promise);
 
-    const { result } = renderHook(
-      () => useActionTypeModel(actionTypeRegistry, specActionType),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
+      wrapper: createWrapper(),
+    });
 
     // Should be loading
     expect(result.current.isLoading).toBe(true);
@@ -195,6 +189,46 @@ describe('useActionTypeModel', () => {
       expect(result.current.actionTypeModel).not.toBeNull();
       expect(result.current.isFromSpec).toBe(true);
     });
+  });
+
+  it('surfaces error when connector spec schema cannot be parsed', async () => {
+    const specActionType: ActionType = {
+      id: 'spec-connector',
+      name: 'Spec Connector',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      source: ACTION_TYPE_SOURCES.spec,
+    };
+
+    actionTypeRegistry.has.mockReturnValue(false);
+    useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
+      ...mockSpecResponse,
+      schema: {
+        type: 'object',
+        properties: {
+          config: { type: 'object', properties: {} },
+          secrets: { type: 'string' },
+        },
+      },
+    });
+
+    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.error?.message).toBe(
+      'Failed to parse connector spec schema for "spec-connector"'
+    );
+    expect(result.current.actionTypeModel).toBeNull();
+    expect(result.current.isFromSpec).toBe(false);
   });
 
   it('handles fetch errors correctly', async () => {
@@ -213,10 +247,9 @@ describe('useActionTypeModel', () => {
     const fetchError = new Error('Failed to fetch spec');
     useKibanaMock().services.http.get = jest.fn().mockRejectedValue(fetchError);
 
-    const { result } = renderHook(
-      () => useActionTypeModel(actionTypeRegistry, specActionType),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -276,10 +309,9 @@ describe('useActionTypeModel', () => {
 
     actionTypeRegistry.has.mockReturnValue(false);
 
-    const { result } = renderHook(
-      () => useActionTypeModel(actionTypeRegistry, unknownActionType),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, unknownActionType), {
+      wrapper: createWrapper(),
+    });
 
     // Should not be loading (no fetch triggered)
     expect(result.current.isLoading).toBe(false);
@@ -306,10 +338,9 @@ describe('useActionTypeModel', () => {
     actionTypeRegistry.has.mockReturnValue(false);
     useKibanaMock().services.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
 
-    const { result } = renderHook(
-      () => useActionTypeModel(actionTypeRegistry, specActionType),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);

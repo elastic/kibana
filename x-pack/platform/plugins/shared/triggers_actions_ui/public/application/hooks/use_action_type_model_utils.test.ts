@@ -7,6 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { connectorsSpecs, serializeConnectorSpec } from '@kbn/connector-specs';
 import {
   fetchConnectorSpec,
   transformSpecToActionTypeModel,
@@ -128,9 +129,18 @@ describe('use_action_type_model_utils', () => {
       expect(model.source).toBe(ACTION_TYPE_SOURCES.spec);
     });
 
-    it('sets isExperimental to false', () => {
-      const model = transformSpecToActionTypeModel(baseSpec);
-      expect(model.isExperimental).toBe(false);
+    it('sets isExperimental from isTechnicalPreview', () => {
+      const validSchema = serializeConnectorSpec(connectorsSpecs.AlienVaultOTXConnector)
+        .schema as Record<string, unknown>;
+      const modelDefault = transformSpecToActionTypeModel({ ...baseSpec, schema: validSchema });
+      expect(modelDefault.isExperimental).toBe(false);
+
+      const modelPreview = transformSpecToActionTypeModel({
+        ...baseSpec,
+        schema: validSchema,
+        metadata: { ...baseSpec.metadata, isTechnicalPreview: true },
+      });
+      expect(modelPreview.isExperimental).toBe(true);
     });
 
     it('sets subtype to undefined', () => {
