@@ -50,6 +50,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.alerts`,
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
+  `${internalNamespaces.security}.find_prebuilt_rules`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
