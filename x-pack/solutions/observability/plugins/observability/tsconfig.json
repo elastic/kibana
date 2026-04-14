@@ -154,7 +154,6 @@
     "@kbn/cps",
     "@kbn/expressions-plugin",
     "@kbn/ingest-hub-plugin",
-    "@kbn/apm-sources-access-plugin",
   ],
   "exclude": ["target/**/*"]
 }
