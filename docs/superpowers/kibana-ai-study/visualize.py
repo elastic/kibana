@@ -26,6 +26,16 @@ def load_metrics() -> dict:
         return json.load(f)
 
 
+TEST_COVERAGE_FILE = Path(__file__).parent / "data" / "test_coverage_proxy.json"
+
+
+def load_test_coverage() -> dict:
+    if not TEST_COVERAGE_FILE.exists():
+        return {}
+    with open(TEST_COVERAGE_FILE) as f:
+        return json.load(f)
+
+
 def get_monthly_series(metrics: dict, key: str) -> tuple[list, list]:
     """Extract a monthly time series from metrics."""
     monthly = metrics["monthly"]
@@ -271,6 +281,100 @@ def plot_correlation_overlay(metrics: dict):
     print("  Created: correlation_overlay.png")
 
 
+def plot_defect_density(metrics: dict):
+    months, values = get_monthly_series(metrics, "defect_density")
+
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    ax.plot(months, values, marker="o", color=BUG_COLOR, linewidth=2)
+    ax.axhline(y=sum(v for v in values if v) / len([v for v in values if v]),
+               color=AI_COLOR, linestyle="--", alpha=0.5, label="Mean")
+    ax.set_title("Defect Density (Bugs per Merged PR)", fontsize=14)
+    ax.set_xlabel("Month")
+    ax.set_ylabel("Bugs / PRs")
+    ax.legend()
+    ax.tick_params(axis="x", rotation=45)
+    fig.tight_layout()
+    fig.savefig(CHARTS_DIR / "defect_density.png", dpi=150)
+    plt.close()
+    print("  Created: defect_density.png")
+
+
+def plot_regression_trend(metrics: dict):
+    monthly = metrics["monthly"]
+    months = sorted(monthly.keys())
+    counts = [monthly[m].get("regression_count", 0) for m in months]
+    rates = [monthly[m].get("regression_rate", 0) * 100 for m in months]
+
+    fig, ax1 = plt.subplots(figsize=FIGSIZE)
+    ax2 = ax1.twinx()
+
+    ax1.bar(months, counts, color=AI_COLOR, alpha=0.6, label="Regression count")
+    ax2.plot(months, rates, color=MAIN_COLOR, marker="o", linewidth=2,
+             label="Regression rate (%)")
+
+    ax1.set_title("Regressions Over Time", fontsize=14)
+    ax1.set_xlabel("Month")
+    ax1.set_ylabel("Regression Count", color=AI_COLOR)
+    ax2.set_ylabel("Regression Rate (%)", color=MAIN_COLOR)
+
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper left")
+    ax1.tick_params(axis="x", rotation=45)
+    fig.tight_layout()
+    fig.savefig(CHARTS_DIR / "regression_trend.png", dpi=150)
+    plt.close()
+    print("  Created: regression_trend.png")
+
+
+def plot_test_coverage_proxy(test_coverage: dict):
+    months = sorted(test_coverage.keys())
+    ratios = [test_coverage[m]["test_to_prod_ratio"] for m in months]
+    line_ratios = [test_coverage[m]["test_line_ratio"] for m in months]
+    new_files = [test_coverage[m]["new_test_files"] for m in months]
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), sharex=True)
+
+    # Top: ratios
+    ax1.plot(months, ratios, marker="o", color=MAIN_COLOR, linewidth=2,
+             label="Test/Prod file ratio")
+    ax1.plot(months, line_ratios, marker="s", color=SECONDARY_COLOR, linewidth=2,
+             label="Test/Prod line ratio")
+    ax1.set_title("Test Coverage Proxy: Investment in Testing", fontsize=14)
+    ax1.set_ylabel("Ratio")
+    ax1.legend()
+
+    # Bottom: new test files
+    ax2.bar(months, new_files, color=MAIN_COLOR, alpha=0.7)
+    ax2.set_title("New Test Files per Month", fontsize=14)
+    ax2.set_xlabel("Month")
+    ax2.set_ylabel("Count")
+    ax2.tick_params(axis="x", rotation=45)
+
+    fig.tight_layout()
+    fig.savefig(CHARTS_DIR / "test_coverage_proxy.png", dpi=150)
+    plt.close()
+    print("  Created: test_coverage_proxy.png")
+
+
+def plot_quality_score(metrics: dict):
+    months, values = get_monthly_series(metrics, "quality_score")
+
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    ax.plot(months, values, marker="o", color=SECONDARY_COLOR, linewidth=2)
+    ax.fill_between(range(len(months)), values, alpha=0.2, color=SECONDARY_COLOR)
+    ax.set_xticks(range(len(months)))
+    ax.set_xticklabels(months, rotation=45)
+    ax.set_title("Quality Score (higher = better)", fontsize=14)
+    ax.set_xlabel("Month")
+    ax.set_ylabel("Score (0-1)")
+    ax.set_ylim(0, 1.05)
+    fig.tight_layout()
+    fig.savefig(CHARTS_DIR / "quality_score.png", dpi=150)
+    plt.close()
+    print("  Created: quality_score.png")
+
+
 def main():
     CHARTS_DIR.mkdir(parents=True, exist_ok=True)
     metrics = load_metrics()
@@ -286,6 +390,13 @@ def main():
     plot_ai_adoption_rate(metrics)
     plot_ai_vs_non_ai_cycle_time(metrics)
     plot_correlation_overlay(metrics)
+    plot_defect_density(metrics)
+    plot_regression_trend(metrics)
+    plot_quality_score(metrics)
+
+    test_coverage = load_test_coverage()
+    if test_coverage:
+        plot_test_coverage_proxy(test_coverage)
     print(f"All charts saved to {CHARTS_DIR}")
 
 
