@@ -95,13 +95,11 @@ export const findRulesRequestQuerySchema = schema.object({
     })
   ),
   filter_consumers: schema.maybe(
-    schema.arrayOf(
-      schema.string({
-        meta: {
-          description: 'List of consumers to filter.',
-        },
-      })
-    )
+    schema.arrayOf(schema.string(), {
+      meta: {
+        description: 'List of consumers to filter.',
+      },
+    })
   ),
 });
 
