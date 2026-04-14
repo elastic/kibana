@@ -229,6 +229,7 @@ export const useAvailablePackages = ({
             item,
             addBasePath,
             packageVerificationKeyId,
+            filterState: { selectedCategory, onlyAgentless: onlyAgentlessFilter },
           });
         })
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -242,6 +243,7 @@ export const useAvailablePackages = ({
     onlyAgentlessFilter,
     isAgentlessEnabled,
     packageVerificationKeyId,
+    selectedCategory,
   ]);
 
   // Packages to show

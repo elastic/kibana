@@ -33,6 +33,10 @@ import type {
   IntegrationCardReleaseLabel,
   PackageSpecIcon,
 } from '../../../../../../../common/types';
+import {
+  getAgentlessReleaseForPackage,
+  isOnlyAgentlessIntegration,
+} from '../../../../../../../common/services/agentless_policy_helper';
 
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
@@ -86,14 +90,14 @@ export const mapToCard = ({
   item,
   addBasePath,
   packageVerificationKeyId,
-  selectedCategory,
+  filterState,
 }: {
   getAbsolutePath: (p: string) => string;
   getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string;
   addBasePath: (url: string) => string;
   item: CustomIntegration | PackageListItem;
   packageVerificationKeyId?: string;
-  selectedCategory?: string;
+  filterState?: { selectedCategory?: string; onlyAgentless?: boolean };
 }): IntegrationCardItem => {
   let uiInternalPathUrl: string;
 
@@ -142,6 +146,8 @@ export const mapToCard = ({
   }
 
   const release: IntegrationCardReleaseLabel = getPackageReleaseLabel(version);
+  const integration = 'integration' in item ? item.integration || '' : '';
+  const packageItem = 'policy_templates' in item ? item : undefined;
 
   let extraLabelsBadges: React.ReactNode[] | undefined;
   if (item.type === 'integration' || item.type === 'content') {
@@ -154,8 +160,8 @@ export const mapToCard = ({
     icons: !item.icons || !item.icons.length ? [] : item.icons,
     title: item.title,
     url: uiInternalPathUrl,
-    fromIntegrations: selectedCategory,
-    integration: 'integration' in item ? item.integration || '' : '',
+    fromIntegrations: filterState?.selectedCategory,
+    integration,
     name: 'name' in item ? item.name : item.id,
     version,
     type: item.type,
@@ -175,6 +181,18 @@ export const mapToCard = ({
 
   if ('supportsAgentless' in item && item.supportsAgentless) {
     cardResult.supportsAgentless = true;
+  }
+
+  // Use the agentless-specific release when agentless is the only deployment mode,
+  // or when the caller is displaying an agentless-filtered view.
+  if (
+    isOnlyAgentlessIntegration(packageItem, integration || undefined) ||
+    filterState?.onlyAgentless
+  ) {
+    const agentlessRelease = getAgentlessReleaseForPackage(packageItem, integration || undefined);
+    if (agentlessRelease !== undefined && agentlessRelease !== 'ga') {
+      cardResult.release = agentlessRelease;
+    }
   }
 
   if ('data_streams' in item && Array.isArray(item.data_streams)) {
