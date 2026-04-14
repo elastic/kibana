@@ -96,15 +96,18 @@ export class ExecutionLogService implements ExecutionLogServiceContract {
   public async getExecutionLog(params: GetExecutionLogParams): Promise<ExecutionLogEntry[]> {
     const { ruleId, dateStart, dateEnd, sort, statusFilter, search } = params;
     const sortDir = sort.toUpperCase();
+    const queryParams: Array<string | number> = [ruleId, dateStart, dateEnd];
 
     let statusClause = '';
     if (statusFilter) {
-      statusClause = `AND event.outcome == "${statusFilter}"`;
+      statusClause = 'AND event.outcome == ?';
+      queryParams.push(statusFilter);
     }
 
     let searchClause = '';
     if (search) {
-      searchClause = `AND message LIKE "*${search}*"`;
+      searchClause = 'AND message LIKE ?';
+      queryParams.push(`*${search}*`);
     }
 
     const query = `FROM ${EVENT_LOG_INDEX}
@@ -124,7 +127,7 @@ export class ExecutionLogService implements ExecutionLogServiceContract {
 
     const rows = await this.queryService.executeQueryRows<ExecutionLogRow>({
       query,
-      params: [ruleId, dateStart, dateEnd],
+      params: queryParams,
     });
 
     return rows.map((row) => ({

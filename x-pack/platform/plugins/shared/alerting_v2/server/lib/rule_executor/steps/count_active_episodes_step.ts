@@ -37,7 +37,10 @@ export class CountActiveEpisodesStep implements RuleExecutionStep {
         message: `[${this.name}] Counting active episodes for rule ${ruleId}`,
       });
 
-      const activeCount = await this.getActiveEpisodeCount(ruleId);
+      const activeCount = await this.getActiveEpisodeCount(
+        ruleId,
+        state.input.executionContext.signal
+      );
 
       this.logger.debug({
         message: `[${this.name}] Active episode count for rule ${ruleId}: ${activeCount}`,
@@ -50,7 +53,7 @@ export class CountActiveEpisodesStep implements RuleExecutionStep {
     });
   }
 
-  private async getActiveEpisodeCount(ruleId: string): Promise<number> {
+  private async getActiveEpisodeCount(ruleId: string, abortSignal: AbortSignal): Promise<number> {
     try {
       const rows = await this.queryService.executeQueryRows<ActiveEpisodeCountRow>({
         query: `FROM ${ALERT_EVENTS_DATA_STREAM}
@@ -59,6 +62,7 @@ export class CountActiveEpisodesStep implements RuleExecutionStep {
             AND episode.status IN ("pending", "active")
           | STATS active_count = COUNT_DISTINCT(episode.id)`,
         params: [ruleId],
+        abortSignal,
       });
 
       return rows[0]?.active_count ?? 0;
