@@ -6,10 +6,13 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { EvaluationCriterion } from '@kbn/evals';
-import type { EvaluationCriterionStructured } from '@kbn/evals/src/evaluators/criteria';
+import type { EvaluationCriterion, EvaluationCriterionStructured } from '@kbn/evals';
 import type { GcsConfig } from '../data_generators/replay';
-import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction/evaluators';
+import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
+
+export interface SamplingCriterion extends EvaluationCriterionStructured {
+  sampling_filters?: QueryDslQueryContainer[];
+}
 
 interface ScenarioMetadata {
   difficulty: 'easy' | 'medium' | 'hard';
@@ -38,12 +41,6 @@ export interface KIQueryGenerationScenario {
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
-}
-
-export interface SamplingCriterion extends EvaluationCriterionStructured {
-  // Query filters used to collect sample documents that match this criterion.
-  // Each filter is executed individually to collect exactly one sample document.
-  sampling_filters?: QueryDslQueryContainer[];
 }
 
 export interface KIFeatureExtractionScenario {

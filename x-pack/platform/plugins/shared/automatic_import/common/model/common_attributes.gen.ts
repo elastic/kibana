@@ -187,6 +187,10 @@ export const IntegrationResponse = z.object({
    */
   version: z.string().optional(),
   /**
+   * The ID of the connector associated with this integration
+   */
+  connectorId: z.string().optional(),
+  /**
    * The username of the user who created the integration
    */
   createdBy: z.string().optional(),

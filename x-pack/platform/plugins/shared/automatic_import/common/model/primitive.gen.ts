@@ -34,14 +34,14 @@ export const SafeIdentifier = z
   .regex(/^[a-zA-Z0-9_]+$/);
 
 /**
- * A semantic version string (e.g. 1.0.0)
+ * A semantic version string (e.g. 1.0.0 or 1.0.0-beta).
  */
 export type SemVer = z.infer<typeof SemVer>;
 export const SemVer = z
   .string()
   .min(5)
   .max(20)
-  .regex(/^\d+\.\d+\.\d+$/);
+  .regex(/^\d+\.\d+\.\d+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?$/);
 
 /**
  * A universally unique identifier

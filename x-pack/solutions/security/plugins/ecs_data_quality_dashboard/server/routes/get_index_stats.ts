@@ -69,12 +69,7 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
           if (startDate && endDate) {
             const decodedStartDate = decodeURIComponent(startDate);
             const decodedEndDate = decodeURIComponent(endDate);
-            const meteringStats = await fetchMeteringStats(
-              client,
-              decodedIndexName,
-              request.headers.authorization
-            );
-
+            const meteringStats = await fetchMeteringStats(client, decodedIndexName);
             if (!meteringStats.indices) {
               logger.warn(`No metering stats indices found under pattern: ${decodedIndexName}`);
               return response.ok({
@@ -117,6 +112,14 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
           }
         } catch (err) {
           logger.error(JSON.stringify(err));
+
+          const decodedIndexName = decodeURIComponent(request.params.pattern);
+
+          if (err.statusCode === 404) {
+            logger.warn(`No metering stats indices found under pattern: ${decodedIndexName}`);
+            return response.ok({ body: {} });
+          }
+
           return resp.error({
             body: err.message ?? API_DEFAULT_ERROR_MESSAGE,
             statusCode: err.statusCode ?? 500,

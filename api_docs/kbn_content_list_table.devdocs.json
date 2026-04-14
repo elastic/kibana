@@ -2069,7 +2069,7 @@
             ],
             "label": "showTags",
             "description": [
-              "\nWhether to show tags below the title/description.\nRequires `item.tags` to contain tag IDs and a tags service\nto be configured on the `ContentListProvider`.\n"
+              "\nWhether to show tags below the title/description.\nRequires `item.tags` to contain tag IDs and a tags service\nto be configured on the `ContentListProvider`.\n\nAuto-enabled when the provider has `supports.tags === true`\n(i.e., a tags service is configured). Set to `false` to\nexplicitly disable tags even when the service is available.\n"
             ],
             "signature": [
               "boolean | undefined"
@@ -2095,7 +2095,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-            "lineNumber": 56,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2121,7 +2121,7 @@
               ", withModifierKey: boolean) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-            "lineNumber": 63,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2147,7 +2147,7 @@
               "<Record<string, unknown>>) => React.ReactNode) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-            "lineNumber": 70,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2170,7 +2170,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-                "lineNumber": 71,
+                "lineNumber": 75,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2581,7 +2581,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-        "lineNumber": 145,
+        "lineNumber": 149,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

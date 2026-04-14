@@ -79,14 +79,30 @@ const baseEsqlControl = {
 };
 
 export const optionsListESQLControlSchema = schema.discriminatedUnion('control_type', [
-  schema.object({
-    ...baseEsqlControl,
-    control_type: schema.literal('STATIC_VALUES'),
-    available_options: schema.arrayOf(schema.string(), { maxSize: MAX_OPTIONS_LIST_REQUEST_SIZE }),
-  }),
-  schema.object({
-    ...baseEsqlControl,
-    control_type: schema.literal('VALUES_FROM_QUERY'),
-    esql_query: schema.string(),
-  }),
+  schema.object(
+    {
+      ...baseEsqlControl,
+      control_type: schema.literal('STATIC_VALUES'),
+      available_options: schema.arrayOf(schema.string(), {
+        maxSize: MAX_OPTIONS_LIST_REQUEST_SIZE,
+      }),
+    },
+    {
+      meta: {
+        id: 'kbn-controls-schemas-options-list-esql-control-schema-static-values',
+      },
+    }
+  ),
+  schema.object(
+    {
+      ...baseEsqlControl,
+      control_type: schema.literal('VALUES_FROM_QUERY'),
+      esql_query: schema.string(),
+    },
+    {
+      meta: {
+        id: 'kbn-controls-schemas-options-list-esql-control-schema-values-from-query',
+      },
+    }
+  ),
 ]);
