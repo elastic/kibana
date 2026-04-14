@@ -6,11 +6,25 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import type { EuiFlexItemProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { A2UISurfaceAttachmentData } from '@kbn/agent-builder-common/attachments';
+import type { A2UIComponent } from '@kbn/agent-builder-common/attachments';
 import { componentRenderers } from './component_map';
 
 const MAX_RENDER_DEPTH = 10;
+const VALID_GROW_SIZES: ReadonlySet<number> = new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+const CONTENT_SIZED_TYPES: ReadonlySet<string> = new Set(['Icon', 'Badge', 'Button', 'Divider']);
+
+const toFlexGrow = (child: A2UIComponent | undefined): EuiFlexItemProps['grow'] => {
+  const { weight, component } = child ?? {};
+  if (weight !== undefined && VALID_GROW_SIZES.has(weight)) {
+    return weight as EuiFlexItemProps['grow'];
+  }
+  return component !== undefined && CONTENT_SIZED_TYPES.has(component) ? false : true;
+};
 
 interface A2UIRendererProps {
   surface: A2UISurfaceAttachmentData;
@@ -24,6 +38,7 @@ interface A2UIRendererProps {
  * EUI equivalent using the component renderer registry.
  */
 export const A2UIRenderer: React.FC<A2UIRendererProps> = ({ surface }) => {
+  const { euiTheme } = useEuiTheme();
   const { components, data_model: dataModel = {} } = surface;
 
   const componentMap = useMemo(() => new Map(components.map((c) => [c.id, c])), [components]);
@@ -44,15 +59,11 @@ export const A2UIRenderer: React.FC<A2UIRendererProps> = ({ surface }) => {
     }
 
     const renderChildren = (childIds: string[]): React.ReactNode =>
-      childIds.map((childId) => {
-        const childComp = componentMap.get(childId);
-        const weight = childComp?.weight;
-        return (
-          <EuiFlexItem key={childId} grow={weight ?? true}>
-            {renderNode(childId, depth + 1)}
-          </EuiFlexItem>
-        );
-      });
+      childIds.map((childId) => (
+        <EuiFlexItem key={childId} grow={toFlexGrow(componentMap.get(childId))}>
+          {renderNode(childId, depth + 1)}
+        </EuiFlexItem>
+      ));
 
     const renderChild = (childId: string): React.ReactNode => renderNode(childId, depth + 1);
 
@@ -71,5 +82,14 @@ export const A2UIRenderer: React.FC<A2UIRendererProps> = ({ surface }) => {
     );
   }
 
-  return <div data-test-subj="a2uiSurface">{renderNode('root', 0)}</div>;
+  return (
+    <div
+      data-test-subj="a2uiSurface"
+      css={css`
+        padding: ${euiTheme.size.m};
+      `}
+    >
+      {renderNode('root', 0)}
+    </div>
+  );
 };

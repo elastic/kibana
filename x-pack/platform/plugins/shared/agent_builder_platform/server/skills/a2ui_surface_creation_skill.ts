@@ -16,7 +16,7 @@ export const a2uiSurfaceCreationSkill = defineSkillType({
   name: 'a2ui-surface-creation',
   basePath: 'skills/platform/a2ui',
   description:
-    'Create rich, structured UI surfaces inline in the conversation using the A2UI declarative component protocol.',
+    'Compose multi-metric summaries, dashboard-like overviews, and structured layouts that combine stats, tables, descriptions, and embedded visualizations into a single inline surface.',
   content: `## When to Use This Skill
 
 Use this skill when:
@@ -62,14 +62,14 @@ Supported types: ${componentTypes}
 ### Layout Components
 - **Row**: Horizontal flex container. Props: \`children\` (array of component ids), \`align\`, \`justify\`
 - **Column**: Vertical flex container. Props: \`children\` (array of component ids), \`align\`, \`justify\`
-- **Card**: Panel wrapper. Props: \`child\` (single component id), \`title\`
-- **Divider**: Horizontal rule. Props: \`size\` ("s"|"m"|"l")
+- **Card**: Panel wrapper. Props: \`child\` (single component id), \`title\`, \`color\` (plain|subdued|primary|success|warning|danger|accent|transparent)
+- **Divider**: Horizontal rule. Props: \`size\` ("s"|"m"|"l"|"xl"|"xxl")
 
 ### Content Components
-- **Text**: Text block. Props: \`text\`, \`variant\` ("title"|"body"|"caption")
-- **Stat**: Metric card. Props: \`title\` (label), \`value\`, \`description\`
-- **Badge**: Label badge. Props: \`text\`, \`color\`
-- **Icon**: EUI icon. Props: \`name\` (EUI icon name), \`color\`, \`size\`
+- **Text**: Text block. Props: \`text\`, \`variant\` ("title"|"body"|"caption"), \`color\` (default|subdued|success|accent|warning|danger)
+- **Stat**: Metric card. Props: \`title\` (label), \`value\`, \`description\`, \`color\` (subdued|primary|accent|success|warning|danger)
+- **Badge**: Label badge. Props: \`text\`, \`color\` (default|hollow|primary|success|accent|warning|danger, or any hex)
+- **Icon**: EUI icon. Props: \`name\` (EUI icon name), \`color\` (default|subdued|primary|success|accent|warning|danger, or any hex), \`size\`
 - **FieldValue**: Key-value display. Props: \`field_name\`, \`field_value\`
 
 ### Data Components
@@ -77,7 +77,7 @@ Supported types: ${componentTypes}
 - **DescriptionList**: Key-value list. Props: \`items\` [{title, description}]
 
 ### Interactive / Embedding Components
-- **Button**: Clickable action. Props: \`text\`, \`action\` {event: {name, context}}, \`variant\` ("primary"|"default")
+- **Button**: Clickable action. Props: \`text\`, \`action\` {event: {name, context}}, \`variant\` ("primary"|"default"), \`color\` (primary|success|warning|danger|accent|text)
 - **VisualizationRef**: Embeds a visualization attachment. Props: \`attachment_id\`, \`version\`
 
 ### Data Binding
@@ -87,6 +87,64 @@ Any string prop can be replaced with \`{path: "/json/pointer"}\` to resolve valu
 
 Always use: \`${KIBANA_EUI_CATALOG_ID}\`. The tool sets this automatically.
 
+## Semantic Color Guidelines
+
+Use the \`color\` prop to add meaning, not decoration. Color should communicate the nature of a value at a glance.
+
+**Available semantic colors:** \`success\`, \`warning\`, \`danger\`, \`primary\`, \`accent\`, \`subdued\`
+
+### When to use each color
+
+**success** — The value is healthy, on target, or positive.
+- Availability/uptime above a healthy threshold (e.g. ≥ 99%)
+- Error rates near zero
+- Completion or success rates above target
+- Positive growth, profit, or surplus
+
+**warning** — The value is degraded or approaching a threshold.
+- Availability between ~90–99%
+- Elevated error or failure rates
+- Approaching capacity limits (e.g. disk 80–90%)
+- Latency above normal but not critical
+
+**danger** — The value is critical, failing, or requires attention.
+- Availability below ~90%, significant outages
+- High error/failure rates
+- Resource exhaustion (disk > 90%, memory maxed)
+- Security alerts, critical counts
+
+**primary** — Neutral emphasis to draw attention to a headline value.
+- The single most important metric in a surface (e.g. total revenue, total requests)
+- Values that are informational rather than good or bad
+
+**accent** — Secondary emphasis for supplementary highlights.
+- Differentiating a secondary metric from the primary one
+- Highlighting categories or segments (e.g. a product category)
+
+**subdued** — Low-emphasis, supporting context.
+- Comparative/reference values (e.g. previous period)
+- Unchanged or stable metrics that need no emphasis
+
+### Contextual thresholds
+
+The same metric can warrant different colors depending on its value. Apply color based on the actual number, not the label:
+- A "Success Rate" of 99.9% → \`success\`; of 92% → \`warning\`; of 78% → \`danger\`
+- "CPU Usage" of 30% → \`success\`; 75% → \`warning\`; 95% → \`danger\`
+- "Disk Free" of 50 GB → \`success\`; 10 GB → \`warning\`; 2 GB → \`danger\`
+
+When you cannot determine appropriate thresholds, omit the color and let the default apply.
+
+### Color applies to these components
+
+| Component | What gets colored | Good use cases |
+|-----------|------------------|----------------|
+| Stat | The value number | KPIs, rates, percentages, counts |
+| Badge | Background fill | Status labels, severity tags, category tags |
+| Text | The text content | Callout messages, inline status notes |
+| Card | Panel background | Grouping related items by status (e.g. a danger card for critical alerts) |
+| Button | Button color | Confirm/destructive actions |
+| Icon | Icon color | Status indicators next to labels |
+
 ## Best Practices
 
 - Keep surfaces focused: one surface per logical unit of information.
@@ -94,6 +152,7 @@ Always use: \`${KIBANA_EUI_CATALOG_ID}\`. The tool sets this automatically.
 - Use meaningful surface_id values (e.g. "host_overview", "alert_summary").
 - Limit component tree depth to keep layouts readable (max 10 levels).
 - When combining with visualizations, create the visualization first, then embed it via VisualizationRef.
+- Apply color to Stats and Badges where the value has a clear healthy/degraded/critical interpretation. Do not color every component.
 `,
   referencedContent: [
     {
@@ -101,7 +160,7 @@ Always use: \`${KIBANA_EUI_CATALOG_ID}\`. The tool sets this automatically.
       name: 'a2ui-surface-examples',
       content: `# A2UI Surface Examples
 
-## Host Summary Surface
+## Host Summary with Contextual Colors
 
 \`\`\`json
 {
@@ -109,9 +168,10 @@ Always use: \`${KIBANA_EUI_CATALOG_ID}\`. The tool sets this automatically.
   "title": "Host Summary",
   "components": [
     {"id": "root", "component": "Column", "children": ["stats_row", "details"]},
-    {"id": "stats_row", "component": "Row", "children": ["cpu_stat", "mem_stat"]},
-    {"id": "cpu_stat", "component": "Stat", "title": "CPU Usage", "value": {"path": "/cpu_percent"}, "description": "Average over last hour"},
+    {"id": "stats_row", "component": "Row", "children": ["cpu_stat", "mem_stat", "uptime_stat"]},
+    {"id": "cpu_stat", "component": "Stat", "title": "CPU Usage", "value": {"path": "/cpu_percent"}, "description": "Average over last hour", "color": "warning"},
     {"id": "mem_stat", "component": "Stat", "title": "Memory", "value": {"path": "/memory_percent"}, "description": "Current usage"},
+    {"id": "uptime_stat", "component": "Stat", "title": "Uptime", "value": {"path": "/uptime_percent"}, "color": "success"},
     {"id": "details", "component": "DescriptionList", "items": [
       {"title": "Hostname", "description": {"path": "/hostname"}},
       {"title": "OS", "description": {"path": "/os"}},
@@ -121,6 +181,7 @@ Always use: \`${KIBANA_EUI_CATALOG_ID}\`. The tool sets this automatically.
   "data_model": {
     "cpu_percent": "72%",
     "memory_percent": "4.2 GB / 8 GB",
+    "uptime_percent": "99.97%",
     "hostname": "web-server-01",
     "os": "Ubuntu 22.04",
     "uptime": "14 days, 6 hours"
@@ -128,7 +189,9 @@ Always use: \`${KIBANA_EUI_CATALOG_ID}\`. The tool sets this automatically.
 }
 \`\`\`
 
-## Alert Overview with Embedded Visualization
+Note: CPU at 72% gets \`warning\` (elevated). Uptime at 99.97% gets \`success\` (healthy). Memory is shown without color because GB usage does not map to a clear threshold.
+
+## Alert Overview with Severity Colors
 
 \`\`\`json
 {
@@ -136,10 +199,10 @@ Always use: \`${KIBANA_EUI_CATALOG_ID}\`. The tool sets this automatically.
   "title": "Critical Alerts Overview",
   "components": [
     {"id": "root", "component": "Column", "children": ["header_row", "divider1", "chart", "divider2", "table"]},
-    {"id": "header_row", "component": "Row", "children": ["total_badge", "critical_stat", "high_stat"]},
-    {"id": "total_badge", "component": "Badge", "text": {"path": "/total_count"}, "color": "danger"},
-    {"id": "critical_stat", "component": "Stat", "title": "Critical", "value": {"path": "/critical_count"}},
-    {"id": "high_stat", "component": "Stat", "title": "High", "value": {"path": "/high_count"}},
+    {"id": "header_row", "component": "Row", "children": ["total_stat", "critical_stat", "high_stat"]},
+    {"id": "total_stat", "component": "Stat", "title": "Total Alerts", "value": {"path": "/total_count"}, "color": "primary"},
+    {"id": "critical_stat", "component": "Stat", "title": "Critical", "value": {"path": "/critical_count"}, "color": "danger"},
+    {"id": "high_stat", "component": "Stat", "title": "High", "value": {"path": "/high_count"}, "color": "warning"},
     {"id": "divider1", "component": "Divider", "size": "m"},
     {"id": "chart", "component": "VisualizationRef", "attachment_id": "alert-trend-viz-123"},
     {"id": "divider2", "component": "Divider", "size": "m"},
@@ -150,7 +213,7 @@ Always use: \`${KIBANA_EUI_CATALOG_ID}\`. The tool sets this automatically.
     ], "data_path": "/top_rules"}
   ],
   "data_model": {
-    "total_count": "47 alerts",
+    "total_count": "47",
     "critical_count": "12",
     "high_count": "35",
     "top_rules": [
@@ -162,6 +225,29 @@ Always use: \`${KIBANA_EUI_CATALOG_ID}\`. The tool sets this automatically.
 }
 \`\`\`
 
+Note: Total uses \`primary\` (headline metric, neutral). Critical uses \`danger\`. High uses \`warning\`.
+
+## Ecommerce KPI Surface with Revenue Coloring
+
+\`\`\`json
+{
+  "surface_id": "ecommerce_kpis",
+  "title": "Ecommerce Store KPIs",
+  "components": [
+    {"id": "root", "component": "Column", "children": ["kpi_row", "status_row"]},
+    {"id": "kpi_row", "component": "Row", "children": ["revenue_stat", "orders_stat", "avg_order_stat"]},
+    {"id": "revenue_stat", "component": "Stat", "title": "Total Revenue", "value": "$350,884", "color": "primary"},
+    {"id": "orders_stat", "component": "Stat", "title": "Orders", "value": "4,675"},
+    {"id": "avg_order_stat", "component": "Stat", "title": "Avg Order Value", "value": "$75.05"},
+    {"id": "status_row", "component": "Row", "children": ["success_badge", "cancel_badge"]},
+    {"id": "success_badge", "component": "Badge", "text": "98.2% fulfillment", "color": "success"},
+    {"id": "cancel_badge", "component": "Badge", "text": "1.8% cancellation", "color": "hollow"}
+  ]
+}
+\`\`\`
+
+Note: Revenue uses \`primary\` (headline figure, not inherently good/bad). Fulfillment badge uses \`success\` (high rate). Cancellation badge uses \`hollow\` (low-emphasis neutral). Order count and avg order value are uncolored because they are pure informational metrics.
+
 ## Simple Metric Card
 
 \`\`\`json
@@ -171,11 +257,13 @@ Always use: \`${KIBANA_EUI_CATALOG_ID}\`. The tool sets this automatically.
   "components": [
     {"id": "root", "component": "Card", "child": "content", "title": "Storage"},
     {"id": "content", "component": "Column", "children": ["usage_stat", "path_info"]},
-    {"id": "usage_stat", "component": "Stat", "title": "Used", "value": "78%", "description": "156 GB of 200 GB"},
+    {"id": "usage_stat", "component": "Stat", "title": "Used", "value": "78%", "description": "156 GB of 200 GB", "color": "warning"},
     {"id": "path_info", "component": "FieldValue", "field_name": "Mount", "field_value": "/data"}
   ]
 }
 \`\`\`
+
+Note: Disk at 78% gets \`warning\` (approaching capacity).
 `,
     },
   ],

@@ -21,10 +21,30 @@ import {
   EuiBadge,
   EuiSpacer,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { EuiBasicTableColumn, EuiButtonProps } from '@elastic/eui';
+import type { PanelColor } from '@elastic/eui/src/components/panel/panel';
 import { A2UIComponentType } from '@kbn/agent-builder-common/attachments';
 import type { A2UIComponent } from '@kbn/agent-builder-common/attachments';
 import { resolveDynamicString, resolveDynamicValue, resolveDataPath } from './data_model';
+import { VisualizationRefRenderer } from './visualization_ref';
+
+const PANEL_COLORS: ReadonlySet<string> = new Set([
+  'transparent', 'plain', 'subdued', 'highlighted',
+  'accent', 'accentSecondary', 'primary', 'success', 'warning', 'danger', 'neutral', 'risk',
+]);
+
+const BUTTON_COLORS: ReadonlySet<string> = new Set([
+  'text', 'accent', 'accentSecondary', 'primary', 'success', 'warning', 'danger',
+]);
+
+const toPanelColor = (color: string | undefined): PanelColor | undefined =>
+  color !== undefined && PANEL_COLORS.has(color) ? (color as PanelColor) : undefined;
+
+const toButtonColor = (color: string | undefined): EuiButtonProps['color'] =>
+  color !== undefined && BUTTON_COLORS.has(color)
+    ? (color as EuiButtonProps['color'])
+    : undefined;
 
 export interface ComponentRenderContext {
   dataModel: Record<string, unknown>;
@@ -39,7 +59,7 @@ type ComponentRenderer = (
 
 const renderText: ComponentRenderer = (component, { dataModel }) => {
   const text = resolveDynamicString(component.text, dataModel);
-  const { variant } = component;
+  const { variant, color } = component;
 
   if (variant === 'title') {
     return (
@@ -50,13 +70,13 @@ const renderText: ComponentRenderer = (component, { dataModel }) => {
   }
   if (variant === 'caption') {
     return (
-      <EuiText size="xs" color="subdued">
+      <EuiText size="xs" color={color ?? 'subdued'}>
         <p>{text}</p>
       </EuiText>
     );
   }
   return (
-    <EuiText size="s">
+    <EuiText size="s" color={color ?? undefined}>
       <p>{text}</p>
     </EuiText>
   );
@@ -93,7 +113,7 @@ const renderColumn: ComponentRenderer = (component, { renderChildren }) => {
 const renderCard: ComponentRenderer = (component, { dataModel, renderChild }) => {
   const title = component.title ? resolveDynamicString(component.title, dataModel) : undefined;
   return (
-    <EuiPanel hasBorder paddingSize="m">
+    <EuiPanel hasBorder paddingSize="m" color={toPanelColor(component.color)}>
       {title && (
         <>
           <EuiTitle size="xs">
@@ -113,9 +133,20 @@ const renderStat: ComponentRenderer = (component, { dataModel }) => {
   const description = component.description
     ? resolveDynamicString(component.description, dataModel)
     : undefined;
+  const titleColor = component.color ?? undefined;
 
   return (
-    <EuiStat title={String(value)} description={title} titleSize="m">
+    <EuiStat
+      title={String(value)}
+      description={title}
+      titleSize="m"
+      titleColor={titleColor}
+      css={css`
+        .euiStat__title {
+          white-space: nowrap;
+        }
+      `}
+    >
       {description && (
         <EuiText size="xs" color="subdued">
           {description}
@@ -152,14 +183,16 @@ const renderButton: ComponentRenderer = (component, { dataModel }) => {
   const isPrimary = component.variant === 'primary';
 
   return (
-    <EuiButton size="s" fill={isPrimary}>
+    <EuiButton size="s" fill={isPrimary} color={toButtonColor(component.color)}>
       {text}
     </EuiButton>
   );
 };
 
-const renderDivider: ComponentRenderer = () => {
-  return <EuiHorizontalRule margin="s" />;
+const renderDivider: ComponentRenderer = (component) => {
+  return (
+    <EuiHorizontalRule margin={(component.size as 's' | 'm' | 'l' | 'xl' | 'xxl') ?? 's'} />
+  );
 };
 
 const renderIcon: ComponentRenderer = (component) => {
@@ -179,15 +212,7 @@ const renderBadge: ComponentRenderer = (component, { dataModel }) => {
 };
 
 const renderVisualizationRef: ComponentRenderer = (component) => {
-  return (
-    <EuiPanel hasBorder paddingSize="m" color="subdued">
-      <EuiText size="xs" color="subdued">
-        <EuiIcon type="lensApp" size="s" aria-hidden={true} /> Visualization:{' '}
-        {component.attachment_id ?? 'unknown'}
-        {component.version !== undefined ? ` (v${component.version})` : ''}
-      </EuiText>
-    </EuiPanel>
-  );
+  return <VisualizationRefRenderer component={component} />;
 };
 
 const renderFieldValue: ComponentRenderer = (component, { dataModel }) => {

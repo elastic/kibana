@@ -124,10 +124,10 @@ describe('a2ui_surface attachment type', () => {
   });
 
   describe('format', () => {
-    it('returns a text representation with surface title', () => {
+    it('returns a text representation with surface title', async () => {
       const attachment = createAttachment(validData);
       const formatted = a2uiType.format(attachment, formatContext) as AgentFormattedAttachment;
-      const representation = formatted.getRepresentation!();
+      const representation = await formatted.getRepresentation!();
 
       expect(representation.type).toBe('text');
       expect((representation as { value: string }).value).toContain('Test Surface');
