@@ -29,6 +29,7 @@
     "@kbn/core-http-common",
     "@kbn/axe-config",
     "@kbn/peggy",
-    "@kbn/test-docker-servers"
+    "@kbn/test-docker-servers",
+    "@kbn/test"
   ]
 }

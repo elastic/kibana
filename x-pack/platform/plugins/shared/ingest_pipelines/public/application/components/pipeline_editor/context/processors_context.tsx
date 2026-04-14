@@ -159,6 +159,13 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             'internal_networks_field',
             'value',
             'copy_from',
+            // input_output, target_field, and field_map are mutually exclusive inference processor
+            // options. We only mark them as known when editing an inference processor so that
+            // target_field (which is also used by other processor types) is not accidentally
+            // stripped from unknownOptions when editing those other processors.
+            ...(processorTypeAndOptions.type === 'inference'
+              ? ['input_output', 'target_field', 'field_map']
+              : []),
           ];
 
           // If the processor type is changed while editing, we need to ignore unkownOptions as they

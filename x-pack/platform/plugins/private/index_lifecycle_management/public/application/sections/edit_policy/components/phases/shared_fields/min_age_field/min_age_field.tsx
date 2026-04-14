@@ -34,6 +34,7 @@ interface Props {
 export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactElement => {
   const minAgeValuePath = `phases.${phase}.min_age`;
   const minAgeUnitPath = `_meta.${phase}.minAgeUnit`;
+  const errorId = `${phase}-minAgeError`;
 
   const { isUsingRollover } = useConfiguration();
   const globalFields = useGlobalFields();
@@ -71,7 +72,13 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
         return (
-          <EuiFormRow fullWidth isInvalid={isInvalid} error={errorMessage}>
+          <EuiFormRow
+            fullWidth
+            isInvalid={isInvalid}
+            error={
+              isInvalid && errorMessage ? <span id={errorId}>{errorMessage}</span> : errorMessage
+            }
+          >
             <EuiFlexGroup
               gutterSize={'s'}
               alignItems={'center'}
@@ -90,6 +97,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                       style={{ minWidth: 50 }}
                       compressed
                       aria-label={getTimingLabelForPhase(phase)}
+                      aria-describedby={isInvalid ? errorId : undefined}
                       isInvalid={isInvalid}
                       value={field.value as EuiFieldNumberProps['value']}
                       onChange={field.onChange}
@@ -111,6 +119,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                               type="info"
                               aria-label={i18nTexts.editPolicy.rolloverToolTipDescription}
                               content={i18nTexts.editPolicy.rolloverToolTipDescription}
+                              disableScreenReaderOutput
                             />
                           </>
                         );
@@ -138,6 +147,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             append={selectAppendValue}
                             data-test-subj={`${phase}-selectedMinimumAgeUnits`}
                             aria-label={getUnitsAriaLabelForPhase(phase)}
+                            aria-describedby={isInvalid ? errorId : undefined}
                             options={unitOptions}
                           />
                         );

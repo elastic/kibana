@@ -756,6 +756,7 @@ describe('Perform bulk action route', () => {
       await server.inject(request, requestContextMock.convertContext(context));
 
       expect(validateRuleResponseActionsMock).toHaveBeenCalledWith({
+        checkOsqueryResponseActionAuthz: expect.any(Function),
         endpointAuthz: expect.any(Object),
         endpointService: expect.any(Object),
         spaceId: 'default',

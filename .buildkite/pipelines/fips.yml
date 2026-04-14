@@ -65,6 +65,24 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
+    label: 'Scout Test Run Builder'
+    agents:
+      machineType: n2d-standard-8
+    key: build_scout_tests
+    timeout_in_minutes: 20
+    depends_on:
+      - build
+    env:
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SELECTIVE_TESTING_ENABLED: 'false'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - wait: ~
     continue_on_failure: true
 

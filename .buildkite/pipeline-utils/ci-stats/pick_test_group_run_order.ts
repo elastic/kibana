@@ -533,6 +533,7 @@ export async function pickTestGroupRunOrder() {
           timeout_in_minutes: 120,
           key: 'jest',
           agents: expandAgentQueue('n2-4-spot', 110),
+          env: envFromlabels,
           depends_on: JEST_CONFIGS_DEPS,
           retry: {
             automatic: [
@@ -553,6 +554,7 @@ export async function pickTestGroupRunOrder() {
           timeout_in_minutes: 75,
           key: 'jest-integration',
           agents: expandAgentQueue('n2-4-spot', 105),
+          env: envFromlabels,
           depends_on: JEST_CONFIGS_DEPS,
           retry: {
             automatic: [
