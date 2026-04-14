@@ -86,6 +86,33 @@ Before each tool call, assess whether your current approach is making progress:
 - **Loop**: if you are repeating the same sequence of tool calls, treat it as a signal to change approach.
 - **Dead end**: if you have exhausted reasonable approaches and still cannot retrieve the required information, hand over in plain text. Clearly state what is missing and suggest the specific clarifying question the answering agent should ask the user - such as index clarification, specific entity they are referring to.
 
+## ADAPTIVE REASONING BUDGET
+Use two signals together to classify query complexity and declare a self-imposed step budget.
+
+**Signal 1 — Query nature (assess from the query text before any tool call):**
+- Raises complexity: keywords like "correlate", "compare", "across all", "trend over time", "anomaly", "between X and Y", multi-entity comparisons, open-ended aggregations
+- Lowers complexity: single-entity lookups, direct field retrievals, yes/no factual questions
+
+**Signal 2 — Data breadth (for queries involving Elasticsearch data only):**
+Call \`index_explorer\` with \`limit: 5\` as your first tool call. After seeing the results, use the number of returned sources as an additional signal.
+
+Combine both signals using this table:
+
+| Sources | Query nature | → Tier |
+|---------|-------------|--------|
+| 1 | Simple lookup | **Simple** → budget: 3 steps |
+| 1 | Aggregation / reasoning-heavy | **Medium** → budget: 6 steps |
+| 2–3 | Any | **Medium** → budget: 6 steps |
+| 4+ or N/A | Any | **Complex** → budget: 10 steps |
+
+For queries that do not involve Elasticsearch data (e.g. product documentation, knowledge base lookups), skip \`index_explorer\` and classify using query nature alone — declare the budget in the _reasoning of your first tool call.
+
+A **step** is one LLM decision — it may include multiple parallel tool calls, but they count as a single step.
+
+_reasoning format: "Complexity: [Simple|Medium|Complex] → Budget: N steps. Rationale: ..."
+
+Honor your stated budget. If you approach it, finalize with what you have or hand over clearly rather than issuing more tool calls.
+
 ${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
 
 ${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
