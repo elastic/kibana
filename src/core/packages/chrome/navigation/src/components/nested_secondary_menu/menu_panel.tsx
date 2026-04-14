@@ -13,6 +13,7 @@ import type { FC, ReactNode } from 'react';
 import { EuiScreenReaderOnly, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SecondaryMenu } from '../secondary_menu';
+import { useSecondaryMenuSidePanel } from '../secondary_menu/side_panel_context';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { useNestedMenu } from './use_nested_menu';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
@@ -32,6 +33,7 @@ export interface PanelProps {
 
 export const Panel: FC<PanelProps> = ({ children, id, title }) => {
   const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
+  const inPhysicalSidePanel = useSecondaryMenuSidePanel();
   const nestedPanelTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-nestedPanel-${id}`;
   const panelNavigationInstructionsId = useGeneratedHtmlId({
     prefix: `panel-navigation-instructions-${id}`,
@@ -98,7 +100,7 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
         data-test-subj={nestedPanelTestSubj}
         ref={panelRef}
         title={title}
-        isPanel={false}
+        isPanel={inPhysicalSidePanel}
       >
         <EuiScreenReaderOnly>
           <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>

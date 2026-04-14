@@ -7,20 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
+import { createContext, useContext } from 'react';
 
-import type { EmotionFn } from '../types';
+const SecondaryMenuSidePanelContext = createContext(false);
 
-const root: EmotionFn = ({ euiTheme }) => css`
-  grid-area: navigation;
-  height: ${layoutVar('navigation.height')};
-  width: ${layoutVar('navigation.width')};
-  z-index: ${layoutLevels.navigation};
-  display: flex;
-  padding-inline-end: 0;
-`;
+export const SecondaryMenuSidePanelProvider = SecondaryMenuSidePanelContext.Provider;
 
-export const styles = {
-  root,
-};
+export function useSecondaryMenuSidePanel(): boolean {
+  return useContext(SecondaryMenuSidePanelContext);
+}

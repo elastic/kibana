@@ -13,9 +13,9 @@ import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { SIDE_PANEL_CONTENT_GAP } from '@kbn/core-chrome-layout-constants';
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
+import { useSecondaryMenuSidePanel } from './side_panel_context';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 import {
@@ -57,6 +57,7 @@ export const SecondaryMenuItemComponent = ({
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const inSidePanel = useSecondaryMenuSidePanel();
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
@@ -68,7 +69,10 @@ export const SecondaryMenuItemComponent = ({
     ...(isExternal && { target: '_blank' }),
   };
 
-  const labelColor = isHighlighted ? euiTheme.colors.textParagraph : euiTheme.colors.textSubdued;
+  const labelColor =
+    isHighlighted || !inSidePanel
+      ? euiTheme.colors.textParagraph
+      : euiTheme.colors.textSubdued;
 
   const buttonStyles = css`
     font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
@@ -99,7 +103,7 @@ export const SecondaryMenuItemComponent = ({
     }
 
     svg:not(.euiBetaBadge__icon) {
-      color: ${iconSide === 'right' ? euiTheme.colors.textDisabled : 'inherit'};
+      color: ${iconSide === 'right' && inSidePanel ? euiTheme.colors.textDisabled : 'inherit'};
     }
 
     --high-contrast-hover-indicator-color: ${labelColor};
@@ -136,10 +140,7 @@ export const SecondaryMenuItemComponent = ({
   `;
 
   const getMaxWidth = () => {
-    const isInSidePanel = testSubjPrefix?.includes('sidePanel');
     let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET;
-    // Secondary item label inside side panel (narrower)
-    if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
     // Secondary item label + badge
     if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
     // Secondary item label + right arrow (More menu)

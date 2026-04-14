@@ -12,10 +12,12 @@ import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react'
 import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { SECONDARY_MENU_POPOVER_TITLE_INLINE_PADDING_PX } from '../../constants';
 import type { BadgeType } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
+import { SecondaryMenuSidePanelProvider } from './side_panel_context';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 
 export interface SecondaryMenuProps {
@@ -33,7 +35,7 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, title, isNew = false }, ref) => {
+  ({ badgeType, children, title, isNew = false, isPanel = false }, ref) => {
     const { euiTheme } = useEuiTheme();
     const headerStyle = useMenuHeaderStyle();
 
@@ -50,32 +52,37 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
       }
     `;
 
+    const popoverTitleInline = `${SECONDARY_MENU_POPOVER_TITLE_INLINE_PADDING_PX}px`;
     const titleStyles = css`
       ${headerStyle}
       box-sizing: border-box;
       display: flex;
       align-items: flex-start;
-      background: ${euiTheme.colors.backgroundBasePlain};
+      background: transparent;
       border-radius: 0;
       text-align: start;
-      padding: ${euiTheme.size.base} 20px 0 20px;
+      padding: ${isPanel
+        ? `${euiTheme.size.base} 20px 0 20px`
+        : `${popoverTitleInline} ${popoverTitleInline} 0 ${popoverTitleInline}`};
       height: fit-content;
       min-height: 0;
     `;
 
     return (
-      <div ref={ref}>
-        <EuiTitle css={titleStyles} size="xs">
-          <div css={titleWithBadgeStyles}>
-            <h4>{title}</h4>
-            {/* Always show non-new badges, only show new ones if isNew check allows it */}
-            {badgeType && (badgeType !== 'new' || isNew) && (
-              <BetaBadge type={badgeType} alignment="text-bottom" />
-            )}
-          </div>
-        </EuiTitle>
-        {children}
-      </div>
+      <SecondaryMenuSidePanelProvider value={isPanel}>
+        <div ref={ref}>
+          <EuiTitle css={titleStyles} size="xs">
+            <div css={titleWithBadgeStyles}>
+              <h4>{title}</h4>
+              {/* Always show non-new badges, only show new ones if isNew check allows it */}
+              {badgeType && (badgeType !== 'new' || isNew) && (
+                <BetaBadge type={badgeType} alignment="text-bottom" />
+              )}
+            </div>
+          </EuiTitle>
+          {children}
+        </div>
+      </SecondaryMenuSidePanelProvider>
     );
   }
 );

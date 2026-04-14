@@ -10,7 +10,6 @@
 import React, { type ReactNode, useMemo } from 'react';
 import {
   EuiScreenReaderOnly,
-  euiShadow,
   EuiSplitPanel,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -18,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { layoutVar, SIDE_PANEL_CONTENT_GAP } from '@kbn/core-chrome-layout-constants';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 import type { MenuItem } from '../../../types';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
@@ -34,15 +33,13 @@ const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   position: relative;
   display: flex;
   flex-direction: column;
-  width: ${SIDE_PANEL_WIDTH - SIDE_PANEL_CONTENT_GAP}px;
+  width: ${SIDE_PANEL_WIDTH}px;
   margin-bottom: ${layoutVar('application.marginBottom', '0px')};
-  background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
-  border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+  background-color: transparent;
+  box-shadow: none;
 
   // use outline for consistency with the application layout style
   outline: ${getHighContrastBorder(euiThemeContext)};
-
-  ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
 `;
 
 export interface SidePanelIds {
@@ -82,8 +79,11 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
   const navigationPanelStyles = useMemo(
     () => css`
       ${scrollStyles}
+      box-sizing: border-box;
+      border-left: ${euiThemeContext.euiTheme.border.width.thin} solid
+        ${euiThemeContext.euiTheme.colors.borderBaseSubdued};
     `,
-    [scrollStyles]
+    [euiThemeContext, scrollStyles]
   );
 
   const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;

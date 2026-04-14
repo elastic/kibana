@@ -234,8 +234,8 @@ const AppMenuBarHeaderTabs = ({ tabs }: { tabs: AppMenuHeaderTab[] }) => (
 
 export interface AppMenuBarProps {
   /**
-   * Global overlay banners (e.g. telemetry notices), shown below the title row and above header tabs.
-   * In project chrome these replace the default `#globalBannerList` placement in the scrollable app body.
+   * Global overlay banners (e.g. telemetry notices), at the top of the project app header
+   * (`kibanaProjectHeader`), above the title and action menu row.
    */
   globalBanners?: ReactNode;
 }
@@ -384,6 +384,21 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
         data-test-subj="kibanaProjectHeader"
         css={styles.root}
       >
+        {globalBanners !== undefined ? (
+          <div
+            css={{
+              width: '100%',
+              flexShrink: 0,
+              minWidth: 0,
+              '& #globalBannerList .kbnGlobalBannerList': {
+                marginBlockEnd: euiTheme.size.m,
+              },
+            }}
+            data-test-subj="kibanaProjectHeaderGlobalBannersWrap"
+          >
+            {globalBanners}
+          </div>
+        ) : null}
         <div css={styles.topRow}>
           <div css={styles.leftCluster}>
             {showBackToParent ? (
@@ -491,22 +506,6 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
-        ) : null}
-        {globalBanners !== undefined ? (
-          <div
-            css={{
-              width: '100%',
-              flexShrink: 0,
-              minWidth: 0,
-              // Avoid a gap when no banners are registered (BannersList renders null).
-              '& #globalBannerList .kbnGlobalBannerList': {
-                marginTop: euiTheme.size.m,
-              },
-            }}
-            data-test-subj="kibanaProjectHeaderGlobalBannersWrap"
-          >
-            {globalBanners}
-          </div>
         ) : null}
         {headerTabs && headerTabs.length > 0 ? (
           <div css={styles.tabsRow}>

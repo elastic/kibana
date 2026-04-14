@@ -12,6 +12,9 @@ import type { ReactNode } from 'react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { SECONDARY_MENU_POPOVER_EDGE_PADDING_PX } from '../../constants';
+import { useSecondaryMenuSidePanel } from './side_panel_context';
+
 export interface SecondaryMenuSectionProps {
   children: ReactNode;
   label?: string;
@@ -23,19 +26,23 @@ export const SecondaryMenuSectionComponent = ({
 }: SecondaryMenuSectionProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme, highContrastMode } = euiThemeContext;
+  const inSidePanel = useSecondaryMenuSidePanel();
+  const sectionEdgeInset = inSidePanel
+    ? euiTheme.size.m
+    : `${SECONDARY_MENU_POPOVER_EDGE_PADDING_PX}px`;
 
   const sectionId = label ? label.replace(/\s+/g, '-').toLowerCase() : undefined;
 
   const secondaryMenuWrapperStyles = css`
-    padding: ${euiTheme.size.m};
+    padding: ${sectionEdgeInset};
     position: relative;
 
     &:not(:last-child) {
       ${highContrastMode
         ? `
         border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
-        margin-left: ${euiTheme.size.m};
-        margin-right: ${euiTheme.size.m};
+        margin-left: ${sectionEdgeInset};
+        margin-right: ${sectionEdgeInset};
         padding-left: 0;
         padding-right: 0;
       `
@@ -44,8 +51,8 @@ export const SecondaryMenuSectionComponent = ({
           content: '';
           position: absolute;
           bottom: 0;
-          left: ${euiTheme.size.m};
-          right: ${euiTheme.size.m};
+          left: ${sectionEdgeInset};
+          right: ${sectionEdgeInset};
           height: ${euiTheme.border.width.thin};
           background-color: ${euiTheme.colors.borderBaseSubdued};
         }
@@ -57,7 +64,8 @@ export const SecondaryMenuSectionComponent = ({
     font-size: ${euiTheme.size.m};
     color: ${euiTheme.colors.textHeading};
     font-weight: ${euiTheme.font.weight.bold};
-    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+    padding: ${euiTheme.size.xs}
+      ${inSidePanel ? euiTheme.size.s : `${SECONDARY_MENU_POPOVER_EDGE_PADDING_PX}px`};
     display: block;
   `;
 

@@ -22,7 +22,7 @@ import { css } from '@emotion/react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useSideNavWidth } from '@kbn/core-chrome-browser-hooks';
+import { useSideNavCollapsed, useSideNavWidth } from '@kbn/core-chrome-browser-hooks';
 import { getSideNavRailWidthPx } from '@kbn/core-chrome-navigation';
 import { Breadcrumbs } from './breadcrumbs';
 import { ProjectHeaderSpaceSwitcher } from './project_header_space_switcher';
@@ -51,6 +51,9 @@ const PROJECT_HEADER_COMPACT_CONTROL_PX = 32;
 
 /** Vertical rules between header zones (navcontrols + breadcrumb chevrons). */
 const PROJECT_HEADER_RULE_PX = 24;
+
+/** First project header row height; keep in sync with `headerHeight` in grid layout project config. */
+const PROJECT_HEADER_FIRST_BAR_HEIGHT_PX = 48;
 
 /** Placeholder until cross-project search exposes result counts to chrome. */
 const PROJECT_HEADER_SEARCH_MULTIPLE_CURRENT = 43;
@@ -122,15 +125,16 @@ const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => {
   leftNavcontrols: css`
     flex-grow: 0;
     flex-shrink: 0;
+    align-self: stretch;
     .navcontrols__separator {
       box-sizing: border-box;
       display: flex;
       align-items: center;
-      align-self: center;
+      align-self: stretch;
       /* Horizontal spacing is only via ::after margin-inline (${size.s}); avoids extra gap before CPS */
       margin-right: 0;
-      block-size: ${ruleHeightPx};
-      min-block-size: ${ruleHeightPx};
+      block-size: 100%;
+      min-block-size: ${PROJECT_HEADER_FIRST_BAR_HEIGHT_PX}px;
       &:after {
         background: ${colors.borderBaseSubdued};
         content: '';
@@ -143,16 +147,43 @@ const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => {
       }
     }
   `,
-  /** Separator after logo / menu rail: flush to rail start; gap before breadcrumbs / space switcher. */
+  /**
+   * Separator after logo / menu rail when the nav is expanded (full label rail): full first-bar height.
+   */
   leadingHeaderSeparatorAfterLogo: css`
     box-sizing: border-box;
     display: flex;
-    align-items: center;
-    align-self: center;
+    align-items: stretch;
+    align-self: stretch;
     margin-inline-start: 0;
     margin-inline-end: ${size.s};
-    block-size: ${ruleHeightPx};
-    min-block-size: ${ruleHeightPx};
+    block-size: 100%;
+    min-block-size: ${PROJECT_HEADER_FIRST_BAR_HEIGHT_PX}px;
+    &:after {
+      background: ${colors.borderBaseSubdued};
+      content: '';
+      flex-shrink: 0;
+      margin-block: 0;
+      margin-inline: 0;
+      align-self: stretch;
+      block-size: 100%;
+      min-block-size: ${PROJECT_HEADER_FIRST_BAR_HEIGHT_PX}px;
+      inline-size: 1px;
+      transform: none;
+    }
+  `,
+  /**
+   * Collapsed rail, hidden nav, or other non-expanded widths: 24px rule, vertically centered (matches navcontrols separator).
+   */
+  leadingHeaderSeparatorAfterLogoCompact: css`
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    margin-inline-start: 0;
+    margin-inline-end: ${size.s};
+    block-size: 100%;
+    min-block-size: ${PROJECT_HEADER_FIRST_BAR_HEIGHT_PX}px;
     &:after {
       background: ${colors.borderBaseSubdued};
       content: '';
@@ -303,6 +334,7 @@ export const ProjectHeader = React.memo(() => {
   const breadcrumbs = useProjectBreadcrumbs();
   const spaceSwitcherBreadcrumb = useSpaceSwitcherBreadcrumb();
   const sideNavWidth = useSideNavWidth();
+  const { isCollapsed: isSideNavCollapsed } = useSideNavCollapsed();
   const { euiTheme } = useEuiTheme();
 
   const searchMultipleButtonAriaLabel = useMemo(() => {
@@ -395,6 +427,11 @@ export const ProjectHeader = React.memo(() => {
 
   const logoNavRailWidthPx = useMemo(() => getSideNavRailWidthPx(sideNavWidth), [sideNavWidth]);
   const logoNavRailCss = useMemo(() => getLogoNavRailCss(logoNavRailWidthPx), [logoNavRailWidthPx]);
+  /** Full-height rule whenever the primary rail is expanded (incl. when the secondary side panel is open). */
+  const leadingSeparatorAfterLogoCss =
+    !isSideNavCollapsed && sideNavWidth > 0
+      ? headerCss.leadingHeaderSeparatorAfterLogo
+      : headerCss.leadingHeaderSeparatorAfterLogoCompact;
 
   const globalHeaderBreadcrumbs = useMemo(() => {
     const first = breadcrumbs[0];
@@ -434,7 +471,7 @@ export const ProjectHeader = React.memo(() => {
                 append={
                   <div
                     className="navcontrols__separator"
-                    css={headerCss.leadingHeaderSeparatorAfterLogo}
+                    css={leadingSeparatorAfterLogoCss}
                   />
                 }
               />
