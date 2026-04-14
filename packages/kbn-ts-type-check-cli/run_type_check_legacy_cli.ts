@@ -19,6 +19,7 @@ import {
   cleanTypeCheckCaches,
   createTypeCheckConfigs,
   detectLocalChanges,
+  runApiExtractorForProjects,
   TSC_LABEL,
 } from './execute_type_check_validation';
 import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
@@ -88,6 +89,11 @@ export const runLegacyTypeCheckCli = () => {
         });
       } catch {
         tscFailed = true;
+      }
+
+      // Run api-extractor for projects that opted into bundled .d.ts generation
+      if (!tscFailed) {
+        runApiExtractorForProjects(log, projects);
       }
 
       try {

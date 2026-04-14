@@ -10,6 +10,7 @@
 import Path from 'path';
 import Fsp from 'fs/promises';
 
+import { Extractor, ExtractorConfig } from '@microsoft/api-extractor';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import {
@@ -33,6 +34,56 @@ import { isCiEnvironment } from './src/archive/utils';
 import { formatPathForLog } from './src/normalize_project_path';
 
 export const TSC_LABEL = 'tsc';
+
+const API_EXTRACTOR_BASE_CONFIG = Path.resolve(__dirname, 'api_extractor.base.json');
+
+/**
+ * Runs api-extractor for a single project that has opted into bundled .d.ts generation.
+ * Returns true if extraction succeeded, false otherwise.
+ */
+const runApiExtractor = (log: ToolingLog, project: TsProject): boolean => {
+  const configObject = ExtractorConfig.loadFile(API_EXTRACTOR_BASE_CONFIG);
+
+  const extractorConfig = ExtractorConfig.prepare({
+    configObject,
+    configObjectFullPath: API_EXTRACTOR_BASE_CONFIG,
+    projectFolderLookupToken: project.directory,
+    packageJsonFullPath: Path.resolve(project.directory, 'package.json'),
+  });
+
+  const result = Extractor.invoke(extractorConfig, {
+    localBuild: true,
+    showVerboseMessages: false,
+  });
+
+  if (result.succeeded) {
+    log.info(`api-extractor succeeded for ${project.name}`);
+    return true;
+  }
+
+  log.warning(
+    `api-extractor completed with ${result.errorCount} error(s) and ${result.warningCount} warning(s) for ${project.name}`
+  );
+  return false;
+};
+
+/**
+ * Runs api-extractor for all projects in the list that have opted into bundled .d.ts generation.
+ * Failures are logged as warnings but do not throw.
+ */
+export const runApiExtractorForProjects = (log: ToolingLog, projects: TsProject[]): void => {
+  const bundledTypesProjects = projects.filter((p) => p.hasBundledTypes());
+  if (bundledTypesProjects.length === 0) {
+    return;
+  }
+
+  log.info(
+    `Running api-extractor for ${bundledTypesProjects.length} project(s) with bundledTypes enabled`
+  );
+  for (const project of bundledTypesProjects) {
+    runApiExtractor(log, project);
+  }
+};
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
@@ -143,6 +194,10 @@ export async function detectLocalChanges(): Promise<string[]> {
 export async function cleanTypeCheckCaches(log: ToolingLog, projects: TsProject[]) {
   await asyncForEachWithLimit(projects, 10, async (proj) => {
     await Fsp.rm(Path.resolve(proj.directory, 'target/types'), {
+      force: true,
+      recursive: true,
+    });
+    await Fsp.rm(Path.resolve(proj.directory, 'target/types-bundled'), {
       force: true,
       recursive: true,
     });
@@ -318,6 +373,9 @@ export const executeTypeCheckValidation = async ({
         wait: true,
       });
     }
+
+    // Run api-extractor for projects that opted into bundled .d.ts generation
+    runApiExtractorForProjects(log, selectedProjects);
   } catch (_error) {
     // Error details are surfaced via captured ToolingLog output from procRunner
     tscFailed = true;
