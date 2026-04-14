@@ -23,7 +23,7 @@ import {
 import { capitalize } from 'lodash';
 import { formatBytes } from '../../helpers/format_bytes';
 import { LifecyclePhaseButton } from './lifecycle_phase_button';
-import { isZeroAge } from '../../helpers/format_size_units';
+import { isZeroAge } from '../../../../../../util/format_size_units';
 
 interface BaseLifecyclePhaseProps {
   color?: string;
