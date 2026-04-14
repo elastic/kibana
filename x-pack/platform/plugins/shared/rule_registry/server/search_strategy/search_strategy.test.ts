@@ -292,6 +292,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     expect(data.search.searchAsInternalUser.search).toHaveBeenCalled();
     expect(searchStrategySearch).not.toHaveBeenCalled();
+    expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][1]).toEqual(
+      options
+    );
   });
 
   it('should use scoped user when requesting siem alerts as RBAC is not applied', async () => {
@@ -314,6 +317,36 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     expect(data.search.searchAsInternalUser.search as jest.Mock).not.toHaveBeenCalled();
     expect(searchStrategySearch).toHaveBeenCalled();
+    expect(searchStrategySearch.mock.calls[0][1]).toEqual(options);
+  });
+
+  it('forwards provided project routing for siem requests', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['siem.esqlRule'],
+    };
+    const options = {
+      projectRouting: '_alias:*',
+    };
+    const deps = {
+      request: {},
+    };
+
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
+    expect(searchStrategySearch).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        projectRouting: '_alias:*',
+      }),
+      deps
+    );
   });
 
   it('should support pagination', async () => {
