@@ -1,5 +1,5 @@
 {
-  "sha1": "7f04622ec128196563f3a0c6236029b1eec8bbea",
+  "sha1": "d53905e70e7bff0b47105c7b43a68ac5d15a8a23",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -1405,7 +1405,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/history_snapshot.spec.ts",
-        "line": 61,
+        "line": 65,
         "column": 10
       }
     },
@@ -1581,7 +1581,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 10
       }
     },
@@ -1597,7 +1597,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 115,
+        "line": 116,
         "column": 10
       }
     },
@@ -1613,7 +1613,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 160,
+        "line": 161,
         "column": 10
       }
     },
@@ -1629,7 +1629,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 196,
+        "line": 197,
         "column": 10
       }
     },
@@ -1645,7 +1645,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 232,
+        "line": 233,
         "column": 10
       }
     },
@@ -1661,7 +1661,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 433,
+        "line": 434,
         "column": 10
       }
     },
@@ -1677,7 +1677,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 565,
+        "line": 566,
         "column": 10
       }
     },
@@ -1694,7 +1694,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 644,
+        "line": 645,
         "column": 10
       }
     },
@@ -1710,7 +1710,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 680,
+        "line": 681,
         "column": 10
       }
     },
@@ -1726,7 +1726,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 717,
+        "line": 718,
         "column": 10
       }
     },
@@ -1742,7 +1742,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 805,
+        "line": 806,
         "column": 10
       }
     },
@@ -1758,7 +1758,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 870,
+        "line": 871,
         "column": 10
       }
     },
@@ -1774,7 +1774,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 992,
+        "line": 993,
         "column": 10
       }
     },
@@ -1790,7 +1790,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
-        "line": 1051,
+        "line": 1052,
+        "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-7007b59e6e39b69",
+      "title": "Entity Store Main logs extraction Should merge entity.relationships.* identifier from host.entity on source documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 1088,
         "column": 10
       }
     },
@@ -2559,6 +2575,86 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/start_stop.spec.ts",
         "line": 32,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d9de4b5bb446e-aa14b0695a8f884",
+      "title": "Entity Store uninstall stops the history snapshot task on uninstall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d9de4b5bb446e-9d0bf9163b755de",
+      "title": "Entity Store uninstall stops the status report task on uninstall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
+        "line": 80,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d9de4b5bb446e-f8f7e592f8450da",
+      "title": "Entity Store uninstall stops extract entity tasks on uninstall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
+        "line": 94,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d9de4b5bb446e-0d93e1080290d46",
+      "title": "Entity Store uninstall deletes the latest entities index on uninstall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
+        "line": 111,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d9de4b5bb446e-aa98491a6bca9fd",
+      "title": "Entity Store uninstall uninstall is a no-op when entity store is not installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
+        "line": 123,
         "column": 10
       }
     }

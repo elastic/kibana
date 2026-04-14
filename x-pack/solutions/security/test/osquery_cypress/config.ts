@@ -58,5 +58,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.task_manager.unsafe.exclude_task_types=["Fleet-Metrics-Task"]`,
       ],
     },
+    uiSettings: {
+      ...xpackFunctionalTestsConfig.get('uiSettings'),
+      globalDefaults: {
+        ...xpackFunctionalTestsConfig.get('uiSettings.globalDefaults'),
+        hideAnnouncements: true,
+      },
+    },
   };
 }
