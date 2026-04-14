@@ -81,7 +81,7 @@ export class CloudUrlsService {
       ? getFullCloudUrl(this.config.base_url, this.config.billing_url)
       : undefined;
 
-    const hasManageSecurity = Boolean(coreStart?.application.capabilities.users?.save);
+    const hasManageSecurity = Boolean(coreStart.application.capabilities.users?.save);
     const conditionalFullCloudUsersAndRolesUrl = hasManageSecurity
       ? getFullCloudUrl(this.config.base_url, this.config.users_and_roles_url)
       : undefined;
