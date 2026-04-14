@@ -11,9 +11,12 @@ import type {
   BaseConnectorContract,
   ConnectorContractUnion,
   ConnectorTypeInfo,
+  StepDeprecationInfo,
   StepPropertyHandler,
 } from '@kbn/workflows';
 import {
+  builtInStepDefinitions,
+  DEPRECATED_STEP_METADATA,
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
@@ -95,6 +98,7 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
         paramsSchema: stepDefinition.inputSchema,
         outputSchema: stepDefinition.outputSchema,
         configSchema: stepDefinition.configSchema,
+        deprecation: stepDefinition.deprecation,
         summary: null,
         description: null,
       };
@@ -338,6 +342,44 @@ export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeIn
 
 export function getAllConnectors(): ConnectorContractUnion[] {
   return getAllConnectorsInternal();
+}
+
+export function getDeprecatedStepMetadataMap(): Readonly<Record<string, StepDeprecationInfo>> {
+  const cached = stepSchemas.getDeprecatedStepMetadataCache();
+  if (cached !== null) {
+    return cached;
+  }
+
+  const deprecatedStepMetadata: Record<string, StepDeprecationInfo> = {
+    ...DEPRECATED_STEP_METADATA,
+  };
+
+  for (const stepDefinition of builtInStepDefinitions) {
+    if (stepDefinition.deprecation) {
+      deprecatedStepMetadata[stepDefinition.id] = stepDefinition.deprecation;
+    }
+  }
+
+  for (const connector of getAllConnectorsInternal()) {
+    if (connector.deprecation) {
+      deprecatedStepMetadata[connector.type] = connector.deprecation;
+    }
+  }
+
+  const frozenDeprecatedStepMetadata = Object.freeze(deprecatedStepMetadata) as Readonly<
+    Record<string, StepDeprecationInfo>
+  >;
+
+  stepSchemas.setDeprecatedStepMetadataCache(frozenDeprecatedStepMetadata);
+  return frozenDeprecatedStepMetadata;
+}
+
+export function getDeprecatedStepMetadata(stepType: string): StepDeprecationInfo | undefined {
+  return getDeprecatedStepMetadataMap()[stepType];
+}
+
+export function isDeprecatedStepType(stepType: string): boolean {
+  return getDeprecatedStepMetadata(stepType) !== undefined;
 }
 
 export function getAllConnectorsWithDynamic(

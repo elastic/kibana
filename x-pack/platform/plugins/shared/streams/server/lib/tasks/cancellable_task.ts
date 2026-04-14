@@ -39,6 +39,7 @@ export function cancellableTask(
           );
 
           if (task.status === TaskStatus.BeingCanceled) {
+            runContext.abortController.abort();
             resolve('canceled' as const);
           }
         }, 5000);
@@ -55,14 +56,17 @@ export function cancellableTask(
 
         /**
          * Here the task can be in BeingCanceled state in two scenarios:
-         * 1. cancellationPromise was resolved
+         * 1. cancellationPromise was resolved — abort was already called in the
+         *    polling loop before resolving the promise.
          * 2. run() exited early in response to cancellation. This might
-         * happen for multi-step tasks, like onboarding, in order to prevent
-         * scheduling the next sub-task while the parent task was already
-         * canceled.
+         *    happen for multi-step tasks, like onboarding, in order to prevent
+         *    scheduling the next sub-task while the parent task was already
+         *    canceled. In this case, the signal may not have been aborted yet.
          */
         if (task.status === TaskStatus.BeingCanceled) {
-          runContext.abortController.abort();
+          if (!runContext.abortController.signal.aborted) {
+            runContext.abortController.abort();
+          }
           await taskClient.markCanceled(task);
         }
       });
