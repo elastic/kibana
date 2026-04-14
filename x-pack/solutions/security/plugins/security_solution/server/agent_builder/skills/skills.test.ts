@@ -9,8 +9,9 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
+import { threatCoverageInitializationSkill } from './threat_coverage_initialization';
 
-const ALL_SKILLS = [threatHuntingSkill, alertAnalysisSkill];
+const ALL_SKILLS = [threatHuntingSkill, alertAnalysisSkill, threatCoverageInitializationSkill];
 
 describe('Security Skills', () => {
   describe('threat-hunting skill', () => {
@@ -95,6 +96,45 @@ describe('Security Skills', () => {
 
     it('content references entity-analytics skill for deeper profiling', () => {
       expect(alertAnalysisSkill.content).toContain('entity-analytics');
+    });
+  });
+
+  describe('threat-coverage-initialization skill', () => {
+    it('validates successfully via validateSkillDefinition', async () => {
+      await expect(
+        validateSkillDefinition(threatCoverageInitializationSkill)
+      ).resolves.toBeDefined();
+    });
+
+    it('has non-empty content', () => {
+      expect(threatCoverageInitializationSkill.content.length).toBeGreaterThan(100);
+    });
+
+    it('has description under 1024 characters', () => {
+      expect(threatCoverageInitializationSkill.description.length).toBeLessThanOrEqual(1024);
+    });
+
+    it('returns 4 registry tools', () => {
+      const tools = threatCoverageInitializationSkill.getRegistryTools!();
+      expect(tools).toHaveLength(4);
+    });
+
+    it('includes platform.core.list_indices for data discovery', () => {
+      const tools = threatCoverageInitializationSkill.getRegistryTools!();
+      expect(tools).toContain(platformCoreTools.listIndices);
+    });
+
+    it('includes fleet.list_installed_integrations for integration assessment', () => {
+      const tools = threatCoverageInitializationSkill.getRegistryTools!();
+      expect(tools).toContain('fleet.list_installed_integrations');
+    });
+
+    it('content mentions MITRE ATT&CK mapping', () => {
+      expect(threatCoverageInitializationSkill.content).toContain('MITRE ATT&CK');
+    });
+
+    it('has no inline tools', () => {
+      expect(threatCoverageInitializationSkill.getInlineTools).toBeUndefined();
     });
   });
 

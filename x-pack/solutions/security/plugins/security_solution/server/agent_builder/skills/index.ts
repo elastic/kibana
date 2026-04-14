@@ -6,6 +6,7 @@
  */
 
 export { alertAnalysisSkill } from './alert_analysis';
+export { threatCoverageInitializationSkill } from './threat_coverage_initialization';
 export { threatHuntingSkill } from './threat_hunting';
 export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 export { getDetectionRuleEditSkill } from './detection_rule_edit';
