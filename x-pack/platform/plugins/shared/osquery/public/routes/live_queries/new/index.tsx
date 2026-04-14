@@ -103,6 +103,7 @@ const NewLiveQueryPageComponent = () => {
         {...initialFormData}
         agentPolicyIds={agentPolicyIds}
         onSuccess={isHistoryEnabled ? handleSuccess : undefined}
+        redirectsOnSuccess={isHistoryEnabled}
       />
     </WithHeaderLayout>
   );

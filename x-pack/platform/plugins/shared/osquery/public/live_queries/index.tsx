@@ -21,6 +21,7 @@ interface LiveQueryProps {
   alertIds?: string[];
   agentPolicyIds?: string[];
   onSuccess?: (actionId: string) => void;
+  redirectsOnSuccess?: boolean;
   query?: string;
   timeout?: number;
   savedQueryId?: string;
@@ -42,6 +43,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   alertIds,
   agentPolicyIds,
   onSuccess,
+  redirectsOnSuccess,
   query,
   savedQueryId,
   ecs_mapping,
@@ -103,6 +105,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       ecsMappingField={ecsMappingField}
       defaultValue={defaultValue}
       onSuccess={onSuccess}
+      redirectsOnSuccess={redirectsOnSuccess}
       formType={formType}
       enabled={enabled}
       hideAgentsField={hideAgentsField}
