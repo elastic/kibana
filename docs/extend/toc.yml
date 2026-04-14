@@ -1,4 +1,99 @@
 toc:
+  - file: welcome.md
+  - folder: getting-started
+    children:
+      - file: welcome.md
+      - file: set-up-a-development-environment.md
+      - file: hello-world.md
+      - file: add-data.md
+      - file: troubleshooting.md
+  - folder: contributing
+    children:
+      - file: developer-principles.md
+      - file: repository-structure.md
+      - file: standards-and-guidelines.md
+      - file: best-practices.md
+      - file: documentation.md
+      - file: guidelines-for-http-api-design-in-kibana.md
+      - file: guidelines-for-terraform-friendly-http-apis.md
+      - file: how-we-use-github.md
+      - file: managing-third-party-dependencies.md
+  - folder: key-concepts
+    children:
+      - file: plugins-packages-and-the-platform.md
+      - file: anatomy-of-a-plugin.md
+      - folder: plugin-performance-and-optimization
+        children:
+          - file: plugin-performance-and-optimization.md
+          - file: client-performance.md
+          - file: server-performance.md
+          - folder: case-studies
+            children:
+              - file: performance-case-studies.md
+              - file: case-study-async-too-early.md
+              - file: case-study-top-level-imports.md
+              - file: case-study-uncommon-code-in-common.md
+      - file: building-blocks.md
+      - file: kibana-api-authorization.md
+      - file: security-kibana-system-user.md
+      - file: creating-feature-privileges.md
+      - file: saved-objects.md
+      - file: encrypted-saved-objects.md
+      - file: persistable-state.md
+      - file: audit-logging.md
+      - file: data-views.md
+      - file: routing-navigation-and-url.md
+      - file: embeddables.md
+  - folder: tutorials
+    children:
+      - file: adding-performance-metrics.md
+      - file: wsl-on-windows-development.md
+      - file: testing-kibana-plugins.md
+      - file: register-a-new-saved-object-type.md
+      - file: saved-object-search-method.md
+      - file: access-the-elasticsearch-client-in-a-plugin.md
+      - file: versioning-http-apis.md
+      - file: versioning-interfaces.md
+      - file: generating-oas-for-http-apis.md
+      - file: submitting-a-kibana-pull-request.md
+      - file: kibana-expressions-service.md
+      - file: kibana-data-search-services.md
+      - folder: screenshotting
+        children:
+          - file: kibana-screenshotting-service.md
+          - file: updating-puppeteer-and-chromium.md
+      - file: data-views-api.md
+      - file: debugging-in-development.md
+      - file: debugging-fips-test-failures.md
+      - file: building-a-kibana-distributable.md
+      - file: ci.md
+      - file: registering-and-accessing-an-endpoint.md
+      - file: how-to-register-a-new-advanced-setting.md
+      - file: local-cross-cluster-search-setup.md
+  - folder: lens
+    children:
+      - file: lens-documentation.md
+      - folder: lens-config-api
+        children:
+          - file: lens-config-builder-api-documentation.md
+          - file: lens-config-builder-api-documentation.md
+          - file: lens-config-builder-api-examples.md
+          - file: lens-config-builder-api-metric.md
+          - file: lens-config-builder-api-gauge.md
+          - file: lens-config-builder-api-pie.md
+          - file: lens-config-builder-api-mosaic.md
+          - file: lens-config-builder-api-treemap.md
+          - file: lens-config-builder-api-tag-cloud.md
+          - file: lens-config-builder-api-region-map.md
+          - file: lens-config-builder-api-table.md
+          - file: lens-config-builder-api-heatmap.md
+          - file: lens-config-builder-api-xy-chart.md
+  - folder: api-documentation
+    children:
+      - file: welcome.md
+
+
+toc:
   - file: index.md
   - file: development-getting-started.md
     children:
