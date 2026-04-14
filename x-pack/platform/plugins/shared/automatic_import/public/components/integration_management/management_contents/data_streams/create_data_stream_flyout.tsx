@@ -224,10 +224,7 @@ interface AnalyzeFormValidityParams {
 }
 
 const isValidTitle = (title: string): boolean =>
-  !!title &&
-  meetsMinLength(title) &&
-  isValidNameFormat(title) &&
-  startsWithLetter(title);
+  !!title && meetsMinLength(title) && isValidNameFormat(title) && startsWithLetter(title);
 
 const checkIntegrationFieldsValid = (params: AnalyzeFormValidityParams): boolean =>
   isValidTitle(params.integrationTitle) &&
