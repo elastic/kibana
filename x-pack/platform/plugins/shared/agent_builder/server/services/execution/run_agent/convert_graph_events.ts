@@ -105,10 +105,12 @@ export const convertGraphEvents = ({
           const nextAction = addedActions[addedActions.length - 1];
 
           if (isToolCallAction(nextAction)) {
-            const { tool_calls: toolCalls, message: messageText = '' } = nextAction;
+            const {
+              tool_calls: toolCalls,
+              tool_call_group_id: toolCallGroupId,
+              message: messageText = '',
+            } = nextAction;
             if (toolCalls.length > 0) {
-              const toolCallGroupId = uuidv4();
-
               if (messageText.trim().length > 0) {
                 events.push(createReasoningEvent(messageText, { toolCallGroupId }));
               }

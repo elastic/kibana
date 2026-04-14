@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
@@ -34,6 +35,7 @@ export interface AgentErrorAction {
 
 export interface ToolCallAction {
   type: AgentActionType.ToolCall;
+  tool_call_group_id: string;
   tool_calls: ToolCallWithReasoning[];
   message?: string;
 }
@@ -132,6 +134,7 @@ export function toolCallAction(
   return {
     type: AgentActionType.ToolCall,
     tool_calls: toolCalls,
+    tool_call_group_id: uuidv4(),
     message,
   };
 }
