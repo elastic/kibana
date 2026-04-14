@@ -1062,7 +1062,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
               otel_exporter_config_yaml: otelExporterConfigInput.value || null,
-              otel_disable_beatsauth: otelDisableBeatsauthInput.value || null,
+              otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               write_to_logs_streams: writeToStreams.value,
