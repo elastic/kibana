@@ -16,6 +16,7 @@ import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { getSyntheticsDynamicSettings } from './saved_objects/synthetics_settings';
 import { getSyntheticsIndices } from './services/get_synthetics_indices';
+import { isCCSEnabled } from './lib/remote_result_utils';
 import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
@@ -50,7 +51,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
       let heartbeatIndices = SYNTHETICS_INDEX_PATTERN;
       let remoteKibanaUrls: Record<string, string> = {};
-      if (!server.isElasticsearchServerless && server.config.experimental?.ccs?.enabled) {
+      if (isCCSEnabled(server)) {
         try {
           const dynamicSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
           const ccsSettings = {

@@ -7,6 +7,11 @@
 
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { RemoteMonitorInfo } from '../../common/runtime_types';
+import type { SyntheticsServerSetup } from '../types';
+
+export const isCCSEnabled = (
+  server: Pick<SyntheticsServerSetup, 'isElasticsearchServerless' | 'config'>
+) => !server.isElasticsearchServerless && Boolean(server.config.experimental?.ccs?.enabled);
 
 /**
  * Extracts the remote cluster name from an ES `_index` field.

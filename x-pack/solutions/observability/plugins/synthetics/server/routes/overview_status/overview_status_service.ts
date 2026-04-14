@@ -27,7 +27,7 @@ import {
   getRangeFilter,
   getTimespanFilter,
 } from '../../../common/constants/client_defaults';
-import { getRemoteMonitorInfo } from '../../lib/remote_result_utils';
+import { getRemoteMonitorInfo, isCCSEnabled } from '../../lib/remote_result_utils';
 
 interface RemoteMonitorSource {
   monitor?: {
@@ -106,8 +106,7 @@ export class OverviewStatusService {
       showFromAllSpaces,
     } = params;
     const { locationIds } = this.filterData;
-    const isCCSEnabled =
-      !server.isElasticsearchServerless && server.config.experimental?.ccs?.enabled;
+    const ccsEnabled = isCCSEnabled(server);
     const getTermFilter = (field: string, value: string | string[] | undefined) => {
       if (!value || isEmpty(value)) {
         return [];
@@ -130,7 +129,7 @@ export class OverviewStatusService {
       ];
     };
     const spaceFilter =
-      showFromAllSpaces || isCCSEnabled
+      showFromAllSpaces || ccsEnabled
         ? []
         : [{ terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } }];
     const filters: QueryDslQueryContainer[] = [
@@ -330,11 +329,7 @@ export class OverviewStatusService {
     // When CCS is enabled, identify monitor IDs from ES data that don't match any local
     // saved object — these are remote monitors from federated clusters.
     // Skip entirely when CCS is disabled to avoid unnecessary iteration over statusData.
-    const { server } = this.routeContext;
-    const isCCSEnabled =
-      !server.isElasticsearchServerless && server.config.experimental?.ccs?.enabled;
-
-    if (isCCSEnabled) {
+    if (isCCSEnabled(this.routeContext.server)) {
       const localMonitorIds = new Set<string>();
       monitors.forEach((monitor) => {
         localMonitorIds.add(monitor.attributes[ConfigKey.MONITOR_QUERY_ID]);
