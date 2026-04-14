@@ -28,7 +28,8 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
     summary: 'Search visualizations',
-    description: 'Returns a paginated list of Lens visualizations matching the optional `query` text.',
+    description:
+      'Returns a paginated list of Lens visualizations matching the optional `query` text.',
     options: {
       tags: [LENS_API_TAG],
       availability: {

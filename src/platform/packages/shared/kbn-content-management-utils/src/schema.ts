@@ -101,13 +101,17 @@ export const searchOptionsSchemas = {
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   fields: schema.maybe(
     schema.arrayOf(schema.string(), {
-      meta: { description: 'Fields to include in each result. When omitted, all fields are returned.' },
+      meta: {
+        description: 'Fields to include in each result. When omitted, all fields are returned.',
+      },
     })
   ),
   search: schema.maybe(schema.string()),
   searchFields: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-      meta: { description: 'Fields to search within. Has no effect when no search query is specified.' },
+      meta: {
+        description: 'Fields to search within. Has no effect when no search query is specified.',
+      },
     })
   ),
   rootSearchFields: schema.maybe(schema.arrayOf(schema.string())),
