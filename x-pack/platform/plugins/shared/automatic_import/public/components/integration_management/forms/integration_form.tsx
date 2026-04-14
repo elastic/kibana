@@ -9,6 +9,7 @@ import {
   useForm,
   useFormContext,
   useFormData,
+  useFormIsModified,
   Form,
   type FormConfig,
   type FormHook,
@@ -17,7 +18,11 @@ import { createFormSchema, REQUIRED_FIELDS } from './integration_form_validation
 import type { IntegrationFormData } from './types';
 import { useKibana, getInstalledPackages, getAllIntegrations } from '../../../common';
 import * as i18n from './translations';
-import { DEFAULT_DATA_STREAM_VALUES, DEFAULT_INTEGRATION_VALUES } from './constants';
+import {
+  DEFAULT_DATA_STREAM_VALUES,
+  DEFAULT_INTEGRATION_VALUES,
+  INTEGRATION_DETAILS_UNTRACKED_FIELDS,
+} from './constants';
 import { normalizeTitleName } from '../../../common/lib/helper_functions';
 
 export interface IntegrationFormProviderProps {
@@ -132,6 +137,7 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
 export const useIntegrationForm = () => {
   const form = useFormContext<IntegrationFormData>();
   const [formData] = useFormData<IntegrationFormData>();
+  const isFormModified = useFormIsModified({ discard: INTEGRATION_DETAILS_UNTRACKED_FIELDS });
 
   // Check if all required fields for the current context are filled
   const isValid = useMemo(() => {
@@ -161,6 +167,7 @@ export const useIntegrationForm = () => {
     form: form as FormHook<IntegrationFormData>,
     formData,
     isValid,
+    isFormModified,
     submit: () => form.submit(),
     reset: () => form.reset(),
     validate: () => form.validate(),
