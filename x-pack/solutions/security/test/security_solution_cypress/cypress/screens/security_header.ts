@@ -10,7 +10,6 @@ import { GLOBAL_KQL_WRAPPER } from './search_bar';
 
 // main links
 export const DASHBOARDS = '[data-test-subj="solutionSideNavItemLink-dashboards"]';
-export const DASHBOARDS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-dashboards"]';
 
 export const ALERTS = '[data-test-subj="solutionSideNavItemLink-alerts"]';
 
@@ -33,17 +32,6 @@ export const MIGRATIONS_LANDING = '[data-test-subj="solutionSideNavItemLink-siem
 export const MIGRATIONS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-siem_migrations"]';
 
 // nested links
-export const OVERVIEW = '[data-test-subj="solutionSideNavPanelLink-overview"]';
-
-export const DETECTION_RESPONSE = '[data-test-subj="solutionSideNavPanelLink-detection_response"]';
-
-export const ENTITY_ANALYTICS = '[data-test-subj="solutionSideNavPanelLink-entity_analytics"]';
-
-export const KUBERNETES = '[data-test-subj="solutionSideNavPanelLink-kubernetes"]';
-
-export const CSP_DASHBOARD =
-  '[data-test-subj="solutionSideNavPanelLink-cloud_security_posture-dashboard"]';
-
 export const HOSTS = '[data-test-subj="solutionSideNavPanelLink-hosts"]';
 
 export const ENDPOINTS = '[data-test-subj="solutionSideNavPanelLink-endpoints"]';
@@ -107,14 +95,6 @@ export const SOLUTION_SIDE_NAV_PANEL = getDataTestSubjectSelector('solutionSideN
 export const openNavigationPanelFor = (page: string) => {
   let panel;
   switch (page) {
-    case OVERVIEW:
-    case DETECTION_RESPONSE:
-    case KUBERNETES:
-    case ENTITY_ANALYTICS:
-    case CSP_DASHBOARD: {
-      panel = DASHBOARDS_PANEL_BTN;
-      break;
-    }
     case HOSTS:
     case NETWORK:
     case USERS: {
