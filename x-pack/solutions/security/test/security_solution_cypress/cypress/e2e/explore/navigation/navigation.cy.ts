@@ -24,6 +24,13 @@ import {
   SETTINGS,
   SOLUTION_SIDE_NAV_PANEL,
   RULES_NAV_LINK,
+  LAUNCHPAD_PANEL_BTN,
+  GET_STARTED_TEST_SUBJ,
+  SIEM_READINESS_TEST_SUBJ,
+  VALUE_REPORTS_TEST_SUBJ,
+  MANAGE_AUTOMATIC_MIGRATIONS_TEST_SUBJ,
+  LAUNCHPAD_TRANSLATED_RULES_PAGE,
+  TRANSLATED_DASHBOARDS_PAGE,
 } from '../../../screens/security_header';
 import * as ServerlessHeaders from '../../../screens/serverless_security_header';
 
@@ -65,6 +72,12 @@ import {
   CLOUD_NATIVE_VULN_MGMT_URL,
   DATA_QUALITY_URL,
   KUBERNETES_URL,
+  GET_STARTED_URL,
+  SIEM_READINESS_URL,
+  VALUE_REPORTS_URL,
+  MANAGE_AUTOMATIC_MIGRATIONS_URL,
+  TRANSLATED_RULES_PAGE_URL,
+  TRANSLATED_DASHBOARDS_PAGE_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
@@ -193,6 +206,59 @@ describe('top-level navigation common to all pages in the Security app', { tags:
   it('navigates to the Cases page', () => {
     navigateFromHeaderTo(CASES);
     cy.url().should('include', CASES_URL);
+  });
+
+  it('opens Launchpad sub nav panel', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Get started');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'SIEM Readiness');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Value report');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Manage Automatic Migrations');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Translated rules');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Translated dashboards');
+  });
+
+  it('navigates to the Get Started page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(GET_STARTED_TEST_SUBJ).click();
+    cy.url().should('include', GET_STARTED_URL);
+  });
+
+  it('navigates to SIEM Readiness page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(SIEM_READINESS_TEST_SUBJ).click();
+    cy.url().should('include', SIEM_READINESS_URL);
+  });
+
+  it('navigates to the Value Report page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(VALUE_REPORTS_TEST_SUBJ).click();
+    cy.url().should('include', VALUE_REPORTS_URL);
+  });
+
+  it('navigates to the Manage Automatic Migrations page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(MANAGE_AUTOMATIC_MIGRATIONS_TEST_SUBJ).click();
+    cy.url().should('include', MANAGE_AUTOMATIC_MIGRATIONS_URL);
+  });
+
+  it('navigates to the Translated Rules page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(LAUNCHPAD_TRANSLATED_RULES_PAGE).click();
+    cy.url().should('include', TRANSLATED_RULES_PAGE_URL);
+  });
+
+  it('navigates to Translated Dashboards page from Launchpad', () => {
+    navigateFromHeaderTo(LAUNCHPAD_PANEL_BTN);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(TRANSLATED_DASHBOARDS_PAGE).click();
+    cy.url().should('include', TRANSLATED_DASHBOARDS_PAGE_URL);
   });
 
   it('opens the Manage sub nav panel', () => {

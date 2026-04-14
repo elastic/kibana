@@ -9,7 +9,7 @@ export const KIBANA_HOME = '/app/home#/';
 export const LOGOUT_URL = '/logout';
 
 // Common
-export const GET_STARTED_URL = '/app/security/get_started';
+
 export const MANAGE_URL = '/app/security/manage';
 export const DASHBOARDS_URL = '/app/security/dashboards';
 
@@ -121,3 +121,11 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
+
+// Launchpad
+export const GET_STARTED_URL = '/app/security/get_started';
+export const SIEM_READINESS_URL = 'app/security/siem_readiness/visibility/coverage';
+export const VALUE_REPORTS_URL = 'app/security/reports/ai_value';
+export const MANAGE_AUTOMATIC_MIGRATIONS_URL = 'app/security/siem_migrations/manage';
+export const TRANSLATED_RULES_PAGE_URL = 'app/security/siem_migrations/rules';
+export const TRANSLATED_DASHBOARDS_PAGE_URL = 'app/security/siem_migrations/dashboards';

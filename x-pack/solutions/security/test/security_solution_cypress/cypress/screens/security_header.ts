@@ -80,6 +80,19 @@ export const LAUNCHPAD_PANEL_BTN = getDataTestSubjectSelector(
   'solutionSideNavItemLink-securityGroup:launchpad'
 );
 
+export const GET_STARTED_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-get_started'
+);
+export const SIEM_READINESS_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_readiness'
+);
+export const VALUE_REPORTS_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-ai_value'
+);
+export const MANAGE_AUTOMATIC_MIGRATIONS_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_migrations-manage'
+);
+
 export const LAUNCHPAD_TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
   'solutionSideNavPanelLink-siem_migrations-rules'
 );
