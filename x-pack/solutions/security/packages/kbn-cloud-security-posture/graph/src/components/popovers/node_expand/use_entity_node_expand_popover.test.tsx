@@ -27,6 +27,7 @@ import {
   emitEntityRelationshipToggle,
   emitPinnedEuidToggle,
 } from '../../filters/filter_store';
+import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../common/constants';
 
 // Mock filter_store module
 jest.mock('../../filters/filter_store', () => {
@@ -78,7 +79,8 @@ jest.mock('./use_node_expand_popover', () => ({
 
 const createMockNode = (
   docMode: 'single-entity' | 'grouped-entities',
-  hasEntityEnrichment: boolean = true
+  hasEntityEnrichment: boolean = true,
+  engineType?: 'user' | 'host' | 'service' | 'generic'
 ): NodeProps => {
   const baseNode = {
     id: 'test-node-id',
@@ -107,6 +109,7 @@ const createMockNode = (
       type: 'entity' as const,
       entity: {
         availableInEntityStore: hasEntityEnrichment,
+        engine_type: engineType,
         sourceFields: { 'user.id': 'test-user', 'user.email': 'test@example.com' },
       },
     };
@@ -133,6 +136,7 @@ const createMockNode = (
         type: 'entity' as const,
         entity: {
           availableInEntityStore: hasEntityEnrichment,
+          engine_type: engineType,
           sourceFields: { 'host.id': id },
         },
       };
@@ -505,6 +509,128 @@ describe('useEntityNodeExpandPopover', () => {
 
       // Should NOT unpin because other role filters are still active
       expect(mockEmitPinnedEuidToggle).not.toHaveBeenCalledWith(scopeId, node.id, 'hide');
+    });
+
+    it('should emit RELATED_USER with user.* source field values when engine_type is user', () => {
+      const node = createMockNode('single-entity', true, 'user');
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relatedItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
+      );
+
+      if (relatedItem?.type === 'item' && relatedItem.onClick) {
+        relatedItem.onClick();
+      }
+
+      // Should emit for each user.* source field value
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_USER, 'test-user', 'show');
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
+        scopeId,
+        RELATED_USER,
+        'test@example.com',
+        'show'
+      );
+      expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
+        scopeId,
+        RELATED_ENTITY,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('should check RELATED_USER with user.* source field values for isRelatedEventsActive when engine_type is user', () => {
+      mockIsFilterActiveForScope.mockImplementation(
+        (_, field, value) => field === RELATED_USER && value === 'test-user'
+      );
+
+      const node = createMockNode('single-entity', true, 'user');
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relatedItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
+      );
+
+      // Filter is active for user, so the label should say "Hide"
+      if (relatedItem?.type === 'item') {
+        expect(relatedItem.label).toContain('Hide');
+      }
+    });
+
+    it('should emit RELATED_HOST with host.* source field values when engine_type is host', () => {
+      // Use grouped-entities mock which has host.* source fields
+      const node = createMockNode('grouped-entities', true, 'host');
+      // Override documentsData engine_type since grouped creates host.* fields
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      // Single-entity mode is needed for related events to show; create a custom node
+      const customNode: NodeProps = {
+        ...node,
+        data: {
+          ...node.data,
+          documentsData: [
+            {
+              id: 'entity-123',
+              type: 'entity' as const,
+              entity: {
+                engine_type: 'host',
+                availableInEntityStore: true,
+                sourceFields: { 'host.name': 'server-1', 'host.id': 'host-abc' },
+              },
+            },
+          ],
+          count: undefined,
+        },
+      } as unknown as NodeProps;
+
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+      const singleHostItems = capturedItemsFn!(customNode);
+
+      const relatedItem = singleHostItems.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
+      );
+
+      if (relatedItem?.type === 'item' && relatedItem.onClick) {
+        relatedItem.onClick();
+      }
+
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_HOST, 'server-1', 'show');
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_HOST, 'host-abc', 'show');
+      expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
+        scopeId,
+        RELATED_ENTITY,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('should fall back to RELATED_ENTITY with node.id when engine_type is not user or host', () => {
+      const node = createMockNode('single-entity', true);
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relatedItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
+      );
+
+      if (relatedItem?.type === 'item' && relatedItem.onClick) {
+        relatedItem.onClick();
+      }
+
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_ENTITY, node.id, 'show');
     });
 
     it('should call onOpenEventPreview callback when entity details item is clicked', () => {

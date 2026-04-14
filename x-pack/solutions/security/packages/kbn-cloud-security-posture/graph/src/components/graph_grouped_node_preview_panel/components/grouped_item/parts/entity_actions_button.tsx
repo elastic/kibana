@@ -26,7 +26,7 @@ import {
   isEntityRelationshipExpandedForScope,
   emitPinnedEuidToggle,
 } from '../../../../filters/filter_store';
-import { RELATED_ENTITY } from '../../../../../common/constants';
+import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../../../common/constants';
 import { useOpenEntityPreviewPanel } from '../../../hooks/use_open_entity_preview_panel';
 
 const actionsButtonAriaLabel = i18n.translate(
@@ -57,6 +57,25 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
 
   const openEntityPreviewPanel = useOpenEntityPreviewPanel();
   const sourceFields = (item.entity.sourceFields ?? {}) as Record<string, string | string[]>;
+  const engineType = item.entity.engine_type;
+
+  const getRelatedFieldAndValues = ():
+    | { field: typeof RELATED_USER | typeof RELATED_HOST | typeof RELATED_ENTITY; values: string[] }
+    | undefined => {
+    if (engineType === 'user') {
+      const values = Object.entries(sourceFields)
+        .filter(([field]) => field.startsWith('user.'))
+        .flatMap(([, value]) => ([] as string[]).concat(value));
+      return { field: RELATED_USER, values };
+    }
+    if (engineType === 'host') {
+      const values = Object.entries(sourceFields)
+        .filter(([field]) => field.startsWith('host.'))
+        .flatMap(([, value]) => ([] as string[]).concat(value));
+      return { field: RELATED_HOST, values };
+    }
+    return { field: RELATED_ENTITY, values: [item.id] };
+  };
 
   const entityFilterActions: EntityFilterActions = {
     toggleEntityFilter: (role, action) => {
@@ -88,8 +107,18 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
           .concat(value)
           .some((v) => isFilterActiveForScope(scopeId, fieldForRole(field, role), v))
       ),
-    toggleRelatedEvents: (action) => emitFilterToggle(scopeId, RELATED_ENTITY, item.id, action),
-    isRelatedEventsActive: () => isFilterActiveForScope(scopeId, RELATED_ENTITY, item.id),
+    toggleRelatedEvents: (action) => {
+      const related = getRelatedFieldAndValues();
+      if (!related) return;
+      for (const v of related.values) {
+        emitFilterToggle(scopeId, related.field, v, action);
+      }
+    },
+    isRelatedEventsActive: () => {
+      const related = getRelatedFieldAndValues();
+      if (!related) return false;
+      return related.values.some((v) => isFilterActiveForScope(scopeId, related.field, v));
+    },
   };
 
   // Generate items fresh on each render to reflect current filter state

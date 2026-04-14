@@ -19,9 +19,18 @@ import { addFilter, removeFilter, containsFilter } from './search_filters';
  * FilterStore instances subscribe and handle events for their scopeId.
  */
 export interface FilterToggleEvent {
+  type: 'equals';
   scopeId: string;
   field: string;
   value: string;
+  action: 'show' | 'hide';
+}
+
+export interface IsOneOfFilterToggleEvent {
+  type: 'isOneOf';
+  scopeId: string;
+  field: string;
+  values: string[];
   action: 'show' | 'hide';
 }
 
@@ -37,7 +46,7 @@ export interface EntityRelationshipEvent {
 }
 
 // Global event bus for filter toggle actions
-const filterToggleEvents$ = new Subject<FilterToggleEvent>();
+const filterToggleEvents$ = new Subject<FilterToggleEvent | IsOneOfFilterToggleEvent>();
 
 // Global event bus for entity relationship toggle actions
 const entityRelationshipEvents$ = new Subject<EntityRelationshipEvent>();
@@ -85,7 +94,17 @@ export const emitFilterToggle = (
   value: string,
   action: 'show' | 'hide'
 ): void => {
-  const event: FilterToggleEvent = { scopeId, field, value, action };
+  const event: FilterToggleEvent = { type: 'equals', scopeId, field, value, action };
+  filterToggleEvents$.next(event);
+};
+
+export const emitIsOneOfFilterToggle = (
+  scopeId: string,
+  field: string,
+  values: string[],
+  action: 'show' | 'hide'
+): void => {
+  const event: IsOneOfFilterToggleEvent = { type: 'isOneOf', scopeId, field, values, action };
   filterToggleEvents$.next(event);
 };
 
@@ -154,21 +173,26 @@ export const isPinnedForScope = (scopeId: string, entityId: string): boolean => 
 };
 
 /**
- * Check if a filter is active for the given scope, field, and value.
+ * Check if a filter is active for the given scope, field, and value(s).
  * Returns false gracefully if no store exists (no warning logged).
  *
  * @param scopeId - Unique identifier for the graph instance
  * @param field - The field to check
- * @param value - The value to check
+ * @param value - The value or values to check
  * @returns true if the filter is active, false otherwise (including when no store exists)
  *
  * @example
  * ```typescript
  * // In a component or hook - no FilterStore needed
  * const isActive = isFilterActiveForScope(scopeId, 'user.entity.id', 'user-123');
+ * const isActive = isFilterActiveForScope(scopeId, 'event.action', ['login', 'logout']);
  * ```
  */
-export const isFilterActiveForScope = (scopeId: string, field: string, value: string): boolean => {
+export const isFilterActiveForScope = (
+  scopeId: string,
+  field: string,
+  value: string | string[]
+): boolean => {
   const store = stores.get(scopeId);
   return store?.isFilterActive(field, value) ?? false;
 };
@@ -206,7 +230,8 @@ export class FilterStore {
     this.filterEventSubscription = filterToggleEvents$
       .pipe(rxFilter((event) => event.scopeId === this.scopeId))
       .subscribe((event) => {
-        this.toggleFilter(event.field, event.value, event.action);
+        const value = event.type === 'isOneOf' ? event.values : event.value;
+        this.toggleFilter(event.field, value, event.action);
       });
 
     // Subscribe to entity relationship toggle events for this scopeId
@@ -264,10 +289,10 @@ export class FilterStore {
   /**
    * Toggle a filter on or off.
    * @param field - The field to filter on
-   * @param value - The value to filter for
+   * @param value - The value or values to filter for
    * @param action - 'show' to add filter, 'hide' to remove
    */
-  toggleFilter(field: string, value: string, action: 'show' | 'hide'): void {
+  toggleFilter(field: string, value: string | string[], action: 'show' | 'hide'): void {
     if (action === 'show') {
       const newFilters = addFilter(this.dataViewId ?? '', this.filters$.value, field, value);
       this.filters$.next(newFilters);
@@ -278,9 +303,9 @@ export class FilterStore {
   }
 
   /**
-   * Check if a filter with the given field and value is currently active.
+   * Check if a filter with the given field and value(s) is currently active.
    */
-  isFilterActive(field: string, value: string): boolean {
+  isFilterActive(field: string, value: string | string[]): boolean {
     return containsFilter(this.filters$.value, field, value);
   }
 
