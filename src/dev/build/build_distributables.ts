@@ -79,7 +79,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.ReplaceFavicon);
     // [rspack-transition] Use rspack or legacy webpack optimizer based on env var.
     // When legacy is removed, keep only Tasks.BuildRspackBundles.
-    if (process.env.KBN_USE_RSPACK === 'true') {
+    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
       await globalRun(Tasks.BuildRspackBundles);
     } else {
       await globalRun(Tasks.BuildKibanaPlatformPlugins);

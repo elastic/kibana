@@ -25,7 +25,8 @@ import { registerRouteForBundle } from './bundles_route';
  * Check if RSPack mode is enabled via environment variable
  */
 function isRspackMode(): boolean {
-  return process.env.KBN_USE_RSPACK === 'true';
+  const v = process.env.KBN_USE_RSPACK;
+  return v === 'true' || v === '1';
 }
 
 /**

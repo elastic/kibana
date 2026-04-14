@@ -40,7 +40,7 @@ export const runCmd: Command<{}> = {
     const dist = flagsReader.boolean('dist');
     const throttle = flagsReader.string('throttle') ?? 'provided';
     const output = flagsReader.string('output');
-    const useRspack = process.env.KBN_USE_RSPACK === 'true';
+    const useRspack = process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
 
     // Guard: devtools throttle requires dist
     if (throttle === 'devtools' && !dist) {

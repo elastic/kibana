@@ -77,17 +77,18 @@ describe('loadDllManifest sanitisation', () => {
   const sanitized = loadDllManifest();
   const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
 
-  it('removes pure CJS modules (exportsType=default + redirect/redirect-warn)', () => {
-    const removedKeys = Object.keys(raw.content).filter((key) => {
+  it('keeps pure CJS modules (exportsType=default + redirect) with stripped buildMeta', () => {
+    const defaultKeys = Object.keys(raw.content).filter((key) => {
       const meta = raw.content[key].buildMeta;
       return (
         meta?.exportsType === 'default' &&
         (meta?.defaultObject === 'redirect' || meta?.defaultObject === 'redirect-warn')
       );
     });
-    expect(removedKeys.length).toBeGreaterThan(0);
-    for (const key of removedKeys) {
-      expect(sanitized.content[key]).toBeUndefined();
+    expect(defaultKeys.length).toBeGreaterThan(0);
+    for (const key of defaultKeys) {
+      expect(sanitized.content[key]).toBeDefined();
+      expect(sanitized.content[key].buildMeta).toBeUndefined();
     }
   });
 

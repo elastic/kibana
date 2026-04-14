@@ -37,7 +37,7 @@ const runInWorktree = async (
 
   // Build dist if requested
   if (dist) {
-    const useRspack = process.env.KBN_USE_RSPACK === 'true';
+    const useRspack = process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
     if (useRspack) {
       log.info(`[${label}] Building rspack dist bundles...`);
       execSync('node scripts/build_rspack_bundles.js --dist', {

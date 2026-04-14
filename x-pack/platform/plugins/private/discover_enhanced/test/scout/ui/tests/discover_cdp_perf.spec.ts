@@ -60,7 +60,7 @@ function getExpectedDiscoverPluginIds(projectType: string | undefined): string[]
  * meaningful in that mode.
  */
 function getBundleSizeLimits() {
-  const isRspack = process.env.KBN_USE_RSPACK === 'true';
+  const isRspack = process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
   return {
     isRspack,
     totalSize: isRspack ? 4.5 * 1024 * 1024 : 3.1 * 1024 * 1024,

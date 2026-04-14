@@ -47,9 +47,12 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
  *    delegated modules.
  *
  *  - `exportsType: "default"` + `defaultObject: "redirect"|"redirect-warn"`
- *    → REMOVE from manifest. Pure CJS modules where `module.exports` IS the
- *    value (no `__esModule`). Removing lets rspack bundle the polyfill
- *    directly with correct CJS interop.
+ *    → strip buildMeta (keep entry). Pure CJS modules where
+ *    `module.exports` IS the value (no `__esModule`). Keeping the entry
+ *    lets DllReferencePlugin resolve them from the DLL instead of rspack
+ *    re-bundling them — avoiding duplicate module instances that break
+ *    shared state (React contexts, singletons). Same treatment as the
+ *    catch-all "everything else" category below.
  *
  *  - Everything else → strip buildMeta (no named imports expected).
  *
@@ -58,9 +61,8 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
  */
 export function loadDllManifest() {
   const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
-  const keysToRemove: string[] = [];
 
-  for (const [key, entry] of Object.entries(raw.content) as Array<
+  for (const [, entry] of Object.entries(raw.content) as Array<
     [string, { buildMeta?: { exportsType?: string; defaultObject?: string | boolean } }]
   >) {
     if (entry.buildMeta) {
@@ -78,19 +80,10 @@ export function loadDllManifest() {
         (defaultObject === 'redirect' || defaultObject === 'redirect-warn')
       ) {
         entry.buildMeta = { exportsType: 'flagged' };
-      } else if (
-        exportsType === 'default' &&
-        (defaultObject === 'redirect' || defaultObject === 'redirect-warn')
-      ) {
-        keysToRemove.push(key);
       } else {
         entry.buildMeta = undefined;
       }
     }
-  }
-
-  for (const key of keysToRemove) {
-    delete raw.content[key];
   }
 
   return raw;
