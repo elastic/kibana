@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { Streams } from '@kbn/streams-schema';
 import { useCallback } from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
 import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
@@ -20,13 +19,15 @@ import {
   STATS_PROMOTE_DISABLED_TOOLTIP,
 } from '../../significant_events_discovery/components/queries_table/translations';
 
+export const KI_ROW_ACTION_MUTATION_KEY = ['ki-row-action'];
+
 interface UseKnowledgeIndicatorActionsParams {
-  definition: Streams.all.Definition;
+  streamName: string;
   onSuccess?: () => void;
 }
 
 export function useKnowledgeIndicatorActions({
-  definition,
+  streamName,
   onSuccess,
 }: UseKnowledgeIndicatorActionsParams) {
   const {
@@ -35,7 +36,7 @@ export function useKnowledgeIndicatorActions({
     },
   } = useKibana();
   const queryClient = useQueryClient();
-  const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useStreamFeaturesApi(definition);
+  const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useStreamFeaturesApi(streamName);
   const { promote } = useQueriesApi();
 
   const invalidateData = useCallback(async () => {
@@ -43,11 +44,13 @@ export function useKnowledgeIndicatorActions({
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
-      queryClient.invalidateQueries({ queryKey: ['features', definition.name] }),
+      queryClient.invalidateQueries({ queryKey: ['features', streamName] }),
+      queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
     ]);
-  }, [definition.name, queryClient]);
+  }, [streamName, queryClient]);
 
   const excludeAction = useMutation<void, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (featureUuid) => {
       await excludeFeaturesInBulk([featureUuid]);
     },
@@ -62,6 +65,7 @@ export function useKnowledgeIndicatorActions({
   });
 
   const restoreAction = useMutation<void, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (featureUuid) => {
       await restoreFeaturesInBulk([featureUuid]);
     },
@@ -76,6 +80,7 @@ export function useKnowledgeIndicatorActions({
   });
 
   const promoteAction = useMutation<PromoteResult, Error, string>({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async (queryId) => {
       return promote({ queryIds: [queryId] });
     },
