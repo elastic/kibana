@@ -311,11 +311,5 @@ const DataTableWithLocalPagination = ({
     onChangeItemsPerPage: setTablePageSize,
   };
 
-  return (
-    <EntitiesDataTable
-      state={newState}
-      height={DEFAULT_TABLE_SECTION_HEIGHT}
-      selectedGroup={selectedGroup}
-    />
-  );
+  return <EntitiesDataTable state={newState} selectedGroup={selectedGroup} />;
 };
