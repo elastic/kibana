@@ -14,12 +14,15 @@ import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
+import { createDetectionCoverageOnboardingSkill } from './detection_coverage_onboarding';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { threatCoverageInitializationSkill } from './threat_coverage_initialization';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
+  core: SecuritySolutionPluginCoreSetupDependencies;
   experimentalFeatures: ExperimentalFeatures;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
@@ -35,6 +38,7 @@ interface RegisterSkillsOpts {
  */
 export const registerSkills = async ({
   agentBuilder,
+  core,
   experimentalFeatures,
   getStartServices,
   kibanaVersion,
@@ -61,4 +65,5 @@ export const registerSkills = async ({
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
   await agentBuilder.skills.register(threatCoverageInitializationSkill);
+  await agentBuilder.skills.register(createDetectionCoverageOnboardingSkill(core, logger));
 };

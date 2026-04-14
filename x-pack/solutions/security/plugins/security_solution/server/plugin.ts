@@ -289,6 +289,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerSkills({
       agentBuilder,
+      core,
       experimentalFeatures,
       getStartServices: core.getStartServices,
       kibanaVersion: this.pluginContext.env.packageInfo.version,
