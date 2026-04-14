@@ -43,7 +43,11 @@ export const validateElasticCloudUrl = (urlString: string): string | undefined =
   }
 
   const hostname = url.hostname.toLowerCase();
-  if (!ALLOWED_CLOUD_SUFFIXES.some((suffix) => hostname.endsWith(suffix))) {
+  const isAllowedHost = ALLOWED_CLOUD_SUFFIXES.some((suffix) => {
+    const idx = hostname.lastIndexOf(suffix);
+    return idx > 0 && idx + suffix.length === hostname.length;
+  });
+  if (!isAllowedHost) {
     return `URL must be an Elastic Cloud deployment (${ALLOWED_CLOUD_SUFFIXES.join(' or ')}).`;
   }
 };

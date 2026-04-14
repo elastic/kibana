@@ -220,6 +220,7 @@ export const registerRemoteConfigsRoutes = ({
             await internalSoClient.create(EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE, next, {
               id: remoteId,
               overwrite: true,
+              version: existing.version,
             });
 
             return response.ok({
@@ -254,6 +255,13 @@ export const registerRemoteConfigsRoutes = ({
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return response.notFound({ body: { message: `Remote config not found: ${remoteId}` } });
+          }
+          if (SavedObjectsErrorHelpers.isConflictError(error)) {
+            return response.conflict({
+              body: {
+                message: 'Remote config was modified concurrently. Please refresh and try again.',
+              },
+            });
           }
           logger.error(`Failed to update remote Kibana config: ${error}`);
           return response.customError({
@@ -403,14 +411,11 @@ export const registerRemoteConfigsRoutes = ({
             });
           }
 
-          const errorBody = await res.text().catch(() => '');
           return response.ok({
             body: {
               success: false,
               statusCode: res.status,
-              message: `Remote responded with ${res.status}${
-                errorBody ? `: ${errorBody.slice(0, 500)}` : ''
-              }`,
+              message: `Remote responded with HTTP ${res.status}`,
             },
           });
         } catch (error) {

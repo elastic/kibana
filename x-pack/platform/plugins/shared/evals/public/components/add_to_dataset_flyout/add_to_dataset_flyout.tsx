@@ -264,7 +264,7 @@ export function AddToDatasetFlyout({
         const datasetsResp = await coreStart.http.get<GetEvaluationDatasetsResponse>(
           EVALS_DATASETS_URL,
           {
-            query: { page: 1, per_page: 100, ...destination },
+            query: { page: 1, per_page: 1000, ...destination },
             version: API_VERSIONS.internal.v1,
           }
         );
@@ -533,6 +533,11 @@ export function AddToDatasetFlyout({
 
         <EuiForm
           component="form"
+          id="evalsAddToDatasetForm"
+          onSubmit={(e: React.FormEvent) => {
+            e.preventDefault();
+            if (!isSubmitting) onSubmit();
+          }}
           css={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
         >
           {remotes.length > 0 ? (
@@ -796,7 +801,13 @@ export function AddToDatasetFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSubmit} fill isLoading={isSubmitting} disabled={isSubmitting}>
+            <EuiButton
+              type="submit"
+              form="evalsAddToDatasetForm"
+              fill
+              isLoading={isSubmitting}
+              disabled={isSubmitting}
+            >
               {SUBMIT_BUTTON}
             </EuiButton>
           </EuiFlexItem>
