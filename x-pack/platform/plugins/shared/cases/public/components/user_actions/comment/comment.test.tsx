@@ -270,6 +270,7 @@ describe('createCommentUserActionBuilder', () => {
         icon: 'bell',
         getAttachmentViewObject: () => ({ event: 'added an event' }),
         getAttachmentRemovalObject: () => ({ event: 'removed event' }),
+        schemaValidator: () => {},
       });
 
       const userAction = getEventUserAction({
@@ -613,6 +614,7 @@ describe('createCommentUserActionBuilder', () => {
           event: 'added an event',
           timelineAvatar: <span data-test-subj="event-timeline-avatar" />,
         }),
+        schemaValidator: () => {},
       });
 
       const userAction = getEventUserAction();
