@@ -36,7 +36,10 @@ const extractCount = (values: unknown[][]): number => {
 };
 
 const runEsqlCount = async (esClient: Client, query: string): Promise<number> => {
-  const response = await esClient.esql.query({ query, format: 'json' });
+  const response = await esClient.esql.query({
+    query: `SET unmapped_fields = "load"; ${query}`,
+    format: 'json',
+  });
   const body = response as unknown as { values: unknown[][] };
   return extractCount(body.values);
 };
