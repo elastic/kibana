@@ -49,7 +49,7 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {
   security: SecurityPluginSetup;
   ml?: MlPluginSetup;
   inference: InferenceServerSetup;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {
@@ -64,7 +64,7 @@ export interface ObservabilityAgentBuilderPluginStartDependencies {
   inference: InferenceServerStart;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 export type ObservabilityAgentBuilderCoreSetup = CoreSetup<
