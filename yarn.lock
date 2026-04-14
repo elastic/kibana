@@ -4711,6 +4711,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-alert-actions@link:x-pack/platform/packages/shared/response-ops/alerting-v2-alert-actions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-constants@link:x-pack/platform/packages/shared/response-ops/alerting-v2-constants":
   version "0.0.0"
   uid ""
