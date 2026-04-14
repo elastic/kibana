@@ -20,6 +20,7 @@ import type { Condition } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import {
   Streams,
+  deriveQueryType,
   LOGS_ROOT_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
   LOGS_ECS_STREAM_NAME,
@@ -1062,7 +1063,12 @@ export class StreamsClient {
 
     if (this.dependencies.getQueryClient) {
       const queryClient = await this.dependencies.getQueryClient();
-      ops.push(queryClient.syncQueries(definition, queries));
+      ops.push(
+        queryClient.syncQueries(
+          definition,
+          queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
+        )
+      );
     }
 
     await Promise.all(ops);

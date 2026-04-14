@@ -104,6 +104,24 @@ describe('utils', () => {
       expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
     });
 
+    it('should reserve one slot when any item is marked as overflow', () => {
+      const result = getDisplayedItemsAllowedAmount({
+        items: [
+          { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+          {
+            id: '2',
+            label: 'Item 2',
+            run: jest.fn(),
+            iconType: 'gear',
+            order: 2,
+            overflow: true,
+          },
+        ],
+      });
+
+      expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
+    });
+
     it('should not be affected by primaryActionItem', () => {
       const items = Array.from({ length: 5 }, (_, i) => ({
         id: `${i}`,
@@ -174,6 +192,27 @@ describe('utils', () => {
 
       const result = getShouldOverflow({
         config: { items },
+        displayedItemsAllowedAmount: 5,
+      });
+
+      expect(result).toBe(true);
+    });
+
+    it('should return true when an item is marked as overflow', () => {
+      const result = getShouldOverflow({
+        config: {
+          items: [
+            { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+            {
+              id: '2',
+              label: 'Item 2',
+              run: jest.fn(),
+              iconType: 'gear',
+              order: 2,
+              overflow: true,
+            },
+          ],
+        },
         displayedItemsAllowedAmount: 5,
       });
 
@@ -271,6 +310,59 @@ describe('utils', () => {
       // Same as without primary action: limit - 1 items shown
       expect(result.displayedItems).toHaveLength(APP_MENU_ITEM_LIMIT - 1);
       expect(result.overflowItems).toHaveLength(3);
+      expect(result.shouldOverflow).toBe(true);
+    });
+
+    it('should move forced overflow items to overflow even when under limit', () => {
+      const items = [
+        {
+          id: 'hiddenUnderOverflow',
+          label: 'Hidden under overflow',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 1,
+          overflow: true,
+        },
+      ];
+
+      const result = getAppMenuItems({ config: { items } });
+
+      expect(result.displayedItems).toHaveLength(0);
+      expect(result.overflowItems).toHaveLength(1);
+      expect(result.overflowItems[0].id).toBe('hiddenUnderOverflow');
+      expect(result.shouldOverflow).toBe(true);
+    });
+
+    it('should preserve order across displayed and overflow items', () => {
+      const items = [
+        {
+          id: 'third',
+          label: 'Third',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 3,
+        },
+        {
+          id: 'firstForced',
+          label: 'First forced',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 1,
+          overflow: true,
+        },
+        {
+          id: 'second',
+          label: 'Second',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 2,
+        },
+      ];
+
+      const result = getAppMenuItems({ config: { items } });
+
+      expect(result.displayedItems.map((item) => item.id)).toEqual(['second', 'third']);
+      expect(result.overflowItems.map((item) => item.id)).toEqual(['firstForced']);
       expect(result.shouldOverflow).toBe(true);
     });
   });
