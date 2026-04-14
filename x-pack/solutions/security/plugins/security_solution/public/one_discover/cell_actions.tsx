@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { copyToClipboard, EuiButtonIcon, EuiFlexGroup, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -74,6 +74,15 @@ const DiscoverCellActions = ({
 }: CellActionRendererProps & DiscoverCellActionRendererDeps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (leaveTimer.current) {
+        clearTimeout(leaveTimer.current);
+      }
+    };
+  }, []);
+
   const isColumnAdded = columns?.includes(field) ?? false;
   const copyValue = typeof value === 'string' ? value : JSON.stringify(value) ?? '';
 
@@ -177,7 +186,7 @@ export const createDiscoverCellActionRenderer = ({
   onAddColumn,
   onRemoveColumn,
 }: DiscoverCellActionRendererDeps): CellActionRenderer => {
-  const Renderer: CellActionRenderer = (props) => (
+  const Renderer: React.FC<CellActionRendererProps> = (props) => (
     <DiscoverCellActions
       {...props}
       columns={columns}
@@ -187,5 +196,5 @@ export const createDiscoverCellActionRenderer = ({
     />
   );
   Renderer.displayName = 'DiscoverCellActionRenderer';
-  return Renderer;
+  return Renderer as CellActionRenderer;
 };
