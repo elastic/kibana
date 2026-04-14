@@ -10,12 +10,13 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { labels } from '../../../utils/i18n';
 
 interface ConfirmRemoveConfig {
   title: string;
@@ -29,9 +30,10 @@ export interface DetailPanelLayoutProps {
   isLoading: boolean;
   isEmpty: boolean;
   title: string;
-  showAutoIcon?: boolean;
+  isReadOnly?: boolean;
   headerActions: (openConfirmRemove: () => void) => React.ReactNode;
   headerContent?: React.ReactNode;
+  footer?: React.ReactNode;
   children: React.ReactNode;
   confirmRemove?: ConfirmRemoveConfig;
 }
@@ -40,9 +42,10 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
   isLoading,
   isEmpty,
   title,
-  showAutoIcon = false,
+  isReadOnly = false,
   headerActions,
   headerContent,
+  footer,
   children,
   confirmRemove,
 }) => {
@@ -92,17 +95,19 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
             background-color: ${euiTheme.colors.backgroundBaseSubdued};
           `}
         >
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
                     <h2>{title}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
-                {showAutoIcon && (
+                {isReadOnly && (
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="logoElastic" size="m" aria-hidden={true} />
+                    <EuiText size="xs" color="subdued">
+                      {labels.byAuthor('Elastic')}
+                    </EuiText>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -118,10 +123,24 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
             flex: 1;
             min-height: 0;
             overflow-y: auto;
+            padding: ${euiTheme.size.l};
           `}
         >
           {children}
         </div>
+
+        {/* Footer: pinned at bottom */}
+        {footer && (
+          <div
+            css={css`
+              flex-shrink: 0;
+              border-top: ${euiTheme.border.thin};
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            `}
+          >
+            {footer}
+          </div>
+        )}
       </div>
 
       {confirmRemove && isConfirmOpen && (

@@ -134,6 +134,7 @@
     "@kbn/css-utils",
     "@kbn/rison",
     "@kbn/rule-data-utils",
-    "@kbn/doc-links"
+    "@kbn/doc-links",
+    "@kbn/yaml-loader"
   ]
 }

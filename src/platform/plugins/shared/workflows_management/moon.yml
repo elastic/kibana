@@ -92,7 +92,11 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/share-plugin'
   - '@kbn/core-security-server'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/logging'
+  - '@kbn/core-saved-objects-api-server'
   - '@kbn/management-settings-ids'
+  - '@kbn/rule-data-utils'
 tags:
   - plugin
   - prod

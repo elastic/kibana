@@ -16,8 +16,16 @@ import type {
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { GaugeState, LensApiState } from '../../schema';
-import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
+import {
+  AUTO_COLOR,
+  NO_COLOR,
+  fromColorByValueAPIToLensState,
+  fromColorByValueLensStateToAPI,
+  isAutoColor,
+  isNoColor,
+} from '../coloring';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import type { DeepMutable, DeepPartial } from '../utils';
@@ -50,6 +58,24 @@ function getAccessorName(type: 'metric' | 'max' | 'min' | 'goal') {
   return `${ACCESSOR}_${type}`;
 }
 
+function convertColorToLensState(color: GaugeState['metric']['color']): {
+  colorMode: GaugeVisualizationState['colorMode'];
+  palette?: PaletteOutput<CustomPaletteParams>;
+} {
+  if (!color || isAutoColor(color)) {
+    return { colorMode: 'palette' };
+  }
+
+  if (isNoColor(color)) {
+    return { colorMode: 'none' };
+  }
+
+  return {
+    colorMode: 'palette' as const,
+    palette: fromColorByValueAPIToLensState(color),
+  };
+}
+
 function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
   const layer = config;
 
@@ -69,11 +95,9 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
         ? 'semiCircle'
         : layer.shape.type
       : 'horizontalBullet',
-    ...(layer.metric.color
-      ? { colorMode: 'palette', palette: fromColorByValueAPIToLensState(layer.metric.color) }
-      : {}),
+    ...convertColorToLensState(layer.metric.color),
     ticksPosition:
-      layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'auto',
+      layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'bands',
     ...(layer.metric.title?.visible === false
       ? { labelMajorMode: 'none' }
       : layer.metric.title?.text
@@ -183,8 +207,10 @@ function reverseBuildVisualizationState(
           : { visible: true, mode: 'auto' };
     }
 
-    if (visualization.colorMode === 'palette' && visualization.palette) {
-      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette);
+    if (visualization.colorMode === 'palette') {
+      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
+    } else {
+      props.metric.color = NO_COLOR;
     }
   }
 

@@ -26,8 +26,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
@@ -40,8 +42,9 @@ import {
   useFetchDiscoveryQueriesOccurrences,
 } from '../../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { useQueriesApi } from '../../../../../hooks/sig_events/use_queries_api';
+import { useQueriesApi, type PromoteResult } from '../../../../../hooks/sig_events/use_queries_api';
 import {
+  HIGH_SEVERITY_THRESHOLD,
   UNBACKED_QUERIES_COUNT_QUERY_KEY,
   useUnbackedQueriesCount,
 } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
@@ -59,6 +62,7 @@ import {
   BACKED_STATUS_COLUMN,
   CHART_SERIES_NAME,
   CHART_TITLE,
+  CREATE_RULES_BUTTON,
   DELETE_QUERY_ERROR_TOAST_TITLE,
   DETAILS_BUTTON_ARIA_LABEL,
   IMPACT_COLUMN,
@@ -68,28 +72,31 @@ import {
   NOT_PROMOTED_TOOLTIP_CONTENT,
   OCCURRENCES_COLUMN,
   OCCURRENCES_TOOLTIP_NAME,
+  THRESHOLD_BREACHES_TOOLTIP_NAME,
   OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
   OPEN_IN_DISCOVER_ACTION_TITLE,
   PROMOTED_BADGE_LABEL,
   PROMOTED_TOOLTIP_CONTENT,
-  PROMOTE_ALL_BUTTON,
-  PROMOTE_ALL_CALLOUT_DESCRIPTION,
   PROMOTE_ALL_ERROR_TOAST_TITLE,
   PROMOTE_QUERY_ACTION_DESCRIPTION,
   PROMOTE_QUERY_ACTION_TITLE,
+  getRuleCountLabel,
   SAVE_QUERY_ERROR_TOAST_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
   TABLE_CAPTION,
   TITLE_COLUMN,
+  STATS_DRAFT_BADGE_LABEL,
+  STATS_LAST_OCCURRED_PLACEHOLDER,
+  STATS_NOT_PROMOTED_TOOLTIP_CONTENT,
   UNABLE_TO_LOAD_QUERIES_BODY,
   UNABLE_TO_LOAD_QUERIES_TITLE,
   getEventsCount,
-  getPromoteAllCalloutTitle,
   getPromoteAllSuccessToast,
 } from './translations';
 import { PromoteAction } from './promote_action';
 import { QueryDetailsFlyout } from './query_details_flyout';
+import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 import { formatLastOccurredAt } from './utils';
 
 const DEFAULT_PAGINATION = { index: 0, size: 10 };
@@ -129,6 +136,15 @@ export function QueriesTable() {
     perPage: pagination.size,
     status: ['active', 'draft'],
   });
+  const queriesList = queriesData?.queries;
+  useEffect(() => {
+    if (!queriesList) return;
+    setSelectedQuery((prev) => {
+      if (!prev) return null;
+      return queriesList.find((q) => q.query.id === prev.query.id) ?? null;
+    });
+  }, [queriesList, setSelectedQuery]);
+
   const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
 
   const { count: unbackedCount } = useUnbackedQueriesCount();
@@ -145,11 +161,16 @@ export function QueriesTable() {
     [queryClient]
   );
 
-  const promoteAllMutation = useMutation<{ promoted: number }, Error>({
-    mutationFn: promoteAll,
+  const promoteAllMutation = useMutation<PromoteResult, Error>({
+    mutationFn: () => promoteAll({ minSeverityScore: HIGH_SEVERITY_THRESHOLD }),
     mutationKey: ['promoteAll'],
-    onSuccess: async ({ promoted }) => {
-      toasts.addSuccess(getPromoteAllSuccessToast(promoted));
+    onSuccess: async ({ promoted, skipped_stats: skippedStats }) => {
+      const toast = getPromoteAllSuccessToast(promoted, skippedStats);
+      if (toast.severity === 'info') {
+        toasts.add({ title: toast.text, color: 'primary' });
+      } else {
+        toasts.addSuccess(toast.text);
+      }
       await invalidateQueriesData();
     },
     onError: (error) => {
@@ -254,6 +275,13 @@ export function QueriesTable() {
         name: LAST_OCCURRED_COLUMN,
         width: '240px',
         render: (_: unknown, item: SignificantEventQueryRow) => {
+          if (item.query.type === QUERY_TYPE_STATS && !item.rule_backed) {
+            return (
+              <EuiText size="s" color="subdued">
+                {STATS_LAST_OCCURRED_PLACEHOLDER}
+              </EuiText>
+            );
+          }
           return <EuiText size="s">{formatLastOccurredAt(item.occurrences)}</EuiText>;
         },
       },
@@ -266,7 +294,11 @@ export function QueriesTable() {
           return (
             <SparkPlot
               id={`sparkplot-${item.query.id}`}
-              name={OCCURRENCES_TOOLTIP_NAME}
+              name={
+                item.query.type === QUERY_TYPE_STATS
+                  ? THRESHOLD_BREACHES_TOOLTIP_NAME
+                  : OCCURRENCES_TOOLTIP_NAME
+              }
               type="bar"
               timeseries={item.occurrences}
               annotations={[]}
@@ -276,6 +308,16 @@ export function QueriesTable() {
             />
           );
         },
+      },
+      {
+        field: 'query.type',
+        name: i18n.translate('xpack.streams.queriesTable.typeColumn', {
+          defaultMessage: 'Type',
+        }),
+        width: '80px',
+        render: (_: unknown, item: SignificantEventQueryRow) => (
+          <QueryTypeBadge type={item.query.type ?? QUERY_TYPE_MATCH} />
+        ),
       },
       {
         field: 'stream_name',
@@ -290,15 +332,29 @@ export function QueriesTable() {
         name: BACKED_STATUS_COLUMN,
         width: '120px',
         render: (_: unknown, item: SignificantEventQueryRow) => {
+          const isStats = item.query.type === QUERY_TYPE_STATS;
+          if (item.rule_backed) {
+            return (
+              <EuiToolTip content={PROMOTED_TOOLTIP_CONTENT}>
+                <span tabIndex={0}>
+                  <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>
+                </span>
+              </EuiToolTip>
+            );
+          }
+          if (isStats) {
+            return (
+              <EuiToolTip content={STATS_NOT_PROMOTED_TOOLTIP_CONTENT}>
+                <span tabIndex={0}>
+                  <EuiBadge color="default">{STATS_DRAFT_BADGE_LABEL}</EuiBadge>
+                </span>
+              </EuiToolTip>
+            );
+          }
           return (
-            <EuiToolTip
-              content={item.rule_backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
-            >
+            <EuiToolTip content={NOT_PROMOTED_TOOLTIP_CONTENT}>
               <span tabIndex={0}>
-                {item.rule_backed && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
-                {!item.rule_backed && (
-                  <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>
-                )}
+                <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>
               </span>
             </EuiToolTip>
           );
@@ -325,9 +381,7 @@ export function QueriesTable() {
             color: 'primary',
             name: PROMOTE_QUERY_ACTION_TITLE,
             description: PROMOTE_QUERY_ACTION_DESCRIPTION,
-            render: (item: SignificantEventQueryRow) => {
-              return <PromoteAction item={item} />;
-            },
+            render: (item: SignificantEventQueryRow) => <PromoteAction item={item} />,
           },
         ],
       },
@@ -394,20 +448,41 @@ export function QueriesTable() {
       {unbackedCount > 0 && (
         <EuiFlexItem grow={false}>
           <EuiCallOut
-            announceOnMount
-            title={getPromoteAllCalloutTitle(unbackedCount)}
-            iconType="info"
+            color="primary"
+            size="s"
+            announceOnMount={false}
             data-test-subj="queriesPromoteAllCallout"
           >
-            <p>{PROMOTE_ALL_CALLOUT_DESCRIPTION}</p>
-            <EuiButton
-              fill
-              onClick={() => promoteAllMutation.mutate()}
-              isLoading={promoteAllMutation.isLoading}
-              data-test-subj="queriesPromoteAllButton"
-            >
-              {PROMOTE_ALL_BUTTON}
-            </EuiButton>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <AssetImage type="significantEventsEmptyState" size={62} />
+              </EuiFlexItem>
+              <EuiFlexItem grow>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutMessage"
+                      defaultMessage="Based on severity, we recommend creating {ruleCount} based on the last run."
+                      values={{
+                        ruleCount: <strong>{getRuleCountLabel(unbackedCount)}</strong>,
+                      }}
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="primary"
+                  size="s"
+                  onClick={() => promoteAllMutation.mutate()}
+                  isLoading={promoteAllMutation.isLoading}
+                  data-test-subj="queriesPromoteAllButton"
+                >
+                  {CREATE_RULES_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiCallOut>
         </EuiFlexItem>
       )}

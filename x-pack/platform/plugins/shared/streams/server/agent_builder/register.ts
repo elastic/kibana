@@ -7,22 +7,58 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import type { GetScopedClients } from '../routes/types';
 import type { StreamsServer } from '../types';
+import type { GetScopedClients } from '../routes/types';
+import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { streamExplorationSkill } from './skills/stream_exploration_skill';
+import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 
-export const registerStreamsAgentBuilder = ({
+export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
   server,
   logger,
+  isMemoryEnabled,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
+  isMemoryEnabled: () => Promise<boolean>;
 }) => {
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
+
+  const getMemoryService = () =>
+    new MemoryServiceImpl({
+      logger: logger.get('memory'),
+      esClient: server.core.elasticsearch.client.asInternalUser,
+    });
+
   agentBuilder.skills.register(streamExplorationSkill);
+
+  // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
+  // This avoids exposing the skill to the agent when memory is not configured.
+  // Call ensureMemorySkillRegistered() after enabling observability:streamsEnableMemory.
+  let memorySkillRegistered = false;
+
+  const ensureMemorySkillRegistered = () => {
+    if (memorySkillRegistered) {
+      return;
+    }
+    memorySkillRegistered = true;
+    agentBuilder.skills.register(
+      createSigEventsMemorySkill({
+        getMemoryService,
+        getSecurity: () => server.core.security,
+      })
+    );
+    logger.info('Memory skill registered (observability:streamsEnableMemory is enabled)');
+  };
+
+  if (await isMemoryEnabled()) {
+    ensureMemorySkillRegistered();
+  }
+
+  return { ensureMemorySkillRegistered };
 };
