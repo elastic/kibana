@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export type { StreamlangDSL, StreamType, StreamlangConditionBlock } from './types/streamlang';
+export type {
+  StreamlangDSL,
+  StreamlangDSLWithUpdatedAt,
+  StreamType,
+  StreamlangConditionBlock,
+} from './types/streamlang';
 export {
   streamlangDSLSchema,
   streamlangDSLSchemaStrict,
@@ -22,6 +27,7 @@ export * from './types/processors';
 export * from './types/conditions';
 export type * from './types/ui';
 export * from './src/conditions/helpers';
+export * from './src/conditions/combine_conditions';
 export * from './src/conditions/condition_to_query_dsl';
 export * from './src/conditions/condition_to_painless';
 export * from './src/transpilers/shared/convert_for_ui';

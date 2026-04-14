@@ -21,20 +21,13 @@ const isNullableOutput = (schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaOb
   );
 };
 
-const replaceNullableOutputWithNullEnum = (schema: OpenAPIV3.SchemaObject) => {
-  let replaced = false;
-  schema.anyOf = schema.anyOf!.map((item) => {
-    if (!isNullableOutput(item)) {
-      return item;
-    }
+const replaceNullableOutputWithNullable = (schema: OpenAPIV3.SchemaObject) => {
+  const remaining = schema.anyOf!.filter((item) => !isNullableOutput(item));
+  if (remaining.length === schema.anyOf!.length) return false;
 
-    replaced = true;
-    return {
-      enum: [null],
-    };
-  });
-
-  return replaced;
+  schema.anyOf = remaining;
+  schema.nullable = true;
+  return true;
 };
 
 /**
@@ -54,7 +47,10 @@ const processNullableOutput = (schema: OpenAPIV3.SchemaObject) => {
   const nullableTarget = anyOf[1 - idx];
 
   if (isReferenceObject(nullableTarget)) {
-    return false;
+    delete schema.anyOf;
+    schema.nullable = true;
+    Object.assign(schema, { allOf: [nullableTarget] });
+    return true;
   }
 
   delete schema.anyOf;
@@ -81,6 +77,6 @@ const prettifyEnum = (schema: OpenAPIV3.SchemaObject) => {
 export const processEnum = (schema: OpenAPIV3.SchemaObject) => {
   if (!schema.anyOf) return;
   if (processNullableOutput(schema)) return;
-  replaceNullableOutputWithNullEnum(schema);
+  replaceNullableOutputWithNullable(schema);
   prettifyEnum(schema);
 };

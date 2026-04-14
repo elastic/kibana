@@ -47,6 +47,7 @@ export class DashboardAgentPlugin
         canWriteDashboards: core.application.capabilities.dashboard_v2?.showWriteControls === true,
         dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
         unifiedSearch: plugins.unifiedSearch,
+        filterManager: plugins.data.query.filterManager,
         dashboardPlugin: plugins.dashboard,
       });
     });

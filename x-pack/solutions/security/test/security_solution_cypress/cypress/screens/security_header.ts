@@ -10,7 +10,6 @@ import { GLOBAL_KQL_WRAPPER } from './search_bar';
 
 // main links
 export const DASHBOARDS = '[data-test-subj="solutionSideNavItemLink-dashboards"]';
-export const DASHBOARDS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-dashboards"]';
 
 export const ALERTS = '[data-test-subj="solutionSideNavItemLink-alerts"]';
 
@@ -24,7 +23,7 @@ export const TIMELINES = '[data-test-subj="solutionSideNavItemLink-timelines"]';
 export const EXPLORE = '[data-test-subj="solutionSideNavItemLink-explore"]';
 export const EXPLORE_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-explore"]';
 
-export const RULES_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-rules-landing"]';
+export const RULES_NAV_LINK = '[data-test-subj="solutionSideNavItemLink-rules-landing"]';
 
 export const SETTINGS = '[data-test-subj="solutionSideNavItemLink-administration"]';
 export const SETTINGS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-administration"]';
@@ -33,17 +32,6 @@ export const MIGRATIONS_LANDING = '[data-test-subj="solutionSideNavItemLink-siem
 export const MIGRATIONS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-siem_migrations"]';
 
 // nested links
-export const OVERVIEW = '[data-test-subj="solutionSideNavPanelLink-overview"]';
-
-export const DETECTION_RESPONSE = '[data-test-subj="solutionSideNavPanelLink-detection_response"]';
-
-export const ENTITY_ANALYTICS = '[data-test-subj="solutionSideNavPanelLink-entity_analytics"]';
-
-export const KUBERNETES = '[data-test-subj="solutionSideNavPanelLink-kubernetes"]';
-
-export const CSP_DASHBOARD =
-  '[data-test-subj="solutionSideNavPanelLink-cloud_security_posture-dashboard"]';
-
 export const HOSTS = '[data-test-subj="solutionSideNavPanelLink-hosts"]';
 
 export const ENDPOINTS = '[data-test-subj="solutionSideNavPanelLink-endpoints"]';
@@ -92,6 +80,19 @@ export const LAUNCHPAD_PANEL_BTN = getDataTestSubjectSelector(
   'solutionSideNavItemLink-securityGroup:launchpad'
 );
 
+export const GET_STARTED_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-get_started'
+);
+export const SIEM_READINESS_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_readiness'
+);
+export const VALUE_REPORTS_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-ai_value'
+);
+export const MANAGE_AUTOMATIC_MIGRATIONS_TEST_SUBJ = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_migrations-manage'
+);
+
 export const LAUNCHPAD_TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
   'solutionSideNavPanelLink-siem_migrations-rules'
 );
@@ -101,34 +102,28 @@ export const TRANSLATED_DASHBOARDS_PAGE = getDataTestSubjectSelector(
   'solutionSideNavPanelLink-siem_migrations-dashboards'
 );
 
+export const SOLUTION_SIDE_NAV_PANEL = getDataTestSubjectSelector('solutionSideNavPanel');
+
 // opens the navigation panel for a given nested link
 export const openNavigationPanelFor = (page: string) => {
   let panel;
   switch (page) {
-    case OVERVIEW:
-    case DETECTION_RESPONSE:
-    case KUBERNETES:
-    case ENTITY_ANALYTICS:
-    case CSP_DASHBOARD: {
-      panel = DASHBOARDS_PANEL_BTN;
-      break;
-    }
     case HOSTS:
     case NETWORK:
     case USERS: {
-      panel = EXPLORE_PANEL_BTN;
+      panel = EXPLORE;
       break;
     }
     case RULES:
     case EXCEPTIONS:
     case CSP_BENCHMARKS: {
-      panel = RULES_PANEL_BTN;
+      panel = RULES_NAV_LINK;
       break;
     }
     case ENDPOINTS:
     case POLICIES:
     case ARTIFACTS: {
-      panel = SETTINGS_PANEL_BTN;
+      panel = SETTINGS;
       break;
     }
   }
