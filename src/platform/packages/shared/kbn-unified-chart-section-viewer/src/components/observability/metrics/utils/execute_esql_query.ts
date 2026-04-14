@@ -34,10 +34,6 @@ export interface ExecuteEsqlParams {
   uiSettings: IUiSettingsClient;
 }
 
-/**
- * Executes an ES|QL query using the data plugin's search service.
- * Rejects when Elasticsearch returns a response body that contains an `error` object.
- */
 export const fetchEsqlResponseOrThrow = async (
   params: Parameters<typeof getESQLResults>[0]
 ): Promise<Awaited<ReturnType<typeof getESQLResults>>> => {
@@ -50,16 +46,16 @@ export const fetchEsqlResponseOrThrow = async (
   return result;
 };
 
-/**
- * Builds time and data view filters, then delegates to {@link fetchEsqlResponseOrThrow}
- * and converts the raw ES|QL response into plain objects.
- */
 export interface ExecuteEsqlResult<TDocument> {
   documents: TDocument[];
   rawResponse: object;
   requestParams: { query: string; filter?: object };
 }
 
+/**
+ * Executes an ES|QL query using the data plugin's search service.
+ * Rejects when Elasticsearch returns a response body that contains an `error` object.
+ */
 export async function executeEsqlQuery<TDocument extends object = Record<string, unknown>>({
   esqlQuery,
   search,
