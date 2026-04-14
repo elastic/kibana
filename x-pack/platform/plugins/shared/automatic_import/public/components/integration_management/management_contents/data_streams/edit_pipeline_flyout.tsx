@@ -214,7 +214,11 @@ export const EditPipelineFlyout = ({
   );
 
   return (
-    <EuiFlyout onClose={handleFlyoutClose} aria-labelledby="editPipelineFlyoutTitle">
+    <EuiFlyout
+      onClose={handleFlyoutClose}
+      aria-labelledby="editPipelineFlyoutTitle"
+      data-test-subj="editPipelineFlyout"
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="editPipelineFlyoutTitle">{dataStream.title}</h2>

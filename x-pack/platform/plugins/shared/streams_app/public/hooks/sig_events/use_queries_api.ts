@@ -10,10 +10,15 @@ import type { StreamQuery } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from '../use_kibana';
 
+export interface PromoteResult {
+  promoted: number;
+  skipped_stats: number;
+}
+
 interface QueriesApi {
-  promote: ({ queryIds }: { queryIds: string[] }) => Promise<{ promoted: number }>;
+  promote: ({ queryIds }: { queryIds: string[] }) => Promise<PromoteResult>;
   demote: ({ queryIds }: { queryIds: string[] }) => Promise<{ demoted: number }>;
-  promoteAll: () => Promise<{ promoted: number }>;
+  promoteAll: (opts?: { minSeverityScore?: number }) => Promise<PromoteResult>;
   upsertQuery: ({ query, streamName }: { query: StreamQuery; streamName: string }) => Promise<void>;
   removeQuery: ({ queryId, streamName }: { queryId: string; streamName: string }) => Promise<void>;
   deleteQueriesInBulk: ({
@@ -23,7 +28,10 @@ interface QueriesApi {
     queryIds: string[];
     streamName: string;
   }) => Promise<void>;
-  getUnbackedQueriesCount: (signal?: AbortSignal | null) => Promise<{ count: number }>;
+  getUnbackedQueriesCount: (
+    signal?: AbortSignal | null,
+    opts?: { minSeverityScore?: number }
+  ) => Promise<{ count: number }>;
   abort: () => void;
 }
 
@@ -54,7 +62,7 @@ export function useQueriesApi(): QueriesApi {
         });
       },
       upsertQuery: async ({ query, streamName }: { query: StreamQuery; streamName: string }) => {
-        const { id, ...body } = query;
+        const { id, type: _type, ...body } = query;
 
         await streamsRepositoryClient.fetch(
           'PUT /api/streams/{name}/queries/{queryId} 2023-10-31',
@@ -103,14 +111,18 @@ export function useQueriesApi(): QueriesApi {
           },
         });
       },
-      promoteAll: async () => {
+      promoteAll: async ({ minSeverityScore }: { minSeverityScore?: number } = {}) => {
         return streamsRepositoryClient.fetch('POST /internal/streams/queries/_promote', {
-          params: { body: {} },
+          params: { body: { minSeverityScore } },
           signal: null,
         });
       },
-      getUnbackedQueriesCount: async (requestSignal?: AbortSignal | null) => {
+      getUnbackedQueriesCount: async (
+        requestSignal?: AbortSignal | null,
+        opts?: { minSeverityScore?: number }
+      ) => {
         return streamsRepositoryClient.fetch('GET /internal/streams/queries/_unbacked_count', {
+          params: { query: { minSeverityScore: opts?.minSeverityScore } },
           signal: requestSignal ?? signal,
         });
       },

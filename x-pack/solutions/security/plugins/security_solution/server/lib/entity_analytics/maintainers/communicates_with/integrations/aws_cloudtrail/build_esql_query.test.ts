@@ -30,9 +30,9 @@ describe('communicates_with AWS CloudTrail buildEsqlQuery', () => {
     expect(query).toContain('"IdentityCenterUser"');
   });
 
-  it('requires event.provider to be present', () => {
+  it('requires host.target.entity.id to be present', () => {
     const query = buildEsqlQuery('default');
-    expect(query).toContain('event.provider IS NOT NULL');
+    expect(query).toContain('host.target.entity.id IS NOT NULL');
   });
 
   it('uses the standard user EUID documents-contains-id filter', () => {
@@ -47,9 +47,9 @@ describe('communicates_with AWS CloudTrail buildEsqlQuery', () => {
     expect(query).toContain(`actorUserId = ${userEuidEval}`);
   });
 
-  it('constructs target EUID as service: + event.provider', () => {
+  it('constructs target EUID as host: + host.target.entity.id', () => {
     const query = buildEsqlQuery('default');
-    expect(query).toContain('CONCAT("service:", event.provider)');
+    expect(query).toContain('CONCAT("host:", host.target.entity.id)');
   });
 
   it('aggregates communicates_with targets per user', () => {

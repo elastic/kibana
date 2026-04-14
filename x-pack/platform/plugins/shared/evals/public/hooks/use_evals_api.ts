@@ -45,6 +45,20 @@ import {
 } from '@kbn/evals-common';
 import { queryKeys } from '../query_keys';
 
+const EVALS_REMOTES_URL = '/internal/evals/remotes' as const;
+const getRemoteUrl = (remoteId: string) =>
+  `/internal/evals/remotes/${encodeURIComponent(remoteId)}` as const;
+
+export interface EvalsRemoteSummary {
+  id: string;
+  displayName: string;
+  url: string;
+}
+
+export interface GetEvalsRemotesResponse {
+  remotes: EvalsRemoteSummary[];
+}
+
 interface RunsListFilters {
   suiteId?: string;
   modelId?: string;
@@ -267,6 +281,89 @@ export const useDeleteExample = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
       ]);
+    },
+  });
+};
+
+export const useRemotes = () => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.remotes.list(),
+    queryFn: async (): Promise<GetEvalsRemotesResponse> => {
+      return services.http!.get<GetEvalsRemotesResponse>(EVALS_REMOTES_URL, {
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+  });
+};
+
+export const useCreateRemote = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: { displayName: string; url: string; apiKey: string }) => {
+      return services.http!.post<EvalsRemoteSummary>(EVALS_REMOTES_URL, {
+        body: JSON.stringify(body),
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.remotes.all });
+    },
+  });
+};
+
+export const useUpdateRemote = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (args: {
+      remoteId: string;
+      updates: { displayName?: string; url?: string; apiKey?: string };
+    }) => {
+      return services.http!.put<EvalsRemoteSummary>(getRemoteUrl(args.remoteId), {
+        body: JSON.stringify(args.updates),
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.remotes.all });
+    },
+  });
+};
+
+export const useTestRemoteConnection = () => {
+  const { services } = useKibana();
+
+  return useMutation({
+    mutationFn: async (body: {
+      url?: string;
+      apiKey?: string;
+      remoteId?: string;
+    }): Promise<{ success: boolean; statusCode: number; message?: string }> => {
+      return services.http!.post('/internal/evals/remotes/_test', {
+        body: JSON.stringify(body),
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+  });
+};
+
+export const useDeleteRemote = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (remoteId: string) => {
+      return services.http!.delete<{ deleted: boolean }>(getRemoteUrl(remoteId), {
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.remotes.all });
     },
   });
 };

@@ -288,6 +288,7 @@ dependsOn:
   - '@kbn/shared-ux-ai-components'
   - '@kbn/controls-schemas'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/evals-plugin'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/core-overlays-browser'
 tags:

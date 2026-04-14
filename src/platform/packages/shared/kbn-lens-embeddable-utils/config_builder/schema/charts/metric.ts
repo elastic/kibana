@@ -19,13 +19,22 @@ import {
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
+  DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
 } from '../../transforms/charts/metric/defaults';
 import {
   metricOperationDefinitionSchema,
   esqlColumnSchema,
   esqlColumnWithFormatSchema,
 } from '../metric_ops';
-import { staticColorSchema, applyColorToSchema, colorByValueSchema } from '../color';
+import {
+  staticColorSchema,
+  applyColorToSchema,
+  colorByValueSchema,
+  autoColorSchema,
+  AUTO_COLOR,
+  NO_COLOR,
+  noColorSchema,
+} from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
@@ -48,7 +57,12 @@ import { objectUnion } from './utils/object_union';
 
 const compareToSchemaShared = schema.object(
   {
-    palette: schema.maybe(schema.string({ meta: { description: 'Palette' } })),
+    palette: schema.maybe(
+      schema.string({
+        meta: { description: 'Palette' },
+        defaultValue: DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
+      })
+    ),
     icon: schema.maybe(schema.boolean({ meta: { description: 'Show icon' }, defaultValue: true })),
     value: schema.maybe(
       schema.boolean({ meta: { description: 'Show value' }, defaultValue: true })
@@ -318,7 +332,11 @@ const metricStatePrimaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueSchema, staticColorSchema])),
+  color: schema.maybe(
+    schema.oneOf([colorByValueSchema, staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   /**
    * Where to apply the color (background or value)
    */
@@ -353,7 +371,11 @@ const metricStateSecondaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(staticColorSchema),
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, noColorSchema], {
+      defaultValue: NO_COLOR,
+    })
+  ),
 };
 
 const metricStateBreakdownByOptionsSchema = {

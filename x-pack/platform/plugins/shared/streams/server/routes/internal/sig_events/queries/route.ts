@@ -45,19 +45,37 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
-  handler: async ({ request, getScopedClients, server }): Promise<{ count: number }> => {
-    const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
+  params: z.object({
+    query: z
+      .object({
+        minSeverityScore: z.coerce.number().int().min(0).max(100).optional(),
+      })
+      .optional(),
+  }),
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ count: number }> => {
+    const { getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const count = await queryClient.getUnbackedQueriesCount();
+    const queryClient = await getQueryClient();
+    const minSeverityScore = params?.query?.minSeverityScore;
+    const count = await queryClient.getUnbackedQueriesCount({ minSeverityScore });
     return { count };
   },
 });
 
+/**
+ * Promotes unbacked queries to rule-backed status.
+ *
+ * Returns `{ promoted, skipped_stats }`:
+ * - `promoted`: number of queries that were successfully backed by a new rule.
+ * - `skipped_stats`: number of STATS-type queries that were skipped because
+ *    they cannot produce document-level alerts required by the rule executor.
+ *
+ * Clients should branch on these values for accurate user feedback.
+ */
 export const promoteUnbackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_promote',
   options: {
@@ -75,6 +93,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     body: z
       .object({
         queryIds: z.array(z.string()).optional(),
+        minSeverityScore: z.number().int().min(0).max(100).optional(),
       })
       .nullish(),
   }),
@@ -84,14 +103,16 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<{ promoted: number }> => {
-    const { queryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+  }): Promise<{ promoted: number; skipped_stats: number }> => {
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const all = await queryClient.getAllUnbackedQueries();
+    const queryClient = await getQueryClient();
+    const minSeverityScore = params?.body?.minSeverityScore;
+    const all = await queryClient.getAllUnbackedQueries({ minSeverityScore });
     const requestedQueryIds = params?.body?.queryIds ?? [];
 
     let toPromote = all;
@@ -115,6 +136,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     );
 
     let promoted = 0;
+    let skippedStats = 0;
     for (const [streamName, queryIds] of Object.entries(byStream)) {
       const definition = streamDefinitionsByName.get(streamName);
       if (!definition) {
@@ -123,8 +145,9 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
       }
       const result = await queryClient.promoteQueries(definition, queryIds);
       promoted += result.promoted;
+      skippedStats += result.skipped_stats;
     }
-    return { promoted };
+    return { promoted, skipped_stats: skippedStats };
   },
 });
 
@@ -153,12 +176,13 @@ export const demoteBackedQueriesRoute = createServerRoute({
     server,
     logger,
   }): Promise<{ demoted: number }> => {
-    const { queryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const queryClient = await getQueryClient();
     const toDemote = await queryClient.getQueryLinks([], {
       ruleUnbacked: 'exclude',
       queryIds: params.body.queryIds,
@@ -222,7 +246,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     },
   },
   handler: async ({ params, request, getScopedClients, server }): Promise<QueriesGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -241,6 +265,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       searchMode,
     } = params.query;
 
+    const queryClient = await getQueryClient();
     const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
       {
         from,
@@ -288,7 +313,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<QueriesOccurrencesGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -297,6 +322,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 
     const { from, to, bucketSize, query, streamNames } = params.query;
 
+    const queryClient = await getQueryClient();
     const { aggregated_occurrences: aggregatedOccurrenceBuckets } =
       await readSignificantEventsFromAlertsIndices(
         {

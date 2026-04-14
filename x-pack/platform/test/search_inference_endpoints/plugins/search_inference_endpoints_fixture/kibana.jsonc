@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-inference-endpoints-fixture-plugin",
+  "owner": "@elastic/search-kibana",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "searchInferenceEndpointsFixture",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "searchInferenceEndpoints"
+    ]
+  }
+}
