@@ -22,7 +22,7 @@ export function useMenuHeaderStyle() {
     top: 0;
     z-index: 1;
     box-sizing: border-box;
-    padding: ${euiTheme.size.base} 20px ${euiTheme.size.base} 20px;
+    padding: ${euiTheme.size.s} 20px 0 20px;
     margin: 0 1px;
     height: auto;
     min-height: 0;

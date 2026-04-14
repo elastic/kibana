@@ -24,7 +24,7 @@ const getFooterWrapperStyles = (theme: UseEuiTheme['euiTheme']) => css`
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: ${theme.size.s};
+  gap: ${theme.size.xs};
   justify-content: center;
   padding-top: 0;
 `;

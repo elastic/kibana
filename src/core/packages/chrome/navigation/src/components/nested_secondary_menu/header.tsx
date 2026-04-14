@@ -26,17 +26,28 @@ export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescrib
   const { euiTheme } = useEuiTheme();
   const headerStyle = useMenuHeaderStyle();
 
-  const titleStyle = css`
+  const rowStyles = css`
+    ${headerStyle}
     align-items: center;
     background: ${euiTheme.colors.backgroundBasePlain};
     border-radius: 0;
+    box-sizing: border-box;
     display: flex;
     gap: ${euiTheme.size.s};
-    ${headerStyle}
+    height: fit-content;
+    min-height: 0;
+    padding: ${euiTheme.size.base} 20px 0 20px;
+    text-align: start;
+  `;
+
+  const titleStyles = css`
+    flex: 1;
+    min-width: 0;
+    margin-block: 0;
   `;
 
   return (
-    <div css={titleStyle}>
+    <div css={rowStyles}>
       <EuiButtonIcon
         aria-describedby={ariaDescribedBy}
         aria-label={i18n.translate('core.ui.chrome.sideNavigation.goBackButtonIconAriaLabel', {
@@ -47,7 +58,7 @@ export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescrib
         onClick={goBack}
       />
       {title && (
-        <EuiTitle size="xs">
+        <EuiTitle css={titleStyles} size="xs">
           <h4>{title}</h4>
         </EuiTitle>
       )}

@@ -65,7 +65,7 @@ export const SecondaryMenuSectionComponent = ({
     display: flex;
     flex-direction: column;
     width: 100%;
-    gap: ${euiTheme.size.xxs};
+    gap: 0;
   `;
 
   return (

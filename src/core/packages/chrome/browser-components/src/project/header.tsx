@@ -197,7 +197,7 @@ const isProjectRootBreadcrumb = (crumb: ChromeBreadcrumb | undefined): boolean =
 const PROJECT_HEADER_ACTION_BUTTON_PX = PROJECT_HEADER_COMPACT_CONTROL_PX;
 const PROJECT_HEADER_ACTION_ICON_PX = 16;
 
-const getProjectHeaderRightActionsCss = (_euiTheme: EuiThemeComputed) => css`
+const getProjectHeaderRightActionsCss = (euiTheme: EuiThemeComputed) => css`
   gap: 8px;
 
   .euiHeaderSectionItemButton {
@@ -217,9 +217,54 @@ const getProjectHeaderRightActionsCss = (_euiTheme: EuiThemeComputed) => css`
     justify-content: center;
   }
 
-  .euiHeaderSectionItemButton svg {
+  .euiHeaderSectionItemButton:not([data-test-subj='userMenuButton']) svg {
     width: ${PROJECT_HEADER_ACTION_ICON_PX}px;
     height: ${PROJECT_HEADER_ACTION_ICON_PX}px;
+  }
+
+  /* User menu: 32px slot + layout (underline / avatar hover: SecurityNavControl Global). */
+  .euiHeaderSectionItemButton[data-test-subj='userMenuButton'].euiButtonEmpty {
+    &&:hover:not(:disabled),
+    &&:active:not(:disabled),
+    &&:focus,
+    &&:focus-visible {
+      background-color: transparent !important;
+      box-shadow: none !important;
+    }
+
+    &&:hover:not(:disabled)::before,
+    &&:active:not(:disabled)::before {
+      display: none !important;
+      content: none !important;
+      opacity: 0 !important;
+      background: transparent !important;
+    }
+
+    .euiButtonEmpty__content {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      line-height: 0;
+      gap: 0;
+    }
+
+    .euiHeaderSectionItemButton__content {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      line-height: 0;
+    }
+
+    .euiAvatar {
+      width: ${PROJECT_HEADER_ACTION_BUTTON_PX}px;
+      height: ${PROJECT_HEADER_ACTION_BUTTON_PX}px;
+      min-width: ${PROJECT_HEADER_ACTION_BUTTON_PX}px;
+      min-height: ${PROJECT_HEADER_ACTION_BUTTON_PX}px;
+    }
   }
 `;
 

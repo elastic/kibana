@@ -57,8 +57,10 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
       align-items: flex-start;
       background: ${euiTheme.colors.backgroundBasePlain};
       border-radius: 0;
-      border-bottom: ${euiTheme.border.thin};
       text-align: start;
+      padding: ${euiTheme.size.base} 20px 0 20px;
+      height: fit-content;
+      min-height: 0;
     `;
 
     return (
