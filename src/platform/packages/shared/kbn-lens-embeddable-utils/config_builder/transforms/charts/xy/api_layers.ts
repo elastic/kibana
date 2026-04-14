@@ -26,6 +26,8 @@ import {
   isPersistedByReferenceAnnotationsLayer,
   isPersistedLinkedByValueAnnotationsLayer,
 } from '@kbn/lens-common';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   AnnotationLayerByValueType,
   AnnotationLayerType,
@@ -37,10 +39,16 @@ import type {
   ReferenceLineLayerTypeNoESQL,
 } from '../../../schema/charts/xy';
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
-import type { DatasetType } from '../../../schema/dataset';
+import type { DataSourceType } from '../../../schema/data_source';
 import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
-import { isEsqlTableTypeDataset } from '../../../utils';
-import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
+import { isEsqlTableTypeDataSource } from '../../../utils';
+import {
+  AUTO_COLOR,
+  DEFAULT_CATEGORICAL_COLOR_MAPPING,
+  fromColorMappingLensStateToAPI,
+  fromStaticColorLensStateToAPI,
+} from '../../coloring';
+import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING } from './defaults';
 import { getValueApiColumn } from '../../columns/esql_column';
 import { toApiFilterLanguage } from '../../columns/filter';
 import {
@@ -49,7 +57,7 @@ import {
   isAPIColumnOfType,
 } from '../../columns/utils';
 import {
-  buildDatasetState,
+  buildDataSourceState,
   generateApiLayer,
   isDataViewSpec,
   isFormBasedLayer,
@@ -58,20 +66,33 @@ import {
   operationFromColumn,
 } from '../../utils';
 import { stripUndefined } from '../utils';
+import { getYAccessorAxisModeMap, type ResolveAxisId } from './chart';
+import { xyIconCompat } from './helpers';
 
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'>
-): Omit<DataLayerTypeNoESQL, 'type' | 'dataset'>;
+  layer: Omit<FormBasedLayer, 'indexPatternId'>,
+  resolveAxisId: ResolveAxisId
+): Omit<DataLayerTypeNoESQL, 'type' | 'data_source'>;
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
-  layer: TextBasedLayer
-): Omit<DataLayerTypeESQL, 'type' | 'dataset'>;
+  layer: TextBasedLayer,
+  resolveAxisId: ResolveAxisId
+): Omit<DataLayerTypeESQL, 'type' | 'data_source'>;
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
-): Omit<DataLayerTypeNoESQL, 'type' | 'dataset'> | Omit<DataLayerTypeESQL, 'type' | 'dataset'> {
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
+  resolveAxisId: ResolveAxisId
+):
+  | Omit<DataLayerTypeNoESQL, 'type' | 'data_source'>
+  | Omit<DataLayerTypeESQL, 'type' | 'data_source'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
+  const yAccessorModesMap = getYAccessorAxisModeMap(visualization, (accessor) => accessor);
+  const defaultColorMapping =
+    visualization.seriesType === 'line'
+      ? DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+      : DEFAULT_CATEGORICAL_COLOR_MAPPING;
+
   if (isFormBasedLayer(layer)) {
     const x = visualization.xAccessor
       ? operationFromColumn(visualization.xAccessor, layer)
@@ -103,15 +124,13 @@ function convertDataLayerToAPI(
             return undefined;
           }
           const yConfig = yConfigMap.get(accessor);
+
           return {
             ...apiOperation,
-            ...(visualization.colorMapping
-              ? {}
-              : yConfig?.color
-              ? {
-                  color: fromStaticColorLensStateToAPI(yConfig.color),
-                }
-              : {}),
+            color: breakdown_by
+              ? undefined // if there is a breakdown, the color is applied to the breakdown
+              : fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR,
+            axis_id: resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left'),
           };
         })
         .filter(nonNullable) ?? [];
@@ -122,7 +141,9 @@ function convertDataLayerToAPI(
       visualization.xAccessor &&
       layer.columnOrder[0] === visualization.splitAccessors[0]; // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
 
-    const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
+    const color =
+      fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette) ??
+      defaultColorMapping;
     return {
       ...generateApiLayer(layer),
       ...(x ? { x } : {}),
@@ -133,7 +154,7 @@ function convertDataLayerToAPI(
               ...breakdown_by,
               ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
               ...(aggregate_first ? { aggregate_first: true } : {}),
-              ...(color ? { color } : {}),
+              color,
             },
           }
         : {}),
@@ -147,14 +168,17 @@ function convertDataLayerToAPI(
       ? getValueApiColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
       : undefined;
   const y = visualization.accessors?.map((accessor) => {
-    const { color } = yConfigMap.get(accessor) || {};
+    const { color: yColor } = yConfigMap.get(accessor) || {};
     return {
       ...getValueApiColumn(accessor, layer),
-      ...(color ? { color: fromStaticColorLensStateToAPI(color) } : {}),
+      color: breakdown_by ? undefined : fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR,
+      axis_id: resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left'),
     };
   });
 
-  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
+  const color =
+    fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette) ??
+    defaultColorMapping;
   return {
     ...generateApiLayer(layer),
     ...(x ? { x } : {}),
@@ -163,7 +187,7 @@ function convertDataLayerToAPI(
       ? {
           breakdown_by: {
             ...breakdown_by,
-            ...(color ? { color } : {}),
+            color,
             ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
           },
         }
@@ -193,29 +217,30 @@ export function buildAPIDataLayer(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
-  adhocReferences?: SavedObjectReference[]
+  adhocReferences: SavedObjectReference[] | undefined,
+  resolveAxisId: ResolveAxisId
 ): DataLayerType {
   const type = convertSeriesTypeToAPIFormat(visualization.seriesType);
   if (isTextBasedLayer(layer)) {
-    const dataset = buildDatasetState(
+    const dataSource = buildDataSourceState(
       layer,
       visualization.layerId,
       adHocDataViews,
       references,
       adhocReferences
     );
-    const baseLayer = convertDataLayerToAPI(visualization, layer);
-    if (isEsqlTableTypeDataset(dataset)) {
+    const baseLayer = convertDataLayerToAPI(visualization, layer, resolveAxisId);
+    if (isEsqlTableTypeDataSource(dataSource)) {
       return {
         type,
-        dataset,
+        data_source: dataSource,
         ...baseLayer,
       };
     }
     // this should be a never as schema should ensure this scenario never happens
     throw new Error('Text based layers can only be used with ESQL or Table datasets');
   }
-  const dataset = buildDatasetState(
+  const dataSource = buildDataSourceState(
     layer,
     visualization.layerId,
     adHocDataViews,
@@ -223,15 +248,15 @@ export function buildAPIDataLayer(
     adhocReferences
   );
 
-  if (isEsqlTableTypeDataset(dataset)) {
+  if (isEsqlTableTypeDataSource(dataSource)) {
     // this should be a never as schema should ensure this scenario never happens
     throw new Error('Form based layers cannot be used with ESQL or Table datasets');
   }
-  const baseLayer = convertDataLayerToAPI(visualization, layer);
+  const baseLayer = convertDataLayerToAPI(visualization, layer, resolveAxisId);
 
   return {
     type,
-    dataset,
+    data_source: dataSource,
     ...baseLayer,
   };
 }
@@ -245,19 +270,28 @@ function isReferenceLineValidIcon(icon: string | undefined): icon is AvailableRe
 }
 
 function convertReferenceLinesDecorationsToAPIFormat(
-  yConfig: Omit<YConfig, 'forAccessor'>
+  yConfig: Omit<YConfig, 'forAccessor'>,
+  resolveAxisId: ResolveAxisId
 ): Pick<
   ReferenceLineDef,
-  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis' | 'text'
+  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis_id' | 'text'
 > {
+  const resolvedAxisId = (): ReferenceLineDef['axis_id'] | undefined => {
+    if (!yConfig.axisMode || yConfig.axisMode === 'auto') return undefined;
+    if (yConfig.axisMode === 'bottom') return 'x';
+    return resolveAxisId(yConfig.axisMode);
+  };
   return stripUndefined({
-    color: yConfig.color ? fromStaticColorLensStateToAPI(yConfig.color) : undefined,
+    color: fromStaticColorLensStateToAPI(yConfig.color) ?? AUTO_COLOR,
     stroke_dash: yConfig.lineStyle,
     stroke_width: yConfig.lineWidth,
-    icon: isReferenceLineValidIcon(yConfig.icon) ? yConfig.icon : undefined,
+    icon:
+      isReferenceLineValidIcon(yConfig.icon) && yConfig.icon !== 'empty'
+        ? xyIconCompat.toAPI(yConfig.icon)
+        : undefined,
     position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
-    axis: yConfig.axisMode && yConfig.axisMode !== 'auto' ? yConfig.axisMode : undefined,
+    axis_id: resolvedAxisId(),
     text: yConfig.textVisibility != null ? { visible: yConfig.textVisibility } : undefined,
   });
 }
@@ -274,22 +308,28 @@ function getLabelFromLayer(
 
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'>
-): Omit<ReferenceLineLayerTypeNoESQL, 'type' | 'dataset'>;
+  layer: Omit<FormBasedLayer, 'indexPatternId'>,
+  resolveAxisId: ResolveAxisId
+): Omit<ReferenceLineLayerTypeNoESQL, 'type' | 'data_source'>;
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
-  layer: TextBasedLayer
-): Omit<ReferenceLineLayerTypeESQL, 'type' | 'dataset'>;
+  layer: TextBasedLayer,
+  resolveAxisId: ResolveAxisId
+): Omit<ReferenceLineLayerTypeESQL, 'type' | 'data_source'>;
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
-): Omit<ReferenceLineLayerType, 'type' | 'dataset'> {
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
+  resolveAxisId: ResolveAxisId
+): Omit<ReferenceLineLayerType, 'type' | 'data_source'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   const thresholds = (visualization.accessors
     ?.map((accessor): ReferenceLineDef | undefined => {
       const label = getLabelFromLayer(accessor, layer);
       const { forAccessor, ...yConfigRest } = yConfigMap.get(accessor) || {};
-      const decorationConfig = convertReferenceLinesDecorationsToAPIFormat(yConfigRest);
+      const decorationConfig = convertReferenceLinesDecorationsToAPIFormat(
+        yConfigRest,
+        resolveAxisId
+      );
 
       // this is very annoying as TS cannot seem to narrow the type correctly here
       // if we move this check outside the loop
@@ -325,12 +365,32 @@ function convertReferenceLineLayerToAPI(
 
 export function buildAPIReferenceLinesLayer(
   visualization: XYReferenceLineLayerConfig,
+  layer: Omit<FormBasedLayer, 'indexPatternId'>,
+  adHocDataViews: Record<string, unknown>,
+  resolveAxisId: ResolveAxisId,
+  references: SavedObjectReference[],
+  adhocReferences?: SavedObjectReference[]
+): ReferenceLineLayerTypeNoESQL;
+/**
+ * @deprecated ES|QL reference lines are not yet supported
+ */
+export function buildAPIReferenceLinesLayer(
+  visualization: XYReferenceLineLayerConfig,
+  layer: TextBasedLayer,
+  adHocDataViews: Record<string, unknown>,
+  resolveAxisId: ResolveAxisId,
+  references: SavedObjectReference[],
+  adhocReferences?: SavedObjectReference[]
+): ReferenceLineLayerTypeESQL;
+export function buildAPIReferenceLinesLayer(
+  visualization: XYReferenceLineLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, unknown>,
+  resolveAxisId: ResolveAxisId,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): ReferenceLineLayerType {
-  const dataset = buildDatasetState(
+  const dataSource = buildDataSourceState(
     layer,
     visualization.layerId,
     adHocDataViews,
@@ -338,22 +398,22 @@ export function buildAPIReferenceLinesLayer(
     adhocReferences
   );
   if (isTextBasedLayer(layer)) {
-    if (isEsqlTableTypeDataset(dataset)) {
+    if (isEsqlTableTypeDataSource(dataSource)) {
       return {
-        type: 'referenceLines',
-        dataset,
-        ...convertReferenceLineLayerToAPI(visualization, layer),
+        type: 'reference_lines',
+        data_source: dataSource,
+        ...convertReferenceLineLayerToAPI(visualization, layer, resolveAxisId),
       };
     }
     throw new Error('Text based layers can only be used with ESQL or Table datasets');
   }
-  if (isEsqlTableTypeDataset(dataset)) {
+  if (isEsqlTableTypeDataSource(dataSource)) {
     throw new Error('Form based layers cannot be used with ESQL or Table datasets');
   }
   return {
-    type: 'referenceLines',
-    dataset,
-    ...convertReferenceLineLayerToAPI(visualization, layer),
+    type: 'reference_lines',
+    data_source: dataSource,
+    ...convertReferenceLineLayerToAPI(visualization, layer, resolveAxisId),
   };
 }
 
@@ -425,21 +485,24 @@ export function buildAPIAnnotationsLayer(
     layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
   const adHocDataView = adHocDataViews[layer.layerId];
   const referencedDataView = findAnnotationDataView(layer.layerId, references);
-  const dataset = (
+  const dataSource = (
     isDataViewSpec(adHocDataView) && adHocDataView?.id === indexPatternId
       ? {
-          type: 'index',
-          index: indexPatternId,
-          time_field: adHocDataView.timeFieldName!,
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: indexPatternId,
+          time_field: adHocDataView.timeFieldName,
         }
       : {
-          type: 'dataView',
-          id: referencedDataView ?? indexPatternId,
+          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+          ref_id: referencedDataView ?? indexPatternId,
         }
-  ) satisfies Extract<DatasetType, { type: 'index' | 'dataView' }>;
+  ) satisfies Extract<
+    DataSourceType,
+    { type: typeof AS_CODE_DATA_VIEW_REFERENCE_TYPE | typeof AS_CODE_DATA_VIEW_SPEC_TYPE }
+  >;
   return {
     type: 'annotations',
-    dataset,
+    data_source: dataSource,
     ignore_global_filters,
     events: layer.annotations.map((annotation) => {
       if (isQueryAnnotationConfig(annotation)) {
@@ -457,10 +520,10 @@ export function buildAPIAnnotationsLayer(
 
           time_field: annotation.timeField!,
           ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),
-          color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
+          color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
           ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...getTextConfigurationForQueryAnnotation(annotation),
-          ...(annotation.icon ? { icon: annotation.icon } : {}),
+          ...(annotation.icon ? { icon: xyIconCompat.toAPI(annotation.icon) } : {}),
           // lineWidth isn't allowed to be zero, so the truthy check is valid here
           ...(annotation.lineWidth || annotation.lineStyle
             ? {
@@ -479,7 +542,7 @@ export function buildAPIAnnotationsLayer(
             from: annotation.key.timestamp,
             to: annotation.key.endTimestamp,
           },
-          color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
+          color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
           fill: annotation.outside ? 'outside' : 'inside',
           ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...(annotation.label ? { label: annotation.label } : {}),
@@ -489,7 +552,7 @@ export function buildAPIAnnotationsLayer(
       return {
         type: 'point',
         timestamp: annotation.key.timestamp,
-        color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
+        color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
         ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
         ...(annotation.textVisibility != null
           ? {
@@ -497,7 +560,7 @@ export function buildAPIAnnotationsLayer(
             }
           : {}),
         ...(annotation.label ? { label: annotation.label } : {}),
-        ...(annotation.icon ? { icon: annotation.icon } : {}),
+        ...(annotation.icon ? { icon: xyIconCompat.toAPI(annotation.icon) } : {}),
         ...(annotation.lineWidth || annotation.lineStyle
           ? {
               line: {

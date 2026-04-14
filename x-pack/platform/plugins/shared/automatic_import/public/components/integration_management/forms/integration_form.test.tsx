@@ -22,6 +22,7 @@ jest.mock('../../../common/lib/api', () => ({
       items: mockExistingPackageNames.map((id) => ({ id })),
     })
   ),
+  getAllIntegrations: jest.fn(() => Promise.resolve([])),
 }));
 
 const mockServices = coreMock.createStart();
@@ -30,7 +31,7 @@ const mockServices = coreMock.createStart();
 const FormTestConsumer: React.FC<{ onSubmitResult?: (data: IntegrationFormData) => void }> = ({
   onSubmitResult,
 }) => {
-  const { isValid, submit } = useIntegrationForm();
+  const { isValid, isFormModified, submit } = useIntegrationForm();
 
   const handleSubmit = async () => {
     const result = await submit();
@@ -66,6 +67,15 @@ const FormTestConsumer: React.FC<{ onSubmitResult?: (data: IntegrationFormData) 
             data-test-subj="connectorIdInput"
             value={field.value as string}
             onChange={(e) => field.setValue(e.target.value)}
+          />
+        )}
+      </UseField>
+      <UseField<string | undefined> path="logo">
+        {(field) => (
+          <input
+            data-test-subj="logoInput"
+            value={(field.value as string) || ''}
+            onChange={(e) => field.setValue(e.target.value || undefined)}
           />
         )}
       </UseField>
@@ -115,6 +125,7 @@ const FormTestConsumer: React.FC<{ onSubmitResult?: (data: IntegrationFormData) 
         )}
       </UseField>
       <span data-test-subj="isValid">{String(isValid)}</span>
+      <span data-test-subj="isFormModified">{String(isFormModified)}</span>
       <button type="button" data-test-subj="submitButton" onClick={handleSubmit}>
         {'Submit'}
       </button>
@@ -222,6 +233,97 @@ describe('IntegrationFormProvider', () => {
       await advancePastDebounce();
 
       expect(getByTestId('isValid').textContent).toBe('false');
+    });
+  });
+
+  describe('useIntegrationForm hook - isFormModified state', () => {
+    it('should return isFormModified=false when no fields have changed from initial values', async () => {
+      const { getByTestId } = renderForm({
+        initialValue: { title: 'My Integration', description: 'My Description' },
+      });
+
+      await advancePastDebounce();
+
+      expect(getByTestId('isFormModified').textContent).toBe('false');
+    });
+
+    it('should return isFormModified=true when title is changed', async () => {
+      const { getByTestId } = renderForm({
+        initialValue: { title: 'My Integration', description: 'My Description' },
+      });
+
+      await act(async () => {
+        fireEvent.change(getByTestId('titleInput'), { target: { value: 'Updated Title' } });
+      });
+      await advancePastDebounce();
+
+      expect(getByTestId('isFormModified').textContent).toBe('true');
+    });
+
+    it('should return isFormModified=true when description is changed', async () => {
+      const { getByTestId } = renderForm({
+        initialValue: { title: 'My Integration', description: 'My Description' },
+      });
+
+      await act(async () => {
+        fireEvent.change(getByTestId('descriptionInput'), {
+          target: { value: 'Updated Description' },
+        });
+      });
+      await advancePastDebounce();
+
+      expect(getByTestId('isFormModified').textContent).toBe('true');
+    });
+
+    it('should return isFormModified=true when logo is changed', async () => {
+      const { getByTestId } = renderForm({
+        initialValue: { title: 'My Integration', description: 'My Description' },
+      });
+
+      await act(async () => {
+        fireEvent.change(getByTestId('logoInput'), { target: { value: 'base64logodata' } });
+      });
+      await advancePastDebounce();
+
+      expect(getByTestId('isFormModified').textContent).toBe('true');
+    });
+
+    it('should return isFormModified=false when title is changed back to initial value', async () => {
+      const { getByTestId } = renderForm({
+        initialValue: { title: 'My Integration', description: 'My Description' },
+      });
+
+      await act(async () => {
+        fireEvent.change(getByTestId('titleInput'), { target: { value: 'Updated Title' } });
+      });
+      await advancePastDebounce();
+      expect(getByTestId('isFormModified').textContent).toBe('true');
+
+      await act(async () => {
+        fireEvent.change(getByTestId('titleInput'), { target: { value: 'My Integration' } });
+      });
+      await advancePastDebounce();
+
+      expect(getByTestId('isFormModified').textContent).toBe('false');
+    });
+
+    it('should return isFormModified=false when only connectorId is changed', async () => {
+      const { getByTestId } = renderForm({
+        initialValue: {
+          title: 'My Integration',
+          description: 'My Description',
+          connectorId: 'connector-original',
+        },
+      });
+
+      await act(async () => {
+        fireEvent.change(getByTestId('connectorIdInput'), {
+          target: { value: 'connector-updated' },
+        });
+      });
+      await advancePastDebounce();
+
+      expect(getByTestId('isFormModified').textContent).toBe('false');
     });
   });
 

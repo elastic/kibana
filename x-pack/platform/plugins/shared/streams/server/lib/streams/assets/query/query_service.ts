@@ -33,6 +33,10 @@ import { getQueryStorageSettings } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
 import type { InferenceResolver } from './helpers/inference_availability';
+import {
+  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+  type SigEventsTuningConfig,
+} from '../../../../../common/sig_events_tuning_config';
 
 export class QueryService {
   constructor(
@@ -45,10 +49,12 @@ export class QueryService {
     esClient,
     soClient,
     rulesClient,
+    config = DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   }: {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     rulesClient: RulesClient;
+    config?: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant'>;
   }): Promise<QueryClient> {
     const [core] = await this.coreSetup.getStartServices();
 
@@ -141,7 +147,8 @@ export class QueryService {
         logger: this.logger,
       },
       isSignificantEventsEnabled,
-      inferenceAvailable
+      inferenceAvailable,
+      config
     );
   }
 }

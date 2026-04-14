@@ -124,7 +124,6 @@ describe('extractEsqlVariables', () => {
     width: 'medium',
     grow: false,
     control_type: EsqlControlType.STATIC_VALUES,
-    esql_query: '',
   });
 
   it('should extract variables from control panels', () => {
