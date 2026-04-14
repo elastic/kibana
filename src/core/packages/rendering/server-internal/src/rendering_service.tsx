@@ -63,7 +63,8 @@ function parseBrowserLocale(acceptLanguage: string | string[] | undefined): stri
   // Parse entries like "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7"
   const entries = acceptLanguage.split(',').map((entry) => {
     const [langTag, qParam] = entry.trim().split(';');
-    const q = qParam ? parseFloat(qParam.replace('q=', '')) : 1.0;
+    const parsed = qParam ? parseFloat(qParam.replace('q=', '')) : 1.0;
+    const q = Number.isNaN(parsed) ? 0 : parsed;
     return { lang: langTag.trim(), q };
   });
 
