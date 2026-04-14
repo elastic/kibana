@@ -23,11 +23,11 @@ const authSchema = z
       .string()
       .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
       .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
-    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
     clientSecret: z
       .string()
       .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
       .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
+    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
     useBasicAuth: z.boolean().default(true).optional().meta({
       hidden: true, // Hidden from UI - uses connector spec defaults
     }),

@@ -53,7 +53,7 @@ function toPublicEngine(
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
   const { versionState, logExtractionState, ...rest } = engine;
-  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter } =
+  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter, maxLogsPerPage } =
     logsExtractionConfig;
 
   return {
@@ -65,6 +65,7 @@ function toPublicEngine(
     frequency,
     lookbackPeriod,
     fieldHistoryLength,
+    maxLogsPerPage,
     docsPerSecond: -1,
     indexPattern: '',
     enrichPolicyExecutionInterval: null,
