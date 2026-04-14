@@ -58,7 +58,7 @@ describe('GET /internal/evals/experiments/suites', () => {
 
     expect(res.status).toBe(200);
     expect(res.payload).toEqual({
-      suites: [{ id: 'suite-1', name: 'Suite 1', description: 'desc' }],
+      suites: [{ id: 'suite-1', name: 'Suite 1', description: 'desc', tags: undefined }],
     });
   });
 });

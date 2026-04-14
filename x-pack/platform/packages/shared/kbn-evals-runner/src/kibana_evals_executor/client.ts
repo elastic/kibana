@@ -198,7 +198,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   result,
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
-                  exampleId: example.id,
+                  exampleId: example.id ?? String(exampleIndex),
                 };
                 evaluationRuns.push(evalRun);
 

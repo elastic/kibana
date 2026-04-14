@@ -66,6 +66,9 @@ export const queryKeys = {
     run: (workflowExecutionId: string) =>
       ['evals', 'experiments', 'run', workflowExecutionId] as const,
     logs: (workflowExecutionId: string, options?: { page?: number; size?: number }) =>
-      ['evals', 'experiments', 'logs', workflowExecutionId, options] as const,
+      [
+        ...(['evals', 'experiments', 'logs', workflowExecutionId] as const),
+        ...(options ? ([options] as const) : []),
+      ] as const,
   },
 };

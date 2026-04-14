@@ -72,7 +72,7 @@ export interface ScoreDocumentRunMetadata {
   gitCommitSha?: string | null;
 }
 
-function getTaskRun(evalRun: EvaluationRun, runs: RanExperiment['runs']): TaskRun {
+function getTaskRun(evalRun: EvaluationRun, runs: RanExperiment['runs']): TaskRun | undefined {
   return runs[evalRun.experimentRunId];
 }
 
@@ -105,6 +105,7 @@ export async function mapToEvaluationScoreDocuments({
 
     for (const evalRun of evaluationRuns) {
       const taskRun = getTaskRun(evalRun, runs);
+      if (!taskRun) continue;
       const exampleId = evalRun.exampleId ?? String(taskRun.exampleIndex);
 
       documents.push({
