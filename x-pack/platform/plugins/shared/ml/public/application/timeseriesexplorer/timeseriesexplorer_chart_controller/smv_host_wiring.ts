@@ -131,14 +131,14 @@ function buildSmvFocusPipelineStatePatch(args: {
   const focusChartLength = Array.isArray(focusChartData) ? focusChartData.length : 0;
 
   return {
+    ...refreshFocusData,
+    ...(tableData ?? {}),
     focusAggregationInterval: getFocusAggregationInterval(selection),
     loading: false,
     showModelBoundsCheckbox: modelPlotEnabled && focusChartLength > 0,
     zoomFromFocusLoaded: selection.from,
     zoomToFocusLoaded: selection.to,
     showForecastCheckbox: Boolean(selectedForecastId && refreshFocusData.showForecastCheckbox),
-    ...refreshFocusData,
-    ...(tableData ?? {}),
   };
 }
 

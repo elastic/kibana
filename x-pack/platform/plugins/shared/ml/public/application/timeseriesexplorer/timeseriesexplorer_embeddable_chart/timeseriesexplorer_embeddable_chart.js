@@ -41,7 +41,7 @@ import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explore
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
 import { mlJobServiceFactory } from '../../services/job_service';
 import { forecastServiceFactory } from '../../services/forecast_service';
-import { SingleMetricViewerTitle } from './timeseriesexplorer_title';
+import { EntityFieldNamesAndFilterButtons } from './timeseriesexplorer_title';
 import {
   SingleMetricViewerChartSurface,
   buildCriteriaFields,
@@ -628,9 +628,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
-              <SingleMetricViewerTitle
+              <EntityFieldNamesAndFilterButtons
                 api={this.props.api}
-                functionLabel={chartDetails.functionLabel}
                 entityData={chartDetails.entityData}
               />
               <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
