@@ -13,6 +13,7 @@ import { createScreenContextAttachmentType } from './screen_context';
 import { createVisualizationAttachmentType } from './visualization';
 import { createGraphAttachmentType } from './graph';
 import { createConnectorAttachmentType } from './connector';
+import { createA2UISurfaceAttachmentType } from './a2ui_surface';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -35,6 +36,7 @@ export const registerAttachmentTypes = ({
     createVisualizationAttachmentType(),
     createGraphAttachmentType(),
     createConnectorAttachmentType(),
+    createA2UISurfaceAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

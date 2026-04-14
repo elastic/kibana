@@ -26,6 +26,7 @@ export const platformCoreTools = {
   generateEsql: platformCoreTool('generate_esql'),
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
+  createA2UISurface: platformCoreTool('create_a2ui_surface'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
   productDocumentation: platformCoreTool('product_documentation'),

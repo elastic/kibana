@@ -23,6 +23,7 @@ import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
+import { createA2UISurfaceTool } from './create_a2ui_surface';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
@@ -44,6 +45,7 @@ export const registerTools = ({
     listIndicesTool(),
     indexExplorerTool(),
     createVisualizationTool(),
+    createA2UISurfaceTool(),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
     casesTool(coreSetup),

@@ -65,6 +65,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
+import { createA2UISurfaceAttachmentDefinition } from './application/components/attachments/a2ui_surface_attachment';
 
 export class AgentBuilderPlugin
   implements
@@ -147,6 +148,8 @@ export class AgentBuilderPlugin
       'visualization',
       createVisualizationAttachmentDefinition({ startDependencies })
     );
+
+    attachmentsService.addAttachmentType('a2ui_surface', createA2UISurfaceAttachmentDefinition());
 
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
