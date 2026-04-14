@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -14,11 +15,16 @@ import {
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import type { OverviewStatusState, SyntheticsParams } from '../../../common/runtime_types';
+import type {
+  EncryptedSyntheticsMonitorAttributes,
+  OverviewStatusState,
+  SyntheticsParams,
+} from '../../../common/runtime_types';
 import type { SyntheticsServerSetup } from '../../types';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import type { OverviewStatusQuery } from '../common';
 import { OverviewStatusService } from '../overview_status/overview_status_service';
+import type { SyntheticsEsClient } from '../../lib';
 import { getPrivateLocationsAndAgentPolicies } from '../settings/private_locations/get_private_locations';
 import { getAgentPoliciesAsInternalUser } from '../settings/private_locations/get_agent_policies';
 import {
@@ -62,7 +68,7 @@ const listAllSyntheticsPackagePolicies = async (
 ): Promise<PackagePolicy[]> => {
   const items: PackagePolicy[] = [];
   let page = 1;
-  const perPage = 500;
+  const perPage = 1000;
   let hasMore = true;
 
   while (hasMore) {
@@ -116,13 +122,44 @@ const collectGlobalParamMetadata = async (savedObjectsClient: SavedObjectsClient
   return params;
 };
 
+const fetchIndicesDiagnostics = async (syntheticsEsClient: SyntheticsEsClient) => {
+  try {
+    const [mappings, settings, stats] = await Promise.all([
+      syntheticsEsClient.baseESClient.indices.getMapping({
+        index: 'synthetics-*',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      }),
+      syntheticsEsClient.baseESClient.indices.getSettings({
+        index: 'synthetics-*',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      }),
+      syntheticsEsClient.baseESClient.indices.stats({
+        index: 'synthetics-*',
+        metric: ['store', 'docs'],
+      }),
+    ]);
+    return { mappings, settings, stats };
+  } catch (e) {
+    return {
+      error: e instanceof Error ? e.message : String(e),
+    };
+  }
+};
+
 const getOverviewStatusForDiagnostics = async (
-  routeContext: RouteContext
+  routeContext: RouteContext,
+  monitorSavedObjects: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>
 ): Promise<OverviewStatusState | { error: string }> => {
   try {
     return await new OverviewStatusService(
       routeContext as RouteContext<Record<string, unknown>, OverviewStatusQuery>
-    ).getOverviewStatus();
+    ).getOverviewStatusWithPrefetchedMonitors(
+      monitorSavedObjects as Array<
+        SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { urls?: string }>
+      >
+    );
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) };
   }
@@ -150,7 +187,7 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
       packagePolicies,
       globalParams,
       dynamicSettings,
-      overviewStatus,
+      indices,
     ] = await Promise.all([
       monitorConfigRepository.getAll({}),
       getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient),
@@ -158,8 +195,13 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
       listAllSyntheticsPackagePolicies(savedObjectsClient, server),
       collectGlobalParamMetadata(savedObjectsClient),
       getSyntheticsDynamicSettings(savedObjectsClient),
-      getOverviewStatusForDiagnostics(routeContext),
+      fetchIndicesDiagnostics(syntheticsEsClient),
     ]);
+
+    const overviewStatusPromise = getOverviewStatusForDiagnostics(
+      routeContext,
+      monitorSavedObjects
+    );
 
     const referencedPackagePolicyIds = new Set<string>();
     for (const so of monitorSavedObjects) {
@@ -180,40 +222,9 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
       attributes: redactMonitorAttributesForDiagnostics(so.attributes as Record<string, unknown>),
     }));
 
-    let indices:
-      | {
-          mappings?: unknown;
-          settings?: unknown;
-          stats?: unknown;
-          error?: string;
-        }
-      | undefined;
-
-    try {
-      const [mappings, settings, stats] = await Promise.all([
-        syntheticsEsClient.baseESClient.indices.getMapping({
-          index: 'synthetics-*',
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        }),
-        syntheticsEsClient.baseESClient.indices.getSettings({
-          index: 'synthetics-*',
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        }),
-        syntheticsEsClient.baseESClient.indices.stats({
-          index: 'synthetics-*',
-          metric: ['store', 'docs'],
-        }),
-      ]);
-      indices = { mappings, settings, stats };
-    } catch (e) {
-      indices = {
-        error: e instanceof Error ? e.message : String(e),
-      };
-    }
-
     const packagePolicySummaries = packagePolicies.map(summarizePackagePolicy);
+
+    const overviewStatus = await overviewStatusPromise;
 
     return {
       meta: {

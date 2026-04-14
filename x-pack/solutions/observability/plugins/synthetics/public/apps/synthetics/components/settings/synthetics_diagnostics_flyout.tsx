@@ -8,11 +8,13 @@
 import React, { useCallback, useState } from 'react';
 import {
   EuiAccordion,
+  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -20,22 +22,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fetchSyntheticsDiagnostics } from './hooks/api';
-
-const ORDERED_SECTION_KEYS: string[] = [
-  'meta',
-  'overviewStatus',
-  'monitors',
-  'monitorCountByLocationId',
-  'referencedPackagePolicyIds',
-  'packagePolicies',
-  'privateLocations',
-  'privateLocationAgentPolicies',
-  'fleetAgentPolicies',
-  'globalParams',
-  'dynamicSettings',
-  'indices',
-  'syntheticsServiceSyncErrors',
-];
+import {
+  getDiagnosticsSectionKeysInOrder,
+  jsonStringifyDiagnostics,
+} from './synthetics_diagnostics_utils';
+import {
+  downloadSyntheticsDiagnosticsZip,
+  showDiagnosticsZipErrorToast,
+} from './synthetics_diagnostics_zip_download';
 
 const getSectionTitle = (key: string): string => {
   const titles: Record<string, string> = {
@@ -88,23 +82,10 @@ const getSectionTitle = (key: string): string => {
   return titles[key] ?? key;
 };
 
-const jsonStringify = (value: unknown): string => {
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-};
-
-const getSectionKeysInOrder = (data: Record<string, unknown>): string[] => {
-  const known = new Set(ORDERED_SECTION_KEYS);
-  const extra = Object.keys(data).filter((k) => !known.has(k));
-  return [...ORDERED_SECTION_KEYS.filter((k) => k in data), ...extra.sort()];
-};
-
 export function SyntheticsDiagnosticsFlyoutLauncher() {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [zipExporting, setZipExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<Record<string, unknown> | null>(null);
 
@@ -129,6 +110,20 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
 
   const onClose = () => {
     setIsOpen(false);
+  };
+
+  const onDownloadZip = async () => {
+    if (!data) {
+      return;
+    }
+    setZipExporting(true);
+    try {
+      await downloadSyntheticsDiagnosticsZip(data);
+    } catch (e) {
+      showDiagnosticsZipErrorToast(e);
+    } finally {
+      setZipExporting(false);
+    }
   };
 
   return (
@@ -176,7 +171,7 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
               </EuiCallOut>
             ) : null}
             {!loading && !error && data
-              ? getSectionKeysInOrder(data).map((key) => (
+              ? getDiagnosticsSectionKeysInOrder(data).map((key) => (
                   <React.Fragment key={key}>
                     <EuiAccordion
                       id={`synthetics-diagnostics-${key}`}
@@ -190,7 +185,7 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
                         fontSize="s"
                         data-test-subj={`syntheticsDiagnosticsSection-${key}`}
                       >
-                        {jsonStringify(data[key])}
+                        {jsonStringifyDiagnostics(data[key])}
                       </EuiCodeBlock>
                     </EuiAccordion>
                     <EuiSpacer size="s" />
@@ -198,6 +193,19 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
                 ))
               : null}
           </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiButton
+              data-test-subj="syntheticsDiagnosticsDownloadZipButton"
+              iconType="download"
+              onClick={() => void onDownloadZip()}
+              isLoading={zipExporting}
+              isDisabled={!data || loading || Boolean(error)}
+            >
+              {i18n.translate('xpack.synthetics.diagnostics.downloadZipButton', {
+                defaultMessage: 'Download ZIP (JSON files)',
+              })}
+            </EuiButton>
+          </EuiFlyoutFooter>
         </EuiFlyout>
       ) : null}
     </>
