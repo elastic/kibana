@@ -44,7 +44,7 @@ export const BulkTagsModal = ({ onClose, onSave, services }: BulkTagsModalProps)
   }));
 
   const handleChange = useCallback((nextOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    setSelectedOptions(nextOptions);
+    setSelectedOptions(nextOptions.slice(0, MAX_TAGS_PER_EPISODE));
   }, []);
 
   const handleCreateOption = useCallback(
