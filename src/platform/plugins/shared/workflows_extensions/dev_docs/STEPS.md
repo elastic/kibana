@@ -459,11 +459,12 @@ For a complete working example, see the `external_step` implementation in `examp
 
 #### Performance Considerations
 
-The selection interface includes built-in caching for resolved entities to optimize performance:
+The workflows editor does **not** apply a generic cache around `search` or `resolve`. Each call goes to your handlers, so repeated validation or autocomplete may invoke them multiple times.
 
-- Resolved entities are cached for 30 seconds to avoid redundant API calls
-- The `resolve` function is only called when needed (on load, paste, or when validation is triggered), and if the value is valid against the schema.
-- The `search` function is called lazily when the user triggers autocomplete
+- The `search` function runs when the user triggers autocomplete for that property.
+- The `resolve` function is invoked when the YAML validator runs for a property (for values that pass schema checks), and whenever the editor needs to resolve a defined value without using the editor completion (e.g. initial load, pasted value).
+
+If you need to reduce duplicate requests (for example, searching the same value while other step fields are unchanged), implement caching **inside your selection handlers**, using whatever subset of `SelectionContext` (including `context.values`) defines a cache hit. A shared TTL cache in the platform was removed because the entire step definition now participates in search context; only each handler knows which inputs make a cached result still valid.
 
 ### Step 4: Register in Plugin Setup
 
