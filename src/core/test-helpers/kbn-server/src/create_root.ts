@@ -30,6 +30,7 @@ import { loadJsonFile } from '@kbn/utils';
 
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
+import { resolveKibanaVersion } from './utils';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put' | 'patch';
 
@@ -67,6 +68,16 @@ const DEFAULTS_SETTINGS = {
   migrations: { skip: false },
 };
 
+/**
+ * Creates a test {@link Root} instance with the given configuration overrides.
+ *
+ * @param settings - Config key/value pairs merged on top of the default test settings.
+ * @param cliArgs - CLI argument overrides applied to the Kibana environment.
+ * @param customKibanaVersion - When provided, overrides the Kibana version from `package.json`.
+ *   Accepts a concrete semver string (e.g. `'9.0.0'`). Special version tokens such as
+ *   `'nextMinor'` and `'previousMinor'` must be resolved to a concrete version first
+ *   (e.g. via {@link resolveKibanaVersion} in {@link createTestServers}).
+ */
 export function createRootWithSettings(
   settings: Record<string, any>,
   cliArgs: Partial<CliArgs> = {},
@@ -331,7 +342,15 @@ export function createTestServers({
       };
     },
     startKibana: async (abortSignal?: AbortSignal) => {
-      const root = createRootWithCorePlugins(kbnSettings, cliArgs, customKibanaVersion);
+      // Get the actual running ES version so we can compute a version that is guaranteed to
+      // differ from it, regardless of what the Kibana package.json says.
+      const {
+        version: { number: esVersion },
+      } = await es.getClient().info();
+
+      const resolvedKibanaVersion = resolveKibanaVersion(customKibanaVersion, esVersion);
+
+      const root = createRootWithCorePlugins(kbnSettings, cliArgs, resolvedKibanaVersion);
 
       abortSignal?.addEventListener('abort', async () => await root.shutdown());
 
