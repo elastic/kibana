@@ -253,6 +253,7 @@ export class TaskStore {
     }> = [];
     let apiKeySOFieldsMap: Map<string, ApiKeySOFields> | null = null;
 
+    // If a task with an API key is updated with a request
     if (hasEncryptedFields && options?.request && options?.regenerateApiKey) {
       const docsWithApiKeys: ConcreteTaskInstance[] = [];
 
@@ -267,6 +268,7 @@ export class TaskStore {
         }
       });
 
+      // and create new API keys using the new request
       if (docsWithApiKeys.length) {
         apiKeySOFieldsMap = await this.grantApiKeysFromRequest(docsWithApiKeys, options.request);
       }
