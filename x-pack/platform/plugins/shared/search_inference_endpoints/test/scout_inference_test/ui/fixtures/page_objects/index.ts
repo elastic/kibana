@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export const wait = (time = 1000) => new Promise((resolve) => setTimeout(resolve, time));
-
-// Return an array of policy names
-export const getPolicyNames = (policies) => policies.map(({ name }) => name);
+export { FeatureSettingsPage } from './feature_settings_page';

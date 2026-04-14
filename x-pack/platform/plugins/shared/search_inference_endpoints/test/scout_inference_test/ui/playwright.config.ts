@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export const LENS_ATTACHMENT_TYPE = '.lens';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
