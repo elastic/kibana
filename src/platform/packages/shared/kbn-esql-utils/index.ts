@@ -71,7 +71,6 @@ export {
   isComputedColumn,
   getQuerySummary,
   getEsqlControls,
-  getWiredStreams,
   type ESQLStatsQueryMeta,
 } from './src';
 

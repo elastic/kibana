@@ -22,7 +22,6 @@ import {
 } from './sources';
 import { EsqlQuery, synth, Walker } from '@elastic/esql';
 import type { ESQLAstJoinCommand } from '@elastic/esql/types';
-import type { Streams } from '@kbn/streams-schema';
 
 describe('specialIndicesToSuggestions()', () => {
   test('converts join indices to suggestions', () => {
@@ -362,85 +361,51 @@ describe('getSourceOfJoinTarget', () => {
 });
 
 describe('hasWiredStreamsInQuery', () => {
-  const dataStreamSource = (name: string) =>
-    ({ name, hidden: false, type: SOURCES_TYPES.DATA_STREAM } as ESQLSourceResult);
+  const wiredStreamSource = (name: string) =>
+    ({ name, hidden: false, type: SOURCES_TYPES.WIRED_STREAM } as ESQLSourceResult);
 
   const indexSource = (name: string) =>
     ({ name, hidden: false, type: SOURCES_TYPES.INDEX } as ESQLSourceResult);
 
-  const wiredStream = (name: string) => ({ name } as Streams.WiredStream.Definition);
-
   it('returns false when getSources is missing', async () => {
-    const result = await hasWiredStreamsInQuery('FROM logs-ds', {
-      getWiredStreams: async () => [wiredStream('logs-ds')],
-    });
-    expect(result).toBe(false);
-  });
-
-  it('returns false when getWiredStreams is missing', async () => {
-    const result = await hasWiredStreamsInQuery('FROM logs-ds', {
-      getSources: async () => [dataStreamSource('logs-ds')],
-    });
+    const result = await hasWiredStreamsInQuery('FROM logs-ds', {});
     expect(result).toBe(false);
   });
 
   it('returns false and does not call any callbacks when the query has no FROM sources', async () => {
-    const getSources = jest.fn(async () => [dataStreamSource('ignored')]);
-    const getWiredStreams = jest.fn(async () => [wiredStream('ignored')]);
+    const getSources = jest.fn(async () => [wiredStreamSource('ignored')]);
 
-    const result = await hasWiredStreamsInQuery('ROW x = 1', { getSources, getWiredStreams });
+    const result = await hasWiredStreamsInQuery('ROW x = 1', { getSources });
 
     expect(result).toBe(false);
     expect(getSources).not.toHaveBeenCalled();
-    expect(getWiredStreams).not.toHaveBeenCalled();
-  });
-
-  it('returns false without calling getWiredStreams when no query source is a data stream', async () => {
-    const getSources = jest.fn(async () => [indexSource('index')]);
-    const getWiredStreams = jest.fn(async () => [wiredStream('index')]);
-
-    const result = await hasWiredStreamsInQuery('FROM index', {
-      getSources,
-      getWiredStreams,
-    });
-
-    expect(result).toBe(false);
-    expect(getSources).toHaveBeenCalledTimes(1);
-    expect(getWiredStreams).not.toHaveBeenCalled();
   });
 
   it('returns false when a data stream is used but it is not a wired stream', async () => {
-    const getSources = jest.fn(async () => [dataStreamSource('logs')]);
-    const getWiredStreams = jest.fn(async () => [wiredStream('other.wired')]);
+    const getSources = jest.fn(async () => [indexSource('logs')]);
 
-    const result = await hasWiredStreamsInQuery('FROM logs', { getSources, getWiredStreams });
+    const result = await hasWiredStreamsInQuery('FROM logs', { getSources });
 
     expect(result).toBe(false);
-    expect(getWiredStreams).toHaveBeenCalledTimes(1);
   });
 
   it('returns true when the query has a source that is a wired stream', async () => {
-    const getSources = jest.fn(async () => [dataStreamSource('logs.otel.child')]);
-    const getWiredStreams = jest.fn(async () => [wiredStream('logs.otel.child')]);
+    const getSources = jest.fn(async () => [wiredStreamSource('logs.otel.child')]);
 
     const result = await hasWiredStreamsInQuery('FROM logs.otel.child | LIMIT 10', {
       getSources,
-      getWiredStreams,
     });
 
     expect(result).toBe(true);
     expect(getSources).toHaveBeenCalledTimes(1);
-    expect(getWiredStreams).toHaveBeenCalledTimes(1);
   });
 
   it('returns true when the wired stream has a wildcard in the name', async () => {
-    const getSources = jest.fn(async () => [dataStreamSource('logs')]);
-    const getWiredStreams = jest.fn(async () => [wiredStream('logs')]);
+    const getSources = jest.fn(async () => [wiredStreamSource('logs')]);
 
-    const result = await hasWiredStreamsInQuery('FROM logs*', { getSources, getWiredStreams });
+    const result = await hasWiredStreamsInQuery('FROM logs*', { getSources });
 
     expect(result).toBe(true);
     expect(getSources).toHaveBeenCalledTimes(1);
-    expect(getWiredStreams).toHaveBeenCalledTimes(1);
   });
 });
