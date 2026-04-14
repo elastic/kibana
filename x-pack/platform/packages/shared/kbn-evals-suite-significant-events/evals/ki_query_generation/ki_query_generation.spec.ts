@@ -8,7 +8,7 @@
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 import { tags } from '@kbn/scout';
-import kbnDatemath from '@kbn/datemath';
+
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { Feature, Streams } from '@kbn/streams-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
@@ -240,8 +240,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   const { queries, toolUsage } = await generateSignificantEvents({
                     stream,
                     esClient,
-                    start: kbnDatemath.parse('now-24h')!.valueOf(),
-                    end: kbnDatemath.parse('now')!.valueOf(),
                     inferenceClient,
                     logger,
                     signal: new AbortController().signal,
@@ -322,8 +320,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               const { queries } = await generateSignificantEvents({
                 stream: streamFromApi as Streams.all.Definition,
                 esClient,
-                start: kbnDatemath.parse('now-24h')!.valueOf(),
-                end: kbnDatemath.parse('now')!.valueOf(),
                 inferenceClient,
                 logger,
                 signal: new AbortController().signal,

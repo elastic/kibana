@@ -686,8 +686,7 @@
                 "docId": "kibSearchInferenceEndpointsPluginApi",
                 "section": "def-server.SearchInferenceEndpointsPluginSetup",
                 "text": "SearchInferenceEndpointsPluginSetup"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
             "lineNumber": 52,
@@ -976,8 +975,7 @@
                 "docId": "kibSearchInferenceEndpointsPluginApi",
                 "section": "def-server.SearchInferenceEndpointsPluginStart",
                 "text": "SearchInferenceEndpointsPluginStart"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
             "lineNumber": 67,
