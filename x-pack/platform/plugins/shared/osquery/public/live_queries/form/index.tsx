@@ -335,7 +335,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
               </EuiFlexItem>
               {submitButtonContent}
-              {data?.action_id ? (
+              {data?.action_id && !onSuccess ? (
                 <EuiFlexItem>
                   {isHistoryEnabled ? (
                     <PackQueriesStatusTable
