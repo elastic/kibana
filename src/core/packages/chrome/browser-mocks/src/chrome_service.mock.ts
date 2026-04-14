@@ -92,6 +92,8 @@ const createStartContractMock = () => {
     project: lazyObject({
       setCloudUrls: jest.fn(),
       setKibanaName: jest.fn(),
+      getKibanaName$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      getKibanaName: jest.fn().mockReturnValue(undefined),
       initNavigation: jest.fn(),
       setBreadcrumbs: jest.fn(),
       setSpaceSwitcherBreadcrumb: jest.fn(),

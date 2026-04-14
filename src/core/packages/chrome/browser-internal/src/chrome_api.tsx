@@ -59,6 +59,8 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
   const project: InternalChromeStart['project'] = {
     setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
     setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
+    getKibanaName$: () => projectNavigation.getKibanaName$(),
+    getKibanaName: () => projectNavigation.getKibanaName(),
     initNavigation: (id, navigationTree$) => {
       validateProjectStyle();
       projectNavigation.initNavigation(id, navigationTree$);

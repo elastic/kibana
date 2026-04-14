@@ -36,6 +36,8 @@ const LazySpaceAvatar = lazy(() =>
 
 export interface ProjectChromeSwitcherRootMenuProps {
   activeSpace: Space;
+  /** Matches the deployment / project line in the header switcher trigger. */
+  deploymentDisplayName: string;
   allowSolutionVisibility: boolean;
   /**
    * Spaces list UI; receives `navigateToPreviousContextPanel` to return to the root switcher
@@ -89,6 +91,7 @@ function getSolutionSubtitleMessage(solution?: Space['solution']) {
 
 export function ProjectChromeSwitcherRootMenu({
   activeSpace,
+  deploymentDisplayName,
   allowSolutionVisibility,
   spacesMenu,
 }: ProjectChromeSwitcherRootMenuProps) {
@@ -102,14 +105,6 @@ export function ProjectChromeSwitcherRootMenu({
   }, []);
 
   const inertFooterMenuItemClick = useCallback(() => {}, []);
-
-  const deploymentTitle = useMemo(
-    () =>
-      i18n.translate('xpack.spaces.navControl.projectChromeSwitcherRoot.deploymentName', {
-        defaultMessage: 'Local deployment',
-      }),
-    []
-  );
 
   const deploymentsPanelTitle = useMemo(
     () =>
@@ -232,7 +227,7 @@ export function ProjectChromeSwitcherRootMenu({
                 responsive={false}
               >
                 <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.regular }}>
-                  {deploymentTitle}
+                  {deploymentDisplayName}
                 </EuiText>
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
@@ -423,7 +418,7 @@ export function ProjectChromeSwitcherRootMenu({
       allowSolutionVisibility,
       connectionDetailsLabel,
       createDeploymentLabel,
-      deploymentTitle,
+      deploymentDisplayName,
       deploymentsPanelTitle,
       euiTheme.font.weight.regular,
       euiTheme.size.m,

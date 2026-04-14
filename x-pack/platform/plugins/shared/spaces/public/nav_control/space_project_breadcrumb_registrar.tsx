@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
 import type { ApplicationStart, Capabilities, CoreStart } from '@kbn/core/public';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
@@ -15,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SpacesMenu } from './components/spaces_menu';
 import { useSpaces } from './hooks/use_spaces';
+import { getProjectChromeDeploymentDisplayName } from './project_chrome_deployment_display_name';
 import { ProjectChromeSwitcherRootMenu } from './project_chrome_switcher_root_menu';
 import type { Space } from '../../common';
 import type { EventTracker } from '../analytics';
@@ -59,18 +61,31 @@ export function SpaceProjectBreadcrumbRegistrar({
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const { data, isLoading } = useSpaces(spacesManager);
   const chrome = core.chrome as InternalChromeStart;
+  const kibanaName$ = useMemo(() => chrome.project.getKibanaName$(), [chrome.project]);
+  const kibanaName = useObservable(kibanaName$, chrome.project.getKibanaName());
+  const deploymentDisplayName = useMemo(
+    () => getProjectChromeDeploymentDisplayName(kibanaName),
+    [kibanaName]
+  );
 
   useEffect(() => {
     const sub = spacesManager.onActiveSpaceChange$.subscribe(setActiveSpace);
     return () => sub.unsubscribe();
   }, [spacesManager]);
 
+  const spaceSwitcherLabel = useMemo(() => {
+    if (!activeSpace) {
+      return '';
+    }
+    return `${deploymentDisplayName}: ${activeSpace.name}`;
+  }, [activeSpace, deploymentDisplayName]);
+
   const breadcrumbText = useMemo(() => {
     if (!activeSpace) {
       return null;
     }
     if (!allowSolutionVisibility) {
-      return activeSpace.name;
+      return spaceSwitcherLabel;
     }
     return (
       <EuiFlexGroup
@@ -78,7 +93,7 @@ export function SpaceProjectBreadcrumbRegistrar({
         alignItems="center"
         responsive={false}
         css={spaceBreadcrumbLabelCss}
-        title={activeSpace.name}
+        title={spaceSwitcherLabel}
       >
         <EuiFlexItem grow={false}>
           <EuiIcon
@@ -87,10 +102,10 @@ export function SpaceProjectBreadcrumbRegistrar({
             aria-hidden={true}
           />
         </EuiFlexItem>
-        <EuiFlexItem css={spaceBreadcrumbLabelCss}>{activeSpace.name}</EuiFlexItem>
+        <EuiFlexItem css={spaceBreadcrumbLabelCss}>{spaceSwitcherLabel}</EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [activeSpace, allowSolutionVisibility, spaceBreadcrumbLabelCss]);
+  }, [activeSpace, allowSolutionVisibility, spaceBreadcrumbLabelCss, spaceSwitcherLabel]);
 
   useEffect(() => {
     if (!activeSpace || breadcrumbText == null) {
@@ -105,14 +120,15 @@ export function SpaceProjectBreadcrumbRegistrar({
       'aria-label': i18n.translate(
         'xpack.spaces.navControl.projectBreadcrumb.spaceMenuButtonAriaLabel',
         {
-          defaultMessage: 'Space menu, {spaceName}',
-          values: { spaceName: activeSpace.name },
+          defaultMessage: 'Space menu, {deploymentAndSpace}',
+          values: { deploymentAndSpace: spaceSwitcherLabel },
         }
       ),
       'data-test-subj': SPACES_PROJECT_BREADCRUMB_TEST_SUBJ,
       popoverContent: (closePopover) => (
         <ProjectChromeSwitcherRootMenu
           activeSpace={activeSpace}
+          deploymentDisplayName={deploymentDisplayName}
           allowSolutionVisibility={allowSolutionVisibility}
           spacesMenu={({ navigateToPreviousContextPanel }) => (
             <SpacesMenu
@@ -149,6 +165,7 @@ export function SpaceProjectBreadcrumbRegistrar({
     activeSpace,
     allowSolutionVisibility,
     breadcrumbText,
+    spaceSwitcherLabel,
     capabilities,
     chrome.project,
     data,

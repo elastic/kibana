@@ -189,6 +189,9 @@ export class ProjectNavigationService {
       getKibanaName$: () => {
         return kibanaName$.asObservable();
       },
+      getKibanaName: () => {
+        return kibanaName$.getValue();
+      },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,
         navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>

@@ -72,6 +72,12 @@ export interface InternalChromeStart extends ChromeStart {
     /** Sets the Kibana name (project name for serverless, deployment name for ECH). */
     setKibanaName(kibanaName: string): void;
 
+    /** Observable of the current Kibana / deployment / project name (see {@link setKibanaName}). */
+    getKibanaName$(): Observable<string | undefined>;
+
+    /** Current Kibana / deployment / project name synchronously. */
+    getKibanaName(): string | undefined;
+
     /** Initialise project navigation from a definition tree. */
     initNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,
