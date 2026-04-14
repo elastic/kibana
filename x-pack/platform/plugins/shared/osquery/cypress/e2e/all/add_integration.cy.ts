@@ -147,7 +147,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
         policyContainsIntegration(integrationName, policyName);
         checkDataStreamsInPolicyDetails();
         cy.visit(OSQUERY);
-        cy.contains('Live queries history');
+        cy.contains('History');
       }
     );
   });
