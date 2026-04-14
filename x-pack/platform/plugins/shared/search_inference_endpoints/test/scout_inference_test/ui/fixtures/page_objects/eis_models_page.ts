@@ -22,6 +22,19 @@ export class EisModelsPage {
   // Empty State
   readonly noModelsFound: Locator;
 
+  // Model Detail Flyout
+  readonly flyout: Locator;
+  readonly flyoutAddEndpointButton: Locator;
+  readonly flyoutCloseButton: Locator;
+  readonly allEndpointRows: Locator;
+
+  // Add/View Endpoint Modal
+  readonly addEndpointModal: Locator;
+  readonly addEndpointSaveButton: Locator;
+  readonly addEndpointCancelButton: Locator;
+  readonly addEndpointCloseButton: Locator;
+  readonly addEndpointIdField: Locator;
+
   constructor(private readonly page: ScoutPage) {
     // Header
     this.pageHeader = this.page.testSubj.locator('eisModelsPageHeader');
@@ -36,6 +49,19 @@ export class EisModelsPage {
 
     // Empty State
     this.noModelsFound = this.page.testSubj.locator('eisNoModelsFound');
+
+    // Model Detail Flyout
+    this.flyout = this.page.testSubj.locator('modelDetailFlyout');
+    this.flyoutAddEndpointButton = this.page.testSubj.locator('modelDetailFlyoutAddEndpointButton');
+    this.flyoutCloseButton = this.page.testSubj.locator('modelDetailFlyoutCloseButton');
+    this.allEndpointRows = this.flyout.locator('[data-test-subj^="endpoint-row-"]');
+
+    // Add/View Endpoint Modal
+    this.addEndpointModal = this.page.testSubj.locator('addEndpointModal');
+    this.addEndpointSaveButton = this.page.testSubj.locator('addEndpointModalSaveButton');
+    this.addEndpointCancelButton = this.page.testSubj.locator('addEndpointModalCancelButton');
+    this.addEndpointCloseButton = this.page.testSubj.locator('addEndpointModalCloseButton');
+    this.addEndpointIdField = this.page.testSubj.locator('addEndpointIdField');
   }
 
   // --- Navigation ---
@@ -53,5 +79,13 @@ export class EisModelsPage {
 
   public taskTypeFilter(category: string): Locator {
     return this.page.testSubj.locator(`eisTaskTypeFilter-${category}`);
+  }
+
+  public endpointRow(inferenceId: string): Locator {
+    return this.page.testSubj.locator(`endpoint-row-${inferenceId}`);
+  }
+
+  public deleteEndpointButton(inferenceId: string): Locator {
+    return this.page.testSubj.locator(`deleteEndpointButton-${inferenceId}`);
   }
 }
