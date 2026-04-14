@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { inc, valid } from 'semver';
+import { valid } from 'semver';
 
 export function nextMinorOf(version: string) {
-  const nextMinor = inc(version, 'minor');
-  if (!nextMinor) {
+  // Parse manually (like previousMinorOf) so that pre-release tags such as
+  // "-SNAPSHOT" are ignored. semver.inc('9.4.0-SNAPSHOT', 'minor') returns
+  // '9.4.0' (the release after the pre-release), not '9.5.0', which would
+  // make the computed Kibana version equal to the real ES version and cause
+  // the version-mismatch check to silently pass.
+  const [major, minor] = version.split('.').map((s) => parseInt(s, 10));
+  if (isNaN(major) || isNaN(minor)) {
     throw new Error(`Failed to compute next minor version for ${version}`);
   }
-  return nextMinor;
+  return `${major}.${minor + 1}.0`;
 }
 
 export function previousMinorOf(version: string) {
