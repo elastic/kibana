@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import { ToolType, isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import type { AgentCapabilities, ChatEvent } from '@kbn/agent-builder-common';
+import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 
@@ -69,9 +70,7 @@ export const createSubagentTool = ({
  * Subscribe to the events observable and extract the final response text
  * from the RoundComplete event.
  */
-const extractFinalResponse = async (
-  events$: import('rxjs').Observable<ChatEvent>
-): Promise<string> => {
+const extractFinalResponse = async (events$: Observable<ChatEvent>): Promise<AssistantResponse> => {
   const events = await firstValueFrom(events$.pipe(toArray()));
   const roundComplete = events.find(isRoundCompleteEvent);
 
@@ -79,5 +78,5 @@ const extractFinalResponse = async (
     throw new Error('Sub-agent execution completed without a round complete event');
   }
 
-  return roundComplete.data.round.response.message;
+  return roundComplete.data.round.response;
 };

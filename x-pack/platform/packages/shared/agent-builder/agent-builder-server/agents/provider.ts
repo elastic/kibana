@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
@@ -15,6 +16,7 @@ import type {
   AgentConfigurationOverrides,
   ConversationAction,
   ExecutionMode,
+  ChatEvent,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -70,7 +72,10 @@ export interface SubAgentExecutor {
     parentExecutionId: string;
     prompt: string;
     abortSignal?: AbortSignal;
-  }): Promise<{ executionId: string; events$: import('rxjs').Observable<import('@kbn/agent-builder-common').ChatEvent> }>;
+  }): Promise<{
+    executionId: string;
+    events$: Observable<ChatEvent>;
+  }>;
 }
 
 /**
