@@ -61,7 +61,13 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
   const [action, setAction] = useState<EditUserPageAction>('none');
   const readOnly = !useCapabilities('users').save;
 
-  const backToUsers = () => history.push('/');
+  const backToUsers = () => {
+    if (history.length > 1) {
+      history.goBack();
+    } else {
+      history.push('/');
+    }
+  };
 
   useEffect(() => {
     getUser();
