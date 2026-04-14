@@ -30,6 +30,11 @@ export const API_VERSIONS = {
   },
 };
 
+/**
+ * How long osqueryd on the agent is allowed to execute a single query.
+ * Validated server-side via inRangeRt() in @kbn/osquery-io-ts-types and client-side in timeout_field.tsx.
+ * The max of 24h matches what osquerybeat actually supports.
+ */
 export enum QUERY_TIMEOUT {
   DEFAULT = 60,
   MAX = 86400,
