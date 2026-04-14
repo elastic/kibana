@@ -18,10 +18,25 @@ import { z } from '@kbn/zod/v4';
 
 export type FindLiveQueryRequestQuery = z.infer<typeof FindLiveQueryRequestQuery>;
 export const FindLiveQueryRequestQuery = z.object({
+  /**
+   * A KQL search string to filter live queries.
+   */
   kuery: z.string().optional(),
+  /**
+   * The page number to return. The default is 1.
+   */
   page: z.number().int().optional(),
+  /**
+   * The number of results to return per page. The default is 20.
+   */
   pageSize: z.number().int().optional(),
+  /**
+   * The field to sort results by.
+   */
   sort: z.string().optional(),
+  /**
+   * The sort order.
+   */
   sortOrder: z.enum(['asc', 'desc']).optional(),
   /**
       * When true, the response includes result_counts on each item with aggregated result statistics from the action responses index.
@@ -30,8 +45,74 @@ export const FindLiveQueryRequestQuery = z.object({
   withResultCounts: z.boolean().optional(),
 });
 
+/**
+ * A list of live queries.
+ */
 export type FindLiveQueryResponse = z.infer<typeof FindLiveQueryResponse>;
-export const FindLiveQueryResponse = z.object({});
+export const FindLiveQueryResponse = z.object({
+  /**
+   * The response data wrapper.
+   */
+  data: z
+    .object({
+      /**
+       * The list of live queries.
+       */
+      items: z.array(z.object({})).optional(),
+    })
+    .optional(),
+});
 
+/**
+ * The details of a live query.
+ */
 export type FindLiveQueryDetailsResponse = z.infer<typeof FindLiveQueryDetailsResponse>;
-export const FindLiveQueryDetailsResponse = z.object({});
+export const FindLiveQueryDetailsResponse = z.object({
+  /**
+   * The live query details.
+   */
+  data: z
+    .object({
+      /**
+       * The ID of the live query action.
+       */
+      action_id: z.string().optional(),
+      /**
+       * The expiration date and time of the live query.
+       */
+      expiration: z.string().optional(),
+      /**
+       * The timestamp when the live query was created.
+       */
+      '@timestamp': z.string().optional(),
+      /**
+       * The original agent selection criteria.
+       */
+      agent_selection: z.object({}).optional(),
+      /**
+       * A list of agent IDs targeted by the live query.
+       */
+      agents: z.array(z.string()).optional(),
+      /**
+       * The ID of the user who ran the live query.
+       */
+      user_id: z.string().optional(),
+      /**
+       * The pack ID, if the live query was run from a pack.
+       */
+      pack_id: z.string().optional(),
+      /**
+       * The pack name, if the live query was run from a pack.
+       */
+      pack_name: z.string().optional(),
+      /**
+       * The list of queries in the live query action, each with aggregated result counts.
+       */
+      queries: z.array(z.object({})).optional(),
+      /**
+       * The overall status of the live query.
+       */
+      status: z.enum(['completed', 'running']).optional(),
+    })
+    .optional(),
+});
