@@ -58,28 +58,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     ): Promise<string> => {
       const legacyPolicyId = `${monitorId}-${privateLocation.id}-${spaceId}`;
 
-      const response = await supertestAdmin.post('/api/fleet/package_policies').send({
-        id: legacyPolicyId,
-        name: `legacy-${legacyPolicyId}`,
-        namespace: 'default',
-        policy_ids: [testFleetPolicyID],
-        package: {
-          name: 'synthetics',
-          version: syntheticsPackageVersion,
-        },
-        inputs: [
-          {
-            type: 'synthetics/http',
-            enabled: true,
-            streams: [],
+      await retry.try(async () => {
+        const response = await supertestAdmin.post('/api/fleet/package_policies').send({
+          id: legacyPolicyId,
+          name: `legacy-${legacyPolicyId}`,
+          namespace: 'default',
+          policy_ids: [testFleetPolicyID],
+          package: {
+            name: 'synthetics',
+            version: syntheticsPackageVersion,
           },
-        ],
-      });
+          inputs: [
+            {
+              type: 'synthetics/http',
+              enabled: true,
+              streams: [],
+            },
+          ],
+        });
 
-      expect(response.status).to.eql(
-        200,
-        `Failed to create legacy policy: ${JSON.stringify(response.body)}`
-      );
+        expect(response.status).to.eql(
+          200,
+          `Failed to create legacy policy: ${JSON.stringify(response.body)}`
+        );
+      });
 
       // Fleet's create API drops is_managed, but the cleanup task filters on it.
       // We need to set it manually.

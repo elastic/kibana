@@ -33,6 +33,13 @@ export class PrivateLocationTestService {
     return res.body?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
   }
 
+  async isSyntheticsPackageVersionAvailable(version: string): Promise<boolean> {
+    const res = await this.supertestWithAuth
+      .get(`/api/fleet/epm/packages/synthetics/${version}`)
+      .set('kbn-xsrf', 'true');
+    return res.status === 200;
+  }
+
   async installSyntheticsPackage({ version }: { version?: string } = {}) {
     await this.retry.try(async () => {
       await this.supertestWithAuth
@@ -57,6 +64,31 @@ export class PrivateLocationTestService {
       if (installedVersion !== resolvedVersion) {
         throw new Error(
           `Package version mismatch after install: expected ${resolvedVersion} but got ${installedVersion}`
+        );
+      }
+    });
+  }
+
+  async reinstallLatestSyntheticsPackage() {
+    await this.retry.try(async () => {
+      await this.supertestWithAuth
+        .post('/api/fleet/setup')
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+      await this.supertestWithAuth
+        .delete(`/api/fleet/epm/packages/synthetics`)
+        .set('kbn-xsrf', 'true');
+      const resolvedVersion = await this.fetchSyntheticsPackageVersion();
+      await this.supertestWithAuth
+        .post(`/api/fleet/epm/packages/synthetics/${resolvedVersion}`)
+        .set('kbn-xsrf', 'true')
+        .send({ force: true })
+        .expect(200);
+      const installedVersion = await this.fetchSyntheticsPackageVersion();
+      if (installedVersion !== resolvedVersion) {
+        throw new Error(
+          `Version mismatch after reinstallLatest: expected ${resolvedVersion} but got ${installedVersion}`
         );
       }
     });
