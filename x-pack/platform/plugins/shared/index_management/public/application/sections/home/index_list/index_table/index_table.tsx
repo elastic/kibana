@@ -53,7 +53,7 @@ import {
 import { formatBytes } from '../../../../..';
 import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
-import { AppContextConsumer, type AppDependencies } from '../../../../app_context';
+import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
@@ -62,12 +62,8 @@ import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_paginatio
 import { DocCountCell } from './doc_count';
 import { docCountApi } from './get_doc_count';
 import type { DocCountApi } from './get_doc_count';
-import type { Health, Index } from '../../../../../../common';
+import type { Index } from '../../../../../../common';
 import type { ExtensionsService } from '../../../../../services';
-
-type IndexRow = Omit<Index, 'status'> & {
-  status?: Index['status'] | string;
-};
 
 interface GetColumnConfigsParams {
   showIndexStats: boolean;
@@ -119,7 +115,7 @@ const getColumnConfigs = ({
             >
               {index.name}
             </EuiLink>
-            {renderBadges(index as Index, extensionsService, filterChanged)}
+            {renderBadges(index, extensionsService, filterChanged)}
           </>
         );
       },
@@ -193,8 +189,7 @@ const getColumnConfigs = ({
         width: '7em',
         minWidth: '7em',
         className: 'eui-textNoWrap',
-        render: (index: Index) =>
-          index.health ? <DataHealth health={index.health as Health} /> : undefined,
+        render: (index: Index) => (index.health ? <DataHealth health={index.health} /> : undefined),
       },
       {
         fieldName: 'status',
@@ -239,7 +234,7 @@ const getColumnConfigs = ({
 
 interface IndexTableProps {
   allIndices: Index[];
-  indices: IndexRow[];
+  indices: Index[];
   pager: Pager;
   filter: string | Query;
   sortField: string;
@@ -475,10 +470,10 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
 
   getFilters = (extensionsService: ExtensionsService): SearchFilterConfig[] => {
     const { allIndices } = this.props;
-    return extensionsService.filters.reduce((accum, filterExtension) => {
+    return extensionsService.filters.reduce<SearchFilterConfig[]>((accum, filterExtension) => {
       const filtersToAdd = filterExtension(allIndices);
       return [...accum, ...filtersToAdd];
-    }, [] as SearchFilterConfig[]);
+    }, []);
   };
 
   toggleAll = () => {
@@ -549,32 +544,29 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
     );
   }
 
-  buildRowCell(index: IndexRow, columnConfig: IndexTableColumnConfig) {
+  buildRowCell(index: Index, columnConfig: IndexTableColumnConfig) {
     if (columnConfig.render) {
-      return columnConfig.render(index as Index);
+      return columnConfig.render(index);
     }
     return get(index, columnConfig.fieldName);
   }
 
-  buildRowCells(index: IndexRow, columnConfigs: IndexTableColumnConfig[]) {
+  buildRowCells(index: Index, columnConfigs: IndexTableColumnConfig[]) {
     return columnConfigs.map((columnConfig) => {
       const { name } = index;
       const { fieldName, width, minWidth, maxWidth, className, align } = columnConfig;
+      const cellProps: ComponentProps<typeof EuiTableRowCell> = {
+        truncateText: false,
+        setScopeRow: fieldName === 'name',
+        'data-test-subj': `indexTableCell-${fieldName}`,
+        width,
+        minWidth,
+        maxWidth,
+        className,
+        align,
+      };
       return (
-        <EuiTableRowCell
-          {...({
-            key: `${fieldName}-${name}`,
-            truncateText: false,
-            setScopeRow: fieldName === 'name',
-            'data-test-subj': `indexTableCell-${fieldName}`,
-            header: fieldName,
-            width,
-            minWidth,
-            maxWidth,
-            className,
-            align,
-          } as ComponentProps<typeof EuiTableRowCell>)}
-        >
+        <EuiTableRowCell key={`${fieldName}-${name}`} {...cellProps}>
           {this.buildRowCell(index, columnConfig)}
         </EuiTableRowCell>
       );
@@ -742,8 +734,11 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
 
     return (
       <AppContextConsumer>
-        {(context: AppDependencies | undefined) => {
-          const { services, config, core, plugins } = context as AppDependencies;
+        {(context) => {
+          if (!context) {
+            throw new Error('"useAppContext" can only be called inside of AppContext.Provider!');
+          }
+          const { services, config, core, plugins } = context;
           const { extensionsService } = services;
           const { application, http } = core;
           const { share } = plugins;
@@ -758,6 +753,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
             http,
             docCountApi: this.docCountApi,
           });
+          const searchFilters = this.getFilters(extensionsService);
           const columnsCount = columnConfigs.length + 1;
           return (
             <EuiPageSection paddingSize="none">
@@ -826,11 +822,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
                   <>
                     <EuiFlexItem>
                       <EuiSearchBar
-                        filters={
-                          (this.getFilters(extensionsService).length > 0
-                            ? this.getFilters(extensionsService)
-                            : null) as SearchFilterConfig[] | undefined
-                        }
+                        filters={searchFilters.length > 0 ? searchFilters : undefined}
                         defaultQuery={filter}
                         query={filter}
                         box={{
