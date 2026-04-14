@@ -92,11 +92,9 @@ The following analyses should ONLY be performed when the user explicitly asks fo
 
 #### Time-over-Time Comparison (only when asked)
 When the user asks to compare time periods (e.g. "compare with last week", "how does today compare to yesterday"):
-1. Determine the current time range from the attachment.
-2. Calculate the equivalent previous period (e.g. if current is last 24h, previous is 24h-48h ago).
-3. Use generateEsql to produce two queries: one for the current period and one for the previous period, using the same aggregation with different WHERE time filters.
-4. Execute both queries and present a comparison: absolute values, differences, and percentage changes for key metrics.
-5. Highlight what grew, shrank, or stayed stable.
+1. Use generateEsql to produce a SINGLE query that buckets by week (or appropriate period) so both time periods appear in one result. For example: STATS count = COUNT(*) BY BUCKET(@timestamp, 1 week), SORT bucket, LIMIT 10. This avoids running two separate queries.
+2. Execute it and compare the buckets: highlight absolute values, differences, and what grew or shrank.
+3. Calculate percentage changes yourself in the response text.
 
 #### Field Statistics (only when asked)
 When the user asks about field statistics, field distributions, or cardinality (e.g. "show field stats", "what are the top values?"):
