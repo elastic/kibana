@@ -24,3 +24,4 @@ export const DEFAULT_PRIMARY_ICON_ALIGNMENT = 'right' as const;
 export const DEFAULT_SECONDARY_LABEL_VISIBLE = true;
 export const DEFAULT_SECONDARY_LABEL_PLACEMENT = 'before' as const;
 export const DEFAULT_SECONDARY_VALUE_ALIGNMENT = 'right' as const;
+export const DEFAULT_SECONDARY_COMPARE_TO_PALETTE = 'compare_to' as const;
