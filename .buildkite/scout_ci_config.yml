@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - advanced_settings
+    - agent_builder
     - alerting
     - alerting_v2
     - apm
