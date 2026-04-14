@@ -24,6 +24,8 @@ export class EisModelsPage {
 
   // Model Detail Flyout
   readonly flyout: Locator;
+  readonly flyoutTaskBadges: Locator;
+  readonly flyoutModelDetails: Locator;
   readonly flyoutAddEndpointButton: Locator;
   readonly flyoutCloseButton: Locator;
   readonly allEndpointRows: Locator;
@@ -45,16 +47,22 @@ export class EisModelsPage {
     this.modelFamilyFilter = this.page.testSubj.locator('modelFamilyFilterMultiselect');
 
     // Model Cards
-    this.allModelCards = this.page.locator('[data-test-subj^="eisModelCard-"]');
+    this.allModelCards = this.page.testSubj
+      .locator('eisModelCards')
+      .locator('[data-test-subj^="eisModelCard-"]');
 
     // Empty State
     this.noModelsFound = this.page.testSubj.locator('eisNoModelsFound');
 
     // Model Detail Flyout
     this.flyout = this.page.testSubj.locator('modelDetailFlyout');
+    this.flyoutTaskBadges = this.page.testSubj.locator('flyoutTaskBadges');
+    this.flyoutModelDetails = this.page.testSubj.locator('flyoutModelDetails');
     this.flyoutAddEndpointButton = this.page.testSubj.locator('modelDetailFlyoutAddEndpointButton');
     this.flyoutCloseButton = this.page.testSubj.locator('modelDetailFlyoutCloseButton');
-    this.allEndpointRows = this.flyout.locator('[data-test-subj^="endpoint-row-"]');
+    this.allEndpointRows = this.page.testSubj
+      .locator('modelDetailFlyout')
+      .locator('[data-test-subj^="endpoint-row-"]');
 
     // Add/View Endpoint Modal
     this.addEndpointModal = this.page.testSubj.locator('addEndpointModal');

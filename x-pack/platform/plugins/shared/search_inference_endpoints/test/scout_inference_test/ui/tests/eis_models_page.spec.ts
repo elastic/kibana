@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { mockEisEndpoints } from '../fixtures/mock_data/eis_endpoints';
+import { eisEndpointsMockData } from '../fixtures/mock_data/eis_endpoints';
 import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mocks';
 
 test.describe(
@@ -15,7 +15,7 @@ test.describe(
   { tag: ['@local-stateful-classic', '@local-stateful-search', '@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-      await mockInferenceEndpoints(page, mockEisEndpoints);
+      await mockInferenceEndpoints(page, eisEndpointsMockData);
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.eisModels.goto();
     });

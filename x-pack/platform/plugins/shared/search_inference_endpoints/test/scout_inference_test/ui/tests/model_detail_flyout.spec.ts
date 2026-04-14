@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { mockEisEndpoints } from '../fixtures/mock_data/eis_endpoints';
+import { eisEndpointsMockData } from '../fixtures/mock_data/eis_endpoints';
 import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mocks';
 
 test.describe(
@@ -15,7 +15,7 @@ test.describe(
   { tag: ['@local-stateful-classic', '@local-stateful-search', '@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-      await mockInferenceEndpoints(page, mockEisEndpoints);
+      await mockInferenceEndpoints(page, eisEndpointsMockData);
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.eisModels.goto();
     });
@@ -31,19 +31,19 @@ test.describe(
         await eisModels.modelCard('Anthropic Claude Sonnet 3.7').click();
       });
 
-      await test.step('flyout shows model name', async () => {
+      await test.step('flyout is visible with model name', async () => {
         await expect(eisModels.flyout).toBeVisible();
         await expect(eisModels.flyout).toContainText('Anthropic Claude Sonnet 3.7');
       });
 
       await test.step('flyout header shows task type badges', async () => {
-        await expect(eisModels.flyout).toContainText('chat_completion');
-        await expect(eisModels.flyout).toContainText('completion');
+        await expect(eisModels.flyoutTaskBadges).toContainText('chat_completion');
+        await expect(eisModels.flyoutTaskBadges).toContainText('completion');
       });
 
       await test.step('flyout body shows model author', async () => {
-        await expect(eisModels.flyout).toContainText('Model author');
-        await expect(eisModels.flyout).toContainText('Anthropic');
+        await expect(eisModels.flyoutModelDetails).toContainText('Model author');
+        await expect(eisModels.flyoutModelDetails).toContainText('Anthropic');
       });
     });
 

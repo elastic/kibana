@@ -168,7 +168,7 @@ export const ElasticInferenceServiceModelsPage = () => {
               }
             />
           ) : (
-            <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3}>
+            <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3} data-test-subj="eisModelCards">
               {filtered.map((m) => (
                 <EuiFlexItem key={`${m.service}::${m.modelName}`}>
                   <ModelCard

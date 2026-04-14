@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const mockEisEndpoints = [
+export const eisEndpointsMockData = [
   {
     inference_id: '.mock-anthropic-claude-3.7-sonnet-chat_completion',
     task_type: 'chat_completion',
