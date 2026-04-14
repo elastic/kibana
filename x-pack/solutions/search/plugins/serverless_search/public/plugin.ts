@@ -10,6 +10,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { QueryClient, MutationCache, QueryCache } from '@kbn/react-query';
+import type { Subscription } from 'rxjs';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -33,6 +34,8 @@ export class ServerlessSearchPlugin
       ServerlessSearchPluginStartDependencies
     >
 {
+  private managementCardsSubscription?: Subscription;
+
   public setup(
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     setupDeps: ServerlessSearchPluginSetupDependencies
@@ -145,7 +148,7 @@ export class ServerlessSearchPlugin
     );
     serverless.initNavigation('es', navigationTree$);
 
-    serverless
+    this.managementCardsSubscription = serverless
       .getNavigationCards$(
         security.authz.isRoleManagementEnabled(),
         aiAssistantIsEnabled
@@ -178,5 +181,7 @@ export class ServerlessSearchPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.managementCardsSubscription?.unsubscribe();
+  }
 }
