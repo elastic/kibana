@@ -4,6 +4,7 @@
   "background-session",
   "cases-sub-case",
   "csp_rule",
+  "data_connector",
   "endpoint:user-artifact",
   "file-upload-telemetry",
   "fleet-agent-actions",

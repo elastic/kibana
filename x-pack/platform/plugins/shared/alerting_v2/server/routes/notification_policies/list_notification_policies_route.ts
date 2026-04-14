@@ -28,6 +28,11 @@ const listNotificationPoliciesQuerySchema = z.object({
   page: z.coerce.number().min(1).optional(),
   perPage: z.coerce.number().min(1).max(100).optional(),
   search: z.string().optional(),
+  tags: z
+    .union([z.string(), z.array(z.string())])
+    .transform((v) => (Array.isArray(v) ? v : [v]).map((t) => t.trim()).filter(Boolean))
+    .pipe(z.array(z.string()).max(10))
+    .optional(),
   destinationType: z.string().optional(),
   createdBy: z.string().optional(),
   enabled: z
@@ -75,12 +80,22 @@ export class ListNotificationPoliciesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { page, perPage, search, destinationType, createdBy, enabled, sortField, sortOrder } =
-      this.request.query ?? {};
+    const {
+      page,
+      perPage,
+      search,
+      tags,
+      destinationType,
+      createdBy,
+      enabled,
+      sortField,
+      sortOrder,
+    } = this.request.query ?? {};
     const result = await this.notificationPolicyClient.findNotificationPolicies({
       page,
       perPage,
       search,
+      tags,
       destinationType,
       createdBy,
       enabled,

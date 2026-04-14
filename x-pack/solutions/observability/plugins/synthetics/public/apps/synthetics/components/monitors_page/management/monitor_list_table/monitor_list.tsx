@@ -15,6 +15,8 @@ import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { MonitorListHeader } from './monitor_list_header';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
+import { ResetMonitorModal } from './reset_monitor_modal';
+import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import type { MonitorListPageState } from '../../../../state';
 import type {
@@ -51,6 +53,11 @@ export const MonitorList = ({
   const isXl = useIsWithinMinBreakpoint('xxl');
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<string[]>([]);
+  const [monitorPendingReset, setMonitorPendingReset] = useState<{
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  } | null>(null);
+  const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
   const handleOnChange = useCallback(
     ({
@@ -94,6 +101,8 @@ export const MonitorList = ({
     loading,
     overviewStatus,
     setMonitorPendingDeletion,
+    setMonitorPendingReset,
+    isFixableByReset,
   });
 
   const [selectedItems, setSelectedItems] = useState<EncryptedSyntheticsSavedMonitor[]>([]);
@@ -125,6 +134,7 @@ export const MonitorList = ({
           recordRangeLabel={recordRangeLabel}
           selectedItems={selectedItems}
           setMonitorPendingDeletion={setMonitorPendingDeletion}
+          setMonitorPendingReset={setMonitorPendingReset}
         />
         <EuiHorizontalRule margin="s" />
         <EuiBasicTable
@@ -147,6 +157,14 @@ export const MonitorList = ({
           selection={selection}
         />
       </EuiPanel>
+      {monitorPendingReset !== null && monitorPendingReset.resetIds.length > 0 && (
+        <ResetMonitorModal
+          configIds={monitorPendingReset.resetIds}
+          skippedMonitors={monitorPendingReset.skippedMonitors}
+          onClose={() => setMonitorPendingReset(null)}
+          resetMonitors={resetMonitors}
+        />
+      )}
       {monitorPendingDeletion.length > 0 && (
         <DeleteMonitor
           configIds={monitorPendingDeletion}

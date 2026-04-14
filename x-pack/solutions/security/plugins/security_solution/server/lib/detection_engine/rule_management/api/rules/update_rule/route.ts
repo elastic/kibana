@@ -8,7 +8,13 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import {
+  CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+  ENABLE_DISABLE_RULES_API_PRIVILEGE,
+  EXCEPTIONS_API_ALL,
+  INVESTIGATION_GUIDE_API_EDIT,
+  RULES_API_ALL,
+} from '@kbn/security-solution-features/constants';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -30,7 +36,17 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
       path: DETECTION_ENGINE_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: [RULES_API_ALL],
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                RULES_API_ALL,
+                EXCEPTIONS_API_ALL,
+                CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+                INVESTIGATION_GUIDE_API_EDIT,
+                ENABLE_DISABLE_RULES_API_PRIVILEGE,
+              ],
+            },
+          ],
         },
       },
     })
@@ -83,6 +99,8 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
             rulePayload: request.body,
             spaceId: ctx.securitySolution.getSpaceId(),
             existingRule,
+            checkOsqueryResponseActionAuthz:
+              ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
           });
 
           const updatedRule = await detectionRulesClient.updateRule({
