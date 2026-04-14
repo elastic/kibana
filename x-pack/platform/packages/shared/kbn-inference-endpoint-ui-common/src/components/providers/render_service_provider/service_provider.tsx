@@ -20,7 +20,6 @@ import huggingFaceIcon from '../assets/images/hugging_face.svg';
 import cohereIcon from '../assets/images/cohere.svg';
 import openAIIcon from '../assets/images/open_ai.svg';
 import azureAIStudioIcon from '../assets/images/azure_ai_studio.svg';
-import azureOpenAIIcon from '../assets/images/azure_open_ai.svg';
 import googleAIStudioIcon from '../assets/images/google_ai_studio.svg';
 import mistralIcon from '../assets/images/mistral.svg';
 import amazonBedrockIcon from '../assets/images/amazon_bedrock.svg';
@@ -80,7 +79,7 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     solutions: ['Search'],
   },
   [ServiceProviderKeys.azureopenai]: {
-    icon: azureOpenAIIcon,
+    icon: azureIcon,
     name: 'Azure OpenAI',
     solutions: ['Observability', 'Security', 'Search'],
   },
@@ -127,11 +126,6 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   [ServiceProviderKeys.hugging_face]: {
     icon: huggingFaceIcon,
     name: 'Hugging Face',
-    solutions: ['Search'],
-  },
-  [ServiceProviderKeys.microsoft]: {
-    icon: azureIcon,
-    name: 'Microsoft',
     solutions: ['Search'],
   },
   [ServiceProviderKeys.mistral]: {

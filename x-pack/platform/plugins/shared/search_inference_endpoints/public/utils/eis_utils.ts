@@ -82,7 +82,7 @@ const CREATOR_TO_PROVIDER_KEY: Record<string, ServiceProviderKeys> = {
   Elastic: ServiceProviderKeys.elastic,
   Google: ServiceProviderKeys.googleaistudio,
   Jina: ServiceProviderKeys.jinaai,
-  Microsoft: ServiceProviderKeys.microsoft,
+  Microsoft: ServiceProviderKeys.azureopenai,
   OpenAI: ServiceProviderKeys.openai,
 };
 
