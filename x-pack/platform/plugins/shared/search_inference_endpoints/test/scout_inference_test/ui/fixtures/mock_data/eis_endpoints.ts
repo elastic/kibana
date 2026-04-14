@@ -47,6 +47,16 @@ export const mockEisEndpoints = [
     },
   },
   {
+    inference_id: 'my-custom-openai-gpt-4.1-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: { model_id: 'openai-gpt-4.1' },
+    metadata: {
+      heuristics: { properties: ['multilingual', 'multimodal'], status: 'ga' },
+      display: { name: 'OpenAI GPT-4.1', model_creator: 'OpenAI' },
+    },
+  },
+  {
     inference_id: '.mock-google-gemini-2.5-pro-chat_completion',
     task_type: 'chat_completion',
     service: 'elastic',

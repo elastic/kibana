@@ -24,21 +24,30 @@ test.describe(
       await unmockInferenceEndpoints(page);
     });
 
-    test('opens flyout when clicking a model card', async ({ pageObjects }) => {
+    test('opens flyout with model details, task badges, and author', async ({ pageObjects }) => {
       const { eisModels } = pageObjects;
 
       await test.step('click a model card to open the flyout', async () => {
         await eisModels.modelCard('Anthropic Claude Sonnet 3.7').click();
       });
 
-      await test.step('flyout is visible with model name and endpoint rows', async () => {
+      await test.step('flyout shows model name', async () => {
         await expect(eisModels.flyout).toBeVisible();
         await expect(eisModels.flyout).toContainText('Anthropic Claude Sonnet 3.7');
-        await expect(eisModels.allEndpointRows).not.toHaveCount(0);
+      });
+
+      await test.step('flyout header shows task type badges', async () => {
+        await expect(eisModels.flyout).toContainText('chat_completion');
+        await expect(eisModels.flyout).toContainText('completion');
+      });
+
+      await test.step('flyout body shows model author', async () => {
+        await expect(eisModels.flyout).toContainText('Model author');
+        await expect(eisModels.flyout).toContainText('Anthropic');
       });
     });
 
-    test('flyout shows endpoint rows and closes via button', async ({ pageObjects }) => {
+    test('flyout shows correct endpoint count and closes via button', async ({ pageObjects }) => {
       const { eisModels } = pageObjects;
 
       await test.step('open flyout for Anthropic model', async () => {
@@ -46,7 +55,8 @@ test.describe(
         await expect(eisModels.flyout).toBeVisible();
       });
 
-      await test.step('endpoint rows contain expected inference IDs', async () => {
+      await test.step('Anthropic model has exactly 2 endpoint rows', async () => {
+        await expect(eisModels.allEndpointRows).toHaveCount(2);
         await expect(
           eisModels.endpointRow('.mock-anthropic-claude-3.7-sonnet-chat_completion')
         ).toBeVisible();
@@ -58,6 +68,31 @@ test.describe(
       await test.step('close flyout via close button', async () => {
         await eisModels.flyoutCloseButton.click();
         await expect(eisModels.flyout).toBeHidden();
+      });
+    });
+
+    test('non-preconfigured endpoint shows delete button', async ({ pageObjects }) => {
+      const { eisModels } = pageObjects;
+
+      await test.step('open flyout for OpenAI model (has a non-preconfigured endpoint)', async () => {
+        await eisModels.modelCard('OpenAI GPT-4.1').click();
+        await expect(eisModels.flyout).toBeVisible();
+      });
+
+      await test.step('OpenAI model has 3 endpoint rows', async () => {
+        await expect(eisModels.allEndpointRows).toHaveCount(3);
+      });
+
+      await test.step('non-preconfigured endpoint has delete button', async () => {
+        await expect(
+          eisModels.deleteEndpointButton('my-custom-openai-gpt-4.1-chat_completion')
+        ).toBeVisible();
+      });
+
+      await test.step('preconfigured endpoint does not have delete button', async () => {
+        await expect(
+          eisModels.deleteEndpointButton('.mock-openai-gpt-4.1-chat_completion')
+        ).toBeHidden();
       });
     });
 

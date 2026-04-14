@@ -80,6 +80,24 @@ test.describe(
       });
     });
 
+    test('model family filter filters cards by provider', async ({ page, pageObjects }) => {
+      const { eisModels } = pageObjects;
+
+      await test.step('open model family filter popover', async () => {
+        await eisModels.modelFamilyFilter.getByRole('button').click();
+      });
+
+      await test.step('select Anthropic provider and close popover', async () => {
+        await page.getByRole('option', { name: 'Anthropic' }).click();
+        await eisModels.modelFamilyFilter.getByRole('button').click();
+      });
+
+      await test.step('only Anthropic model card is shown', async () => {
+        await expect(eisModels.allModelCards).toHaveCount(1);
+        await expect(eisModels.modelCard('Anthropic Claude Sonnet 3.7')).toBeVisible();
+      });
+    });
+
     test('shows empty state when no models match search', async ({ pageObjects }) => {
       const { eisModels } = pageObjects;
 
