@@ -164,6 +164,7 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                     existingPages,
                   },
                   maxSteps: 20,
+                  abortSignal: runContext.abortController.signal,
                   toolCallbacks: {
                     get_conversation_details: async (toolCall) => {
                       const { index } = toolCall.function.arguments;
