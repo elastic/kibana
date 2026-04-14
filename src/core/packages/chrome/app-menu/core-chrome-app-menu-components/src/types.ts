@@ -19,6 +19,12 @@ export interface AppMenuRunActionParams {
    */
   triggerElement: HTMLElement;
   /**
+   * Returns focus to the originating app menu control (or an internal fallback such as
+   * the overflow button). This is useful when a run action opens and later closes a
+   * modal/flyout/dialog that should restore keyboard focus.
+   */
+  returnFocus: () => void;
+  /**
    * Generic context object that can be used to pass additional data to the run action.
    * Consumers can extend this to add custom properties as needed.
    */
@@ -216,20 +222,28 @@ export type AppMenuItemType = AppMenuItemCommon & {
    * Order of the item in the menu. Lower numbers appear first.
    */
   order: number;
+  /**
+   * If `true`, the item will be moved to the "More" menu. Only used in top-level items, not in popover items.
+   */
+  overflow?: boolean;
+  /**
+   * Adds a separator line above or below the item when rendered inside a popover menu.
+   * Ignored for top-level, non-popover items.
+   */
+  separator?: 'above' | 'below';
 };
 
 /**
  * Popover item type for use in `items` arrays.
  */
-export type AppMenuPopoverItem = Omit<AppMenuItemType, 'iconType' | 'hidden' | 'popoverWidth'> & {
+export type AppMenuPopoverItem = Omit<
+  AppMenuItemType,
+  'iconType' | 'hidden' | 'popoverWidth' | 'overflow'
+> & {
   /**
    * The icon type for the item.
    */
   iconType?: IconType;
-  /**
-   * Adds a separator line above or below the item in the popover menu.
-   */
-  separator?: 'above' | 'below';
   /**
    * Optional badge text displayed after the label (e.g. "New").
    * Rendered as an inline EuiBadge next to the item name.
@@ -237,7 +251,7 @@ export type AppMenuPopoverItem = Omit<AppMenuItemType, 'iconType' | 'hidden' | '
   labelBadgeText?: string;
 };
 
-type AppMenuActionButton = Omit<AppMenuItemCommon, 'order'> & {
+type AppMenuActionButton = Omit<AppMenuItemCommon, 'order' | 'overflow' | 'separator'> & {
   /**
    * The color of the button.
    */
