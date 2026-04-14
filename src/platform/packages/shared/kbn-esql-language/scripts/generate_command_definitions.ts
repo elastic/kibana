@@ -22,6 +22,7 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
   const esCommandDefinitions = readElasticsearchDefinitions<ElasticsearchCommandDefinition>({
     pathToElasticsearch,
     definitionType: 'commands',
+    language: 'esql',
   });
 
   const outputCommandsDir = join(__dirname, GENERATED_COMMANDS_BASE_PATH);

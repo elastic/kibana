@@ -26,6 +26,7 @@ async function generateElasticsearchSettingsDefinitions(): Promise<void> {
   const esSettingsDefinitions = readElasticsearchDefinitions<ElasticsearchSettingsDefinition>({
     pathToElasticsearch,
     definitionType: 'settings',
+    language: 'esql',
   });
 
   const outputSettingsDir = join(__dirname, GENERATED_DEFINITIONS_PATH);

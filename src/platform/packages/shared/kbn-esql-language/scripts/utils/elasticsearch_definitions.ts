@@ -13,18 +13,21 @@ import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 
 export type EsqlDefinitionType = 'functions' | 'operators' | 'commands' | 'settings';
+export type Language = 'esql' | 'promql';
 
 export interface ReadDefinitionsOptions {
   pathToElasticsearch: string;
+  language: Language;
   definitionType: EsqlDefinitionType;
 }
 
 export const ELASTICSEARCH_ESQL_KIBANA_ROOT = 'docs/reference/query-languages/esql/kibana';
+export const ELASTICSEARCH_PROMQL_KIBANA_ROOT = 'docs/reference/query-languages/promql/kibana';
 
 export function readElasticsearchDefinitions<T extends Record<string, any>>(
   options: ReadDefinitionsOptions
 ): T[] {
-  const { pathToElasticsearch, definitionType: definitionCategory } = options;
+  const { pathToElasticsearch, definitionType, language } = options;
 
   if (!pathToElasticsearch) {
     console.error('Error: Path to Elasticsearch is required.');
@@ -34,24 +37,23 @@ export function readElasticsearchDefinitions<T extends Record<string, any>>(
 
   const definitionDirectories = listEsqlDefinitionDirectories(
     pathToElasticsearch,
-    definitionCategory
+    definitionType,
+    language
   );
 
   let definitions: T[] = [];
 
   try {
-    definitions = mergeJsonDefinitionsFromDirectories<T>(definitionDirectories, definitionCategory);
+    definitions = mergeJsonDefinitionsFromDirectories<T>(definitionDirectories, definitionType);
   } catch (error) {
-    const errorMessage = `An error occurred while reading ${definitionCategory} definitions: ${error.message}`;
+    const errorMessage = `An error occurred while reading ${definitionType} definitions: ${error.message}`;
 
-    console.warn(
-      `Warning: ${errorMessage} \n Skipping ${definitionCategory} definitions generation.`
-    );
+    console.warn(`Warning: ${errorMessage} \n Skipping ${definitionType} definitions generation.`);
     process.exit(0);
   }
 
   if (definitions.length === 0) {
-    console.log(`No ${definitionCategory} definitions found.`);
+    console.log(`No ${definitionType} definitions found.`);
     process.exit(0);
   }
 
@@ -84,7 +86,9 @@ export function mergeJsonDefinitionsFromDirectories<T extends Record<string, any
     process.exit(0);
   }
 
-  return definitions;
+  return definitions.sort((definitionA, definitionB) =>
+    definitionA.name.localeCompare(definitionB.name)
+  );
 }
 
 /**
@@ -102,44 +106,22 @@ function listSortedProjectNames(generatedRoot: string): string[] {
  */
 export function listEsqlDefinitionDirectories(
   pathToElasticsearch: string,
-  category: EsqlDefinitionType
+  definitionType: EsqlDefinitionType,
+  language: Language
 ): string[] {
-  const generatedRoot = join(pathToElasticsearch, ELASTICSEARCH_ESQL_KIBANA_ROOT, 'generated');
+  const kibanaRoot =
+    language === 'esql' ? ELASTICSEARCH_ESQL_KIBANA_ROOT : ELASTICSEARCH_PROMQL_KIBANA_ROOT;
+  const generatedRoot = join(pathToElasticsearch, kibanaRoot, 'generated');
 
   if (existsSync(generatedRoot)) {
     const directories: string[] = [];
     for (const projectName of listSortedProjectNames(generatedRoot)) {
-      const dir = join(generatedRoot, projectName, 'definition', category);
+      const dir = join(generatedRoot, projectName, 'definition', definitionType);
       if (existsSync(dir) && statSync(dir).isDirectory()) {
         directories.push(dir);
       }
     }
     return directories;
-  }
-
-  return [];
-}
-
-/**
- * Absolute paths to `inline_cast.json` for every generated project that defines one (sorted by project name).
- */
-export function listEsqlInlineCastJsonPaths(pathToElasticsearch: string): string[] {
-  const generatedRoot = join(ELASTICSEARCH_ESQL_KIBANA_ROOT, 'generated');
-  const paths: string[] = [];
-
-  if (existsSync(generatedRoot)) {
-    for (const projectName of listSortedProjectNames(generatedRoot)) {
-      const candidate = join(generatedRoot, projectName, 'definition', 'inline_cast.json');
-      if (existsSync(candidate) && statSync(candidate).isFile()) {
-        paths.push(candidate);
-      }
-    }
-    return paths;
-  }
-
-  const legacy = join(ELASTICSEARCH_ESQL_KIBANA_ROOT, 'definition', 'inline_cast.json');
-  if (existsSync(legacy) && statSync(legacy).isFile()) {
-    return [legacy];
   }
 
   return [];
