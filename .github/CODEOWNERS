@@ -3325,3 +3325,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
