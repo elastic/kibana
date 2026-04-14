@@ -14,8 +14,8 @@ import { SEARCH_INDEX_MANAGEMENT_LOCATOR_ID } from './constants';
 export { SEARCH_INDEX_MANAGEMENT_LOCATOR_ID };
 
 export interface SearchIndexManagementLocatorDependencies {
-  /** Resolves chrome style at runtime (when getLocation is called) */
-  getChromeStyle: () => Promise<'classic' | 'project' | undefined>;
+  /** Gets chrome style at runtime (when getLocation is called) */
+  getChromeStyle: () => 'classic' | 'project' | undefined;
   /** Platform index management locator; used when chrome style is classic */
   indexManagementLocator?: LocatorPublic<IndexManagementLocatorParams>;
 }
