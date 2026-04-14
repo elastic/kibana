@@ -13,33 +13,12 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiText,
-  EuiTextTruncate,
-  useEuiTheme,
+  EuiTitle,
 } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { HuntingLead } from './types';
 import { VIEW_LEAD_DETAILS } from './translations';
 import { MAX_VISIBLE_TAGS } from './utils';
 import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
-
-const getCardStyles = (euiTheme: EuiThemeComputed) => css`
-  position: relative;
-  cursor: pointer;
-  height: 100%;
-  transition: transform ${euiTheme.animation.normal} ease,
-    box-shadow ${euiTheme.animation.normal} ease;
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px ${euiTheme.colors.shadow};
-  }
-`;
-
-const infoIconStyles = css`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-`;
 
 interface LeadCardProps {
   lead: HuntingLead;
@@ -48,7 +27,6 @@ interface LeadCardProps {
 }
 
 export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }) => {
-  const { euiTheme } = useEuiTheme();
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
   const handleInfoClick = useCallback(
     (e: React.MouseEvent) => {
@@ -64,8 +42,8 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }
   return (
     <EuiPanel
       hasBorder
+      hasShadow={false}
       paddingSize="m"
-      css={getCardStyles(euiTheme)}
       onClick={handleClick}
       data-test-subj={`leadCard-${lead.id}`}
     >
@@ -75,21 +53,14 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }
           aria-label={VIEW_LEAD_DETAILS}
           onClick={handleInfoClick}
           data-test-subj={`leadInfoButton-${lead.id}`}
-          css={infoIconStyles}
         />
       )}
 
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiText
-            size="s"
-            css={css`
-              font-weight: 600;
-              padding-right: 24px;
-            `}
-          >
-            <EuiTextTruncate text={lead.title} />
-          </EuiText>
+          <EuiTitle size="xs">
+            <h5>{lead.title}</h5>
+          </EuiTitle>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

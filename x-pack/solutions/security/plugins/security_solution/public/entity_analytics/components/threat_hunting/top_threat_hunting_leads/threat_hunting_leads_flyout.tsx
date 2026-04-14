@@ -17,7 +17,6 @@ import {
   EuiFlyoutResizable,
   EuiPanel,
   EuiSpacer,
-  EuiTablePagination,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -28,8 +27,6 @@ import { fromApiLead } from './types';
 import * as i18n from './translations';
 import { MAX_VISIBLE_TAGS } from './utils';
 import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
-
-const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 interface ThreatHuntingLeadsFlyoutProps {
   onClose: () => void;
@@ -42,20 +39,18 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
   onSelectLead,
   onInfoClick,
 }) => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { fetchLeads } = useEntityAnalyticsRoutes();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['hunting-leads-flyout', pageIndex, pageSize],
+    queryKey: ['hunting-leads-flyout'],
     queryFn: ({ signal }) =>
       fetchLeads({
         signal,
         params: {
-          page: pageIndex + 1,
-          perPage: pageSize,
+          page: 1,
+          perPage: 10,
           sortField: 'priority',
           sortOrder: 'desc',
         },
@@ -63,7 +58,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
   });
 
   const leads: HuntingLead[] = useMemo(() => data?.leads?.map(fromApiLead) ?? [], [data?.leads]);
-  const totalCount = data?.total ?? 0;
 
   const filteredLeads = useMemo(() => {
     if (!searchQuery) return leads;
@@ -75,12 +69,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
         lead.entities.some((e) => e.name.toLowerCase().includes(query))
     );
   }, [leads, searchQuery]);
-
-  const handlePageChange = useCallback((page: number) => setPageIndex(page), []);
-  const handlePageSizeChange = useCallback((size: number) => {
-    setPageSize(size);
-    setPageIndex(0);
-  }, []);
 
   return (
     <EuiFlyoutResizable
@@ -104,10 +92,7 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
         <EuiFieldSearch
           placeholder={i18n.SEARCH_LEADS_PLACEHOLDER}
           value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setPageIndex(0);
-          }}
+          onChange={(e) => setSearchQuery(e.target.value)}
           fullWidth
           data-test-subj="leadSearchField"
         />
@@ -126,17 +111,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-            <EuiTablePagination
-              pageCount={Math.ceil((searchQuery ? filteredLeads.length : totalCount) / pageSize)}
-              activePage={pageIndex}
-              onChangePage={handlePageChange}
-              itemsPerPage={pageSize}
-              onChangeItemsPerPage={handlePageSizeChange}
-              itemsPerPageOptions={PAGE_SIZE_OPTIONS}
-              data-test-subj="leadsPagination"
-            />
           </>
         )}
       </EuiFlyoutBody>

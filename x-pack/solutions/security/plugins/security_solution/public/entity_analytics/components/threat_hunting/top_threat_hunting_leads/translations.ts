@@ -49,7 +49,7 @@ export const HUNT_WITH_AI = i18n.translate(
 
 export const getSeeAllLeadsLabel = (count: number) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.leads.seeAllCount', {
-    defaultMessage: 'See all ({count})',
+    defaultMessage: 'Recent leads ({count})',
     values: { count },
   });
 

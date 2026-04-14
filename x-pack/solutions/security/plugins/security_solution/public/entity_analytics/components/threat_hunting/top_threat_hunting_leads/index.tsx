@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 import {
   EuiAccordion,
   EuiButton,
@@ -22,12 +23,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import type { HuntingLead } from './types';
 import { LeadCard } from './lead_card';
 import * as i18n from './translations';
 
 const MAX_VISIBLE_CARDS = 5;
+const MIN_CARD_WIDTH = 200;
+const CARD_GAP = 8;
 
 interface TopThreatHuntingLeadsProps {
   leads: HuntingLead[];
@@ -63,8 +67,23 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const toggleOptions = useCallback(() => setIsOptionsOpen((prev) => !prev), []);
   const closeOptions = useCallback(() => setIsOptionsOpen(false), []);
+
+  const { ref: cardsRef, width: cardsWidth = 0 } = useResizeObserver<HTMLDivElement>();
+  const visibleCards = useMemo(() => {
+    if (!cardsWidth) return MAX_VISIBLE_CARDS;
+    const count = Math.floor((cardsWidth + CARD_GAP) / (MIN_CARD_WIDTH + CARD_GAP));
+    return Math.max(1, Math.min(count, MAX_VISIBLE_CARDS));
+  }, [cardsWidth]);
+
   const buttonContent = (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      css={css`
+        white-space: nowrap;
+      `}
+    >
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h3>{i18n.TOP_THREAT_HUNTING_LEADS_TITLE}</h3>
@@ -82,7 +101,14 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         <>
           {lastRunTimestamp && (
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="leadsGeneratedTimestamp">
+              <EuiText
+                size="xs"
+                color="subdued"
+                data-test-subj="leadsGeneratedTimestamp"
+                css={css`
+                  white-space: nowrap;
+                `}
+              >
                 {i18n.getGeneratedOnLabel(lastRunTimestamp)}
               </EuiText>
             </EuiFlexItem>
@@ -165,13 +191,31 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   );
 
   return (
-    <EuiPanel hasBorder data-test-subj="topThreatHuntingLeads" color="subdued">
+    <EuiPanel
+      hasBorder
+      data-test-subj="topThreatHuntingLeads"
+      color="subdued"
+      css={css`
+        container-type: inline-size;
+      `}
+    >
       <EuiAccordion
         id="huntingLeadsAccordion"
         buttonContent={buttonContent}
         extraAction={extraAction}
         initialIsOpen
         paddingSize="m"
+        css={css`
+          @container (max-width: 920px) {
+            .euiAccordion__triggerWrapper {
+              flex-wrap: wrap;
+              row-gap: 8px;
+            }
+            .euiAccordion__button {
+              flex: 0 1 auto;
+            }
+          }
+        `}
       >
         {isLoading || isGenerating ? (
           <EuiFlexGroup
@@ -197,13 +241,20 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             data-test-subj="leadsEmptyPrompt"
           />
         ) : (
-          <EuiFlexGroup gutterSize="m" responsive={false}>
-            {leads.slice(0, MAX_VISIBLE_CARDS).map((lead) => (
-              <EuiFlexItem key={lead.id}>
-                <LeadCard lead={lead} onClick={onLeadClick} onInfoClick={onLeadInfoClick} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <div ref={cardsRef}>
+            <EuiFlexGroup gutterSize="m" responsive={false} wrap={false}>
+              {leads.slice(0, visibleCards).map((lead) => (
+                <EuiFlexItem
+                  key={lead.id}
+                  css={css`
+                    min-width: 0;
+                  `}
+                >
+                  <LeadCard lead={lead} onClick={onLeadClick} onInfoClick={onLeadInfoClick} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </div>
         )}
       </EuiAccordion>
     </EuiPanel>
