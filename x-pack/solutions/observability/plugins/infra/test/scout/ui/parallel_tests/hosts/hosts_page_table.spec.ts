@@ -1,0 +1,220 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
+import { test } from '../../fixtures';
+import {
+  HOST1_NAME,
+  HOST2_NAME,
+  HOST5_NAME,
+  HOST6_NAME,
+  HOSTS,
+  DATE_WITH_HOSTS_DATA_FROM,
+  DATE_WITH_HOSTS_DATA_TO,
+  EXTENDED_TIMEOUT,
+} from '../../fixtures/constants';
+
+const EXPECTED_HOST_COUNT = HOSTS.length;
+
+test.describe(
+  'Hosts Page - Table',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage }, page }) => {
+      await browserAuth.loginAsViewer();
+      await hostsPage.goToPage({
+        from: DATE_WITH_HOSTS_DATA_FROM,
+        to: DATE_WITH_HOSTS_DATA_TO,
+      });
+
+      await test.step('wait for table and KPIs to load', async () => {
+        await expect(hostsPage.tableRows).toHaveCount(EXPECTED_HOST_COUNT);
+        await expect(
+          page
+            .getByTestId('infraAssetDetailsKPIcpuUsage')
+            .getByRole('progressbar', { name: 'Loading' })
+        ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+      });
+    });
+
+    test('should render a table with the correct number of hosts', async ({
+      pageObjects: { hostsPage },
+    }) => {
+      await expect(hostsPage.tableRows).toHaveCount(EXPECTED_HOST_COUNT);
+    });
+
+    test('should render the computed metrics for each host entry', async ({
+      pageObjects: { hostsPage },
+    }) => {
+      for (const host of HOSTS) {
+        const row = hostsPage.tableRows.filter({ hasText: host.hostName });
+        await expect(row).toBeVisible();
+        const rowData = await hostsPage.getRowData(row);
+        expect(rowData.title).toBe(host.hostName);
+        const expectedCpu = `${Math.round(host.cpuValue * 100)}%`;
+        expect(rowData.cpuUsage).toBe(expectedCpu);
+      }
+    });
+
+    test('should select and filter hosts inside the table', async ({
+      pageObjects: { hostsPage },
+      page,
+    }) => {
+      await test.step('verify selected hosts button is not visible initially', async () => {
+        await expect(hostsPage.selectedHostsFilterButton).toBeHidden();
+      });
+
+      await test.step('select two hosts via checkboxes', async () => {
+        await hostsPage.clickHostCheckbox(HOST1_NAME, 'Linux');
+        await hostsPage.clickHostCheckbox(HOST2_NAME, 'Linux');
+        await expect(hostsPage.selectedHostsFilterButton).toBeVisible();
+      });
+
+      await test.step('apply the selected hosts filter', async () => {
+        await hostsPage.clickSelectedHostsButton();
+        await hostsPage.clickAddFilterButton();
+        await expect(hostsPage.tableRows).toHaveCount(2);
+      });
+
+      await test.step('remove the filter and verify all hosts return', async () => {
+        const deleteFilterButton = page.locator(
+          `[title="Delete host.name: ${HOST1_NAME} OR host.name: ${HOST2_NAME}"]`
+        );
+        await deleteFilterButton.click();
+        await expect(hostsPage.tableRows).toHaveCount(EXPECTED_HOST_COUNT);
+      });
+    });
+
+    test('should display correct KPI tile values', async ({ pageObjects: { hostsPage }, page }) => {
+      await test.step('verify hosts count KPI', async () => {
+        const hostsCountValue = hostsPage.kpiGrid
+          .getByTestId('hostsViewKPI-hostsCount')
+          .locator('.echMetricText__value');
+        await expect(hostsCountValue).toHaveAttribute('title', String(EXPECTED_HOST_COUNT));
+      });
+
+      await test.step('verify CPU usage KPI is present', async () => {
+        await expect(
+          page.getByTestId('infraAssetDetailsKPIcpuUsage').locator('.echMetricText__value')
+        ).toHaveAttribute('title', /.+/);
+      });
+
+      await test.step('verify memory usage KPI is present', async () => {
+        await expect(
+          page.getByTestId('infraAssetDetailsKPImemoryUsage').locator('.echMetricText__value')
+        ).toHaveAttribute('title', /.+/);
+      });
+
+      await test.step('verify normalized load KPI is present', async () => {
+        await expect(
+          page.getByTestId('infraAssetDetailsKPInormalizedLoad1m').locator('.echMetricText__value')
+        ).toHaveAttribute('title', /.+/);
+      });
+
+      await test.step('verify disk usage KPI is present', async () => {
+        await expect(
+          page.getByTestId('infraAssetDetailsKPIdiskUsage').locator('.echMetricText__value')
+        ).toHaveAttribute('title', /.+/);
+      });
+    });
+
+    test('should paginate to 5 rows per page and navigate to the last page', async ({
+      pageObjects: { hostsPage },
+    }) => {
+      await test.step('change page size to 5', async () => {
+        await hostsPage.changePageSize(5);
+        await expect(hostsPage.tableRows).toHaveCount(5);
+      });
+
+      await test.step('navigate to the second page and verify 1 row', async () => {
+        await hostsPage.paginateTo(2);
+        await expect(hostsPage.tableRows).toHaveCount(1);
+      });
+    });
+
+    test('should show all hosts when page size is increased', async ({
+      pageObjects: { hostsPage },
+    }) => {
+      await test.step('change page size to 5 first', async () => {
+        await hostsPage.changePageSize(5);
+        await expect(hostsPage.tableRows).toHaveCount(5);
+      });
+
+      await test.step('change page size to 10 and verify all hosts', async () => {
+        await hostsPage.changePageSize(10);
+        await expect(hostsPage.tableRows).toHaveCount(EXPECTED_HOST_COUNT);
+      });
+    });
+
+    test('should sort by CPU usage ascending', async ({ pageObjects: { hostsPage } }) => {
+      await hostsPage.changePageSize(5);
+
+      await test.step('sort ascending and verify lowest CPU host is on first page', async () => {
+        await hostsPage.sortByCpuUsage();
+        const lowestCpuRow = hostsPage.tableRows.filter({ hasText: HOST5_NAME });
+        await expect(lowestCpuRow).toBeVisible();
+      });
+
+      await test.step('navigate to last page and verify highest CPU host', async () => {
+        await hostsPage.paginateTo(2);
+        const highestCpuRow = hostsPage.tableRows.filter({ hasText: 'host-3' });
+        await expect(highestCpuRow).toBeVisible();
+      });
+    });
+
+    test('should sort by CPU usage descending', async ({ pageObjects: { hostsPage } }) => {
+      await hostsPage.changePageSize(5);
+
+      await test.step('sort descending and verify highest CPU host is on first page', async () => {
+        await hostsPage.sortByCpuUsage();
+        await hostsPage.sortByCpuUsage();
+        const highestCpuRow = hostsPage.tableRows.filter({ hasText: 'host-3' });
+        await expect(highestCpuRow).toBeVisible();
+      });
+
+      await test.step('navigate to last page and verify lowest CPU host', async () => {
+        await hostsPage.paginateTo(2);
+        const lowestCpuRow = hostsPage.tableRows.filter({ hasText: HOST5_NAME });
+        await expect(lowestCpuRow).toBeVisible();
+      });
+    });
+
+    test('should sort by title ascending', async ({ pageObjects: { hostsPage } }) => {
+      await hostsPage.changePageSize(5);
+
+      await test.step('sort ascending and verify host-1 is on first page', async () => {
+        await hostsPage.sortByTitle();
+        const firstHostRow = hostsPage.tableRows.filter({ hasText: HOST1_NAME });
+        await expect(firstHostRow).toBeVisible();
+      });
+
+      await test.step('navigate to last page and verify host-6', async () => {
+        await hostsPage.paginateTo(2);
+        const lastHostRow = hostsPage.tableRows.filter({ hasText: HOST6_NAME });
+        await expect(lastHostRow).toBeVisible();
+      });
+    });
+
+    test('should sort by title descending', async ({ pageObjects: { hostsPage } }) => {
+      await hostsPage.changePageSize(5);
+
+      await test.step('sort descending and verify host-6 is on first page', async () => {
+        await hostsPage.sortByTitle();
+        await hostsPage.sortByTitle();
+        const lastHostRow = hostsPage.tableRows.filter({ hasText: HOST6_NAME });
+        await expect(lastHostRow).toBeVisible();
+      });
+
+      await test.step('navigate to last page and verify host-1', async () => {
+        await hostsPage.paginateTo(2);
+        const firstHostRow = hostsPage.tableRows.filter({ hasText: HOST1_NAME });
+        await expect(firstHostRow).toBeVisible();
+      });
+    });
+  }
+);

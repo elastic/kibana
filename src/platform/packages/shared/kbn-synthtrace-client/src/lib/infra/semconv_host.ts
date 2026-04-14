@@ -34,10 +34,16 @@ export interface SemconvHostMetricsDocument extends SemconvHostDocument {
   'system.cpu.utilization'?: number;
   'system.cpu.logical.count'?: number;
   'system.cpu.load_average.1m'?: number;
+  'metrics.system.cpu.utilization'?: number;
+  'metrics.system.cpu.logical.count'?: number;
+  'metrics.system.cpu.load_average.1m'?: number;
   'system.memory.utilization'?: number;
   'system.memory.usage'?: number;
+  'metrics.system.memory.utilization'?: number;
+  'metrics.system.memory.usage'?: number;
   'metrics.system.filesystem.usage'?: number;
   'system.network.io'?: number;
+  'metrics.system.network.io'?: number;
   'device.keyword'?: string;
 }
 
@@ -47,6 +53,7 @@ export class SemconvHost extends Entity<SemconvHostDocument> {
   cpu() {
     const idle = 0.3 + Math.random() * 0.4;
     const wait = Math.random() * 0.1;
+    const loadAvg1m = 1 + Math.random() * 3;
     return [
       { state: 'idle', 'system.cpu.utilization': idle },
       { state: 'wait', 'system.cpu.utilization': wait },
@@ -57,9 +64,12 @@ export class SemconvHost extends Entity<SemconvHostDocument> {
         new SemconvHostMetrics({
           ...this.fields,
           ...cpu,
+          'metrics.system.cpu.utilization': cpu['system.cpu.utilization'],
           'metricset.name': 'cpu',
           'system.cpu.logical.count': 4,
-          'system.cpu.load_average.1m': 1 + Math.random() * 3,
+          'metrics.system.cpu.logical.count': 4,
+          'system.cpu.load_average.1m': loadAvg1m,
+          'metrics.system.cpu.load_average.1m': loadAvg1m,
         })
     );
   }
@@ -96,6 +106,8 @@ export class SemconvHost extends Entity<SemconvHostDocument> {
         new SemconvHostMetrics({
           ...this.fields,
           ...mem,
+          'metrics.system.memory.utilization': mem['system.memory.utilization'],
+          'metrics.system.memory.usage': mem['system.memory.usage'],
           'metricset.name': 'memory',
         })
     );
@@ -128,6 +140,7 @@ export class SemconvHost extends Entity<SemconvHostDocument> {
         new SemconvHostMetrics({
           ...this.fields,
           ...net,
+          'metrics.system.network.io': net['system.network.io'],
           'metricset.name': 'network',
           'device.keyword': 'eth0',
         })

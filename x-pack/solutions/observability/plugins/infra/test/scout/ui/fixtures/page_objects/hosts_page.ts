@@ -81,17 +81,26 @@ export class HostsPage {
     from,
     to,
     preferredSchema = null,
+    skipLoadWait = false,
   }: {
     from: string;
     to: string;
     preferredSchema?: PreferredSchema;
+    skipLoadWait?: boolean;
   }) {
     const baseUrl = this.kbnUrl.app('metrics');
     const schemaPart =
       preferredSchema === null ? 'preferredSchema:!n' : `preferredSchema:${preferredSchema}`;
     const risonState = `(dateRange:(from:'${from}',to:'${to}'),filters:!(),limit:100,panelFilters:!(),${schemaPart},query:(language:kuery,query:''))`;
     await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`);
-    await this.waitForTableToLoad();
+    if (!skipLoadWait) {
+      await this.waitForTableToLoad();
+    }
+  }
+
+  public async goToHostsPage() {
+    const baseUrl = this.kbnUrl.app('metrics');
+    await this.page.goto(`${baseUrl}/hosts`);
   }
 
   public async openHostFlyout(hostName: string) {
@@ -119,38 +128,35 @@ export class HostsPage {
     return this.page.getByTestId('hostsViewTableEntryTitleLink');
   }
 
+  private async getCellText(row: Locator, cellTestId: string) {
+    const cell = row.getByTestId(cellTestId).locator('.euiTableCellContent');
+    return (await cell.textContent())?.trim() ?? '';
+  }
+
   public async getRowData(row: Locator) {
-    const cells = row.locator('[data-test-subj*="hostsView-tableRow-"]');
-    const cellTexts = await cells.allInnerTexts();
-    const [title, cpuUsage, normalizedLoad, memoryUsage, memoryFree, diskSpaceUsage, rx, tx] =
-      cellTexts;
-    return { title, cpuUsage, normalizedLoad, memoryUsage, memoryFree, diskSpaceUsage, rx, tx };
+    return {
+      title: (await row.getByTestId('hostsViewTableEntryTitleLink').textContent())?.trim() ?? '',
+      cpuUsage: await this.getCellText(row, 'hostsView-tableRow-cpuUsage'),
+      normalizedLoad: await this.getCellText(row, 'hostsView-tableRow-normalizedLoad1m'),
+      memoryUsage: await this.getCellText(row, 'hostsView-tableRow-memoryUsage'),
+      memoryFree: await this.getCellText(row, 'hostsView-tableRow-memoryFree'),
+      diskSpaceUsage: await this.getCellText(row, 'hostsView-tableRow-diskSpaceUsage'),
+      rx: await this.getCellText(row, 'hostsView-tableRow-rx'),
+      tx: await this.getCellText(row, 'hostsView-tableRow-tx'),
+    };
   }
 
   public async getRowDataWithAlerts(row: Locator) {
-    const cells = row.locator('[data-test-subj*="hostsView-tableRow-"]');
-    const cellTexts = await cells.allInnerTexts();
-    const [
-      alertsCount,
-      title,
-      cpuUsage,
-      normalizedLoad,
-      memoryUsage,
-      memoryFree,
-      diskSpaceUsage,
-      rx,
-      tx,
-    ] = cellTexts;
     return {
-      alertsCount,
-      title,
-      cpuUsage,
-      normalizedLoad,
-      memoryUsage,
-      memoryFree,
-      diskSpaceUsage,
-      rx,
-      tx,
+      alertsCount: await this.getCellText(row, 'hostsView-tableRow-alertsCount'),
+      title: (await row.getByTestId('hostsViewTableEntryTitleLink').textContent())?.trim() ?? '',
+      cpuUsage: await this.getCellText(row, 'hostsView-tableRow-cpuUsage'),
+      normalizedLoad: await this.getCellText(row, 'hostsView-tableRow-normalizedLoad1m'),
+      memoryUsage: await this.getCellText(row, 'hostsView-tableRow-memoryUsage'),
+      memoryFree: await this.getCellText(row, 'hostsView-tableRow-memoryFree'),
+      diskSpaceUsage: await this.getCellText(row, 'hostsView-tableRow-diskSpaceUsage'),
+      rx: await this.getCellText(row, 'hostsView-tableRow-rx'),
+      tx: await this.getCellText(row, 'hostsView-tableRow-tx'),
     };
   }
 
