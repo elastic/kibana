@@ -20,7 +20,6 @@ if (!BUMP_TYPE) {
 
 (async () => {
   const pipeline: string[] = [];
-  // TODO: Introduce dry run
   try {
     if (BUMP_TYPE === 'patch') {
       // Step 1: Trigger ES build and promote (synchronous)

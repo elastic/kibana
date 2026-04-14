@@ -39,6 +39,10 @@ prUrl=$(gh pr create --repo elastic/kibana --base main --head "$head_branch" \
   --label "release_note:skip" --label "backport:skip")
 echo "Opened PR: $prUrl"
 
-gh pr merge --repo elastic/kibana --auto --squash --delete-branch "$prUrl"
+if [ "${DRY_RUN:-}" = "true" ]; then
+  echo "DRY_RUN is enabled — skipping auto-merge and merge wait"
+else
+  gh pr merge --repo elastic/kibana --auto --squash --delete-branch "$prUrl"
 
-wait_for_pr_merge "$prUrl"
+  wait_for_pr_merge "$prUrl"
+fi
