@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type {
+  Subject} from 'rxjs';
 import {
   type Observable,
   type Subscription,
-  Subject,
   EMPTY,
   debounceTime,
   map,
