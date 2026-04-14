@@ -93,6 +93,7 @@ import {
   TIMELINES_PAGE,
   FINDINGS_PAGE,
   THREAT_INTELLIGENCE_PAGE,
+  LAUNCHPAD_PAGE,
 } from '../../../screens/kibana_navigation';
 
 describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
@@ -340,6 +341,11 @@ describe('Kibana navigation to all pages in the Security app ', { tags: '@ess' }
   it('navigates to the Manage page', () => {
     navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
     cy.url().should('include', MANAGE_URL);
+  });
+
+  it('navigates to Launchpad - Get started page', () => {
+    navigateFromKibanaCollapsibleTo(LAUNCHPAD_PAGE);
+    cy.url().should('include', GET_STARTED_URL);
   });
 });
 
