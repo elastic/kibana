@@ -277,7 +277,7 @@ describe('hidden panel link', () => {
         undefined,
         "Alerts and Insights",
         "Machine Learning",
-        "Model management",
+        "Model Management",
         "AI",
         "Security",
         "Data",
