@@ -1234,17 +1234,14 @@ describe('ui settings', () => {
     });
 
     describe('in-flight cleanup', () => {
-      it('prevents stale data from being cached when setMany runs during getUserProvided', async () => {
+      it('invalidates cache after setMany completes', async () => {
         const savedObjectsClient = savedObjectsClientMock.create();
         const sharedCache = new NamespacedCache<Record<string, any>>();
 
-        let resolveGetCall: (value: any) => void;
-        const delayedGetPromise = new Promise((resolve) => {
-          resolveGetCall = resolve;
-        });
-
-        savedObjectsClient.get.mockReturnValueOnce(delayedGetPromise as any);
-        savedObjectsClient.get.mockReturnValue({ attributes: { foo: 'after-write' } } as any);
+        savedObjectsClient.get.mockResolvedValueOnce({
+          attributes: { foo: 'before-write' },
+        } as any);
+        savedObjectsClient.get.mockResolvedValueOnce({ attributes: { foo: 'after-write' } } as any);
         savedObjectsClient.update.mockResolvedValue({} as any);
 
         const uiSettings = new UiSettingsClient({
@@ -1259,17 +1256,16 @@ describe('ui settings', () => {
           sharedUserProvidedCache: sharedCache,
         });
 
-        const getUserProvidedCall = uiSettings.getUserProvided();
+        // First call caches data
+        const firstResult = await uiSettings.getUserProvided();
+        expect(firstResult.foo).toEqual({ userValue: 'before-write' });
 
-        const setManyPromise = uiSettings.setMany({ foo: 'new-value' });
+        // setMany should invalidate cache
+        await uiSettings.setMany({ foo: 'new-value' });
 
-        resolveGetCall!({ attributes: { foo: 'before-write' } });
+        // Next getUserProvided should fetch fresh data (not cached)
+        const result = await uiSettings.getUserProvided();
 
-        await Promise.all([getUserProvidedCall, setManyPromise]);
-
-        const result = await uiSettings.getUserProvided(); // cache should be invalidated at this point
-
-        // If stale data was cached, second call would return 'before-write' value and there would be no need to call savedObjectsClient.get again.
         expect(result.foo).toEqual({ userValue: 'after-write' });
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
       });
@@ -1288,29 +1284,173 @@ describe('ui settings', () => {
           resolveNew = resolve;
         });
 
-        sharedCache.setInflight('test-namespace', oldPromise);
-        expect(sharedCache.getInflight('test-namespace')).toBe(oldPromise);
+        sharedCache.setInflightRead('test-namespace', oldPromise);
+        expect(sharedCache.getInflightRead('test-namespace')).toBe(oldPromise);
 
         sharedCache.del('test-namespace');
-        expect(sharedCache.getInflight('test-namespace')).toBeNull();
+        expect(sharedCache.getInflightRead('test-namespace')).toBeNull();
 
-        sharedCache.setInflight('test-namespace', newPromise);
-        expect(sharedCache.getInflight('test-namespace')).toBe(newPromise);
+        sharedCache.setInflightRead('test-namespace', newPromise);
+        expect(sharedCache.getInflightRead('test-namespace')).toBe(newPromise);
 
         resolveOld!('old-value');
         await oldPromise;
 
         await new Promise((resolve) => setTimeout(resolve, 10));
 
-        expect(sharedCache.getInflight('test-namespace')).toBe(newPromise);
+        expect(sharedCache.getInflightRead('test-namespace')).toBe(newPromise);
 
         resolveNew!('new-value');
         await newPromise;
 
         await new Promise((resolve) => setTimeout(resolve, 10));
 
-        expect(sharedCache.getInflight('test-namespace')).toBeNull();
+        expect(sharedCache.getInflightRead('test-namespace')).toBeNull();
       });
+    });
+  });
+
+  describe('read-write synchronization', () => {
+    it('prevents setMany from writing to savedObjects until getUserProvided completes', async () => {
+      const sharedCache = new NamespacedCache();
+      const executionOrder: string[] = [];
+
+      const { uiSettings: uiSettings1, savedObjectsClient: soClient1 } = setup({
+        namespace: 'sync-test',
+      });
+      (uiSettings1 as any).sharedUserProvidedCache = sharedCache;
+
+      const { uiSettings: uiSettings2, savedObjectsClient: soClient2 } = setup({
+        namespace: 'sync-test',
+      });
+      (uiSettings2 as any).sharedUserProvidedCache = sharedCache;
+
+      // Mock savedObjectsClient.get to simulate a slow read
+      let resolveRead: (value: any) => void;
+      const readPromise = new Promise<any>((resolve) => {
+        resolveRead = resolve;
+      });
+
+      soClient1.get.mockImplementation(() => {
+        executionOrder.push('read-start');
+        return readPromise.then((result) => {
+          executionOrder.push('read-complete');
+          return result;
+        });
+      });
+
+      // Also mock soClient2 to track when write happens
+      soClient2.update.mockImplementation((...args) => {
+        executionOrder.push('write-start');
+        return Promise.resolve({ attributes: {} } as any);
+      });
+
+      // Start getUserProvided in background
+      executionOrder.push('getUserProvided-called');
+      const getUserProvidedPromise = uiSettings1.getUserProvided();
+
+      // Wait a tick for read to start
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Try to setMany while read is in-flight
+      executionOrder.push('setMany-called');
+      const setManyPromise = uiSettings2.setMany({ foo: 'bar' });
+
+      // Wait a bit to ensure setMany is waiting
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Verify that write hasn't started yet
+      expect(executionOrder).not.toContain('write-start');
+
+      // Complete the read
+      resolveRead!({ attributes: {} });
+      await getUserProvidedPromise;
+
+      // Now setMany should proceed
+      await setManyPromise;
+      executionOrder.push('setMany-complete');
+
+      // Verify execution order
+      expect(executionOrder).toEqual([
+        'getUserProvided-called',
+        'read-start',
+        'setMany-called',
+        'read-complete',
+        'write-start',
+        'setMany-complete',
+      ]);
+    });
+
+    it('prevents getUserProvided from reading savedObjects until setMany completes', async () => {
+      const sharedCache = new NamespacedCache();
+      const executionOrder: string[] = [];
+
+      const { uiSettings: uiSettings1, savedObjectsClient: soClient1 } = setup({
+        namespace: 'sync-test-2',
+      });
+      (uiSettings1 as any).sharedUserProvidedCache = sharedCache;
+
+      const { uiSettings: uiSettings2, savedObjectsClient: soClient2 } = setup({
+        namespace: 'sync-test-2',
+      });
+      (uiSettings2 as any).sharedUserProvidedCache = sharedCache;
+
+      // Mock savedObjectsClient.update to simulate a slow write
+      let resolveWrite: (value: any) => void;
+      const writePromise = new Promise<any>((resolve) => {
+        resolveWrite = resolve;
+      });
+
+      soClient1.update.mockImplementation(() => {
+        executionOrder.push('write-start');
+        return writePromise.then((result) => {
+          executionOrder.push('write-complete');
+          return result;
+        });
+      });
+
+      // Mock soClient2.get to track when read happens
+      soClient2.get.mockImplementation(() => {
+        executionOrder.push('read-start');
+        return Promise.resolve({ attributes: {} } as any);
+      });
+
+      // Start setMany in background
+      executionOrder.push('setMany-called');
+      const setManyPromise = uiSettings1.setMany({ foo: 'bar' });
+
+      // Wait a tick for write to start
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Try to getUserProvided while write is in-flight
+      executionOrder.push('getUserProvided-called');
+      const getUserProvidedPromise = uiSettings2.getUserProvided();
+
+      // Wait a bit
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Verify that read hasn't started yet (waiting for write)
+      expect(executionOrder).not.toContain('read-start');
+
+      // Complete the write
+      resolveWrite!({ attributes: {} });
+      await setManyPromise;
+      executionOrder.push('setMany-complete');
+
+      // Now getUserProvided should proceed
+      await getUserProvidedPromise;
+      executionOrder.push('getUserProvided-complete');
+
+      // Verify execution order
+      expect(executionOrder).toEqual([
+        'setMany-called',
+        'write-start',
+        'getUserProvided-called',
+        'write-complete',
+        'setMany-complete',
+        'read-start',
+        'getUserProvided-complete',
+      ]);
     });
   });
 });

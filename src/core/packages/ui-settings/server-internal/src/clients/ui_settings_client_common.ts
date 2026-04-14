@@ -52,6 +52,9 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
     // 1. Check shared process-wide cache
     if (this.sharedUserProvidedCache) {
+      // await any in-flight write to prevent reading stale data while a write is in progress
+      await this.sharedUserProvidedCache.awaitInflightWrite(this.namespace);
+
       const sharedCached = this.sharedUserProvidedCache.get(this.namespace);
       if (sharedCached) {
         this.log.info(
@@ -60,17 +63,17 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
         return sharedCached as UserProvided<T>;
       }
 
-      // 2. Check for in-flight request (deduplication)
-      const inflight = this.sharedUserProvidedCache.getInflight(this.namespace);
-      if (inflight) {
+      // check for in-flight read request (deduplication)
+      const inflightRead = this.sharedUserProvidedCache.getInflightRead(this.namespace);
+      if (inflightRead) {
         this.log.info(
-          `[UiSettings] getUserProvided using IN-FLIGHT request for namespace=${this.namespace}`
+          `[UiSettings] getUserProvided using IN-FLIGHT READ for namespace=${this.namespace}`
         );
-        return inflight as Promise<UserProvided<T>>;
+        return inflightRead as Promise<UserProvided<T>>;
       }
     }
 
-    // 3. Check per-instance cache (within same request)
+    // 4. Check per-instance cache (within same request)
     const instanceCached = this.cache.get();
     if (instanceCached) {
       this.log.info(
@@ -83,12 +86,12 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
       `[UiSettings] getUserProvided cache MISS - fetching from ES for namespace=${this.namespace}`
     );
 
-    // 4. Fetch from ES, process, and cache at all levels
+    // 5. Fetch from ES, process, and cache at all levels
     const promise = this.computeUserProvided<T>();
 
     // Register in-flight promise for deduplication
     if (this.sharedUserProvidedCache) {
-      this.sharedUserProvidedCache.setInflight(this.namespace, promise);
+      this.sharedUserProvidedCache.setInflightRead(this.namespace, promise);
     }
 
     return promise;
@@ -133,15 +136,11 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
 
     // check if a read is currently in progress, wait for it to complete before proceeding
     if (this.sharedUserProvidedCache) {
-      const inflight = this.sharedUserProvidedCache.getInflight(this.namespace);
-      if (inflight) {
-        this.log.info(
-          `[UiSettings] setMany waiting for IN-FLIGHT request for namespace=${this.namespace}`
-        );
-        await inflight.catch(() => {
-          // Ignore errors from in-flight request, we'll invalidate regardless
-        });
-      }
+      await this.sharedUserProvidedCache.awaitInflightRead(this.namespace);
+      this.log.info(
+        `[UiSettings] setMany invalidating SHARED cache for namespace=${this.namespace}`
+      );
+      this.sharedUserProvidedCache.del(this.namespace);
     }
 
     this.log.info(
@@ -149,17 +148,19 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     );
     this.cache.del();
 
-    // Invalidate shared getUserProvided cache for this namespace
+    this.onWriteHook(changes);
+
+    // Register write operation as in-flight so concurrent reads will wait
+    const writePromise = this.write({ changes, handleWriteErrors });
     if (this.sharedUserProvidedCache) {
+      this.sharedUserProvidedCache.setInflightWrite(this.namespace, writePromise);
       this.log.info(
-        `[UiSettings] setMany invalidating SHARED cache for namespace=${this.namespace}`
+        `[UiSettings] setMany registered IN-FLIGHT WRITE for namespace=${this.namespace}`
       );
-      this.sharedUserProvidedCache.del(this.namespace);
     }
 
-    this.onWriteHook(changes);
     this.log.info(`[UiSettings] setMany writing to ES for namespace=${this.namespace}`);
-    await this.write({ changes, handleWriteErrors });
+    await writePromise;
     this.log.info(`[UiSettings] setMany ES write COMPLETED for namespace=${this.namespace}`);
 
     this.log.info(`[UiSettings] setMany COMPLETED for namespace=${this.namespace}`);

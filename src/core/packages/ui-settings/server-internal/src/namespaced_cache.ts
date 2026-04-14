@@ -27,7 +27,8 @@ interface NamespacedCacheEntry<T = unknown> {
  */
 export class NamespacedCache<T = unknown> {
   private readonly entries = new Map<string, NamespacedCacheEntry<T>>();
-  private readonly inflightRequests = new Map<string, Promise<T>>();
+  private readonly inflightReads = new Map<string, Promise<T>>();
+  private readonly inflightWrites = new Map<string, Promise<void>>();
 
   /**
    * Get cached value for a specific namespace
@@ -62,8 +63,9 @@ export class NamespacedCache<T = unknown> {
       this.entries.delete(namespace);
     }
 
-    // Clear in-flight promise to prevent stale data
-    this.inflightRequests.delete(namespace);
+    // Clear in-flight promises to prevent stale data
+    this.inflightReads.delete(namespace);
+    this.inflightWrites.delete(namespace);
   }
 
   /**
@@ -74,36 +76,50 @@ export class NamespacedCache<T = unknown> {
       clearTimeout(entry.timer);
     }
     this.entries.clear();
-    this.inflightRequests.clear();
+    this.inflightReads.clear();
+    this.inflightWrites.clear();
   }
 
   /**
-   * Get in-flight promise for a specific namespace.
-   * Used for request deduplication.
+   * Get in-flight read promise for a specific namespace.
+   * Used for request deduplication - caller receives the actual result.
    */
-  getInflight(namespace: string): Promise<T> | null {
-    const promise = this.inflightRequests.get(namespace);
+  getInflightRead(namespace: string): Promise<T> | null {
+    const promise = this.inflightReads.get(namespace);
     return promise ? promise : null;
+  }
+
+  /**
+   * Wait for any in-flight read to complete, ignoring errors.
+   * Used for synchronization when writes need to wait for reads.
+   */
+  async awaitInflightRead(namespace: string): Promise<void> {
+    const promise = this.inflightReads.get(namespace);
+    if (promise) {
+      await promise.catch(() => {
+        // Ignore errors - caller just needs to wait for completion
+      });
+    }
   }
 
   /**
    * Set in-flight promise for a specific namespace.
    * The promise is automatically removed when it resolves or rejects.
    */
-  setInflight(namespace: string, promise: Promise<T>): void {
-    this.inflightRequests.set(namespace, promise);
+  setInflightRead(namespace: string, promise: Promise<T>): void {
+    this.inflightReads.set(namespace, promise);
 
     // Auto-cleanup when promise settles
     // Only delete if this promise is still the current one (prevents race conditions)
     promise
       .then(() => {
-        if (this.inflightRequests.get(namespace) === promise) {
-          this.inflightRequests.delete(namespace);
+        if (this.inflightReads.get(namespace) === promise) {
+          this.inflightReads.delete(namespace);
         }
       })
       .catch(() => {
-        if (this.inflightRequests.get(namespace) === promise) {
-          this.inflightRequests.delete(namespace);
+        if (this.inflightReads.get(namespace) === promise) {
+          this.inflightReads.delete(namespace);
         }
       });
   }
@@ -113,5 +129,39 @@ export class NamespacedCache<T = unknown> {
    */
   has(namespace: string): boolean {
     return this.entries.has(namespace);
+  }
+
+  /**
+   * Wait for any in-flight write to complete.
+   * Errors are already swallowed in setInflightWrite, so this is safe to await.
+   * Used for synchronization when reads need to wait for writes.
+   */
+  async awaitInflightWrite(namespace: string): Promise<void> {
+    const promise = this.inflightWrites.get(namespace);
+    if (promise) {
+      await promise;
+    }
+  }
+
+  /**
+   * Set in-flight write promise for a specific namespace.
+   * The promise is automatically removed when it resolves or rejects.
+   * Errors are swallowed since reads will continue from ES regardless of write success.
+   */
+  setInflightWrite(namespace: string, promise: Promise<void>): void {
+    // Wrap promise to swallow errors - callers don't need to handle them
+    const safePromise = promise.catch(() => {
+      // Error swallowed - reads waiting on this write will continue from ES anyway
+    });
+
+    // Auto-cleanup when promise settles
+    // Only delete if this promise is still the current one (prevents race conditions)
+    safePromise.finally(() => {
+      if (this.inflightWrites.get(namespace) === safePromise) {
+        this.inflightWrites.delete(namespace);
+      }
+    });
+
+    this.inflightWrites.set(namespace, safePromise);
   }
 }

@@ -108,24 +108,24 @@ describe('NamespacedCache', () => {
 
     it('clears in-flight promises when deleting', () => {
       const promise = Promise.resolve('test-value');
-      cache.setInflight('default', promise);
+      cache.setInflightRead('default', promise);
 
-      expect(cache.getInflight('default')).toBe(promise);
+      expect(cache.getInflightRead('default')).toBe(promise);
 
       cache.del('default');
 
-      expect(cache.getInflight('default')).toBeNull();
+      expect(cache.getInflightRead('default')).toBeNull();
     });
 
     it('clears both cached value and in-flight promise', () => {
       cache.set('default', 'value1', 5000);
       const promise = Promise.resolve('test-value');
-      cache.setInflight('default', promise);
+      cache.setInflightRead('default', promise);
 
       cache.del('default');
 
       expect(cache.get('default')).toBeNull();
-      expect(cache.getInflight('default')).toBeNull();
+      expect(cache.getInflightRead('default')).toBeNull();
     });
   });
 
@@ -154,13 +154,13 @@ describe('NamespacedCache', () => {
       const promise1 = Promise.resolve('value1');
       const promise2 = Promise.resolve('value2');
 
-      cache.setInflight('ns1', promise1);
-      cache.setInflight('ns2', promise2);
+      cache.setInflightRead('ns1', promise1);
+      cache.setInflightRead('ns2', promise2);
 
       cache.clear();
 
-      expect(cache.getInflight('ns1')).toBeNull();
-      expect(cache.getInflight('ns2')).toBeNull();
+      expect(cache.getInflightRead('ns1')).toBeNull();
+      expect(cache.getInflightRead('ns2')).toBeNull();
     });
   });
 
@@ -200,25 +200,25 @@ describe('NamespacedCache', () => {
   describe('in-flight promise tracking', () => {
     it('stores and retrieves in-flight promises', () => {
       const promise = Promise.resolve('test-value');
-      cache.setInflight('default', promise);
+      cache.setInflightRead('default', promise);
 
-      const retrieved = cache.getInflight('default');
+      const retrieved = cache.getInflightRead('default');
       expect(retrieved).toBe(promise);
     });
 
     it('returns null for non-existent in-flight promises', () => {
-      expect(cache.getInflight('nonexistent')).toBeNull();
+      expect(cache.getInflightRead('nonexistent')).toBeNull();
     });
 
     it('isolates in-flight promises by namespace', () => {
       const promise1 = Promise.resolve('value1');
       const promise2 = Promise.resolve('value2');
 
-      cache.setInflight('ns1', promise1);
-      cache.setInflight('ns2', promise2);
+      cache.setInflightRead('ns1', promise1);
+      cache.setInflightRead('ns2', promise2);
 
-      expect(cache.getInflight('ns1')).toBe(promise1);
-      expect(cache.getInflight('ns2')).toBe(promise2);
+      expect(cache.getInflightRead('ns1')).toBe(promise1);
+      expect(cache.getInflightRead('ns2')).toBe(promise2);
     });
 
     it('auto-removes in-flight promise after it resolves', async () => {
@@ -226,15 +226,15 @@ describe('NamespacedCache', () => {
       jest.useRealTimers();
 
       const promise = Promise.resolve('test-value');
-      cache.setInflight('default', promise);
+      cache.setInflightRead('default', promise);
 
-      expect(cache.getInflight('default')).toBe(promise);
+      expect(cache.getInflightRead('default')).toBe(promise);
 
       // Wait for promise to resolve and cleanup to run
       await promise;
       await new Promise((resolve) => setImmediate(resolve));
 
-      expect(cache.getInflight('default')).toBeNull();
+      expect(cache.getInflightRead('default')).toBeNull();
 
       // Restore fake timers for other tests
       jest.useFakeTimers();
@@ -245,15 +245,15 @@ describe('NamespacedCache', () => {
       jest.useRealTimers();
 
       const promise = Promise.reject(new Error('test error'));
-      cache.setInflight('default', promise);
+      cache.setInflightRead('default', promise);
 
-      expect(cache.getInflight('default')).toBe(promise);
+      expect(cache.getInflightRead('default')).toBe(promise);
 
       // Wait for promise to reject (and catch to prevent unhandled rejection)
       await promise.catch(() => {});
       await new Promise((resolve) => setImmediate(resolve));
 
-      expect(cache.getInflight('default')).toBeNull();
+      expect(cache.getInflightRead('default')).toBeNull();
 
       // Restore fake timers for other tests
       jest.useFakeTimers();
@@ -263,21 +263,171 @@ describe('NamespacedCache', () => {
       const promise1 = Promise.resolve('value1');
       const promise2 = Promise.resolve('value2');
 
-      cache.setInflight('ns1', promise1);
-      cache.setInflight('ns2', promise2);
+      cache.setInflightRead('ns1', promise1);
+      cache.setInflightRead('ns2', promise2);
 
-      expect(cache.getInflight('ns1')).toBe(promise1);
-      expect(cache.getInflight('ns2')).toBe(promise2);
+      expect(cache.getInflightRead('ns1')).toBe(promise1);
+      expect(cache.getInflightRead('ns2')).toBe(promise2);
     });
 
     it('replaces in-flight promise when setting same namespace again', () => {
       const promise1 = Promise.resolve('value1');
       const promise2 = Promise.resolve('value2');
 
-      cache.setInflight('default', promise1);
-      cache.setInflight('default', promise2);
+      cache.setInflightRead('default', promise1);
+      cache.setInflightRead('default', promise2);
 
-      expect(cache.getInflight('default')).toBe(promise2);
+      expect(cache.getInflightRead('default')).toBe(promise2);
+    });
+  });
+
+  describe('awaitInflightRead', () => {
+    it('waits for in-flight read to complete', async () => {
+      jest.useRealTimers();
+
+      let readCompleted = false;
+      const promise = new Promise<string>((resolve) => {
+        setTimeout(() => {
+          readCompleted = true;
+          resolve('test-value');
+        }, 10);
+      });
+
+      cache.setInflightRead('default', promise);
+
+      expect(readCompleted).toBe(false);
+
+      await cache.awaitInflightRead('default');
+
+      expect(readCompleted).toBe(true);
+
+      jest.useFakeTimers();
+    });
+
+    it('ignores errors from in-flight reads', async () => {
+      jest.useRealTimers();
+
+      const promise = Promise.reject(new Error('test error'));
+      cache.setInflightRead('default', promise);
+
+      // Should not throw
+      await expect(cache.awaitInflightRead('default')).resolves.toBeUndefined();
+
+      jest.useFakeTimers();
+    });
+
+    it('does nothing if no in-flight read exists', async () => {
+      await expect(cache.awaitInflightRead('nonexistent')).resolves.toBeUndefined();
+    });
+
+    it('prevents write from starting before read completes', async () => {
+      jest.useRealTimers();
+
+      const executionOrder: string[] = [];
+
+      // Simulate a long-running read
+      const readPromise = new Promise<string>((resolve) => {
+        setTimeout(() => {
+          executionOrder.push('read-complete');
+          resolve('read-value');
+        }, 20);
+      });
+
+      cache.setInflightRead('default', readPromise);
+      executionOrder.push('read-started');
+
+      // Simulate write waiting for read
+      const writePromise = (async () => {
+        executionOrder.push('write-waiting');
+        await cache.awaitInflightRead('default');
+        executionOrder.push('write-started');
+      })();
+
+      await writePromise;
+
+      expect(executionOrder).toEqual([
+        'read-started',
+        'write-waiting',
+        'read-complete',
+        'write-started',
+      ]);
+
+      jest.useFakeTimers();
+    });
+  });
+
+  describe('awaitInflightWrite', () => {
+    it('waits for in-flight write to complete', async () => {
+      jest.useRealTimers();
+
+      let writeCompleted = false;
+      const promise = new Promise<void>((resolve) => {
+        setTimeout(() => {
+          writeCompleted = true;
+          resolve();
+        }, 10);
+      });
+
+      cache.setInflightWrite('default', promise);
+
+      expect(writeCompleted).toBe(false);
+
+      await cache.awaitInflightWrite('default');
+
+      expect(writeCompleted).toBe(true);
+
+      jest.useFakeTimers();
+    });
+
+    it('does not throw even if write failed (errors are swallowed)', async () => {
+      jest.useRealTimers();
+
+      const promise = Promise.reject(new Error('write failed'));
+      cache.setInflightWrite('default', promise);
+
+      // Should not throw because errors are swallowed in setInflightWrite
+      await expect(cache.awaitInflightWrite('default')).resolves.toBeUndefined();
+
+      jest.useFakeTimers();
+    });
+
+    it('does nothing if no in-flight write exists', async () => {
+      await expect(cache.awaitInflightWrite('nonexistent')).resolves.toBeUndefined();
+    });
+
+    it('prevents read from starting before write completes', async () => {
+      jest.useRealTimers();
+
+      const executionOrder: string[] = [];
+
+      // Simulate a long-running write
+      const writePromise = new Promise<void>((resolve) => {
+        setTimeout(() => {
+          executionOrder.push('write-complete');
+          resolve();
+        }, 20);
+      });
+
+      cache.setInflightWrite('default', writePromise);
+      executionOrder.push('write-started');
+
+      // Simulate read waiting for write
+      const readPromise = (async () => {
+        executionOrder.push('read-waiting');
+        await cache.awaitInflightWrite('default');
+        executionOrder.push('read-started');
+      })();
+
+      await readPromise;
+
+      expect(executionOrder).toEqual([
+        'write-started',
+        'read-waiting',
+        'write-complete',
+        'read-started',
+      ]);
+
+      jest.useFakeTimers();
     });
   });
 });
