@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -78,6 +78,13 @@ export const renderTextWithEntities = (
 export const TagsPopover: React.FC<{ tags: string[] }> = ({ tags }) => {
   const [isOpen, setIsOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(
+    () => () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    },
+    []
+  );
 
   const open = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);

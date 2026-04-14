@@ -200,35 +200,39 @@ export const createLeadDataClient = ({
   }: CreateLeadsParams): Promise<void> => {
     const indexName = getLeadsIndexName(spaceId, sourceType);
 
-    if (leads.length > 0) {
-      const bulkBody = leads.flatMap((lead) => [
-        { index: { _index: indexName, _id: lead.id } },
-        leadToEsDoc(lead, executionId, sourceType),
-      ]);
-      const bulkResp = await esClient.bulk({ body: bulkBody });
+    try {
+      if (leads.length > 0) {
+        const bulkBody = leads.flatMap((lead) => [
+          { index: { _index: indexName, _id: lead.id } },
+          leadToEsDoc(lead, executionId, sourceType),
+        ]);
+        const bulkResp = await esClient.bulk({ body: bulkBody });
 
-      if (bulkResp.errors) {
-        const failedItems = bulkResp.items.filter((item) => item.index?.error);
-        const failedIds = failedItems.map((item) => item.index?._id);
-        logger.error(
-          `[LeadGeneration] Bulk indexing had ${failedItems.length}/${leads.length} failures ` +
-            `(executionId=${executionId}, index=${indexName}): ${JSON.stringify(failedIds)}`
-        );
+        if (bulkResp.errors) {
+          const failedItems = bulkResp.items.filter((item) => item.index?.error);
+          const failedIds = failedItems.map((item) => item.index?._id);
+          logger.error(
+            `[LeadGeneration] Bulk indexing had ${failedItems.length}/${leads.length} failures ` +
+              `(executionId=${executionId}, index=${indexName}): ${JSON.stringify(failedIds)}`
+          );
+        } else {
+          logger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
+        }
       }
 
-      logger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
+      await esClient.deleteByQuery({
+        index: indexName,
+        query: {
+          bool: { must_not: [{ term: { 'execution_uuid.keyword': executionId } }] },
+        },
+        refresh: true,
+        conflicts: 'proceed',
+        slices: 'auto',
+        ignore_unavailable: true,
+      });
+    } catch (e) {
+      logger.warn(`[LeadGeneration] Failed to persist leads to "${indexName}": ${e}`);
     }
-
-    await esClient.deleteByQuery({
-      index: indexName,
-      query: {
-        bool: { must_not: [{ term: { 'execution_uuid.keyword': executionId } }] },
-      },
-      refresh: true,
-      conflicts: 'proceed',
-      slices: 'auto',
-      ignore_unavailable: true,
-    });
   };
 
   // -----------------------------------------------------------------------
