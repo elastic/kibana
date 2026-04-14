@@ -6,6 +6,7 @@
  */
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import type { FindCompositeSLOResponse, GetCompositeSLOResponse } from '@kbn/slo-schema';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
@@ -263,8 +264,8 @@ describe('CompositeSloTable', () => {
 
       useFetchActiveAlertsMock.mockReturnValue({
         data: new ActiveAlerts([
-          [{ id: 'member-slo-1', instanceId: undefined }, 2],
-          [{ id: 'member-slo-2', instanceId: undefined }, 3],
+          [{ id: 'member-slo-1', instanceId: ALL_VALUE }, 2],
+          [{ id: 'member-slo-2', instanceId: ALL_VALUE }, 3],
         ]),
       });
 
