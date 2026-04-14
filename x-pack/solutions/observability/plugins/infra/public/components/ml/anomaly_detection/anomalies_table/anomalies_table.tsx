@@ -282,7 +282,6 @@ export interface Props {
   // subject to watch the completion of the request
   fetcherOpts?: Pick<FetcherOptions, 'autoFetch' | 'requestObservable$'>;
   hideSelectGroup?: boolean;
-  onJobTypeChange?: (jobType: 'host' | 'pod') => void;
 }
 
 const DEFAULT_DATE_RANGE: TimeRange = {
