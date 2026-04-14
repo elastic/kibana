@@ -2209,7 +2209,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 133,
+        "lineNumber": 178,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2226,7 +2226,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 137,
+        "lineNumber": 182,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2243,7 +2243,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 392,
+        "lineNumber": 437,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2605,7 +2605,7 @@
           "$ZodTypeInternals<any, unknown>>"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
-        "lineNumber": 393,
+        "lineNumber": 438,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
