@@ -58,7 +58,7 @@ const listQueriesRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
-    const { queryClient, streamsClient, licensing } = await getScopedClients({ request });
+    const { getQueryClient, streamsClient, licensing } = await getScopedClients({ request });
     await assertEnterpriseLicense(licensing);
     await streamsClient.ensureStream(params.path.name);
 
@@ -66,6 +66,7 @@ const listQueriesRoute = createServerRoute({
       path: { name: streamName },
     } = params;
 
+    const queryClient = await getQueryClient();
     const { [streamName]: queryLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
 
     return {
@@ -98,7 +99,7 @@ const upsertQueryRoute = createServerRoute({
     body: upsertStreamQueryRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+    const { streamsClient, getQueryClient, licensing } = await getScopedClients({ request });
     const {
       path: { name: streamName, queryId },
       body,
@@ -112,6 +113,7 @@ const upsertQueryRoute = createServerRoute({
       stream: definition,
     });
 
+    const queryClient = await getQueryClient();
     await queryClient.upsert(definition, {
       id: queryId,
       type: deriveQueryType(body.esql.query),
@@ -151,7 +153,7 @@ const deleteQueryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, queryClient, licensing } = await getScopedClients({
+    const { streamsClient, getQueryClient, licensing } = await getScopedClients({
       request,
     });
     await assertEnterpriseLicense(licensing);
@@ -162,6 +164,7 @@ const deleteQueryRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(streamName);
 
+    const queryClient = await getQueryClient();
     const queryLink = await queryClient.bulkGetByIds(streamName, [queryId]);
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
@@ -216,7 +219,7 @@ const bulkQueriesRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+    const { streamsClient, getQueryClient, licensing } = await getScopedClients({ request });
     await assertEnterpriseLicense(licensing);
 
     const {
@@ -264,6 +267,7 @@ const bulkQueriesRoute = createServerRoute({
       });
     }
 
+    const queryClient = await getQueryClient();
     await queryClient.bulk(definition, typedOperations);
 
     logger

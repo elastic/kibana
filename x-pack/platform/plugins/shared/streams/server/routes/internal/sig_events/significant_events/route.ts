@@ -189,7 +189,7 @@ const readAllSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -197,6 +197,7 @@ const readAllSignificantEventsRoute = createServerRoute({
 
     const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
 
+    const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
         from,

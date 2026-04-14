@@ -99,7 +99,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               const { streamName, from, to, steps, saveQueries, connectors, _task } = runContext
                 .taskInstance.params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, queryClient, streamsClient, uiSettingsClient } =
+              const { taskClient, getQueryClient, streamsClient, uiSettingsClient } =
                 await taskContext.getScopedClients({
                   request: fakeRequest,
                 });
@@ -172,7 +172,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                       if (saveQueries) {
                         await persistQueries(streamName, queriesTaskResult.queries, {
-                          queryClient,
+                          queryClient: await getQueryClient(),
                           streamsClient,
                         });
                       }

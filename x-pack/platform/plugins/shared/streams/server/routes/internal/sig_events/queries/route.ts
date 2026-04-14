@@ -47,12 +47,13 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
   },
   params: z.object({}),
   handler: async ({ request, getScopedClients, server }): Promise<{ count: number }> => {
-    const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
+    const { getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const queryClient = await getQueryClient();
     const count = await queryClient.getUnbackedQueriesCount();
     return { count };
   },
@@ -95,12 +96,13 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     server,
     logger,
   }): Promise<{ promoted: number; skipped_stats: number }> => {
-    const { queryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const queryClient = await getQueryClient();
     const all = await queryClient.getAllUnbackedQueries();
     const requestedQueryIds = params?.body?.queryIds ?? [];
 
@@ -165,12 +167,13 @@ export const demoteBackedQueriesRoute = createServerRoute({
     server,
     logger,
   }): Promise<{ demoted: number }> => {
-    const { queryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const queryClient = await getQueryClient();
     const toDemote = await queryClient.getQueryLinks([], {
       ruleUnbacked: 'exclude',
       queryIds: params.body.queryIds,
@@ -234,7 +237,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     },
   },
   handler: async ({ params, request, getScopedClients, server }): Promise<QueriesGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -253,6 +256,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       searchMode,
     } = params.query;
 
+    const queryClient = await getQueryClient();
     const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
       {
         from,
@@ -300,7 +304,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<QueriesOccurrencesGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -309,6 +313,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 
     const { from, to, bucketSize, query, streamNames } = params.query;
 
+    const queryClient = await getQueryClient();
     const { aggregated_occurrences: aggregatedOccurrenceBuckets } =
       await readSignificantEventsFromAlertsIndices(
         {
