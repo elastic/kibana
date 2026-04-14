@@ -19,8 +19,12 @@ import { apiTest, testData } from '../fixtures';
  * Note: PLI-based gating for osquery response actions is enforced at the UI
  * level via the `osqueryAutomatedResponseActions` feature key and upselling
  * components — not at the API level. The API validates user privileges (PR
- * #260947) but does not block based on tier. UI-level tier gating is covered
- * in Phase 2 as Jest component tests for the upselling component.
+ * #260947) but does not block based on tier.
+ *
+ * The original Cypress tests verified the NEGATIVE case (UI shows upselling
+ * message + disabled button). This test verifies only the POSITIVE case (API
+ * accepts). The UI-level blocking assertions are tracked in Phase 2 spec:
+ * "Tier gating upselling component tests (deferred from Phase 1)".
  */
 
 apiTest.describe(

@@ -36,5 +36,31 @@ apiTest.describe(
       // Both are valid outcomes. 400/403 would indicate a request/permission issue.
       expect([200, 500]).toContain(response.statusCode);
     });
+
+    apiTest('GET live query details returns expected shape', async ({ apiClient, apiServices }) => {
+      // First create a live query to get a valid action ID
+      const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
+        headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
+        body: testData.getMinimalLiveQuery(),
+        responseType: 'json',
+      });
+
+      // Skip details assertion if creation failed (no enrolled agents)
+      if (createResponse.statusCode !== 200) {
+        return;
+      }
+
+      const actionId = createResponse.body.data?.action_id;
+      expect(actionId).toBeDefined();
+
+      // GET /api/osquery/live_queries/{id} — verify the details endpoint returns correct shape
+      const detailsResponse = await apiServices.osquery.liveQueries.getDetails(actionId);
+
+      expect(detailsResponse.data).toBeDefined();
+      expect(detailsResponse.data.data).toBeDefined();
+      expect('action_id' in detailsResponse.data.data).toBe(true);
+      expect('queries' in detailsResponse.data.data).toBe(true);
+      expect('@timestamp' in detailsResponse.data.data).toBe(true);
+    });
   }
 );
