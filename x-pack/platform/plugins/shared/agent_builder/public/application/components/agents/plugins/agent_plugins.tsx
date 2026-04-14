@@ -16,7 +16,6 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
@@ -41,7 +40,6 @@ import { PluginLibraryPanel } from './plugin_library_panel';
 import { PluginDetailPanel } from './plugin_detail_panel';
 import { InstallPluginFlyout } from './install_plugin_flyout';
 import { PageWrapper } from '../common/page_wrapper';
-import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 
@@ -236,16 +234,9 @@ export const AgentPlugins: React.FC = () => {
       <div css={styles.header}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="package" aria-hidden={true} css={ICON_DIMENSIONS} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.plugins.title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiTitle size="l">
+              <h1>{labels.plugins.title}</h1>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -296,8 +287,8 @@ export const AgentPlugins: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
+        <EuiSpacer size="m" />
+        <EuiText size="m" color="default">
           {labels.agentPlugins.pageDescription}
         </EuiText>
       </div>
