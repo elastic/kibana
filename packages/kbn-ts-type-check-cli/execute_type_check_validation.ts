@@ -25,7 +25,7 @@ import { normalizeRepoRelativePath } from '@kbn/moon';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { TsProject } from '@kbn/ts-projects';
+import { readTsConfig, type TsProject } from '@kbn/ts-projects';
 
 import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
 import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
@@ -65,7 +65,8 @@ const isTsProjectWithinMoonSourceRoots = (
 export async function createTypeCheckConfigs(
   log: ToolingLog,
   projects: TsProject[],
-  allProjects: TsProject[]
+  allProjects: TsProject[],
+  baseRootPaths?: Record<string, string[]>
 ) {
   const writes: Array<[path: string, content: string]> = [];
 
@@ -77,12 +78,12 @@ export async function createTypeCheckConfigs(
   // with overrides, so they can't inherit from the root (child `paths` fully overrides parent).
   let rootPaths: Record<string, string[]> | undefined;
   if (bundledTypesProjects.length > 0) {
-    const rootTsconfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
-    const rootTsconfigText = Fs.readFileSync(rootTsconfigPath, 'utf8')
-      .replace(/\/\/.*$/gm, '')
-      .replace(/\/\*[\s\S]*?\*\//g, '');
-    const rootTsconfig = JSON.parse(rootTsconfigText);
-    rootPaths = rootTsconfig.compilerOptions?.paths;
+    rootPaths = baseRootPaths;
+    if (!rootPaths) {
+      const rootTsconfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
+      const rootTsconfig = readTsConfig(rootTsconfigPath);
+      rootPaths = rootTsconfig.compilerOptions?.paths as Record<string, string[]> | undefined;
+    }
   }
 
   // Identify consumers of bundledTypes — projects that reference a bundledTypes package.
@@ -354,7 +355,8 @@ export const bootstrapCircularConsumers = async (
   procRunner: ProcRunnerLike,
   consumers: TsProject[],
   allProjects: TsProject[],
-  pretty = true
+  pretty = true,
+  baseRootPaths?: Record<string, string[]>
 ): Promise<void> => {
   if (consumers.length === 0) return;
 
@@ -366,12 +368,7 @@ export const bootstrapCircularConsumers = async (
     const bootstrapConfigPath = Path.resolve(project.directory, 'tsconfig.bootstrap.json');
 
     // Build a paths override mapping bundledTypes packages to their bundled .d.ts
-    const rootTsconfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
-    const rootTsconfigText = Fs.readFileSync(rootTsconfigPath, 'utf8')
-      .replace(/\/\/.*$/gm, '')
-      .replace(/\/\*[\s\S]*?\*\//g, '');
-    const rootPaths: Record<string, string[]> =
-      JSON.parse(rootTsconfigText).compilerOptions?.paths ?? {};
+    const rootPaths: Record<string, string[]> = { ...(baseRootPaths ?? {}) };
 
     for (const bp of bundledTypesProjects) {
       const pkgName = bp.rootImportReq;
@@ -595,6 +592,11 @@ export const executeTypeCheckValidation = async ({
       log.verbose('Skipping TypeScript cache restore because --with-archive was not provided.');
     }
 
+    // Resolve root paths once for all consumers of bundledTypes packages
+    const rootTsconfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
+    const rootTsconfig = readTsConfig(rootTsconfigPath);
+    const rootPaths = (rootTsconfig.compilerOptions?.paths as Record<string, string[]>) ?? {};
+
     // Bootstrap bundledTypes packages if their bundled .d.ts doesn't exist yet.
     // Consumers resolve these via path mappings, so the bundled output must be present.
     const needBootstrap = getBundledTypesProjectsNeedingBootstrap(TS_PROJECTS);
@@ -606,10 +608,17 @@ export const executeTypeCheckValidation = async ({
     // to resolve via paths (avoiding diamond dependency from project references).
     const circularConsumers = getCircularConsumersNeedingBootstrap(TS_PROJECTS);
     if (circularConsumers.length > 0) {
-      await bootstrapCircularConsumers(log, procRunner, circularConsumers, TS_PROJECTS, pretty);
+      await bootstrapCircularConsumers(
+        log,
+        procRunner,
+        circularConsumers,
+        TS_PROJECTS,
+        pretty,
+        rootPaths
+      );
     }
 
-    createdConfigs = await createTypeCheckConfigs(log, selectedProjects, TS_PROJECTS);
+    createdConfigs = await createTypeCheckConfigs(log, selectedProjects, TS_PROJECTS, rootPaths);
 
     const buildTargets = shouldRunAllProjects
       ? [Path.relative(REPO_ROOT, ROOT_REFS_CONFIG_PATH)]

@@ -9,4 +9,5 @@
 
 export type { TsProject, RefableTsProject } from './ts_project';
 export { TS_PROJECTS } from './ts_projects';
+export { readTsConfig } from './ts_configfile';
 export type { TsConfig } from './ts_configfile';
