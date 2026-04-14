@@ -6,7 +6,12 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { SavedObjectsErrorHelpers, type CoreStart, type KibanaRequest } from '@kbn/core/server';
+import {
+  SavedObjectsErrorHelpers,
+  type CoreStart,
+  type ElasticsearchClient,
+  type KibanaRequest,
+} from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -30,7 +35,7 @@ import type {
 } from '../../tasks/entity_maintainers/types';
 import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
 import type { TelemetryReporter } from '../../telemetry/events';
-import { CRUDClient } from '../crud';
+import { CRUDClient, type EntityUpdateClient } from '../crud';
 
 interface TaskSnapshot {
   runs: number;
@@ -56,6 +61,16 @@ interface EntityMaintainersClientDeps {
   analytics: TelemetryReporter;
   coreStart: CoreStart;
   licensing: LicensingPluginStart;
+}
+
+interface SyncExecutionContext {
+  taskId: string;
+  currentStatus: EntityMaintainerStatus;
+  fakeRequest: KibanaRequest;
+  logger: Logger;
+  abortController: AbortController;
+  esClient: ElasticsearchClient;
+  crudClient: EntityUpdateClient;
 }
 
 export class EntityMaintainersClient {
@@ -168,36 +183,21 @@ export class EntityMaintainersClient {
         logger: this.logger,
       });
       if (!hasValidLicense) {
+        // Keep sync behavior aligned with task execution, skip run when license is invalid
         return;
       }
 
-      const taskId = getTaskId(id, this.namespace);
-      const task = await this.taskManager.get(taskId);
-      const currentStatus = task.state as Partial<EntityMaintainerStatus>;
-      const maintainerStatus = createMaintainerStatus({
-        currentStatus,
-        namespace: this.namespace,
+      const { taskId, ...executionContext } = await this.getSyncExecutionContext({
+        id,
+        request,
         initialState,
       });
-      const esClient = this.coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-      const crudClient = new CRUDClient({
-        logger: this.logger,
-        esClient,
-        namespace: maintainerStatus.metadata.namespace,
-      });
-      const abortController = new AbortController();
-      const taskLogger = this.logger.get(taskId);
 
       const result = await runEntityMaintainerTask({
-        currentStatus: maintainerStatus,
-        fakeRequest: request,
-        logger: taskLogger,
+        ...executionContext,
         id,
         run,
         setup,
-        abortController,
-        esClient,
-        crudClient,
         analytics: this.analytics,
       });
 
@@ -283,5 +283,42 @@ export class EntityMaintainersClient {
     );
 
     return results;
+  }
+
+  private async getSyncExecutionContext({
+    id,
+    request,
+    initialState,
+  }: {
+    id: string;
+    request: KibanaRequest;
+    initialState: EntityMaintainerState;
+  }): Promise<SyncExecutionContext> {
+    const taskId = getTaskId(id, this.namespace);
+    const task = await this.taskManager.get(taskId);
+    const taskStatus = task.state as Partial<EntityMaintainerStatus>;
+    const currentStatus = createMaintainerStatus({
+      currentStatus: taskStatus,
+      namespace: this.namespace,
+      initialState,
+    });
+    const esClient = this.coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+    const crudClient = new CRUDClient({
+      logger: this.logger,
+      esClient,
+      namespace: currentStatus.metadata.namespace,
+    });
+    const abortController = new AbortController();
+    const logger = this.logger.get(taskId);
+
+    return {
+      taskId,
+      currentStatus,
+      fakeRequest: request,
+      logger,
+      abortController,
+      esClient,
+      crudClient,
+    };
   }
 }
