@@ -10,10 +10,6 @@ import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 
-/**
- * Least-privilege role for viewing detection alerts and using the "Run workflow" action
- * (workflows read + execute + execution read), without `kibana.base: ['all']`.
- */
 const WORKFLOW_ENABLED_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
@@ -59,7 +55,7 @@ spaceTest.describe(
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
       await scoutSpace.savedObjects.cleanStandardList();
-      // Enable the Workflows UI setting required for the "Run workflow" action to appear
+      // Space-level Advanced Setting: show Workflows in the UI so the alert row action "Run workflow" is available
       await scoutSpace.uiSettings.set({ 'workflows:ui:enabled': true });
     });
 
