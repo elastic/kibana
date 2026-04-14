@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
@@ -33,14 +34,18 @@ import {
 } from '../../../sourcerer/containers/sourcerer_paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
+import {
+  SecurityProjectChromeAddIntegrationsOverflow,
+  SecurityProjectChromeMlOverflow,
+} from './security_project_chrome_global_overflow';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
 });
 
 /**
- * This component uses the reverse portal to add the Add Data, ML job settings, and AI Assistant buttons on the
- * right hand side of the Kibana global header
+ * Uses a reverse portal to mount the global header action strip (sourcerer, classic-only ML job settings, etc.).
+ * With project chrome, ML job settings and Add integrations are registered on the app overflow menu instead of this strip.
  */
 export const GlobalHeader = React.memo(() => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -50,6 +55,7 @@ export const GlobalHeader = React.memo(() => {
     setHeaderActionMenu,
     i18n: kibanaServiceI18n,
     application: { capabilities },
+    chrome,
   } = useKibana().services;
   const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
   const canReadFleet = capabilities.fleet.read === true;
@@ -66,6 +72,10 @@ export const GlobalHeader = React.memo(() => {
   const dashboardViewPath = isDashboardViewPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
+
+  const chromeStyle$ = useMemo(() => chrome.getChromeStyle$(), [chrome]);
+  const chromeStyle = useObservable(chromeStyle$, chrome.getChromeStyle());
+  const isProjectChrome = chromeStyle === 'project';
 
   useEffect(() => {
     if (setHeaderActionMenu) {
@@ -95,32 +105,36 @@ export const GlobalHeader = React.memo(() => {
   );
 
   return (
-    <InPortal node={portalNode}>
-      <EuiHeaderSection side="right">
-        {isDetectionsPath(pathname) && (
-          <EuiHeaderSectionItem>
-            <MlPopover />
-          </EuiHeaderSectionItem>
-        )}
+    <>
+      {isProjectChrome && canAddData ? <SecurityProjectChromeAddIntegrationsOverflow /> : null}
+      {isProjectChrome && isDetectionsPath(pathname) ? <SecurityProjectChromeMlOverflow /> : null}
+      <InPortal node={portalNode}>
+        <EuiHeaderSection side="right">
+          {isDetectionsPath(pathname) && !isProjectChrome && (
+            <EuiHeaderSectionItem>
+              <MlPopover />
+            </EuiHeaderSectionItem>
+          )}
 
-        <EuiHeaderSectionItem>
-          <EuiHeaderLinks>
-            {canAddData && (
-              <EuiHeaderLink
-                color="primary"
-                data-test-subj="add-data"
-                href={href}
-                iconType="indexOpen"
-                onClick={onClick}
-              >
-                {BUTTON_ADD_DATA}
-              </EuiHeaderLink>
-            )}
-            {showSourcerer && !showTimeline && dataViewPicker}
-          </EuiHeaderLinks>
-        </EuiHeaderSectionItem>
-      </EuiHeaderSection>
-    </InPortal>
+          <EuiHeaderSectionItem>
+            <EuiHeaderLinks>
+              {canAddData && !isProjectChrome && (
+                <EuiHeaderLink
+                  color="primary"
+                  data-test-subj="add-data"
+                  href={href}
+                  iconType="indexOpen"
+                  onClick={onClick}
+                >
+                  {BUTTON_ADD_DATA}
+                </EuiHeaderLink>
+              )}
+              {showSourcerer && !showTimeline && dataViewPicker}
+            </EuiHeaderLinks>
+          </EuiHeaderSectionItem>
+        </EuiHeaderSection>
+      </InPortal>
+    </>
   );
 });
 GlobalHeader.displayName = 'GlobalHeader';
