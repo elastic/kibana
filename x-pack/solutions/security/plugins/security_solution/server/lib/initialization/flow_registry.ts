@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type {
   InitializationFlowId,
   InitializeSecuritySolutionResponse,
@@ -126,10 +125,9 @@ const executeSingleFlow = async <TPayload>(
  */
 export const runInitializationFlows = async (
   requestedFlows: InitializationFlowId[],
-  context: InitializationFlowContext,
-  logger: Logger
+  context: InitializationFlowContext
 ): Promise<InitializeSecuritySolutionResponse> => {
-  const flowContext: InitializationFlowContext = { ...context, logger };
+  const { logger } = context;
   const sequential = requestedFlows.filter((id) => flows[id]?.runFirst);
   const parallel = requestedFlows.filter((id) => !flows[id]?.runFirst);
 
@@ -142,12 +140,12 @@ export const runInitializationFlows = async (
   // Run runFirst flows sequentially
   const sequentialResults: FlowRunResult[] = [];
   for (const flowId of sequential) {
-    sequentialResults.push(await runSingleFlow(flowId, flowContext));
+    sequentialResults.push(await runSingleFlow(flowId, context));
   }
 
   // Then run remaining flows in parallel
   const parallelResults = await Promise.all(
-    parallel.map((flowId) => runSingleFlow(flowId, flowContext))
+    parallel.map((flowId) => runSingleFlow(flowId, context))
   );
 
   const allResults = [...sequentialResults, ...parallelResults];

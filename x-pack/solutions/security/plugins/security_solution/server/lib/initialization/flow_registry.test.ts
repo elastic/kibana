@@ -72,10 +72,7 @@ const createMockContext = (): InitializationFlowContext => ({
 });
 
 describe('runInitializationFlows', () => {
-  let logger: ReturnType<typeof loggerMock.create>;
-
   beforeEach(() => {
-    logger = loggerMock.create();
     jest.clearAllMocks();
   });
 
@@ -83,7 +80,7 @@ describe('runInitializationFlows', () => {
 
   it('runs a registered flow and returns its result', async () => {
     const context = createMockContext();
-    const response = await runInitializationFlows([flowA], context, logger);
+    const response = await runInitializationFlows([flowA], context);
 
     expect(response.flows[flowA]).toEqual({
       status: INITIALIZATION_FLOW_STATUS_READY,
@@ -95,7 +92,7 @@ describe('runInitializationFlows', () => {
     const { createListIndicesInitializationFlow } = jest.requireMock('./flows/create_list_indices');
 
     const context = createMockContext();
-    await runInitializationFlows([flowA], context, logger);
+    await runInitializationFlows([flowA], context);
 
     expect(createListIndicesInitializationFlow.runFlow).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -108,7 +105,7 @@ describe('runInitializationFlows', () => {
   it('returns an error for an unregistered flow', async () => {
     const nonExistingFlow = 'non-existing-flow' as InitializationFlowId;
     const context = createMockContext();
-    const response = await runInitializationFlows([nonExistingFlow], context, logger);
+    const response = await runInitializationFlows([nonExistingFlow], context);
 
     expect(response.flows[nonExistingFlow]).toEqual({
       status: INITIALIZATION_FLOW_STATUS_ERROR,
@@ -118,7 +115,7 @@ describe('runInitializationFlows', () => {
 
   it('returns an empty flows object when given an empty array', async () => {
     const context = createMockContext();
-    const response = await runInitializationFlows([], context, logger);
+    const response = await runInitializationFlows([], context);
     expect(response).toEqual({ flows: {} });
   });
 
@@ -132,13 +129,13 @@ describe('runInitializationFlows', () => {
       );
 
       const context = createMockContext();
-      const response = await runInitializationFlows([flowA], context, logger);
+      const response = await runInitializationFlows([flowA], context);
 
       expect(response.flows[flowA]).toEqual({
         status: INITIALIZATION_FLOW_STATUS_ERROR,
         error: 'lists plugin is not available',
       });
-      expect(logger.error).toHaveBeenCalledWith(
+      expect(context.logger.error).toHaveBeenCalledWith(
         "Initialization flow 'create-list-indices' failed: lists plugin is not available"
       );
     });
@@ -152,13 +149,13 @@ describe('runInitializationFlows', () => {
       );
 
       const context = createMockContext();
-      const response = await runInitializationFlows([flowA], context, logger);
+      const response = await runInitializationFlows([flowA], context);
 
       expect(response.flows[flowA]).toEqual({
         status: INITIALIZATION_FLOW_STATUS_ERROR,
         error: 'internal initialization flow error',
       });
-      expect(logger.error).toHaveBeenCalledWith(
+      expect(context.logger.error).toHaveBeenCalledWith(
         "Initialization flow 'create-list-indices' failed: ES connection failed"
       );
     });
@@ -174,7 +171,7 @@ describe('runInitializationFlows', () => {
     });
 
     const context = createMockContext();
-    const response = await runInitializationFlows([flowA, nonExistingFlow], context, logger);
+    const response = await runInitializationFlows([flowA, nonExistingFlow], context);
 
     expect(response.flows[flowA]).toEqual({
       status: INITIALIZATION_FLOW_STATUS_READY,
@@ -214,8 +211,7 @@ describe('runInitializationFlows', () => {
           INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
           INITIALIZATION_FLOW_INIT_AI_PROMPTS,
         ],
-        context,
-        logger
+        context
       );
 
       // prebuilt-rules has runFirst=true, so it must appear before the others
@@ -247,8 +243,7 @@ describe('runInitializationFlows', () => {
       const context = createMockContext();
       await runInitializationFlows(
         [INITIALIZATION_FLOW_CREATE_LIST_INDICES, INITIALIZATION_FLOW_INIT_PREBUILT_RULES],
-        context,
-        logger
+        context
       );
 
       // Both are runFirst: they should execute in request order (list-indices first)
@@ -285,8 +280,7 @@ describe('runInitializationFlows', () => {
       const context = createMockContext();
       const promise = runInitializationFlows(
         [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION, INITIALIZATION_FLOW_INIT_AI_PROMPTS],
-        context,
-        logger
+        context
       );
 
       // Wait a tick for the promises to be created
@@ -319,10 +313,10 @@ describe('runInitializationFlows', () => {
       const context = createMockContext();
 
       // Fire two concurrent requests for the same flow
-      const promise1 = runInitializationFlows([flowA], context, logger);
+      const promise1 = runInitializationFlows([flowA], context);
       // Allow the first call to reach the inflight map
       await new Promise((r) => setImmediate(r));
-      const promise2 = runInitializationFlows([flowA], context, logger);
+      const promise2 = runInitializationFlows([flowA], context);
 
       // Resolve the single underlying execution
       resolveRunFlow!({ status: 'ready', payload: null });
@@ -357,17 +351,19 @@ describe('runInitializationFlows', () => {
         requestHandlerContext: {
           securitySolution: Promise.resolve({ getSpaceId: () => 'space-a' }),
         },
+        logger: loggerMock.create(),
       } as unknown as InitializationFlowContext;
 
       const contextSpaceB = {
         requestHandlerContext: {
           securitySolution: Promise.resolve({ getSpaceId: () => 'space-b' }),
         },
+        logger: loggerMock.create(),
       } as unknown as InitializationFlowContext;
 
       await Promise.all([
-        runInitializationFlows([flowA], contextSpaceA, logger),
-        runInitializationFlows([flowA], contextSpaceB, logger),
+        runInitializationFlows([flowA], contextSpaceA),
+        runInitializationFlows([flowA], contextSpaceB),
       ]);
 
       // runFlow was called twice -- once per space
@@ -389,24 +385,24 @@ describe('runInitializationFlows', () => {
         requestHandlerContext: {
           securitySolution: Promise.resolve({ getSpaceId: () => 'space-a' }),
         },
+        logger: loggerMock.create(),
       } as unknown as InitializationFlowContext;
 
       const contextSpaceB = {
         requestHandlerContext: {
           securitySolution: Promise.resolve({ getSpaceId: () => 'space-b' }),
         },
+        logger: loggerMock.create(),
       } as unknown as InitializationFlowContext;
 
       const promise1 = runInitializationFlows(
         [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION],
-        contextSpaceA,
-        logger
+        contextSpaceA
       );
       await new Promise((r) => setImmediate(r));
       const promise2 = runInitializationFlows(
         [INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION],
-        contextSpaceB,
-        logger
+        contextSpaceB
       );
 
       resolveRunFlow!({ status: 'ready', payload: null });
@@ -439,9 +435,9 @@ describe('runInitializationFlows', () => {
       const context = createMockContext();
 
       // First request completes
-      await runInitializationFlows([flowA], context, logger);
+      await runInitializationFlows([flowA], context);
       // Second request after the first completed — should execute fresh
-      await runInitializationFlows([flowA], context, logger);
+      await runInitializationFlows([flowA], context);
 
       // runFlow was called twice — no stale caching
       expect(createListIndicesInitializationFlow.runFlow).toHaveBeenCalledTimes(2);
@@ -462,10 +458,10 @@ describe('runInitializationFlows', () => {
 
       const context = createMockContext();
 
-      const promise1 = runInitializationFlows([flowA], context, logger);
+      const promise1 = runInitializationFlows([flowA], context);
       // Allow the first call to reach the inflight map
       await new Promise((r) => setImmediate(r));
-      const promise2 = runInitializationFlows([flowA], context, logger);
+      const promise2 = runInitializationFlows([flowA], context);
 
       rejectRunFlow!(new Error('something broke'));
 

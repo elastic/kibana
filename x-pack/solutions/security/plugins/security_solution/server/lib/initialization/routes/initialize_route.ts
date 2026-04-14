@@ -52,13 +52,10 @@ export const initializeRoute = (router: SecuritySolutionPluginRouter, logger: Lo
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const results = await runInitializationFlows(
-            request.body.flows,
-            {
-              requestHandlerContext: context,
-            },
-            logger
-          );
+          const results = await runInitializationFlows(request.body.flows, {
+            requestHandlerContext: context,
+            logger,
+          });
 
           return response.ok({ body: results });
         } catch (err) {
