@@ -25,6 +25,7 @@ plugins:
     - infra
     - intercepts
     - lens
+    - logstash
     - maps
     - navigation
     - observability
