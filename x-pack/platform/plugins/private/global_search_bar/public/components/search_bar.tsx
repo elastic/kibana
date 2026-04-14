@@ -419,7 +419,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         text-overflow: ellipsis;
         white-space: nowrap;
         font-weight: ${euiTheme.font.weight.regular} !important;
-        color: ${euiTheme.colors.textParagraph} !important;
+        color: ${euiTheme.colors.textDisabled} !important;
       }
 
       /* EuiButton base+text uses an overlay ::before for hover/active; remove so background never changes */

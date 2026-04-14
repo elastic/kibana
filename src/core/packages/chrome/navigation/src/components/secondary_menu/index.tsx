@@ -58,7 +58,7 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
       box-sizing: border-box;
       display: flex;
       align-items: flex-start;
-      background: transparent;
+      background: ${isPanel ? euiTheme.colors.backgroundBasePlain : 'transparent'};
       border-radius: 0;
       text-align: start;
       padding: ${isPanel
