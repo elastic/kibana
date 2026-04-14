@@ -39,8 +39,9 @@ export interface ChartSectionInspectorContextValue {
   ) => Promise<T>;
 }
 
-export const ChartSectionInspectorContext =
-  createContext<ChartSectionInspectorContextValue | null>(null);
+export const ChartSectionInspectorContext = createContext<ChartSectionInspectorContextValue | null>(
+  null
+);
 
 export const ChartSectionInspectorProvider = ({ children }: { children: React.ReactNode }) => {
   const requestAdapter = useMemo(() => new RequestAdapter(), []);
@@ -66,10 +67,7 @@ export const ChartSectionInspectorProvider = ({ children }: { children: React.Re
     [requestAdapter]
   );
 
-  const value = useMemo(
-    () => ({ requestAdapter, trackRequest }),
-    [requestAdapter, trackRequest]
-  );
+  const value = useMemo(() => ({ requestAdapter, trackRequest }), [requestAdapter, trackRequest]);
 
   return (
     <ChartSectionInspectorContext.Provider value={value}>

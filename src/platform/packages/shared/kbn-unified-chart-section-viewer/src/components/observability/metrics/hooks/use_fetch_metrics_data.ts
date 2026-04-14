@@ -58,17 +58,20 @@ export function useFetchMetricsData({
         'Grid of metrics',
         'This request queries Elasticsearch to fetch metrics info for the grid.',
         async () => {
-          const { documents: docs, rawResponse, requestParams } =
-            await executeEsqlQuery<MetricsESQLResponse>({
-              esqlQuery: metricsInfoQuery,
-              search: services.data.search.search,
-              signal,
-              dataView: fetchParams.dataView,
-              timeRange: fetchParams.timeRange,
-              filters: fetchParams.filters ?? [],
-              variables: fetchParams.esqlVariables,
-              uiSettings: services.uiSettings,
-            });
+          const {
+            documents: docs,
+            rawResponse,
+            requestParams,
+          } = await executeEsqlQuery<MetricsESQLResponse>({
+            esqlQuery: metricsInfoQuery,
+            search: services.data.search.search,
+            signal,
+            dataView: fetchParams.dataView,
+            timeRange: fetchParams.timeRange,
+            filters: fetchParams.filters ?? [],
+            variables: fetchParams.esqlVariables,
+            uiSettings: services.uiSettings,
+          });
 
           return {
             data: docs,
