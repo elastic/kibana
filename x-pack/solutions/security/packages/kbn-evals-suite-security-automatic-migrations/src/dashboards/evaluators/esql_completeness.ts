@@ -10,11 +10,11 @@ import type { DashboardExample } from '../../../datasets/dashboards/types';
 import type { MigrationResult } from '../migration_client';
 import { extractEsqlQueries } from '../helpers';
 
-export const createEsqlSyntaxValidityEvaluator = (): Evaluator<
+export const createEsqlCompletenessEvaluator = (): Evaluator<
   DashboardExample,
   MigrationResult
 > => ({
-  name: 'ES|QL Syntax Validity',
+  name: 'ES|QL Completeness',
   kind: 'CODE',
   evaluate: async ({
     output,
@@ -55,8 +55,8 @@ export const createEsqlSyntaxValidityEvaluator = (): Evaluator<
       panelsWithIssues.length > 0
         ? `${validQueries.length}/${
             translatedQueries.length
-          } queries are valid. Issues: ${errorDetails.join(' | ')}`
-        : `All ${translatedQueries.length} ES|QL queries are syntactically valid`;
+          } queries are complete. Issues: ${errorDetails.join(' | ')}`
+        : `All ${translatedQueries.length} ES|QL queries are fully resolved`;
 
     return {
       score,
@@ -65,6 +65,7 @@ export const createEsqlSyntaxValidityEvaluator = (): Evaluator<
         totalQueries: translatedQueries.length,
         validQueries: validQueries.length,
         invalidPanels: panelsWithIssues.map((p) => ({ title: p.title, errors: p.issues })),
+        queries: translatedQueries.map(({ panelTitle, query }) => ({ panelTitle, query })),
       },
     };
   },

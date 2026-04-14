@@ -7,7 +7,7 @@ Evaluation suite for the Splunk-to-Kibana dashboard migration AI pipeline.
 | # | Name | Kind | What It Checks |
 |---|------|------|----------------|
 | E1 | `lookup_join_presence` | CODE | LOOKUP JOIN present when source SPL had lookups |
-| E2 | `esql_syntax_validity` | CODE | Generated ES\|QL parses without errors |
+| E2 | `esql_completeness` | CODE | Generated ES\|QL has no unresolved placeholders |
 | E3 | `markdown_error_detection` | CODE | No error/fallback content in panels |
 | E4 | `translation_fidelity` | LLM | Content grounded in source + intent preserved |
 | E5 | `panel_count_preservation` | CODE | Output panel count matches source |

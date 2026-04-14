@@ -15,7 +15,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { DashboardExample } from '../../datasets/dashboards/types';
 import type { DashboardMigrationClient, MigrationResult } from './migration_client';
 import { createLookupJoinPresenceEvaluator } from './evaluators/lookup_join_presence';
-import { createEsqlSyntaxValidityEvaluator } from './evaluators/esql_syntax_validity';
+import { createEsqlCompletenessEvaluator } from './evaluators/esql_completeness';
 import { createMarkdownErrorDetectionEvaluator } from './evaluators/markdown_error_detection';
 import { createPanelCountPreservationEvaluator } from './evaluators/panel_count_preservation';
 import { createTranslationCompletenessEvaluator } from './evaluators/translation_completeness';
@@ -99,7 +99,7 @@ export function createEvaluateDataset({
 }): ({ dataset }: { dataset: EvaluationDataset<DashboardExample> }) => Promise<void> {
   const allEvaluators: Array<Evaluator<DashboardExample, MigrationResult>> = [
     createLookupJoinPresenceEvaluator(),
-    createEsqlSyntaxValidityEvaluator(),
+    createEsqlCompletenessEvaluator(),
     createMarkdownErrorDetectionEvaluator(),
     createPanelCountPreservationEvaluator(),
     createTranslationCompletenessEvaluator(),

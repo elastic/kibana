@@ -93,7 +93,7 @@ export const evaluate = base.extend<{}, WorkerFixtures>({
         [toolCalls.name, { decimalPlaces: 1, statsToInclude: ['mean', 'median'] }],
         [latency.name, { unitSuffix: 's', statsToInclude: ['mean', 'median'] }],
         ['Lookup Join Presence', { statsToInclude: ['mean'] }],
-        ['ES|QL Syntax Validity', { statsToInclude: ['mean'] }],
+        ['ES|QL Completeness', { statsToInclude: ['mean'] }],
         ['Markdown Error Detection', { statsToInclude: ['mean'] }],
         ['Panel Count Preservation', { statsToInclude: ['mean'] }],
         ['Translation Completeness', { statsToInclude: ['mean'] }],
@@ -119,7 +119,7 @@ export const evaluate = base.extend<{}, WorkerFixtures>({
           },
           {
             evaluatorNames: [
-              'ES|QL Syntax Validity',
+              'ES|QL Completeness',
               'Markdown Error Detection',
               'Panel Count Preservation',
               'Translation Completeness',
