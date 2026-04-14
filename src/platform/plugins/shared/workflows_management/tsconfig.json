@@ -94,7 +94,8 @@
     "@kbn/logging",
     "@kbn/core-saved-objects-api-server",
     "@kbn/management-settings-ids",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/rule-data-utils"
   ],
   "exclude": ["target/**/*"]
 }

@@ -6,7 +6,11 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { getImpactLevel, type Insight, type SaveInsightBody } from '@kbn/streams-schema';
+import {
+  getImpactLevel,
+  type Insight,
+  type SaveInsightBody,
+} from '@kbn/streams-schema/src/insights';
 import { v4 as uuidv4 } from 'uuid';
 import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';

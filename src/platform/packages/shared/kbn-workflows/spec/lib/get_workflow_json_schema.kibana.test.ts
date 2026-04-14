@@ -26,6 +26,14 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
     validateWithYamlLsp = getValidateWithYamlLsp(jsonSchema);
   });
 
+  it('uses shared deprecation messaging for deprecated alias step types', () => {
+    const jsonSchemaString = JSON.stringify(jsonSchema);
+
+    expect(jsonSchemaString).toContain(
+      'Step type \\"kibana.createCaseDefaultSpace\\" is deprecated. Use \\"cases.createCase\\" instead.'
+    );
+  });
+
   it('should fix Monaco JSON schema generation to restore YAML validation', () => {
     // This test verifies that the Monaco YAML validation works properly
     // after fixing the broken $ref paths in the JSON schema

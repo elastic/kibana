@@ -80,12 +80,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await expectCascadeRequestTimestampToChange(baseline);
 
       const firstTimestamp = await getCascadeRequestTimestamp();
+      // close first row so the second row is in view
+      await discover.toggleCascadeLayoutRow(firstRowId);
 
       await discover.toggleCascadeLayoutRow(secondRowId);
       await expectCascadeRequestTimestampToChange(firstTimestamp);
 
       const secondTimestamp = await getCascadeRequestTimestamp();
+      // close the just opened second row so the first row is in view
+      await discover.toggleCascadeLayoutRow(secondRowId);
 
+      // reopen previously expanded row
       await discover.toggleCascadeLayoutRow(firstRowId);
       await expectCascadeRequestTimestampToStay(secondTimestamp);
     });
