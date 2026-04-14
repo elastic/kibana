@@ -387,6 +387,7 @@ export const bootstrapCircularConsumers = async (
     }
 
     const bootstrapConfig = {
+      extends: '@kbn/tsconfig-base/tsconfig.json',
       compilerOptions: {
         baseUrl: REPO_ROOT,
         paths: rootPaths,
@@ -397,14 +398,6 @@ export const bootstrapCircularConsumers = async (
         skipLibCheck: true,
         noCheck: true,
         types: ['jest', 'node'],
-        target: 'es2021',
-        module: 'node16',
-        moduleResolution: 'node16',
-        lib: ['es2021'],
-        strict: true,
-        esModuleInterop: true,
-        resolveJsonModule: true,
-        isolatedModules: true,
       },
       include: ['**/*.ts'],
       exclude: ['target/**/*'],
