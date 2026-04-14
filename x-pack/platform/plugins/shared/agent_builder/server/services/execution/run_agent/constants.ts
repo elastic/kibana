@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+export const BACKGROUND_CHECK_CYCLE_INTERVAL = 5;
+
 export const steps = {
   init: 'init',
+  checkBackgroundWork: 'checkBackgroundWork',
   researchAgent: 'researchAgent',
   executeTool: 'executeTool',
   handleToolInterrupt: 'handleToolInterrupt',

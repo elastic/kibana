@@ -312,6 +312,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
+      getExecution: jest.fn(),
     },
   };
 };
@@ -395,6 +396,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     toolManager: createToolManagerMock(),
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
+      getExecution: jest.fn(),
     },
   };
 };

@@ -7,6 +7,7 @@
 
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { formatSystemNotice } from '../prompts/utils/actions';
 import type {
   AssistantResponse,
   ConversationRoundStep,
@@ -83,8 +84,28 @@ export const convertPreviousRounds = async ({
     messages.push(createAIMessage(summaryText));
   }
 
+  const backgroundExecutions = conversation.backgroundExecutions ?? [];
+
   for (const round of rounds) {
-    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
+    // Inject notices completed at this round WITHOUT a tool_call_group_id (between-round completions)
+    const beforeRoundNotices = backgroundExecutions.filter(
+      (exec) => exec.completed_at?.round_id === round.id && !exec.completed_at?.tool_call_group_id
+    );
+    for (const notice of beforeRoundNotices) {
+      messages.push(createUserMessage(formatSystemNotice(notice)));
+    }
+
+    const roundMessages = await roundToLangchain(round, { resultTransformer, ignoreSteps });
+
+    // Inject notices completed INSIDE this round (with tool_call_group_id) after the round messages
+    const intraRoundNotices = backgroundExecutions.filter(
+      (exec) => exec.completed_at?.round_id === round.id && exec.completed_at?.tool_call_group_id
+    );
+    for (const notice of intraRoundNotices) {
+      roundMessages.push(createUserMessage(formatSystemNotice(notice)));
+    }
+
+    messages.push(...roundMessages);
   }
 
   messages.push(formatRoundInput({ input }));

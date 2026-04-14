@@ -76,6 +76,16 @@ export interface SubAgentExecutor {
     executionId: string;
     events$: Observable<ChatEvent>;
   }>;
+
+  /** Retrieve a sub-agent execution by ID. Returns undefined if not found. */
+  getExecution(executionId: string): Promise<SubAgentExecution | undefined>;
+}
+
+export interface SubAgentExecution {
+  executionId: string;
+  status: string;
+  error?: { code: string; message: string };
+  events: ChatEvent[];
 }
 
 /**

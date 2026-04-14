@@ -12,6 +12,7 @@ import type {
   ConverseInput,
   RoundInput,
 } from '@kbn/agent-builder-common';
+import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { createBadRequestError, createInternalError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
@@ -53,6 +54,8 @@ export interface ProcessedConversation {
   versionedAttachmentPresentation?: AttachmentPresentation;
   /** Compaction summary covering older rounds that were replaced by this summary */
   compactionSummary?: CompactionSummary;
+  /** Completed background executions for notification positioning. */
+  backgroundExecutions?: BackgroundExecutionState[];
 }
 
 const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {
@@ -167,11 +170,13 @@ export const prepareConversation = async ({
   nextInput,
   context,
   action,
+  backgroundExecutions = [],
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   context: AgentHandlerContext;
   action?: ConversationAction;
+  backgroundExecutions?: BackgroundExecutionState[];
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const formatContext = createFormatContext(context);
@@ -290,6 +295,7 @@ export const prepareConversation = async ({
     attachments: allAttachments,
     attachmentStateManager,
     versionedAttachmentPresentation,
+    backgroundExecutions,
   };
 };
 

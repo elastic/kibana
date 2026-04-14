@@ -31,6 +31,7 @@ export {
 } from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
 export type { ExecutionMode } from './execution_mode';
+export { ExecutionStatus, type SerializedExecutionError } from './execution_status';
 export {
   type ConfirmPromptDefinition,
   type ConfirmationPrompt,

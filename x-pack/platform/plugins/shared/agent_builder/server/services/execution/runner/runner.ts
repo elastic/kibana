@@ -223,6 +223,10 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
           abortSignal: params.abortSignal,
         });
       },
+      getExecution: async (executionId) => {
+        const executionService = getExecutionService();
+        return executionService.getExecution(executionId);
+      },
     };
 
     const allDeps = {

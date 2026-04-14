@@ -14,20 +14,13 @@ import type {
   BrowserApiToolMetadata,
   ConversationAction,
   ExecutionMode,
+  SerializedExecutionError,
 } from '@kbn/agent-builder-common';
-import type { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
-/**
- * Possible statuses for an agent execution.
- */
-export enum ExecutionStatus {
-  scheduled = 'scheduled',
-  running = 'running',
-  completed = 'completed',
-  failed = 'failed',
-  aborted = 'aborted',
-}
+export { ExecutionStatus };
+export type { SerializedExecutionError };
 
 /**
  * Serializable execution parameters.
@@ -60,18 +53,6 @@ export interface AgentExecutionParams {
   configurationOverrides?: AgentConfigurationOverrides;
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
   action?: ConversationAction;
-}
-
-/**
- * Serialized error stored in the execution document when the execution fails.
- */
-export interface SerializedExecutionError {
-  /** The error code. */
-  code: AgentBuilderErrorCode;
-  /** Human-readable error message. */
-  message: string;
-  /** Optional metadata associated with the error. */
-  meta?: Record<string, any>;
 }
 
 /**

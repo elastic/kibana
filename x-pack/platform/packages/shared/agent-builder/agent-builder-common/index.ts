@@ -121,6 +121,8 @@ export {
   type AgentResearchStepConfiguration,
   agentIdRegexp,
   type ExecutionMode,
+  ExecutionStatus,
+  type SerializedExecutionError,
 } from './agents';
 export {
   type RoundInput,

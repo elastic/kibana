@@ -16,7 +16,7 @@ import { createSubagentTool } from './start_subagent';
 // We also cast the return to access `results` directly since the handler always returns results (never prompts).
 const callHandler = async (
   tool: ReturnType<typeof createSubagentTool>,
-  params: { description: string; prompt: string }
+  params: { description: string; prompt: string; run_in_background?: boolean }
 ) => tool.handler(params, {} as any) as Promise<{ results: any[] }>;
 
 describe('createSubagentTool', () => {
@@ -50,6 +50,7 @@ describe('createSubagentTool', () => {
           executionId: 'sub-exec-id',
           events$: events$.asObservable(),
         }),
+        getExecution: jest.fn(),
       },
       abortSignal: new AbortController().signal,
     });
@@ -58,7 +59,7 @@ describe('createSubagentTool', () => {
     expect(result.results).toHaveLength(1);
     expect(result.results![0].type).toBe(ToolResultType.other);
     expect(result.results![0].data).toEqual({
-      response: 'Sub-agent response text',
+      response: { message: 'Sub-agent response text' },
     });
   });
 
@@ -69,6 +70,7 @@ describe('createSubagentTool', () => {
       connectorId: 'connector-1',
       subAgentExecutor: {
         executeSubAgent: jest.fn().mockRejectedValue(new Error('LLM timeout')),
+        getExecution: jest.fn(),
       },
       abortSignal: new AbortController().signal,
     });
@@ -92,6 +94,7 @@ describe('createSubagentTool', () => {
           executionId: 'sub-exec-id',
           events$: events$.asObservable(),
         }),
+        getExecution: jest.fn(),
       },
     });
 
@@ -128,7 +131,7 @@ describe('createSubagentTool', () => {
       agentId: 'test-agent',
       executionId: 'parent-exec-id',
       connectorId: 'connector-1',
-      subAgentExecutor: { executeSubAgent },
+      subAgentExecutor: { executeSubAgent, getExecution: jest.fn() },
       abortSignal,
     });
 
@@ -145,5 +148,44 @@ describe('createSubagentTool', () => {
       prompt: 'Summarize the following data...',
       abortSignal,
     });
+  });
+
+  it('returns execution_id immediately when run_in_background is true', async () => {
+    const events$ = new ReplaySubject<ChatEvent>();
+    const registerExecution = jest.fn();
+
+    const tool = createSubagentTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec-id',
+      subAgentExecutor: {
+        executeSubAgent: jest.fn().mockResolvedValue({
+          executionId: 'bg-exec-id',
+          events$: events$.asObservable(),
+        }),
+        getExecution: jest.fn(),
+      },
+      backgroundExecutionService: {
+        registerExecution,
+        getState: jest.fn(),
+        hasPending: jest.fn(),
+        checkForCompletions: jest.fn(),
+      } as any,
+    });
+
+    const result = await callHandler(tool, {
+      description: 'background task',
+      prompt: 'Do something in background',
+      run_in_background: true,
+    });
+
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].data).toEqual({
+      execution_id: 'bg-exec-id',
+      mode: 'background',
+    });
+    expect(registerExecution).toHaveBeenCalledWith('bg-exec-id');
+
+    // Clean up — complete the observable (it's still running in the background)
+    events$.complete();
   });
 });

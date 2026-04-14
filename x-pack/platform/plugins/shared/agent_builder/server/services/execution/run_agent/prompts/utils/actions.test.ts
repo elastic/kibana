@@ -16,6 +16,7 @@ const makeToolCallAction = (
   message?: string
 ): ToolCallAction => ({
   type: AgentActionType.ToolCall,
+  tool_call_group_id: 'tool_call_group_id',
   tool_calls: toolCalls.map((tc) => ({
     toolCallId: tc.toolCallId,
     toolName: tc.toolName,

@@ -15,6 +15,8 @@ export {
   type ConversationRound,
   type Conversation,
   type ConversationInternalState,
+  type BackgroundExecutionState,
+  type BackgroundExecutionCompletedAt,
   type ConversationWithoutRounds,
   type ConversationRoundStepMixin,
   type ToolCallStep,

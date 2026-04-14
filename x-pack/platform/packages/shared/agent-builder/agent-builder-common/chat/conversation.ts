@@ -7,6 +7,7 @@
 
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
+import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
   Attachment,
   VersionedAttachment,
@@ -303,6 +304,28 @@ export interface ConversationInternalState {
    * Reused across rounds until regeneration is needed.
    */
   compaction_summary?: CompactionSummary;
+  /** Background sub-agent executions keyed by execution ID. */
+  background_executions?: Record<string, BackgroundExecutionState>;
+}
+
+export interface BackgroundExecutionCompletedAt {
+  /** The round it was completed at. */
+  round_id: string;
+  /** If completion was resolved inside a round, the last tool call group ID before completion. */
+  tool_call_group_id?: string;
+}
+
+export interface BackgroundExecutionState {
+  /** The execution ID of the background sub-agent. */
+  execution_id: string;
+  /** Current status of the execution. */
+  status: ExecutionStatus;
+  /** The sub-agent's response, present when status is 'completed'. */
+  response?: AssistantResponse;
+  /** Error details, present when status is 'failed'. */
+  error?: SerializedExecutionError;
+  /** When and where the execution completed, for positioning the notification. */
+  completed_at?: BackgroundExecutionCompletedAt;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

@@ -16,6 +16,7 @@ import {
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import type {
   AgentErrorAction,
   HandoverAction,
@@ -24,6 +25,7 @@ import type {
 } from '../../actions';
 import {
   isAgentErrorAction,
+  isBackgroundExecutionCompleteAction,
   isHandoverAction,
   isToolCallAction,
   isExecuteToolAction,
@@ -61,6 +63,9 @@ export const formatResearcherActionHistory = ({
     if (isAgentErrorAction(action)) {
       // returns a single [AI, user] tuple
       formatted.push(...formatErrorAction(action));
+    }
+    if (isBackgroundExecutionCompleteAction(action)) {
+      formatted.push(createUserMessage(formatSystemNotice(action.execution)));
     }
   }
 
@@ -166,4 +171,29 @@ const isExecutionError = <TCode extends AgentExecutionErrorCode>(
   code: TCode
 ): error is AgentBuilderAgentExecutionError<TCode> => {
   return error.meta.errCode === code;
+};
+
+export const formatSystemNotice = (execution: BackgroundExecutionState): string => {
+  const { status, execution_id: executionId } = execution;
+
+  if (execution.error) {
+    return (
+      `<system_notice>\n` +
+      `  A background agent execution has failed.\n` +
+      `  <execution-id>${executionId}</execution-id>\n` +
+      `  <status>${status}</status>\n` +
+      `  <error>${execution.error.message}</error>\n` +
+      `</system_notice>`
+    );
+  }
+
+  const result = execution.response?.message ?? 'No response';
+  return (
+    `<system_notice>\n` +
+    `  A background agent execution has completed.\n` +
+    `  <execution-id>${executionId}</execution-id>\n` +
+    `  <status>${status}</status>\n` +
+    `  <result>${result}</result>\n` +
+    `</system_notice>`
+  );
 };

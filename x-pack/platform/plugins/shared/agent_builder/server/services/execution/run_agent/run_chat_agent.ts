@@ -43,6 +43,7 @@ import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { createSubagentTool } from './tools/start_subagent';
+import { BackgroundExecutionService } from './background_execution_service';
 import { builtinToolToExecutable } from './utils/select_tools';
 import type { StateType } from './state';
 
@@ -112,6 +113,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context.attachmentStateManager.clearAccessTracking();
   }
 
+  const roundId = uuidv4();
+
+  // Create background execution service from conversation state
+  const backgroundExecutionService = new BackgroundExecutionService({
+    subAgentExecutor: context.subAgentExecutor,
+    initialState: conversation?.state?.background_executions,
+  });
+
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
@@ -135,11 +144,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
 
   // Pass action so regenerate uses the last round's original input instead of request input
+  const completedBackgroundExecutions = Object.values(
+    conversation?.state?.background_executions ?? {}
+  ).filter((exec) => exec.completed_at !== undefined);
+
   let processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
     action,
+    backgroundExecutions: completedBackgroundExecutions,
   });
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
@@ -187,6 +201,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       capabilities,
       subAgentExecutor: context.subAgentExecutor,
       abortSignal,
+      backgroundExecutionService,
     });
     await toolManager.addTools({
       type: ToolManagerToolType.executable,
@@ -259,6 +274,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     processedConversation,
     promptFactory,
+    backgroundExecutionService,
+    roundId,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -310,6 +327,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           promptManager,
           toolManager,
           compactionSummary: compactionResult.summary,
+          backgroundExecutionService,
         }),
       pendingRound,
       startTime,
@@ -318,6 +336,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       attachmentStateManager: context.attachmentStateManager,
       configurationOverrides: effectiveOverrides,
       compactionResult,
+      roundId,
     }),
     evictInternalEvents(),
     shareReplay()
@@ -340,15 +359,19 @@ const getConversationState = ({
   promptManager,
   toolManager,
   compactionSummary,
+  backgroundExecutionService,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
   compactionSummary?: CompactionSummary;
+  backgroundExecutionService?: BackgroundExecutionService;
 }): ConversationInternalState => {
+  const bgState = backgroundExecutionService?.getState();
   return {
     prompt: promptManager.dump(),
     dynamic_tool_ids: toolManager.getDynamicToolIds(),
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
+    ...(bgState ? { background_executions: bgState } : {}),
   };
 };
 

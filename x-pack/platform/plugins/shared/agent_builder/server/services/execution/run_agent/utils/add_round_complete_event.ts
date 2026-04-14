@@ -72,6 +72,7 @@ export const addRoundCompleteEvent = ({
   attachmentStateManager,
   configurationOverrides,
   compactionResult,
+  roundId: providedRoundId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -84,6 +85,8 @@ export const addRoundCompleteEvent = ({
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   /** Result of the compaction pipeline; used to build the compaction step and audit trail */
   compactionResult?: CompactedConversation;
+  /** Optional pre-generated round ID. If not provided, a new UUID is generated. */
+  roundId?: string;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -106,6 +109,7 @@ export const addRoundCompleteEvent = ({
                 compactionResult,
               })
             : createRound({
+                roundId: providedRoundId,
                 events,
                 input: userInput,
                 startTime,
@@ -252,6 +256,7 @@ const mergeAttachmentRefs = (
 };
 
 const createRound = ({
+  roundId: providedRoundId,
   events,
   input,
   startTime,
@@ -261,6 +266,7 @@ const createRound = ({
   configurationOverrides,
   compactionResult,
 }: {
+  roundId?: string;
   events: SourceEvents[];
   input: RoundInput;
   startTime: Date;
@@ -326,7 +332,7 @@ const createRound = ({
   steps.push(...stepEvents.flatMap(eventToStep));
 
   const round: ConversationRound = {
-    id: uuidv4(),
+    id: providedRoundId ?? uuidv4(),
     status: hasPromptRequests
       ? ConversationRoundStatus.awaitingPrompt
       : ConversationRoundStatus.completed,

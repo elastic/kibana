@@ -23,7 +23,8 @@ import type { ResolvedConfiguration } from './types';
 import { convertError, isRecoverableError } from './utils/errors';
 import type { PromptFactory } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
-import { steps, tags } from './constants';
+import { steps, tags, BACKGROUND_CHECK_CYCLE_INTERVAL } from './constants';
+import type { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
 import {
@@ -35,6 +36,7 @@ import { createAnswerAgentStructured } from './answer_agent_structured';
 import {
   errorAction,
   handoverAction,
+  backgroundExecutionCompleteAction,
   isAgentErrorAction,
   isAnswerAction,
   isHandoverAction,
@@ -58,6 +60,8 @@ export const createAgentGraph = ({
   outputSchema,
   processedConversation,
   promptFactory,
+  backgroundExecutionService,
+  roundId,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -69,9 +73,32 @@ export const createAgentGraph = ({
   outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
   promptFactory: PromptFactory;
+  backgroundExecutionService?: BackgroundExecutionService;
+  roundId: string;
 }) => {
   const init = async () => {
     return {};
+  };
+
+  const checkBackgroundWork = async (state: StateType) => {
+    // Only check at the beginning (cycle 0) and every BACKGROUND_CHECK_CYCLE_INTERVAL cycles
+    if (
+      !backgroundExecutionService ||
+      !backgroundExecutionService.hasPending() ||
+      (state.currentCycle > 0 && state.currentCycle % BACKGROUND_CHECK_CYCLE_INTERVAL !== 0)
+    ) {
+      return {};
+    }
+
+    const completions = await backgroundExecutionService.checkForCompletions({
+      roundId,
+    });
+
+    if (completions.length === 0) return {};
+
+    return {
+      mainActions: completions.map(backgroundExecutionCompleteAction),
+    };
   };
 
   const researchAgent = async (state: StateType) => {
@@ -159,7 +186,7 @@ export const createAgentGraph = ({
     if (isToolPromptAction(lastAction)) {
       return steps.handleToolInterrupt;
     }
-    return steps.researchAgent;
+    return steps.checkBackgroundWork;
   };
 
   const handleToolInterrupt = async (state: StateType) => {
@@ -268,6 +295,7 @@ export const createAgentGraph = ({
   const graph = new StateGraph(StateAnnotation)
     // nodes
     .addNode(steps.init, init)
+    .addNode(steps.checkBackgroundWork, checkBackgroundWork)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
@@ -276,14 +304,15 @@ export const createAgentGraph = ({
     .addNode(steps.finalize, finalize)
     // edges
     .addEdge(_START_, steps.init)
-    .addEdge(steps.init, steps.researchAgent)
+    .addEdge(steps.init, steps.checkBackgroundWork)
+    .addEdge(steps.checkBackgroundWork, steps.researchAgent)
     .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
       [steps.researchAgent]: steps.researchAgent,
       [steps.executeTool]: steps.executeTool,
       [steps.prepareToAnswer]: steps.prepareToAnswer,
     })
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
-      [steps.researchAgent]: steps.researchAgent,
+      [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
     })
     .addEdge(steps.handleToolInterrupt, _END_)
