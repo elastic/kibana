@@ -224,7 +224,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useRestorableLocalStorage(
     'editorHeight',
-    'esqlEditorHeight',
+    'esql:editorHeight',
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
   );
   // the resizable container is the container that holds the history component or the inline docs
