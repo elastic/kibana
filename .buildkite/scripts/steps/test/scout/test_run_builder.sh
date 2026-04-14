@@ -92,12 +92,29 @@ else
   buildkite-agent artifact upload "scout_playwright_configs.json"
 fi
 
-echo '--- Running Scout API Integration Tests (against Kibana source code)'
-node scripts/scout.js run-tests \
-  --location local \
-  --arch stateful \
-  --domain classic \
-  --config src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts \
+RUN_SCOUT_API_TESTS=true
+
+if [[ -n "${AFFECTED_MODULES_FILE:-}" ]] && [[ -f "${AFFECTED_MODULES_FILE}" ]]; then
+  AFFECTED_MODULE_COUNT=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.env.AFFECTED_MODULES_FILE,'utf8')).length)")
+  if [[ "$AFFECTED_MODULE_COUNT" == "0" ]] && [[ "${SCOUT_CRITICAL_FILES_TOUCHED:-false}" != "true" ]]; then
+    RUN_SCOUT_API_TESTS=false
+    echo "Skipping Scout API Integration Tests: 0 affected modules and no critical files touched"
+  else
+    echo "Running Scout API Integration Tests: ${AFFECTED_MODULE_COUNT} affected module(s), critical files touched: ${SCOUT_CRITICAL_FILES_TOUCHED:-false}"
+  fi
+fi
+
+if [[ "$RUN_SCOUT_API_TESTS" == "true" ]]; then
+  echo '--- Build Kibana platform plugins'
+  node scripts/build_kibana_platform_plugins.js
+
+  echo '--- Running Scout API Integration Tests (against Kibana source code)'
+  node scripts/scout.js run-tests \
+    --location local \
+    --arch stateful \
+    --domain classic \
+    --config src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts
+fi
 
 source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
