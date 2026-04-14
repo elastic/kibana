@@ -7,22 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**
- * There is a requirement for the menu header to have a sticky position.
+ * Sticky positioning for secondary / nested menu titles.
+ * Padding is set on `SecondaryMenu` and `nested_secondary_menu/header` so popover insets stay in sync.
  * We cannot apply border to the header because we need to account for the scrollbar.
  */
 export function useMenuHeaderStyle() {
-  const { euiTheme } = useEuiTheme();
-
   return css`
     position: sticky;
     top: 0;
     z-index: 1;
     box-sizing: border-box;
-    padding: ${euiTheme.size.s} 20px 0 20px;
     margin: 0 1px;
     height: auto;
     min-height: 0;

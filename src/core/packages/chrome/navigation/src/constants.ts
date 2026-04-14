@@ -23,7 +23,7 @@ export const TOOLTIP_OFFSET = 4;
 export const ITEM_HORIZONTAL_SPACING_OFFSET = 32;
 export const SUB_MENU_ICON_SPACING_OFFSET = 48;
 export const BADGE_SPACING_OFFSET = 60;
-/** Outer padding for secondary menu blocks inside side-nav popovers (matches tighter popover chrome). */
-export const SECONDARY_MENU_POPOVER_EDGE_PADDING_PX = 8;
+/** Outer padding for secondary menu blocks inside side-nav popovers. */
+export const SECONDARY_MENU_POPOVER_EDGE_PADDING_PX = 12;
 /** Horizontal inset for popover menu titles (e.g. “More”) and trailing edge when a back button is present. */
 export const SECONDARY_MENU_POPOVER_TITLE_INLINE_PADDING_PX = 12;

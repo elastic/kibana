@@ -12,7 +12,6 @@ import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react'
 import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { SECONDARY_MENU_POPOVER_TITLE_INLINE_PADDING_PX } from '../../constants';
 import type { BadgeType } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { SecondaryMenuItemComponent } from './item';
@@ -52,34 +51,41 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
       }
     `;
 
-    const popoverTitleInline = `${SECONDARY_MENU_POPOVER_TITLE_INLINE_PADDING_PX}px`;
-    const titleStyles = css`
+    /** Same inset as the flyout panel title (popover + side panel). Wrapper avoids `EuiTitle` padding quirks. */
+    const titleShellStyles = css`
       ${headerStyle}
       box-sizing: border-box;
       display: flex;
       align-items: flex-start;
+      width: 100%;
       background: ${isPanel ? euiTheme.colors.backgroundBasePlain : 'transparent'};
       border-radius: 0;
       text-align: start;
-      padding: ${isPanel
-        ? `${euiTheme.size.base} 20px 0 20px`
-        : `${popoverTitleInline} ${popoverTitleInline} 0 ${popoverTitleInline}`};
+      padding: ${euiTheme.size.base} 20px 0 20px;
       height: fit-content;
       min-height: 0;
+    `;
+
+    const titleTypographyStyles = css`
+      flex: 1;
+      min-width: 0;
+      width: 100%;
     `;
 
     return (
       <SecondaryMenuSidePanelProvider value={isPanel}>
         <div ref={ref}>
-          <EuiTitle css={titleStyles} size="xs">
-            <div css={titleWithBadgeStyles}>
-              <h4>{title}</h4>
-              {/* Always show non-new badges, only show new ones if isNew check allows it */}
-              {badgeType && (badgeType !== 'new' || isNew) && (
-                <BetaBadge type={badgeType} alignment="text-bottom" />
-              )}
-            </div>
-          </EuiTitle>
+          <div css={titleShellStyles}>
+            <EuiTitle css={titleTypographyStyles} size="xs">
+              <div css={titleWithBadgeStyles}>
+                <h4>{title}</h4>
+                {/* Always show non-new badges, only show new ones if isNew check allows it */}
+                {badgeType && (badgeType !== 'new' || isNew) && (
+                  <BetaBadge type={badgeType} alignment="text-bottom" />
+                )}
+              </div>
+            </EuiTitle>
+          </div>
           {children}
         </div>
       </SecondaryMenuSidePanelProvider>

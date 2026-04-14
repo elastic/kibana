@@ -25,6 +25,7 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiMemoizedStyles,
   useEuiTheme,
+  useEuiFontSize,
   useEuiBreakpoint,
   mathWithUnits,
   useEuiMinBreakpoint,
@@ -99,6 +100,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
+  const projectSearchShortcutKbdTypography = useEuiFontSize('xs');
   const chromeStyle = useObservable(chromeStyle$);
 
   // These hooks are used when on chromeStyle set to 'project'
@@ -366,7 +368,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
             : i18nStrings.keyboardShortcutTooltip.onNotMac,
         },
       }),
-    [isMac]
+    []
   );
 
   useEvent('keydown', onKeyDown);
@@ -391,6 +393,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         /* Figma: frame radius = space xs → 4px */
         border-radius: 4px !important;
         box-shadow: none !important;
+        /* EuiButton color="text" uses overflow:hidden; allow shortcut ::before to extend past the pill */
+        overflow: visible !important;
         text-align: start !important;
         /* Figma: 8px horizontal, 6px vertical padding; end inset −2px so shortcut sits closer to the frame edge */
         padding-block: 6px !important;
@@ -398,12 +402,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         padding-inline-end: ${mathWithUnits(euiTheme.size.s, (x) => x - 2)} !important;
       }
 
-      /* Figma: 6px gap between icon, label, and shortcut (matches --spaces/6) */
+      /* Figma: 6px gap between icon and label; shortcut is absolutely positioned so it never steals width */
       &&& [class*='euiButtonDisplayContent'] {
+        position: relative !important;
         justify-content: flex-start !important;
         inline-size: 100% !important;
         gap: 6px;
         color: ${euiTheme.colors.textParagraph} !important;
+        overflow: visible !important;
       }
 
       &&& .euiIcon,
@@ -450,79 +456,73 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         box-shadow: none !important;
       }
 
-      /* Shortcut span: no overflow:hidden — it would clip descendants; max-width/opacity animate here */
-      &&& .kbnSearchBarProjectRevealShortcut {
-        flex-shrink: 0;
-        min-inline-size: 0;
-        max-width: 0;
+      /* Same pill as modal footer shortcut; overlays trailing edge so label width stays unchanged */
+      &&& .kbnSearchBarProjectRevealShortcut.euiCode {
+        position: absolute !important;
+        inset-inline-end: 0 !important;
+        top: 50% !important;
+        z-index: 1 !important;
+        pointer-events: none !important;
+        overflow: visible !important;
+        white-space: nowrap;
         opacity: 0;
-        margin-inline-start: 0;
+        transform: translateY(-50%) translateX(${euiTheme.size.xs});
+        background-color: ${euiTheme.colors.backgroundLightText} !important;
+        color: ${euiTheme.colors.textParagraph} !important;
+        border: none !important;
+        border-inline-start: ${euiTheme.border.width.thin} solid
+          ${euiTheme.colors.borderBaseSubdued} !important;
+        box-shadow: none !important;
+        border-radius: ${euiTheme.border.radius.small} !important;
+        box-sizing: border-box !important;
+        font-size: ${projectSearchShortcutKbdTypography.fontSize} !important;
+        line-height: ${projectSearchShortcutKbdTypography.lineHeight} !important;
+        min-block-size: ${mathWithUnits(euiTheme.size.base, (x) => x + 2)} !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding-block: 0 !important;
+        padding-inline: ${euiTheme.size.xs} !important;
+        transition: opacity 150ms ease, transform 150ms ease;
+      }
+
+      /* Wider gradient scrim toward the label (under the visible inline-start border) */
+      &&& .kbnSearchBarProjectRevealShortcut.euiCode::before {
+        content: '';
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: -8px;
+        inline-size: 8px;
+        pointer-events: none;
+        background: linear-gradient(
+          to inline-end,
+          ${euiTheme.colors.backgroundBasePlain} 0%,
+          ${euiTheme.colors.backgroundLightText} 100%
+        );
+        border-start-start-radius: ${euiTheme.border.radius.small};
+        border-end-start-radius: ${euiTheme.border.radius.small};
       }
 
       @media (hover: hover) and (pointer: fine) {
-        &&&:hover .kbnSearchBarProjectRevealShortcut,
-        &&&:focus-visible .kbnSearchBarProjectRevealShortcut {
-          max-width: 10rem;
+        &&&:hover .kbnSearchBarProjectRevealShortcut.euiCode,
+        &&&:focus-visible .kbnSearchBarProjectRevealShortcut.euiCode {
           opacity: 1;
-          margin-inline-start: 2px;
+          transform: translateY(-50%) translateX(0);
         }
       }
 
       @media (hover: none), (pointer: coarse) {
-        &&& .kbnSearchBarProjectRevealShortcut {
-          max-width: 10rem;
+        &&& .kbnSearchBarProjectRevealShortcut.euiCode {
           opacity: 1;
-          margin-inline-start: 2px;
+          transform: translateY(-50%) translateX(0);
         }
       }
     `,
-    [euiTheme]
-  );
-
-  const projectRevealShortcutSurfaceCss = useMemo(
-    () => css`
-      && {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-        min-inline-size: 0;
-        block-size: 20px;
-        max-block-size: 20px;
-        overflow: visible;
-        white-space: nowrap;
-        vertical-align: bottom;
-        background-color: ${euiTheme.colors.backgroundLightText};
-        border: none;
-        border-radius: 2px;
-        padding-inline: 6px;
-        padding-block: 0;
-        transition:
-          max-width 150ms ease,
-          opacity 150ms ease,
-          margin-inline-start 150ms ease;
-      }
-    `,
-    [euiTheme]
-  );
-
-  const projectRevealShortcutCodeCss = useMemo(
-    () => css`
-      &&& {
-        background-color: transparent !important;
-        box-shadow: none !important;
-        color: ${euiTheme.colors.textParagraph} !important;
-        font-weight: ${euiTheme.font.weight.bold} !important;
-        border-radius: 0 !important;
-        border: none !important;
-        padding-block: 0 !important;
-        padding-inline: 0 !important;
-        max-inline-size: 100%;
-        min-inline-size: 0;
-        overflow: hidden;
-      }
-    `,
-    [euiTheme]
+    [
+      euiTheme,
+      projectSearchShortcutKbdTypography.fontSize,
+      projectSearchShortcutKbdTypography.lineHeight,
+    ]
   );
 
   const getAppendForChromeStyle = () => {
@@ -580,17 +580,22 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         box-shadow: none !important;
         border-radius: ${euiTheme.border.radius.small} !important;
         box-sizing: border-box !important;
-        min-block-size: 20px !important;
+        font-size: ${projectSearchShortcutKbdTypography.fontSize} !important;
+        line-height: ${projectSearchShortcutKbdTypography.lineHeight} !important;
+        min-block-size: ${mathWithUnits(euiTheme.size.base, (x) => x + 2)} !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
         padding-block: 0 !important;
-        padding-inline: ${euiTheme.size.s} !important;
-        line-height: 1 !important;
+        padding-inline: ${euiTheme.size.xs} !important;
         vertical-align: middle;
       }
     `,
-    [euiTheme]
+    [
+      euiTheme,
+      projectSearchShortcutKbdTypography.fontSize,
+      projectSearchShortcutKbdTypography.lineHeight,
+    ]
   );
 
   if (chromeStyle === 'project') {
@@ -702,17 +707,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           <span className="kbnSearchBarProjectRevealLabel">
             {i18nStrings.projectChromeSearchRevealLabel}
           </span>
-          <span
-            aria-hidden
-            className="kbnSearchBarProjectRevealShortcut"
-            css={projectRevealShortcutSurfaceCss}
-          >
-            <EuiCode css={projectRevealShortcutCodeCss}>
-              {isMac
-                ? i18nStrings.keyboardShortcutTooltip.onMac
-                : i18nStrings.keyboardShortcutTooltip.onNotMac}
-            </EuiCode>
-          </span>
+          <EuiCode aria-hidden className="kbnSearchBarProjectRevealShortcut" language="text">
+            {isMac
+              ? i18nStrings.keyboardShortcutTooltip.onMac
+              : i18nStrings.keyboardShortcutTooltip.onNotMac}
+          </EuiCode>
         </EuiButton>
       </>
     );
