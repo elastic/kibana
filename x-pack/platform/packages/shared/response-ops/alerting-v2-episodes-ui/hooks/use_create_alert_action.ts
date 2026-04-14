@@ -30,6 +30,7 @@ export const useCreateAlertAction = (http: HttpStart) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.actionsAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.groupActionsAll() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.alertActionTagSuggestions() }),
       ]);
     },
   });

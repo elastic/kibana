@@ -15,6 +15,7 @@ export { UnsavedChangesPrompt } from './unsaved_changes_prompt';
 export { WorkflowStatus } from './workflow_status';
 export {
   getRunTooltipContent,
+  getRunStepTooltipContent,
   getTestRunTooltipContent,
   getSaveWorkflowTooltipContent,
 } from './workflow_action_buttons/get_workflow_tooltip_content';

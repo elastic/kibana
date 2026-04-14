@@ -354,4 +354,121 @@ describe('KibanaEvalsClient', () => {
       'KibanaEvalsClient runExperiment called with trustUpstreamDataset=true, but getDatasetByName is not configured'
     );
   });
+
+  describe('onEvaluationComplete callback', () => {
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [
+        { id: 'ex-1', input: { q: 1 }, output: { expected: 1 } },
+        { id: 'ex-2', input: { q: 2 }, output: { expected: 2 } },
+      ],
+    };
+
+    const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { value: number }>> = [
+      {
+        name: 'AlwaysOne',
+        kind: 'CODE',
+        evaluate: async () => ({ score: 1 }),
+      },
+      {
+        name: 'HasValue',
+        kind: 'CODE',
+        evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
+      },
+    ];
+
+    it('invokes the callback once per evaluator per example per repetition', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 2, onEvaluationComplete });
+
+      await client.runExperiment({ dataset, task: async () => ({ value: 42 }) }, evaluators);
+
+      // 2 examples * 2 repetitions * 2 evaluators = 8 calls
+      expect(onEvaluationComplete).toHaveBeenCalledTimes(8);
+    });
+
+    it('passes correct event data to the callback', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 1, onEvaluationComplete });
+
+      const exp = await client.runExperiment(
+        {
+          dataset: { ...dataset, examples: [dataset.examples[0]] },
+          task: async () => ({ value: 1 }),
+        },
+        [evaluators[0]]
+      );
+
+      expect(onEvaluationComplete).toHaveBeenCalledTimes(1);
+      const event = onEvaluationComplete.mock.calls[0][0];
+
+      expect(event.experimentId).toBe(exp.id);
+      expect(event.datasetId).toBe(exp.datasetId);
+      expect(event.datasetName).toBe('ds');
+      expect(event.exampleId).toBe('ex-1');
+      expect(event.taskRun).toEqual(
+        expect.objectContaining({
+          exampleIndex: 0,
+          repetition: 0,
+          output: { value: 1 },
+        })
+      );
+      expect(event.evaluationRun).toEqual(
+        expect.objectContaining({
+          name: 'AlwaysOne',
+          result: { score: 1 },
+        })
+      );
+    });
+
+    it('uses stringified exampleIndex when example has no id', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 1, onEvaluationComplete });
+
+      const noIdDataset: EvaluationDataset = {
+        name: 'no-ids',
+        description: 'desc',
+        examples: [{ input: { q: 1 } }],
+      };
+
+      await client.runExperiment({ dataset: noIdDataset, task: async () => ({ value: 1 }) }, [
+        evaluators[0],
+      ]);
+
+      const event = onEvaluationComplete.mock.calls[0][0];
+      expect(event.exampleId).toBe('0');
+    });
+
+    it('does not abort the experiment when the callback throws', async () => {
+      const onEvaluationComplete = jest.fn().mockRejectedValue(new Error('ES write failed'));
+      const client = createClient({ repetitions: 1, onEvaluationComplete });
+
+      const exp = await client.runExperiment(
+        { dataset, task: async () => ({ value: 1 }) },
+        evaluators
+      );
+
+      // 2 examples * 1 rep * 2 evaluators = 4 calls, all throwing
+      expect(onEvaluationComplete).toHaveBeenCalledTimes(4);
+      expect(mockLog.warning).toHaveBeenCalledWith(
+        expect.stringContaining('Incremental score export failed')
+      );
+
+      // Experiment still completes and accumulates all results
+      expect(exp.evaluationRuns).toHaveLength(4);
+      expect(Object.values(exp.runs)).toHaveLength(2);
+    });
+
+    it('is not invoked when no callback is provided', async () => {
+      const client = createClient({ repetitions: 1 });
+
+      const exp = await client.runExperiment(
+        { dataset, task: async () => ({ value: 1 }) },
+        evaluators
+      );
+
+      expect(exp.evaluationRuns).toHaveLength(4);
+    });
+  });
 });
