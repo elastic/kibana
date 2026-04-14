@@ -9,7 +9,9 @@ import React from 'react';
 import type { PropsOf } from '@elastic/eui';
 import type { CoreSetup } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ApmPluginStartDeps } from '../../../plugin';
+import type { ApmPluginStart, ApmPluginStartDeps } from '../../../plugin';
+
+export type ApmCoreSetup = CoreSetup<ApmPluginStartDeps, ApmPluginStart>;
 
 /**
  * Wraps a lazy-loaded component with a KibanaContextProvider that resolves
@@ -22,7 +24,7 @@ import type { ApmPluginStartDeps } from '../../../plugin';
  * (see infra/public/hooks/use_kibana.tsx → createLazyComponentWithKibanaContext).
  */
 export const createLazyApmComponentWithContext = <T extends React.ComponentType<any>>(
-  coreSetup: CoreSetup,
+  coreSetup: ApmCoreSetup,
   lazyComponentFactory: () => Promise<{ default: T }>
 ) =>
   React.lazy(() =>
@@ -32,7 +34,7 @@ export const createLazyApmComponentWithContext = <T extends React.ComponentType<
           <KibanaContextProvider
             services={{
               ...core,
-              ...(plugins as unknown as ApmPluginStartDeps),
+              ...plugins,
             }}
           >
             <LazilyLoadedComponent {...props} />

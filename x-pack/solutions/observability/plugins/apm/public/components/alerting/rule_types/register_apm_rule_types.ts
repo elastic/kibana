@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import type { CoreSetup } from '@kbn/core/public';
 import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../common/utils/formatters';
@@ -23,7 +22,10 @@ import {
 } from '../../../../common/rules/default_action_message';
 import type { AlertParams } from './anomaly_rule_type';
 import { getDescriptionFields } from './get_description_fields';
-import { createLazyApmComponentWithContext } from '../utils/create_lazy_component_with_context';
+import {
+  createLazyApmComponentWithContext,
+  type ApmCoreSetup,
+} from '../utils/create_lazy_component_with_context';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
@@ -32,7 +34,7 @@ const TRANSACTION_TYPE = 'transaction.type';
 
 export function registerApmRuleTypes(
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  coreSetup: CoreSetup
+  coreSetup: ApmCoreSetup
 ) {
   observabilityRuleTypeRegistry.register({
     id: ApmRuleType.ErrorCount,
