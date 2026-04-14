@@ -50,6 +50,7 @@ export type {
   DeleteIntegrationRequest,
 } from './lib/api';
 
+export { fetchTakenPackageNames } from './lib/package_names';
 export { getLangSmithOptions } from './lib/lang_smith';
 export type { LangSmithOptions } from './lib/lang_smith';
 

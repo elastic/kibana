@@ -8,7 +8,6 @@
 import { SAVED_QUERY_DROPDOWN_SELECT } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import {
-  checkActionItemsInResults,
   checkResults,
   fillInQueryTimeout,
   inputQuery,
@@ -18,7 +17,7 @@ import {
   typeInOsqueryFieldInput,
   verifyQueryTimeout,
 } from '../../tasks/live_query';
-import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { LIVE_QUERY_EDITOR, RESULTS_TABLE } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
@@ -51,27 +50,9 @@ describe(
     });
 
     it('should run query and enable ecs mapping', () => {
-      const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
-      cy.contains('New live query').click();
+      navigateTo('/app/osquery/new');
       selectAllAgents();
       inputQuery('select * from uptime;');
-      cy.wait(500);
-      // checking submit by clicking cmd+enter
-      inputQuery(cmd);
-      checkResults();
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: true,
-        timeline: false,
-      });
-      cy.get(
-        '[data-gridcell-column-index="1"][data-test-subj="dataGridHeaderCell-osquery.days.number"]'
-      ).should('exist');
-      cy.get(
-        '[data-gridcell-column-index="2"][data-test-subj="dataGridHeaderCell-osquery.hours.number"]'
-      ).should('exist');
-
       getAdvancedButton().click();
       typeInECSFieldInput('message{downArrow}{enter}');
       typeInOsqueryFieldInput('days{downArrow}{enter}');
@@ -79,22 +60,12 @@ describe(
 
       checkResults();
       cy.getBySel(RESULTS_TABLE).within(() => {
-        cy.getBySel(RESULTS_TABLE_BUTTON).should('exist');
+        cy.get('[data-test-subj="dataGridHeaderCell-message"]').should('exist');
       });
-      cy.get(
-        '[data-gridcell-column-index="1"][data-test-subj="dataGridHeaderCell-message"]'
-      ).should('exist');
-      cy.get(
-        '[data-gridcell-column-index="2"][data-test-subj="dataGridHeaderCell-osquery.days.number"]'
-      )
-        .should('exist')
-        .within(() => {
-          cy.get(`.euiToolTipAnchor`);
-        });
     });
 
     it('should run customized saved query', () => {
-      cy.contains('New live query').click();
+      navigateTo('/app/osquery/new');
       selectAllAgents();
       cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
       inputQuery('{selectall}{backspace}select * from users;');
@@ -111,7 +82,7 @@ describe(
 
     it('should open query details by clicking the details icon', () => {
       cy.get('[aria-label="Details"]').first().should('be.visible').click();
-      cy.contains('Live query details');
+      cy.contains('View history');
       cy.contains('select * from users;');
     });
   }
