@@ -38,9 +38,7 @@ async function main() {
 
   const preamble = locationFileLines.slice(0, 1);
 
-  const locationObj = parse(
-    locationFileLines.slice(1).join('\n')
-  ) as BackstageLocationResource;
+  const locationObj = parse(locationFileLines.slice(1).join('\n')) as BackstageLocationResource;
   locationObj.spec.targets = pipelines.map(
     (fileName) => `${resourceDefinitionsBaseUrl}/${fileName}`
   );
