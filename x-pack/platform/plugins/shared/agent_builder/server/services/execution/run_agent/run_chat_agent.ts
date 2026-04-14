@@ -14,7 +14,7 @@ import {
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
@@ -42,6 +42,8 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
+import { createSubagentTool } from './tools/start_subagent';
+import { builtinToolToExecutable } from './utils/select_tools';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
@@ -79,6 +81,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     startTime = new Date(),
     configurationOverrides,
     action,
+    executionId,
   },
   context
 ) => {
@@ -174,6 +177,23 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       tools: browserApiTools ?? [],
     }),
   ]);
+
+  // Register start_subagent tool if experimental features enabled and not already a sub-agent
+  if (experimentalFeatures.subagents && context.executionMode !== 'subagent') {
+    const subagentTool = createSubagentTool({
+      agentId: agentId ?? agentBuilderDefaultAgentId,
+      executionId: executionId ?? '',
+      connectorId: context.defaultConnectorId,
+      capabilities,
+      subAgentExecutor: context.subAgentExecutor,
+      abortSignal,
+    });
+    await toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: [builtinToolToExecutable({ tool: subagentTool, runner: context.runner })],
+      logger,
+    });
+  }
 
   // Then add dynamic tools
   await toolManager.addTools(

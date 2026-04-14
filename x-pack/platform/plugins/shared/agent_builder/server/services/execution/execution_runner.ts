@@ -39,7 +39,7 @@ import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
 import type { MeteringService } from '../metering';
-import type { AgentExecution, SerializedExecutionError } from './types';
+import type { AgentExecution, AgentExecutionParams, SerializedExecutionError } from './types';
 import type { AgentExecutionClient } from './persistence';
 
 import { EVENT_BATCH_INTERVAL_MS } from './constants';
@@ -92,7 +92,7 @@ export const handleAgentExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
-  } = execution.agentParams;
+  } = execution.agentParams as AgentExecutionParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
 

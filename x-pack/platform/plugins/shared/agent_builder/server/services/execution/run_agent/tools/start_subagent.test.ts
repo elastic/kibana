@@ -1,0 +1,149 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Subject, ReplaySubject } from 'rxjs';
+import { ChatEventType } from '@kbn/agent-builder-common';
+import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { createSubagentTool } from './start_subagent';
+
+// The handler is typed as ToolHandlerFn which expects (args, context),
+// but our implementation doesn't use context. Cast to simplify test calls.
+// We also cast the return to access `results` directly since the handler always returns results (never prompts).
+const callHandler = async (
+  tool: ReturnType<typeof createSubagentTool>,
+  params: { description: string; prompt: string }
+) => tool.handler(params, {} as any) as Promise<{ results: any[] }>;
+
+describe('createSubagentTool', () => {
+  const mockRound = {
+    id: 'round-1',
+    status: 'completed',
+    input: { message: 'test' },
+    steps: [],
+    response: { message: 'Sub-agent response text' },
+    started_at: new Date().toISOString(),
+    time_to_first_token: 100,
+    time_to_last_token: 500,
+    model_usage: { input_tokens: 10, output_tokens: 20 },
+  } as unknown as ConversationRound;
+
+  it('returns the sub-agent final response on success', async () => {
+    // Use ReplaySubject so events are replayed to late subscribers (after await resolves)
+    const events$ = new ReplaySubject<ChatEvent>();
+    events$.next({
+      type: ChatEventType.roundComplete,
+      data: { round: mockRound },
+    } as ChatEvent);
+    events$.complete();
+
+    const tool = createSubagentTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec-id',
+      connectorId: 'connector-1',
+      subAgentExecutor: {
+        executeSubAgent: jest.fn().mockResolvedValue({
+          executionId: 'sub-exec-id',
+          events$: events$.asObservable(),
+        }),
+      },
+      abortSignal: new AbortController().signal,
+    });
+
+    const result = await callHandler(tool, { description: 'test task', prompt: 'Do something' });
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].type).toBe(ToolResultType.other);
+    expect(result.results![0].data).toEqual({
+      response: 'Sub-agent response text',
+    });
+  });
+
+  it('returns error result when sub-agent execution fails', async () => {
+    const tool = createSubagentTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec-id',
+      connectorId: 'connector-1',
+      subAgentExecutor: {
+        executeSubAgent: jest.fn().mockRejectedValue(new Error('LLM timeout')),
+      },
+      abortSignal: new AbortController().signal,
+    });
+
+    const result = await callHandler(tool, { description: 'test', prompt: 'Do something' });
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].type).toBe(ToolResultType.error);
+    expect(result.results![0].data).toEqual(
+      expect.objectContaining({ message: expect.stringContaining('LLM timeout') })
+    );
+  });
+
+  it('returns error result when no round complete event is emitted', async () => {
+    const events$ = new Subject<ChatEvent>();
+
+    const tool = createSubagentTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec-id',
+      subAgentExecutor: {
+        executeSubAgent: jest.fn().mockResolvedValue({
+          executionId: 'sub-exec-id',
+          events$: events$.asObservable(),
+        }),
+      },
+    });
+
+    const resultPromise = callHandler(tool, { description: 'test', prompt: 'Do something' });
+
+    // Complete without emitting roundComplete
+    events$.complete();
+
+    const result = await resultPromise;
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].type).toBe(ToolResultType.error);
+    expect(result.results![0].data).toEqual(
+      expect.objectContaining({
+        message: expect.stringContaining('without a round complete event'),
+      })
+    );
+  });
+
+  it('passes correct params to executeSubAgent', async () => {
+    const events$ = new ReplaySubject<ChatEvent>();
+    events$.next({
+      type: ChatEventType.roundComplete,
+      data: { round: mockRound },
+    } as ChatEvent);
+    events$.complete();
+
+    const executeSubAgent = jest.fn().mockResolvedValue({
+      executionId: 'sub-exec-id',
+      events$: events$.asObservable(),
+    });
+
+    const abortSignal = new AbortController().signal;
+    const tool = createSubagentTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec-id',
+      connectorId: 'connector-1',
+      subAgentExecutor: { executeSubAgent },
+      abortSignal,
+    });
+
+    await callHandler(tool, {
+      description: 'Summarize data',
+      prompt: 'Summarize the following data...',
+    });
+
+    expect(executeSubAgent).toHaveBeenCalledWith({
+      agentId: 'test-agent',
+      connectorId: 'connector-1',
+      capabilities: undefined,
+      parentExecutionId: 'parent-exec-id',
+      prompt: 'Summarize the following data...',
+      abortSignal,
+    });
+  });
+});

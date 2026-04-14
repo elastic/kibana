@@ -862,3 +862,109 @@ describe('runInternalTool - telemetry', () => {
     expect(duration).toBeGreaterThanOrEqual(0);
   });
 });
+
+describe('runInternalTool - sub-agent HITL blocking', () => {
+  let runnerDeps: CreateScopedRunnerDepsMock;
+  let tool: MockedTool;
+  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
+
+  beforeEach(() => {
+    runnerDeps = createScopedRunnerDepsMock();
+
+    (getToolResultId as jest.Mock).mockReturnValue('some-result-id');
+
+    toolHandler = jest.fn().mockReturnValue({ results: [] });
+
+    tool = createMockedTool({});
+    tool.getSchema.mockReturnValue(
+      z.object({
+        foo: z.string(),
+      })
+    );
+    tool.getHandler.mockReturnValue(toolHandler);
+  });
+
+  it('returns error result instead of confirmation prompt when executionMode is subagent', async () => {
+    runnerDeps.executionMode = 'subagent';
+    const runnerManager = new RunnerManager(runnerDeps);
+
+    tool.confirmation = { askUser: 'always' };
+    runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+      status: ConfirmationStatus.unprompted,
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-1',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(result).toHaveProperty('results');
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].type).toBe(ToolResultType.error);
+    expect(result.results![0].data).toEqual(
+      expect.objectContaining({ message: expect.stringContaining('non-interactive mode') })
+    );
+    expect(toolHandler).not.toHaveBeenCalled();
+  });
+
+  it('returns error result instead of on-demand prompt when executionMode is subagent', async () => {
+    runnerDeps.executionMode = 'subagent';
+    const runnerManager = new RunnerManager(runnerDeps);
+
+    toolHandler.mockReturnValue({
+      prompt: {
+        type: AgentPromptType.confirmation,
+        id: 'some-prompt-id',
+        message: 'please confirm',
+      },
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-2',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(result).toHaveProperty('results');
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].type).toBe(ToolResultType.error);
+    expect(result.results![0].data).toEqual(
+      expect.objectContaining({ message: expect.stringContaining('non-interactive mode') })
+    );
+  });
+
+  it('allows HITL prompts when executionMode is undefined', async () => {
+    const runnerManager = new RunnerManager(runnerDeps);
+
+    tool.confirmation = { askUser: 'always' };
+    runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+      status: ConfirmationStatus.unprompted,
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-3',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(result).toHaveProperty('prompt');
+    expect(result.prompt).toEqual(
+      expect.objectContaining({
+        type: AgentPromptType.confirmation,
+      })
+    );
+  });
+});

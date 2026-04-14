@@ -30,6 +30,7 @@ export {
   getKibanaDefaultAgentCapabilities,
 } from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
+export type { ExecutionMode } from './execution_mode';
 export {
   type ConfirmPromptDefinition,
   type ConfirmationPrompt,

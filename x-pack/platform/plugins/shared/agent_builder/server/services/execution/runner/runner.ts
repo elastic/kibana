@@ -15,7 +15,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
-import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
+import type { Conversation, ConverseInput, ExecutionMode } from '@kbn/agent-builder-common';
 import type {
   ScopedRunner,
   ScopedRunnerRunAgentParams,
@@ -26,6 +26,7 @@ import type {
   WritableToolResultStore,
   ModelProvider,
   HooksServiceStart,
+  SubAgentExecutor,
 } from '@kbn/agent-builder-server';
 import type { WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 import type {
@@ -50,6 +51,7 @@ import { runAgent } from './run_agent';
 import { createStore } from './store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
+import type { AgentExecutionService } from '../types';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -87,6 +89,10 @@ export interface CreateScopedRunnerDeps {
   pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
   filestore: IFileStore;
+  /** Execution mode for this runner context. */
+  executionMode?: ExecutionMode;
+  /** Sub-agent executor for spawning child executions. */
+  subAgentExecutor: SubAgentExecutor;
 }
 
 export type CreateRunnerDeps = Omit<
@@ -101,8 +107,11 @@ export type CreateRunnerDeps = Omit<
   | 'stateManager'
   | 'filestore'
   | 'toolManager'
+  | 'subAgentExecutor'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
+  /** Lazy getter for the execution service (breaks circular dep with runner). */
+  getExecutionService: () => AgentExecutionService;
 };
 
 export class RunnerManager {
@@ -168,7 +177,7 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
-  const { modelProviderFactory, ...runnerDeps } = deps;
+  const { modelProviderFactory, getExecutionService, ...runnerDeps } = deps;
 
   const createScopedRunnerWithDeps = async ({
     request,
@@ -177,6 +186,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     nextInput,
     promptState,
     abortSignal,
+    executionMode,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
@@ -184,6 +194,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
+    executionMode?: ExecutionMode;
   }): Promise<ScopedRunner> => {
     const { resultStore, filestore, skillsStore } = createStore({ conversation });
 
@@ -196,6 +207,24 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const toolManager = createToolManager();
 
     const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+
+    const subAgentExecutor: SubAgentExecutor = {
+      executeSubAgent: async (params) => {
+        const executionService = getExecutionService();
+        return executionService.executeSubAgent({
+          request,
+          params: {
+            agentId: params.agentId,
+            connectorId: params.connectorId,
+            capabilities: params.capabilities,
+            parentExecutionId: params.parentExecutionId,
+            prompt: params.prompt,
+          },
+          abortSignal: params.abortSignal,
+        });
+      },
+    };
+
     const allDeps = {
       ...runnerDeps,
       modelProvider,
@@ -209,6 +238,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       promptManager,
       filestore,
       toolManager,
+      executionMode,
+      subAgentExecutor,
     };
     return createScopedRunner(allDeps);
   };
@@ -237,7 +268,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       return runner.runInternalTool(otherParams);
     },
     runAgent: async (params) => {
-      const { request, defaultConnectorId, abortSignal, ...otherParams } = params;
+      const { request, defaultConnectorId, abortSignal, executionMode, ...otherParams } = params;
       const { nextInput, conversation } = params.agentParams;
       const runner = await createScopedRunnerWithDeps({
         request,
@@ -245,6 +276,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         conversation,
         nextInput,
         abortSignal,
+        executionMode,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,

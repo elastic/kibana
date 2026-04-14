@@ -13,6 +13,7 @@ import type {
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
   ConversationAction,
+  ExecutionMode,
 } from '@kbn/agent-builder-common';
 import type { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -85,10 +86,14 @@ export interface AgentExecution {
   status: ExecutionStatus;
   /** Id of the agent being executed. */
   agentId: string;
+  /** The execution mode: 'agent' for normal, 'subagent' for sub-agent executions. */
+  executionMode?: ExecutionMode;
+  /** For sub-agent executions, the ID of the parent execution. */
+  parentExecutionId?: string;
   /** Id of the space the execution was performed in. */
   spaceId: string;
   /** Serialized execution parameters. */
-  agentParams: AgentExecutionParams;
+  agentParams: AgentExecutionParams | SubAgentExecutionParams;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
   /** Number of events stored on the document (kept in sync with `events.length`). */
@@ -134,6 +139,28 @@ export interface ExecuteAgentResult {
    * - TM mode: polls the data stream (equivalent to followExecution).
    */
   events$: Observable<ChatEvent>;
+}
+
+export interface SubAgentExecutionParams {
+  /** Id of the agent to execute as sub-agent. */
+  agentId: string;
+  /** Id of the genAI connector to use. */
+  connectorId?: string;
+  /** Capabilities to use for the sub-agent execution. */
+  capabilities?: AgentCapabilities;
+  /** Id of the parent execution that spawned this sub-agent. */
+  parentExecutionId: string;
+  /** The prompt to pass to the sub-agent. */
+  prompt: string;
+}
+
+export interface ExecuteSubAgentParams {
+  /** The request that initiated the execution. */
+  request: KibanaRequest;
+  /** Sub-agent execution parameters. */
+  params: SubAgentExecutionParams;
+  /** Optional abort signal. When aborted, the sub-agent execution will be cancelled. */
+  abortSignal?: AbortSignal;
 }
 
 /**
@@ -183,6 +210,12 @@ export interface AgentExecutionService {
    * Creates an execution document and returns the execution ID along with an events observable.
    */
   executeAgent(params: ExecuteAgentParams): Promise<ExecuteAgentResult>;
+
+  /**
+   * Execute a sub-agent locally. Creates an execution document with mode 'subagent'
+   * and returns the execution ID along with an events observable.
+   */
+  executeSubAgent(params: ExecuteSubAgentParams): Promise<ExecuteAgentResult>;
 
   /**
    * Retrieve an agent execution by its ID.

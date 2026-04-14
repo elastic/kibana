@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatAgentEvent } from '@kbn/agent-builder-common';
+import type { ChatAgentEvent, ExecutionMode } from '@kbn/agent-builder-common';
 import type { AgentParams, AgentResponse } from './provider';
 
 export interface RunAgentReturn {
@@ -47,6 +47,8 @@ export interface RunAgentParams {
    * If unspecified, will use internal logic to use the default connector
    */
   defaultConnectorId?: string;
+  /** Execution mode for this run. When 'subagent', HITL is disabled. */
+  executionMode?: ExecutionMode;
 }
 
 export type RunAgentOnEventFn = (event: ChatAgentEvent) => void;

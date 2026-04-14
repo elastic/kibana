@@ -13,6 +13,7 @@ export type {
   AgentEventEmitter,
   AgentEventEmitterFn,
   ExperimentalFeatures,
+  SubAgentExecutor,
 } from './provider';
 export type {
   RunAgentFn,

@@ -308,6 +308,10 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     experimentalFeatures: {
       filestore: false,
       skills: false,
+      subagents: false,
+    },
+    subAgentExecutor: {
+      executeSubAgent: jest.fn(),
     },
   };
 };
@@ -389,6 +393,9 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),
     toolManager: createToolManagerMock(),
+    subAgentExecutor: {
+      executeSubAgent: jest.fn(),
+    },
   };
 };
 
@@ -409,5 +416,6 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),
     toolManager: createToolManagerMock(),
+    getExecutionService: jest.fn(),
   };
 };

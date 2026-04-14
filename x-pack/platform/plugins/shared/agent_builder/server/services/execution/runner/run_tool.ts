@@ -104,9 +104,22 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const beforeToolHooksResult = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
   toolParams = beforeToolHooksResult.toolParams;
 
+  const isSubAgentExecution = manager.deps.executionMode === 'subagent';
+
   // only perform pre-call confirmation prompt when the agent is calling the tool
   if (tool.confirmation && source === 'agent') {
     if (tool.confirmation.askUser === 'once' || tool.confirmation.askUser === 'always') {
+      // In sub-agent mode, HITL is not available — auto-decline
+      if (isSubAgentExecution) {
+        return {
+          results: [
+            createErrorResult(
+              'Agent running in non-interactive mode, user input not available - execution was declined'
+            ),
+          ],
+        };
+      }
+
       const confirmationId = toolConfirmationId({
         toolId: tool.id,
         toolCallId,
@@ -190,7 +203,18 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       duration,
     });
   } else {
-    runToolReturn = { prompt: toolReturn.prompt };
+    // On-demand HITL prompt from tool handler
+    if (isSubAgentExecution) {
+      runToolReturn = {
+        results: [
+          createErrorResult(
+            'Agent running in non-interactive mode, user input not available - execution was declined'
+          ),
+        ],
+      };
+    } else {
+      runToolReturn = { prompt: toolReturn.prompt };
+    }
   }
 
   const postContext: AfterToolCallHookContext = {
@@ -276,6 +300,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
     runContext: manager.context,
+    executionMode: manager.deps.executionMode,
   };
 };
 

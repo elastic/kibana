@@ -20,6 +20,7 @@ import type { AttachmentServiceStart } from '../../attachments';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
+import type { AgentExecutionService } from '../types';
 
 export interface RunnerFactoryDeps {
   // core services
@@ -41,6 +42,8 @@ export interface RunnerFactoryDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   hooks: HooksServiceStart;
+  /** Lazy getter for the execution service (breaks circular dep with runner). */
+  getExecutionService: () => AgentExecutionService;
 }
 
 export interface RunnerFactory {

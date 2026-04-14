@@ -120,6 +120,7 @@ export {
   type AgentAnswerStepConfiguration,
   type AgentResearchStepConfiguration,
   agentIdRegexp,
+  type ExecutionMode,
 } from './agents';
 export {
   type RoundInput,

@@ -164,6 +164,16 @@ export class ServiceManager {
       config: this.config,
     });
 
+    // Use a lazy getter to break the circular dep: runner → executionService → runner.
+    // The execution service is created after the runner, but accessed lazily at call time.
+    let executionService: ReturnType<typeof createAgentExecutionService> | undefined;
+    const getExecutionService = () => {
+      if (!executionService) {
+        throw new Error('Execution service not yet initialized');
+      }
+      return executionService;
+    };
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -181,6 +191,7 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       hooks,
+      getExecutionService,
     });
     runner = runnerFactory.getRunner();
 
@@ -211,7 +222,7 @@ export class ServiceManager {
       meteringService: this.services.metering,
     });
 
-    const execution = createAgentExecutionService({
+    executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
       taskManager,
@@ -238,7 +249,7 @@ export class ServiceManager {
       conversations,
       runnerFactory,
       auditLogService,
-      execution,
+      execution: executionService,
       taskHandler,
       hooks,
       spaces,
