@@ -49,6 +49,8 @@ const defaultProps = {
   onLeadClick: jest.fn(),
   onHuntInChat: jest.fn(),
   onGenerate: jest.fn(),
+  connectorId: 'test-connector-id',
+  onConnectorIdSelected: jest.fn(),
 };
 
 describe('TopThreatHuntingLeads', () => {

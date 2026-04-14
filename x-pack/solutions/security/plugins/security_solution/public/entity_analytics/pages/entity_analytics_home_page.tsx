@@ -72,8 +72,17 @@ export const EntityAnalyticsHomePage = () => {
   const { dataView, status } = useDataView(PageScope.explore);
 
   const spaceId = useSpaceId();
-  const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(spaceId ?? '');
-  const connectorId = storedConnectorId ?? '';
+  const resolvedSpaceId = spaceId ?? 'default';
+  const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
+  const connectorId = spaceId ? storedConnectorId ?? '' : '';
+  const safeSetConnectorId = useCallback(
+    (id: string | undefined) => {
+      if (spaceId) {
+        setStoredConnectorId(id);
+      }
+    },
+    [spaceId, setStoredConnectorId]
+  );
   const {
     leads,
     totalCount,
@@ -206,7 +215,7 @@ export const EntityAnalyticsHomePage = () => {
                   isScheduled={isScheduled}
                   onToggleSchedule={toggleSchedule}
                   connectorId={connectorId}
-                  onConnectorIdSelected={setStoredConnectorId}
+                  onConnectorIdSelected={safeSetConnectorId}
                 />
               </EuiFlexItem>
             )}
