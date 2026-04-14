@@ -1,5 +1,0 @@
-tags:
-  - jest-unit-tests
-fileGroups:
-  jest-config:
-    - jest.config.js
