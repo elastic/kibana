@@ -74,6 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'my-error-query',
+              type: 'match',
               title: 'error query',
               description: '',
               esql: {
@@ -260,6 +261,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(leafEntry.request.queries).to.eql([
           {
             id: 'my-error-query',
+            type: 'match',
             title: 'error query',
             description: '',
             esql: {
@@ -514,6 +516,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(createdStream.queries).to.eql([
           {
             id: 'my-error-query',
+            type: 'match',
             title: 'error query',
             description: '',
             esql: {
@@ -777,6 +780,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 queries: [
                   {
                     id: 'my-error-query',
+                    type: 'match',
                     title: 'error query',
                     description: '',
                     esql: {
