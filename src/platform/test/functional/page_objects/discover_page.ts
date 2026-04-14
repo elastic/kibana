@@ -157,6 +157,54 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async saveSearchToDashboard(
+    searchName: string,
+    dashboardOption: 'new' | { existing: string },
+    { saveAsNew, storeTimeRange }: { saveAsNew?: boolean; storeTimeRange?: boolean } = {}
+  ) {
+    if (saveAsNew) {
+      await this.clickSaveAsSearchButton();
+    } else {
+      await this.clickSaveSearchButton();
+    }
+
+    await this.retry.waitFor(
+      `saved search title is set to ${searchName} and save button is clickable`,
+      async () => {
+        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
+        await this.testSubjects.setValue('savedObjectTitle', searchName);
+        return (await saveButton.getAttribute('disabled')) !== 'true';
+      }
+    );
+
+    if (storeTimeRange !== undefined) {
+      await this.retry.waitFor(`store time range switch is set`, async () => {
+        await this.testSubjects.setEuiSwitch(
+          'storeTimeWithSearch',
+          storeTimeRange ? 'check' : 'uncheck'
+        );
+        return (
+          (await this.testSubjects.isEuiSwitchChecked('storeTimeWithSearch')) === storeTimeRange
+        );
+      });
+    }
+
+    if (dashboardOption === 'new') {
+      await this.find.clickByCssSelector('#new-dashboard-option');
+    } else {
+      await this.find.clickByCssSelector('#existing-dashboard-option');
+      await this.testSubjects.waitForEnabled('open-dashboard-picker');
+      await this.testSubjects.click('open-dashboard-picker');
+      await this.testSubjects.setValue('dashboard-picker-search', dashboardOption.existing);
+      await this.testSubjects.click(
+        `dashboard-picker-option-${dashboardOption.existing.replaceAll(' ', '-')}`
+      );
+    }
+
+    await this.clickConfirmSavedSearch();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async clickSaveDiscoverTableToDashboard(title: string, existing?: string) {
     await this.testSubjects.click('saveDiscoverTableToDashboardButton');
     await this.retry.waitFor('Save Discover session table modal', () =>
