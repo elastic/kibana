@@ -40,6 +40,17 @@ export async function fetchSampleDocuments({
   diverseRatio: number;
   maxEntityFilters: number;
 }) {
+  if (entityFilteredRatio < 0 || diverseRatio < 0) {
+    throw new Error(
+      `entityFilteredRatio (${entityFilteredRatio}) and diverseRatio (${diverseRatio}) must be >= 0`
+    );
+  }
+  if (entityFilteredRatio + diverseRatio > 1) {
+    throw new Error(
+      `entityFilteredRatio (${entityFilteredRatio}) + diverseRatio (${diverseRatio}) must be <= 1`
+    );
+  }
+
   const entityFilters = getEntityFilters(features, maxEntityFilters);
 
   if (entityFilters.length === 0) {

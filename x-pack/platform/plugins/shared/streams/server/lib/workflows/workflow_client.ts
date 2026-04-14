@@ -1,0 +1,229 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import {
+  type ExecutionStatus,
+  type WorkflowDetailDto,
+  type WorkflowExecutionEngineModel,
+  type WorkflowExecutionListItemDto,
+  NonTerminalExecutionStatuses,
+} from '@kbn/workflows';
+import { StatusError } from '../streams/errors/status_error';
+import { pollUntil } from './poll_until';
+
+export interface WorkflowExecutionResult {
+  executionId: string;
+  status: ExecutionStatus;
+  error?: string;
+  duration?: number | null;
+  output?: Record<string, unknown>;
+}
+
+export interface WorkflowClient<TInputs extends Record<string, unknown>> {
+  ensureExists(request: KibanaRequest): Promise<void>;
+  remove(request: KibanaRequest): Promise<void>;
+
+  run(
+    inputs: TInputs,
+    request: KibanaRequest,
+    executionSource?: string
+  ): Promise<{ executionId: string }>;
+  cancel(executionId: string): Promise<void>;
+  getStatus(executionId: string): Promise<WorkflowExecutionResult>;
+
+  getNonTerminalExecutions(): Promise<{
+    results: WorkflowExecutionListItemDto[];
+    total: number;
+  }>;
+  getActiveExecution(
+    predicate: (execution: WorkflowExecutionListItemDto) => boolean
+  ): Promise<WorkflowExecutionResult | null>;
+}
+
+interface WorkflowClientParams {
+  workflowId: string;
+  yaml: string;
+  logger: Logger;
+  managementApi: WorkflowsServerPluginSetup['management'];
+}
+
+export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
+  workflowId,
+  yaml,
+  logger,
+  managementApi,
+}: WorkflowClientParams): WorkflowClient<TInputs> => {
+  const log = logger.get(`workflow-client:${workflowId}`);
+
+  const getWorkflowForExecution = async (): Promise<WorkflowExecutionEngineModel> => {
+    const workflow = await managementApi.getWorkflow(workflowId, DEFAULT_SPACE_ID);
+
+    if (!workflow) {
+      throw new StatusError(`Workflow ${workflowId} not found.`, 404);
+    }
+    if (!workflow.enabled) {
+      throw new StatusError(`Workflow ${workflowId} is disabled.`, 400);
+    }
+    if (!workflow.definition) {
+      throw new StatusError(`Workflow ${workflowId} definition is missing.`, 500);
+    }
+    return {
+      id: workflow.id,
+      name: workflow.name,
+      enabled: workflow.enabled,
+      definition: workflow.definition,
+      yaml: workflow.yaml,
+    };
+  };
+
+  const getNonTerminalExecutions = async () => {
+    const { results, total } = await managementApi.getWorkflowExecutions(
+      {
+        workflowId,
+        statuses: [...NonTerminalExecutionStatuses],
+      },
+      DEFAULT_SPACE_ID
+    );
+    return { results, total };
+  };
+
+  const cancelAndAwaitTermination = async () => {
+    const { results } = await getNonTerminalExecutions();
+    if (results.length === 0) return;
+
+    await Promise.all(
+      results.map((r) => managementApi.cancelWorkflowExecution(r.id, DEFAULT_SPACE_ID))
+    );
+
+    log.debug(() => `Requested cancellation for ${results.length} running execution(s)`);
+
+    await pollUntil(
+      () => getNonTerminalExecutions(),
+      ({ total }) => total === 0
+    );
+  };
+
+  const hardDelete = async (request: KibanaRequest) => {
+    await cancelAndAwaitTermination().catch((err) =>
+      log.warn(`Failed to cancel running workflow executions: ${err}`)
+    );
+
+    const { deleted, failures } = await managementApi.deleteWorkflows(
+      [workflowId],
+      DEFAULT_SPACE_ID,
+      request,
+      { force: true }
+    );
+
+    if (deleted === 0 && failures.length > 0) {
+      const reasons = failures.map((f) => `${f.id}: ${f.error}`).join('; ');
+      throw new Error(`Failed to delete workflow ${workflowId}: ${reasons}`);
+    }
+  };
+
+  const ensureWorkflow = async (request: KibanaRequest): Promise<WorkflowDetailDto> => {
+    const existing = await managementApi.getWorkflow(workflowId, DEFAULT_SPACE_ID);
+
+    if (existing?.yaml === yaml) {
+      return existing;
+    }
+
+    if (existing) {
+      log.info('Workflow YAML changed, re-creating');
+      await hardDelete(request);
+    } else {
+      log.info('Workflow not found, creating');
+    }
+
+    await managementApi.createWorkflow({ yaml, id: workflowId }, DEFAULT_SPACE_ID, request);
+
+    const created = await managementApi.getWorkflow(workflowId, DEFAULT_SPACE_ID);
+
+    if (!created) {
+      throw new StatusError(`Failed to create workflow ${workflowId}.`, 500);
+    }
+
+    return created;
+  };
+
+  return {
+    async ensureExists(request) {
+      await ensureWorkflow(request);
+    },
+
+    async remove(request) {
+      const existing = await managementApi.getWorkflow(workflowId, DEFAULT_SPACE_ID);
+      if (!existing) return;
+
+      await hardDelete(request);
+      log.info(`Removed workflow ${workflowId}`);
+    },
+
+    async run(inputs, request, executionSource) {
+      await ensureWorkflow(request);
+      const workflow = await getWorkflowForExecution();
+
+      const filteredInputs: Record<string, unknown> = Object.fromEntries(
+        Object.entries(inputs).filter(([, v]) => v !== undefined)
+      );
+
+      const executionId = await managementApi.runWorkflow(
+        workflow,
+        DEFAULT_SPACE_ID,
+        filteredInputs,
+        request,
+        executionSource
+      );
+
+      log.debug(() => `Started workflow execution: ${executionId}`);
+
+      return { executionId };
+    },
+
+    async cancel(executionId) {
+      await managementApi.cancelWorkflowExecution(executionId, DEFAULT_SPACE_ID);
+      log.debug(() => `Cancelled workflow execution ${executionId}`);
+    },
+
+    async getStatus(executionId) {
+      const execution = await managementApi.getWorkflowExecution(executionId, DEFAULT_SPACE_ID, {
+        includeOutput: true,
+      });
+
+      if (!execution) {
+        throw new StatusError(`Workflow execution ${executionId} not found`, 404);
+      }
+
+      return {
+        executionId: execution.id,
+        status: execution.status,
+        error: execution.error?.message,
+        duration: execution.duration,
+        output: execution.context,
+      };
+    },
+
+    getNonTerminalExecutions,
+
+    async getActiveExecution(predicate) {
+      const { results } = await getNonTerminalExecutions();
+      const match = results.find(predicate);
+
+      if (!match) return null;
+
+      return {
+        executionId: match.id,
+        status: match.status,
+        error: match.error?.message,
+        duration: match.duration,
+      };
+    },
+  };
+};

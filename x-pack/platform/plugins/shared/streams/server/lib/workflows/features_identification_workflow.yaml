@@ -1,0 +1,215 @@
+# KI Features Identification Workflow
+#
+# On-demand workflow that identifies KI features for a single stream.
+# Each iteration is split into three visible steps — sample, infer,
+# reconcile — so the full pipeline is observable in the workflow execution.
+#
+# Flow:
+#   setup → init → while(iteration < max) {
+#     sample → if(noDocuments) break → infer → reconcile → update_state
+#   } → finalize → output
+#
+# Concurrency is keyed per stream so only one identification run can be active
+# for a given stream at any time; overlapping triggers are dropped.
+
+version: "1"
+name: ".streams-ki-features-identification"
+description: "Identifies KI features in a stream using LLM analysis and computed KI features."
+settings:
+  timeout: "15m"
+  concurrency:
+    key: "streams-ki-features-identification-{{ inputs.streamName }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+inputs:
+  - name: streamName
+    type: string
+    required: true
+    description: "Target stream name to identify KI features for."
+  - name: start
+    type: number
+    description: "Start timestamp (epoch ms) for the document sampling window. Defaults to 24 h ago."
+  - name: end
+    type: number
+    description: "End timestamp (epoch ms) for the document sampling window. Defaults to now."
+  - name: connectorId
+    type: string
+    description: "Override connector ID for LLM inference. When omitted, the default connector is resolved."
+  - name: maxIterations
+    type: number
+    default: 5
+    description: "Maximum number of LLM sampling iterations."
+  - name: sampleSize
+    type: number
+    default: 20
+    description: "Number of documents sampled per iteration."
+  - name: featureTtlDays
+    type: number
+    default: 7
+    description: "Number of days before a KI feature expires and is cleaned up."
+  - name: entityFilteredRatio
+    type: number
+    default: 0.4
+    description: "Fraction of sample allocated to entity-filtered (must_not) documents."
+  - name: diverseRatio
+    type: number
+    default: 0.4
+    description: "Fraction of sample allocated to diverse (unfiltered) documents."
+  - name: maxExcludedFeaturesInPrompt
+    type: number
+    default: 10
+    description: "Maximum number of excluded KI features sent in the LLM prompt."
+  - name: maxEntityFilters
+    type: number
+    default: 10
+    description: "Maximum number of entity filters applied during sampling."
+  - name: maxPreviouslyIdentifiedFeatures
+    type: number
+    default: 100
+    description: "Maximum number of previously identified features sent in the LLM prompt."
+steps:
+  # -----------------------------------------------------------------------
+  # Step 1: Setup — resolve connector, fetch stream and already discoveredKI features.
+  # -----------------------------------------------------------------------
+  - name: setup
+    type: kibana.request
+    with:
+      method: POST
+      path: "/internal/streams/{{ inputs.streamName }}/features/_identify/setup"
+      use_server_info: true
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        start: "${{ inputs.start }}"
+        end: "${{ inputs.end }}"
+        connectorId: "${{ inputs.connectorId }}"
+
+  # -----------------------------------------------------------------------
+  # Step 2: Initialize loop variables from setup output.
+  # -----------------------------------------------------------------------
+  - name: init
+    type: data.set
+    with:
+      iteration: 0
+      successCount: 0
+      discoveredFeatures: []
+      totalTokensUsed:
+        prompt: 0
+        completion: 0
+        total: 0
+        cached: 0
+
+  # -----------------------------------------------------------------------
+  # Step 3: Main loop — each pass runs sample → infer → reconcile.
+  # -----------------------------------------------------------------------
+  - name: identify_loop
+    type: while
+    condition: "variables.iteration < {{ inputs.maxIterations }}"
+    max-iterations: "${{ inputs.maxIterations }}"
+    steps:
+      # 3a: Fetch sample documents from ES.
+      - name: sample_docs
+        type: kibana.request
+        with:
+          method: POST
+          path: "/internal/streams/{{ inputs.streamName }}/features/_identify/sample"
+          use_server_info: true
+          headers:
+            x-elastic-internal-origin: "kibana"
+          body:
+            start: "${{ steps.setup.output.start }}"
+            end: "${{ steps.setup.output.end }}"
+            discoveredFeatures: "${{ variables.discoveredFeatures }}"
+            sampleSize: "${{ inputs.sampleSize }}"
+            entityFilteredRatio: "${{ inputs.entityFilteredRatio }}"
+            diverseRatio: "${{ inputs.diverseRatio }}"
+            maxEntityFilters: "${{ inputs.maxEntityFilters }}"
+
+      # 3b: If no documents were returned, stop the loop.
+      - name: check_docs
+        type: if
+        condition: "steps.sample_docs.output.hasDocuments:false"
+        steps:
+          - name: stop_loop
+            type: loop.break
+
+      # 3c: Run LLM inference (catches errors internally, never throws).
+      - name: infer_features
+        type: kibana.request
+        with:
+          method: POST
+          path: "/internal/streams/{{ inputs.streamName }}/features/_identify/infer"
+          use_server_info: true
+          headers:
+            x-elastic-internal-origin: "kibana"
+          body:
+            connectorId: "${{ steps.setup.output.connectorId }}"
+            documents: "${{ steps.sample_docs.output.documents }}"
+            discoveredFeatures: "${{ variables.discoveredFeatures }}"
+            maxExcludedFeaturesInPrompt: "${{ inputs.maxExcludedFeaturesInPrompt }}"
+            maxPreviouslyIdentifiedFeatures: "${{ inputs.maxPreviouslyIdentifiedFeatures }}"
+
+      # 3d: Reconcile — merge, persist KI features, track telemetry.
+      - name: reconcile_features
+        type: kibana.request
+        with:
+          method: POST
+          path: "/internal/streams/{{ inputs.streamName }}/features/_identify/reconcile"
+          use_server_info: true
+          headers:
+            x-elastic-internal-origin: "kibana"
+          body:
+            runId: "${{ execution.id }}"
+            iteration: "${{ variables.iteration | plus: 1 }}"
+            inferSuccess: "${{ steps.infer_features.output.success }}"
+            rawFeatures: "${{ steps.infer_features.output.rawFeatures }}"
+            ignoredFeatures: "${{ steps.infer_features.output.ignoredFeatures }}"
+            tokensUsed: "${{ steps.infer_features.output.tokensUsed }}"
+            discoveredFeatures: "${{ variables.discoveredFeatures }}"
+            docsCount: "${{ steps.sample_docs.output.docsCount }}"
+            totalFilters: "${{ steps.sample_docs.output.totalFilters }}"
+            filtersCapped: "${{ steps.sample_docs.output.filtersCapped }}"
+            hasFilteredDocuments: "${{ steps.sample_docs.output.hasFilteredDocuments }}"
+            totalTokensUsed: "${{ variables.totalTokensUsed }}"
+            successCount: "${{ variables.successCount }}"
+            featureTtlDays: "${{ inputs.featureTtlDays }}"
+
+      # 3e: Update loop variables with reconcile output.
+      - name: update_state
+        type: data.set
+        with:
+          iteration: "${{ variables.iteration | plus: 1 }}"
+          successCount: "${{ steps.reconcile_features.output.successCount }}"
+          discoveredFeatures: "${{ steps.reconcile_features.output.discoveredFeatures }}"
+          totalTokensUsed: "${{ steps.reconcile_features.output.totalTokensUsed }}"
+
+  # -----------------------------------------------------------------------
+  # Step 4: Finalize — generate computed KI features.
+  # -----------------------------------------------------------------------
+  - name: finalize
+    type: kibana.request
+    with:
+      method: POST
+      path: "/internal/streams/{{ inputs.streamName }}/features/_identify/finalize"
+      use_server_info: true
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        start: "${{ steps.setup.output.start }}"
+        end: "${{ steps.setup.output.end }}"
+        iteration: "${{ variables.iteration }}"
+        successCount: "${{ variables.successCount }}"
+
+  # -----------------------------------------------------------------------
+  # Step 5: Output results.
+  # -----------------------------------------------------------------------
+  - name: output_result
+    type: workflow.output
+    with:
+      streamName: "${{ inputs.streamName }}"
+      discoveredFeatures: "${{ variables.discoveredFeatures }}"
+      computedFeaturesCount: "${{ steps.finalize.output.computedFeaturesCount }}"
+      tokensUsed: "${{ variables.totalTokensUsed }}"
+      iterations: "${{ variables.iteration }}"
