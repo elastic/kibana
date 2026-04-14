@@ -507,9 +507,9 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(
-      coreStart.elasticsearch.client.asInternalUser
-    );
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
       workflowExecutionRepository
@@ -634,6 +634,19 @@ export class WorkflowsExecutionEnginePlugin
         if (delayMs > 0) {
           await new Promise((r) => setTimeout(r, delayMs));
         }
+      }
+
+      // Re-check that the workflow is still enabled right before persisting the
+      // execution document. The route-level check (run_workflow.ts:75) may have
+      // read a stale value if a concurrent hard-delete disabled the workflow
+      // between the route read and this point.
+      const executionSpaceId = (context.spaceId as string | undefined) || 'default';
+      const stillEnabled = await workflowRepository.isWorkflowEnabled(
+        workflow.id,
+        executionSpaceId
+      );
+      if (!stillEnabled) {
+        throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
       }
 
       const { workflowExecution } = await createAndPersistWorkflowExecution(
