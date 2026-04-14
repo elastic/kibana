@@ -19,6 +19,7 @@ import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
 import { useGetIntegrationById, isValidNameFormat, startsWithLetter } from '../../../../common';
+import { meetsMinLength } from '../../../../common/lib/helper_functions';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import { useTelemetry } from '../../../telemetry_context';
@@ -49,6 +50,7 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
     const title = formData?.title?.trim() ?? '';
     return (
       Boolean(title) &&
+      meetsMinLength(title) &&
       Boolean(formData?.description?.trim()) &&
       isValidNameFormat(title) &&
       startsWithLetter(title)

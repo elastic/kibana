@@ -7,6 +7,7 @@
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
   TaskStatus,
+  deriveQueryType,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
@@ -36,8 +37,17 @@ const dateFromString = z.string().transform((input) => new Date(input));
 const sanitizeTaskResult = (
   result: SignificantEventsQueriesGenerationTaskResult
 ): SignificantEventsQueriesGenerationTaskResult => {
-  if ('queries' in result && result.queries.some((q) => q.esql.query === undefined)) {
+  if ('queries' in result && result.queries.some((q) => q.esql?.query === undefined)) {
     return { status: TaskStatus.Failed, error: 'Stale task result from a previous version.' };
+  }
+  if ('queries' in result) {
+    return {
+      ...result,
+      queries: result.queries.map((q) => ({
+        ...q,
+        type: deriveQueryType(q.esql.query),
+      })),
+    };
   }
   return result;
 };

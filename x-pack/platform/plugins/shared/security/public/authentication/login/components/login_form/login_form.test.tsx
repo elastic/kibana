@@ -5,22 +5,13 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiIcon, EuiProvider } from '@elastic/eui';
-import type { RenderResult } from '@testing-library/react';
-import { act, queryByTestId } from '@testing-library/react';
-import type { ReactWrapper } from 'enzyme';
+import { EuiProvider } from '@elastic/eui';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { i18n } from '@kbn/i18n';
-import {
-  findTestSubject,
-  mountWithIntl,
-  nextTick,
-  renderWithI18n,
-  shallowWithIntl,
-} from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { LoginForm, PageMode } from './login_form';
 import { MessageType } from '../../../components';
@@ -48,20 +39,13 @@ function getPageModeAssertions(mode: PageMode): Array<[string, boolean]> {
       ];
 }
 
-function expectPageMode(wrapper: ReactWrapper, mode: PageMode) {
+function expectPageMode(mode: PageMode) {
   for (const [selector, exists] of getPageModeAssertions(mode)) {
-    expect(findTestSubject(wrapper, selector).exists()).toBe(exists);
+    expect(!!screen.queryByTestId(selector)).toBe(exists);
   }
 }
 
-function expectPageModeRenderResult(renderResult: RenderResult, mode: PageMode) {
-  for (const [selector, exists] of getPageModeAssertions(mode)) {
-    expect(!!renderResult.queryByTestId(selector)).toBe(exists);
-  }
-}
-
-function expectAutoLoginOverlay(wrapper: ReactWrapper) {
-  // Everything should be hidden except for the overlay
+function expectAutoLoginOverlay() {
   for (const selector of [
     'loginForm',
     'loginSelector',
@@ -69,9 +53,9 @@ function expectAutoLoginOverlay(wrapper: ReactWrapper) {
     'loginHelpLink',
     'loginAssistanceMessage',
   ]) {
-    expect(findTestSubject(wrapper, selector).exists()).toBe(false);
+    expect(screen.queryByTestId(selector)).not.toBeInTheDocument();
   }
-  expect(findTestSubject(wrapper, 'autoLoginOverlay').exists()).toBe(true);
+  expect(screen.getByTestId('autoLoginOverlay')).toBeInTheDocument();
 }
 
 describe('LoginForm', () => {
@@ -84,8 +68,8 @@ describe('LoginForm', () => {
 
   it('renders as expected', () => {
     const coreStartMock = coreMock.createStart();
-    expect(
-      shallowWithIntl(
+    const { container } = render(
+      <I18nProvider>
         <EuiProvider>
           <LoginForm
             http={coreStartMock.http}
@@ -99,91 +83,98 @@ describe('LoginForm', () => {
             }}
           />
         </EuiProvider>
-      )
-    ).toMatchSnapshot();
+      </I18nProvider>
+    );
+
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   it('renders an info message when provided.', () => {
     const coreStartMock = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EuiProvider>
-        <LoginForm
-          http={coreStartMock.http}
-          notifications={coreStartMock.notifications}
-          message={{ type: MessageType.Info, content: 'Hey this is an info message' }}
-          loginAssistanceMessage=""
-          selector={{
-            enabled: false,
-            providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-            ],
-          }}
-        />
-      </EuiProvider>
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <LoginForm
+            http={coreStartMock.http}
+            notifications={coreStartMock.notifications}
+            message={{ type: MessageType.Info, content: 'Hey this is an info message' }}
+            loginAssistanceMessage=""
+            selector={{
+              enabled: false,
+              providers: [
+                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              ],
+            }}
+          />
+        </EuiProvider>
+      </I18nProvider>
     );
 
-    expectPageMode(wrapper, PageMode.Form);
+    expectPageMode(PageMode.Form);
 
-    expect(wrapper.find(EuiCallOut).props().title).toEqual('Hey this is an info message');
+    expect(screen.getByTestId('loginInfoMessage')).toHaveTextContent('Hey this is an info message');
   });
 
   it('renders `Need help?` link if login help text is provided.', () => {
     const coreStartMock = coreMock.createStart();
-    const wrapper = mountWithIntl(
-      <EuiProvider>
-        <LoginForm
-          http={coreStartMock.http}
-          notifications={coreStartMock.notifications}
-          loginHelp={'**Hey this is a login help message**'}
-          loginAssistanceMessage=""
-          selector={{
-            enabled: false,
-            providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-            ],
-          }}
-        />
-      </EuiProvider>
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <LoginForm
+            http={coreStartMock.http}
+            notifications={coreStartMock.notifications}
+            loginHelp={'**Hey this is a login help message**'}
+            loginAssistanceMessage=""
+            selector={{
+              enabled: false,
+              providers: [
+                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              ],
+            }}
+          />
+        </EuiProvider>
+      </I18nProvider>
     );
 
-    expectPageMode(wrapper, PageMode.Form);
+    expectPageMode(PageMode.Form);
 
-    expect(findTestSubject(wrapper, 'loginHelpLink').text()).toEqual('Need help?');
+    expect(screen.getByTestId('loginHelpLink')).toHaveTextContent('Need help?');
   });
 
   it('renders an invalid credentials message', async () => {
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
     coreStartMock.http.post.mockRejectedValue({ response: { status: 401 } });
 
-    const wrapper = mountWithIntl(
-      <EuiProvider>
-        <LoginForm
-          http={coreStartMock.http}
-          notifications={coreStartMock.notifications}
-          loginAssistanceMessage=""
-          selector={{
-            enabled: false,
-            providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-            ],
-          }}
-        />
-      </EuiProvider>
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <LoginForm
+            http={coreStartMock.http}
+            notifications={coreStartMock.notifications}
+            loginAssistanceMessage=""
+            selector={{
+              enabled: false,
+              providers: [
+                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              ],
+            }}
+          />
+        </EuiProvider>
+      </I18nProvider>
     );
 
-    expectPageMode(wrapper, PageMode.Form);
+    expectPageMode(PageMode.Form);
 
-    wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username' } });
-    wrapper.find('input[name="password"]').simulate('change', { target: { value: 'password' } });
-    wrapper.find('button[data-test-subj="loginSubmit"]').simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    fireEvent.change(document.querySelector('input[name="username"]')!, {
+      target: { value: 'username' },
     });
+    fireEvent.change(document.querySelector('input[name="password"]')!, {
+      target: { value: 'password' },
+    });
+    fireEvent.click(screen.getByTestId('loginSubmit'));
 
-    expect(wrapper.find(EuiCallOut).props().title).toEqual(
-      `Username or password is incorrect. Please try again.`
+    expect(await screen.findByTestId('loginErrorMessage')).toHaveTextContent(
+      'Username or password is incorrect. Please try again.'
     );
   });
 
@@ -191,34 +182,35 @@ describe('LoginForm', () => {
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
     coreStartMock.http.post.mockRejectedValue({ response: { status: 500 } });
 
-    const wrapper = mountWithIntl(
-      <EuiProvider>
-        <LoginForm
-          http={coreStartMock.http}
-          notifications={coreStartMock.notifications}
-          loginAssistanceMessage=""
-          selector={{
-            enabled: false,
-            providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-            ],
-          }}
-        />
-      </EuiProvider>
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <LoginForm
+            http={coreStartMock.http}
+            notifications={coreStartMock.notifications}
+            loginAssistanceMessage=""
+            selector={{
+              enabled: false,
+              providers: [
+                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              ],
+            }}
+          />
+        </EuiProvider>
+      </I18nProvider>
     );
 
-    expectPageMode(wrapper, PageMode.Form);
+    expectPageMode(PageMode.Form);
 
-    wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username' } });
-    wrapper.find('input[name="password"]').simulate('change', { target: { value: 'password' } });
-    wrapper.find('button[data-test-subj="loginSubmit"]').simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    fireEvent.change(document.querySelector('input[name="username"]')!, {
+      target: { value: 'username' },
     });
+    fireEvent.change(document.querySelector('input[name="password"]')!, {
+      target: { value: 'password' },
+    });
+    fireEvent.click(screen.getByTestId('loginSubmit'));
 
-    expect(wrapper.find(EuiCallOut).props().title).toEqual(
+    expect(await screen.findByTestId('loginErrorMessage')).toHaveTextContent(
       `We couldn't log you in. Please try again.`
     );
   });
@@ -230,32 +222,35 @@ describe('LoginForm', () => {
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
     coreStartMock.http.post.mockResolvedValue({ location: '/some-base-path/app/home#/?_g=()' });
 
-    const wrapper = mountWithIntl(
-      <EuiProvider>
-        <LoginForm
-          http={coreStartMock.http}
-          notifications={coreStartMock.notifications}
-          loginAssistanceMessage=""
-          selector={{
-            enabled: false,
-            providers: [
-              { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
-            ],
-          }}
-        />
-      </EuiProvider>
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <LoginForm
+            http={coreStartMock.http}
+            notifications={coreStartMock.notifications}
+            loginAssistanceMessage=""
+            selector={{
+              enabled: false,
+              providers: [
+                { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+              ],
+            }}
+          />
+        </EuiProvider>
+      </I18nProvider>
     );
 
-    expectPageMode(wrapper, PageMode.Form);
+    expectPageMode(PageMode.Form);
 
-    wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username1' } });
-    wrapper.find('input[name="password"]').simulate('change', { target: { value: 'password1' } });
-    wrapper.find('button[data-test-subj="loginSubmit"]').simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    fireEvent.change(document.querySelector('input[name="username"]')!, {
+      target: { value: 'username1' },
     });
+    fireEvent.change(document.querySelector('input[name="password"]')!, {
+      target: { value: 'password1' },
+    });
+    fireEvent.click(screen.getByTestId('loginSubmit'));
+
+    await waitFor(() => expect(window.location.href).toBe('/some-base-path/app/home#/?_g=()'));
 
     expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
     expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
@@ -269,95 +264,97 @@ describe('LoginForm', () => {
       }),
     });
 
-    expect(window.location.href).toBe('/some-base-path/app/home#/?_g=()');
-    expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+    expect(screen.queryByTestId('loginErrorMessage')).not.toBeInTheDocument();
   });
 
   it('properly switches to login help', async () => {
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
-    const wrapper = mountWithIntl(
-      <EuiProvider>
-        <LoginForm
-          http={coreStartMock.http}
-          notifications={coreStartMock.notifications}
-          loginAssistanceMessage=""
-          loginHelp="**some help**"
-          selector={{
-            enabled: false,
-            providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-            ],
-          }}
-        />
-      </EuiProvider>
-    );
-
-    expectPageMode(wrapper, PageMode.Form);
-    expect(findTestSubject(wrapper, 'loginBackToSelector').exists()).toBe(false);
-
-    // Going to login help.
-    findTestSubject(wrapper, 'loginHelpLink').simulate('click');
-    wrapper.update();
-    expectPageMode(wrapper, PageMode.LoginHelp);
-
-    expect(findTestSubject(wrapper, 'loginHelp').find(ReactMarkdown)).toMatchSnapshot('Login Help');
-
-    // Going back to login form.
-    findTestSubject(wrapper, 'loginBackToLoginLink').simulate('click');
-    wrapper.update();
-    expectPageMode(wrapper, PageMode.Form);
-    expect(findTestSubject(wrapper, 'loginBackToSelector').exists()).toBe(false);
-  });
-
-  describe('login selector', () => {
-    it('renders as expected with providers that use login form', async () => {
-      const coreStartMock = coreMock.createStart();
-      const wrapper = mountWithIntl(
+    render(
+      <I18nProvider>
         <EuiProvider>
           <LoginForm
             http={coreStartMock.http}
             notifications={coreStartMock.notifications}
             loginAssistanceMessage=""
+            loginHelp="**some help**"
             selector={{
-              enabled: true,
+              enabled: false,
               providers: [
-                {
-                  type: 'basic',
-                  name: 'basic',
-                  usesLoginForm: true,
-                  hint: 'Basic hint',
-                  icon: 'logoElastic',
-                  showInSelector: true,
-                },
-                {
-                  type: 'saml',
-                  name: 'saml1',
-                  description: 'Log in w/SAML',
-                  usesLoginForm: false,
-                  showInSelector: true,
-                },
-                {
-                  type: 'pki',
-                  name: 'pki1',
-                  description: 'Log in w/PKI',
-                  hint: 'PKI hint',
-                  usesLoginForm: false,
-                  showInSelector: true,
-                },
+                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
               ],
             }}
           />
         </EuiProvider>
+      </I18nProvider>
+    );
+
+    expectPageMode(PageMode.Form);
+    expect(screen.queryByTestId('loginBackToSelector')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('loginHelpLink'));
+    expectPageMode(PageMode.LoginHelp);
+
+    expect(screen.getByTestId('loginHelp')).toMatchSnapshot('Login Help');
+
+    fireEvent.click(screen.getByTestId('loginBackToLoginLink'));
+    expectPageMode(PageMode.Form);
+    expect(screen.queryByTestId('loginBackToSelector')).not.toBeInTheDocument();
+  });
+
+  describe('login selector', () => {
+    it('renders as expected with providers that use login form', async () => {
+      const coreStartMock = coreMock.createStart();
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginAssistanceMessage=""
+              selector={{
+                enabled: true,
+                providers: [
+                  {
+                    type: 'basic',
+                    name: 'basic',
+                    usesLoginForm: true,
+                    hint: 'Basic hint',
+                    icon: 'logoElastic',
+                    showInSelector: true,
+                  },
+                  {
+                    type: 'saml',
+                    name: 'saml1',
+                    description: 'Log in w/SAML',
+                    usesLoginForm: false,
+                    showInSelector: true,
+                  },
+                  {
+                    type: 'pki',
+                    name: 'pki1',
+                    description: 'Log in w/PKI',
+                    hint: 'PKI hint',
+                    usesLoginForm: false,
+                    showInSelector: true,
+                  },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectPageMode(wrapper, PageMode.Selector);
+      expectPageMode(PageMode.Selector);
 
-      const result = findTestSubject(wrapper, 'loginCard-', '^=').map((card) => {
-        const hint = findTestSubject(card, 'card-hint');
+      const cards = screen.queryAllByTestId(/^loginCard-/);
+      const result = cards.map((card) => {
+        const hint = within(card).queryByTestId('card-hint');
+        const title = within(card).getByTestId('card-title');
+        const icon = card.querySelector('[data-euiicon-type]');
         return {
-          title: findTestSubject(card, 'card-title').text(),
-          hint: hint.exists() ? hint.text() : '',
-          icon: card.find(EuiIcon).props().type,
+          title: title.textContent ?? '',
+          hint: hint?.textContent ?? '',
+          icon: icon?.getAttribute('data-euiicon-type') ?? 'empty',
         };
       });
 
@@ -370,43 +367,48 @@ describe('LoginForm', () => {
 
     it('renders as expected without providers that use login form', async () => {
       const coreStartMock = coreMock.createStart();
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginAssistanceMessage=""
-            selector={{
-              enabled: true,
-              providers: [
-                {
-                  type: 'saml',
-                  name: 'saml1',
-                  description: 'Login w/SAML',
-                  hint: 'SAML hint',
-                  usesLoginForm: false,
-                  showInSelector: true,
-                },
-                {
-                  type: 'pki',
-                  name: 'pki1',
-                  icon: 'some-icon',
-                  usesLoginForm: false,
-                  showInSelector: true,
-                },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginAssistanceMessage=""
+              selector={{
+                enabled: true,
+                providers: [
+                  {
+                    type: 'saml',
+                    name: 'saml1',
+                    description: 'Login w/SAML',
+                    hint: 'SAML hint',
+                    usesLoginForm: false,
+                    showInSelector: true,
+                  },
+                  {
+                    type: 'pki',
+                    name: 'pki1',
+                    icon: 'some-icon',
+                    usesLoginForm: false,
+                    showInSelector: true,
+                  },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectPageMode(wrapper, PageMode.Selector);
-      const result = findTestSubject(wrapper, 'loginCard-', '^=').map((card) => {
-        const hint = findTestSubject(card, 'card-hint');
+      expectPageMode(PageMode.Selector);
+      const cards = screen.queryAllByTestId(/^loginCard-/);
+      const result = cards.map((card) => {
+        const hint = within(card).queryByTestId('card-hint');
+        const title = within(card).getByTestId('card-title');
+        const icon = card.querySelector('[data-euiicon-type]');
         return {
-          title: findTestSubject(card, 'card-title').text(),
-          hint: hint.exists() ? hint.text() : '',
-          icon: card.find(EuiIcon).props().type,
+          title: title.textContent ?? '',
+          hint: hint?.textContent ?? '',
+          icon: icon?.getAttribute('data-euiicon-type') ?? 'empty',
         };
       });
       expect(result).toEqual([
@@ -424,55 +426,56 @@ describe('LoginForm', () => {
 
       // @ts-expect-error upgrade typescript v5.9.3
       window.location = { ...window.location, href: currentURL, origin: 'https://some-host.com' };
-      const wrapper = renderWithI18n(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginAssistanceMessage=""
-            selector={{
-              enabled: true,
-              providers: [
-                {
-                  type: 'basic',
-                  name: 'basic',
-                  usesLoginForm: true,
-                  hint: 'Basic hint',
-                  icon: 'logoElastic',
-                  showInSelector: true,
-                },
-                {
-                  type: 'saml',
-                  name: 'saml1',
-                  description: 'Log in w/SAML',
-                  origin: ['https://some-host.com', 'https://some-other-host.com'],
-                  usesLoginForm: false,
-                  showInSelector: true,
-                },
-                {
-                  type: 'pki',
-                  name: 'pki1',
-                  description: 'Log in w/PKI',
-                  hint: 'PKI hint',
-                  origin: 'https://not-some-host.com',
-                  usesLoginForm: false,
-                  showInSelector: true,
-                },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginAssistanceMessage=""
+              selector={{
+                enabled: true,
+                providers: [
+                  {
+                    type: 'basic',
+                    name: 'basic',
+                    usesLoginForm: true,
+                    hint: 'Basic hint',
+                    icon: 'logoElastic',
+                    showInSelector: true,
+                  },
+                  {
+                    type: 'saml',
+                    name: 'saml1',
+                    description: 'Log in w/SAML',
+                    origin: ['https://some-host.com', 'https://some-other-host.com'],
+                    usesLoginForm: false,
+                    showInSelector: true,
+                  },
+                  {
+                    type: 'pki',
+                    name: 'pki1',
+                    description: 'Log in w/PKI',
+                    hint: 'PKI hint',
+                    origin: 'https://not-some-host.com',
+                    usesLoginForm: false,
+                    showInSelector: true,
+                  },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
       expect(window.location.origin).toBe('https://some-host.com');
 
-      expectPageModeRenderResult(wrapper, PageMode.Selector);
+      expectPageMode(PageMode.Selector);
 
-      wrapper.queryAllByTestId(/^loginCard-/);
-
-      const result = wrapper.queryAllByTestId(/^loginCard-/).map((card) => {
-        const hint = queryByTestId(card, 'card-hint');
-        const title = queryByTestId(card, 'card-title');
+      const cards = screen.queryAllByTestId(/^loginCard-/);
+      const result = cards.map((card) => {
+        const hint = within(card).queryByTestId('card-hint');
+        const title = within(card).getByTestId('card-title');
         const icon = card.querySelector('[data-euiicon-type]');
         return {
           title: title?.textContent ?? '',
@@ -503,56 +506,58 @@ describe('LoginForm', () => {
         basePath: '/some-base-path',
       });
 
-      const rendered = renderWithI18n(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginAssistanceMessage=""
-            selector={{
-              enabled: true,
-              providers: [
-                {
-                  type: 'basic',
-                  name: 'basic',
-                  usesLoginForm: true,
-                  hint: 'Basic hint',
-                  icon: 'logoElastic',
-                  origin: 'https://not-some-host.com',
-                  showInSelector: true,
-                },
-                {
-                  type: 'saml',
-                  name: 'saml1',
-                  description: 'Log in w/SAML',
-                  origin: ['https://not-some-host.com', 'https://not-some-other-host.com'],
-                  usesLoginForm: false,
-                  showInSelector: true,
-                },
-                {
-                  type: 'pki',
-                  name: 'pki1',
-                  description: 'Log in w/PKI',
-                  hint: 'PKI hint',
-                  origin: 'https://not-some-host.com',
-                  usesLoginForm: false,
-                  showInSelector: true,
-                },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginAssistanceMessage=""
+              selector={{
+                enabled: true,
+                providers: [
+                  {
+                    type: 'basic',
+                    name: 'basic',
+                    usesLoginForm: true,
+                    hint: 'Basic hint',
+                    icon: 'logoElastic',
+                    origin: 'https://not-some-host.com',
+                    showInSelector: true,
+                  },
+                  {
+                    type: 'saml',
+                    name: 'saml1',
+                    description: 'Log in w/SAML',
+                    origin: ['https://not-some-host.com', 'https://not-some-other-host.com'],
+                    usesLoginForm: false,
+                    showInSelector: true,
+                  },
+                  {
+                    type: 'pki',
+                    name: 'pki1',
+                    description: 'Log in w/PKI',
+                    hint: 'PKI hint',
+                    origin: 'https://not-some-host.com',
+                    usesLoginForm: false,
+                    showInSelector: true,
+                  },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
       expect(window.location.origin).toBe('https://some-host.com');
 
-      expect(rendered.queryByTestId('loginForm')).toBeFalsy();
-      expect(rendered.queryByTestId('loginSelector')).toBeFalsy();
-      expect(rendered.queryByTestId('loginHelp')).toBeFalsy();
-      expect(rendered.queryByTestId('autoLoginOverlay')).toBeFalsy();
-      expect(rendered.queryAllByTestId(/^loginCard-/).length).toBe(0);
+      expect(screen.queryByTestId('loginForm')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('loginSelector')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('loginHelp')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('autoLoginOverlay')).not.toBeInTheDocument();
+      expect(screen.queryAllByTestId(/^loginCard-/).length).toBe(0);
 
-      expect((await rendered.findByTestId('loginErrorMessage')).textContent).toEqual(
+      expect(screen.getByTestId('loginErrorMessage')).toHaveTextContent(
         i18n.translate('xpack.security.noAuthProvidersForDomain', {
           defaultMessage:
             'No authentication providers have been configured for this origin (https://some-host.com).',
@@ -571,52 +576,52 @@ describe('LoginForm', () => {
       });
 
       window.location.href = currentURL;
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginAssistanceMessage=""
-            selector={{
-              enabled: true,
-              providers: [
-                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-                {
-                  type: 'saml',
-                  name: 'saml1',
-                  description: 'Login w/SAML',
-                  usesLoginForm: false,
-                  showInSelector: true,
-                },
-                {
-                  type: 'pki',
-                  name: 'pki1',
-                  description: 'Login w/PKI',
-                  usesLoginForm: false,
-                  showInSelector: true,
-                },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginAssistanceMessage=""
+              selector={{
+                enabled: true,
+                providers: [
+                  { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+                  {
+                    type: 'saml',
+                    name: 'saml1',
+                    description: 'Login w/SAML',
+                    usesLoginForm: false,
+                    showInSelector: true,
+                  },
+                  {
+                    type: 'pki',
+                    name: 'pki1',
+                    description: 'Login w/PKI',
+                    usesLoginForm: false,
+                    showInSelector: true,
+                  },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectPageMode(wrapper, PageMode.Selector);
+      expectPageMode(PageMode.Selector);
 
-      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
+      fireEvent.click(screen.getByTestId('loginCard-saml/saml1'));
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitFor(() =>
+        expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash')
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
-      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
-      expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+      expect(screen.queryByTestId('loginErrorMessage')).not.toBeInTheDocument();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
     });
 
@@ -630,31 +635,35 @@ describe('LoginForm', () => {
       coreStartMock.http.post.mockRejectedValue(failureReason);
 
       window.location.href = currentURL;
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginAssistanceMessage=""
-            selector={{
-              enabled: true,
-              providers: [
-                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-                { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginAssistanceMessage=""
+              selector={{
+                enabled: true,
+                providers: [
+                  { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+                  { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectPageMode(wrapper, PageMode.Selector);
+      expectPageMode(PageMode.Selector);
 
-      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
+      fireEvent.click(screen.getByTestId('loginCard-saml/saml1'));
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitFor(() =>
+        expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
+          title: 'Could not perform login.',
+          toastMessage: 'Oh no!',
+        })
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
@@ -662,10 +671,6 @@ describe('LoginForm', () => {
       });
 
       expect(window.location.href).toBe(currentURL);
-      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
-        title: 'Could not perform login.',
-        toastMessage: 'Oh no!',
-      });
     });
 
     it('shows error with message in the `body`', async () => {
@@ -680,31 +685,35 @@ describe('LoginForm', () => {
       });
 
       window.location.href = currentURL;
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginAssistanceMessage=""
-            selector={{
-              enabled: true,
-              providers: [
-                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-                { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginAssistanceMessage=""
+              selector={{
+                enabled: true,
+                providers: [
+                  { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+                  { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectPageMode(wrapper, PageMode.Selector);
+      expectPageMode(PageMode.Selector);
 
-      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
+      fireEvent.click(screen.getByTestId('loginCard-saml/saml1'));
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitFor(() =>
+        expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(
+          new Error('Oh no! But with much more details!'),
+          { title: 'Could not perform login.', toastMessage: 'Oh no!' }
+        )
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
@@ -712,10 +721,6 @@ describe('LoginForm', () => {
       });
 
       expect(window.location.href).toBe(currentURL);
-      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(
-        new Error('Oh no! But with much more details!'),
-        { title: 'Could not perform login.', toastMessage: 'Oh no!' }
-      );
     });
 
     it('properly switches to login form', async () => {
@@ -725,28 +730,29 @@ describe('LoginForm', () => {
 
       const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
       window.location.href = currentURL;
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginAssistanceMessage=""
-            selector={{
-              enabled: true,
-              providers: [
-                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-                { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginAssistanceMessage=""
+              selector={{
+                enabled: true,
+                providers: [
+                  { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+                  { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectPageMode(wrapper, PageMode.Selector);
+      expectPageMode(PageMode.Selector);
 
-      wrapper.findWhere((node) => node.key() === 'basic').simulate('click');
-      wrapper.update();
-      expectPageMode(wrapper, PageMode.Form);
+      fireEvent.click(screen.getByTestId('loginCard-basic/basic'));
+      expectPageMode(PageMode.Form);
 
       expect(coreStartMock.http.post).not.toHaveBeenCalled();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
@@ -755,38 +761,35 @@ describe('LoginForm', () => {
 
     it('properly switches to login help', async () => {
       const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginAssistanceMessage=""
-            loginHelp="**some help**"
-            selector={{
-              enabled: true,
-              providers: [
-                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-                { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginAssistanceMessage=""
+              loginHelp="**some help**"
+              selector={{
+                enabled: true,
+                providers: [
+                  { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+                  { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectPageMode(wrapper, PageMode.Selector);
+      expectPageMode(PageMode.Selector);
 
-      findTestSubject(wrapper, 'loginHelpLink').simulate('click');
-      wrapper.update();
-      expectPageMode(wrapper, PageMode.LoginHelp);
+      fireEvent.click(screen.getByTestId('loginHelpLink'));
+      expectPageMode(PageMode.LoginHelp);
 
-      expect(findTestSubject(wrapper, 'loginHelp').find(ReactMarkdown)).toMatchSnapshot(
-        'Login Help'
-      );
+      expect(screen.getByTestId('loginHelp')).toMatchSnapshot('Login Help');
 
-      // Going back to login selector.
-      findTestSubject(wrapper, 'loginBackToLoginLink').simulate('click');
-      wrapper.update();
-      expectPageMode(wrapper, PageMode.Selector);
+      fireEvent.click(screen.getByTestId('loginBackToLoginLink'));
+      expectPageMode(PageMode.Selector);
 
       expect(coreStartMock.http.post).not.toHaveBeenCalled();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
@@ -794,49 +797,41 @@ describe('LoginForm', () => {
 
     it('properly switches to login form -> login help and back', async () => {
       const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginAssistanceMessage=""
-            loginHelp="**some help**"
-            selector={{
-              enabled: true,
-              providers: [
-                { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
-                { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginAssistanceMessage=""
+              loginHelp="**some help**"
+              selector={{
+                enabled: true,
+                providers: [
+                  { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+                  { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectPageMode(wrapper, PageMode.Selector);
+      expectPageMode(PageMode.Selector);
 
-      // Going to login form.
-      wrapper.findWhere((node) => node.key() === 'basic').simulate('click');
-      wrapper.update();
-      expectPageMode(wrapper, PageMode.Form);
+      fireEvent.click(screen.getByTestId('loginCard-basic/basic'));
+      expectPageMode(PageMode.Form);
 
-      // Going to login help.
-      findTestSubject(wrapper, 'loginHelpLink').simulate('click');
-      wrapper.update();
-      expectPageMode(wrapper, PageMode.LoginHelp);
+      fireEvent.click(screen.getByTestId('loginHelpLink'));
+      expectPageMode(PageMode.LoginHelp);
 
-      expect(findTestSubject(wrapper, 'loginHelp').find(ReactMarkdown)).toMatchSnapshot(
-        'Login Help'
-      );
+      expect(screen.getByTestId('loginHelp')).toMatchSnapshot('Login Help');
 
-      // Going back to login form.
-      findTestSubject(wrapper, 'loginBackToLoginLink').simulate('click');
-      wrapper.update();
-      expectPageMode(wrapper, PageMode.Form);
+      fireEvent.click(screen.getByTestId('loginBackToLoginLink'));
+      expectPageMode(PageMode.Form);
 
-      // Going back to login selector.
-      findTestSubject(wrapper, 'loginBackToSelector').simulate('click');
-      wrapper.update();
-      expectPageMode(wrapper, PageMode.Selector);
+      fireEvent.click(screen.getByTestId('loginBackToSelector'));
+      expectPageMode(PageMode.Selector);
 
       expect(coreStartMock.http.post).not.toHaveBeenCalled();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
@@ -846,28 +841,30 @@ describe('LoginForm', () => {
   describe('auto login', () => {
     it('automatically switches to the Login Form mode if provider suggested by the auth provider hint needs it', () => {
       const coreStartMock = coreMock.createStart();
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginHelp={'**Hey this is a login help message**'}
-            loginAssistanceMessage="Need assistance?"
-            authProviderHint="basic1"
-            selector={{
-              enabled: true,
-              providers: [
-                { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
-                { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginHelp={'**Hey this is a login help message**'}
+              loginAssistanceMessage="Need assistance?"
+              authProviderHint="basic1"
+              selector={{
+                enabled: true,
+                providers: [
+                  { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+                  { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectPageMode(wrapper, PageMode.Form);
-      expect(findTestSubject(wrapper, 'loginHelpLink').text()).toEqual('Need help?');
-      expect(findTestSubject(wrapper, 'loginAssistanceMessage').text()).toEqual('Need assistance?');
+      expectPageMode(PageMode.Form);
+      expect(screen.getByTestId('loginHelpLink')).toHaveTextContent('Need help?');
+      expect(screen.getByTestId('loginAssistanceMessage')).toHaveTextContent('Need assistance?');
     });
 
     it('automatically logs in if provider suggested by the auth provider hint is displayed in the selector', async () => {
@@ -880,39 +877,39 @@ describe('LoginForm', () => {
       });
 
       window.location.href = currentURL;
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginHelp={'**Hey this is a login help message**'}
-            loginAssistanceMessage="Need assistance?"
-            authProviderHint="saml1"
-            selector={{
-              enabled: true,
-              providers: [
-                { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
-                { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginHelp={'**Hey this is a login help message**'}
+              loginAssistanceMessage="Need assistance?"
+              authProviderHint="saml1"
+              selector={{
+                enabled: true,
+                providers: [
+                  { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+                  { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectAutoLoginOverlay(wrapper);
+      expectAutoLoginOverlay();
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitFor(() =>
+        expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash')
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
-      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
-      expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+      expect(screen.queryByTestId('loginErrorMessage')).not.toBeInTheDocument();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
     });
 
@@ -926,39 +923,39 @@ describe('LoginForm', () => {
       });
 
       window.location.href = currentURL;
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginHelp={'**Hey this is a login help message**'}
-            loginAssistanceMessage="Need assistance?"
-            authProviderHint="saml1"
-            selector={{
-              enabled: true,
-              providers: [
-                { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
-                { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: false },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginHelp={'**Hey this is a login help message**'}
+              loginAssistanceMessage="Need assistance?"
+              authProviderHint="saml1"
+              selector={{
+                enabled: true,
+                providers: [
+                  { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+                  { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: false },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectAutoLoginOverlay(wrapper);
+      expectAutoLoginOverlay();
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitFor(() =>
+        expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash')
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
-      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
-      expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+      expect(screen.queryByTestId('loginErrorMessage')).not.toBeInTheDocument();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
     });
 
@@ -972,31 +969,35 @@ describe('LoginForm', () => {
       coreStartMock.http.post.mockRejectedValue(failureReason);
 
       window.location.href = currentURL;
-      const wrapper = mountWithIntl(
-        <EuiProvider>
-          <LoginForm
-            http={coreStartMock.http}
-            notifications={coreStartMock.notifications}
-            loginHelp={'**Hey this is a login help message**'}
-            loginAssistanceMessage="Need assistance?"
-            authProviderHint="saml1"
-            selector={{
-              enabled: true,
-              providers: [
-                { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
-                { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
-              ],
-            }}
-          />
-        </EuiProvider>
+      render(
+        <I18nProvider>
+          <EuiProvider>
+            <LoginForm
+              http={coreStartMock.http}
+              notifications={coreStartMock.notifications}
+              loginHelp={'**Hey this is a login help message**'}
+              loginAssistanceMessage="Need assistance?"
+              authProviderHint="saml1"
+              selector={{
+                enabled: true,
+                providers: [
+                  { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+                  { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+                ],
+              }}
+            />
+          </EuiProvider>
+        </I18nProvider>
       );
 
-      expectAutoLoginOverlay(wrapper);
+      expectAutoLoginOverlay();
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitFor(() =>
+        expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
+          title: 'Could not perform login.',
+          toastMessage: 'Oh no!',
+        })
+      );
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
       expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
@@ -1004,14 +1005,10 @@ describe('LoginForm', () => {
       });
 
       expect(window.location.href).toBe(currentURL);
-      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
-        title: 'Could not perform login.',
-        toastMessage: 'Oh no!',
-      });
 
-      expectPageMode(wrapper, PageMode.Selector);
-      expect(findTestSubject(wrapper, 'loginHelpLink').text()).toEqual('Need help?');
-      expect(findTestSubject(wrapper, 'loginAssistanceMessage').text()).toEqual('Need assistance?');
+      expectPageMode(PageMode.Selector);
+      expect(screen.getByTestId('loginHelpLink')).toHaveTextContent('Need help?');
+      expect(screen.getByTestId('loginAssistanceMessage')).toHaveTextContent('Need assistance?');
     });
   });
 });
