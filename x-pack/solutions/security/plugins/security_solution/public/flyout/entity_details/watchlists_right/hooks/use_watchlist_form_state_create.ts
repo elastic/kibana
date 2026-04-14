@@ -8,11 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import type { WatchlistFormState } from './use_watchlist_form_state';
-import {
-  getDefaultWatchlist,
-  getWatchlistNameValidation,
-  useResetEditsOnFlyoutOpen,
-} from './use_watchlist_form_state_shared';
+import { getDefaultWatchlist, useResetEditsOnFlyoutOpen } from './use_watchlist_form_state_shared';
 
 export const useCreateWatchlistFormState = (): WatchlistFormState => {
   const defaultWatchlist = useMemo<CreateWatchlistRequestBodyInput>(
@@ -40,11 +36,7 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     setWatchlist(defaultWatchlist);
   }, [defaultWatchlist, hasUserEdits]);
 
-  const { trimmedName, isNameInvalid } = getWatchlistNameValidation(
-    watchlist.name,
-    watchlist.name.length > 0
-  );
-  const isDisabled = isNameInvalid || !trimmedName;
+  const isDisabled = !watchlist.name.trim();
 
   return {
     watchlist,
@@ -52,7 +44,6 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     ruleBasedSourceIds: {},
     isEditMode: false,
     isDisabled,
-    isNameInvalid,
     setWatchlistField,
   };
 };

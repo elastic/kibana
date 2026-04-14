@@ -17,7 +17,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { canUpdateWatchlistField } from '../../../../common/api/entity_analytics/watchlists/management';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import {
@@ -35,7 +34,6 @@ export interface WatchlistFormProps {
   watchlist: CreateWatchlistRequestBodyInput;
   watchlistId?: string;
   isEditMode: boolean;
-  isNameInvalid: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
@@ -46,7 +44,6 @@ export const WatchlistForm = ({
   watchlist,
   watchlistId,
   isEditMode,
-  isNameInvalid,
   onFieldChange,
 }: WatchlistFormProps) => {
   const isManaged = watchlist.managed === true;
@@ -55,28 +52,11 @@ export const WatchlistForm = ({
 
   return (
     <EuiForm component="form" fullWidth>
-      <EuiFormRow
-        label={WATCHLIST_NAME_LABEL}
-        isInvalid={isNameInvalid}
-        error={
-          isNameInvalid
-            ? [
-                i18n.translate(
-                  'xpack.securitySolution.entityAnalytics.watchlists.flyout.nameInvalid',
-                  {
-                    defaultMessage:
-                      'Use lowercase letters, numbers, ".", "_" or "-" and start with a letter or number.',
-                  }
-                ),
-              ]
-            : undefined
-        }
-      >
+      <EuiFormRow label={WATCHLIST_NAME_LABEL}>
         <EuiFieldText
           name="WatchlistName"
           value={watchlist.name}
           onChange={(e) => onFieldChange('name', e.target.value)}
-          isInvalid={isNameInvalid}
           disabled={isNameDisabled}
         />
       </EuiFormRow>
