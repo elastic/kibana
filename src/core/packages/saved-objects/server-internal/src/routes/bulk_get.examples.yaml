@@ -1,0 +1,41 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkGetSavedObjectsRequest:
+          summary: Retrieve a dashboard and visualization by identifier.
+          value:
+            - type: dashboard
+              id: revenue-overview
+            - type: visualization
+              id: revenue-by-region
+              fields:
+                - title
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          bulkGetSavedObjectsResponse:
+            summary: The response includes the saved objects that were found.
+            value:
+              saved_objects:
+                - id: revenue-overview
+                  type: dashboard
+                  version: WzEsMV0=
+                  managed: false
+                  updated_at: '2024-03-15T08:30:00.000Z'
+                  references: []
+                  attributes:
+                    title: Revenue Overview - Q1
+                - id: revenue-by-region
+                  type: visualization
+                  version: WzEsMl0=
+                  managed: false
+                  updated_at: '2024-03-14T11:45:00.000Z'
+                  references: []
+                  attributes:
+                    title: Revenue by Region
+  '400':
+    description: Bad request.

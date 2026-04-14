@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -40,6 +41,11 @@ export const registerBulkGetRoute = (
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        description: `Retrieve multiple Kibana saved objects by identifier.
+
+WARNING: This API is intended to be removed in a future Elastic Stack version.
+Consider using the export API for your use case.`,
+        oasOperationObject: () => path.resolve(__dirname, './bulk_get.examples.yaml'),
       },
       security: {
         authz: {
@@ -52,8 +58,23 @@ export const registerBulkGetRoute = (
           schema.object({
             type: schema.string(),
             id: schema.string(),
-            fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-            namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+            fields: schema.maybe(
+              schema.arrayOf(schema.string(), {
+                maxSize: 100,
+                meta: {
+                  description: 'The saved object fields to include in the response.',
+                },
+              })
+            ),
+            namespaces: schema.maybe(
+              schema.arrayOf(schema.string(), {
+                maxSize: 100,
+                meta: {
+                  description:
+                    'The space or spaces to read from when the saved object type supports multiple namespaces.',
+                },
+              })
+            ),
           }),
           { maxSize: 10_000 }
         ),

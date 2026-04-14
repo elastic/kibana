@@ -1,0 +1,41 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createSavedObjectRequest:
+          summary: Create a dashboard with an explicit identifier.
+          value:
+            attributes:
+              title: Revenue Overview
+              description: Dashboard used by the finance team
+            references:
+              - name: kibanaSavedObjectMeta.searchSourceJSON.index
+                type: index-pattern
+                id: 90943e30-9a47-11e8-b64d-95841ca0b247
+            coreMigrationVersion: 8.8.0
+            typeMigrationVersion: 8.4.0
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          createSavedObjectResponse:
+            summary: The created dashboard and its metadata are returned.
+            value:
+              id: revenue-overview
+              type: dashboard
+              version: WzEsMV0=
+              managed: false
+              coreMigrationVersion: 8.8.0
+              typeMigrationVersion: 8.4.0
+              updated_at: '2024-03-01T12:00:00.000Z'
+              references:
+                - name: kibanaSavedObjectMeta.searchSourceJSON.index
+                  type: index-pattern
+                  id: 90943e30-9a47-11e8-b64d-95841ca0b247
+              attributes:
+                title: Revenue Overview
+                description: Dashboard used by the finance team
+  '409':
+    description: Indicates a conflict error.

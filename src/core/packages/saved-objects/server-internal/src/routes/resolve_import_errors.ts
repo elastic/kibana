@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { extname } from 'path';
 import type { Readable } from 'stream';
 import { chain } from 'lodash';
@@ -42,12 +43,13 @@ export const registerResolveImportErrorsRoute = (
         tags: ['oas-tag:saved objects'],
         access: 'public',
         description:
-          'To resolve errors from the import objects API, you can retry certain saved objects, overwrite specific saved objects, and change references to different saved objects',
+          'To resolve errors from the import objects API, you can retry certain saved objects, overwrite specific saved objects, and change references to different saved objects.',
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',
           accepts: 'multipart/form-data',
         },
+        oasOperationObject: () => path.resolve(__dirname, './resolve_import_errors.examples.yaml'),
       },
       security: {
         authz: {
@@ -58,8 +60,20 @@ export const registerResolveImportErrorsRoute = (
       validate: {
         query: schema.object(
           {
-            createNewCopies: schema.boolean({ defaultValue: false }),
-            compatibilityMode: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({
+              defaultValue: false,
+              meta: {
+                description:
+                  'Creates copies of the saved objects, regenerates each object ID, and resets the origin. When enabled during the initial import, also enable it here.',
+              },
+            }),
+            compatibilityMode: schema.boolean({
+              defaultValue: false,
+              meta: {
+                description:
+                  'Applies adjustments to imported saved objects to maintain compatibility between Kibana versions. When enabled during the initial import, also enable it here.',
+              },
+            }),
           },
           {
             validate: (object) => {
@@ -70,23 +84,57 @@ export const registerResolveImportErrorsRoute = (
           }
         ),
         body: schema.object({
-          file: schema.stream(),
+          file: schema.stream({
+            meta: {
+              description: 'The same NDJSON file that was submitted to the import API.',
+            },
+          }),
           retries: schema.arrayOf(
             schema.object({
-              type: schema.string(),
-              id: schema.string(),
-              overwrite: schema.boolean({ defaultValue: false }),
-              destinationId: schema.maybe(schema.string()),
+              type: schema.string({
+                meta: { description: 'The saved object type.' },
+              }),
+              id: schema.string({
+                meta: { description: 'The saved object identifier.' },
+              }),
+              overwrite: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, the source object overwrites the conflicting destination object.',
+                },
+              }),
+              destinationId: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'The destination identifier to assign to the imported object when it should differ from the current ID.',
+                  },
+                })
+              ),
               replaceReferences: schema.arrayOf(
                 schema.object({
-                  type: schema.string(),
-                  from: schema.string(),
-                  to: schema.string(),
+                  type: schema.string({
+                    meta: { description: 'The referenced saved object type.' },
+                  }),
+                  from: schema.string({
+                    meta: { description: 'The original reference identifier.' },
+                  }),
+                  to: schema.string({
+                    meta: { description: 'The replacement reference identifier.' },
+                  }),
                 }),
                 { defaultValue: [], maxSize: 100 }
               ),
               createNewCopy: schema.maybe(schema.boolean()),
-              ignoreMissingReferences: schema.maybe(schema.boolean()),
+              ignoreMissingReferences: schema.maybe(
+                schema.boolean({
+                  meta: {
+                    description:
+                      'When true, ignores missing reference errors for this object retry.',
+                  },
+                })
+              ),
             }),
             { maxSize: 10_000 }
           ),

@@ -1,0 +1,40 @@
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          findSavedObjectsResponse:
+            summary: The response returns a paginated set of dashboards.
+            value:
+              page: 1
+              per_page: 2
+              total: 2
+              saved_objects:
+                - id: revenue-overview
+                  type: dashboard
+                  version: WzEsMV0=
+                  score: 1
+                  managed: false
+                  updated_at: '2024-03-15T08:30:00.000Z'
+                  references: []
+                  attributes:
+                    title: Revenue Overview - Q1
+                - id: bookings-overview
+                  type: dashboard
+                  version: WzEsMl0=
+                  score: 1
+                  managed: false
+                  updated_at: '2024-03-14T11:45:00.000Z'
+                  references: []
+                  attributes:
+                    title: Bookings Overview
+  '400':
+    description: Bad request.
+x-codeSamples:
+  - lang: cURL
+    label: Find dashboards
+    source: |
+      curl \
+        -X GET 'api/saved_objects/_find?type=dashboard&search=Revenue&search_fields=title&page=1&per_page=20' \
+        -H "kbn-xsrf: true"

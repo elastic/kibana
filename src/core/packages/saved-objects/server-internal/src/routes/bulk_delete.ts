@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -40,6 +41,13 @@ export const registerBulkDeleteRoute = (
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        description: `Delete multiple Kibana saved objects.
+
+WARNING: This operation permanently deletes objects and cannot be reversed.
+
+WARNING: This API is intended to be removed in a future Elastic Stack version.
+There is currently no alternative API for all use cases supported by this API.`,
+        oasOperationObject: () => path.resolve(__dirname, './bulk_delete.examples.yaml'),
       },
       security: {
         authz: {
@@ -56,7 +64,14 @@ export const registerBulkDeleteRoute = (
           { maxSize: 10_000 }
         ),
         query: schema.object({
-          force: schema.maybe(schema.boolean()),
+          force: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'When true, force deletes objects that exist in multiple namespaces. This applies to the entire request.',
+              },
+            })
+          ),
         }),
       },
     },

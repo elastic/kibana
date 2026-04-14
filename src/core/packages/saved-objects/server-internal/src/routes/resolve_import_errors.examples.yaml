@@ -1,0 +1,37 @@
+requestBody:
+  content:
+    multipart/form-data:
+      examples:
+        resolveImportErrorsRequest:
+          summary: Retry an import and replace a missing reference.
+          value:
+            file: export.ndjson
+            retries:
+              - type: dashboard
+                id: revenue-overview
+                overwrite: true
+                replaceReferences:
+                  - type: index-pattern
+                    from: missing-pattern
+                    to: 90943e30-9a47-11e8-b64d-95841ca0b247
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          resolveImportErrorsResponse:
+            summary: The response indicates the retried import completed successfully.
+            value:
+              success: true
+              successCount: 1
+              errors: []
+              successResults:
+                - type: dashboard
+                  id: revenue-overview
+                  meta:
+                    title: Revenue Overview
+                    icon: dashboardApp
+                  managed: false
+  '400':
+    description: Bad request.

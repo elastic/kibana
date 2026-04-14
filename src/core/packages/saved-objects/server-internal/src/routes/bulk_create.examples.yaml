@@ -1,0 +1,47 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkCreateSavedObjectsRequest:
+          summary: Create two dashboards in a single request.
+          value:
+            - type: dashboard
+              id: revenue-overview
+              attributes:
+                title: Revenue Overview
+              coreMigrationVersion: 8.8.0
+              typeMigrationVersion: 8.4.0
+            - type: dashboard
+              id: bookings-overview
+              attributes:
+                title: Bookings Overview
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          bulkCreateSavedObjectsResponse:
+            summary: The response returns the created saved objects.
+            value:
+              saved_objects:
+                - id: revenue-overview
+                  type: dashboard
+                  version: WzEsMV0=
+                  managed: false
+                  coreMigrationVersion: 8.8.0
+                  typeMigrationVersion: 8.4.0
+                  updated_at: '2024-03-01T12:00:00.000Z'
+                  references: []
+                  attributes:
+                    title: Revenue Overview
+                - id: bookings-overview
+                  type: dashboard
+                  version: WzEsMl0=
+                  managed: false
+                  updated_at: '2024-03-01T12:00:01.000Z'
+                  references: []
+                  attributes:
+                    title: Bookings Overview
+  '400':
+    description: Bad request.

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -44,6 +45,11 @@ export const registerFindRoute = (
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        description: `Retrieve a paginated set of Kibana saved objects.
+
+WARNING: This API is intended to be removed in a future Elastic Stack version.
+Consider using the export API for your use case.`,
+        oasOperationObject: () => path.resolve(__dirname, './find.examples.yaml'),
       },
       security: {
         authz: {
@@ -53,30 +59,92 @@ export const registerFindRoute = (
       },
       validate: {
         query: schema.object({
-          per_page: schema.number({ min: 0, defaultValue: 20 }),
-          page: schema.number({ min: 0, defaultValue: 1 }),
-          type: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })]),
-          search: schema.maybe(schema.string()),
+          per_page: schema.number({
+            min: 0,
+            defaultValue: 20,
+            meta: { description: 'The number of objects to return per page.' },
+          }),
+          page: schema.number({
+            min: 0,
+            defaultValue: 1,
+            meta: { description: 'The page of objects to return.' },
+          }),
+          type: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+            meta: {
+              description: 'The saved object types to include in the response.',
+            },
+          }),
+          search: schema.maybe(
+            schema.string({
+              meta: {
+                description:
+                  'An Elasticsearch simple_query_string query that filters the objects in the response.',
+              },
+            })
+          ),
           default_search_operator: searchOperatorSchema,
           search_fields: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+              meta: {
+                description: 'The fields to run the simple_query_string query against.',
+              },
+            })
           ),
-          sort_field: schema.maybe(schema.string()),
+          sort_field: schema.maybe(
+            schema.string({
+              meta: {
+                description:
+                  'The saved object field to sort by. When multiple types are requested, only root fields are supported.',
+              },
+            })
+          ),
           has_reference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })], {
+              meta: {
+                description:
+                  'Filters to objects that have a relationship with the specified type and identifier combination.',
+              },
+            })
           ),
           has_reference_operator: searchOperatorSchema,
           has_no_reference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })], {
+              meta: {
+                description:
+                  'Filters to objects that do not have a relationship with the specified type and identifier combination.',
+              },
+            })
           ),
           has_no_reference_operator: searchOperatorSchema,
           fields: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+              meta: {
+                description: 'The fields to include under the attributes key in each saved object.',
+              },
+            })
           ),
-          filter: schema.maybe(schema.string()),
-          aggs: schema.maybe(schema.string()),
+          filter: schema.maybe(
+            schema.string({
+              meta: {
+                description:
+                  'A KQL filter string. Refer to saved object attributes as savedObjectType.attributes.fieldName and root fields as savedObjectType.rootField.',
+              },
+            })
+          ),
+          aggs: schema.maybe(
+            schema.string({
+              meta: {
+                description:
+                  'An aggregation structure serialized as a string. Avoid using the find API to export large numbers of objects.',
+              },
+            })
+          ),
           namespaces: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+              meta: {
+                description: 'The space or spaces to search in for shareable saved object types.',
+              },
+            })
           ),
         }),
       },

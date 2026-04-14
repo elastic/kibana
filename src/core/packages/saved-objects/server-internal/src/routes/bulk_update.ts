@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -40,6 +41,11 @@ export const registerBulkUpdateRoute = (
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        description: `Update the attributes for multiple Kibana saved objects.
+
+WARNING: This API is intended to be removed in a future Elastic Stack version.
+Consider using the import API for your use case.`,
+        oasOperationObject: () => path.resolve(__dirname, './bulk_update.examples.yaml'),
       },
       security: {
         authz: {
@@ -53,7 +59,13 @@ export const registerBulkUpdateRoute = (
             type: schema.string(),
             id: schema.string(),
             attributes: schema.recordOf(schema.string(), schema.any()),
-            version: schema.maybe(schema.string()),
+            version: schema.maybe(
+              schema.string({
+                meta: {
+                  description: 'The opaque version string used for optimistic concurrency control.',
+                },
+              })
+            ),
             references: schema.maybe(
               schema.arrayOf(
                 schema.object({
@@ -64,7 +76,15 @@ export const registerBulkUpdateRoute = (
                 { maxSize: 1000 }
               )
             ),
-            namespace: schema.maybe(schema.string({ minLength: 1 })),
+            namespace: schema.maybe(
+              schema.string({
+                minLength: 1,
+                meta: {
+                  description:
+                    'The space to target for this object. When provided, it overrides the request-level namespace.',
+                },
+              })
+            ),
           }),
           { maxSize: 10_000 }
         ),

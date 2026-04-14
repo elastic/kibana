@@ -1,0 +1,33 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateSavedObjectRequest:
+          summary: Update the attributes of an existing dashboard.
+          value:
+            attributes:
+              title: Revenue Overview - Q1
+              description: Updated dashboard title after the quarterly review
+            version: WzEsMV0=
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          updateSavedObjectResponse:
+            summary: The updated dashboard is returned with the new attributes.
+            value:
+              id: revenue-overview
+              type: dashboard
+              version: WzIsMV0=
+              managed: false
+              updated_at: '2024-03-15T08:30:00.000Z'
+              references: []
+              attributes:
+                title: Revenue Overview - Q1
+                description: Updated dashboard title after the quarterly review
+  '404':
+    description: Indicates the object was not found.
+  '409':
+    description: Indicates a conflict error.

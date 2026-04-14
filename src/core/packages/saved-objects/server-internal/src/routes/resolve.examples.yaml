@@ -1,0 +1,23 @@
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          resolveSavedObjectResponse:
+            summary: The response shows a successful legacy URL alias match.
+            value:
+              outcome: aliasMatch
+              alias_target_id: revenue-overview
+              alias_purpose: savedObjectConversion
+              saved_object:
+                id: revenue-overview
+                type: dashboard
+                version: WzEsMV0=
+                managed: false
+                updated_at: '2024-03-15T08:30:00.000Z'
+                references: []
+                attributes:
+                  title: Revenue Overview - Q1
+  '400':
+    description: Bad request.

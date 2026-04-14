@@ -40,6 +40,10 @@ export const registerGetRoute = (
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        description: `Retrieve a single Kibana saved object by identifier.
+
+WARNING: This API is intended to be removed in a future Elastic Stack version.
+Consider using the export API for your use case.`,
       },
       security: {
         authz: {

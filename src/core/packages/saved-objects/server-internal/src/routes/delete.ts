@@ -40,6 +40,12 @@ export const registerDeleteRoute = (
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        description: `Delete a Kibana saved object.
+
+WARNING: This operation permanently deletes the object and cannot be reversed.
+
+WARNING: This API is intended to be removed in a future Elastic Stack version.
+There is currently no alternative API for all use cases supported by this API.`,
       },
       security: {
         authz: {
@@ -53,7 +59,14 @@ export const registerDeleteRoute = (
           id: schema.string(),
         }),
         query: schema.object({
-          force: schema.maybe(schema.boolean()),
+          force: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'When true, force deletes an object that exists in multiple namespaces.',
+              },
+            })
+          ),
         }),
       },
     },

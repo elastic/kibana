@@ -1,0 +1,45 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkUpdateSavedObjectsRequest:
+          summary: Update multiple dashboards in a single request.
+          value:
+            - type: dashboard
+              id: revenue-overview
+              version: WzEsMV0=
+              attributes:
+                title: Revenue Overview - Q1
+            - type: dashboard
+              id: bookings-overview
+              version: WzEsMl0=
+              attributes:
+                title: Bookings Overview - EMEA
+responses:
+  '200':
+    description: Indicates a successful call. Errors for individual objects are returned in the response body.
+    content:
+      application/json:
+        examples:
+          bulkUpdateSavedObjectsResponse:
+            summary: The response returns the updated objects.
+            value:
+              saved_objects:
+                - id: revenue-overview
+                  type: dashboard
+                  version: WzIsMV0=
+                  managed: false
+                  updated_at: '2024-03-15T08:30:00.000Z'
+                  references: []
+                  attributes:
+                    title: Revenue Overview - Q1
+                - id: bookings-overview
+                  type: dashboard
+                  version: WzIsMl0=
+                  managed: false
+                  updated_at: '2024-03-15T08:31:00.000Z'
+                  references: []
+                  attributes:
+                    title: Bookings Overview - EMEA
+  '400':
+    description: Bad request.

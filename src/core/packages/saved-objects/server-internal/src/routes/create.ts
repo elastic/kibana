@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -40,6 +41,13 @@ export const registerCreateRoute = (
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        description: `Create a Kibana saved object with either a caller-provided identifier or a randomly generated one.
+
+WARNING: This API is intended to be removed in a future Elastic Stack version.
+Consider using the import API for your use case.
+
+NOTE: For forward compatibility, include \`coreMigrationVersion\` and \`typeMigrationVersion\` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.`,
+        oasOperationObject: () => path.resolve(__dirname, './create.examples.yaml'),
       },
       security: {
         authz: {
@@ -53,13 +61,32 @@ export const registerCreateRoute = (
           id: schema.maybe(schema.string()),
         }),
         query: schema.object({
-          overwrite: schema.boolean({ defaultValue: false }),
+          overwrite: schema.boolean({
+            defaultValue: false,
+            meta: {
+              description: 'When true, overwrites the destination document if it already exists.',
+            },
+          }),
         }),
         body: schema.object({
           attributes: schema.recordOf(schema.string(), schema.any()),
           migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-          coreMigrationVersion: schema.maybe(schema.string()),
-          typeMigrationVersion: schema.maybe(schema.string()),
+          coreMigrationVersion: schema.maybe(
+            schema.string({
+              meta: {
+                description:
+                  'The Kibana version that last migrated this document. Preserve this field when creating saved objects outside of Kibana to retain forward compatibility.',
+              },
+            })
+          ),
+          typeMigrationVersion: schema.maybe(
+            schema.string({
+              meta: {
+                description:
+                  'The saved object type version that last migrated this document. Preserve this field when creating saved objects outside of Kibana to retain forward compatibility.',
+              },
+            })
+          ),
           references: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -71,7 +98,14 @@ export const registerCreateRoute = (
             )
           ),
           initialNamespaces: schema.maybe(
-            schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })
+            schema.arrayOf(schema.string(), {
+              minSize: 1,
+              maxSize: 100,
+              meta: {
+                description:
+                  'The spaces where the object should be created when the saved object type supports multiple namespaces.',
+              },
+            })
           ),
         }),
       },

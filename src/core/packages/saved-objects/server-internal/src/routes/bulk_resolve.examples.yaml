@@ -1,0 +1,45 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkResolveSavedObjectsRequest:
+          summary: Resolve multiple saved objects, including one using a legacy alias.
+          value:
+            - type: dashboard
+              id: revenue-overview
+            - type: dashboard
+              id: legacy-bookings-overview
+responses:
+  '200':
+    description: Indicates a successful call. Errors for individual objects are returned in the response body.
+    content:
+      application/json:
+        examples:
+          bulkResolveSavedObjectsResponse:
+            summary: The response returns the outcome for each resolved object.
+            value:
+              resolved_objects:
+                - outcome: exactMatch
+                  saved_object:
+                    id: revenue-overview
+                    type: dashboard
+                    version: WzEsMV0=
+                    managed: false
+                    updated_at: '2024-03-15T08:30:00.000Z'
+                    references: []
+                    attributes:
+                      title: Revenue Overview - Q1
+                - outcome: aliasMatch
+                  alias_target_id: bookings-overview
+                  alias_purpose: savedObjectConversion
+                  saved_object:
+                    id: bookings-overview
+                    type: dashboard
+                    version: WzEsMl0=
+                    managed: false
+                    updated_at: '2024-03-14T11:45:00.000Z'
+                    references: []
+                    attributes:
+                      title: Bookings Overview
+  '400':
+    description: Bad request.

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
@@ -41,6 +42,11 @@ export const registerUpdateRoute = (
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        description: `Update the attributes for a Kibana saved object.
+
+WARNING: This API is intended to be removed in a future Elastic Stack version.
+Consider using the import API for your use case.`,
+        oasOperationObject: () => path.resolve(__dirname, './update.examples.yaml'),
       },
       security: {
         authz: {
@@ -55,7 +61,13 @@ export const registerUpdateRoute = (
         }),
         body: schema.object({
           attributes: schema.recordOf(schema.string(), schema.any()),
-          version: schema.maybe(schema.string()),
+          version: schema.maybe(
+            schema.string({
+              meta: {
+                description: 'The opaque version string used for optimistic concurrency control.',
+              },
+            })
+          ),
           references: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -63,16 +75,29 @@ export const registerUpdateRoute = (
                 type: schema.string(),
                 id: schema.string(),
               }),
-              { maxSize: 1000 }
+              {
+                maxSize: 1000,
+                meta: {
+                  description:
+                    'The saved object references to persist alongside the updated attributes.',
+                },
+              }
             )
           ),
-          upsert: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+          upsert: schema.maybe(
+            schema.recordOf(schema.string(), schema.any(), {
+              meta: {
+                description:
+                  'If provided, creates the saved object with these attributes when it does not already exist.',
+              },
+            })
+          ),
         }),
       },
     },
     catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
-        method: 'get',
+        method: 'put',
         path: '/api/saved_objects/{type}/{id}',
         request,
         logger,

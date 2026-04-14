@@ -1,0 +1,33 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkDeleteSavedObjectsRequest:
+          summary: Delete two dashboards in a single request.
+          value:
+            - type: dashboard
+              id: revenue-overview
+            - type: dashboard
+              id: bookings-overview
+responses:
+  '200':
+    description: Indicates a successful call. Errors for individual objects are returned in the response body.
+    content:
+      application/json:
+        examples:
+          bulkDeleteSavedObjectsResponse:
+            summary: The response reports per-object deletion status.
+            value:
+              statuses:
+                - type: dashboard
+                  id: revenue-overview
+                  success: true
+                - type: dashboard
+                  id: bookings-overview
+                  success: false
+                  error:
+                    statusCode: 404
+                    error: Not Found
+                    message: Saved object [dashboard/bookings-overview] not found
+  '400':
+    description: Bad request.

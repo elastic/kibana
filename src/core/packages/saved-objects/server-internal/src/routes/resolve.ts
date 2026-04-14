@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
@@ -36,8 +37,12 @@ export const registerResolveRoute = (
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
-        description: `Retrieve a single Kibana saved object by ID, using any legacy URL alias if it exists.
-        Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved with the resolve API using either its new ID or its old ID.`,
+        description: `Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists.
+Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.
+
+WARNING: This API is intended to be removed in a future Elastic Stack version.
+Consider using the export API for your use case.`,
+        oasOperationObject: () => path.resolve(__dirname, './resolve.examples.yaml'),
       },
       security: {
         authz: {
