@@ -382,12 +382,11 @@ actions:
                     "x": 0,
                     "y": 0,
                     "w": 12,
-                    "h": 8
+                    "h": 5
                   },
                   "type": "vis",
                   "config": {
                     "type": "metric",
-                    "title": "Total requests",
                     "data_source": {
                       "type": "data_view_spec",
                       "index_pattern": "kibana_sample_data_logs",
@@ -406,12 +405,11 @@ actions:
                     "x": 12,
                     "y": 0,
                     "w": 12,
-                    "h": 8
+                    "h": 5
                   },
                   "type": "vis",
                   "config": {
                     "type": "metric",
-                    "title": "Average response size",
                     "data_source": {
                       "type": "data_view_spec",
                       "index_pattern": "kibana_sample_data_logs",
@@ -470,12 +468,11 @@ actions:
                     "x": 0,
                     "y": 0,
                     "w": 12,
-                    "h": 8
+                    "h": 5
                   },
                   "type": "vis",
                   "config": {
                     "type": "metric",
-                    "title": "Total requests",
                     "data_source": {
                       "type": "data_view_spec",
                       "index_pattern": "kibana_sample_data_logs",
@@ -494,12 +491,11 @@ actions:
                     "x": 12,
                     "y": 0,
                     "w": 12,
-                    "h": 8
+                    "h": 5
                   },
                   "type": "vis",
                   "config": {
                     "type": "metric",
-                    "title": "Average response size",
                     "data_source": {
                       "type": "data_view_spec",
                       "index_pattern": "kibana_sample_data_logs",
@@ -584,7 +580,7 @@ actions:
                         "x": 0,
                         "y": 0,
                         "w": 12,
-                        "h": 8
+                        "h": 5
                       },
                       "type": "vis",
                       "config": {
@@ -608,7 +604,7 @@ actions:
                         "x": 12,
                         "y": 0,
                         "w": 12,
-                        "h": 8
+                        "h": 5
                       },
                       "type": "vis",
                       "config": {
@@ -647,6 +643,7 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "xy",
+                        "title": "Requests over time",
                         "layers": [
                           {
                             "type": "line",
@@ -678,6 +675,7 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "xy",
+                        "title": "Requests over time (ES|QL)",
                         "layers": [
                           {
                             "type": "line",
@@ -736,7 +734,7 @@ actions:
                         "x": 0,
                         "y": 0,
                         "w": 12,
-                        "h": 8
+                        "h": 5
                       },
                       "type": "vis",
                       "config": {
@@ -760,7 +758,7 @@ actions:
                         "x": 12,
                         "y": 0,
                         "w": 12,
-                        "h": 8
+                        "h": 5
                       },
                       "type": "vis",
                       "config": {
@@ -799,6 +797,7 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "xy",
+                        "title": "Requests over time",
                         "layers": [
                           {
                             "type": "line",
@@ -830,6 +829,7 @@ actions:
                       "type": "vis",
                       "config": {
                         "type": "xy",
+                        "title": "Requests over time (ES|QL)",
                         "layers": [
                           {
                             "type": "line",
@@ -1077,8 +1077,14 @@ actions:
   # PUT /api/dashboards/{id} — examples and code samples
   # ──────────────────────────────────────────────
   - target: "$.paths['/api/dashboards/{id}']['put']"
-    description: Add examples and code samples to update endpoint
+    description: Add description note and examples to update endpoint
     update:
+      description: >-
+        Creates a new dashboard with the given ID if none exists, or replaces the complete state of an
+        existing one. This is a full replacement, not a partial update — any panels not included in the
+        request body are permanently removed from the dashboard. To make targeted changes, retrieve the
+        current state first with GET /api/dashboards/{id}, apply your changes, and submit the full
+        updated object.
       responses:
         '200':
           content:
@@ -1276,12 +1282,11 @@ actions:
                     "x": 0,
                     "y": 0,
                     "w": 12,
-                    "h": 8
+                    "h": 5
                   },
                   "type": "vis",
                   "config": {
                     "type": "metric",
-                    "title": "Total requests",
                     "data_source": {
                       "type": "data_view_spec",
                       "index_pattern": "kibana_sample_data_logs",
@@ -1300,12 +1305,11 @@ actions:
                     "x": 12,
                     "y": 0,
                     "w": 12,
-                    "h": 8
+                    "h": 5
                   },
                   "type": "vis",
                   "config": {
                     "type": "metric",
-                    "title": "Average response size",
                     "data_source": {
                       "type": "data_view_spec",
                       "index_pattern": "kibana_sample_data_logs",
@@ -1354,13 +1358,12 @@ actions:
                   "grid": {
                     "x": 24,
                     "y": 8,
-                    "w": 24,
-                    "h": 10
+                    "w": 12,
+                    "h": 5
                   },
                   "type": "vis",
                   "config": {
                     "type": "metric",
-                    "title": "Unique visitors",
                     "data_source": {
                       "type": "data_view_spec",
                       "index_pattern": "kibana_sample_data_logs",
@@ -1389,12 +1392,11 @@ actions:
                     "x": 0,
                     "y": 0,
                     "w": 12,
-                    "h": 8
+                    "h": 5
                   },
                   "type": "vis",
                   "config": {
                     "type": "metric",
-                    "title": "Total requests",
                     "data_source": {
                       "type": "data_view_spec",
                       "index_pattern": "kibana_sample_data_logs",
@@ -1413,12 +1415,11 @@ actions:
                     "x": 12,
                     "y": 0,
                     "w": 12,
-                    "h": 8
+                    "h": 5
                   },
                   "type": "vis",
                   "config": {
                     "type": "metric",
-                    "title": "Average response size",
                     "data_source": {
                       "type": "data_view_spec",
                       "index_pattern": "kibana_sample_data_logs",
@@ -1467,13 +1468,12 @@ actions:
                   "grid": {
                     "x": 24,
                     "y": 8,
-                    "w": 24,
-                    "h": 10
+                    "w": 12,
+                    "h": 5
                   },
                   "type": "vis",
                   "config": {
                     "type": "metric",
-                    "title": "Unique visitors",
                     "data_source": {
                       "type": "data_view_spec",
                       "index_pattern": "kibana_sample_data_logs",
