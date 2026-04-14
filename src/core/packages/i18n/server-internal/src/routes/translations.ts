@@ -71,6 +71,15 @@ export const registerTranslationsRoute = ({
             });
           }
 
+          // Validate the translation hash if provided in the URL
+          const requestedHash = req.params.translationHash;
+          const expectedHash = translationHashes[req.params.locale];
+          if (requestedHash && expectedHash && requestedHash !== expectedHash) {
+            return res.notFound({
+              body: `Stale translation hash for locale: ${req.params.locale}`,
+            });
+          }
+
           let cached = translationCaches.get(requestedLocale);
           if (!cached) {
             let translations: string;
