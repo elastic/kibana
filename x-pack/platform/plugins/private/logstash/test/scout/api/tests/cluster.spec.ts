@@ -14,7 +14,7 @@ import { apiTest, testData } from '../fixtures';
 // The built-in `viewer` Kibana role has no ES cluster privileges and produces a non-403 error
 // that bypasses the route's catch block, resulting in a 500. A custom role with `monitor` is
 // the minimum required privilege.
-apiTest.describe('GET /api/logstash/cluster', { tag: tags.stateful.all }, () => {
+apiTest.describe('GET /api/logstash/cluster', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {

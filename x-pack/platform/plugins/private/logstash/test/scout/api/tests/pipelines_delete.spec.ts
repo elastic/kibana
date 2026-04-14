@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-apiTest.describe('POST /api/logstash/pipelines/delete', { tag: tags.stateful.all }, () => {
+apiTest.describe('POST /api/logstash/pipelines/delete', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, apiClient }) => {

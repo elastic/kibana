@@ -10,13 +10,16 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-apiTest.describe('GET /api/logstash/pipelines', { tag: tags.stateful.all }, () => {
+apiTest.describe('GET /api/logstash/pipelines', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, esClient }) => {
     credentials = await requestAuth.getApiKeyForCustomRole(testData.LOGSTASH_MANAGER_ROLE);
 
-    const PIPELINE_METADATA = { type: 'logstash_pipeline', version: 1 };
+    // ES accepts an empty settings object at runtime; the TS type is overly strict
+    type PipelineSettings = import('@elastic/elasticsearch').estypes.LogstashPipelineSettings;
+    const PIPELINE_METADATA = { type: 'logstash_pipeline', version: '1' };
+    const PIPELINE_SETTINGS = {} as unknown as PipelineSettings;
 
     await esClient.logstash.putPipeline({
       id: testData.PIPELINE_IDS.TWEETS_AND_BEATS,
@@ -25,7 +28,7 @@ apiTest.describe('GET /api/logstash/pipelines', { tag: tags.stateful.all }, () =
         last_modified: '2017-08-02T18:59:07.724Z',
         pipeline: testData.EXPECTED_TWEETS_AND_BEATS_PIPELINE.pipeline,
         pipeline_metadata: PIPELINE_METADATA,
-        pipeline_settings: {},
+        pipeline_settings: PIPELINE_SETTINGS,
         username: testData.EXPECTED_TWEETS_AND_BEATS_PIPELINE.username,
       },
     });
@@ -38,7 +41,7 @@ apiTest.describe('GET /api/logstash/pipelines', { tag: tags.stateful.all }, () =
           last_modified: '2017-08-02T18:57:32.907Z',
           pipeline: '# empty pipeline',
           pipeline_metadata: PIPELINE_METADATA,
-          pipeline_settings: {},
+          pipeline_settings: PIPELINE_SETTINGS,
           username: 'elastic',
         },
       });
