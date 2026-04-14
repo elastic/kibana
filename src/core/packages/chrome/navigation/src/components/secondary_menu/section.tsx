@@ -62,8 +62,8 @@ export const SecondaryMenuSectionComponent = ({
 
   const labelStyles = css`
     font-size: ${euiTheme.size.m};
-    color: ${euiTheme.colors.textHeading};
-    font-weight: ${euiTheme.font.weight.bold};
+    color: ${euiTheme.colors.textSubdued};
+    font-weight: ${euiTheme.font.weight.regular};
     padding: ${euiTheme.size.xs}
       ${inSidePanel ? euiTheme.size.s : `${SECONDARY_MENU_POPOVER_EDGE_PADDING_PX}px`};
     display: block;

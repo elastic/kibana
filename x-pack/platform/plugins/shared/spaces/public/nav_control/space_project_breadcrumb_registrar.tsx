@@ -53,10 +53,14 @@ export function SpaceProjectBreadcrumbRegistrar({
   const spaceBreadcrumbLabelCss = useMemo(
     () => css`
       min-width: 0;
-      color: ${euiTheme.colors.textSubdued};
+      color: ${euiTheme.colors.textParagraph};
       font-weight: ${euiTheme.font.weight.regular};
+
+      .euiIcon {
+        color: inherit;
+      }
     `,
-    [euiTheme.colors.textSubdued, euiTheme.font.weight.regular]
+    [euiTheme.colors.textParagraph, euiTheme.font.weight.regular]
   );
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const { data, isLoading } = useSpaces(spacesManager);

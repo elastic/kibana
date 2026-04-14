@@ -73,8 +73,8 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
 
     const buttonStyles = css`
       --menu-item-text-color: ${isHighlighted
-        ? euiTheme.colors.textParagraph
-        : euiTheme.colors.textSubdued};
+        ? euiTheme.colors.textPrimary
+        : euiTheme.colors.textParagraph};
       --high-contrast-hover-indicator-color: var(--menu-item-text-color);
       ${useHighContrastModeStyles(`.${iconWrapperClassName}`)};
 
@@ -101,7 +101,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         width: ${euiTheme.size.xl};
         border-radius: ${euiTheme.border.radius.medium};
         background-color: ${isHighlighted
-          ? euiTheme.colors.backgroundLightText
+          ? euiTheme.colors.backgroundLightPrimary
           : euiTheme.colors.backgroundTransparent};
         z-index: 1;
       }
@@ -116,15 +116,19 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       }
 
       &:focus-visible .${iconWrapperClassName} {
-        border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.textParagraph};
+        border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
       }
 
       &:hover .${iconWrapperClassName}::before {
-        background-color: ${euiTheme.components.buttons.backgroundTextHover};
+        background-color: ${isHighlighted
+          ? euiTheme.components.buttons.backgroundPrimaryHover
+          : euiTheme.components.buttons.backgroundTextHover};
       }
 
       &:active .${iconWrapperClassName}::before {
-        background-color: ${euiTheme.components.buttons.backgroundTextActive};
+        background-color: ${isHighlighted
+          ? euiTheme.components.buttons.backgroundPrimaryActive
+          : euiTheme.components.buttons.backgroundTextActive};
       }
     `;
 

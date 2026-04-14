@@ -3,7 +3,7 @@
 exports[`Both modes should render the side navigation 1`] = `
 <div>
   <div
-    class="css-y5yq76-navigationWrapperStyles"
+    class="css-3c7eve-navigationWrapperStyles"
     data-test-subj="kbnChromeNav-root"
     id="kbnChromeNav-root"
   >
@@ -181,7 +181,7 @@ exports[`Both modes should render the side navigation 1`] = `
       </p>
       <footer
         aria-label="Side navigation"
-        class="css-1iluzpd-getFooterWrapperStyles"
+        class="css-dvbcn9-getFooterWrapperStyles"
         data-test-subj="kbnChromeNav-footer"
       >
         <div

@@ -385,7 +385,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         min-inline-size: 280px !important;
         max-inline-size: 280px !important;
         background-color: transparent !important;
-        color: ${euiTheme.colors.textSubdued} !important;
+        color: ${euiTheme.colors.textParagraph} !important;
         font-weight: ${euiTheme.font.weight.semiBold} !important;
         border: ${euiTheme.border.width.thin} solid ${euiTheme.components.forms.border} !important;
         /* Figma: frame radius = space xs → 4px */
@@ -403,6 +403,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         justify-content: flex-start !important;
         inline-size: 100% !important;
         gap: 6px;
+        color: ${euiTheme.colors.textParagraph} !important;
+      }
+
+      &&& .euiIcon,
+      &&& .euiIcon svg {
+        color: ${euiTheme.colors.textParagraph} !important;
       }
 
       &&& .kbnSearchBarProjectRevealLabel {
@@ -413,6 +419,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         text-overflow: ellipsis;
         white-space: nowrap;
         font-weight: ${euiTheme.font.weight.regular} !important;
+        color: ${euiTheme.colors.textParagraph} !important;
       }
 
       /* EuiButton base+text uses an overlay ::before for hover/active; remove so background never changes */

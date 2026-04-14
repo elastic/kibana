@@ -11,7 +11,7 @@ import React, { useMemo, useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
 import {
@@ -30,10 +30,6 @@ import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
-
-const navigationWrapperStyles = css`
-  display: flex;
-`;
 
 export interface NavigationProps {
   /**
@@ -102,7 +98,14 @@ export const Navigation = ({
   const moreMenuTriggerTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-moreMenuTrigger`;
 
   const { hideInSideNav, ...logoForSideNav } = logo;
-  const { euiTheme } = useEuiTheme();
+
+  const navigationWrapperStyles = useMemo(
+    () => css`
+      display: flex;
+      box-sizing: border-box;
+    `,
+    []
+  );
 
   const sideNavRailAndLogoStackStyles = useMemo(
     () => css`

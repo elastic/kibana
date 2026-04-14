@@ -11,6 +11,7 @@ import React, { type ReactNode, useMemo } from 'react';
 import {
   EuiScreenReaderOnly,
   EuiSplitPanel,
+  euiShadow,
   useEuiTheme,
   useGeneratedHtmlId,
   type UseEuiTheme,
@@ -20,7 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 import type { MenuItem } from '../../../types';
-import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
+import {
+  SIDE_PANEL_TRAILING_GUTTER_PX,
+  SIDE_PANEL_WIDTH,
+} from '../../hooks/use_layout_width';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
@@ -28,18 +32,20 @@ import { useScroll } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { getHighContrastBorder } from '../../hooks/use_high_contrast_mode_styles';
 
+/** Matches project `LayoutApplication` root (`#app-main-scroll`): plain surface, radius, outline, xs shadow. */
 const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
   width: ${SIDE_PANEL_WIDTH}px;
+  margin-inline-end: ${SIDE_PANEL_TRAILING_GUTTER_PX}px;
   margin-bottom: ${layoutVar('application.marginBottom', '0px')};
-  background-color: transparent;
-  box-shadow: none;
-
-  // use outline for consistency with the application layout style
+  overflow: hidden;
+  background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+  border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
   outline: ${getHighContrastBorder(euiThemeContext)};
+  ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
 `;
 
 export interface SidePanelIds {
@@ -80,10 +86,8 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
     () => css`
       ${scrollStyles}
       box-sizing: border-box;
-      border-left: ${euiThemeContext.euiTheme.border.width.thin} solid
-        ${euiThemeContext.euiTheme.colors.borderBaseSubdued};
     `,
-    [euiThemeContext, scrollStyles]
+    [scrollStyles]
   );
 
   const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;

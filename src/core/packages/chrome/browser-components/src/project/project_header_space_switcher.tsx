@@ -13,7 +13,7 @@ import React, { useCallback, useState } from 'react';
 
 import { useSpaceSwitcherBreadcrumb } from '../shared/chrome_hooks';
 
-/** Match {@link header.tsx} compact header controls. */
+/** Match {@link header.tsx} compact header controls (32px hit target). */
 const PROJECT_HEADER_COMPACT_CONTROL_PX = 32;
 
 export const ProjectHeaderSpaceSwitcher = React.memo(() => {
@@ -37,19 +37,25 @@ export const ProjectHeaderSpaceSwitcher = React.memo(() => {
       padding-inline: ${euiTheme.size.s};
       border-radius: ${euiTheme.border.radius.small};
       line-height: 1;
-      color: ${euiTheme.colors.textSubdued};
+      color: ${euiTheme.colors.textParagraph};
       font-weight: ${euiTheme.font.weight.regular};
     }
 
     &&& .euiButtonEmpty__text,
-    &&& .euiIcon {
+    &&& .euiButtonEmpty__content,
+    &&& [class*='euiButtonDisplayContent'] {
+      color: ${euiTheme.colors.textParagraph};
+    }
+
+    &&& .euiIcon,
+    &&& .euiIcon svg {
       color: inherit;
     }
 
     &&&:hover,
     &&&:focus {
       text-decoration: none !important;
-      color: ${euiTheme.colors.textSubdued};
+      color: ${euiTheme.colors.textParagraph};
     }
 
     &&&:hover {

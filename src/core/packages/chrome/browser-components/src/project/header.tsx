@@ -62,6 +62,28 @@ const PROJECT_HEADER_SEARCH_MULTIPLE_TOTAL = 134;
 const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => {
   const ruleHeightPx = `${PROJECT_HEADER_RULE_PX}px`;
 
+  /** After logo / menu rail: 24px vertical rule, centered in the first bar (matches navcontrols + breadcrumb separators). */
+  const leadingSeparatorAfterLogo = css`
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    margin-inline-start: 0;
+    margin-inline-end: ${size.s};
+    block-size: 100%;
+    min-block-size: ${PROJECT_HEADER_FIRST_BAR_HEIGHT_PX}px;
+    &:after {
+      background: ${colors.borderBaseSubdued};
+      content: '';
+      flex-shrink: 0;
+      margin-block: 0;
+      margin-inline: 0;
+      block-size: ${ruleHeightPx};
+      inline-size: 1px;
+      transform: none;
+    }
+  `;
+
   return {
   logoHeaderSectionItem: css`
     display: flex;
@@ -147,54 +169,8 @@ const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => {
       }
     }
   `,
-  /**
-   * Separator after logo / menu rail when the nav is expanded (full label rail): full first-bar height.
-   */
-  leadingHeaderSeparatorAfterLogo: css`
-    box-sizing: border-box;
-    display: flex;
-    align-items: stretch;
-    align-self: stretch;
-    margin-inline-start: 0;
-    margin-inline-end: ${size.s};
-    block-size: 100%;
-    min-block-size: ${PROJECT_HEADER_FIRST_BAR_HEIGHT_PX}px;
-    &:after {
-      background: ${colors.borderBaseSubdued};
-      content: '';
-      flex-shrink: 0;
-      margin-block: 0;
-      margin-inline: 0;
-      align-self: stretch;
-      block-size: 100%;
-      min-block-size: ${PROJECT_HEADER_FIRST_BAR_HEIGHT_PX}px;
-      inline-size: 1px;
-      transform: none;
-    }
-  `,
-  /**
-   * Collapsed rail, hidden nav, or other non-expanded widths: 24px rule, vertically centered (matches navcontrols separator).
-   */
-  leadingHeaderSeparatorAfterLogoCompact: css`
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    align-self: stretch;
-    margin-inline-start: 0;
-    margin-inline-end: ${size.s};
-    block-size: 100%;
-    min-block-size: ${PROJECT_HEADER_FIRST_BAR_HEIGHT_PX}px;
-    &:after {
-      background: ${colors.borderBaseSubdued};
-      content: '';
-      flex-shrink: 0;
-      margin-block: 0;
-      margin-inline: 0;
-      block-size: ${ruleHeightPx};
-      inline-size: 1px;
-      transform: none;
-    }
-  `,
+  leadingHeaderSeparatorAfterLogo: leadingSeparatorAfterLogo,
+  leadingHeaderSeparatorAfterLogoCompact: leadingSeparatorAfterLogo,
   };
 };
 
@@ -366,7 +342,7 @@ export const ProjectHeader = React.memo(() => {
     []
   );
 
-  /** Match {@link ProjectHeaderSpaceSwitcher} trigger: subdued icon + label, 32px row, vertical center. */
+  /** Match {@link ProjectHeaderSpaceSwitcher} trigger: paragraph icon + label, 32px row, vertical center. */
   const searchMultipleTriggerCss = useMemo(
     () => css`
       &&& {
@@ -381,13 +357,13 @@ export const ProjectHeader = React.memo(() => {
         padding-inline: ${euiTheme.size.s};
         border-radius: ${euiTheme.border.radius.small};
         line-height: 1;
-        color: ${euiTheme.colors.textSubdued};
+        color: ${euiTheme.colors.textParagraph};
         font-weight: ${euiTheme.font.weight.regular};
       }
 
       &&& .euiButtonEmpty__content,
       &&& .euiButtonEmpty__text {
-        color: ${euiTheme.colors.textSubdued};
+        color: ${euiTheme.colors.textParagraph};
       }
 
       &&& .euiIcon {
@@ -395,12 +371,12 @@ export const ProjectHeader = React.memo(() => {
       }
 
       &&& .projectHeaderSearchMultiple-countSuffix {
-        color: ${euiTheme.colors.textSubdued};
+        color: ${euiTheme.colors.textParagraph};
       }
 
       &&&:hover .projectHeaderSearchMultiple-countSuffix,
       &&&:focus .projectHeaderSearchMultiple-countSuffix {
-        color: ${euiTheme.colors.textSubdued};
+        color: ${euiTheme.colors.textParagraph};
       }
 
       &&& .euiIcon,
@@ -412,7 +388,7 @@ export const ProjectHeader = React.memo(() => {
       &&&:hover,
       &&&:focus {
         text-decoration: none !important;
-        color: ${euiTheme.colors.textSubdued};
+        color: ${euiTheme.colors.textParagraph};
       }
 
       &&&:hover {

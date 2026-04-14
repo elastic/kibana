@@ -15,7 +15,6 @@ import { css } from '@emotion/react';
 
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
-import { useSecondaryMenuSidePanel } from './side_panel_context';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 import {
@@ -57,7 +56,6 @@ export const SecondaryMenuItemComponent = ({
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
-  const inSidePanel = useSecondaryMenuSidePanel();
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
   const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
@@ -69,10 +67,9 @@ export const SecondaryMenuItemComponent = ({
     ...(isExternal && { target: '_blank' }),
   };
 
-  const labelColor =
-    isHighlighted || !inSidePanel
-      ? euiTheme.colors.textParagraph
-      : euiTheme.colors.textSubdued;
+  const labelColor = isHighlighted
+    ? euiTheme.colors.textPrimary
+    : euiTheme.colors.textParagraph;
 
   const buttonStyles = css`
     font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
@@ -103,30 +100,30 @@ export const SecondaryMenuItemComponent = ({
     }
 
     svg:not(.euiBetaBadge__icon) {
-      color: ${iconSide === 'right' && inSidePanel ? euiTheme.colors.textDisabled : 'inherit'};
+      color: ${isHighlighted ? euiTheme.colors.textPrimary : 'inherit'};
     }
 
     --high-contrast-hover-indicator-color: ${labelColor};
 
     ${isHighlighted
       ? css`
-          /* Match primary rail MenuItem: filled chip, no default EUI outline/shadow/border */
+          /* Match primary rail MenuItem: primary chip, no default EUI outline/shadow/border */
           && {
             outline: none !important;
             box-shadow: none !important;
             border: none !important;
-            background-color: ${euiTheme.colors.backgroundLightText} !important;
+            background-color: ${euiTheme.colors.backgroundLightPrimary} !important;
           }
           &&:hover:not(:disabled) {
-            background-color: ${euiTheme.components.buttons.backgroundTextHover} !important;
+            background-color: ${euiTheme.components.buttons.backgroundPrimaryHover} !important;
           }
           &&:active:not(:disabled) {
-            background-color: ${euiTheme.components.buttons.backgroundTextActive} !important;
+            background-color: ${euiTheme.components.buttons.backgroundPrimaryActive} !important;
           }
           &&:focus-visible {
             outline: none !important;
             box-shadow: none !important;
-            border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.textParagraph} !important;
+            border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary} !important;
           }
         `
       : undefined}

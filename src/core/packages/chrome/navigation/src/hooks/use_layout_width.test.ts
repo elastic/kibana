@@ -12,6 +12,7 @@ import { renderHook } from '@testing-library/react';
 import {
   COLLAPSED_WIDTH,
   EXPANDED_WIDTH,
+  SIDE_PANEL_TRAILING_GUTTER_PX,
   SIDE_PANEL_WIDTH,
   getSideNavRailWidthPx,
   useLayoutWidth,
@@ -31,7 +32,10 @@ describe('useLayoutWidth', () => {
 
     renderHook(() => useLayoutWidth({ isCollapsed: false, isSidePanelOpen: true, setWidth }));
 
-    expect(setWidth).toHaveBeenNthCalledWith(1, EXPANDED_WIDTH + SIDE_PANEL_WIDTH);
+    expect(setWidth).toHaveBeenNthCalledWith(
+      1,
+      EXPANDED_WIDTH + SIDE_PANEL_WIDTH + SIDE_PANEL_TRAILING_GUTTER_PX
+    );
   });
 
   it('updates when dependencies change', () => {
@@ -48,7 +52,10 @@ describe('useLayoutWidth', () => {
 
     rerender({ isCollapsed: true, isSidePanelOpen: true });
 
-    expect(setWidth).toHaveBeenNthCalledWith(1, COLLAPSED_WIDTH + SIDE_PANEL_WIDTH);
+    expect(setWidth).toHaveBeenNthCalledWith(
+      1,
+      COLLAPSED_WIDTH + SIDE_PANEL_WIDTH + SIDE_PANEL_TRAILING_GUTTER_PX
+    );
   });
 });
 
@@ -58,9 +65,13 @@ describe('getSideNavRailWidthPx', () => {
     expect(getSideNavRailWidthPx(EXPANDED_WIDTH)).toBe(EXPANDED_WIDTH);
   });
 
-  it('strips the flyout width when the side panel is open', () => {
-    expect(getSideNavRailWidthPx(COLLAPSED_WIDTH + SIDE_PANEL_WIDTH)).toBe(COLLAPSED_WIDTH);
-    expect(getSideNavRailWidthPx(EXPANDED_WIDTH + SIDE_PANEL_WIDTH)).toBe(EXPANDED_WIDTH);
+  it('strips the flyout width and trailing gutter when the side panel is open', () => {
+    expect(
+      getSideNavRailWidthPx(COLLAPSED_WIDTH + SIDE_PANEL_WIDTH + SIDE_PANEL_TRAILING_GUTTER_PX)
+    ).toBe(COLLAPSED_WIDTH);
+    expect(
+      getSideNavRailWidthPx(EXPANDED_WIDTH + SIDE_PANEL_WIDTH + SIDE_PANEL_TRAILING_GUTTER_PX)
+    ).toBe(EXPANDED_WIDTH);
   });
 
   it('passes through unknown totals (e.g. initial 0)', () => {

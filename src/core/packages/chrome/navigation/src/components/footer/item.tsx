@@ -63,27 +63,27 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
 
     const buttonStyles = css`
       --high-contrast-hover-indicator-color: ${isHighlighted
-        ? euiTheme.colors.textParagraph
-        : euiTheme.colors.textSubdued};
-      ${!isHighlighted && `color: ${euiTheme.colors.textSubdued};`}
+        ? euiTheme.colors.textPrimary
+        : euiTheme.colors.textParagraph};
+      ${!isHighlighted && `color: ${euiTheme.colors.textParagraph};`}
       ${isHighlighted &&
       css`
-        color: ${euiTheme.colors.textParagraph};
-        background-color: ${euiTheme.colors.backgroundLightText};
+        color: ${euiTheme.colors.textPrimary};
+        background-color: ${euiTheme.colors.backgroundLightPrimary};
         /* Match primary rail MenuItem chip: no EUI outline / shadow / plain border */
         border: none;
         outline: none !important;
         box-shadow: none !important;
         &:hover {
-          background-color: ${euiTheme.components.buttons.backgroundTextHover};
+          background-color: ${euiTheme.components.buttons.backgroundPrimaryHover};
         }
         &:active {
-          background-color: ${euiTheme.components.buttons.backgroundTextActive};
+          background-color: ${euiTheme.components.buttons.backgroundPrimaryActive};
         }
         &:focus-visible {
           outline: none !important;
           box-shadow: none !important;
-          border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.textParagraph};
+          border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
         }
       `}
       ${highContrastModeStyles}
