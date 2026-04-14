@@ -1200,6 +1200,7 @@ x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/r
 x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture @elastic/response-ops
 x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
+x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture @elastic/search-kibana
 x-pack/platform/test/security_api_integration/packages/helpers @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/features_provider @elastic/kibana-security
@@ -3235,7 +3236,7 @@ oas_docs/linters                              @elastic/experience-docs
 oas_docs/overlays                             @elastic/experience-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/experience-docs
 oas_docs/kibana.info.yaml                     @elastic/experience-docs
-oas_docs/output                               @elastic/experience-docs
+oas_docs/output                               @elastic/ski-docs
 
 # Documentation settings files
 docs/settings-gen                             @elastic/experience-docs
