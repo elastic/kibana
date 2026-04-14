@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useCallback, useLayoutEffect, useRef } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { BehaviorSubject } from 'rxjs';
 import { SHORT_CONTAINER_QUERY, FOOTER_HELP_TEXT, MarkdownFooter } from './markdown_footer';
@@ -92,17 +92,19 @@ export const MarkdownEditor = ({
 }: MarkdownEditorProps) => {
   const styles = useMemoCss(componentStyles);
   const [isPreview, settings] = useBatchedPublishingSubjects(isPreview$, settings$);
-  const [value, onChange] = React.useState(content);
+  const [value, onChange] = useState(content);
 
   const editorRef = useRef<EuiMarkdownEditorRef>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
   useCaretPosition(editorRef, !isPreview);
-  const isSaveable = Boolean(value === '' || value !== content);
+  const [haveSettingsChanged, setHaveSettingsChanged] = useState(false);
+  const isSaveable = Boolean(value === '' || value !== content || haveSettingsChanged);
 
   const updateSettings = useCallback(
     (nextSettings: Partial<MarkdownSettingsState>) => {
       settings$.next({ ...settings, ...nextSettings } as MarkdownSettingsState);
+      setHaveSettingsChanged(true);
     },
     [settings, settings$]
   );

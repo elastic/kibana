@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { MarkdownEditorProps } from './markdown_editor';
 import { MarkdownEditor } from './markdown_editor';
@@ -69,6 +69,19 @@ it('calls onSave with current value when Apply clicked', async () => {
   await userEvent.type(textarea, ' Added Paragraph');
   await userEvent.click(screen.getByRole('button', { name: /Apply/i }));
   expect(onSave).toHaveBeenCalledWith(testedContent + ' Added Paragraph');
+});
+
+it('enables Apply when only the open links in new tab setting changes', async () => {
+  renderMarkdownEditor();
+
+  expect(screen.getByRole('button', { name: /Apply/i })).toBeDisabled();
+
+  await userEvent.click(screen.getByRole('button', { name: /Settings/i }));
+  // Use fireEvent instead of userEvent to bypass pointer events check. Waiting
+  // for the EUI CSS animation to end before continuing the test is potentially flaky.
+  fireEvent.click(await screen.findByTestId('openLinksInNewTabSwitch'));
+
+  expect(screen.getByRole('button', { name: /Apply/i })).toBeEnabled();
 });
 
 // this is a guard to not accidentally change the implementation so we can keep the scroll position for editor when switching between editor/preview mode

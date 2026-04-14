@@ -69,6 +69,7 @@ export function MarkdownEditorSettingsPopover({ settings, updateSettings }: Prop
         color="primary"
         checked={Boolean(openLinksInNewTab)}
         onChange={(e) => setOpenLinksInNewTab(e.target.checked)}
+        data-test-subj="openLinksInNewTabSwitch"
       />
     </EuiPopover>
   );
