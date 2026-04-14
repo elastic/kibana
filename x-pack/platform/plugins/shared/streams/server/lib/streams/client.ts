@@ -1018,7 +1018,7 @@ export class StreamsClient {
     if (this.dependencies.getQueryClient) {
       const queryClient = await this.dependencies.getQueryClient();
       ops.push(
-        this.dependencies.queryClient.syncQueries(
+        queryClient.syncQueries(
           definition,
           queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
         )
