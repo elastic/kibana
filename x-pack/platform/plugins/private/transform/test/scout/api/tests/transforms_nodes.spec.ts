@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { GetTransformNodesResponseSchema } from '../../../../common';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
-apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.stateful.all }, () => {
   apiTest(
     'should return the number of available transform nodes for a transform manager',
     async ({ apiClient, samlAuth }) => {
@@ -27,7 +28,7 @@ apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }
 
       expect(statusCode).toBe(200);
 
-      expect(nodesResponse.count).toBeGreaterThanOrEqual(1);
+      expect(nodesResponse.count).toBeGreaterThan(0);
     }
   );
 
@@ -47,7 +48,7 @@ apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }
 
       expect(statusCode).toBe(200);
 
-      expect(nodesResponse.count).toBeGreaterThanOrEqual(1);
+      expect(nodesResponse.count).toBeGreaterThan(0);
     }
   );
 

@@ -225,9 +225,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": [
-                  "Get current user profile operation parameters."
-                ],
+                "description": [],
                 "signature": [
                   "UserProfileGetCurrentParams",
                   " | undefined"

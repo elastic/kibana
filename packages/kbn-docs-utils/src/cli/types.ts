@@ -17,6 +17,7 @@ import type {
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
   AdoptionTrackedAPIsByPlugin,
+  UnnamedExportsByPlugin,
   ApiStats,
   PluginMetaInfo,
 } from '../types';
@@ -37,6 +38,8 @@ export interface CliFlags {
   plugin?: string | string[];
   /** Package filter: single package ID or array of package IDs (id from kibana.jsonc). */
   package?: string | string[];
+  /** Whether to write stats to a flat JSON file. */
+  write?: boolean;
 }
 
 /**
@@ -51,6 +54,8 @@ export interface CliOptions {
   pluginFilter?: string[];
   /** Package filter IDs (id from kibana.jsonc, e.g., @kbn/package-name). */
   packageFilter?: string[];
+  /** Whether to write stats to a flat JSON file. */
+  writeStats?: boolean;
 }
 
 /**
@@ -71,8 +76,10 @@ export interface CliContext {
  * Result from setup_project task.
  */
 export interface SetupProjectResult {
-  /** Discovered plugins and packages. */
+  /** Plugins/packages to analyze (may be filtered via --plugin/--package). */
   plugins: PluginOrPackage[];
+  /** All discovered plugins/packages (for cross-reference resolution). */
+  allPlugins: PluginOrPackage[];
   /** File paths grouped by package. */
   pathsByPlugin: Map<PluginOrPackage, string[]>;
   /** TypeScript project instance. */
@@ -95,6 +102,8 @@ export interface BuildApiMapResult {
   unreferencedDeprecations: UnreferencedDeprecationsByPlugin;
   /** Adoption-tracked APIs. */
   adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
+  /** Unnamed exports found during API collection. */
+  unnamedExports: UnnamedExportsByPlugin;
 }
 
 /**

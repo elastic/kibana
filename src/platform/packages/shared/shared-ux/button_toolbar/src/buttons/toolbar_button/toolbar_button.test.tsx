@@ -32,7 +32,7 @@ describe('<ToolbarButton />', () => {
       const component = mountWithIntl(
         <ToolbarButton
           type="primary"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           label="Create chart"
           onClick={() => 'click'}
         />
@@ -58,7 +58,7 @@ describe('<ToolbarButton />', () => {
   describe('iconButton', () => {
     test('is rendered - default', () => {
       const component = mountWithIntl(
-        <ToolbarButton as="iconButton" iconType="launch" onClick={jest.fn()} />
+        <ToolbarButton as="iconButton" iconType="rocket" onClick={jest.fn()} />
       );
       expect(component.render()).toMatchSnapshot();
     });

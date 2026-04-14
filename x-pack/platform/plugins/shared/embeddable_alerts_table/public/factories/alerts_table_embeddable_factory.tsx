@@ -19,7 +19,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
@@ -51,13 +51,13 @@ export const getAlertsTableEmbeddableFactory = (
     const initialTableConfig = initialState.tableConfig;
     const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(initialTableConfig);
 
-    const serializeState = () => ({
+    const serializeState = (): EmbeddableAlertsTableSerializedState => ({
       ...titleManager.getLatestState(),
       ...timeRangeManager.getLatestState(),
       tableConfig: tableConfig$.getValue(),
     });
 
-    const unsavedChangesApi = initializeUnsavedChanges({
+    const unsavedChangesApi = initializeUnsavedChanges<EmbeddableAlertsTableSerializedState>({
       uuid,
       parentApi,
       anyStateChange$: merge(
@@ -74,6 +74,9 @@ export const getAlertsTableEmbeddableFactory = (
       onReset: (lastSaved) => {
         titleManager.reinitializeState(lastSaved);
         timeRangeManager.reinitializeState(lastSaved);
+        if (lastSaved?.tableConfig) {
+          tableConfig$.next(lastSaved.tableConfig);
+        }
       },
     });
 

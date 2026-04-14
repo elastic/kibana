@@ -85,6 +85,7 @@ export function runBuildApiDocsCli() {
       const apiMapResult = buildApiMap(
         setupResult.project,
         setupResult.plugins,
+        setupResult.allPlugins,
         log,
         transaction,
         options

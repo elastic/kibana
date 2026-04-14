@@ -18,15 +18,14 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 
-// FLAKY: https://github.com/elastic/kibana/issues/218380
-describe.skip('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+describe('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     initializeDataViews();
   });
 
   it('should properly show static values in form and results', () => {
     navigateTo('/app/osquery');
-    cy.contains('New live query').click();
+    cy.contains('Run query').click();
     selectAllAgents();
     inputQuery('select * from processes;');
     getAdvancedButton().click();
@@ -54,7 +53,7 @@ describe.skip('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMK
 
   it('should hide and show ecs mappings on Advanced accordion click', () => {
     navigateTo('/app/osquery');
-    cy.contains('New live query').click();
+    cy.contains('Run query').click();
     selectAllAgents();
     cy.getBySel('savedQuerySelect').within(() => {
       cy.getBySel('comboBoxInput').type('processes_elastic{downArrow}{enter}');

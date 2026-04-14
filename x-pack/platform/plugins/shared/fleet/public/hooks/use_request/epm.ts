@@ -22,6 +22,7 @@ import type {
   DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  ReviewUpgradeResponse,
   GetBulkAssetsRequest,
   GetBulkAssetsResponse,
   GetVerificationKeyIdResponse,
@@ -35,6 +36,7 @@ import type {
   GetEpmDataStreamsResponse,
   GetOneBulkOperationPackagesResponse,
   GetStatsResponse,
+  GetDependenciesResponse,
   BulkUninstallPackagesRequest,
   DeletePackageDatastreamAssetsRequest,
   DeletePackageDatastreamAssetsResponse,
@@ -216,6 +218,23 @@ export const useGetPackageStats = (pkgName: string) => {
     method: 'get',
     version: API_VERSIONS.public.v1,
   });
+};
+
+export const useGetPackageDependencies = (
+  pkgName: string,
+  pkgVersion: string,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
+  return useQuery<GetDependenciesResponse, RequestError>(
+    ['package-dependencies', pkgName, pkgVersion],
+    () =>
+      sendRequestForRq<GetDependenciesResponse>({
+        path: epmRouteService.getDependenciesPath(pkgName, pkgVersion),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+      }),
+    { enabled, refetchOnWindowFocus: false }
+  );
 };
 
 export const useGetPackageVerificationKeyId = () => {
@@ -470,15 +489,45 @@ interface InstallKibanaAssetsArgs {
 }
 
 export const useUpdatePackageMutation = () => {
-  return useMutation<UpdatePackageResponse, RequestError, UpdatePackageArgs>(
-    ({ pkgName, pkgVersion, body }: UpdatePackageArgs) =>
+  const queryClient = useQueryClient();
+
+  return useMutation<UpdatePackageResponse, RequestError, UpdatePackageArgs>({
+    mutationFn: ({ pkgName, pkgVersion, body }: UpdatePackageArgs) =>
       sendRequestForRq<UpdatePackageResponse>({
         path: epmRouteService.getUpdatePath(pkgName, pkgVersion),
         method: 'put',
         version: API_VERSIONS.public.v1,
         body,
-      })
-  );
+      }),
+    onSuccess: (_data, { pkgName }) => {
+      queryClient.invalidateQueries([pkgName]);
+      queryClient.invalidateQueries(['get-packages']);
+    },
+  });
+};
+
+interface ReviewUpgradeArgs {
+  pkgName: string;
+  action: 'accept' | 'decline' | 'pending';
+  targetVersion: string;
+}
+
+export const useReviewUpgradeMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ReviewUpgradeResponse, RequestError, ReviewUpgradeArgs>({
+    mutationFn: ({ pkgName, action, targetVersion }: ReviewUpgradeArgs) =>
+      sendRequestForRq<ReviewUpgradeResponse>({
+        path: epmRouteService.getReviewUpgradePath(pkgName),
+        method: 'post',
+        version: API_VERSIONS.public.v1,
+        body: { action, target_version: targetVersion },
+      }),
+    onSuccess: (_data, { pkgName }) => {
+      queryClient.invalidateQueries(['get-packages']);
+      queryClient.invalidateQueries([pkgName]);
+    },
+  });
 };
 
 export const useInstallKibanaAssetsMutation = () => {

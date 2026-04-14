@@ -37,12 +37,19 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
     };
   } else {
+    const openAiTools = toolsToOpenAI(tools);
+    const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
       model: modelName,
       messages: messagesToOpenAI({ system, messages }),
-      tool_choice: toolChoiceToOpenAI(toolChoice),
-      tools: toolsToOpenAI(tools),
+      ...(hasTools
+        ? {
+            tool_choice: toolChoiceToOpenAI(toolChoice),
+            tools: openAiTools,
+          }
+        : {}),
     };
   }
 

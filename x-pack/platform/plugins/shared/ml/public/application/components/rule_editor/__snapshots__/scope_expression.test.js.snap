@@ -20,6 +20,7 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
         <input
           checked=""
           class="euiCheckbox__input emotion-euiCheckbox__input"
+          data-test-subj="mlScopeCheckbox_domain"
           id="scope_cb_domain"
           type="checkbox"
         />
@@ -67,6 +68,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
         />
         <input
           class="euiCheckbox__input emotion-euiCheckbox__input"
+          data-test-subj="mlScopeCheckbox_domain"
           id="scope_cb_domain"
           type="checkbox"
         />
@@ -140,6 +142,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
         <input
           checked=""
           class="euiCheckbox__input emotion-euiCheckbox__input"
+          data-test-subj="mlScopeCheckbox_domain"
           id="scope_cb_domain"
           type="checkbox"
         />
@@ -213,6 +216,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
         <input
           checked=""
           class="euiCheckbox__input emotion-euiCheckbox__input"
+          data-test-subj="mlScopeCheckbox_domain"
           id="scope_cb_domain"
           type="checkbox"
         />

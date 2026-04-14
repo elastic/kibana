@@ -9,6 +9,7 @@
     "server": true,
     "browser": true,
     "optionalPlugins": [
+      "cps",
       "fieldsMetadata",
       "usageCollection",
       "licensing"
@@ -21,7 +22,8 @@
       "share",
       "fileUpload",
       "fieldFormats",
-      "kql"
+      "kql",
+      "inference"
     ],
     "requiredBundles": [
       "kibanaReact",

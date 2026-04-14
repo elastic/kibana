@@ -245,7 +245,7 @@ export const TopValues: FC<TopValuesProps> = ({
                     >
                       <EuiButtonIcon
                         iconSize="s"
-                        iconType="plusInCircle"
+                        iconType="plusCircle"
                         onClick={() => onAddFilter(fieldName, fieldValue, '+')}
                         aria-label={i18n.translate(
                           'xpack.dataVisualizer.dataGrid.field.addFilterAriaLabel',
@@ -266,7 +266,7 @@ export const TopValues: FC<TopValuesProps> = ({
                       />
                       <EuiButtonIcon
                         iconSize="s"
-                        iconType="minusInCircle"
+                        iconType="minusCircle"
                         onClick={() => onAddFilter(fieldName, fieldValue, '-')}
                         aria-label={i18n.translate(
                           'xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel',

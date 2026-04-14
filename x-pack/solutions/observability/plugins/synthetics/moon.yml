@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/synthetics-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/actionable-obs-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/synthetics-plugin'
+  title: '@kbn/synthetics-plugin'
   description: Moon project for @kbn/synthetics-plugin
   channel: ''
   owner: '@elastic/actionable-obs-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/synthetics
+  sourceRoot: x-pack/solutions/observability/plugins/synthetics
 dependsOn:
   - '@kbn/alerting-plugin'
   - '@kbn/ml-plugin'
@@ -34,7 +33,6 @@ dependsOn:
   - '@kbn/discover-plugin'
   - '@kbn/home-plugin'
   - '@kbn/embeddable-plugin'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/data-plugin'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/inspector-plugin'
@@ -87,7 +85,6 @@ dependsOn:
   - '@kbn/securitysolution-io-ts-types'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/serverless'
-  - '@kbn/repo-info'
   - '@kbn/index-management-plugin'
   - '@kbn/license-management-plugin'
   - '@kbn/react-kibana-mount'
@@ -95,9 +92,7 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/search-types'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/ui-actions-browser'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-util-plugin'
   - '@kbn/core-application-browser'
@@ -132,6 +127,10 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/scout-oblt'
+  - '@kbn/core-saved-objects-utils-server'
 tags:
   - plugin
   - prod
@@ -145,17 +144,8 @@ fileGroups:
     - scripts/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

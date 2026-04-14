@@ -16,7 +16,7 @@ export function useDatasetQualityWarnings() {
   );
 
   const isNonAggregatableDatasetsLoading = useSelector(service, (state) =>
-    state.matches('main.stats.nonAggregatableDatasets.fetching')
+    state.matches({ main: { stats: { nonAggregatableDatasets: 'fetching' } } })
   );
 
   return {

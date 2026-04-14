@@ -54,7 +54,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      width: '30%',
+      minWidth: '8em',
       render: (name: TemplateListItem['name'], item: TemplateListItem) => {
         return (
           <span>
@@ -85,7 +85,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Index patterns',
       }),
       sortable: true,
-      width: '20%',
+      minWidth: '10em',
+      width: '18em',
       render: (indexPatterns: string[]) => <strong>{indexPatterns.join(', ')}</strong>,
     },
     {
@@ -93,8 +94,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.componentsColumnTitle', {
         defaultMessage: 'Component templates',
       }),
-      width: '100px',
-      truncateText: true,
+      width: '12em',
+      minWidth: '12em',
       sortable: (template) => {
         return template.composedOf?.length;
       },
@@ -114,9 +115,9 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.dataStreamColumnTitle', {
         defaultMessage: 'Data stream',
       }),
-      width: '90px',
       align: 'center',
-      truncateText: true,
+      width: '6.5em',
+      minWidth: '6.5em',
       render: (template: TemplateListItem) =>
         template._kbnMeta.hasDatastream ? <EuiIcon type="check" /> : null,
     },
@@ -125,6 +126,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Content',
       }),
       width: '120px',
+      className: 'eui-textNoWrap',
       render: (item: TemplateListItem) => (
         <TemplateContentIndicator
           mappings={item.hasMappings}
@@ -144,7 +146,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.actionColumnTitle', {
         defaultMessage: 'Actions',
       }),
-      width: '120px',
+      width: '7.5em',
+      minWidth: '7.5em',
       actions: [
         {
           name: i18n.translate('xpack.idxMgmt.templateList.table.actionEditText', {
@@ -253,7 +256,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       ) : undefined,
     toolsRight: [
       <EuiButton
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="createTemplateButton"
         key="createTemplateButton"
         fill
@@ -314,6 +317,9 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             defaultMessage="No index templates found"
           />
         }
+        tableLayout="auto"
+        scrollableInline
+        responsiveBreakpoint={false}
       />
     </Fragment>
   );

@@ -1,0 +1,45 @@
+{
+  "id": "visualizationListing",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "visualizationListing",
+      "id": "def-public.VisualizationListingPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "VisualizationListingPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "src/platform/plugins/shared/visualization_listing/public/plugin.ts",
+      "lineNumber": 31,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

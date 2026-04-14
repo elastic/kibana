@@ -7,7 +7,6 @@
 
 import type { MouseEventHandler, FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Popover } from '../popover';
@@ -34,7 +33,7 @@ interface Props {
 export const ArgAddPopover: FC<Props> = ({ options }) => {
   const button = (handleClick: MouseEventHandler<HTMLButtonElement>) => (
     <EuiButtonIcon
-      iconType="plusInCircle"
+      iconType="plusCircle"
       aria-label={strings.getAddAriaLabel()}
       onClick={handleClick}
       className="canvasArg__addArg"
@@ -63,8 +62,4 @@ export const ArgAddPopover: FC<Props> = ({ options }) => {
       }
     </Popover>
   );
-};
-
-ArgAddPopover.propTypes = {
-  options: PropTypes.array.isRequired,
 };

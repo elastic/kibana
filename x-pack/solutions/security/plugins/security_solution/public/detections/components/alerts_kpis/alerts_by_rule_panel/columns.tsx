@@ -10,12 +10,12 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
 import {
   CellActionsMode,
   SecurityCellActions,
-  SecurityCellActionsTrigger,
   SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../../helpers';
@@ -58,7 +58,7 @@ const CELL_ACTIONS_COLUMN: EuiBasicTableColumn<AlertsByRuleData> = {
     <SecurityCellActions
       mode={CellActionsMode.INLINE}
       visibleCellActions={0}
-      triggerId={SecurityCellActionsTrigger.DEFAULT}
+      triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
       data={{ field: ALERT_RULE_NAME, value: rule }}
       sourcererScopeId={getSourcererScopeId(TableId.alertsOnAlertsPage)}
       disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}

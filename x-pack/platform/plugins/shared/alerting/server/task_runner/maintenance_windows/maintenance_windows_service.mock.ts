@@ -21,6 +21,17 @@ export const getMockMaintenanceWindow = (
       freq: Frequency.WEEKLY,
       count: 2,
     } as MaintenanceWindowAttributes['rRule'],
+    schedule: {
+      custom: {
+        start: '2023-02-26T00:00:00.000Z',
+        duration: '1h',
+        timezone: 'UTC',
+        recurring: {
+          every: '1w',
+          occurrences: 2,
+        },
+      },
+    },
     events: [
       {
         gte: '2023-02-26T00:00:00.000Z',

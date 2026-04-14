@@ -90,7 +90,8 @@ const mockAlertsGroupingState = {
   updateGrouping: jest.fn(),
 };
 
-describe('AlertsGrouping', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253312
+describe.skip('AlertsGrouping', () => {
   beforeEach(() => {
     window.localStorage.clear();
     mockUseGetAlertsGroupAggregationsQuery.mockImplementation(() => ({

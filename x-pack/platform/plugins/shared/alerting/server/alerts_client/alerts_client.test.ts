@@ -537,6 +537,82 @@ describe('Alerts Client', () => {
           spy.mockRestore();
         });
 
+        test('should query for alerts and filter out null execution uuids', async () => {
+          clusterClient.search.mockResolvedValueOnce({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  fields: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] },
+                },
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  fields: { [ALERT_RULE_EXECUTION_UUID]: [null] },
+                },
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  fields: { [ALERT_RULE_EXECUTION_UUID]: null },
+                },
+              ],
+            },
+          });
+          const spy = jest
+            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+            .mockImplementation(() => mockLegacyAlertsClient);
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+          });
+          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
+            ...defaultExecutionOpts,
+          });
+
+          expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
+            size: 20,
+            ignore_unavailable: true,
+            index: useDataStreamForAlerts
+              ? '.alerts-test.alerts-default'
+              : '.internal.alerts-test.alerts-default-*',
+            query: {
+              bool: {
+                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+              },
+            },
+            collapse: {
+              field: ALERT_RULE_EXECUTION_UUID,
+            },
+            _source: false,
+            sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+          });
+
+          expect(clusterClient.search).toHaveBeenNthCalledWith(2, {
+            size: 2000,
+            ignore_unavailable: true,
+            seq_no_primary_term: true,
+            index: useDataStreamForAlerts
+              ? '.alerts-test.alerts-default'
+              : '.internal.alerts-test.alerts-default-*',
+            query: {
+              bool: {
+                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
+                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] } }],
+              },
+            },
+          });
+
+          spy.mockRestore();
+        });
+
         test('should not query for the alerts if the rule type is not a lifecycle rule', async () => {
           const alertsClient = new AlertsClient({
             ...alertsClientParams,

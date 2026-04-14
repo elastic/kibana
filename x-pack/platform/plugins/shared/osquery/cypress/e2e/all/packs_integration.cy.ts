@@ -162,7 +162,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
 
       it('should be able to run live prebuilt pack', () => {
         navigateTo('/app/osquery/live_queries');
-        cy.contains('New live query').click();
+        cy.contains('Run query').click();
         cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.contains('Run a set of queries in a pack.').click();
         cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
@@ -245,7 +245,9 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         }).then((response) => {
           const item = find(response.body.items, ['policy_id', agentPolicyId]);
 
-          expect(item?.inputs[0].config?.osquery.value.packs[globalPack]).to.deep.equal({
+          expect(
+            item?.inputs[0].config?.osquery.value.packs[`default--${globalPack}`]
+          ).to.deep.include({
             shard: 100,
             queries: {},
           });
@@ -302,7 +304,9 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
             (policy: PackagePolicy) => policy.name === `Policy for ${DEFAULT_POLICY}`
           );
 
-          expect(shardPolicy?.inputs[0].config?.osquery.value.packs[shardPack]).to.deep.equal({
+          expect(
+            shardPolicy?.inputs[0].config?.osquery.value.packs[`default--${shardPack}`]
+          ).to.deep.include({
             shard: 15,
             queries: {},
           });

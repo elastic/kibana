@@ -27,7 +27,9 @@ import {
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
+
+const urlParamOverride = { timeline: { isOpen: false } };
 
 export interface PanelHeaderProps {
   /**
@@ -44,7 +46,7 @@ export interface PanelHeaderProps {
  * Title component that shows basic information of a rule. This is displayed above rule overview body
  */
 export const PanelHeader: React.FC<PanelHeaderProps> = memo(({ rule, isSuppressed }) => {
-  const href = useRuleDetailsLink({ ruleId: rule.id });
+  const href = useRuleDetailsLink({ ruleId: rule.id }, urlParamOverride);
 
   return (
     <FlyoutHeader data-test-subj={RULE_TITLE_TEST_ID}>

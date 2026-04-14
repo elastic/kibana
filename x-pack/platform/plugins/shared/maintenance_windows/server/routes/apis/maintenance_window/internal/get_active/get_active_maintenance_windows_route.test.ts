@@ -13,7 +13,7 @@ import { maintenanceWindowClientMock } from '../../../../../maintenance_window_c
 import { getActiveMaintenanceWindowsRoute } from './get_active_maintenance_windows_route';
 import { getMockMaintenanceWindow } from '../../../../../data/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
-import { rewriteMaintenanceWindowRes } from '../../../../lib';
+import { rewritePartialMaintenanceBodyRes } from '../../../../lib';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -76,7 +76,10 @@ describe('getActiveMaintenanceWindowsRoute', () => {
 
     expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalled();
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: mockMaintenanceWindows.map((data) => rewriteMaintenanceWindowRes(data)),
+      body: mockMaintenanceWindows.map((data) => {
+        const { schedule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
+        return rewritePartialMaintenanceBodyRes(mwWithoutSchedule);
+      }),
     });
   });
 

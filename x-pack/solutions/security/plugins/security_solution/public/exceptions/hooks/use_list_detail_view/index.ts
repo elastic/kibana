@@ -15,6 +15,7 @@ import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-i
 import { useApi } from '@kbn/securitysolution-list-hooks';
 import { isEqual } from 'lodash';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
@@ -58,6 +59,10 @@ export const useListDetailsView = (exceptionListId: string) => {
     exceptions: { edit: canEditExceptions },
     rules: { read: canReadRules },
   } = useUserPrivileges().rulesPrivileges;
+
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
 
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const canUserWriteCurrentList =
@@ -115,7 +120,13 @@ export const useListDetailsView = (exceptionListId: string) => {
   const initializeListRules = useCallback(
     async (result: Awaited<ReturnType<typeof getListById>>) => {
       if (result) {
-        const listRules = canReadRules ? await getListRules(result.list_id) : [];
+        const listRules = canReadRules
+          ? await getListRules({
+              id: result.id,
+              listId: result.list_id,
+              namespaceType: result.namespace_type,
+            })
+          : [];
         setLinkedRules(listRules);
       }
     },
@@ -124,9 +135,11 @@ export const useListDetailsView = (exceptionListId: string) => {
 
   const initializeList = useCallback(async () => {
     try {
-      const endpointArtifactIds = ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
-        (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-      );
+      const endpointArtifactIds = isEndpointExceptionsMovedFFEnabled
+        ? ALL_ENDPOINT_ARTIFACT_LIST_IDS
+        : ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+            (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+          );
       if ((endpointArtifactIds as string[]).includes(exceptionListId))
         return setInvalidListId(true);
       setIsLoading(true);
@@ -153,7 +166,13 @@ export const useListDetailsView = (exceptionListId: string) => {
         i18n.EXCEPTION_ERROR_DESCRIPTION
       );
     }
-  }, [exceptionListId, http, initializeListRules, handleErrorStatus]);
+  }, [
+    isEndpointExceptionsMovedFFEnabled,
+    exceptionListId,
+    http,
+    initializeListRules,
+    handleErrorStatus,
+  ]);
 
   useEffect(() => {
     initializeList();

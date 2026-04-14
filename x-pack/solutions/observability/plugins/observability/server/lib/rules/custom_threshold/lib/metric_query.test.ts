@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { DataViewBase } from '@kbn/es-query';
 import type {
   CustomMetricExpressionParams,
   SearchConfigurationType,
@@ -43,12 +44,27 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     },
   };
   const esQueryConfig = {
-    allowLeadingWildcards: false,
+    allowLeadingWildcards: true,
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: false,
   };
 
   const groupBy = 'host.doggoname';
+  const dataView: DataViewBase = {
+    title: 'logs-*-*',
+    fields: [
+      {
+        name: 'host.name',
+        type: 'string',
+        esTypes: ['keyword'],
+      },
+      {
+        name: 'service.name',
+        type: 'string',
+        esTypes: ['keyword'],
+      },
+    ],
+  };
   const timeFieldName = 'mockedTimeFieldName';
   const timeframe = {
     start: moment().subtract(5, 'minutes').valueOf(),
@@ -63,6 +79,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       searchConfiguration,
+      undefined,
       esQueryConfig,
       undefined,
       void 0,
@@ -70,12 +87,12 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
+        searchBody.query!.bool!.filter!.find((filter) => Object.hasOwn(filter!, 'range'))
       ).toBeTruthy();
     });
 
     test('includes a metric field filter', () => {
-      expect(searchBody.aggs.groupings.aggs.currentPeriod).toMatchObject(
+      expect(searchBody.aggs!.groupings!.aggs!.currentPeriod).toMatchObject(
         expect.objectContaining({
           aggs: {
             // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -121,6 +138,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       currentSearchConfiguration,
+      undefined,
       esQueryConfig,
       undefined,
       void 0,
@@ -128,12 +146,12 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
+        searchBody.query!.bool!.filter!.find((filter) => Object.hasOwn(filter!, 'range'))
       ).toBeTruthy();
     });
 
     test('includes a metric field filter', () => {
-      expect(searchBody.query.bool.filter).toMatchObject(
+      expect(searchBody.query!.bool!.filter).toMatchObject(
         expect.arrayContaining([
           { range: { mockedTimeFieldName: expect.any(Object) } },
           {
@@ -164,7 +182,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
           },
         ])
       );
-      expect(searchBody.aggs.groupings.aggs).toMatchObject(
+      expect(searchBody.aggs!.groupings!.aggs).toMatchObject(
         expect.objectContaining({
           currentPeriod: {
             filters: {
@@ -234,6 +252,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       currentSearchConfiguration,
+      undefined,
       esQueryConfig,
       undefined,
       void 0,
@@ -241,17 +260,74 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
+        searchBody.query!.bool!.filter!.find((filter) => Object.hasOwn(filter!, 'range'))
       ).toBeTruthy();
     });
 
     test('includes a metric field filter', () => {
-      expect(searchBody.query.bool.filter).toMatchObject(
+      expect(searchBody.query!.bool!.filter!).toMatchObject(
         expect.arrayContaining([
           { range: { mockedTimeFieldName: expect.any(Object) } },
           { match_phrase: { 'service.name': 'synth-node-2' } },
         ])
       );
+    });
+  });
+
+  describe('when passed wildcard KQL query on keyword field', () => {
+    const query = 'machine.os.keyword: *win 7*';
+    const currentSearchConfiguration = {
+      ...searchConfiguration,
+      query: {
+        language: 'kuery',
+        query,
+      },
+    };
+
+    const searchBody = getElasticsearchMetricQuery(
+      expressionParams,
+      timeframe,
+      timeFieldName,
+      100,
+      true,
+      currentSearchConfiguration,
+      {
+        ...dataView,
+        fields: [
+          ...dataView.fields,
+          {
+            name: 'machine.os.keyword',
+            type: 'string',
+            esTypes: ['keyword'],
+          },
+        ],
+      },
+      esQueryConfig,
+      undefined,
+      void 0,
+      groupBy
+    );
+
+    test('uses wildcard query instead of query_string for keyword wildcard KQL', () => {
+      expect(searchBody.query!.bool!.filter).toMatchObject(
+        expect.arrayContaining([
+          {
+            bool: {
+              should: [
+                {
+                  wildcard: {
+                    'machine.os.keyword': {
+                      value: '*win 7*',
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ])
+      );
+      expect(JSON.stringify(searchBody.query!.bool!.filter)).not.toContain('query_string');
     });
   });
 });

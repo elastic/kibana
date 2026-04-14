@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/feedback-components",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/feedback-components",
+        "id": "def-public.FeedbackTriggerButton",
+        "type": "Function",
+        "tags": [],
+        "label": "FeedbackTriggerButton",
+        "description": [],
+        "signature": [
+          "({ getQuestions, getAppDetails, getCurrentUserEmail, sendFeedback, showToast, checkTelemetryOptIn, }: Props) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/feedback-components/src/components/feedback_trigger_button.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/feedback-components",
+            "id": "def-public.FeedbackTriggerButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  getQuestions,\n  getAppDetails,\n  getCurrentUserEmail,\n  sendFeedback,\n  showToast,\n  checkTelemetryOptIn,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "src/platform/packages/shared/feedback-components/src/components/feedback_trigger_button.tsx",
+            "lineNumber": 30,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

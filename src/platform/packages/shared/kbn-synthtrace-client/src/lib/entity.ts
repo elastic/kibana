@@ -9,7 +9,7 @@
 
 export type ObjectEntry<T> = [keyof T, T[keyof T]];
 
-export type Fields<TMeta extends Record<string, any> | undefined = undefined> = {
+export type Fields<TMeta extends Record<string, unknown> | undefined = undefined> = {
   '@timestamp'?: number;
 } & (TMeta extends undefined ? {} : Partial<{ meta: TMeta }>);
 
@@ -20,10 +20,10 @@ export class Entity<TFields extends Fields> {
 
   defaults(defaults: TFields) {
     Object.keys(defaults).forEach((key) => {
-      const fieldName: keyof TFields = key as any;
+      const fieldName = key as keyof TFields;
 
-      if (!(fieldName in this.fields)) {
-        this.fields[fieldName] = defaults[fieldName] as any;
+      if (!Object.prototype.hasOwnProperty.call(this.fields, fieldName)) {
+        this.fields[fieldName] = defaults[fieldName] as TFields[keyof TFields];
       }
     });
 

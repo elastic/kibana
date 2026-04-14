@@ -21,7 +21,7 @@ exports[`install footer should render 1`] = `
           data-euiicon-type="download"
         />
         <span
-          class="eui-textTruncate"
+          class="eui-textTruncate css-13ifi6d-m"
         >
           Install data
         </span>

@@ -9,7 +9,7 @@ import { act, waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { useAggregatedAnomaliesByJob, AnomalyEntity } from './use_anomalies_search';
 
-const jobId = 'auth_rare_source_ip_for_a_user';
+const jobId = 'auth_rare_source_ip_for_a_user_ea';
 const from = 'now-24h';
 const to = 'now';
 const job = { id: jobId, jobState: 'started', datafeedState: 'started' };
@@ -106,8 +106,8 @@ describe('useAggregatedAnomaliesByJob', () => {
   });
 
   it('returns jobs sorted by name', async () => {
-    const firstJobId = 'v3_windows_anomalous_script';
-    const secondJobId = 'auth_rare_source_ip_for_a_user';
+    const firstJobId = 'v3_windows_anomalous_script_ea';
+    const secondJobId = 'auth_rare_source_ip_for_a_user_ea';
     const fistJobCount = { key: firstJobId, doc_count: 99 };
     const secondJobCount = { key: secondJobId, doc_count: 99 };
     const firstJobSecurityName = '0000001';

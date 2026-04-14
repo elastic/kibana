@@ -47,7 +47,7 @@ export interface SearchAlertsParams {
   /**
    * ES query to perform on the affected alert indices
    */
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
   /**
    * The alert document fields to include in the response
    */

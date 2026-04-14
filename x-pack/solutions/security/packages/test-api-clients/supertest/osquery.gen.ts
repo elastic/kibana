@@ -29,13 +29,7 @@ import type {
   GetAgentsRequestQueryInput,
 } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
 import type {
-  OsqueryCreateLiveQueryRequestBodyInput,
-  OsqueryFindLiveQueriesRequestQueryInput,
-  OsqueryGetLiveQueryDetailsRequestParamsInput,
-  OsqueryGetLiveQueryResultsRequestQueryInput,
-  OsqueryGetLiveQueryResultsRequestParamsInput,
-} from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
-import type {
+  OsqueryCopyPacksRequestParamsInput,
   OsqueryCreatePacksRequestBodyInput,
   OsqueryDeletePacksRequestParamsInput,
   OsqueryFindPacksRequestQueryInput,
@@ -44,6 +38,7 @@ import type {
   OsqueryUpdatePacksRequestBodyInput,
 } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
 import type {
+  OsqueryCopySavedQueryRequestParamsInput,
   OsqueryCreateSavedQueryRequestBodyInput,
   OsqueryDeleteSavedQueryRequestParamsInput,
   OsqueryFindSavedQueriesRequestQueryInput,
@@ -51,6 +46,20 @@ import type {
   OsqueryUpdateSavedQueryRequestParamsInput,
   OsqueryUpdateSavedQueryRequestBodyInput,
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
+import type {
+  OsqueryCreateLiveQueryRequestBodyInput,
+  OsqueryFindLiveQueriesRequestQueryInput,
+  OsqueryGetLiveQueryDetailsRequestParamsInput,
+  OsqueryGetLiveQueryResultsRequestQueryInput,
+  OsqueryGetLiveQueryResultsRequestParamsInput,
+} from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
+import type {
+  OsqueryGetScheduledActionResultsRequestQueryInput,
+  OsqueryGetScheduledActionResultsRequestParamsInput,
+  OsqueryGetScheduledQueryResultsRequestQueryInput,
+  OsqueryGetScheduledQueryResultsRequestParamsInput,
+} from '@kbn/osquery-plugin/common/api/scheduled_results/scheduled_results.gen';
+import type { OsqueryGetUnifiedHistoryRequestQueryInput } from '@kbn/osquery-plugin/common/api/unified_history/unified_history.gen';
 import type {
   ReadAssetsStatusRequestQueryInput,
   UpdateAssetsStatusRequestQueryInput,
@@ -105,6 +114,36 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
+  },
+  /**
+   * Create a copy of a query pack with a unique name by appending a `_copy` suffix. If the name already exists, a numeric suffix is added (e.g., `_copy_2`). The copied pack is always created with `enabled` set to `false`.
+   */
+  osqueryCopyPacks(props: OsqueryCopyPacksProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/osquery/packs/{id}/copy', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Create a copy of a saved query with a unique name by appending a `_copy` suffix. If the name already exists, a numeric suffix is added (e.g., `_copy_2`).
+   */
+  osqueryCopySavedQuery(props: OsqueryCopySavedQueryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/osquery/saved_queries/{id}/copy', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
    * Create and run a live query.
@@ -265,6 +304,64 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
+      * Get paginated per-agent action results for a specific scheduled query execution, with success/failure aggregation and execution metadata (pack name, query name/text, timestamp).
+
+      */
+  osqueryGetScheduledActionResults(
+    props: OsqueryGetScheduledActionResultsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/osquery/scheduled_results/{scheduleId}/{executionCount}',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+      * Get paginated query result rows (the actual osquery output data) for a specific scheduled query execution.
+
+      */
+  osqueryGetScheduledQueryResults(
+    props: OsqueryGetScheduledQueryResultsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+      * Get a unified, time-sorted history of live, rule-triggered, and scheduled osquery executions. The response uses cursor-based pagination.
+
+      */
+  osqueryGetUnifiedHistory(props: OsqueryGetUnifiedHistoryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/osquery/history', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Update a query pack using the pack ID.
 > info
 > You cannot update a prebuilt pack.
@@ -335,11 +432,11 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     ...securitySolutionApiServiceFactory(supertestService),
-    withUser: (user: { username: string; password: string }) => {
+    withUser: (user: { username: string; password?: string }) => {
       const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
       return securitySolutionApiServiceFactory(
-        supertest_.agent(kbnUrl).auth(user.username, user.password)
+        supertest_.agent(kbnUrl).auth(user.username, user.password ?? 'changeme')
       );
     },
   };
@@ -353,6 +450,12 @@ export interface GetAgentPolicyProps {
 }
 export interface GetAgentsProps {
   query: GetAgentsRequestQueryInput;
+}
+export interface OsqueryCopyPacksProps {
+  params: OsqueryCopyPacksRequestParamsInput;
+}
+export interface OsqueryCopySavedQueryProps {
+  params: OsqueryCopySavedQueryRequestParamsInput;
 }
 export interface OsqueryCreateLiveQueryProps {
   body: OsqueryCreateLiveQueryRequestBodyInput;
@@ -390,6 +493,17 @@ export interface OsqueryGetPacksDetailsProps {
 }
 export interface OsqueryGetSavedQueryDetailsProps {
   params: OsqueryGetSavedQueryDetailsRequestParamsInput;
+}
+export interface OsqueryGetScheduledActionResultsProps {
+  query: OsqueryGetScheduledActionResultsRequestQueryInput;
+  params: OsqueryGetScheduledActionResultsRequestParamsInput;
+}
+export interface OsqueryGetScheduledQueryResultsProps {
+  query: OsqueryGetScheduledQueryResultsRequestQueryInput;
+  params: OsqueryGetScheduledQueryResultsRequestParamsInput;
+}
+export interface OsqueryGetUnifiedHistoryProps {
+  query: OsqueryGetUnifiedHistoryRequestQueryInput;
 }
 export interface OsqueryUpdatePacksProps {
   params: OsqueryUpdatePacksRequestParamsInput;

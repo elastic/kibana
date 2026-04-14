@@ -16,3 +16,5 @@ export type { SidebarBodyProps } from './src/components';
 // Hooks
 export { useSidebar, useSidebarWidth, useSidebarApp } from './src/hooks';
 export type { UseSidebarApi, UseSidebarAppApi } from './src/hooks';
+export { useSidebarPanel } from './src/components';
+export type { SidebarPanelContextValue } from './src/components';

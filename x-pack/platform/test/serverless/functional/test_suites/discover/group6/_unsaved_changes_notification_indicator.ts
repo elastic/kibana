@@ -56,6 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
+      await dataViews.switchTo('logstash-*');
     });
 
     it('should not show the notification indicator initially nor after changes to a draft saved search', async () => {

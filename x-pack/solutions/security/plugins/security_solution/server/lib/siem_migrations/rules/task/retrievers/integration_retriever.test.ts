@@ -7,7 +7,7 @@
 
 import { MockRuleMigrationsDataClient } from '../../data/__mocks__/mocks';
 import { IntegrationRetriever } from './integration_retriever';
-import type { RuleMigrationsRetrieverClients } from './rule_migrations_retriever';
+import type { RuleMigrationsRetrieverDeps } from './rule_migrations_retriever';
 
 describe('IntegrationRetriever', () => {
   let integrationRetriever: IntegrationRetriever;
@@ -22,7 +22,7 @@ describe('IntegrationRetriever', () => {
   beforeEach(() => {
     integrationRetriever = new IntegrationRetriever({
       data: mockRuleMigrationsDataClient,
-    } as RuleMigrationsRetrieverClients);
+    } as RuleMigrationsRetrieverDeps);
     mockRuleMigrationsDataClient.integrations.semanticSearch.mockImplementation(
       async (_: string) => {
         return mockIntegrationItem;

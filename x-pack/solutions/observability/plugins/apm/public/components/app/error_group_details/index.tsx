@@ -208,7 +208,7 @@ export function ErrorGroupDetails() {
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
+    agentBuilder.setChatConfig({
       newConversation: true,
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
@@ -226,7 +226,7 @@ export function ErrorGroupDetails() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, errorId, serviceName, environment, start, end]);
 
@@ -241,11 +241,24 @@ export function ErrorGroupDetails() {
         <EuiFlexItem grow={3}>
           <EuiPanel hasBorder={true}>
             <ErrorDistribution
-              fetchStatus={errorDistributionStatus}
-              distribution={errorDistributionData}
               title={i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
                 defaultMessage: 'Error occurrences',
               })}
+              fetchStatus={errorDistributionStatus}
+              distribution={errorDistributionData}
+              discoverParams={{
+                label: i18n.translate('xpack.apm.errorGroupDetails.openErrorGroupInDiscover', {
+                  defaultMessage: 'Open error group in Discover',
+                }),
+                rangeFrom,
+                rangeTo,
+                queryParams: {
+                  kuery,
+                  serviceName,
+                  errorGroupId: groupId,
+                  sortDirection: 'DESC',
+                },
+              }}
             />
           </EuiPanel>
         </EuiFlexItem>

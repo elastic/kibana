@@ -10,10 +10,11 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiHasAppContext } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { LensApi } from '@kbn/lens-common-2';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
 import { generateId } from '../../id_generator';
 import { mountInlinePanel } from '../../react_embeddable/mount';
@@ -55,7 +56,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
       loadContent: async ({ closeFlyout } = { closeFlyout: () => {} }) => {
         const embeddable = await api.addNewPanel<object, LensApi>({
           maybePanelId: uuid,
-          panelType: 'lens',
+          panelType: LENS_EMBEDDABLE_TYPE,
           serializedState: {
             id: uuid,
             isNewPanel: true,
@@ -67,7 +68,6 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
         }
         return embeddable.getEditPanel?.({
           closeFlyout,
-          showOnly: true,
         });
       },
       options: { uuid },

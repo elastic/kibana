@@ -1,0 +1,148 @@
+{
+  "sha1": "7d87791f6be5b70ca3b0454934bb745a6680933e",
+  "tests": [
+    {
+      "id": "a3e4b1438a281ec-a15d1ea44076beb",
+      "title": "security feature controls global advanced_settings all privileges - shows management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-70c55d39cde2292",
+      "title": "security feature controls global advanced_settings all privileges - allows settings to be changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-b1c5ef3921e581b",
+      "title": "security feature controls global advanced_settings all privileges - doesn't show read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 49,
+        "column": 7
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-c585365935086e4",
+      "title": "security feature controls global advanced_settings read-only privileges - shows Management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 63,
+        "column": 7
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-24e9d48b87bab9b",
+      "title": "security feature controls global advanced_settings read-only privileges - does not allow settings to be changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-bbea8154da45959",
+      "title": "security feature controls global advanced_settings read-only privileges - shows read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 92,
+        "column": 7
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-6a3472d15e66cfe",
+      "title": "security feature controls no advanced_settings privileges - does not show Management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 110,
+        "column": 7
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-2e2c27193dc1ee1",
+      "title": "security feature controls no advanced_settings privileges - does not allow navigation to advanced settings; shows \"not found\" error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 122,
+        "column": 7
+      }
+    },
+    {
+      "id": "1fc0f0abf7efc2c-731a1321bb41fe8",
+      "title": "spaces feature controls space with no features disabled - shows Management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "1fc0f0abf7efc2c-1e9fd06bfa8c668",
+      "title": "spaces feature controls space with no features disabled - allows settings to be changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "1fc0f0abf7efc2c-7343cf3be887afc",
+      "title": "spaces feature controls space with Advanced Settings disabled - redirects to management home",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    }
+  ]
+}

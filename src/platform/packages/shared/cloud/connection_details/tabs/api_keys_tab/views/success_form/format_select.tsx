@@ -22,6 +22,9 @@ export const FormatSelect: React.FC<FormatSelectProps> = ({ value, onChange }) =
   return (
     <FancySelect
       value={value}
+      ariaLabel={i18n.translate('cloud.connectionDetails.components.formatSelect.ariaLabel', {
+        defaultMessage: 'API key format',
+      })}
       options={[
         {
           id: 'encoded',

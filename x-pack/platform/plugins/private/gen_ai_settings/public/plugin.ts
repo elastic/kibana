@@ -12,11 +12,13 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type { GenAiSettingsConfigType } from '../common/config';
 
 export interface GenAiSettingsStartDeps {
   spaces?: SpacesPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBasePluginStart;
 }
@@ -53,13 +55,13 @@ export class GenAiSettingsPlugin
       ? (await firstValueFrom(licensing.license$)).hasAtLeast('enterprise')
       : false;
 
+    const hasConnectorsReadPrivilege =
+      capabilities.actions?.show === true && capabilities.actions?.execute === true;
+    const hasAnonymizationPrivilege =
+      capabilities.anonymization?.show === true || capabilities.anonymization?.manage === true;
+
     // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
-    if (
-      // Connectors 'Read' privilege
-      capabilities.actions?.show === true &&
-      capabilities.actions?.execute === true &&
-      hasEnterpriseLicense
-    ) {
+    if (hasEnterpriseLicense && (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)) {
       management.sections.section.ai.registerApp({
         id: 'genAiSettings',
         title: i18n.translate('genAiSettings.managementSectionLabel', {

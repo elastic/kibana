@@ -62,8 +62,8 @@ export const plugin = (ctx: PluginInitializerContext) => {
             unMappedField: 'Unmapped field but exists in the document _source',
           };
 
-          const result = await client.index({
-            document,
+          const result = await client.create({
+            documents: [document],
           });
 
           ctx.logger.get('data-streams-example').info(JSON.stringify(result, null, 2));

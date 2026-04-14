@@ -58,11 +58,18 @@ export default class CiStatsJestReporter extends BaseReporter {
       throw new Error('missing testGroupType reporter option');
     }
 
-    const configArg = getopts(process.argv).config;
+    const argv = getopts(process.argv);
+    const configArg = argv.config;
     if (typeof configArg !== 'string') {
       throw new Error('expected to find a single --config arg');
     }
-    this.reportName = configArg;
+
+    // When running with --shard (e.g., --shard=1/2), include the shard annotation
+    // in the report name so ci-stats tracks durations per shard independently.
+    // This matches the annotated names produced by pick_test_group_run_order.ts
+    // (e.g., "config.js||shard=1/2").
+    const shardArg = argv.shard;
+    this.reportName = typeof shardArg === 'string' ? `${configArg}||shard=${shardArg}` : configArg;
   }
 
   async onRunStart() {

@@ -22,7 +22,7 @@ const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDef
   defaultMessage: 'Static value',
 });
 
-const defaultValue = 100;
+export const defaultValue = 100;
 
 function isEmptyValue(value: number | string | undefined) {
   return value == null || value === '';

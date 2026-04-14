@@ -8,6 +8,7 @@
  */
 
 import { run } from '../../lib/spawn.mjs';
+import { moonRun } from '../../lib/moon.mjs';
 import External from '../../lib/external_packages.js';
 
 import {
@@ -67,7 +68,6 @@ export const command = {
     const quiet = args.getBooleanValue('quiet') ?? false;
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
-    const allowRoot = args.getBooleanValue('allow-root') ?? false;
     const forceInstall = args.getBooleanValue('force-install');
     const skipPrebuilt =
       args.getBooleanValue('prebuilt') === false || !!process.env.KBN_BOOTSTRAP_NO_PREBUILT;
@@ -115,28 +115,28 @@ export const command = {
       }
     });
 
-    await time('run install scripts', async () => {
-      await runInstallScripts(log, { quiet });
-    });
-
     if (skipPrebuilt) {
       log.info('skipping pre-built webpack bundles (--no-prebuilt)');
-    } else {
-      await time('pre-build webpack bundles for packages', async () => {
-        log.info('pre-build webpack bundles for packages');
-        await run(
-          'yarn',
-          ['kbn', 'build-shared']
-            .concat(quiet ? ['--quiet'] : [])
-            .concat(forceInstall ? ['--no-cache'] : [])
-            .concat(allowRoot ? ['--allow-root'] : []),
-          {
-            pipe: true,
-          }
-        );
-        log.success('shared webpack bundles built');
-      });
     }
+
+    await Promise.all([
+      skipPrebuilt
+        ? undefined
+        : time('prepare webpack bundles for packages', async () => {
+            log.info('pre-build webpack bundles');
+            await moonRun([':build-webpack'], {
+              pipe: !quiet,
+              quiet,
+              noCache: forceInstall,
+            });
+            log.success('relevant versions extracted for packages and shared webpack bundles built');
+          }),
+      shouldInstall
+        ? time('run install scripts', async () => {
+            await runInstallScripts(log, { quiet });
+          })
+        : undefined,
+    ]);
 
     await time('sort package json', async () => {
       await sortPackageJson(log);

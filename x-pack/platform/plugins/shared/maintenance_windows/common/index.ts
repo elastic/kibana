@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MaintenanceWindow } from '../server/application/types';
+
 export type {
   MaintenanceWindowModificationMetadata,
   DateRange,
@@ -32,6 +34,8 @@ export {
   MAINTENANCE_WINDOW_DEFAULT_PER_PAGE,
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
 } from './constants';
+
+export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule' | 'scope'>;
 
 export {
   getScopedQueryErrorMessage,

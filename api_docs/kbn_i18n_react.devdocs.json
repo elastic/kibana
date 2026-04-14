@@ -68,7 +68,7 @@
         "signature": [
           "React.FunctionComponent<Intl.DateTimeFormatOptions & ",
           "CustomFormatConfig",
-          "<string> & { value: string | number | Date | undefined; children?(formattedDate: string): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null; }>"
+          "<string> & { value: string | number | Date | undefined; children?(formattedDate: string): React.ReactElement<any> | null; }>"
         ],
         "path": "node_modules/react-intl/index.d.ts",
         "lineNumber": 19,
@@ -124,7 +124,7 @@
           "NumberFormatOptions",
           ", \"localeMatcher\"> & ",
           "CustomFormatConfig",
-          "<\"number\"> & { value: number; children?(formattedNumber: string): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null; }>"
+          "<\"number\"> & { value: number; children?(formattedNumber: string): React.ReactElement<any> | null; }>"
         ],
         "path": "node_modules/react-intl/index.d.ts",
         "lineNumber": 27,
@@ -337,7 +337,7 @@
         "signature": [
           "React.FunctionComponent<Intl.DateTimeFormatOptions & ",
           "CustomFormatConfig",
-          "<string> & { value: string | number | Date | undefined; children?(formattedTime: string): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null; }>"
+          "<string> & { value: string | number | Date | undefined; children?(formattedTime: string): React.ReactElement<any> | null; }>"
         ],
         "path": "node_modules/react-intl/index.d.ts",
         "lineNumber": 23,
@@ -678,11 +678,11 @@
         "signature": [
           "React.ComponentClass<",
           "Props",
-          "<Record<string, string | number | boolean | Date | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | ",
+          "<Record<string, string | number | boolean | Date | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | ",
           "FormatXMLElementFn",
           "<React.ReactNode, React.ReactNode> | null | undefined>>, any> | React.FunctionComponent<",
           "Props",
-          "<Record<string, string | number | boolean | Date | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | ",
+          "<Record<string, string | number | boolean | Date | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | ",
           "FormatXMLElementFn",
           "<React.ReactNode, React.ReactNode> | null | undefined>>>"
         ],

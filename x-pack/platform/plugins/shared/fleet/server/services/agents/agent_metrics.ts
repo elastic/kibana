@@ -15,7 +15,19 @@ const AGGREGATION_MAX_SIZE = 1000;
 
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
   try {
-    return await _fetchAndAssignAgentMetrics(esClient, agents);
+    const fleetAgents = agents.filter((agent) => agent.type !== 'OPAMP');
+    const opampAgents = agents.filter((agent) => agent.type === 'OPAMP');
+    const fleetAgentsMetrics = await _fetchAndAssignAgentMetrics(esClient, fleetAgents);
+    const opampAgentsMetrics = await _fetchAndAssignOtelMetrics(esClient, opampAgents);
+    const metricsMap = [...fleetAgentsMetrics, ...opampAgentsMetrics].reduce((acc, agent) => {
+      acc[agent.id] = agent.metrics;
+      return acc;
+    }, {} as Record<string, Agent['metrics']>);
+
+    return agents.map((agent) => ({
+      ...agent,
+      metrics: metricsMap[agent.id],
+    }));
   } catch (err) {
     //  Do not throw if we are not able to fetch metrics, as it could occur if the user is missing some permissions
     appContextService.getLogger().warn(err);
@@ -23,6 +35,125 @@ export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, 
     return agents;
   }
 }
+
+async function _fetchAndAssignOtelMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
+  const res = await esClient.search<
+    unknown,
+    Record<
+      'agents',
+      {
+        buckets: Array<{
+          key: string;
+          avg_memory_size: { value: number };
+          avg_cpu: { value: number };
+        }>;
+      }
+    >
+  >({
+    ...(aggregationQueryBuilderOtel(agents.map(({ id }) => id)) as any),
+    index: 'metrics-collectortelemetry.otel-*',
+  });
+
+  const formattedResults =
+    res.aggregations?.agents.buckets.reduce((acc, bucket) => {
+      acc[bucket.key] = {
+        avg_memory_size: bucket.avg_memory_size.value,
+        avg_cpu: bucket.avg_cpu.value,
+      };
+      return acc;
+    }, {} as Record<string, { avg_memory_size: number; avg_cpu: number }>) ?? {};
+
+  return agents.map((agent) => {
+    const results = formattedResults[agent.id];
+
+    return {
+      id: agent.id,
+      metrics: {
+        cpu_avg: results?.avg_cpu ? Math.trunc(results.avg_cpu * 100000) / 100000 : undefined,
+        memory_size_byte_avg: results?.avg_memory_size
+          ? Math.trunc(results?.avg_memory_size)
+          : undefined,
+      },
+    };
+  });
+}
+
+const aggregationQueryBuilderOtel = (agentIds: string[]) => ({
+  size: 0,
+  query: {
+    bool: {
+      must: [
+        {
+          terms: {
+            _tier: DATA_TIERS,
+          },
+        },
+        {
+          range: {
+            '@timestamp': {
+              gte: 'now-5m',
+            },
+          },
+        },
+        {
+          terms: {
+            'service.instance.id': agentIds,
+          },
+        },
+        {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        'data_stream.dataset': 'collectortelemetry.otel',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+  aggs: {
+    agents: {
+      terms: {
+        field: 'service.instance.id',
+        size: AGGREGATION_MAX_SIZE,
+      },
+      aggs: {
+        avg_memory_size: {
+          avg: {
+            field: 'otelcol_process_memory_rss',
+          },
+        },
+
+        cpu_seconds_max: { max: { field: 'otelcol_process_cpu_seconds' } },
+        cpu_seconds_min: { min: { field: 'otelcol_process_cpu_seconds' } },
+        uptime_max: { max: { field: 'otelcol_process_uptime' } },
+        uptime_min: { min: { field: 'otelcol_process_uptime' } },
+
+        avg_cpu: {
+          bucket_script: {
+            buckets_path: {
+              cpuMax: 'cpu_seconds_max',
+              cpuMin: 'cpu_seconds_min',
+              upMax: 'uptime_max',
+              upMin: 'uptime_min',
+            },
+            script:
+              'double cpuDelta = params.cpuMax - params.cpuMin; double upDelta = params.upMax - params.upMin; return upDelta > 0 ? (cpuDelta / upDelta) : null;',
+          },
+        },
+      },
+    },
+  },
+});
 
 async function _fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
   const res = await esClient.search<
@@ -55,7 +186,7 @@ async function _fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents
     const results = formattedResults[agent.id];
 
     return {
-      ...agent,
+      id: agent.id,
       metrics: {
         cpu_avg: results?.sum_cpu ? Math.trunc(results.sum_cpu * 100000) / 100000 : undefined,
         memory_size_byte_avg: results?.sum_memory_size

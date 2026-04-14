@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstQueryExpression } from '@kbn/esql-language';
-import { Walker } from '@kbn/esql-language';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
+import { Walker } from '@elastic/esql';
 import { ParameterReplacer } from '../transformers/parameter_replacer';
 import type { Params } from '../types';
 

@@ -74,11 +74,11 @@ describe('utils', () => {
       });
     });
 
-    test('should remove existing mode when indexMode is undefined', () => {
+    test('should preserve existing mode when indexMode is undefined', () => {
       const template = {
         settings: {
           index: {
-            mode: IndexMode.standard,
+            mode: IndexMode.logsdb,
             number_of_shards: 3,
           },
         },
@@ -86,6 +86,7 @@ describe('utils', () => {
       const result = buildTemplateSettings(template, undefined);
       expect(result).toEqual({
         index: {
+          mode: IndexMode.logsdb,
           number_of_shards: 3,
         },
       });
@@ -141,18 +142,6 @@ describe('utils', () => {
         number_of_shards: 3,
         other_setting: 10000,
       });
-    });
-
-    test('should return undefined when only mode exists and indexMode is undefined', () => {
-      const template = {
-        settings: {
-          index: {
-            mode: IndexMode.standard,
-          },
-        },
-      };
-      const result = buildTemplateSettings(template, undefined);
-      expect(result).toBeUndefined();
     });
 
     test('should handle complex nested settings', () => {

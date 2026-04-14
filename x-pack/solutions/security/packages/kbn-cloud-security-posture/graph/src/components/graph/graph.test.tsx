@@ -118,6 +118,26 @@ describe('<Graph />', () => {
       });
     });
 
+    it('should render relationship node', async () => {
+      const { container } = renderGraphPreview({
+        nodes: [
+          {
+            id: 'rel1',
+            label: 'Owns',
+            shape: 'relationship',
+          },
+        ],
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        const nodeEl = container.querySelector('[data-id="rel1"]');
+        expect(nodeEl).not.toBeNull();
+        expect(nodeEl).toHaveTextContent('Owns');
+      });
+    });
+
     it('should render 2 nodes connected', async () => {
       const { container } = renderGraphPreview({
         nodes: [
@@ -572,6 +592,63 @@ describe('<Graph />', () => {
       await waitFor(() => {
         expect(onCenterGraphAfterRefresh).toHaveBeenCalledWith(newNodes);
         expect(mockFitView).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should center on origin relationship nodes for entity origin scenario', async () => {
+      const props = {
+        nodes: [
+          { id: 'originEntity', label: 'Origin Entity', color: 'primary', shape: 'ellipse' },
+          { id: 'target1', label: 'Target 1', color: 'primary', shape: 'hexagon' },
+          { id: 'target2', label: 'Target 2', color: 'primary', shape: 'rectangle' },
+          { id: 'rel-owns', label: 'Owns', shape: 'relationship', isOrigin: true },
+          {
+            id: 'rel-communicates',
+            label: 'Communicates with',
+            shape: 'relationship',
+            isOrigin: true,
+          },
+          { id: 'rel-depends', label: 'Depends on', shape: 'relationship' },
+        ] as NodeViewModel[],
+        edges: [
+          { id: 'e1', source: 'originEntity', target: 'rel-owns', color: 'primary' },
+          { id: 'e2', source: 'originEntity', target: 'rel-communicates', color: 'primary' },
+          { id: 'e3', source: 'rel-owns', target: 'target1', color: 'primary' },
+          { id: 'e4', source: 'rel-communicates', target: 'target2', color: 'primary' },
+          { id: 'e5', source: 'target1', target: 'rel-depends', color: 'primary' },
+        ] as EdgeViewModel[],
+        interactive: true,
+      };
+
+      const { container, rerender } = render(
+        <TestProviders>
+          <Graph {...props} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(6);
+      });
+
+      const newNodes: NodeViewModel[] = [
+        { id: 'target1a', label: 'Target 1a', color: 'primary', shape: 'diamond' },
+      ];
+
+      rerender(
+        <TestProviders>
+          <Graph {...props} nodes={[...props.nodes, ...newNodes]} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(7);
+      });
+
+      await waitFor(() => {
+        expect(mockFitView).toHaveBeenCalledWith({
+          ...fitViewOptions,
+          nodes: [{ id: newNodes[0].id }],
+        });
       });
     });
 

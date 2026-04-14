@@ -8,7 +8,9 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getSampleDocuments } from '@kbn/ai-tools';
 import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/streams-schema';
+import { compact } from 'lodash';
 import type { ComputedFeatureGenerator } from './types';
+import { formatRawDocument } from '../utils/format_raw_document';
 
 const SAMPLE_SIZE = 5;
 const LOG_MESSAGE_FIELDS = ['message', 'body.text'];
@@ -46,7 +48,7 @@ This is useful for understanding error patterns, identifying recurring issues, a
     });
 
     return {
-      samples: hits.map((hit) => hit.fields ?? {}),
+      samples: compact(hits.map((hit) => formatRawDocument({ hit })?.fields)),
     };
   },
 };

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ToolType, platformCoreTools } from '@kbn/agent-builder-common';
 import type { WorkflowToolConfig } from '@kbn/agent-builder-common/tools';
-import { createErrorResult } from '@kbn/agent-builder-server';
+import { createErrorResult, getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/agent-builder-common/tools/types/workflow';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { AnyToolTypeDefinition } from '../definitions';
-import { executeWorkflow } from './execute_workflow';
+import { executeWorkflow } from '../../../workflow';
 import { generateSchema } from './generate_schema';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateWorkflowId } from './validation';
@@ -36,22 +37,28 @@ export const getWorkflowToolType = ({
     getDynamicProps: (config, { spaceId }) => {
       return {
         getHandler: () => {
-          return async (params, { request }) => {
+          return async (params, { request, runContext }) => {
             const { management: workflowApi } = workflowsManagement;
             const workflowId = config.workflow_id;
+            const agentId = getAgentFromRunContext(runContext)?.agentId;
 
             try {
-              const workflowResults = await executeWorkflow({
+              const result = await executeWorkflow({
                 request,
                 spaceId,
                 workflowApi,
                 workflowId,
                 workflowParams: params,
                 waitForCompletion: config.wait_for_completion,
+                metadata: agentId ? { agent_id: agentId } : undefined,
               });
 
+              const toolResults = result.success
+                ? [otherResult({ execution: result.execution })]
+                : [errorResult(result.error)];
+
               return {
-                results: workflowResults,
+                results: toolResults,
               };
             } catch (e) {
               return {
@@ -91,7 +98,11 @@ export const getWorkflowToolType = ({
           - This tool executes the workflow with the ID '${config.workflow_id}'
           - ${waitInstruction}
           - If the workflow wasn't completed, a workflow execution ID will be returned.
-          - The ${platformCoreTools.getWorkflowExecutionStatus} tool can be used later to check the status of the workflow execution
+          - The ${platformCoreTools.getWorkflowExecutionStatus} tool can be used later to check the status of the workflow execution.
+          - If the workflow returns with status "waiting_for_input", it is paused and requires human input to continue.
+            The response will include a "waiting_input" object with a "message" (what the workflow is asking for)
+            and an optional "schema" (JSON Schema describing the expected input fields).
+            Use the ${platformCoreTools.resumeWorkflowExecution} tool to provide the required input and resume the workflow.
 
           `);
         },

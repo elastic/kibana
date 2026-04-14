@@ -95,7 +95,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
     <>
       {tagMenuButtonVisible && (
         <EuiButtonIcon
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.translate('xpack.fleet.tagOptions.tagOptionsToggleButtonLabel', {
             defaultMessage: 'Tag Options',
           })}

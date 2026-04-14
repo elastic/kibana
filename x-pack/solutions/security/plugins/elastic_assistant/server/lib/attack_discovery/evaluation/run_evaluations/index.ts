@@ -6,11 +6,11 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type { Logger } from '@kbn/core/server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { asyncForEach } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
 
@@ -30,6 +30,7 @@ export const runEvaluations = async ({
   connectorTimeout,
   evaluatorConnectorId,
   datasetName,
+  getInferenceConnectorById,
   graphs,
   langSmithApiKey,
   logger,
@@ -38,8 +39,9 @@ export const runEvaluations = async ({
   connectorTimeout: number;
   evaluatorConnectorId: string | undefined;
   datasetName: string;
+  getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
   graphs: Array<{
-    connector: Connector;
+    connector: InferenceConnector;
     graph: DefaultAttackDiscoveryGraph;
     llmType: string | undefined;
     name: string;
@@ -83,6 +85,7 @@ export const runEvaluations = async ({
         connectorTimeout,
         evaluatorConnectorId,
         experimentConnector: connector,
+        getInferenceConnectorById,
         langSmithApiKey,
         logger,
       });

@@ -40,7 +40,6 @@
       "savedObjectsTaggingOss",
       "serverless",
       "noDataPage",
-      "embeddableEnhanced",
       "cps"
     ],
     "requiredBundles": [

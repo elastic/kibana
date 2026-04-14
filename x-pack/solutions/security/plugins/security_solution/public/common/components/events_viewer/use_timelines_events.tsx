@@ -22,6 +22,7 @@ import type {
   TimelineEventsAllStrategyResponse,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import type {
   EntityType,
   TimelineFactoryQueryTypes,
@@ -49,6 +50,7 @@ export interface TimelineArgs {
   inspect: InspectResponse;
   loadPage: LoadPage;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
+  rawEvents: EsHitRecord[];
   refetch: Refetch;
   totalCount: number;
   updatedAt: number;
@@ -214,6 +216,7 @@ export const useTimelineEventsHandler = ({
       querySize: 0,
     },
     events: [],
+    rawEvents: [],
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
@@ -253,6 +256,7 @@ export const useTimelineEventsHandler = ({
                       ...prevResponse,
                       consumers: response.consumers,
                       events: getTimelineEvents(response.edges),
+                      rawEvents: (response.rawResponse?.hits?.hits ?? []) as EsHitRecord[],
                       inspect: getInspectResponse(response, prevResponse.inspect),
                       pageInfo: response.pageInfo,
                       totalCount: response.totalCount,
@@ -403,6 +407,7 @@ export const useTimelineEventsHandler = ({
           querySize: 0,
         },
         events: [],
+        rawEvents: [],
         loadPage: wrappedLoadPage,
         updatedAt: 0,
       });

@@ -5,7 +5,6 @@
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
@@ -64,7 +63,6 @@
     "@kbn/index-management-plugin",
     "@kbn/snapshot-restore-plugin",
     "@kbn/monitoring-plugin",
-    "@kbn/automatic-import-plugin",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/utils",
     "@kbn/core",
@@ -152,8 +150,6 @@
     "@kbn/palettes",
     "@kbn/field-formats-plugin",
     "@kbn/datemath",
-    "@kbn/global-search-plugin",
-    "@kbn/global-search-test-plugin",
     "@kbn/data-usage-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/response-ops-rule-params",
@@ -179,8 +175,14 @@
     "@kbn/es-types",
     "@kbn/streamlang",
     "@kbn/dashboard-plugin",
-    "@kbn/automatic-import-v2-plugin",
+    "@kbn/automatic-import-plugin",
     "@kbn/connector-specs",
-    "@kbn/ftr-llm-proxy"
+    "@kbn/alerting-v2-plugin",
+    "@kbn/ftr-llm-proxy",
+    "@kbn/dev-cli-runner",
+    "@kbn/ui-actions-plugin",
+    "@kbn/product-doc-common",
+    "@kbn/lens-common",
+    "@kbn/alerting-v2-episodes-ui"
   ]
 }

@@ -14,15 +14,19 @@ import type api from '@elastic/elasticsearch/lib/api/types';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type { BaseSearchRuntimeMappings, IDataStreamClient, DataStreamDefinition } from './types';
 import type { ClientHelpers } from './types/client';
-import type {
-  ClientSearchRequest,
-  ClientIndexRequest,
-  ClientBulkRequest,
-  ClientGetRequest,
-} from './types/es_api';
+import type { ClientSearchRequest, ClientCreateRequest } from './types/es_api';
 
 import { initialize } from './initialize';
 import { validateClientArgs } from './validate_client_args';
+import {
+  generateSpacePrefixedId,
+  throwOnIdWithSeparator,
+  decorateDocumentWithSpace,
+  buildSpaceFilter,
+  buildSpaceAgnosticFilter,
+} from './space_utils';
+
+export const DEFAULT_SPACE = 'default';
 
 export class DataStreamClient<
   MappingsInDefinition extends MappingsDefinition,
@@ -74,28 +78,51 @@ export class DataStreamClient<
     },
   };
 
-  public async index(args: ClientIndexRequest<FullDocumentType>) {
-    return this.client.index<FullDocumentType>({
-      ...args,
-      index: this.dataStreamDefinition.name,
-    });
-  }
+  public async create(args: ClientCreateRequest<FullDocumentType>) {
+    const { space, documents, ...restArgs } = args;
 
-  public async bulk(args: ClientBulkRequest<FullDocumentType>) {
+    // Convert documents to ES bulk format: [metadata, document] pairs
+    const operations: Array<api.BulkOperationContainer | FullDocumentType> = [];
+
+    for (const doc of documents) {
+      // Extract _id from document if present
+      const { _id, ...documentWithoutId } = doc as { _id?: string; [key: string]: unknown };
+
+      // Validate _id if provided
+      if (typeof _id !== 'undefined') {
+        throwOnIdWithSeparator(_id);
+      }
+
+      // Process ID and document based on space
+      let processedId: string | undefined = _id;
+      let processedDocument: FullDocumentType;
+
+      if (this.isNonDefaultSpace(space)) {
+        // Space-aware mode: prefix ID and decorate document
+        processedId = generateSpacePrefixedId(space, _id);
+        processedDocument = decorateDocumentWithSpace(documentWithoutId as FullDocumentType, space);
+      } else {
+        // Space-agnostic mode: no prefixing or decoration
+        processedDocument = documentWithoutId as FullDocumentType;
+      }
+
+      // Add create metadata
+      operations.push({
+        create: processedId ? { _id: processedId } : {},
+      } as api.BulkOperationContainer);
+
+      // Add document
+      operations.push(processedDocument);
+    }
+
     return this.client.bulk<FullDocumentType>({
       index: this.dataStreamDefinition.name,
-      ...args,
+      ...restArgs,
+      operations,
     });
   }
 
-  public async get(args: ClientGetRequest) {
-    return this.client.get<FullDocumentType>({
-      index: this.dataStreamDefinition.name,
-      ...args,
-    });
-  }
-
-  public async existsIndex() {
+  public async exists() {
     return this.client.indices.exists({
       index: this.dataStreamDefinition.name,
     });
@@ -105,14 +132,84 @@ export class DataStreamClient<
     args: ClientSearchRequest<SRM>,
     transportOpts?: TransportRequestOptionsWithOutMeta
   ) {
-    return this.client.search<FullDocumentType, Agg>(
+    const { space, query, ...restArgs } = args;
+
+    // Build the space-aware query
+    const spaceQuery = this.buildSpaceAwareQuery(query, space);
+    const response = await this.client.search<FullDocumentType, Agg>(
       {
         index: this.dataStreamDefinition.name,
         runtime_mappings: this.dataStreamDefinition.searchRuntimeMappings,
         fields: this.runtimeFields,
-        ...args,
+        ...restArgs,
+        query: spaceQuery,
       },
       transportOpts
     );
+
+    // Strip kibana.space_ids from all hits if space was provided
+    if (this.isNonDefaultSpace(space) && response.hits?.hits) {
+      return {
+        ...response,
+        hits: {
+          ...response.hits,
+          hits: response.hits.hits.map((hit) => ({
+            ...hit,
+            _source: this.stripSpaceProperty(hit._source),
+          })),
+        },
+      };
+    }
+
+    return response;
+  }
+
+  private isNonDefaultSpace(space?: string): space is string {
+    return typeof space !== 'undefined' && space !== DEFAULT_SPACE;
+  }
+
+  /**
+   * Build a space-aware query by wrapping the original query with space filtering.
+   */
+  private buildSpaceAwareQuery(
+    originalQuery?: api.QueryDslQueryContainer,
+    space?: string
+  ): api.QueryDslQueryContainer {
+    if (this.isNonDefaultSpace(space)) {
+      // Space-aware mode: filter to only documents in this space
+      const spaceFilter = buildSpaceFilter(space);
+      if (originalQuery) {
+        return {
+          bool: {
+            must: [originalQuery],
+            filter: [spaceFilter],
+          },
+        };
+      }
+      return spaceFilter;
+    } else {
+      // Space-agnostic mode: exclude documents that have kibana.space_ids
+      const agnosticFilter = buildSpaceAgnosticFilter();
+      if (originalQuery) {
+        return {
+          bool: {
+            must: [originalQuery],
+            filter: [agnosticFilter],
+          },
+        };
+      }
+      return agnosticFilter;
+    }
+  }
+
+  /**
+   * Remove kibana.space_ids from document before returning to caller.
+   */
+  private stripSpaceProperty(doc?: FullDocumentType): FullDocumentType | undefined {
+    if (typeof doc !== 'object') {
+      return doc;
+    }
+    const { kibana, ...rest } = doc as Record<string, unknown>;
+    return rest as FullDocumentType;
   }
 }

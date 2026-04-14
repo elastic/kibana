@@ -623,8 +623,19 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         expect.objectContaining({
           index: '.fleet-agents',
           query: {
-            terms: {
-              policy_id: ['policy-1', 'policy-4'],
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    policy_id: ['policy-1', 'policy-4'],
+                  },
+                },
+                {
+                  term: {
+                    active: true,
+                  },
+                },
+              ],
             },
           },
           aggs: {

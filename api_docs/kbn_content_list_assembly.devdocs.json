@@ -1,0 +1,944 @@
+{
+  "id": "@kbn/content-list-assembly",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.AssemblyFactory",
+        "type": "Interface",
+        "tags": [
+          "template"
+        ],
+        "label": "AssemblyFactory",
+        "description": [
+          "\nFactory for defining parts and parsing children within an assembly.\n\nCreated by {@link defineAssembly}. Provides `definePart` for creating\ntyped part factories and `parseChildren` for extracting configuration\nfrom React children.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.AssemblyFactory",
+            "text": "AssemblyFactory"
+          },
+          "<TName>"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+        "lineNumber": 167,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.AssemblyFactory.name",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "The assembly name (literal type preserved)."
+            ],
+            "signature": [
+              "TName"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+            "lineNumber": 177,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.AssemblyFactory.definePart",
+            "type": "Function",
+            "tags": [
+              "template",
+              "template",
+              "template"
+            ],
+            "label": "definePart",
+            "description": [
+              "\nDefine a part within this assembly.\n"
+            ],
+            "signature": [
+              "<TPresetMap extends object = Record<string, unknown>, TOutput = React.ReactNode, TContext = void>(partDefinition: { name: string; }) => ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.PartFactory",
+                "text": "PartFactory"
+              },
+              "<TPresetMap, TOutput, TContext>"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.AssemblyFactory.definePart.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "partDefinition",
+                "description": [
+                  "- The part definition."
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 208,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-list-assembly",
+                    "id": "def-public.AssemblyFactory.definePart.$1.name",
+                    "type": "string",
+                    "tags": [],
+                    "label": "name",
+                    "description": [
+                      "- Part name (e.g., `'column'`, `'filter'`)."
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                    "lineNumber": 209,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": [
+              "A {@link PartFactory } for creating presets and components."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.AssemblyFactory.parseChildren",
+            "type": "Function",
+            "tags": [],
+            "label": "parseChildren",
+            "description": [
+              "\nParse React children for declarative components in this assembly.\n\nReturns a flat array in source order. Each item is either a\n`ParsedPart` (with `part`, `preset`, `instanceId`, `attributes`) or\na `ParsedChild` passthrough. Use the `type` field to discriminate.\n\nAll part types in the assembly are matched in a single pass.\nFilter by `item.part` to scope to a specific part type.\n\nIn development, warns for function component children that are not\nregistered parts. Pass `{ supportsOtherChildren: true }` to suppress\nthe warning when the renderer intentionally handles non-part children.\n"
+            ],
+            "signature": [
+              "(children: React.ReactNode, options?: { supportsOtherChildren?: boolean | undefined; } | undefined) => ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.ParsedItem",
+                "text": "ParsedItem"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.AssemblyFactory.parseChildren.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [
+                  "- React children to parse."
+                ],
+                "signature": [
+                  "React.ReactNode"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 235,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.AssemblyFactory.parseChildren.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- Optional parsing options."
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 236,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-list-assembly",
+                    "id": "def-public.AssemblyFactory.parseChildren.$2.supportsOtherChildren",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "supportsOtherChildren",
+                    "description": [
+                      "- When `true`, suppresses the"
+                    ],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                    "lineNumber": 236,
+                    "columnNumber": 17,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": [
+              "Flat array of parsed items in source order."
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.ParsedChild",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParsedChild",
+        "description": [
+          "\nA non-part child from the React tree.\n\nPassthrough children that are not declarative parts (e.g., plain text,\nunknown components) are preserved in source order."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.ParsedChild.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Discriminator. Always `'child'` for passthrough children."
+            ],
+            "signature": [
+              "\"child\""
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.ParsedChild.node",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "node",
+            "description": [
+              "The original React node."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.ParsedPart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParsedPart",
+        "description": [
+          "\nA parsed declarative part extracted from React children.\n\nThe `part` and `preset` fields are the names provided when calling\n`definePart` and `createPreset`. The `attributes` are the component's\nprops as declared in JSX."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.ParsedPart.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Discriminator. Always `'part'` for declarative parts."
+            ],
+            "signature": [
+              "\"part\""
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.ParsedPart.part",
+            "type": "string",
+            "tags": [],
+            "label": "part",
+            "description": [
+              "Part name (e.g., `'column'`, `'filter'`)."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.ParsedPart.preset",
+            "type": "string",
+            "tags": [],
+            "label": "preset",
+            "description": [
+              "Preset name (e.g., `'name'`, `'sort'`), or `undefined` for custom parts."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.ParsedPart.instanceId",
+            "type": "string",
+            "tags": [],
+            "label": "instanceId",
+            "description": [
+              "Unique instance identity, resolved from `props.id`, preset, or auto-generated."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.ParsedPart.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [
+              "The component's props as declared in JSX."
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.PartFactory",
+        "type": "Interface",
+        "tags": [
+          "template",
+          "template",
+          "template"
+        ],
+        "label": "PartFactory",
+        "description": [
+          "\nFactory for creating parts within an assembly.\n\nCreated by {@link AssemblyFactory.definePart}. Provides methods to\ncreate preset components, generic components, and to tag existing\ncomponents with assembly metadata.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.PartFactory",
+            "text": "PartFactory"
+          },
+          "<TPresetMap, TOutput, TContext>"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.PartFactory.createPreset",
+            "type": "Function",
+            "tags": [
+              "template"
+            ],
+            "label": "createPreset",
+            "description": [
+              "\nCreate a preset component. The props type is inferred from the\npreset-to-props mapping provided to `definePart`.\n\nOptionally provide a `resolve` callback that converts declarative\nattributes into concrete output (e.g., an `EuiBasicTableColumn`).\nThe callback is stored internally and invoked by {@link resolve}.\n"
+            ],
+            "signature": [
+              "<K extends keyof TPresetMap & string>(definition: { name: K; resolve?: ((attributes: TPresetMap[K], context: TContext) => TOutput | undefined) | undefined; }) => React.FC<TPresetMap[K]>"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.PartFactory.createPreset.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "definition",
+                "description": [
+                  "- The preset definition."
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 97,
+                "columnNumber": 67,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-list-assembly",
+                    "id": "def-public.PartFactory.createPreset.$1.name",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "name",
+                    "description": [
+                      "- Preset name, constrained to `keyof TPresetMap`."
+                    ],
+                    "signature": [
+                      "K"
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                    "lineNumber": 98,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-list-assembly",
+                    "id": "def-public.PartFactory.createPreset.$1.resolve",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "resolve",
+                    "description": [
+                      "- Optional callback to resolve attributes into output."
+                    ],
+                    "signature": [
+                      "((attributes: TPresetMap[K], context: TContext) => TOutput | undefined) | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                    "lineNumber": 99,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/content-list-assembly",
+                        "id": "def-public.PartFactory.createPreset.$1.resolve.$1",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "attributes",
+                        "description": [],
+                        "signature": [
+                          "TPresetMap[K]"
+                        ],
+                        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                        "lineNumber": 99,
+                        "columnNumber": 16,
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      },
+                      {
+                        "parentPluginId": "@kbn/content-list-assembly",
+                        "id": "def-public.PartFactory.createPreset.$1.resolve.$2",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "context",
+                        "description": [],
+                        "signature": [
+                          "TContext"
+                        ],
+                        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                        "lineNumber": 99,
+                        "columnNumber": 43,
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      }
+                    ],
+                    "returnComment": []
+                  }
+                ]
+              }
+            ],
+            "returnComment": [
+              "An `FC` whose props type is `TPresetMap[K]`."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.PartFactory.resolve",
+            "type": "Function",
+            "tags": [],
+            "label": "resolve",
+            "description": [
+              "\nResolve a parsed part into concrete output by dispatching to the\n`resolve` callback registered via `createPreset` or `createComponent`.\n\nChecks preset resolvers first. If no preset resolver matches, falls\nback to the component resolver registered via `createComponent({ resolve })`.\nReturns `undefined` if no resolver handles the part.\n"
+            ],
+            "signature": [
+              "(part: ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.ParsedPart",
+                "text": "ParsedPart"
+              },
+              ", context: TContext) => TOutput | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.PartFactory.resolve.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "part",
+                "description": [
+                  "- A parsed part from `parseChildren`."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-assembly",
+                    "scope": "public",
+                    "docId": "kibKbnContentListAssemblyPluginApi",
+                    "section": "def-public.ParsedPart",
+                    "text": "ParsedPart"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 114,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.PartFactory.resolve.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [
+                  "- Context passed through to the resolve callback."
+                ],
+                "signature": [
+                  "TContext"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 114,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The resolved output, or `undefined`."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.PartFactory.parseChildren",
+            "type": "Function",
+            "tags": [],
+            "label": "parseChildren",
+            "description": [
+              "\nParse React children and filter to this part type.\n\nEquivalent to calling `assembly.parseChildren(children)` and filtering\nto `item.type === 'part' && item.part === thisPartName`. Use this\ninstead of importing the assembly factory directly.\n"
+            ],
+            "signature": [
+              "(children: React.ReactNode) => ",
+              {
+                "pluginId": "@kbn/content-list-assembly",
+                "scope": "public",
+                "docId": "kibKbnContentListAssemblyPluginApi",
+                "section": "def-public.ParsedPart",
+                "text": "ParsedPart"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.PartFactory.parseChildren.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [
+                  "- React children to parse."
+                ],
+                "signature": [
+                  "React.ReactNode"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 126,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "Parsed parts belonging to this part type, in source order."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.PartFactory.createComponent",
+            "type": "Function",
+            "tags": [
+              "template"
+            ],
+            "label": "createComponent",
+            "description": [
+              "\nCreate a component without a preset (e.g., custom columns).\n\nUse this for parts that get their identity from `props.id` rather\nthan a static preset name. Optionally provide a `resolve` callback\nto handle custom parts in `part.resolve()`, eliminating the need\nfor manual casts in consumer code.\n"
+            ],
+            "signature": [
+              "<P>(options?: { resolve?: ((attributes: P, context: TContext) => TOutput | undefined) | undefined; } | undefined) => React.FC<P>"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.PartFactory.createComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- Optional configuration."
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 142,
+                "columnNumber": 34,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-list-assembly",
+                    "id": "def-public.PartFactory.createComponent.$1.resolve",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "resolve",
+                    "description": [
+                      "- Fallback resolver for parts without a preset."
+                    ],
+                    "signature": [
+                      "((attributes: P, context: TContext) => TOutput | undefined) | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                    "lineNumber": 143,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/content-list-assembly",
+                        "id": "def-public.PartFactory.createComponent.$1.resolve.$1",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "attributes",
+                        "description": [],
+                        "signature": [
+                          "P"
+                        ],
+                        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                        "lineNumber": 143,
+                        "columnNumber": 16,
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      },
+                      {
+                        "parentPluginId": "@kbn/content-list-assembly",
+                        "id": "def-public.PartFactory.createComponent.$1.resolve.$2",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "context",
+                        "description": [],
+                        "signature": [
+                          "TContext"
+                        ],
+                        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                        "lineNumber": 143,
+                        "columnNumber": 31,
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      }
+                    ],
+                    "returnComment": []
+                  }
+                ]
+              }
+            ],
+            "returnComment": [
+              "An `FC<P>` that returns `null`."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.PartFactory.tagComponent",
+            "type": "Function",
+            "tags": [
+              "template"
+            ],
+            "label": "tagComponent",
+            "description": [
+              "\nTag an existing component with assembly metadata.\n\nUse this when the component needs its own generic type parameter\nand cannot be created via `createPreset` or `createComponent`.\n"
+            ],
+            "signature": [
+              "<C extends (...args: any[]) => null>(component: C, options?: { preset?: (keyof TPresetMap & string) | undefined; } | undefined) => C"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.PartFactory.tagComponent.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "component",
+                "description": [
+                  "- The component function to tag."
+                ],
+                "signature": [
+                  "C"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 158,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-list-assembly",
+                "id": "def-public.PartFactory.tagComponent.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- Optional preset name."
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                "lineNumber": 159,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-list-assembly",
+                    "id": "def-public.PartFactory.tagComponent.$2.preset",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "preset",
+                    "description": [],
+                    "signature": [
+                      "(keyof TPresetMap & string) | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+                    "lineNumber": 159,
+                    "columnNumber": 17,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": [
+              "The same component, now tagged with static Symbol properties."
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.DeclarativeComponent",
+        "type": "Type",
+        "tags": [
+          "template"
+        ],
+        "label": "DeclarativeComponent",
+        "description": [
+          "\nFunction type for a non-generic declarative component.\n\nShorthand for `(props: P) => null`. This is the recommended way to type\nhand-written declarative components.\n"
+        ],
+        "signature": [
+          "(props: P) => null"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-assembly",
+            "id": "def-public.DeclarativeComponent.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.DeclarativeReturn",
+        "type": "Type",
+        "tags": [],
+        "label": "DeclarativeReturn",
+        "description": [
+          "\nReturn type for declarative components.\n\nPrefer {@link DeclarativeComponent} when possible. Use `DeclarativeReturn`\ndirectly when you need to hand-write the full function signature.\n"
+        ],
+        "signature": [
+          "null"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.defineAssembly",
+        "type": "Any",
+        "tags": [
+          "template"
+        ],
+        "label": "defineAssembly",
+        "description": [
+          "\nDefine a new assembly.\n\nReturns an {@link AssemblyFactory} that provides `definePart()` for\ncreating typed part factories and `parseChildren()` for extracting\nconfiguration from React children.\n"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/assembly.ts",
+        "lineNumber": 278,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-assembly",
+        "id": "def-public.ParsedItem",
+        "type": "Type",
+        "tags": [],
+        "label": "ParsedItem",
+        "description": [
+          "\nA single item from the parse result -- either a declarative part or\na passthrough child. Use the `type` field to discriminate."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.ParsedPart",
+            "text": "ParsedPart"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/content-list-assembly",
+            "scope": "public",
+            "docId": "kibKbnContentListAssemblyPluginApi",
+            "section": "def-public.ParsedChild",
+            "text": "ParsedChild"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/src/parsing.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

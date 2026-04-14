@@ -7,13 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { metricStateSchema } from '../../schema/charts/metric';
+import type { MetricState } from '../../schema/charts/metric';
+import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
+import { dynamicColorsMetricAttributes } from './dynamic_colors.mock';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
   simpleMetricAttributes,
   breakdownMetricAttributes,
   complexMetricAttributes,
   breakdownMetricWithFormulaRefColumnsAttributes,
+  selectorColorByValueAttributes,
+  defaultColorByValueAttributes,
 } from './lens_state_config.mock';
 import {
   simpleMetricAPIAttributes,
@@ -35,6 +42,14 @@ describe('Metric', () => {
 
     it('should convert a breakdown-by metric', () => {
       validateConverter(breakdownMetricAttributes, metricStateSchema);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, metricStateSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, metricStateSchema);
     });
   });
   describe('validateAPIConverter', () => {
@@ -61,5 +76,59 @@ describe('Metric', () => {
 
   it('should convert a breakdown-by metric with formula reference columns and rank_by in the terms bucket operation', () => {
     validateConverter(breakdownMetricWithFormulaRefColumnsAttributes, metricStateSchema);
+  });
+
+  it('should convert a dynamic colors metric', () => {
+    validateConverter(dynamicColorsMetricAttributes, metricStateSchema);
+  });
+
+  describe('color default application', () => {
+    const baseMetric = {
+      type: 'metric',
+      title: 'Color default test',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'count',
+          empty_as_null: false,
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies MetricState;
+
+    it('should emit AUTO_COLOR for primary metric when no color is specified', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseMetric);
+      const apiOutput = builder.toAPIFormat(lensState) as MetricState;
+
+      expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+    });
+
+    it('should emit NO_COLOR for secondary metric when no color is specified', () => {
+      const config = {
+        ...baseMetric,
+        metrics: [
+          ...baseMetric.metrics,
+          {
+            type: 'secondary',
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+      } satisfies MetricState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as MetricState;
+
+      expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metrics[1].color).toEqual(NO_COLOR);
+    });
   });
 });

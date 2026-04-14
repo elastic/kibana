@@ -7,6 +7,7 @@
 import { isEmpty } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { migrateLegacyLastRunOutcomeMsg } from '../../../rules_client/lib';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import type { RuleDomain, Monitoring, RuleParams } from '../types';
@@ -207,6 +208,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     apiKey: esRule.apiKey,
     apiKeyOwner: esRule.apiKeyOwner,
     apiKeyCreatedByUser: esRule.apiKeyCreatedByUser,
+    ...(esRule.uiamApiKey !== undefined ? { uiamApiKey: esRule.uiamApiKey } : {}),
     throttle: esRule.throttle,
     muteAll: esRule.muteAll,
     notifyWhen: esRule.notifyWhen,
@@ -224,17 +226,9 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
             : {}),
         }
       : {}),
-    ...(lastRun
-      ? {
-          lastRun: {
-            ...lastRun,
-            ...(lastRun.outcomeMsg && !Array.isArray(lastRun.outcomeMsg)
-              ? { outcomeMsg: lastRun.outcomeMsg ? [lastRun.outcomeMsg] : null }
-              : { outcomeMsg: lastRun.outcomeMsg }),
-          },
-        }
-      : {}),
+    ...(lastRun ? { lastRun: migrateLegacyLastRunOutcomeMsg(lastRun) } : {}),
     ...(esRule.nextRun ? { nextRun: new Date(esRule.nextRun) } : {}),
+    ...(esRule.lastEnabledAt ? { lastEnabledAt: new Date(esRule.lastEnabledAt) } : {}),
     revision: esRule.revision,
     running: esRule.running,
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),

@@ -211,6 +211,40 @@ describe('waterfall_helpers', () => {
       expect(waterfall.errorItems.length).toBe(0);
       expect(waterfall.getErrorCount('myTransactionId2')).toEqual(0);
     });
+
+    it('should fallback to root transaction when entry is missing from trace docs', () => {
+      const apiResp = {
+        traceItems: {
+          traceDocs: hits.filter(
+            (item) =>
+              item.processor?.event === 'transaction' && item.transaction?.id === 'myTransactionId2'
+          ),
+          errorDocs,
+          exceedsMax: false,
+          spanLinksCountById: {},
+          traceDocsTotal: hits.length,
+          maxTraceItems: 5000,
+        },
+        entryTransaction: {
+          processor: { event: 'transaction' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-node' },
+          transaction: {
+            duration: { us: 49660 },
+            name: 'GET /api',
+            id: 'myTransactionId1',
+          },
+          timestamp: { us: 1549324795784006 },
+        } as Transaction,
+      };
+
+      const waterfall = getWaterfall(apiResp);
+
+      expect(waterfall.items.length).toBe(1);
+      expect(waterfall.items[0].id).toBe('myTransactionId2');
+      expect(waterfall.errorItems.length).toBe(0);
+    });
+
     it('should reparent spans', () => {
       const traceItems = [
         {

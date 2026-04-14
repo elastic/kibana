@@ -1,0 +1,47 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "synthetics-browser-default",
+    "template": {
+      "name": "synthetics-browser-test-archiver",
+      "index_patterns": ["synthetics-browser-default*"],
+      "data_stream": {},
+      "priority": 1,
+      "template": {
+        "settings": {}
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "synthetics-browser.network-default",
+    "template": {
+      "name": "synthetics-browser.network-test-archiver",
+      "index_patterns": ["synthetics-browser.network-default*"],
+      "data_stream": {},
+      "priority": 1,
+      "template": {
+        "settings": {}
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "synthetics-browser.screenshot-default",
+    "template": {
+      "name": "synthetics-browser.screenshot-test-archiver",
+      "index_patterns": ["synthetics-browser.screenshot-default*"],
+      "data_stream": {},
+      "priority": 1,
+      "template": {
+        "settings": {}
+      }
+    }
+  }
+}

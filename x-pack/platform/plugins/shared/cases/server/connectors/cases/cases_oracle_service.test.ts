@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -33,7 +33,7 @@ describe('CasesOracleService', () => {
       const owner = 'cases';
       const grouping = { 'host.ip': '0.0.0.1' };
 
-      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(grouping)}`;
+      const payload = `${ruleId}:${spaceId}:${owner}:${stableStringify(grouping)}`;
       const hash = createHash('sha256');
 
       hash.update(payload);
@@ -50,7 +50,7 @@ describe('CasesOracleService', () => {
       const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
       const sortedGrouping = { 'agent.id': '8a4f500d', 'host.ip': '0.0.0.1' };
 
-      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(sortedGrouping)}`;
+      const payload = `${ruleId}:${spaceId}:${owner}:${stableStringify(sortedGrouping)}`;
       const hash = createHash('sha256');
 
       hash.update(payload);
@@ -81,7 +81,7 @@ describe('CasesOracleService', () => {
       const owner = 'cases';
       const grouping = {};
 
-      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(grouping)}`;
+      const payload = `${ruleId}:${spaceId}:${owner}:${stableStringify(grouping)}`;
       const hash = createHash('sha256');
 
       hash.update(payload);
@@ -96,7 +96,7 @@ describe('CasesOracleService', () => {
       const owner = 'cases';
       const grouping = { 'host.ip': '0.0.0.1' };
 
-      const payload = `${spaceId}:${owner}:${stringify(grouping)}`;
+      const payload = `${spaceId}:${owner}:${stableStringify(grouping)}`;
       const hash = createHash('sha256');
 
       hash.update(payload);
@@ -133,7 +133,7 @@ describe('CasesOracleService', () => {
 
         const payload = `${getPayloadValue(params.ruleId)}${getPayloadValue(
           params.spaceId
-        )}${getPayloadValue(params.owner)}${stringify(grouping)}`;
+        )}${getPayloadValue(params.owner)}${stableStringify(grouping)}`;
 
         const hash = createHash('sha256');
 
@@ -151,7 +151,7 @@ describe('CasesOracleService', () => {
       const owner = 'cases{';
       const grouping = { '{:}': `{}=:&".'/{}}` };
 
-      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(grouping)}`;
+      const payload = `${ruleId}:${spaceId}:${owner}:${stableStringify(grouping)}`;
       const hash = createHash('sha256');
 
       hash.update(payload);

@@ -166,8 +166,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       const packagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
       );
 
       expect(packagePolicy?.policy_id).eql(testFleetPolicyID);
@@ -230,8 +229,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       let packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -246,8 +244,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2 + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID2);
@@ -281,8 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       let packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -297,8 +293,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2 + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2
       );
 
       expect(packagePolicy).eql(undefined);
@@ -312,8 +307,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       const packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
       );
 
       expect(packagePolicy).eql(undefined);
@@ -355,18 +349,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       monitorId = apiResponse.body.id;
 
       const policyResponse = await supertestWithAuth.get(
-        '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        `/s/${SPACE_ID}/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics`
       );
 
       const packagePolicy = policyResponse.body.items.find(
         (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === monitorId + '-' + spaceScopedPrivateLocation.id + `-${SPACE_ID}`
+          pkgPolicy.id === monitorId + '-' + spaceScopedPrivateLocation.id
       );
 
       expect(packagePolicy.policy_id).eql(spaceScopedPrivateLocation.id);
-      expect(packagePolicy.name).eql(
-        `${monitor.name}-${spaceScopedPrivateLocation.label}-${SPACE_ID}`
-      );
+      expect(packagePolicy.name).eql(`${monitor.name}-${spaceScopedPrivateLocation.label}`);
       comparePolicies(
         packagePolicy,
         getTestSyntheticsPolicy({
@@ -417,8 +409,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + testFleetPolicyID
         );
         comparePolicies(
           packagePolicy,
@@ -466,8 +457,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + testFleetPolicyID
         );
         comparePolicies(
           packagePolicy,
@@ -482,9 +472,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    it('handles auto upgrading policies', async () => {
+    it('handles auto upgrading policies', async function () {
       // force a lower version
       const lowerVersion = '1.1.1';
+
+      // Check if the lower version is available in the package registry.
+      // The package-registry-verify-and-promote pipeline may use a registry
+      // that doesn't include old versions — skip gracefully instead of timing out.
+      const pkgCheck = await supertestWithAuth
+        .get(`/api/fleet/epm/packages/synthetics/${lowerVersion}`)
+        .set('kbn-xsrf', 'true');
+      if (pkgCheck.status === 404) {
+        this.skip();
+      }
+
       await testPrivateLocations.installSyntheticsPackage({ version: lowerVersion });
       let monitorId = '';
       const privateLocation = await testPrivateLocations.addTestPrivateLocation();
@@ -512,24 +513,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + privateLocation.id + `-default`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
         );
 
         expect(packagePolicy.package.version).eql(lowerVersion);
         await supertestWithAuth.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-        await retry.tryForTime(60 * 1000, async () => {
+        await retry.tryForTime(120 * 1000, async () => {
           const policyResponseAfterUpgrade = await supertestWithAuth.get(
             '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
           );
           const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
-            (pkgPolicy: PackagePolicy) =>
-              pkgPolicy.id === monitorId + '-' + privateLocation.id + `-default`
+            (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
           );
           expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(true);
         });
       } finally {
-        await deleteMonitor(monitorId);
+        try {
+          await deleteMonitor(monitorId);
+        } catch (e) {
+          // ignore cleanup errors
+        }
+        // Restore the package to the latest version so subsequent tests aren't affected
+        try {
+          await testPrivateLocations.installSyntheticsPackage();
+        } catch (e) {
+          // ignore cleanup errors
+        }
       }
     });
 

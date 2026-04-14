@@ -24,6 +24,17 @@ export const getSnapshots: Task = async (ctx, task) => {
       },
     },
     {
+      title: `Obtain snapshot for current serverless baseline '${ctx.serverlessGitRev}'`,
+      task: async () => {
+        ctx.serverlessFrom = await fetchSnapshot(ctx.serverlessGitRev!);
+      },
+      enabled: () => Boolean(ctx.serverlessGitRev) && ctx.serverlessGitRev !== ctx.gitRev,
+      retry: {
+        delay: 2000,
+        tries: 5,
+      },
+    },
+    {
       title: `Take snapshot of current SO type definitions`,
       task: async () => {
         ctx.to = await takeSnapshot(ctx.registeredTypes!);

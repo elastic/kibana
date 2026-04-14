@@ -89,7 +89,7 @@
         "label": "KeyValueTable",
         "description": [],
         "signature": [
-          "({\n  keyValuePairs,\n  tableProps = {},\n}: { keyValuePairs: ",
+          "({\n  keyValuePairs,\n  tableProps = {},\n  dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS',\n  dateTimezone = 'Browser',\n}: { keyValuePairs: ",
           {
             "pluginId": "@kbn/key-value-metadata-table",
             "scope": "common",
@@ -99,7 +99,7 @@
           },
           "[]; tableProps?: (",
           "EuiTableProps",
-          " & React.TableHTMLAttributes<HTMLTableElement>) | undefined; }) => React.JSX.Element"
+          " & React.TableHTMLAttributes<HTMLTableElement>) | undefined; dateFormat?: string | undefined; dateTimezone?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
         "lineNumber": 16,
@@ -112,10 +112,10 @@
             "id": "def-common.KeyValueTable.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  keyValuePairs,\n  tableProps = {},\n}",
+            "label": "{\n  keyValuePairs,\n  tableProps = {},\n  dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS',\n  dateTimezone = 'Browser',\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
-            "lineNumber": 19,
+            "lineNumber": 21,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -138,7 +138,7 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
-                "lineNumber": 20,
+                "lineNumber": 22,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -156,7 +156,39 @@
                   " & React.TableHTMLAttributes<HTMLTableElement>) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
-                "lineNumber": 21,
+                "lineNumber": 23,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/key-value-metadata-table",
+                "id": "def-common.KeyValueTable.$1.dateFormat",
+                "type": "string",
+                "tags": [],
+                "label": "dateFormat",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
+                "lineNumber": 24,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/key-value-metadata-table",
+                "id": "def-common.KeyValueTable.$1.dateTimezone",
+                "type": "string",
+                "tags": [],
+                "label": "dateTimezone",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
+                "lineNumber": 25,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

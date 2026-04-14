@@ -930,6 +930,92 @@ export default function (providerContext: FtrProviderContext) {
           deleteAgentPolicy(policy4.item.id, TEST_SPACE_ID),
         ]);
       });
+
+      describe('with space awareness disabled', () => {
+        beforeEach(async () => {
+          await kibanaServer.savedObjects.update({
+            type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+            id: 'fleet-default-settings',
+            attributes: {
+              use_space_awareness_migration_status: null,
+            },
+            overwrite: true,
+          });
+        });
+        afterEach(async () => {
+          await kibanaServer.savedObjects.update({
+            type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+            id: 'fleet-default-settings',
+            attributes: {
+              use_space_awareness_migration_status: 'success',
+            },
+            overwrite: true,
+          });
+        });
+        it('should bump all related policies if updating non-default output and space awareness is disabled', async () => {
+          // Update settings to simulate older cluster
+          await kibanaServer.savedObjects.update({
+            type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+            id: 'fleet-default-settings',
+            attributes: {},
+            overwrite: true,
+          });
+          const { body: nonDefaultOutput } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Nondefault Output',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr'],
+            })
+            .expect(200);
+
+          const [policy1, policy2, policy3, policy4] = await Promise.all([
+            createAgentPolicy(),
+            createAgentPolicy(undefined, nonDefaultOutput.item.id),
+            createAgentPolicy(TEST_SPACE_ID),
+            createAgentPolicy(TEST_SPACE_ID, nonDefaultOutput.item.id),
+          ]);
+
+          // Create package policies under agent policies using default output to ensure those
+          // agent policies still get bumped
+          await Promise.all([
+            createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id),
+            createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id),
+          ]);
+
+          await supertest
+            .put(`/api/fleet/outputs/${nonDefaultOutput.item.id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Updated Nondefault Output',
+              type: 'elasticsearch',
+              hosts: ['http://test.fr:443'],
+            })
+            .expect(200);
+
+          const [updatedPolicy1, updatedPolicy2, updatedPolicy3, updatedPolicy4] =
+            await Promise.all([
+              getAgentPolicy(policy1.item.id),
+              getAgentPolicy(policy2.item.id),
+              getAgentPolicy(policy3.item.id, TEST_SPACE_ID),
+              getAgentPolicy(policy4.item.id, TEST_SPACE_ID),
+            ]);
+
+          expect(updatedPolicy1.item.revision).to.eql(policy1.item.revision + 2);
+          expect(updatedPolicy2.item.revision).to.eql(policy2.item.revision + 1);
+          expect(updatedPolicy3.item.revision).to.eql(policy3.item.revision + 2);
+          expect(updatedPolicy4.item.revision).to.eql(policy4.item.revision + 1);
+
+          // cleanup
+          await Promise.all([
+            deleteAgentPolicy(policy1.item.id),
+            deleteAgentPolicy(policy2.item.id),
+            deleteAgentPolicy(policy3.item.id, TEST_SPACE_ID),
+            deleteAgentPolicy(policy4.item.id, TEST_SPACE_ID),
+          ]);
+        });
+      });
     });
 
     describe('POST /outputs', () => {

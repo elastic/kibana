@@ -12,6 +12,7 @@ import { memoize, noop } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Moment } from 'moment';
 import moment from 'moment';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat, FIELD_FORMAT_IDS } from '..';
 import type { TextContextTypeConvert } from '../types';
 
@@ -102,7 +103,7 @@ export class DateNanosFormat extends FieldFormat {
 
       this.memoizedConverter = memoize(function converter(value: string | number) {
         if (value === null || value === undefined) {
-          return '-';
+          return NULL_LABEL;
         }
 
         const date = moment(value);

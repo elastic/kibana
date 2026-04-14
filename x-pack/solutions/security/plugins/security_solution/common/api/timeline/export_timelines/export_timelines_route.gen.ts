@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type ExportTimelinesRequestQuery = z.infer<typeof ExportTimelinesRequestQuery>;
 export const ExportTimelinesRequestQuery = z.object({
@@ -27,6 +27,6 @@ export type ExportTimelinesRequestQueryInput = z.input<typeof ExportTimelinesReq
 
 export type ExportTimelinesRequestBody = z.infer<typeof ExportTimelinesRequestBody>;
 export const ExportTimelinesRequestBody = z.object({
-  ids: z.array(z.string()).nullable().optional(),
+  ids: z.array(z.string()).min(1).max(1000).nullable().optional(),
 });
 export type ExportTimelinesRequestBodyInput = z.input<typeof ExportTimelinesRequestBody>;

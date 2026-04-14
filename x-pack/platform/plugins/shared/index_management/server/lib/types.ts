@@ -17,5 +17,6 @@ export interface MeteringStatsResponse {
 export interface UserStartPrivilegesResponse {
   privileges: {
     canManageIndex: boolean;
+    canDeleteDocuments: boolean;
   };
 }

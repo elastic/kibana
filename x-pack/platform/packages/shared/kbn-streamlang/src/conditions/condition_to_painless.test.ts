@@ -6,6 +6,7 @@
  */
 
 import { conditionToPainless, conditionToStatement } from './condition_to_painless';
+import { encodeValue } from '../../types/utils/painless_encoding';
 
 const operatorConditionAndResults = [
   {
@@ -378,5 +379,103 @@ describe('conditionToPainless', () => {
       }
       "
     `);
+  });
+});
+
+describe('encodeValue', () => {
+  describe('string escaping for Painless literals', () => {
+    test('should escape backslashes', () => {
+      expect(encodeValue('C:\\Program Files\\app')).toBe('"C:\\\\Program Files\\\\app"');
+    });
+
+    test('should escape double quotes', () => {
+      expect(encodeValue('say "hello"')).toBe('"say \\"hello\\""');
+    });
+
+    test('should escape newlines as Unicode', () => {
+      expect(encodeValue('line1\nline2')).toBe('"line1\\u000Aline2"');
+    });
+
+    test('should escape carriage returns as Unicode', () => {
+      expect(encodeValue('line1\rline2')).toBe('"line1\\u000Dline2"');
+    });
+
+    test('should escape tabs as Unicode', () => {
+      expect(encodeValue('col1\tcol2')).toBe('"col1\\u0009col2"');
+    });
+
+    test('should handle mixed special characters', () => {
+      expect(encodeValue('path\\to\\"file"\n')).toBe('"path\\\\to\\\\\\"file\\"\\u000A"');
+    });
+
+    test('should handle Windows paths correctly', () => {
+      expect(encodeValue('C:\\Windows\\System32\\drivers\\etc\\hosts')).toBe(
+        '"C:\\\\Windows\\\\System32\\\\drivers\\\\etc\\\\hosts"'
+      );
+    });
+
+    test('should handle strings without special characters', () => {
+      expect(encodeValue('simple_string')).toBe('"simple_string"');
+    });
+
+    test('should handle empty strings', () => {
+      expect(encodeValue('')).toBe('""');
+    });
+  });
+
+  describe('non-string values', () => {
+    test('should return true for boolean true', () => {
+      expect(encodeValue(true)).toBe('true');
+    });
+
+    test('should return false for boolean false', () => {
+      expect(encodeValue(false)).toBe('false');
+    });
+
+    test('should return null for null', () => {
+      expect(encodeValue(null)).toBe('null');
+    });
+
+    test('should return null for undefined', () => {
+      expect(encodeValue(undefined)).toBe('null');
+    });
+
+    test('should return numbers as-is', () => {
+      expect(encodeValue(42)).toBe(42);
+      expect(encodeValue(3.14)).toBe(3.14);
+      expect(encodeValue(-100)).toBe(-100);
+    });
+  });
+});
+
+describe('conditionToStatement with special characters', () => {
+  test('should properly escape backslashes in eq conditions', () => {
+    const condition = { field: 'file.path', eq: 'C:\\Program Files' };
+    const result = conditionToStatement(condition);
+    expect(result).toContain('"C:\\\\Program Files"');
+  });
+
+  test('should properly escape double quotes in eq conditions', () => {
+    const condition = { field: 'message', eq: 'said "hello"' };
+    const result = conditionToStatement(condition);
+    expect(result).toContain('"said \\"hello\\""');
+  });
+
+  test('should properly escape backslashes in contains conditions', () => {
+    const condition = { field: 'log.message', contains: '\\apache' };
+    const result = conditionToStatement(condition);
+    expect(result).toContain('"\\\\apache"');
+  });
+
+  test('should properly escape in startsWith conditions', () => {
+    const condition = { field: 'file.path', startsWith: 'C:\\' };
+    const result = conditionToStatement(condition);
+    expect(result).toContain('"C:\\\\"');
+  });
+
+  test('should properly escape in endsWith conditions', () => {
+    const condition = { field: 'file.path', endsWith: '\\config' };
+    const result = conditionToStatement(condition);
+    expect(result).toContain('"\\\\config"');
   });
 });

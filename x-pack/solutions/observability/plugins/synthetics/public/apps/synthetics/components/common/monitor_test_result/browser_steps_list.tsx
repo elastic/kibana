@@ -169,7 +169,7 @@ export const BrowserStepsList = ({
                 data-test-subj="syntheticsColumnsButton"
                 onClick={() => toggleDetails(item)}
                 aria-label={expandedMap[item._id] ? 'Collapse' : 'Expand'}
-                iconType={expandedMap[item._id] ? 'arrowDown' : 'arrowRight'}
+                iconType={expandedMap[item._id] ? 'chevronSingleDown' : 'chevronSingleRight'}
               />
             ),
           },
@@ -324,6 +324,9 @@ export const BrowserStepsList = ({
               defaultMessage: 'No data found',
             })
       }
+      tableCaption={i18n.translate('xpack.synthetics.monitor.browserStepsList.caption', {
+        defaultMessage: 'Step results',
+      })}
       tableLayout="auto"
       itemId="_id"
       itemIdToExpandedRowMap={testNowMode || showExpand ? expandedMap : undefined}

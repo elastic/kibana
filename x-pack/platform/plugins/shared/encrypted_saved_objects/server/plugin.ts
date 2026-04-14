@@ -8,7 +8,13 @@
 import nodeCrypto from '@elastic/node-crypto';
 import { createHash } from 'crypto';
 
-import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ISavedObjectTypeRegistry,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { ConfigType } from './config';
@@ -25,7 +31,7 @@ import {
 } from './crypto';
 import { defineRoutes } from './routes';
 import type { ClientInstanciator } from './saved_objects';
-import { setupSavedObjects } from './saved_objects';
+import { SavedObjectsEncryptionExtension, setupSavedObjects } from './saved_objects';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -44,6 +50,13 @@ export interface EncryptedSavedObjectsPluginSetup {
 export interface EncryptedSavedObjectsPluginStart {
   isEncryptionError: (error: Error) => boolean;
   getClient: ClientInstanciator;
+  /**
+   * This function is exposed for Core migration testing purposes only.
+   */
+  __testCreateDangerousExtension: (
+    typeRegistry: ISavedObjectTypeRegistry,
+    typeRegistrationOverrides?: EncryptedSavedObjectTypeRegistration[]
+  ) => SavedObjectsEncryptionExtension;
 }
 
 /**
@@ -55,6 +68,7 @@ export class EncryptedSavedObjectsPlugin
 {
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
+  #service?: Readonly<EncryptedSavedObjectsService>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -96,7 +110,8 @@ export class EncryptedSavedObjectsPlugin
     const decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
       nodeCrypto({ encryptionKey: decryptionKey })
     );
-    const service = Object.freeze(
+
+    this.#service = Object.freeze(
       new EncryptedSavedObjectsService({
         primaryCrypto,
         decryptionOnlyCryptos,
@@ -105,7 +120,7 @@ export class EncryptedSavedObjectsPlugin
     );
 
     this.savedObjectsSetup = setupSavedObjects({
-      service,
+      service: this.#service,
       savedObjects: core.savedObjects,
       getStartServices: core.getStartServices,
       logger: this.logger,
@@ -119,7 +134,7 @@ export class EncryptedSavedObjectsPlugin
       encryptionKeyRotationService: Object.freeze(
         new EncryptionKeyRotationService({
           logger: this.logger.get('key-rotation-service'),
-          service,
+          service: this.#service,
           getStartServices: core.getStartServices,
         })
       ),
@@ -129,10 +144,11 @@ export class EncryptedSavedObjectsPlugin
 
     return {
       canEncrypt,
-      registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
-        service.registerType(typeRegistration),
+      registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
+        this.#service?.registerType(typeRegistration);
+      },
       createMigration: getCreateMigration(
-        service,
+        this.#service,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
           const serviceForMigration = new EncryptedSavedObjectsService({
             primaryCrypto,
@@ -144,7 +160,7 @@ export class EncryptedSavedObjectsPlugin
         }
       ),
       createModelVersion: getCreateEsoModelVersion(
-        service,
+        this.#service,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
           const serviceForMigration = new EncryptedSavedObjectsService({
             primaryCrypto,
@@ -163,6 +179,19 @@ export class EncryptedSavedObjectsPlugin
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
       getClient: (options = {}) => this.savedObjectsSetup(options),
+      __testCreateDangerousExtension: (
+        typeRegistry: ISavedObjectTypeRegistry,
+        typeRegistrationOverrides?: EncryptedSavedObjectTypeRegistration[]
+      ): SavedObjectsEncryptionExtension => {
+        if (!this.#service) {
+          throw new Error('EncryptedSavedObjectsPlugin setup has not been called');
+        }
+        return new SavedObjectsEncryptionExtension({
+          baseTypeRegistry: typeRegistry,
+          service: this.#service.__dangerousClone(typeRegistrationOverrides),
+          getCurrentUser: async () => undefined,
+        });
+      },
     };
   }
 

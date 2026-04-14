@@ -6,19 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isAssignment, isColumn, isOptionNode } from '../../../ast/is';
-import { errors, getMessageFromId } from '../../definitions/utils/errors';
-import { validateCommandArguments } from '../../definitions/utils/validation';
+import { isAssignment, isColumn, isOptionNode } from '@elastic/esql';
 import type {
   ESQLAst,
   ESQLAstAllCommands,
   ESQLAstCommand,
   ESQLCommandOption,
-  ESQLMessage,
   ESQLSource,
-} from '../../../types';
+} from '@elastic/esql/types';
+import { errors, getMessageFromId } from '../../definitions/utils/errors';
+import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ESQLPolicy, ICommandCallbacks, ICommandContext } from '../types';
 import { ENRICH_MODES } from './util';
+import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
   command: ESQLAstAllCommands,

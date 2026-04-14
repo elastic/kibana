@@ -14,21 +14,44 @@ import { AddToCaseButton } from './add_to_cases_button';
 
 const CASES_OWNER: string[] = [];
 
+/**
+ * Provides CasesContext without rendering any UI.
+ * Use this when you need CasesContext at a higher level than where
+ * AddToCaseButton is rendered (e.g. above a popover).
+ */
+export const AddToCaseContextProvider: React.FC<React.PropsWithChildren<unknown>> = React.memo(
+  ({ children }) => {
+    const { cases } = useKibana().services;
+    const isCasesAttachment = useContext(CasesAttachmentWrapperContext);
+
+    if (isCasesAttachment) {
+      return <>{children}</>;
+    }
+
+    const casePermissions = cases.helpers.canUseCases();
+    const CasesContext = cases.ui.getCasesContext();
+
+    return (
+      <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
+        {children}
+      </CasesContext>
+    );
+  }
+);
+
+AddToCaseContextProvider.displayName = 'AddToCaseContextProvider';
+
 export const AddToCaseWrapper = React.memo<AddToCaseButtonProps>((props) => {
-  const { cases } = useKibana().services;
   const isCasesAttachment = useContext(CasesAttachmentWrapperContext);
 
-  if (isCasesAttachment || !props.actionId) {
+  if (isCasesAttachment || (!props.actionId && !props.scheduleId)) {
     return <></>;
   }
 
-  const casePermissions = cases.helpers.canUseCases();
-  const CasesContext = cases.ui.getCasesContext();
-
   return (
-    <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
+    <AddToCaseContextProvider>
       <AddToCaseButton {...props} />
-    </CasesContext>
+    </AddToCaseContextProvider>
   );
 });
 

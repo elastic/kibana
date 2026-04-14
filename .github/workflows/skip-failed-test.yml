@@ -1,3 +1,5 @@
+name: Skip failed test on comment
+
 on:
   issue_comment:
     types:

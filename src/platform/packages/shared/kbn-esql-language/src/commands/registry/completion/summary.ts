@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstCompletionCommand, ESQLCommand } from '../../../types';
+import type { ESQLAstCompletionCommand, ESQLCommand } from '@elastic/esql/types';
+import { LeafPrinter } from '@elastic/esql';
 import type { ESQLCommandSummary } from '../types';
-import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
   const { targetField } = command as ESQLAstCompletionCommand;

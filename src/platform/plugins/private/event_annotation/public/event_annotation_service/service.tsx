@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { partition } from 'lodash';
+import { Subject } from 'rxjs';
 import { queryToAst } from '@kbn/data-plugin/common';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
@@ -52,6 +53,7 @@ export function getEventAnnotationService(
   contentManagement: ContentManagementPublicStart
 ): EventAnnotationServiceType {
   const client = contentManagement.client;
+  const annotationGroupUpdated$ = new Subject<string>();
 
   const mapSavedObjectToGroupConfig = (
     savedObject: EventAnnotationGroupSavedObject
@@ -262,6 +264,8 @@ export function getEventAnnotationService(
         references,
       },
     });
+
+    annotationGroupUpdated$.next(annotationGroupId);
   };
 
   const checkHasAnnotationGroups = async (): Promise<boolean> => {
@@ -279,6 +283,7 @@ export function getEventAnnotationService(
   };
 
   return {
+    annotationGroupUpdated$: annotationGroupUpdated$.asObservable(),
     loadAnnotationGroup,
     groupExistsWithTitle,
     updateAnnotationGroup,

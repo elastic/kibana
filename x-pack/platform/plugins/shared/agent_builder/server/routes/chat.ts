@@ -21,13 +21,15 @@ import {
   isConversationCreatedEvent,
   createBadRequestError,
 } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import {
+  ConnectorOrInferenceIdConflictError,
+  resolveConnectorOrInferenceId,
+} from '../../common/resolve_connector_or_inference_id';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
-import type { ChatService } from '../services/chat';
-import type { AttachmentServiceStart } from '../services/attachments';
-import { validateToolSelection } from '../services/agents/persisted/client/utils';
+import type { AgentExecutionService } from '../services/execution';
+import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
@@ -38,7 +40,6 @@ export function registerChatRoutes({
   getInternalServices,
   coreSetup,
   logger,
-  analyticsService,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -50,11 +51,24 @@ export function registerChatRoutes({
       },
     }),
     connector_id: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Optional connector ID for the agent to use for external integrations.',
-        },
-      })
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'Optional connector ID for the agent to use for model routing. Mutually exclusive with `inference_id`; omit or use only one.',
+          },
+        })
+      )
+    ),
+    inference_id: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'Optional inference endpoint ID for model routing (public alias for the same internal identifier as `connector_id`). Mutually exclusive with `connector_id`.',
+          },
+        })
+      )
     ),
     conversation_id: schema.maybe(
       schema.string({
@@ -75,24 +89,46 @@ export function registerChatRoutes({
     ),
     attachments: schema.maybe(
       schema.arrayOf(
-        schema.object({
-          id: schema.maybe(
-            schema.string({
-              meta: { description: 'Optional id for the attachment.' },
-            })
-          ),
-          type: schema.string({
-            meta: { description: 'Type of the attachment.' },
-          }),
-          data: schema.recordOf(schema.string(), schema.any(), {
-            meta: { description: 'Payload of the attachment.' },
-          }),
-          hidden: schema.maybe(
-            schema.boolean({
-              meta: { description: 'When true, the attachment will not be displayed in the UI.' },
-            })
-          ),
-        }),
+        schema.object(
+          {
+            id: schema.maybe(
+              schema.string({
+                meta: { description: 'Optional id for the attachment.' },
+              })
+            ),
+            type: schema.string({
+              meta: { description: 'Type of the attachment.' },
+            }),
+            data: schema.maybe(
+              schema.recordOf(schema.string(), schema.any(), {
+                meta: {
+                  description:
+                    'Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).',
+                },
+              })
+            ),
+            origin: schema.maybe(
+              schema.string({
+                meta: {
+                  description:
+                    'Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.',
+                },
+              })
+            ),
+            hidden: schema.maybe(
+              schema.boolean({
+                meta: { description: 'When true, the attachment will not be displayed in the UI.' },
+              })
+            ),
+          },
+          {
+            validate: (attachment) => {
+              if (attachment.data === undefined && attachment.origin === undefined) {
+                return 'Each attachment must include either data or origin (by-reference attachments require origin)';
+              }
+            },
+          }
+        ),
         {
           meta: {
             description:
@@ -167,25 +203,42 @@ export function registerChatRoutes({
         }
       )
     ),
+    action: schema.maybe(
+      schema.oneOf([schema.literal('regenerate')], {
+        meta: {
+          description:
+            'The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.',
+        },
+      })
+    ),
+    _execution_mode: schema.maybe(
+      schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
+        meta: {
+          description:
+            '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)',
+        },
+      })
+    ),
   });
 
-  const validateAttachments = async ({
-    attachments,
-    attachmentsService,
-  }: {
-    attachments: AttachmentInput[];
-    attachmentsService: AttachmentServiceStart;
-  }) => {
-    const results: AttachmentInput[] = [];
-    for (const attachment of attachments) {
-      const validation = await attachmentsService.validate(attachment);
-      if (validation.valid) {
-        results.push(validation.attachment);
-      } else {
-        throw createBadRequestError(`Attachment validation failed: ${validation.error}`);
-      }
+  const validateAction = (payload: ChatRequestBodyPayload) => {
+    if (payload.action === 'regenerate' && !payload.conversation_id) {
+      throw createBadRequestError('conversation_id is required when action is regenerate');
     }
-    return results;
+  };
+
+  const resolveConnectorIdFromPayload = (payload: ChatRequestBodyPayload): string | undefined => {
+    try {
+      return resolveConnectorOrInferenceId({
+        connectorId: payload.connector_id,
+        inferenceId: payload.inference_id,
+      });
+    } catch (e) {
+      if (e instanceof ConnectorOrInferenceIdConflictError) {
+        throw createBadRequestError(e.message);
+      }
+      throw e;
+    }
   };
 
   const validateConfigurationOverrides = async ({
@@ -209,45 +262,56 @@ export function registerChatRoutes({
     }
   };
 
-  const callConverse = ({
+  const executeAgent = async ({
     payload,
-    attachments,
     request,
-    chatService,
     abortSignal,
+    executionService,
   }: {
-    payload: Omit<ChatRequestBodyPayload, 'attachments'>;
-    attachments: AttachmentInput[];
+    payload: ChatRequestBodyPayload;
     request: KibanaRequest;
-    chatService: ChatService;
     abortSignal: AbortSignal;
+    executionService: AgentExecutionService;
   }) => {
     const {
       agent_id: agentId,
-      connector_id: connectorId,
       conversation_id: conversationId,
       input,
       prompts,
+      attachments,
       capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
+      action,
+      _execution_mode: executionMode,
     } = payload;
 
-    return chatService.converse({
-      agentId,
-      connectorId,
-      conversationId,
-      capabilities,
-      browserApiTools,
-      configurationOverrides,
-      abortSignal,
-      nextInput: {
-        message: input,
-        prompts,
-        attachments,
-      },
+    const connectorId = resolveConnectorIdFromPayload(payload);
+
+    const useTaskManager =
+      executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined;
+
+    const { events$ } = await executionService.executeAgent({
       request,
+      abortSignal,
+      useTaskManager,
+      params: {
+        agentId,
+        connectorId,
+        conversationId,
+        capabilities,
+        browserApiTools,
+        configurationOverrides,
+        action,
+        nextInput: {
+          message: input,
+          prompts,
+          attachments,
+        },
+      },
     });
+
+    return events$;
   };
 
   router.versioned
@@ -281,29 +345,22 @@ export function registerChatRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
+        const { execution: executionService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
+
+        await validateConfigurationOverrides({ payload, request });
+        validateAction(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
           abortController.abort();
         });
 
-        const attachments = payload.attachments
-          ? await validateAttachments({
-              attachments: payload.attachments,
-              attachmentsService,
-            })
-          : [];
-
-        await validateConfigurationOverrides({ payload, request });
-
-        const chatEvents$ = callConverse({
+        const chatEvents$ = await executeAgent({
           payload,
-          attachments,
-          chatService,
           request,
           abortSignal: abortController.signal,
+          executionService,
         });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
@@ -320,10 +377,10 @@ export function registerChatRoutes({
           body: {
             conversation_id: convId,
             round_id: round.id,
-            ...omit(round, ['id', 'input', 'response', 'pending_prompt', 'state']),
+            ...omit(round, ['id', 'input', 'response', 'pending_prompts', 'state']),
             response: {
               ...round.response,
-              prompt: round.pending_prompt,
+              prompts: round.pending_prompts,
             },
           },
         });
@@ -361,29 +418,22 @@ export function registerChatRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const [, { cloud }] = await coreSetup.getStartServices();
-        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
+        const { execution: executionService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
+
+        await validateConfigurationOverrides({ payload, request });
+        validateAction(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
           abortController.abort();
         });
 
-        const attachments = payload.attachments
-          ? await validateAttachments({
-              attachments: payload.attachments,
-              attachmentsService,
-            })
-          : [];
-
-        await validateConfigurationOverrides({ payload, request });
-
-        const chatEvents$ = callConverse({
+        const chatEvents$ = await executeAgent({
           payload,
-          attachments,
           request,
-          chatService,
           abortSignal: abortController.signal,
+          executionService,
         });
 
         return response.ok({
@@ -392,6 +442,8 @@ export function registerChatRoutes({
             'Content-Type': cloud?.isCloudEnabled
               ? 'application/octet-stream'
               : 'text/event-stream',
+            // another attempt at disabling compression
+            'Content-Encoding': 'identity',
             'Cache-Control': 'no-cache',
             Connection: 'keep-alive',
             'Transfer-Encoding': 'chunked',

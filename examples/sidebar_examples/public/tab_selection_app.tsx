@@ -10,28 +10,38 @@
 import React from 'react';
 import { EuiPanel, EuiSpacer, EuiButtonGroup, EuiText, EuiFormRow, EuiTitle } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
-import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
-import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
+import { createSidebarStore, type SidebarComponentProps } from '@kbn/core-chrome-sidebar';
+import { SidebarHeader, SidebarBody, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 
 export const tabSelectionAppId = 'sidebarExampleTabs';
 
-export const getTabSelectionParamsSchema = () =>
-  z.object({
+/** Store for tab selection sidebar app */
+export const tabSelectionStore = createSidebarStore({
+  schema: z.object({
     selectedTab: z.string().default('overview'),
-  });
+  }),
+  actions: (set, get, sidebar) => ({
+    selectTab: (tabId: string) => set({ selectedTab: tabId }),
+  }),
+});
 
-export type TabSelectionSidebarParams = z.infer<ReturnType<typeof getTabSelectionParamsSchema>>;
+export type TabSelectionState = typeof tabSelectionStore.types.state;
+export type TabSelectionActions = typeof tabSelectionStore.types.actions;
+
+/** Typed hook for the tab selection sidebar app */
+export const useTabSelectionSidebarApp = () =>
+  useSidebarApp<TabSelectionState, TabSelectionActions>(tabSelectionAppId);
 
 /**
  * Tab selection app that demonstrates custom header content.
  * Uses children prop of SidebarHeader for a dynamic title based on the selected tab.
  */
 export function TabSelectionApp({
-  params,
-  setParams,
+  state,
+  actions,
   onClose,
-}: SidebarComponentProps<TabSelectionSidebarParams>) {
-  const { selectedTab } = params;
+}: SidebarComponentProps<TabSelectionState, TabSelectionActions>) {
+  const { selectedTab } = state;
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -43,9 +53,9 @@ export function TabSelectionApp({
 
   return (
     <>
-      <SidebarHeader onClose={onClose}>
+      <SidebarHeader title={`Tabs: ${currentTab.label}`} onClose={onClose}>
         <EuiTitle size="xs">
-          <h3>Tabs: {currentTab.label}</h3>
+          <h2>Tabs: {currentTab.label}</h2>
         </EuiTitle>
       </SidebarHeader>
       <SidebarBody>
@@ -63,7 +73,7 @@ export function TabSelectionApp({
               label: tab.label,
             }))}
             idSelected={selectedTab}
-            onChange={(id) => setParams({ selectedTab: id })}
+            onChange={(id) => actions.selectTab(id)}
           />
         </EuiFormRow>
 
@@ -71,7 +81,7 @@ export function TabSelectionApp({
 
         <EuiPanel color="subdued" paddingSize="s">
           <EuiText size="xs">
-            <pre>{JSON.stringify(params, null, 2)}</pre>
+            <pre>{JSON.stringify(state, null, 2)}</pre>
           </EuiText>
         </EuiPanel>
       </SidebarBody>

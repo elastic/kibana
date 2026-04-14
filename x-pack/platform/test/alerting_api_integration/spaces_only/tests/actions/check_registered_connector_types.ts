@@ -62,6 +62,8 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.torq',
           '.opsgenie',
           '.gen-ai',
+          '.http',
+          '.http-system',
           '.bedrock',
           '.gemini',
           '.sentinelone',

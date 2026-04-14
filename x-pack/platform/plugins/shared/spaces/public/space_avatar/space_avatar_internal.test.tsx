@@ -5,71 +5,67 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { SpaceAvatarInternal } from './space_avatar_internal';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiAvatar: () => <></>, // we mock this to avoid asserting what the internals of the avatar looks like in our snapshots below
-}));
-
 test('renders without crashing', () => {
-  const wrapper = shallow(<SpaceAvatarInternal space={{ name: '', id: '' }} />);
-  expect(wrapper).toMatchInlineSnapshot(`
-    <EuiAvatar
-      color="#FFC9C2"
+  const { container } = render(<SpaceAvatarInternal space={{ name: '', id: '' }} />);
+  expect(screen.getByTestId('space-avatar-')).toBeInTheDocument();
+  expect(container.children[0]).toMatchInlineSnapshot(`
+    <div
+      aria-label=""
+      class="euiAvatar euiAvatar--m euiAvatar--space emotion-euiAvatar-space-m-none"
       data-test-subj="space-avatar-"
-      initials=""
-      initialsLength={2}
-      name=""
-      size="m"
-      type="space"
-    />
+      role="img"
+      style="background-color: rgb(255, 201, 194); color: rgb(0, 0, 0);"
+      title=""
+    >
+      <span
+        aria-hidden="true"
+      />
+    </div>
   `);
 });
 
 test('renders with a space name entirely made of whitespace', () => {
-  const wrapper = shallow(<SpaceAvatarInternal space={{ name: '      ', id: '' }} />);
-  expect(wrapper).toMatchInlineSnapshot(`
-    <EuiAvatar
-      color="#61A2FF"
+  const { container } = render(<SpaceAvatarInternal space={{ name: '      ', id: '' }} />);
+  expect(screen.getByTestId('space-avatar-')).toBeInTheDocument();
+  expect(container.children[0]).toMatchInlineSnapshot(`
+    <div
+      aria-label=""
+      class="euiAvatar euiAvatar--m euiAvatar--space emotion-euiAvatar-space-m-none"
       data-test-subj="space-avatar-"
-      initials=""
-      initialsLength={2}
-      name=""
-      size="m"
-      type="space"
-    />
+      role="img"
+      style="background-color: rgb(97, 162, 255); color: rgb(0, 0, 0);"
+      title=""
+    >
+      <span
+        aria-hidden="true"
+      />
+    </div>
   `);
 });
 
 test('removes aria-label when instructed not to announce the space name', () => {
-  const wrapper = mount(
+  const { container } = render(
     <SpaceAvatarInternal space={{ name: '', id: '' }} announceSpaceName={false} />
   );
-  expect(wrapper).toMatchInlineSnapshot(`
-    <SpaceAvatarInternal
-      announceSpaceName={false}
-      space={
-        Object {
-          "id": "",
-          "name": "",
-        }
-      }
+  expect(screen.getByTestId('space-avatar-')).toHaveAttribute('aria-hidden', 'true');
+  expect(container.children[0]).toMatchInlineSnapshot(`
+    <div
+      aria-hidden="true"
+      aria-label=""
+      class="euiAvatar euiAvatar--m euiAvatar--space emotion-euiAvatar-space-m-none"
+      data-test-subj="space-avatar-"
+      role="img"
+      style="background-color: rgb(255, 201, 194); color: rgb(0, 0, 0);"
+      title=""
     >
-      <EuiAvatar
-        aria-hidden={true}
-        aria-label=""
-        color="#FFC9C2"
-        data-test-subj="space-avatar-"
-        initials=""
-        initialsLength={2}
-        name=""
-        size="m"
-        type="space"
+      <span
+        aria-hidden="true"
       />
-    </SpaceAvatarInternal>
+    </div>
   `);
 });

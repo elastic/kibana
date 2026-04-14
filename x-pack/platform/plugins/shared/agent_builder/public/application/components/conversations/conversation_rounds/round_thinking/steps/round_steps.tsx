@@ -6,7 +6,11 @@
  */
 
 import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
-import { isReasoningStep, isToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import {
+  isReasoningStep,
+  isToolCallStep,
+  isCompactionStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ReactNode } from 'react';
@@ -20,6 +24,7 @@ import { ToolCallDisplay } from './tool_call_display';
 import { ToolProgressDisplay } from './tool_progress_display';
 import { ToolResultDisplay } from './tool_result_display';
 import { FlyoutResultItem } from './flyout_result_item';
+import { CompactionDisplay } from './compaction_display';
 
 const labels = {
   roundThinkingSteps: i18n.translate('xpack.agentBuilder.conversation.thinking.stepsList', {
@@ -36,24 +41,19 @@ const labels = {
   }),
 };
 
-// Exposed in main thinking chain, for now query and tabular data
-const mainThinkingResultTypes = [
+// Exposed in main thinking chain, for now query and esql results
+const mainThinkingResultTypes: string[] = [
   ToolResultType.query,
-  ToolResultType.tabularData,
+  ToolResultType.esqlResults,
   ToolResultType.error,
 ];
-// Populated in flyout
-const flyoutResultTypes = [
-  ToolResultType.visualization,
-  ToolResultType.other,
-  ToolResultType.resource,
-];
+
 // Tool result types that should not have an icon displayed in the thinking steps list
-const disabledToolResultIconTypes = [ToolResultType.error, ToolResultType.query];
+const disabledToolResultIconTypes: string[] = [ToolResultType.error, ToolResultType.query];
 
 const getItemIcon = (isLastItem: boolean, isLoading: boolean): ReactNode => {
   if (isLastItem && isLoading) {
-    return <EuiIcon type="doubleArrowRight" color="text" />;
+    return <EuiIcon type="chevronDoubleRight" color="text" />;
   }
   return <EuiIcon type="check" color="success" />;
 };
@@ -133,8 +133,8 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
           });
 
         // Add flyout result items
-        const flyoutResultItems = step.results.filter((result: ToolResult) =>
-          flyoutResultTypes.includes(result.type)
+        const flyoutResultItems = step.results.filter(
+          (result: ToolResult) => !mainThinkingResultTypes.includes(result.type)
         );
         if (flyoutResultItems.length > 0) {
           itemFactories.push({
@@ -165,6 +165,20 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
                 {step.reasoning}
               </div>
             </ThinkingItemLayout>
+          ),
+        });
+      } else if (isCompactionStep(step)) {
+        const compactionInProgress = step.token_count_after === 0;
+        itemFactories.push({
+          key: `step-compaction-${stepIndex}`,
+          factory: (icon, textColor) => (
+            <CompactionDisplay
+              key={`step-compaction-${stepIndex}`}
+              step={step}
+              icon={icon}
+              textColor={textColor}
+              isInProgress={compactionInProgress}
+            />
           ),
         });
       }

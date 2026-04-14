@@ -27,6 +27,9 @@ check_cdn_assets_ready() {
   fi
 }
 
+echo "--- Clean up cached images"
+clean_cached_images
+
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
@@ -212,6 +215,8 @@ steps:
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
         GPCTL_PROMOTE_DRY_RUN: ${DRY_RUN:-false}
         CHANGE_WINDOW_OVERRIDE: true
+        DEVCTL_CREATE_DIRECT: true
+        DEVCTL_VERSION: 0.7.1
 EOF
 
 else

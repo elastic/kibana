@@ -15,7 +15,7 @@ import type {
   Platform,
   TutorialContext,
 } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
+import { cloudPasswordAndResetLink, cloudServerlessApiKeyNote } from './cloud_instructions';
 
 export const createAuditbeatInstructions = (context: TutorialContext) => {
   const SSL_DOC_URL = `https://www.elastic.co/guide/en/beats/auditbeat/${context.kibanaBranch}/configuration-ssl.html#ca-sha256`;
@@ -413,6 +413,107 @@ export const createAuditbeatCloudInstructions = () => ({
   },
 });
 
+export const createAuditbeatCloudInstructionsServerless = () => ({
+  CONFIG: {
+    OSX: {
+      title: i18n.translate(
+        'home.tutorials.common.auditbeatCloudInstructionsServerless.config.osxTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.auditbeatCloudInstructionsServerless.config.osxTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`auditbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    DEB: {
+      title: i18n.translate(
+        'home.tutorials.common.auditbeatCloudInstructionsServerless.config.debTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.auditbeatCloudInstructionsServerless.config.debTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`/etc/auditbeat/auditbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    RPM: {
+      title: i18n.translate(
+        'home.tutorials.common.auditbeatCloudInstructionsServerless.config.rpmTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.auditbeatCloudInstructionsServerless.config.rpmTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`/etc/auditbeat/auditbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    WINDOWS: {
+      title: i18n.translate(
+        'home.tutorials.common.auditbeatCloudInstructionsServerless.config.windowsTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.auditbeatCloudInstructionsServerless.config.windowsTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`C:\\Program Files\\Auditbeat\\auditbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+  },
+});
+
 export function auditbeatStatusCheck() {
   return {
     title: i18n.translate('home.tutorials.common.auditbeatStatusCheck.title', {
@@ -514,7 +615,9 @@ export function onPremCloudInstructions(platforms: readonly Platform[], context:
 
 export function cloudInstructions(platforms: readonly Platform[], context: TutorialContext) {
   const AUDITBEAT_INSTRUCTIONS = createAuditbeatInstructions(context);
-  const AUDITBEAT_CLOUD_INSTRUCTIONS = createAuditbeatCloudInstructions();
+  const AUDITBEAT_CLOUD_INSTRUCTIONS = context.isServerless
+    ? createAuditbeatCloudInstructionsServerless()
+    : createAuditbeatCloudInstructions();
 
   const variants = [];
   for (let i = 0; i < platforms.length; i++) {

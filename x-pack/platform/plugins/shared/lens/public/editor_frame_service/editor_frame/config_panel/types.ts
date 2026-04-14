@@ -83,11 +83,14 @@ export interface LayerPanelProps extends LensConfigPanelBaseProps {
     dontSyncLinkedDimensions?: boolean
   ) => void;
   updateDatasourceAsync: (datasourceId: string | undefined, newState: unknown) => void;
-  updateAll: (
-    datasourceId: string | undefined,
-    newDatasourcestate: unknown,
-    newVisualizationState: unknown
-  ) => void;
+  // Dispatches a single intent so reducer can apply datasource + visualization updates atomically.
+  updateAll: (payload: {
+    datasourceId: string | undefined;
+    newDatasourceState: unknown;
+    layerId: string;
+    groupId: string;
+    columnId: string;
+  }) => void;
   onRemoveLayer: (layerId: string) => void;
   onCloneLayer: () => void;
   onRemoveDimension: (props: { columnId: string; layerId: string }) => void;
