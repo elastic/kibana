@@ -349,13 +349,10 @@ const A11yGridCell = React.forwardRef(
         css={css`
           outline: none;
           cursor: pointer;
-          ${
-            isFocused && {
-              boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
-              borderRadius: euiTheme.border.radius.medium,
-            }
-          }
-
+          ${isFocused && {
+            boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
+            borderRadius: euiTheme.border.radius.medium,
+          }}
         `}
       >
         {children}
