@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { type EsqlFieldType, esqlFieldTypes } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -500,7 +501,19 @@ export interface ESQLMessage {
   code: string;
   errorType?: 'semantic';
   requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
+
+  // By default warnings are not underlined, use this flag to indicate it should be
   underlinedWarning?: boolean;
+
+  quickFix?: {
+    // Title of the quick fix button
+    title: string;
+    // A function that recieves the current query and returns it corrected.
+    fixQuery: (query: string) => string;
+    // A function that determines if the quick fix should be displayed under some special condition,
+    // it will be always visible if not provided.
+    displayCondition?: (query: string, callbacks: ESQLCallbacks) => Promise<boolean>;
+  };
 }
 
 /**

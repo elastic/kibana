@@ -16,10 +16,8 @@ import type {
   ESQLIdentifier,
   ESQLLocation,
   ESQLSource,
-  ESQLMessage,
 } from '@elastic/esql/types';
 import { EsqlQuery, mutate } from '@elastic/esql';
-import type { ESQLCallbacks } from '@kbn/esql-types';
 import type {
   ErrorTypes,
   ErrorValues,
@@ -40,15 +38,9 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
   values: ErrorValues<K>;
 }): {
   message: string;
-  type?: 'error' | 'warning';
-  underlinedWarning?: boolean;
-  quickFix?: {
-    // HD improve types sharing
-    title: string;
-    displayCondition?: (query: string, callbacks: ESQLCallbacks) => Promise<boolean>;
-    // A function that recieves the current query and returns it corrected.
-    fixQuery: (query: string) => string;
-  };
+  type?: ESQLMessage['type'];
+  underlinedWarning?: ESQLMessage['underlinedWarning'];
+  quickFix?: ESQLMessage['quickFix'];
 } {
   // Use a less strict type instead of doing a typecast on each message type
   const out = values as unknown as Record<string, string>;
@@ -551,12 +543,12 @@ export function getMessageFromId<K extends ErrorTypes>({
 }
 
 export function createMessage(
-  type: 'error' | 'warning',
+  type: ESQLMessage['type'],
   message: string,
-  location: ESQLLocation,
+  location: ESQLMessage['location'],
   messageId: string,
-  underlinedWarning?: boolean,
-  quickFix?: { title: string; action: (query: string) => string }
+  underlinedWarning?: ESQLMessage['underlinedWarning'],
+  quickFix?: ESQLMessage['quickFix']
 ): ESQLMessage {
   return {
     type,

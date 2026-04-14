@@ -9,6 +9,7 @@
 
 import { esqlFunctionNames } from '@kbn/esql-language/src/commands/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
+import type { ESQLMessage } from '@kbn/esql-language';
 import {
   getSignatureHelp,
   getHoverItem,
@@ -43,12 +44,8 @@ export type MonacoMessage = monaco.editor.IMarkerData & {
   code: string;
 
   // By default warnings are not underlined, use this flag to indicate it should be
-  underlinedWarning?: boolean;
-  quickFix?: {
-    title: string;
-    displayCondition?: (query: string, callbacks: ESQLCallbacks) => Promise<boolean>;
-    fixQuery: (query: string) => string;
-  };
+  underlinedWarning?: ESQLMessage['underlinedWarning'];
+  quickFix?: ESQLMessage['quickFix'];
 };
 
 export type ESQLDependencies = ESQLCallbacks &
