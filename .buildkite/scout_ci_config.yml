@@ -35,6 +35,7 @@ plugins:
     - saved_objects_management
     - search_getting_started
     - search_homepage
+    - search_inference_endpoints
     - security
     - security_solution
     - share
