@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { load } from 'js-yaml';
 
 import {
   EuiFlyout,
@@ -50,6 +49,7 @@ import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import type { Output, FleetProxy } from '../../../../types';
 
 import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../hooks';
+import { useYaml } from '../../../../../../services';
 
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 
@@ -77,8 +77,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   proxies,
 }) => {
   useBreadcrumbs('settings');
+  const yaml = useYaml();
   const form = useOutputForm(onClose, output, defaultOutput);
   const inputs = form.inputs;
+  const parseFn = yaml?.parse;
   const { docLinks, cloud } = useStartServices();
   const fleetStatus = useFleetStatus();
   const isServerless = !!cloud?.isServerlessEnabled;
@@ -112,14 +114,23 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
     : false;
 
-  // Remote ES output not yet supported in serverless
-  const isStateful = !cloud?.isServerlessEnabled;
+  const yamlConfigValue = inputs.additionalYamlConfigInput.value;
+  const presetValue = inputs.presetInput.value;
+  const setPresetValue = inputs.presetInput.setValue;
+  useEffect(() => {
+    if (
+      yaml &&
+      supportsPresets &&
+      outputYmlIncludesReservedPerformanceKey(yamlConfigValue, yaml.parse) &&
+      presetValue !== 'custom'
+    ) {
+      setPresetValue('custom');
+    }
+  }, [yaml, supportsPresets, yamlConfigValue, presetValue, setPresetValue]);
 
   const OUTPUT_TYPE_OPTIONS = [
     { value: outputType.Elasticsearch, text: 'Elasticsearch' },
-    ...(isStateful
-      ? [{ value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' }]
-      : []),
+    { value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' },
     { value: outputType.Logstash, text: 'Logstash' },
     { value: outputType.Kafka, text: 'Kafka' },
   ];
@@ -453,10 +464,11 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   onChange={(e) => inputs.presetInput.setValue(e.target.value)}
                   disabled={
                     inputs.presetInput.props.disabled ||
-                    outputYmlIncludesReservedPerformanceKey(
-                      inputs.additionalYamlConfigInput.value,
-                      load
-                    )
+                    (!!parseFn &&
+                      outputYmlIncludesReservedPerformanceKey(
+                        inputs.additionalYamlConfigInput.value,
+                        parseFn
+                      ))
                   }
                   options={[
                     { value: 'balanced', text: 'Balanced' },
@@ -510,9 +522,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </EuiFormRow>
           )}
           {supportsPresets &&
+            !!parseFn &&
             outputYmlIncludesReservedPerformanceKey(
               inputs.additionalYamlConfigInput.value,
-              load
+              parseFn
             ) && (
               <>
                 <EuiSpacer size="s" />
@@ -563,7 +576,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               <YamlCodeEditorWithPlaceholder
                 value={inputs.additionalYamlConfigInput.value}
                 onChange={(value) => {
-                  if (outputYmlIncludesReservedPerformanceKey(value, load)) {
+                  if (parseFn && outputYmlIncludesReservedPerformanceKey(value, parseFn)) {
                     inputs.presetInput.setValue('custom');
                   }
 
