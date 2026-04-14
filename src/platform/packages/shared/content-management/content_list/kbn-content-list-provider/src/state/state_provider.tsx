@@ -15,6 +15,7 @@ import { ContentListStateContext } from './use_content_list_state';
 import { useContentListConfig } from '../context';
 import { isSortingConfig, isPaginationConfig, isSearchConfig } from '../features';
 import { DEFAULT_PAGE_SIZE } from '../features/pagination';
+import { DEFAULT_INITIAL_SORT } from '../features/sorting';
 import { getPersistedPageSize } from '../features/pagination';
 import type { PaginationConfig } from '../features/pagination';
 import { reducer, DEFAULT_SELECTION } from './state_reducer';
@@ -71,7 +72,7 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     if (isSortingConfig(sorting) && sorting.initialSort) {
       return sorting.initialSort;
     }
-    return { field: 'title', direction: 'asc' as const };
+    return DEFAULT_INITIAL_SORT;
   }, [sorting]);
 
   // Determine initial page size from pagination config or persisted value.
