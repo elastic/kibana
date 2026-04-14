@@ -73,6 +73,7 @@ export default function (ctx: FtrProviderContext) {
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await security.forceLogout();
 
       await kibanaServer.importExport.unload(
