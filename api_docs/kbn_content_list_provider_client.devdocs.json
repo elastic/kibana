@@ -10,10 +10,10 @@
         "tags": [],
         "label": "ContentListClientProvider",
         "description": [
-          "\nClient-side content list provider.\n\nWraps an existing `TableListView`-style `findItems` function and provides\nclient-side sorting, filtering, and pagination. The strategy handles transformation\nof `UserContentCommonSchema` items to `ContentListItem` format.\n"
+          "\nClient-side content list provider.\n\nWraps an existing `TableListView`-style `findItems` function and provides\nclient-side sorting, filtering, and pagination. The strategy handles transformation\nof `UserContentCommonSchema` items to `ContentListItem` format.\n\nThe `services.uiSettings` is read once at mount to determine the default page size\nfrom the `savedObjects:perPage` user setting. An explicit\n`features.pagination.initialPageSize` takes priority over the uiSettings value.\n"
         ],
         "signature": [
-          "({ children, findItems: tableListViewFindItems, ...rest }: ",
+          "({ children, findItems: tableListViewFindItems, features, services, ...rest }: ",
           {
             "pluginId": "@kbn/content-list-provider-client",
             "scope": "public",
@@ -24,7 +24,7 @@
           ") => JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/provider.tsx",
-        "lineNumber": 56,
+        "lineNumber": 68,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -34,7 +34,7 @@
             "id": "def-public.ContentListClientProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  findItems: tableListViewFindItems,\n  ...rest\n}",
+            "label": "{\n  children,\n  findItems: tableListViewFindItems,\n  features,\n  services,\n  ...rest\n}",
             "description": [],
             "signature": [
               {
@@ -46,7 +46,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/provider.tsx",
-            "lineNumber": 56,
+            "lineNumber": 68,
             "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
@@ -124,6 +124,59 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.ContentListClientServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentListClientServices",
+        "description": [
+          "\nServices required by the client provider.\n\nExtends the base `ContentListServices` with `uiSettings`, which is used to read\nthe `savedObjects:perPage` setting for default page size."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentListClientServices",
+            "text": "ContentListClientServices"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListServices",
+            "text": "ContentListServices"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentListClientServices.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [
+              "UI settings accessor. Required for reading defaults like page size."
+            ],
+            "signature": [
+              "UiSettingsAccessor"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
         "id": "def-public.SavedObjectReference",
         "type": "Interface",
         "tags": [],
@@ -132,7 +185,7 @@
           "\nReference type matching `SavedObjectsFindOptionsReference` from Kibana core."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-        "lineNumber": 12,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -145,7 +198,7 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 16,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -158,7 +211,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 17,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -174,7 +227,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 18,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -192,7 +245,7 @@
           "\nResult type from the `TableListView` `findItems` function."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-        "lineNumber": 21,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -207,7 +260,7 @@
               "Total count of matching items."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 25,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -232,7 +285,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 27,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -276,10 +329,18 @@
             "section": "def-public.ContentListFeatures",
             "text": "ContentListFeatures"
           },
-          " | undefined; }"
+          " | undefined; services: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentListClientServices",
+            "text": "ContentListClientServices"
+          },
+          "; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/provider.tsx",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -322,7 +383,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-        "lineNumber": 31,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -336,7 +397,7 @@
             "label": "searchQuery",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -368,7 +429,7 @@
               "[] | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -384,7 +445,7 @@
               "AbortSignal | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 43,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

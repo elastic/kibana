@@ -6,9 +6,12 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { isMissingApiKey, isRevokedApiKey } from '@kbn/core-security-server';
 import type { ApiKeyIdAndSOId, UiamApiKeyAndSOId } from './get_api_key_ids_to_invalidate';
 import { invalidateAPIKeys, invalidateUiamAPIKeys } from './invalidate_api_keys';
 import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
+
+const MAX_MISSING_KEY_RETRIES = 5;
 
 interface InvalidateApiKeysAndDeleteSO {
   apiKeyIdsToInvalidate: ApiKeyIdAndSOId[];
@@ -16,8 +19,14 @@ interface InvalidateApiKeysAndDeleteSO {
   invalidateApiKeyFn?: ApiKeyInvalidationFn;
   invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   logger: Logger;
+  missingApiKeyRetries: Record<string, number>;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: string;
+}
+
+export interface InvalidateApiKeysResult {
+  totalInvalidated: number;
+  missingApiKeyRetries: Record<string, number>;
 }
 
 export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
@@ -26,10 +35,12 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
   invalidateApiKeyFn,
   invalidateUiamApiKeyFn,
   logger,
+  missingApiKeyRetries: inputRetries,
   savedObjectsClient,
   savedObjectType,
-}: InvalidateApiKeysAndDeleteSO) {
+}: InvalidateApiKeysAndDeleteSO): Promise<InvalidateApiKeysResult> {
   let totalInvalidated = 0;
+  const missingApiKeyRetries = { ...inputRetries };
 
   // ES APIKey invalidation
   if (apiKeyIdsToInvalidate.length > 0) {
@@ -60,18 +71,45 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
       );
 
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-        logger.error(`Failed to invalidate UIAM APIKey id`);
-      } else {
-        try {
-          await savedObjectsClient.delete(savedObjectType, id);
-          totalInvalidated++;
-        } catch (err) {
-          logger.error(`Failed to delete invalidated UIAM API key. Error: ${err.message}`);
+        if (isRevokedApiKey(response.result)) {
+          logger.warn(
+            `UIAM APIKey is already revoked, removing pending invalidation. ` +
+              `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`
+          );
+        } else if (isMissingApiKey(response.result)) {
+          const retryCount = (missingApiKeyRetries[id] ?? 0) + 1;
+          missingApiKeyRetries[id] = retryCount;
+          if (retryCount < MAX_MISSING_KEY_RETRIES) {
+            logger.warn(
+              `UIAM APIKey not found, will retry (${retryCount}/${MAX_MISSING_KEY_RETRIES}). ` +
+                `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`
+            );
+            continue;
+          }
+          logger.warn(
+            `UIAM APIKey not found after ${MAX_MISSING_KEY_RETRIES} attempts, removing pending invalidation. ` +
+              `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`
+          );
+        } else {
+          logger.error(
+            `Failed to invalidate UIAM APIKey: ${response.result.error_details
+              ?.map((d) => d.reason)
+              .join('; ')}`
+          );
+          continue;
         }
+      }
+
+      try {
+        await savedObjectsClient.delete(savedObjectType, id);
+        delete missingApiKeyRetries[id];
+        totalInvalidated++;
+      } catch (err) {
+        logger.error(`Failed to delete invalidated UIAM API key. Error: ${err.message}`);
       }
     }
   }
 
   logger.debug(`Total invalidated API keys "${totalInvalidated}"`);
-  return totalInvalidated;
+  return { totalInvalidated, missingApiKeyRetries };
 }
