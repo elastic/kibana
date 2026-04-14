@@ -40,6 +40,48 @@ export const ExecutionEventLoggerToken = Symbol.for(
 
 const MS_TO_NS = 1_000_000;
 
+/**
+ * Shape of the event log documents written by ExecutionEventLogger.
+ * Used by ExecutionLogService to read execution history with type safety.
+ */
+export interface ExecutionEventSource {
+  '@timestamp': string;
+  event: {
+    provider: string;
+    action: string;
+    outcome: string;
+    duration: number;
+    start: string;
+    end: string;
+  };
+  kibana: {
+    alert: {
+      rule: {
+        execution: {
+          metrics?: {
+            alert_counts?: {
+              active?: number;
+              new?: number;
+              recovered?: number;
+            };
+          };
+        };
+      };
+    };
+    alerting: {
+      instance_id: string;
+    };
+    space_ids: string[];
+    task: {
+      scheduled: string;
+    };
+  };
+  message: string;
+  error?: {
+    message?: string;
+  };
+}
+
 export class ExecutionEventLogger implements ExecutionEventLoggerContract {
   constructor(private readonly eventLogger: IEventLogger) {}
 

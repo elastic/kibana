@@ -73,6 +73,10 @@ import {
   EVENT_LOG_PROVIDER,
   EVENT_LOG_ACTIONS,
 } from '../lib/services/execution_event_logger';
+import {
+  ExecutionLogService,
+  ExecutionLogServiceToken,
+} from '../lib/services/execution_log_service';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -269,4 +273,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return new ExecutionEventLogger(eventLogger);
     })
     .inSingletonScope();
+
+  bind(ExecutionLogService).toSelf().inSingletonScope();
+  bind(ExecutionLogServiceToken).toService(ExecutionLogService);
 }

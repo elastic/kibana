@@ -13,6 +13,7 @@ export {
 } from './execution_event_logger';
 export type {
   ExecutionEventLoggerContract,
+  ExecutionEventSource,
   ExecutionMetrics,
   ExecutionOutcome,
   LogExecutionParams,
