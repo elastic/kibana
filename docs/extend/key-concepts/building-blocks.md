@@ -14,7 +14,7 @@ provide greater flexibility, but require more code to stitch them together into 
 across Kibana.
 
 For example, if an application is using [Index Patterns](./building-blocks.md#index-patterns) and [Search Source](./building-blocks.md#search-source), their application would
-automatically support runtime fields. If the app is instead using the lower-level [Search Strategy](./building-blocks.md#search-strategy), additional work would be required.
+automatically support runtime fields. If the app is instead using the lower-level [Search Strategy](./building-blocks.md#search-strategies), additional work would be required.
 
 Armed with this knowledge, you can choose what works best for your use case!
 
@@ -34,7 +34,7 @@ and [Index Patterns](./building-blocks.md#index-patterns). If you would like to 
 ### Dashboard Embeddable
 
 Add a Dashboard Embeddable directly inside your application to provide users with a set of visualizations and graphs that work seamlessly
-with the [Query Bar](./building-blocks.md#query-bar). Every feature that is added to a registered [Embeddable](./building-blocks.md#embeddables) (Lens, Maps, Discover sessions and more) will be available automatically, as well as any [UI Actions](./building-blocks.md#ui-actions--triggers) that are added to the Embeddable context menu panel (for example, drilldowns, custom panel time ranges, and "share to" features).
+with the [Query Bar](./building-blocks.md#query-bar). Every feature that is added to a registered [Embeddable](./building-blocks.md#embeddables) (Lens, Maps, Discover sessions and more) will be available automatically, as well as any [UI Actions](./building-blocks.md#ui-actions-and-triggers) that are added to the Embeddable context menu panel (for example, drilldowns, custom panel time ranges, and "share to" features).
 
 The Dashboard Embeddable is one of the highest-level UI components you can add to your application.
 
@@ -42,7 +42,7 @@ The Dashboard Embeddable is one of the highest-level UI components you can add t
 
 ### Lens Embeddable
 
-Check out the Lens Embeddable if you wish to show users visualizations based on Elasticsearch data without worrying about query building and chart rendering. It's built on top of the [Expression language](./building-blocks.md#expressions), and integrates with [Index Patterns](./building-blocks.md#index-patterns) and [UI Actions](./building-blocks.md#ui-actions--triggers). Using the same configuration, it's also possible to link to a prefilled Lens editor, allowing the user to drill deeper and explore their data.
+Check out the Lens Embeddable if you wish to show users visualizations based on Elasticsearch data without worrying about query building and chart rendering. It's built on top of the [Expression language](./building-blocks.md#expressions), and integrates with [Index Patterns](./building-blocks.md#index-patterns) and [UI Actions](./building-blocks.md#ui-actions-and-triggers). Using the same configuration, it's also possible to link to a prefilled Lens editor, allowing the user to drill deeper and explore their data.
 
 **Github labels**: `Team:Visualizations`, `Feature:Lens`
 
@@ -56,7 +56,7 @@ Check out the Map Embeddable if you wish to embed a map in your application.
 
 All Kibana pages should use KibanaPageTemplate to setup their pages. It's a thin wrapper around [EuiPageTemplate](https://elastic.github.io/eui/#/layout/page) that makes setting up common types of Kibana pages quicker and easier while also adhering to any Kibana-specific requirements.
 
-Check out [the KibanaPageTemplate tutorial](../shared-ux/kibana-page-template.md) for more implementation guidance.
+Check out [the KibanaPageTemplate tutorial](../tutorials/kibana-page-template.md) for more implementation guidance.
 
 **Github labels**: `EUI`
 
@@ -112,7 +112,7 @@ sharing and space isolation, and tags.
 
 ## Advanced Settings
 
-[Advanced Settings and the uiSettings service](../shared-ux/how-to-register-a-new-advanced-setting.md) should be used if you need to add application-level configuration options. If you wanted to add a setting for listing a number of items per page in your TODO application, then `pageListing` would be a configuration option.
+[Advanced Settings and the uiSettings service](../tutorials/how-to-register-a-new-advanced-setting.md) should be used if you need to add application-level configuration options. If you wanted to add a setting for listing a number of items per page in your TODO application, then `pageListing` would be a configuration option.
 
 **Github labels**: `Team:Core`, `Feature:uiSettings`, `Feature:Advanced Settings`
 
@@ -121,7 +121,7 @@ sharing and space isolation, and tags.
 Use the following building blocks to create an inter-connected, cross-application, holistic Kibana experience. These building blocks allow you to expose functionality
 that promotes your own application into other applications, as well as help developers of other applications integrate into your app.
 
-## UI Actions & Triggers
+## UI Actions and Triggers
 
 Integrate custom actions into other applications by registering UI Actions attached to existing triggers. For example, the Maps
 application could register a UI Action called "View in Maps" to appear any time the user clicked a geo field to filter on.

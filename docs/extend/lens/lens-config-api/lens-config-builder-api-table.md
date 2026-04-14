@@ -19,7 +19,7 @@ Understanding `LensTableConfig` in detail
 - **Type:** `string`
 - **Description:** The title of the visualization.
 
-:::{include} ./dataset.md
+:::{include} ./_snippets/dataset.md
 :::
 
 ## Optional Properties
@@ -36,7 +36,7 @@ Understanding `LensTableConfig` in detail
 - **Optional**
 - **Description:** Similar to `splitBy`, but specifically used for creating additional columns based on the breakdown of a particular field. It's useful for comparing metrics across different categories directly within the table. Check breakdown configuration details below.
 
-:::{include} ./breakdown.md
+:::{include} ./_snippets/breakdown.md
 :::
 
 ## Example

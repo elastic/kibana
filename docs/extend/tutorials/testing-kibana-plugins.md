@@ -432,7 +432,7 @@ While applications do get an opportunity to unmount and run cleanup logic, it is
 
 By following the [renderApp](https://github.com/elastic/kibana/blob/main/src/core/CONVENTIONS.md#applications) convention, you can greatly reduce the amount of logic in your application's mount function. This makes testing your application's actual rendering logic easier.
 
-```typescript jsx
+```typescript
 /** public/plugin.ts */
 class Plugin {
   setup(core) {
@@ -817,7 +817,7 @@ _todo: fully worked out example_
 
 ### Saved Objects model versions
 
-_Also see [Defining model versions](./register-a-new-saved-object-type.md#model-versions)._
+_Also see [Defining model versions](./register-a-new-saved-object-type.md)._
 
 Model versions definitions are more structured than the legacy migration functions, which makes them harder
 to test without the proper tooling. This is why a set of testing tools and utilities are exposed

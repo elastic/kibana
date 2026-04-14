@@ -437,7 +437,7 @@ export class MyPlugin implements Plugin {
 :::{note} Search sessions restore state
 The restore state of a search session may be different from the initial state used to create it.
   For example, where the initial state may contain relative dates, in the restore state, those must
-  be converted to absolute dates. Read more about the [NowProvider]().
+  be converted to absolute dates. Read more about the NowProvider.
 :::
 
 :::{important} Search sessions indicator

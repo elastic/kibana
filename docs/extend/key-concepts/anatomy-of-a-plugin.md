@@ -15,7 +15,7 @@ Plugins are defined as classes and present themselves to Kibana through a simple
 or both. There is no architectural difference between a plugin in the browser and a plugin on the server. In both places, you describe your plugin similarly,
 and you interact with Core and other plugins in the same way.
 
-This anatomy of a plugin documentation applies to internal/built-in plugins. 3rd-party plugins should refer to the [external plugin development guide](../getting-started/external-plugin-development.md).
+This anatomy of a plugin documentation applies to internal/built-in plugins. 3rd-party plugins should refer to the [external plugin development guide](../external-plugin-development.md).
 
 The basic file structure of a Kibana plugin named demo that has both client-side and server-side code would be:
 
@@ -35,7 +35,7 @@ plugins/
     jest.config.js
 ```
 
-### kibana.jsonc
+### kibana.jsonc [kibana-jsonc]
 
 `kibana.jsonc` is a static manifest file that is used to identify the plugin and to specify if this plugin has server-side code, browser-side code, or both:
 
@@ -88,7 +88,7 @@ plugins/
 You don't need to declare a dependency on a plugin if you only wish to access its types.
 :::
 
-### tsconfig.json
+### tsconfig.json [tsconfig-json]
 
 If you are developing in TypeScript (which we recommend), you will need to add a `tsconfig.json` file. Here is an example file that you would use if adding a plugin into the `examples` directory.
 

@@ -5,28 +5,11 @@ description: "This guide provides an overview of API authorization in Kibana."
 
 # Kibana API authorization
 
-Authorization is an important aspect of API design. It must be considered for all endpoints, even those marked as `internal`. This guide explains how and when to apply authorization to your endpoints
+Authorization is an important aspect of API design. It must be considered for all endpoints, even those marked as `internal`. This guide explains how and when to apply authorization to your endpoints.
 
-Table of contents:
-1.  [API authorization](#api-authorization)
-2.  [Adding API authorization with `security` configuration](#adding-api-authorization-with-security-configuration)
-    - [Key features](#key-features)
-    - [Configuring authorization on routes](#configuring-authorization-on-routes)
-    - [Opting out of authorization for specific routes](#opting-out-of-authorization-for-specific-routes)
-    - [Classic router security configuration examples](#classic-router-security-configuration-examples)
-    - [Versioned router security configuration examples](#versioned-router-security-configuration-examples)
-3. [Authorization response available in route handlers](#authorization-response-available-in-route-handlers)
-4. [OpenAPI specification (OAS) documentation](#openapi-specification-oas-documentation)
-5. [Questions?](#questions)
+Kibana API routes must declare their authorization requirements using the `security` configuration in `KibanaRouteOptions`. This allows Kibana to enforce these requirements and ensure that only authorized users can access the API routes.
 
-## API authorization
-Kibana API routes do not have any authorization checks applied by default. This means that your APIs are accessible to anyone with valid credentials, regardless of their permissions. This includes users with no roles assigned.
-This on its own is insufficient, and care must be taken to ensure that only authorized users can invoke your endpoints.
-
-Kibana leverages [Saved Objects](./saved-objects.md) for a majority of its persistence. The Saved Objects Service performs its own authorization checks, so if your API route is primarily a CRUD interface to Saved Objects, then your authorization needs are likely already met.
-This is also true for derivatives of the Saved Objects Service, such as the Alerting and Cases services.
-
-If your endpoint is not a CRUD interface to Saved Objects, or if your endpoint bypasses our built-in Saved Objects authorization checks, then you must ensure that only authorized users can invoke your endpoint. 
+If your endpoint is not a simple CRUD interface to Saved Objects, or if your endpoint bypasses our built-in Saved Objects authorization checks, then you must ensure that only authorized users can invoke your endpoint. 
 This is **especially** important if your route does any of the following:
 1. Performs non-insignificant processing, causing load on the Elasticsearch cluster or the Kibana server.
 2. Calls Elasticsearch APIs using the internal `kibana_system` user.

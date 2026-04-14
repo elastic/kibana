@@ -19,7 +19,7 @@ Understanding `LensPieConfig` in detail
 - **Type:** `string`
 - **Description:** The title of the visualization.
 
-:::{include} ./dataset.md
+:::{include} ./_snippets/dataset.md
 :::
 
 ### `breakdown`
@@ -34,7 +34,7 @@ Understanding `LensPieConfig` in detail
 - **Type:** `Identity`
 - **Description:** Configures the chart's legend. It includes properties to show or hide the legend and to position it relative to the chart ('top', 'left', 'bottom', 'right'). This helps in identifying what each slice of the pie or donut chart represents.
 
-:::{include} ./breakdown.md
+:::{include} ./_snippets/breakdown.md
 :::
 
 ## Example

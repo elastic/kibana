@@ -19,10 +19,10 @@ Understanding `LensTagCloudConfig` in detail
 - **Type:** `string`
 - **Description:** The title of the visualization.
 
-:::{include} ./dataset.md
+:::{include} ./_snippets/dataset.md
 :::
 
-:::{include} ./breakdown.md
+:::{include} ./_snippets/breakdown.md
 :::
 
 ## Optional Properties

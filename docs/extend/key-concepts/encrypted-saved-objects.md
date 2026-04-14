@@ -152,7 +152,7 @@ The optional `shouldTransformIfDecryptionFails` parameter defines whether an ESO
 Some examples of `createModelVersion` can be found in the ESO Model Version example plugin (
 [examples/eso_model_version_example/server/plugin.ts](https://github.com/elastic/kibana/blob/06fc22a0f15e692857ba689a7b0ddec91ed2dac2/examples/eso_model_version_example/server/plugin.ts))
 
-For more information see our developer documentation for [Model Versions](../tutorials/register-a-new-saved-object-type.md#defining-model-versions).
+For more information see our developer documentation for [Model Versions](../tutorials/register-a-new-saved-object-type.md).
 
 #### Serverless Considerations
 

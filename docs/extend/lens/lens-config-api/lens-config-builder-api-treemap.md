@@ -19,7 +19,7 @@ Understanding `LensTreeMapConfig` in detail
 - **Type:** `string`
 - **Description:** The title of the visualization.
 
-:::{include} ./dataset.md
+:::{include} ./_snippets/dataset.md
 :::
 
 ### `breakdown`
@@ -27,7 +27,7 @@ Understanding `LensTreeMapConfig` in detail
 - **Type:** `LensBreakdownConfig[]`
 - **Description:** An array of breakdown configurations to hierarchically segment the data into nested rectangles. The breakdowns determine how the data is grouped and subdivided, with each level of the hierarchy represented by a deeper level of nesting in the treemap. Check breakdown configuration details below.
 
-:::{include} ./breakdown.md
+:::{include} ./_snippets/breakdown.md
 :::
 
 ## Optional Properties

@@ -240,7 +240,7 @@ Does the feature work efficiently on the below listed browsers
 
 ## Backward compatibility
 
-Any time you change state that is part of a Saved Object you will have to write a [migration](../key-concepts/saved-objects.md#migrations-and-backward-compatibility).
+Any time you change state that is part of a Saved Object you will have to write a [migration](../key-concepts/saved-objects.md).
 
 Never store state from another plugin in your Saved Objects or URLs unless it implements the [persistable state interface](../key-concepts/persistable-state.md). Remember to check for migrations when deserializing that state.
 

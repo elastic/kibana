@@ -5,7 +5,7 @@ description: "Persitable state is a key concept to understand when building a Ki
 
 # Persistable State
 
-“Persistable state” is developer-defined state that supports being persisted by a plugin other than the one defining it. Persistable State needs to be serializable and the owner can/should provide utilities to migrate it, extract and inject any [references to Saved Objects](./saved-objects.md#references) it may contain, as well as telemetry collection utilities.
+“Persistable state” is developer-defined state that supports being persisted by a plugin other than the one defining it. Persistable State needs to be serializable and the owner can/should provide utilities to migrate it, extract and inject any [references to Saved Objects](./saved-objects.md) it may contain, as well as telemetry collection utilities.
 
 ## Exposing state that can be persisted
 
@@ -63,7 +63,7 @@ note: Currently there is no recommended way on how to store version in url and i
 In order to support import and export, and space-sharing capabilities, Saved Objects need to explicitly list any references they contain to other Saved Objects.
 To support persisting your state in saved objects owned by another plugin, the `extract` and `inject` methods of Persistable State interface should be implemented.
 
-[Learn how to define Saved Object references](../tutorials/register-a-new-saved-object-type.md#references)
+[Learn how to define Saved Object references](../tutorials/register-a-new-saved-object-type.md)
 
 [See example embeddable providing extract/inject functions](https://github.com/elastic/kibana/blob/8.9/examples/embeddable_examples/public/migrations/migrations_embeddable_factory.ts)
 
@@ -71,7 +71,7 @@ To support persisting your state in saved objects owned by another plugin, the `
 
 As your plugin evolves, you may need to change your state in a breaking way. If that happens, you should write a migration to upgrade the state that existed prior to the change.
 
-[How to write a migration](../tutorials/register-a-new-saved-object-type.md#migrations).
+[How to write a migration](../tutorials/register-a-new-saved-object-type.md).
 
 [See an example saved object storing embeddable state implementing saved object migration function](https://github.com/elastic/kibana/blob/8.9/examples/embeddable_examples/server/searchable_list_saved_object.ts)
 

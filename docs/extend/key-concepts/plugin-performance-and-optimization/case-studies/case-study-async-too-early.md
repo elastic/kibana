@@ -49,7 +49,7 @@ While the `index.tsx` file was set up to load the `EmbeddableConsole` asyncronou
 
 The primary fix for this problem was to add a dynamic import for the `ConsoleWrapper` component in the `EmbeddableConsole` component:
 
-```diff
+```
 diff --git a/embeddable_console.tsx b/embeddable_console.tsx
 index 6a2ab55..386c29 111111
 --- a/src/plugins/console/public/application/containers/embeddable/embeddable_console.tsx

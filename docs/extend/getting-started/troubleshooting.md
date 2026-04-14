@@ -68,7 +68,7 @@ Please reach out to the [Kibana Operations team](https://github.com/orgs/elastic
 
 If you experience minified React errors and want to expand them to their full error messages you will currently need to rebuild the `@kbn/ui-shared-deps-npm` package using "development" mode instead of "production", which can be done by modifying the corresponding line in `packages/kbn-ui-shared-deps-npm/webpack.config.js` and make sure to run `yarn kbn bootstrap` afterwards:
 
-```diff
+```
 -    mode: 'production',
 +    mode: 'development',
 ```

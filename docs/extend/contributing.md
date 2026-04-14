@@ -7,7 +7,7 @@ mapped_pages:
 
 This guide outlines the contribution process, whether you're fixing a bug, implementing a feature, or adding improvements and APIs. After committing your code, explore the [Elastic Contributor Program](https://www.elastic.co/community/contributor) for points and rewards.
 
-Read [*Getting started*](/extend/development-getting-started.md) to get your environment up and running, then read [*Best practices*](/extend/development-best-practices.md). And don't forget that [Elastic's Open Source Community Code of Conduct](https://www.elastic.co/community/codeofconduct) applies to code contributions too.
+Read [*Getting started*](/extend/getting-started/welcome.md) to get your environment up and running, then read [*Best practices*](/extend/development-best-practices.md). And don't forget that [Elastic's Open Source Community Code of Conduct](https://www.elastic.co/community/codeofconduct) applies to code contributions too.
 
 * [Testing](/extend/development-tests.md)
 * [How we use Git and GitHub](/extend/development-github.md)

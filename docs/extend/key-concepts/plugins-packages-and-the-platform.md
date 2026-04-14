@@ -53,7 +53,7 @@ Today it looks something like this.
 
 Plugins are code that is written to extend and customize Kibana. Plugin's don't have to be part of the Kibana repo, though the Kibana
 repo does contain many plugins! Plugins add customizations by
-using [extension points](./plugins-packages-and-the-platform.md#extension-points) provided by [platform services](./plugins-packages-and-the-platform.md#platform-services).
+using [extension points](./plugins-packages-and-the-platform.md#extension-points) provided by platform services.
 Sometimes people confuse the term "plugin" and "application". While often there is a 1:1 relationship between a plugin and an application, it is not always the case.
 A plugin may register many applications, or none.
 
@@ -64,11 +64,11 @@ Applications are top level pages in the Kibana UI. Discover, Dashboard, Dev Tool
 ![applications in kibana](../assets/applications.png)
 
 A plugin can register an application by
-adding it to core's application [registry](./plugins-packages-and-the-platform.md#registry).
+adding it to core's application registry.
 
 ### Public plugin API
 
-A plugin's public API consists of everything exported from a plugin's [start or setup lifecycle methods](./plugins-packages-and-the-platform.md#plugin-lifecycle),
+A plugin's public API consists of everything exported from a plugin's [start or setup lifecycle methods](./plugins-packages-and-the-platform.md#lifecycle-methods),
 as well as from the top level `index.ts` files that exist in the three "scope" folders:
 
 - common/index.ts

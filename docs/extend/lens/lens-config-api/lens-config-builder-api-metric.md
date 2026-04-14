@@ -19,7 +19,7 @@ Understanding `LensMetricConfig` in detail
 - **Type:** `string`
 - **Description:** The title of the visualization.
 
-:::{include} ./dataset.md
+:::{include} ./_snippets/dataset.md
 :::
 
 ### `value`
@@ -44,7 +44,7 @@ Understanding `LensMetricConfig` in detail
 - **Type:** `LensLayerQuery`
 - **Description:** Used to define a query for calculating a maximum value, same as value it should be the name of field or lens formula.
 
-:::{include} ./breakdown.md
+:::{include} ./_snippets/breakdown.md
 :::
 
 ### `trendLine`

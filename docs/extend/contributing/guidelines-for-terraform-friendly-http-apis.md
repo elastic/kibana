@@ -56,7 +56,7 @@ PUT _ilm/policy/my_ilm_policy
 
 [Corresponding resource configuration](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/elasticsearch_index_lifecycle)
 
-```terraform
+```
 provider "elasticstack" {
   elasticsearch {}
 }
@@ -191,7 +191,7 @@ router.post(
 
 Complex mappings (e.g. saved objects) make life difficult but not impossible. One *can* make complex mappings readable through JSON encoding:
 
-```terraform
+```
 mappings = jsonencode({
   properties = {
     user = {
