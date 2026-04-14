@@ -231,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
           policy_id: 'policy1',
           type: 'PERMANENT',
           policy_revision_idx: 1,
-          local_metadata: { host: { hostname: 'host6' } },
+          local_metadata: { host: { hostname: 'host-disconnected' } },
           user_provided_metadata: {},
           enrolled_at: '2022-06-21T12:17:25Z',
           last_checkin: new Date().toISOString(),
@@ -261,6 +261,18 @@ export default function ({ getService }: FtrProviderContext) {
           uninstalled: 1,
         },
       });
+    });
+
+    it('should return offline status for agent with disconnected last_checkin_status', async () => {
+      const { body: apiResponse } = await supertest
+        .get(
+          `/api/fleet/agents?kuery=fleet-agents.local_metadata.host.hostname:host-disconnected`
+        )
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      expect(apiResponse.items.length).to.eql(1);
+      expect(apiResponse.items[0].status).to.eql('offline');
+      expect(apiResponse.items[0].last_checkin_status).to.eql('disconnected');
     });
 
     it('should not perform inactivity check if there are too many agent policies with inactivity timeout', async () => {
