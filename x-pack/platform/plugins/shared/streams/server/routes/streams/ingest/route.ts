@@ -231,7 +231,7 @@ const upsertIngestRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
+    const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -252,6 +252,8 @@ const upsertIngestRoute = createServerRoute({
         'Cannot modify ingest settings of a replicated stream. It is managed by the source cluster via cross-cluster replication.'
       );
     }
+
+    const queryClient = await getQueryClient();
 
     if (WiredIngestUpsertRequest.is(ingest)) {
       return await updateWiredIngest({
