@@ -11,7 +11,6 @@ import type {
   AggregationsTopHitsAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { BudgetingMethod } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   calendarAlignedTimeWindowSchema,
@@ -34,7 +33,6 @@ interface Params {
   instanceId?: string;
   remoteName?: string;
   timeWindowOverride?: TimeWindow;
-  budgetingMethodOverride?: BudgetingMethod;
 }
 
 export interface BurnRateWindow {
@@ -68,7 +66,6 @@ interface ResolvedParams {
   dateRange: DateRange;
   shouldIncludeInstanceIdFilter: boolean;
   index: string;
-  budgetingMethodOverride?: BudgetingMethod;
 }
 
 const resolveIndex = (remoteName?: string) =>
@@ -79,7 +76,6 @@ const resolveParams = ({
   instanceId,
   remoteName,
   timeWindowOverride,
-  budgetingMethodOverride,
 }: Params): ResolvedParams => {
   const dateRange = toDateRange(timeWindowOverride ?? slo.timeWindow);
   const isDefinedWithGroupBy = ![slo.groupBy].flat().includes(ALL_VALUE);
@@ -93,7 +89,6 @@ const resolveParams = ({
     dateRange,
     shouldIncludeInstanceIdFilter,
     index: resolveIndex(remoteName),
-    budgetingMethodOverride,
   };
 };
 
@@ -160,8 +155,7 @@ const toSummaryResult = (
   slo: SLODefinition,
   dateRange: DateRange,
   aggregations: SummaryAggregations | undefined,
-  burnRates: BurnRateWindow[],
-  budgetingMethodOverride?: BudgetingMethod
+  burnRates: BurnRateWindow[]
 ): SummaryResult => {
   const source = aggregations?.last_doc?.hits?.hits?.[0]?._source as
     | {
@@ -173,7 +167,7 @@ const toSummaryResult = (
     | undefined;
   const groupings = source?.slo?.groupings;
 
-  const sliValue = computeSliValue(slo, dateRange, aggregations, budgetingMethodOverride);
+  const sliValue = computeSliValue(slo, dateRange, aggregations);
   const errorBudget = computeErrorBudget(slo, sliValue);
 
   return {
@@ -196,7 +190,7 @@ export class DefaultSummaryClient implements SummaryClient {
 
   async computeSummary(params: Params): Promise<SummaryResult> {
     const resolved = resolveParams(params);
-    const { slo, instanceId, remoteName, dateRange, index, budgetingMethodOverride } = resolved;
+    const { slo, instanceId, remoteName, dateRange, index } = resolved;
 
     const result = await this.esClient.search<any, SummaryAggregations>({
       index,
@@ -210,7 +204,7 @@ export class DefaultSummaryClient implements SummaryClient {
       remoteName
     );
 
-    return toSummaryResult(slo, dateRange, result.aggregations, burnRates, budgetingMethodOverride);
+    return toSummaryResult(slo, dateRange, result.aggregations, burnRates);
   }
 
   async computeSummaries(paramsList: Params[]): Promise<SummaryResult[]> {
@@ -243,12 +237,12 @@ export class DefaultSummaryClient implements SummaryClient {
       this.burnRatesClient.calculateBatch(burnRateBatchParams),
     ]);
 
-    return resolvedList.map(({ slo, dateRange, budgetingMethodOverride }, i) => {
+    return resolvedList.map(({ slo, dateRange }, i) => {
       const aggs = summaryAggregations[i];
       if (!aggs) {
         return buildNoDataResult(slo);
       }
-      return toSummaryResult(slo, dateRange, aggs, allBurnRates[i], budgetingMethodOverride);
+      return toSummaryResult(slo, dateRange, aggs, allBurnRates[i]);
     });
   }
 
@@ -391,14 +385,12 @@ interface BurnRateBucket {
 function computeSliValue(
   slo: SLODefinition,
   dateRange: DateRange,
-  bucket: BurnRateBucket | undefined,
-  budgetingMethodOverride?: BudgetingMethod
+  bucket: BurnRateBucket | undefined
 ) {
   const good = bucket?.good?.value ?? 0;
   const total = bucket?.total?.value ?? 0;
-  const budgetingMethod = budgetingMethodOverride ?? slo.budgetingMethod;
 
-  if (timeslicesBudgetingMethodSchema.is(budgetingMethod) && slo.objective.timesliceWindow) {
+  if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && slo.objective.timesliceWindow) {
     const totalSlices = getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow);
 
     return computeSLI(good, total, totalSlices);
