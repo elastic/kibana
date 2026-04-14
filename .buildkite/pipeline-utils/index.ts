@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './affected-packages';
 export * from './agent_images';
 export * from './buildkite';
 export * as CiStats from './ci-stats';
