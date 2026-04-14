@@ -121,6 +121,7 @@ dependsOn:
   - '@kbn/search-inference-endpoints'
   - '@kbn/response-ops-oauth-hooks'
   - '@kbn/connector-specs'
+  - '@kbn/core-user-profile-browser'
 tags:
   - plugin
   - prod
