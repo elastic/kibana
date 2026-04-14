@@ -36,8 +36,8 @@ export interface KIQueryGenerationScenario {
   output: {
     criteria: EvaluationCriterion[];
     expected_categories: string[];
-    esql_substrings?: string[];
     expected_ground_truth: string;
+    expect_stats?: boolean;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;

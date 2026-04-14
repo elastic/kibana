@@ -619,10 +619,16 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Queries must be grounded in features from the input (entities, dependencies, dataset_analysis, error_logs) rather than being speculative or based solely on the stream name/description',
             score: 2,
           },
+          {
+            id: 'stats-aggregate-monitoring',
+            text: 'Should generate at least one STATS query for aggregate monitoring (e.g., error rate, traffic volume) when dataset_analysis reveals fields suitable for aggregation. STATS queries should have calibrated thresholds documented in descriptions.',
+            score: 1,
+          },
         ],
         expected_categories: ['operational', 'error'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[operational monitoring and proactive error detection across OTel Demo microservices (cart, checkout, shipping, payment, frontend, email, recommendation, ad, quote, valkey); operational queries for service health and request patterns; error queries for exception/failure detection grounded in entity and dependency features]',
+          'queries=[operational monitoring and proactive error detection across OTel Demo microservices (cart, checkout, shipping, payment, frontend, email, recommendation, ad, quote, valkey); operational queries for service health and request patterns; error queries for exception/failure detection grounded in entity and dependency features; STATS queries for aggregate monitoring (error rate, traffic volume) with calibrated thresholds]',
       },
       metadata: {
         difficulty: 'easy',
@@ -653,11 +659,16 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Should generate a query targeting gRPC transport or connection errors (evidence: "transport: Error while dialing", gRPC code 13 INTERNAL / code 14 UNAVAILABLE in checkout and frontend logs)',
             score: 1,
           },
+          {
+            id: 'stats-error-rate-detection',
+            text: 'Should generate a STATS query detecting elevated error rates during the payment-unreachable failure (e.g., error rate spike correlated with the payment service disruption). The STATS query should complement the match-type error detection queries.',
+            score: 2,
+          },
         ],
         expected_categories: ['error', 'operational'],
-        esql_substrings: ['charge', 'dial', 'timeout'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[error detection for payment charge failures (failed to charge card), gRPC transport/dialing errors (dial tcp, i/o timeout, deadline exceeded), upstream impact detection in checkout/frontend services, operational monitoring across OTel Demo microservices]',
+          'queries=[error detection for payment charge failures (failed to charge card), gRPC transport/dialing errors (dial tcp, i/o timeout, deadline exceeded), upstream impact detection in checkout/frontend services, operational monitoring across OTel Demo microservices; STATS queries for aggregate error rate detection during payment disruption]',
       },
       metadata: {
         difficulty: 'medium',
@@ -689,11 +700,16 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Should generate a query detecting upstream impact in checkout or frontend caused by cart unavailability (evidence: checkout logs "failed to get user cart", frontend sees gRPC code 14 UNAVAILABLE from cart)',
             score: 2,
           },
+          {
+            id: 'stats-error-rate-detection',
+            text: 'Should generate a STATS query detecting elevated error rates or degraded cart operation success rates during the Redis cutoff. The threshold should reflect the severity of the cache failure.',
+            score: 2,
+          },
         ],
         expected_categories: ['error', 'operational'],
-        esql_substrings: ['cart', 'ECONNREFUSED'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[error detection for Valkey/Redis ECONNREFUSED connection failures in cart, cart service crash/shutdown detection, upstream impact in checkout/frontend from cart unavailability (gRPC UNAVAILABLE, failed to get user cart), operational monitoring across OTel Demo microservices]',
+          'queries=[error detection for Valkey/Redis ECONNREFUSED connection failures in cart, cart service crash/shutdown detection, upstream impact in checkout/frontend from cart unavailability (gRPC UNAVAILABLE, failed to get user cart), operational monitoring across OTel Demo microservices; STATS queries for aggregate error rate detection during cart cache failure]',
       },
       metadata: {
         difficulty: 'medium',
@@ -725,10 +741,16 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Should generate operational queries for service health monitoring (e.g., order throughput, transaction completions, email confirmations) grounded in entity features and log patterns observed in the data',
             score: 2,
           },
+          {
+            id: 'stats-component-degradation',
+            text: 'Should generate STATS queries detecting per-component error rate spikes or traffic drops that correlate with the checkout disruption. Entity-scoped STATS (BY resource.attributes.app) is preferred when multiple services are affected.',
+            score: 2,
+          },
         ],
         expected_categories: ['operational', 'error'],
+        expect_stats: true,
         expected_ground_truth:
-          'queries=[entity-scoped error detection for checkout, cart, payment, and shipping services; dependency-aware monitoring for checkout→payment, cart→valkey, checkout→email, shipping→quote communication paths; operational monitoring for order throughput (PlaceOrder), payment transactions, and email confirmations across OTel Demo microservices]',
+          'queries=[entity-scoped error detection for checkout, cart, payment, and shipping services; dependency-aware monitoring for checkout→payment, cart→valkey, checkout→email, shipping→quote communication paths; operational monitoring for order throughput (PlaceOrder), payment transactions, and email confirmations across OTel Demo microservices; STATS queries for per-component error rate spikes and traffic drops during checkout disruption]',
       },
       metadata: {
         difficulty: 'hard',

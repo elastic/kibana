@@ -21,7 +21,7 @@ import {
   SIGEVENTS_SNAPSHOT_RUN,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
-import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation/evaluators';
+import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation';
 import { createScenarioCriteriaLlmEvaluator } from '../../src/evaluators/scenario_criteria/evaluators';
 import {
   getActiveDatasets,
@@ -33,8 +33,7 @@ import {
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
 import { getComputedKIFeaturesFromDocs } from './get_computed_ki_features_from_docs';
-
-const SAMPLE_DOCS_SIZE = 500;
+import { collectSampleDocuments } from './collect_sample_documents';
 
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
@@ -145,20 +144,16 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-          const query = extractionScenario?.input.log_query_filter ?? [{ match_all: {} }];
-          const searchResult = await esClient.search<Record<string, unknown>>({
-            index: MANAGED_STREAM_SEARCH_PATTERN,
-            size: SAMPLE_DOCS_SIZE,
-            query: { bool: { filter: query } },
-            sort: [{ '@timestamp': { order: 'desc' } }],
+          const sampleHits = await collectSampleDocuments({
+            esClient,
+            extractionScenario,
+            log,
           });
 
-          sampleLogs = searchResult.hits.hits.map((hit) =>
-            extractLogTextFromSourceDoc(hit._source)
-          );
+          sampleLogs = sampleHits.map((hit) => extractLogTextFromSourceDoc(hit._source));
 
           if (shouldUseCanonicalKIs) {
-            const sourceDocs = searchResult.hits.hits
+            const sourceDocs = sampleHits
               .map((hit) => hit._source)
               .filter((doc): doc is Record<string, unknown> => doc != null);
 
