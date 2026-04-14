@@ -140,7 +140,7 @@ const getStatusAttributes = ({
 
         return {
           textColor: 'success',
-          icon: <EuiIcon color="success" type="checkInCircleFilled" />,
+          icon: <EuiIcon color="success" type="checkCircleFill" />,
           label: <TableText>{getStatusText(session.status)}</TableText>,
           toolTipContent,
         };

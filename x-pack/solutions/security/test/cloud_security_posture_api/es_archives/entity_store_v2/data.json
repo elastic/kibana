@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "1",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -41,7 +41,7 @@
   "type": "doc",
   "value": {
     "id": "2",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -80,7 +80,7 @@
   "type": "doc",
   "value": {
     "id": "3",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -115,7 +115,7 @@
   "type": "doc",
   "value": {
     "id": "4",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -154,7 +154,7 @@
   "type": "doc",
   "value": {
     "id": "5",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -193,7 +193,7 @@
   "type": "doc",
   "value": {
     "id": "6",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -232,7 +232,7 @@
   "type": "doc",
   "value": {
     "id": "7",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -271,7 +271,7 @@
   "type": "doc",
   "value": {
     "id": "8",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -306,7 +306,7 @@
   "type": "doc",
   "value": {
     "id": "9",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -341,7 +341,7 @@
   "type": "doc",
   "value": {
     "id": "10",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -376,7 +376,7 @@
   "type": "doc",
   "value": {
     "id": "11",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -415,7 +415,7 @@
   "type": "doc",
   "value": {
     "id": "12",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -452,7 +452,7 @@
   "type": "doc",
   "value": {
     "id": "13",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -489,7 +489,7 @@
   "type": "doc",
   "value": {
     "id": "14",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -513,10 +513,12 @@
         "sub_type": "AWS IAM User",
         "type": "Identity",
         "relationships": {
-          "owns": [
-            "host:relationships-target-host-1",
-            "host:relationships-target-host-2"
-          ]
+          "owns": {
+            "ids": [
+              "host:relationships-target-host-1",
+              "host:relationships-target-host-2"
+            ]
+          }
         }
       },
       "event": {
@@ -534,7 +536,7 @@
   "type": "doc",
   "value": {
     "id": "15",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -573,7 +575,7 @@
   "type": "doc",
   "value": {
     "id": "16",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -612,7 +614,7 @@
   "type": "doc",
   "value": {
     "id": "17",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -651,7 +653,7 @@
   "type": "doc",
   "value": {
     "id": "18",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -679,14 +681,18 @@
         "sub_type": "GCP Service Account",
         "type": "Service Account",
         "relationships": {
-          "owns": [
-            "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
-            "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
-          ],
-          "communicates_with": [
-            "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
-            "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
-          ]
+          "owns": {
+            "ids": [
+              "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
+              "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
+            ]
+          },
+          "communicates_with": {
+            "ids": [
+              "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
+              "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
+            ]
+          }
         }
       },
       "event": {
@@ -704,7 +710,7 @@
   "type": "doc",
   "value": {
     "id": "19",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -747,7 +753,7 @@
   "type": "doc",
   "value": {
     "id": "20",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -790,7 +796,7 @@
   "type": "doc",
   "value": {
     "id": "21",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -833,7 +839,7 @@
   "type": "doc",
   "value": {
     "id": "22",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -861,10 +867,12 @@
         "sub_type": "GCP Compute Instance",
         "type": "Host",
         "relationships": {
-          "communicates_with": [
-            "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
-            "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
-          ]
+          "communicates_with": {
+            "ids": [
+              "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
+              "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
+            ]
+          }
         }
       },
       "event": {
@@ -882,7 +890,7 @@
   "type": "doc",
   "value": {
     "id": "23",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -925,7 +933,7 @@
   "type": "doc",
   "value": {
     "id": "24",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -949,11 +957,13 @@
         "sub_type": "AWS IAM User",
         "type": "Identity",
         "relationships": {
-          "owns": [
-            "host:rel-hierarchy-host-1",
-            "service:Hierarchy Service 1",
-            "user:rel-hierarchy-identity-1@gcp"
-          ]
+          "owns": {
+            "ids": [
+              "host:rel-hierarchy-host-1",
+              "service:Hierarchy Service 1",
+              "user:rel-hierarchy-identity-1@gcp"
+            ]
+          }
         }
       },
       "event": {
@@ -971,7 +981,7 @@
   "type": "doc",
   "value": {
     "id": "25",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -995,10 +1005,12 @@
         "sub_type": "AWS EC2 Instance",
         "type": "Host",
         "relationships": {
-          "communicates_with": [
-            "rel-hierarchy-storage-1",
-            "rel-hierarchy-storage-2"
-          ]
+          "communicates_with": {
+            "ids": [
+              "rel-hierarchy-storage-1",
+              "rel-hierarchy-storage-2"
+            ]
+          }
         }
       },
       "event": {
@@ -1017,7 +1029,7 @@
   "type": "doc",
   "value": {
     "id": "26",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1041,10 +1053,12 @@
         "sub_type": "AWS Lambda Function",
         "type": "Service",
         "relationships": {
-          "communicates_with": [
-            "rel-hierarchy-database-1",
-            "rel-hierarchy-database-2"
-          ]
+          "communicates_with": {
+            "ids": [
+              "rel-hierarchy-database-1",
+              "rel-hierarchy-database-2"
+            ]
+          }
         }
       },
       "event": {
@@ -1062,7 +1076,7 @@
   "type": "doc",
   "value": {
     "id": "27",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1086,16 +1100,22 @@
         "sub_type": "AWS IAM Role",
         "type": "Identity",
         "relationships": {
-          "communicates_with": [
-            "rel-hierarchy-network-1",
-            "rel-hierarchy-network-2"
-          ],
-          "supervises": [
-            "user:rel-hierarchy-delegate-1@gcp"
-          ],
-          "depends_on": [
-            "user:rel-hierarchy-delegate-1@gcp"
-          ]
+          "communicates_with": {
+            "ids": [
+              "rel-hierarchy-network-1",
+              "rel-hierarchy-network-2"
+            ]
+          },
+          "supervises": {
+            "ids": [
+              "user:rel-hierarchy-delegate-1@gcp"
+            ]
+          },
+          "depends_on": {
+            "ids": [
+              "user:rel-hierarchy-delegate-1@gcp"
+            ]
+          }
         }
       },
       "event": {
@@ -1113,7 +1133,7 @@
   "type": "doc",
   "value": {
     "id": "28",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1148,7 +1168,7 @@
   "type": "doc",
   "value": {
     "id": "29",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1183,7 +1203,7 @@
   "type": "doc",
   "value": {
     "id": "30",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1218,7 +1238,7 @@
   "type": "doc",
   "value": {
     "id": "31",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1253,7 +1273,7 @@
   "type": "doc",
   "value": {
     "id": "32",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1291,7 +1311,7 @@
   "type": "doc",
   "value": {
     "id": "33",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1329,7 +1349,7 @@
   "type": "doc",
   "value": {
     "id": "34",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1368,7 +1388,7 @@
   "type": "doc",
   "value": {
     "id": "rel-hierarchy-external-caller",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1392,9 +1412,11 @@
         "sub_type": "AWS Lambda Function",
         "type": "Service",
         "relationships": {
-          "communicates_with": [
-            "user:rel-hierarchy-identity-1@gcp"
-          ]
+          "communicates_with": {
+            "ids": [
+              "user:rel-hierarchy-identity-1@gcp"
+            ]
+          }
         }
       },
       "event": {

@@ -9,6 +9,7 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  createReturnFocus,
   getDisplayedItemsAllowedAmount,
   getShouldOverflow,
   getAppMenuItems,
@@ -21,36 +22,121 @@ import { APP_MENU_ITEM_LIMIT } from './constants';
 import type { AppMenuPopoverItem } from './types';
 
 describe('utils', () => {
+  describe('createReturnFocus', () => {
+    let triggerElement: HTMLButtonElement;
+    let overflowButton: HTMLButtonElement;
+
+    beforeEach(() => {
+      triggerElement = document.createElement('button');
+      overflowButton = document.createElement('button');
+      overflowButton.setAttribute('data-test-subj', 'app-menu-overflow-button');
+    });
+
+    afterEach(() => {
+      triggerElement.remove();
+      overflowButton.remove();
+    });
+
+    it('should focuse the trigger element when it is still in the DOM', () => {
+      document.body.appendChild(triggerElement);
+      const returnFocus = createReturnFocus(triggerElement);
+      returnFocus();
+      expect(document.activeElement).toBe(triggerElement);
+    });
+
+    it('should focuse the parent element when the trigger has been removed but the parent is still in the DOM', () => {
+      const parentElement = document.createElement('button');
+      document.body.appendChild(parentElement);
+      // triggerElement is NOT appended — simulates a popover item that was unmounted
+      const returnFocus = createReturnFocus(triggerElement, parentElement);
+      returnFocus();
+      expect(document.activeElement).toBe(parentElement);
+      parentElement.remove();
+    });
+
+    it('should focuse the overflow button when both trigger and parent element have been removed from the DOM', () => {
+      // neither triggerElement nor parentElement is appended
+      document.body.appendChild(overflowButton);
+      const parentElement = document.createElement('button');
+      const returnFocus = createReturnFocus(triggerElement, parentElement);
+      returnFocus();
+      expect(document.activeElement).toBe(overflowButton);
+    });
+
+    it('should focuse the overflow button when the trigger element has been removed from the DOM', () => {
+      // triggerElement is NOT appended — simulates a popover item that was unmounted
+      document.body.appendChild(overflowButton);
+      const returnFocus = createReturnFocus(triggerElement);
+      returnFocus();
+      expect(document.activeElement).toBe(overflowButton);
+    });
+  });
+
   describe('getDisplayedItemsAllowedAmount', () => {
-    it('should return full limit when no action items', () => {
+    it('should return full limit when items fit within limit', () => {
+      const result = getDisplayedItemsAllowedAmount({
+        items: [
+          { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+          { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear', order: 2 },
+        ],
+      });
+
+      expect(result).toBe(APP_MENU_ITEM_LIMIT);
+    });
+
+    it('should return full limit when no items', () => {
       const result = getDisplayedItemsAllowedAmount({});
 
       expect(result).toBe(APP_MENU_ITEM_LIMIT);
     });
 
-    it('should reduce limit by 1 when primary action item is present', () => {
+    it('should reserve one slot for overflow when items exceed limit', () => {
+      const items = Array.from({ length: 5 }, (_, i) => ({
+        id: `${i}`,
+        label: `Item ${i}`,
+        run: jest.fn(),
+        iconType: 'gear' as const,
+        order: i,
+      }));
+
+      const result = getDisplayedItemsAllowedAmount({ items });
+
+      expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
+    });
+
+    it('should reserve one slot when any item is marked as overflow', () => {
       const result = getDisplayedItemsAllowedAmount({
-        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+        items: [
+          { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+          {
+            id: '2',
+            label: 'Item 2',
+            run: jest.fn(),
+            iconType: 'gear',
+            order: 2,
+            overflow: true,
+          },
+        ],
       });
 
       expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
     });
 
-    it('should reduce limit by 1 when secondary action item is present', () => {
+    it('should not be affected by primaryActionItem', () => {
+      const items = Array.from({ length: 5 }, (_, i) => ({
+        id: `${i}`,
+        label: `Item ${i}`,
+        run: jest.fn(),
+        iconType: 'gear' as const,
+        order: i,
+      }));
+
       const result = getDisplayedItemsAllowedAmount({
-        secondaryActionItem: { id: 'cancel', label: 'Cancel', run: jest.fn(), iconType: 'cross' },
+        items,
+        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
       });
 
       expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
-    });
-
-    it('should reduce limit by 2 when both action items are present', () => {
-      const result = getDisplayedItemsAllowedAmount({
-        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
-        secondaryActionItem: { id: 'cancel', label: 'Cancel', run: jest.fn(), iconType: 'cross' },
-      });
-
-      expect(result).toBe(APP_MENU_ITEM_LIMIT - 2);
     });
   });
 
@@ -111,6 +197,27 @@ describe('utils', () => {
 
       expect(result).toBe(true);
     });
+
+    it('should return true when an item is marked as overflow', () => {
+      const result = getShouldOverflow({
+        config: {
+          items: [
+            { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+            {
+              id: '2',
+              label: 'Item 2',
+              run: jest.fn(),
+              iconType: 'gear',
+              order: 2,
+              overflow: true,
+            },
+          ],
+        },
+        displayedItemsAllowedAmount: 5,
+      });
+
+      expect(result).toBe(true);
+    });
   });
 
   describe('getAppMenuItems', () => {
@@ -162,12 +269,29 @@ describe('utils', () => {
 
       const result = getAppMenuItems({ config: { items } });
 
-      expect(result.displayedItems).toHaveLength(APP_MENU_ITEM_LIMIT);
-      expect(result.overflowItems).toHaveLength(2);
+      // limit - 1 items shown, rest overflow
+      expect(result.displayedItems).toHaveLength(APP_MENU_ITEM_LIMIT - 1);
+      expect(result.overflowItems).toHaveLength(5);
       expect(result.shouldOverflow).toBe(true);
     });
 
-    it('should account for action items when calculating overflow', () => {
+    it('should show all items when exactly at limit', () => {
+      const items = Array.from({ length: APP_MENU_ITEM_LIMIT }, (_, i) => ({
+        id: `${i}`,
+        label: `Item ${i}`,
+        run: jest.fn(),
+        iconType: 'gear' as const,
+        order: i,
+      }));
+
+      const result = getAppMenuItems({ config: { items } });
+
+      expect(result.displayedItems).toHaveLength(APP_MENU_ITEM_LIMIT);
+      expect(result.overflowItems).toHaveLength(0);
+      expect(result.shouldOverflow).toBe(false);
+    });
+
+    it('should not be affected by primaryActionItem presence', () => {
       const items = Array.from({ length: 5 }, (_, i) => ({
         id: `${i}`,
         label: `Item ${i}`,
@@ -183,8 +307,62 @@ describe('utils', () => {
         },
       });
 
+      // Same as without primary action: limit - 1 items shown
       expect(result.displayedItems).toHaveLength(APP_MENU_ITEM_LIMIT - 1);
+      expect(result.overflowItems).toHaveLength(3);
+      expect(result.shouldOverflow).toBe(true);
+    });
+
+    it('should move forced overflow items to overflow even when under limit', () => {
+      const items = [
+        {
+          id: 'hiddenUnderOverflow',
+          label: 'Hidden under overflow',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 1,
+          overflow: true,
+        },
+      ];
+
+      const result = getAppMenuItems({ config: { items } });
+
+      expect(result.displayedItems).toHaveLength(0);
       expect(result.overflowItems).toHaveLength(1);
+      expect(result.overflowItems[0].id).toBe('hiddenUnderOverflow');
+      expect(result.shouldOverflow).toBe(true);
+    });
+
+    it('should preserve order across displayed and overflow items', () => {
+      const items = [
+        {
+          id: 'third',
+          label: 'Third',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 3,
+        },
+        {
+          id: 'firstForced',
+          label: 'First forced',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 1,
+          overflow: true,
+        },
+        {
+          id: 'second',
+          label: 'Second',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 2,
+        },
+      ];
+
+      const result = getAppMenuItems({ config: { items } });
+
+      expect(result.displayedItems.map((item) => item.id)).toEqual(['second', 'third']);
+      expect(result.overflowItems.map((item) => item.id)).toEqual(['firstForced']);
       expect(result.shouldOverflow).toBe(true);
     });
   });
@@ -278,15 +456,6 @@ describe('utils', () => {
       expect(result[1].key).toBe('action-items');
     });
 
-    it('should return items with separator when secondary action item is provided', () => {
-      const result = getPopoverActionItems({
-        secondaryActionItem: { id: 'cancel', label: 'Cancel', run: jest.fn(), iconType: 'cross' },
-      });
-
-      expect(result).toHaveLength(2);
-      expect(result[0].isSeparator).toBe(true);
-    });
-
     it('should return empty array when both items are hidden with "all"', () => {
       const result = getPopoverActionItems({
         primaryActionItem: {
@@ -296,57 +465,9 @@ describe('utils', () => {
           iconType: 'save',
           hidden: 'all',
         },
-        secondaryActionItem: {
-          id: 'cancel',
-          label: 'Cancel',
-          run: jest.fn(),
-          iconType: 'cross',
-          hidden: 'all',
-        },
       });
 
       expect(result).toEqual([]);
-    });
-
-    it('should return empty array when both items are hidden at mobile breakpoints', () => {
-      const result = getPopoverActionItems({
-        primaryActionItem: {
-          id: 'save',
-          label: 'Save',
-          run: jest.fn(),
-          iconType: 'save',
-          hidden: ['xs', 's', 'm'],
-        },
-        secondaryActionItem: {
-          id: 'cancel',
-          label: 'Cancel',
-          run: jest.fn(),
-          iconType: 'cross',
-          hidden: ['m'],
-        },
-      });
-
-      expect(result).toEqual([]);
-    });
-
-    it('should return items when only one is hidden', () => {
-      const result = getPopoverActionItems({
-        primaryActionItem: {
-          id: 'save',
-          label: 'Save',
-          run: jest.fn(),
-          iconType: 'save',
-          hidden: 'all',
-        },
-        secondaryActionItem: {
-          id: 'cancel',
-          label: 'Cancel',
-          run: jest.fn(),
-          iconType: 'cross',
-        },
-      });
-
-      expect(result).toHaveLength(2);
     });
 
     it('should return items when hidden at non-mobile breakpoints only', () => {

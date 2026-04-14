@@ -15,6 +15,7 @@ describe('Internal Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
   let mockGetWorkflowExecutionEngine: jest.Mock;
   let mockEngine: { isEventDrivenExecutionEnabled: jest.Mock };
+  let mockApi: { disableAllWorkflows: jest.Mock };
 
   const mockContext = {
     licensing: Promise.resolve({
@@ -33,6 +34,7 @@ describe('Internal Routes', () => {
 
     mockEngine = { isEventDrivenExecutionEnabled: jest.fn() };
     mockGetWorkflowExecutionEngine = jest.fn().mockResolvedValue(mockEngine);
+    mockApi = { disableAllWorkflows: jest.fn() };
 
     const createVersionedRoute = (method: string, path: string) => ({
       addVersion: jest
@@ -50,13 +52,24 @@ describe('Internal Routes', () => {
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('GET', config.path)
           ),
+        post: jest
+          .fn()
+          .mockImplementation((config: { path: string }) =>
+            createVersionedRoute('POST', config.path)
+          ),
       },
     } as unknown as jest.Mocked<IRouter>;
 
-    registerInternalRoutes({
-      router: mockRouter as any,
-      getWorkflowExecutionEngine: mockGetWorkflowExecutionEngine,
-    });
+    registerInternalRoutes(
+      {
+        router: mockRouter as any,
+        api: mockApi as any,
+        logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as any,
+        spaces: {} as any,
+        audit: {} as any,
+      },
+      mockGetWorkflowExecutionEngine
+    );
   });
 
   it('should register the config route handler', () => {
@@ -91,6 +104,31 @@ describe('Internal Routes', () => {
     expect(mockEngine.isEventDrivenExecutionEnabled).toHaveBeenCalledTimes(1);
     expect(response.ok).toHaveBeenCalledWith({
       body: { eventDrivenExecutionEnabled: false },
+    });
+  });
+
+  it('should register the disable_all_workflows route handler', () => {
+    expect(routeHandlers[`POST:/internal/workflows/disable_all_workflows`]).toBeDefined();
+    expect(routeHandlers[`POST:/internal/workflows/disable_all_workflows`].handler).toEqual(
+      expect.any(Function)
+    );
+  });
+
+  it('should call api.disableAllWorkflows across all spaces', async () => {
+    mockApi.disableAllWorkflows.mockResolvedValue({ total: 3, disabled: 3, failures: [] });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest();
+
+    await routeHandlers[`POST:/internal/workflows/disable_all_workflows`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.disableAllWorkflows).toHaveBeenCalledWith();
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { total: 3, disabled: 3, failures: [] },
     });
   });
 });

@@ -53,7 +53,7 @@ function toPublicEngine(
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
   const { versionState, logExtractionState, ...rest } = engine;
-  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter } =
+  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter, maxLogsPerPage } =
     logsExtractionConfig;
 
   return {
@@ -65,6 +65,7 @@ function toPublicEngine(
     frequency,
     lookbackPeriod,
     fieldHistoryLength,
+    maxLogsPerPage,
     docsPerSecond: -1,
     indexPattern: '',
     enrichPolicyExecutionInterval: null,
@@ -77,8 +78,8 @@ function toPublicEngine(
 export function registerStatus(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.STATUS,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.STATUS,
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -86,7 +87,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(querySchema),

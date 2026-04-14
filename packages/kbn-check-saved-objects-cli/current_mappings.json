@@ -370,14 +370,6 @@
       "groupingMode": {
         "type": "keyword"
       },
-      "throttle": {
-        "type": "object",
-        "properties": {
-          "strategy": {
-            "type": "keyword"
-          }
-        }
-      },
       "name": {
         "fields": {
           "keyword": {
@@ -389,6 +381,17 @@
       },
       "snoozedUntil": {
         "type": "date"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "throttle": {
+        "properties": {
+          "strategy": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
       },
       "updatedAt": {
         "type": "date"
@@ -419,9 +422,6 @@
             "properties": {
               "base": {
                 "type": "text"
-              },
-              "condition": {
-                "type": "text"
               }
             }
           }
@@ -442,13 +442,18 @@
           "description": {
             "type": "text"
           },
-          "labels": {
-            "type": "keyword"
-          },
           "name": {
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            },
             "type": "text"
           },
           "owner": {
+            "type": "keyword"
+          },
+          "tags": {
             "type": "keyword"
           }
         }
@@ -468,9 +473,6 @@
           "query": {
             "properties": {
               "base": {
-                "type": "text"
-              },
-              "condition": {
                 "type": "text"
               }
             }
@@ -1334,31 +1336,6 @@
       }
     }
   },
-  "data_connector": {
-    "dynamic": false,
-    "properties": {
-      "kscIds": {
-        "type": "keyword"
-      },
-      "name": {
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "toolIds": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "workflowIds": {
-        "type": "keyword"
-      }
-    }
-  },
   "data_stream-config": {
     "dynamic": false,
     "properties": {
@@ -1390,6 +1367,9 @@
       },
       "result": {
         "properties": {}
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
@@ -2229,6 +2209,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2309,6 +2292,15 @@
       },
       "vars": {
         "type": "flattened"
+      },
+      "verification_failed_at": {
+        "type": "date"
+      },
+      "verification_started_at": {
+        "type": "date"
+      },
+      "verification_status": {
+        "type": "keyword"
       }
     }
   },
@@ -2669,6 +2661,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2847,6 +2842,9 @@
       },
       "name": {
         "type": "keyword"
+      },
+      "otel_exporter_config_yaml": {
+        "type": "text"
       },
       "output_id": {
         "index": false,
@@ -3134,6 +3132,9 @@
   "integration-config": {
     "dynamic": false,
     "properties": {
+      "connector_id": {
+        "type": "keyword"
+      },
       "created_by": {
         "type": "keyword"
       },
@@ -4399,10 +4400,6 @@
     "properties": {}
   },
   "stream-prompts": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "streams-significant-events-settings": {
     "dynamic": false,
     "properties": {}
   },
