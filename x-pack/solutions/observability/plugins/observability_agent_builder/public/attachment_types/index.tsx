@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ComponentType } from 'react';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import {
@@ -19,6 +20,8 @@ import {
   OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
 } from '../../common/constants';
+import type { ServiceMapRendererProps } from '../types';
+import { registerServiceMapAttachment } from './service_map';
 
 type UnknownAttachmentWithLabel = Attachment<
   string,
@@ -107,8 +110,10 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
+  getServiceMapComponent,
 }: {
   attachments: AttachmentServiceStartContract;
+  getServiceMapComponent: () => ComponentType<ServiceMapRendererProps> | null;
 }) => {
   ATTACHMENT_TYPE_CONFIGS.forEach(({ type, label, icon }) => {
     attachments.addAttachmentType<UnknownAttachmentWithLabel>(
@@ -116,4 +121,6 @@ export const registerAttachmentUiDefinitions = ({
       createAttachmentTypeConfig(label, icon)
     );
   });
+
+  registerServiceMapAttachment({ attachments, getServiceMapComponent });
 };

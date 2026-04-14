@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { ComponentType } from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type {
   ObservabilityAgentBuilderPluginPublicSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginPublicStart,
   ObservabilityAgentBuilderPluginStartDependencies,
+  ServiceMapRendererProps,
 } from './types';
 import {
   createAlertAIInsight,
@@ -30,6 +32,8 @@ export class ObservabilityAgentBuilderPlugin
       ObservabilityAgentBuilderPluginStartDependencies
     >
 {
+  private serviceMapComponent: ComponentType<ServiceMapRendererProps> | null = null;
+
   constructor(initContext: PluginInitializerContext) {}
 
   public setup(
@@ -56,11 +60,15 @@ export class ObservabilityAgentBuilderPlugin
 
     registerAttachmentUiDefinitions({
       attachments: plugins.agentBuilder.attachments,
+      getServiceMapComponent: () => this.serviceMapComponent,
     });
 
     return {
       getAlertAIInsight: () => createAlertAIInsight(core, plugins),
       getErrorSampleAIInsight: () => createErrorSampleAIInsight(core, plugins),
+      registerServiceMapComponent: (component: ComponentType<ServiceMapRendererProps>) => {
+        this.serviceMapComponent = component;
+      },
     };
   }
 

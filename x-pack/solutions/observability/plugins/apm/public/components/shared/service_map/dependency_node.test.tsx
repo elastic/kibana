@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { DependencyNode } from './dependency_node';
 import type { DependencyNodeData } from '../../../../common/service_map';
-import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
+import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

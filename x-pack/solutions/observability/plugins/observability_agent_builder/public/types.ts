@@ -10,6 +10,11 @@ import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/publ
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { AlertAiInsightProps, ErrorSampleAiInsightProps } from './components/insights';
+import type { ServiceMapAttachmentData } from '../common/attachments';
+
+export interface ServiceMapRendererProps {
+  connections: ServiceMapAttachmentData['connections'];
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAgentBuilderPluginPublicSetup {}
@@ -17,6 +22,7 @@ export interface ObservabilityAgentBuilderPluginPublicSetup {}
 export interface ObservabilityAgentBuilderPluginPublicStart {
   getAlertAIInsight: () => ComponentType<AlertAiInsightProps>;
   getErrorSampleAIInsight: () => ComponentType<ErrorSampleAiInsightProps>;
+  registerServiceMapComponent: (component: ComponentType<ServiceMapRendererProps>) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
