@@ -152,21 +152,6 @@ export const LAST_SEEN_COLUMN = i18n.translate(
   { defaultMessage: 'Last seen' }
 );
 
-export const SHOWING_ENTITIES_PREFIX = i18n.translate(
-  'xpack.securitySolution.entityResolution.showingEntitiesPrefix',
-  { defaultMessage: 'Showing' }
-);
-
-export const SHOWING_ENTITIES_OF = i18n.translate(
-  'xpack.securitySolution.entityResolution.showingEntitiesOf',
-  { defaultMessage: 'of' }
-);
-
-export const SHOWING_ENTITIES_SUFFIX = i18n.translate(
-  'xpack.securitySolution.entityResolution.showingEntitiesSuffix',
-  { defaultMessage: 'entities' }
-);
-
 export const ENTITY_HAS_ALIASES_ERROR = i18n.translate(
   'xpack.securitySolution.entityResolution.entityHasAliasesError',
   {

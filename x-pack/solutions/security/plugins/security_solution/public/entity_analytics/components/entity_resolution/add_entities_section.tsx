@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiBasicTable,
@@ -39,9 +40,6 @@ import {
   LAST_SEEN_COLUMN,
   RISK_SCORE_COLUMN,
   ACTIONS_COLUMN,
-  SHOWING_ENTITIES_PREFIX,
-  SHOWING_ENTITIES_OF,
-  SHOWING_ENTITIES_SUFFIX,
 } from './translations';
 import {
   ADD_ENTITIES_SECTION_TEST_ID,
@@ -224,14 +222,20 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
         {total > 0 && (
           <>
             <EuiText size="xs" data-test-subj={ADD_ENTITIES_SHOWING_TEST_ID}>
-              {SHOWING_ENTITIES_PREFIX}{' '}
-              <strong>
-                {from}
-                {'-'}
-                {to}
-              </strong>{' '}
-              {SHOWING_ENTITIES_OF} <strong>{total.toLocaleString()}</strong>{' '}
-              {SHOWING_ENTITIES_SUFFIX}
+              <FormattedMessage
+                id="xpack.securitySolution.entityResolution.showingEntities"
+                defaultMessage="Showing {range} of {total} entities"
+                values={{
+                  range: (
+                    <strong>
+                      {from}
+                      {'-'}
+                      {to}
+                    </strong>
+                  ),
+                  total: <strong>{total.toLocaleString()}</strong>,
+                }}
+              />
             </EuiText>
             <EuiSpacer size="s" />
           </>
