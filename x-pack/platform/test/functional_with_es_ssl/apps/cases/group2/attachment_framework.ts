@@ -428,7 +428,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
 
-        await testSubjects.existOrFail('comment-persistableState-.lens');
+        await testSubjects.existOrFail('comment-lens-lens');
       });
 
       it('adds lens visualization to an existing case from dashboard', async () => {
@@ -454,7 +454,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);
 
-        await testSubjects.existOrFail('comment-persistableState-.lens');
+        await testSubjects.existOrFail('comment-lens-lens');
       });
     });
   });

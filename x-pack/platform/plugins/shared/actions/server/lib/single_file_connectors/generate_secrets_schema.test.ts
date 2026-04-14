@@ -104,6 +104,41 @@ describe('generateSecretsSchema', () => {
     expect(result.schema.parse({})).toEqual({});
   });
 
+  describe('customValidator - EARS auth gating', () => {
+    const earsAuthSpec: ConnectorSpec['auth'] = {
+      types: ['none', 'ears'],
+    };
+
+    it('throws when EARS is disabled', () => {
+      mockConfigUtils.isEarsEnabled.mockReturnValue(false);
+      const validator = generateSecretsSchema(earsAuthSpec, mockConfigUtils);
+
+      expect(() =>
+        validator.customValidator!({ authType: 'ears', provider: 'google' }, validatorServices)
+      ).toThrow(
+        'EARS OAuth authentication is not enabled. Enable it via xpack.actions.ears.enabled in kibana.yml.'
+      );
+    });
+
+    it('does not throw when EARS is enabled', () => {
+      mockConfigUtils.isEarsEnabled.mockReturnValue(true);
+      const validator = generateSecretsSchema(earsAuthSpec, mockConfigUtils);
+
+      expect(() =>
+        validator.customValidator!({ authType: 'ears', provider: 'google' }, validatorServices)
+      ).not.toThrow();
+    });
+
+    it('does not check EARS when authType is not ears', () => {
+      mockConfigUtils.isEarsEnabled.mockReturnValue(false);
+      const validator = generateSecretsSchema(earsAuthSpec, mockConfigUtils);
+
+      expect(() =>
+        validator.customValidator!({ authType: 'none' }, validatorServices)
+      ).not.toThrow();
+    });
+  });
+
   describe('customValidator - allowedHosts validation for URL fields', () => {
     const oauthAuthSpec = {
       types: [

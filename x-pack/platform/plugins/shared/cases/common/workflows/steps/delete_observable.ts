@@ -32,7 +32,7 @@ export const deleteObservableStepCommonDefinition: CommonStepDefinition<
   DeleteObservableStepOutputSchema
 > = {
   id: DeleteObservableStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.DELETE_OBSERVABLE_STEP_LABEL,
   description: i18n.DELETE_OBSERVABLE_STEP_DESCRIPTION,
   documentation: {
