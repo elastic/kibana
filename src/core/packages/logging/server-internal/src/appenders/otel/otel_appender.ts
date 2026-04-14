@@ -22,7 +22,7 @@ import {
   resourceFromAttributes,
 } from '@opentelemetry/resources';
 import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
-import type { OtelAppenderConfig } from '@kbn/core-logging-server';
+import type { OtelAppenderConfig, LayoutConfigType } from '@kbn/core-logging-server';
 // getConfiguration returns the already-initialised APM config singleton (loaded at bootstrap).
 // Both packages are platform/private so this import is within the allowed visibility boundary.
 import { getConfiguration } from '@kbn/apm-config-loader';
@@ -37,7 +37,9 @@ const DISPOSE_TIMEOUT_MS = 5_000;
  * identity without requiring the user to re-declare it in `kibana.yml`.
  */
 const deriveServiceAttributes = (): Record<string, string> => {
-  const attrs: Record<string, string> = {};
+  // telemetry.sdk.language is always known for this Node.js process.
+  const attrs: Record<string, string> = { 'telemetry.sdk.language': 'nodejs' };
+
   const apmConfig = getConfiguration('kibana');
   if (!apmConfig) {
     return attrs;
@@ -50,6 +52,15 @@ const deriveServiceAttributes = (): Record<string, string> => {
   }
   if (apmConfig.environment) {
     attrs['deployment.environment'] = String(apmConfig.environment);
+  }
+  // The Kibana node UUID is stored in globalLabels.kibana_uuid by ApmConfiguration.
+  // We surface it as service.instance.id per the OTel Resource semantic conventions.
+  const { globalLabels } = apmConfig;
+  if (globalLabels && typeof globalLabels === 'object' && !Array.isArray(globalLabels)) {
+    const kibanaUuid = globalLabels.kibana_uuid;
+    if (kibanaUuid) {
+      attrs['service.instance.id'] = String(kibanaUuid);
+    }
   }
   return attrs;
 };
@@ -99,6 +110,44 @@ const toTraceContext = (record: LogRecord): Context | undefined => {
 };
 
 /**
+ * Builds a sanitised copy of a `LogRecord` for use as `body.structured`.
+ *
+ * The raw record is stripped of:
+ * - `level`: a Kibana-internal `LogLevel` object that is redundant given the
+ *   top-level `severity_number` / `severity_text` OTLP fields.
+ * - Fields with `null` or `undefined` values (e.g. `spanId`/`traceId` when no
+ *   trace context is present) to avoid noisy empty entries in Elasticsearch.
+ */
+const toStructuredBody = (record: LogRecord): AnyValueMap =>
+  Object.fromEntries(
+    Object.entries(record as unknown as Record<string, unknown>).filter(
+      ([key, v]) => key !== 'level' && v != null
+    )
+  ) as AnyValueMap;
+
+/**
+ * Resolves the effective layout config for the OTel appender.
+ *
+ * Defaults to pattern layout because Elastic's OTel ingest aliases `body.text`
+ * to the ECS `message` field, while `body.structured` (used by JSON layout)
+ * leaves `message` empty in Logs Explorer.
+ *
+ * When the user selects pattern layout without an explicit pattern string, an
+ * OTel-specific default of `%message %error` is used: level, timestamp, and
+ * logger name are already captured as dedicated top-level OTLP fields and do
+ * not need repeating in the body text.
+ */
+const resolveLayoutConfig = (config?: LayoutConfigType): LayoutConfigType => {
+  if (!config) {
+    return { type: 'pattern', pattern: '%message %error' };
+  }
+  if (config.type === 'pattern' && !config.pattern) {
+    return { ...config, pattern: '%message %error' };
+  }
+  return config;
+};
+
+/**
  * Builds the OTel attribute map from a Kibana LogRecord.
  *
  * Per the OTel Logs spec:
@@ -120,12 +169,12 @@ const toAttributes = (
   };
 
   if (record.transactionId) {
-    // APM transaction ID — no standard OTel field exists for this.
+    // APM transaction ID - no standard OTel field exists for this.
     attrs['transaction.id'] = record.transactionId;
   }
 
   if (record.error) {
-    // OTel semantic conventions for exceptions — backends use these for error detection.
+    // OTel semantic conventions for exceptions - backends use these for error detection.
     attrs['exception.type'] = record.error.name;
     attrs['exception.message'] = record.error.message;
     if (record.error.stack) {
@@ -154,8 +203,9 @@ export class OtelAppender implements DisposableAppender {
     url: schema.string(),
     headers: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
     /**
-     * Optional layout config. Defaults to JSON (structured body).
-     * Use `{ type: 'pattern' }` for a human-readable string body.
+     * Optional layout config. Defaults to pattern layout (body.text, aliased to `message`).
+     * Use `{ type: 'json' }` for a structured body (body.structured); note that the ECS
+     * `message` field will be empty in that case because it aliases body.text.
      */
     layout: schema.maybe(Layouts.configSchema),
     // Optional: user-provided attributes override the service attributes derived from APM config.
@@ -188,10 +238,10 @@ export class OtelAppender implements DisposableAppender {
     // Individual logger contexts are passed as the 'log.logger' attribute.
     this.logger = this.loggerProvider.getLogger('kibana');
 
-    const layoutConfig = config.layout ?? { type: 'json' as const };
+    const layoutConfig = resolveLayoutConfig(config.layout);
     this.layout = Layouts.create(layoutConfig);
-    // JSON layout → full LogRecord as AnyValueMap → indexed as body.structured.
-    // Pattern layout → formatted string → indexed as body.text.
+    // JSON layout → sanitised LogRecord as AnyValueMap → indexed as body.structured.
+    // Pattern layout → formatted string → indexed as body.text (aliased to `message`).
     this.useStructuredBody = layoutConfig.type !== 'pattern';
   }
 
@@ -205,15 +255,13 @@ export class OtelAppender implements DisposableAppender {
       timestamp: record.timestamp,
       severityNumber,
       severityText: record.level.id.toUpperCase(),
-      // JSON layout (default): send the full LogRecord as a structured object.
-      // Elastic's OTel ingest indexes this as body.structured, giving individual
-      // fields (message, meta, level, etc.) proper searchability.
+      // JSON layout: send a sanitised LogRecord as a structured object.
+      // Elastic's OTel ingest indexes this as body.structured. Note that the ECS
+      // `message` field will be empty because it aliases body.text, not body.structured.
       //
-      // Pattern layout: format the record to a human-readable string.
+      // Pattern layout (default): format the record to a human-readable string.
       // Elastic indexes this as body.text, aliased to the ECS `message` field.
-      body: this.useStructuredBody
-        ? (record as unknown as AnyValueMap)
-        : this.layout.format(record),
+      body: this.useStructuredBody ? toStructuredBody(record) : this.layout.format(record),
       context: toTraceContext(record),
       // log.meta is omitted from attributes when using JSON layout because it
       // is already part of the structured body.

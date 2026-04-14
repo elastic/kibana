@@ -22,8 +22,7 @@ import type { LayoutConfigType } from '../layout';
  *       url: https://collector:4318/v1/logs
  *       headers:
  *         Authorization: "ApiKey <base64>"
- *       layout:
- *         type: json   # default — records indexed as body.structured
+ *       # layout defaults to pattern - body.text is aliased to the ECS `message` field
  * ```
  * @public
  */
@@ -38,12 +37,21 @@ export interface OtelAppenderConfig {
    */
   headers?: Record<string, string>;
   /**
-   * Controls how the log record body is serialised:
-   * - `json` (default): the full `LogRecord` is sent as a structured object,
-   *   indexed as `body.structured` in Elastic. Meta fields are part of the body.
-   * - `pattern`: the record is formatted to a human-readable string (pattern
-   *   layout), indexed as `body.text`. Meta fields are included as a
-   *   `log.meta` attribute.
+   * Controls how the log record body is serialised.
+   *
+   * - `pattern` (**default**): the message is formatted to a human-readable string
+   *   and indexed as `body.text` in Elastic. Elastic's ingest aliases `body.text`
+   *   to the ECS `message` field, so records are visible in Logs Explorer.
+   *   When no explicit `pattern` string is provided, the appender uses
+   *   `%message %error` - level, timestamp, and logger name are omitted because
+   *   they are already captured as dedicated top-level OTLP fields.
+   *   Meta fields are included as a `log.meta` attribute.
+   *
+   * - `json`: the full `LogRecord` is sent as a structured object and indexed as
+   *   `body.structured`. **Note**: the ECS `message` field will be empty in Logs
+   *   Explorer because it aliases `body.text`, which JSON layout does not populate.
+   *   Use this only when the consuming backend natively handles `body.structured`.
+   *   Meta fields are part of the body (not repeated in attributes).
    */
   layout?: LayoutConfigType;
   /**

@@ -120,16 +120,38 @@ describe('OtelAppender constructor', () => {
     });
   });
 
-  it('creates a JSON layout by default', () => {
+  it('creates a pattern layout with the OTel-specific default pattern when no layout is configured', () => {
     new OtelAppender(validConfig);
+
+    expect(mockLayoutsCreate).toHaveBeenCalledWith({ type: 'pattern', pattern: '%message %error' });
+  });
+
+  it('uses the OTel-specific "%message %error" pattern when pattern type is requested without a custom string', () => {
+    new OtelAppender({ ...validConfig, layout: { type: 'pattern' } });
+
+    expect(mockLayoutsCreate).toHaveBeenCalledWith({ type: 'pattern', pattern: '%message %error' });
+  });
+
+  it('preserves an explicit custom pattern string provided by the user', () => {
+    new OtelAppender({ ...validConfig, layout: { type: 'pattern', pattern: '%m' } });
+
+    expect(mockLayoutsCreate).toHaveBeenCalledWith({ type: 'pattern', pattern: '%m' });
+  });
+
+  it('creates a JSON layout when explicitly configured', () => {
+    new OtelAppender({ ...validConfig, layout: { type: 'json' } });
 
     expect(mockLayoutsCreate).toHaveBeenCalledWith({ type: 'json' });
   });
 
-  it('creates the layout specified in config', () => {
-    new OtelAppender({ ...validConfig, layout: { type: 'pattern', pattern: '%m' } });
+  it('always includes telemetry.sdk.language: nodejs in derived attributes', () => {
+    mockGetConfiguration.mockReturnValue(undefined);
 
-    expect(mockLayoutsCreate).toHaveBeenCalledWith({ type: 'pattern', pattern: '%m' });
+    new OtelAppender(validConfig);
+
+    expect(mockResourceFromAttributes).toHaveBeenCalledWith(
+      expect.objectContaining({ 'telemetry.sdk.language': 'nodejs' })
+    );
   });
 
   it('derives service.name, service.version and deployment.environment from the APM config singleton', () => {
@@ -143,26 +165,55 @@ describe('OtelAppender constructor', () => {
 
     expect(mockGetConfiguration).toHaveBeenCalledWith('kibana');
     expect(mockResourceFromAttributes).toHaveBeenCalledWith({
+      'telemetry.sdk.language': 'nodejs',
       'service.name': 'kibana',
       'service.version': '9.4.0',
       'deployment.environment': 'production',
     });
   });
 
-  it('omits service attributes whose APM config value is falsy', () => {
-    mockGetConfiguration.mockReturnValue({ serviceName: 'kibana' }); // no version or environment
+  it('derives service.instance.id from kibana_uuid in APM global labels', () => {
+    mockGetConfiguration.mockReturnValue({
+      serviceName: 'kibana',
+      globalLabels: { kibana_uuid: 'test-uuid-123' },
+    });
 
     new OtelAppender(validConfig);
 
-    expect(mockResourceFromAttributes).toHaveBeenCalledWith({ 'service.name': 'kibana' });
+    expect(mockResourceFromAttributes).toHaveBeenCalledWith(
+      expect.objectContaining({ 'service.instance.id': 'test-uuid-123' })
+    );
   });
 
-  it('produces no service attributes when the APM config singleton is not initialised', () => {
+  it('omits service.instance.id when kibana_uuid is absent from global labels', () => {
+    mockGetConfiguration.mockReturnValue({ serviceName: 'kibana', globalLabels: {} });
+
+    new OtelAppender(validConfig);
+
+    expect(mockResourceFromAttributes).toHaveBeenCalledWith(
+      expect.not.objectContaining({ 'service.instance.id': expect.anything() })
+    );
+  });
+
+  it('omits APM-derived service attributes whose config value is falsy', () => {
+    mockGetConfiguration.mockReturnValue({ serviceName: 'kibana' }); // no version, environment or uuid
+
+    new OtelAppender(validConfig);
+
+    expect(mockResourceFromAttributes).toHaveBeenCalledWith({
+      'telemetry.sdk.language': 'nodejs',
+      'service.name': 'kibana',
+    });
+  });
+
+  it('only emits telemetry.sdk.language when the APM config singleton is not initialised', () => {
     mockGetConfiguration.mockReturnValue(undefined);
 
     new OtelAppender(validConfig);
 
-    expect(mockResourceFromAttributes).toHaveBeenCalledWith({});
+    expect(mockResourceFromAttributes).toHaveBeenCalledWith({
+      'telemetry.sdk.language': 'nodejs',
+    });
   });
 
   it('user-provided attributes override the APM-derived ones', () => {
@@ -256,28 +307,49 @@ describe('OtelAppender.append() — severity mapping', () => {
 });
 
 describe('OtelAppender.append() — body', () => {
-  it('with JSON layout (default): passes the full LogRecord as structured body', () => {
+  it('with pattern layout (default): passes the formatted string as body.text', () => {
+    mockLayoutFormat.mockReturnValue('hello world');
     const appender = new OtelAppender(validConfig);
     const record = makeRecord({ message: 'hello world' });
     appender.append(record);
 
-    // The record itself is used as body (indexed as body.structured by Elastic)
-    expect(mockEmit).toHaveBeenCalledWith(expect.objectContaining({ body: record }));
-    // The layout's format() method is NOT invoked for JSON layout
-    expect(mockLayoutFormat).not.toHaveBeenCalled();
+    expect(mockLayoutFormat).toHaveBeenCalledWith(record);
+    // Formatted string is indexed as body.text, aliased to the ECS `message` field.
+    expect(mockEmit).toHaveBeenCalledWith(expect.objectContaining({ body: 'hello world' }));
   });
 
-  it('with pattern layout: passes the formatted string as body', () => {
+  it('with explicit pattern layout: passes the formatted string as body.text', () => {
     mockLayoutFormat.mockReturnValue('formatted: hello world');
     const appender = new OtelAppender({ ...validConfig, layout: { type: 'pattern' } });
     const record = makeRecord({ message: 'hello world' });
     appender.append(record);
 
     expect(mockLayoutFormat).toHaveBeenCalledWith(record);
-    // The formatted string is used as body (indexed as body.text by Elastic)
     expect(mockEmit).toHaveBeenCalledWith(
       expect.objectContaining({ body: 'formatted: hello world' })
     );
+  });
+
+  it('with JSON layout: passes a sanitised LogRecord as structured body - strips level and null fields', () => {
+    const appender = new OtelAppender({ ...validConfig, layout: { type: 'json' } });
+    // Simulate runtime null values that can appear for missing trace identifiers.
+    const record = makeRecord({ message: 'hello world', spanId: null, traceId: null });
+    appender.append(record as unknown as ReturnType<typeof makeRecord>);
+
+    const { body } = mockEmit.mock.calls[0][0];
+    // level is a LogLevel object - redundant given severity_text/severity_number
+    expect(body).not.toHaveProperty('level');
+    // null fields are stripped to avoid empty entries in Elasticsearch
+    expect(body).not.toHaveProperty('spanId');
+    expect(body).not.toHaveProperty('traceId');
+    // non-null fields are preserved
+    expect(body).toMatchObject({
+      message: 'hello world',
+      context: record.context,
+      pid: record.pid,
+    });
+    // The layout's format() method is NOT invoked for JSON layout
+    expect(mockLayoutFormat).not.toHaveBeenCalled();
   });
 });
 
@@ -374,17 +446,8 @@ describe('OtelAppender.append() — attributes', () => {
   });
 
   describe('log.meta', () => {
-    it('with JSON layout (default): does not include log.meta in attributes (meta is in the structured body)', () => {
+    it('with pattern layout (default): JSON-serialises meta and includes it as log.meta attribute', () => {
       const appender = new OtelAppender(validConfig);
-      const meta = { http: { method: 'GET' }, tags: ['api'] };
-      appender.append(makeRecord({ meta }));
-
-      const { attributes } = mockEmit.mock.calls[0][0];
-      expect(attributes).not.toHaveProperty('log.meta');
-    });
-
-    it('with pattern layout: JSON-serialises meta and includes it as log.meta attribute', () => {
-      const appender = new OtelAppender({ ...validConfig, layout: { type: 'pattern' } });
       const meta = { http: { method: 'GET' }, tags: ['api'] };
       appender.append(makeRecord({ meta }));
 
@@ -396,8 +459,17 @@ describe('OtelAppender.append() — attributes', () => {
     });
 
     it('with pattern layout: omits log.meta when meta is not present', () => {
-      const appender = new OtelAppender({ ...validConfig, layout: { type: 'pattern' } });
+      const appender = new OtelAppender(validConfig);
       appender.append(makeRecord());
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty('log.meta');
+    });
+
+    it('with JSON layout: does not include log.meta in attributes (meta is part of the structured body)', () => {
+      const appender = new OtelAppender({ ...validConfig, layout: { type: 'json' } });
+      const meta = { http: { method: 'GET' }, tags: ['api'] };
+      appender.append(makeRecord({ meta }));
 
       const { attributes } = mockEmit.mock.calls[0][0];
       expect(attributes).not.toHaveProperty('log.meta');
