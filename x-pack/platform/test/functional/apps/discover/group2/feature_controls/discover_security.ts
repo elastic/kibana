@@ -73,7 +73,6 @@ export default function (ctx: FtrProviderContext) {
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await security.forceLogout();
 
       await kibanaServer.importExport.unload(
@@ -112,7 +111,6 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await security.forceLogout();
         await securityService.role.delete('global_discover_all_role');
         await securityService.user.delete('global_discover_all_user');
@@ -189,7 +187,6 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await security.forceLogout();
         await securityService.role.delete('global_discover_read_role');
         await securityService.user.delete('global_discover_read_user');
@@ -302,7 +299,6 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await security.forceLogout();
         await securityService.user.delete('global_discover_read_url_create_user');
         await securityService.role.delete('global_discover_read_url_create_role');
@@ -381,7 +377,6 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await security.forceLogout();
         await securityService.role.delete('global_discover_visualize_read_role');
         await securityService.user.delete('global_discover_visualize_read_user');
@@ -436,7 +431,6 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await security.forceLogout();
         await securityService.role.delete('no_discover_privileges_role');
         await securityService.user.delete('no_discover_privileges_user');
@@ -505,8 +499,6 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await security.forceLogout();
         await kibanaServer.uiSettings.unset('defaultIndex');
         await esSupertest
           .post('/_aliases')
@@ -518,7 +510,7 @@ export default function (ctx: FtrProviderContext) {
             ],
           })
           .expect(200);
-
+        await security.forceLogout();
         await securityService.role.delete('discover_only_data_views_role');
         await securityService.user.delete('discover_only_data_views_user');
       });
