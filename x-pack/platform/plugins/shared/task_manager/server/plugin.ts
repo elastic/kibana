@@ -47,7 +47,14 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import type { AggregationOpts, FetchResult, SearchOpts } from './task_store';
 import { TaskStore } from './task_store';
 import { TaskScheduling } from './task_scheduling';
-import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
+import {
+  backgroundTaskUtilizationRoute,
+  deleteRoute,
+  healthRoute,
+  metricsRoute,
+  scheduleRoute,
+  NOOP_TASK_TYPE,
+} from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
@@ -159,6 +166,7 @@ export class TaskManagerPlugin
   private taskEventLogger?: TaskEventLogger;
   private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   private taskStore?: TaskStore;
+  private startContract?: TaskManagerStartContract;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -258,6 +266,17 @@ export class TaskManagerPlugin
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
     });
+
+    this.definitions.registerTaskDefinitions({
+      [NOOP_TASK_TYPE]: {
+        title: 'Noop task for API key lifecycle verification',
+        createTaskRunner: () => ({
+          run: async () => ({ state: {} }),
+        }),
+      },
+    });
+    scheduleRoute(router, () => this.startContract);
+    deleteRoute(router, () => this.startContract);
 
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
@@ -474,7 +493,7 @@ export class TaskManagerPlugin
     ).catch(() => {});
     scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
 
-    return {
+    this.startContract = {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
         taskStore.aggregate(opts),
@@ -502,6 +521,8 @@ export class TaskManagerPlugin
         this.invalidateUiamApiKeyFn = fn;
       },
     };
+
+    return this.startContract;
   }
 
   public async stop() {

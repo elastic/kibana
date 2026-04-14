@@ -8,3 +8,5 @@
 export { healthRoute } from './health';
 export { backgroundTaskUtilizationRoute } from './background_task_utilization';
 export { metricsRoute } from './metrics';
+export { scheduleRoute, NOOP_TASK_TYPE } from './schedule';
+export { deleteRoute } from './delete';
