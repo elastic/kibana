@@ -28,10 +28,16 @@ export const getDetectionAlertsApiService = ({
   return {
     deleteAll: async () => {
       await measurePerformanceAsync(log, 'security.detectionAlerts.deleteAll', async () => {
-        await esClient.indices.refresh({ index: `${DEFAULT_ALERTS_INDEX_PATTERN}${space}` });
+        const index = `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`;
+        const indexExists = await esClient.indices.exists({ index });
+        if (!indexExists) {
+          return;
+        }
+
+        await esClient.indices.refresh({ index });
 
         await esClient.deleteByQuery({
-          index: `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`,
+          index,
           query: {
             match_all: {},
           },

@@ -12,7 +12,6 @@ const PAGE_URL = 'security/alerts';
 
 export class AlertsTablePage {
   public detectionsAlertsWrapper: Locator;
-  public alertRow: Locator;
   public alertsTable: Locator;
   public contextMenuButton: Locator;
   public actionsContextMenu: Locator;
@@ -26,14 +25,15 @@ export class AlertsTablePage {
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
-    this.alertRow = this.page.testSubj.locator('alertsTableIsLoaded').locator('div.euiDataGridRow');
     this.contextMenuButton = this.page.testSubj.locator('timeline-context-menu-button');
     this.actionsContextMenu = this.page.testSubj.locator('actions-context-menu');
     this.runWorkflowMenuItem = this.page.testSubj.locator('run-workflow-action');
     this.workflowPanel = this.page.testSubj.locator('alert-workflow-context-menu-panel');
     this.workflowIdSelect = this.page.testSubj.locator('workflowIdSelect');
     this.executeWorkflowButton = this.page.testSubj.locator('execute-alert-workflow-button');
-    this.workflowSuccessToastTitle = this.page.testSubj.locator('euiToastHeader__title');
+    this.workflowSuccessToastTitle = this.page.testSubj
+      .locator('globalToastList')
+      .getByText('Workflow successfully started', { exact: true });
     this.viewWorkflowExecutionButton = this.page.getByRole('button', {
       name: 'View workflow execution',
     });
@@ -73,8 +73,7 @@ export class AlertsTablePage {
 
   private async getAlertRowByRuleName(ruleName: string): Promise<Locator> {
     await this.alertsTable.waitFor({ state: 'visible' });
-    const ruleNameCell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
-    const row = this.alertsTable.getByRole('row').filter({ has: ruleNameCell });
+    const row = this.alertsTable.locator('div.euiDataGridRow').filter({ hasText: ruleName });
 
     await expect(
       row,

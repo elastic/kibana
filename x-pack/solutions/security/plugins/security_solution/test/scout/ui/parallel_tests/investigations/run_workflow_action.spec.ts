@@ -11,9 +11,8 @@ import { expect } from '@kbn/scout-security/ui';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 
 /**
- * A role combining the security alert index privileges of platform_engineer with
- * full Kibana access (including workflowsManagement) required to see and use the
- * "Run workflow" alert action.
+ * Least-privilege role for viewing detection alerts and using the "Run workflow" action
+ * (workflows read + execute + execution read), without `kibana.base: ['all']`.
  */
 const WORKFLOW_ENABLED_ROLE: KibanaRole = {
   elasticsearch: {
@@ -49,8 +48,7 @@ const WORKFLOW_ENABLED_ROLE: KibanaRole = {
   ],
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/261392
-spaceTest.describe.skip(
+spaceTest.describe(
   'Run workflow alert action',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
@@ -60,7 +58,8 @@ spaceTest.describe.skip(
     spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
-      // Enable the Workflows UI feature flag required for the "Run workflow" action to appear
+      await scoutSpace.savedObjects.cleanStandardList();
+      // Enable the Workflows UI setting required for the "Run workflow" action to appear
       await scoutSpace.uiSettings.set({ 'workflows:ui:enabled': true });
     });
 
@@ -70,8 +69,6 @@ spaceTest.describe.skip(
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
       });
-      // Use a custom role that includes workflowsManagement privileges (canExecuteWorkflow)
-      // in addition to the security index privileges needed to view alerts
       await browserAuth.loginWithCustomRole(WORKFLOW_ENABLED_ROLE);
     });
 
@@ -109,26 +106,34 @@ spaceTest.describe.skip(
           "      message: 'Alert received'",
         ].join('\n');
 
-        const workflowId = await apiServices.workflow.createWorkflow({ yaml: workflowYaml });
-        createdWorkflowIds.push(workflowId);
+        await spaceTest.step('Create workflow via API', async () => {
+          const id = await apiServices.workflow.createWorkflow({ yaml: workflowYaml });
+          createdWorkflowIds.push(id);
+        });
 
-        await alertsTablePage.navigate();
-        await alertsTablePage.waitForDetectionsAlertsWrapper();
-        await alertsTablePage.openRunWorkflowPanel(ruleName);
+        await spaceTest.step('Open run workflow from alerts', async () => {
+          await alertsTablePage.navigate();
+          await alertsTablePage.waitForDetectionsAlertsWrapper();
+          await alertsTablePage.openRunWorkflowPanel(ruleName);
 
-        await expect(alertsTablePage.workflowPanel).toBeVisible();
-        await alertsTablePage.selectWorkflowByName(workflowName);
+          await expect(alertsTablePage.workflowPanel).toBeVisible();
+          await alertsTablePage.selectWorkflowByName(workflowName);
+        });
 
-        await expect(alertsTablePage.executeWorkflowButton).toBeEnabled();
-        await alertsTablePage.executeWorkflowButton.click();
+        await spaceTest.step('Execute workflow and assert success toast', async () => {
+          await expect(alertsTablePage.executeWorkflowButton).toBeEnabled();
+          await alertsTablePage.executeWorkflowButton.click();
 
-        await expect(alertsTablePage.workflowSuccessToastTitle).toHaveText(
-          'Workflow successfully started'
-        );
-        await expect(alertsTablePage.viewWorkflowExecutionButton).toBeVisible();
+          await expect(alertsTablePage.workflowSuccessToastTitle).toHaveText(
+            'Workflow successfully started'
+          );
+          await expect(alertsTablePage.viewWorkflowExecutionButton).toBeVisible();
+        });
 
-        const newTab = await alertsTablePage.clickViewWorkflowExecutionAndWaitForNewTab();
-        await expect(newTab).toHaveURL(/\/app\/workflows/);
+        await spaceTest.step('Verify workflows app opens in a new tab', async () => {
+          const newTab = await alertsTablePage.clickViewWorkflowExecutionAndWaitForNewTab();
+          await expect(newTab).toHaveURL(/\/app\/workflows/);
+        });
       }
     );
   }
