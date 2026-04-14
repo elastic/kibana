@@ -18,6 +18,7 @@ import {
   yarnInstallDeps,
   runInstallScripts,
 } from './yarn.mjs';
+import { applyNodeModulesPatches } from './apply_node_modules_patches.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
 import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
@@ -136,6 +137,11 @@ export const command = {
       shouldInstall
         ? time('run install scripts', async () => {
             await runInstallScripts(log, { quiet });
+          })
+        : undefined,
+      shouldInstall
+        ? time('apply node_modules patches', async () => {
+            await applyNodeModulesPatches(log);
           })
         : undefined,
     ]);
