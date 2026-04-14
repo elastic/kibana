@@ -5,6 +5,13 @@ set -euo pipefail
 source .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
+# When FIPS is enabled, Scout starts Kibana from source (dev mode) which does not read
+# config/node.options. Export --enable-fips via NODE_OPTIONS so the spawned Kibana process
+# inherits FIPS mode, matching the fipsMode.enabled: true set in config/kibana.yml by env.sh.
+if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-3" ]]; then
+  export NODE_OPTIONS="${NODE_OPTIONS:-} --enable-fips --openssl-config=$HOME/nodejs.cnf"
+fi
+
 echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
 
