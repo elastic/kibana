@@ -239,10 +239,19 @@ actions:
                         - grid:
                             x: 0
                             y: 0
-                            w: 12
-                            h: 8
+                            w: 24
+                            h: 10
                           config:
-                            title: Total requests
+                            content: "## Web logs overview\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
+                          id: a1b2c3d4-0001-4000-8000-000000000001
+                          type: markdown
+                        - grid:
+                            x: 0
+                            y: 10
+                            w: 12
+                            h: 5
+                          config:
+                            title: ""
                             data_source:
                               type: data_view_spec
                               index_pattern: kibana_sample_data_logs
@@ -262,15 +271,15 @@ actions:
                                 value:
                                   sizing: auto
                                   alignment: right
-                          id: a1b2c3d4-0001-4000-8000-000000000001
+                          id: a1b2c3d4-0001-4000-8000-000000000002
                           type: vis
                         - grid:
                             x: 12
-                            y: 0
+                            y: 10
                             w: 12
-                            h: 8
+                            h: 5
                           config:
-                            title: Average response size
+                            title: ""
                             data_source:
                               type: data_view_spec
                               index_pattern: kibana_sample_data_logs
@@ -290,11 +299,11 @@ actions:
                                 value:
                                   sizing: auto
                                   alignment: right
-                          id: a1b2c3d4-0001-4000-8000-000000000002
+                          id: a1b2c3d4-0001-4000-8000-000000000003
                           type: vis
                         - grid:
                             x: 0
-                            y: 8
+                            y: 15
                             w: 24
                             h: 10
                           config:
@@ -381,6 +390,18 @@ actions:
                   "grid": {
                     "x": 0,
                     "y": 0,
+                    "w": 24,
+                    "h": 10
+                  },
+                  "type": "markdown",
+                  "config": {
+                    "content": "## Web logs overview\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
+                  }
+                },
+                {
+                  "grid": {
+                    "x": 0,
+                    "y": 10,
                     "w": 12,
                     "h": 5
                   },
@@ -403,7 +424,7 @@ actions:
                 {
                   "grid": {
                     "x": 12,
-                    "y": 0,
+                    "y": 10,
                     "w": 12,
                     "h": 5
                   },
@@ -427,7 +448,7 @@ actions:
                 {
                   "grid": {
                     "x": 0,
-                    "y": 8,
+                    "y": 15,
                     "w": 24,
                     "h": 10
                   },
@@ -467,6 +488,18 @@ actions:
                   "grid": {
                     "x": 0,
                     "y": 0,
+                    "w": 24,
+                    "h": 10
+                  },
+                  "type": "markdown",
+                  "config": {
+                    "content": "## Web logs overview\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
+                  }
+                },
+                {
+                  "grid": {
+                    "x": 0,
+                    "y": 10,
                     "w": 12,
                     "h": 5
                   },
@@ -489,7 +522,7 @@ actions:
                 {
                   "grid": {
                     "x": 12,
-                    "y": 0,
+                    "y": 10,
                     "w": 12,
                     "h": 5
                   },
@@ -513,7 +546,7 @@ actions:
                 {
                   "grid": {
                     "x": 0,
-                    "y": 8,
+                    "y": 15,
                     "w": 24,
                     "h": 10
                   },
@@ -991,7 +1024,7 @@ actions:
                           type: vis
                         - grid:
                             x: 0
-                            y: 8
+                            y: 15
                             w: 24
                             h: 10
                           config:
@@ -1111,10 +1144,19 @@ actions:
                         - grid:
                             x: 0
                             y: 0
-                            w: 12
-                            h: 8
+                            w: 24
+                            h: 10
                           config:
-                            title: Total requests
+                            content: "## Web logs overview\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
+                          id: a1b2c3d4-0001-4000-8000-000000000001
+                          type: markdown
+                        - grid:
+                            x: 0
+                            y: 10
+                            w: 12
+                            h: 5
+                          config:
+                            title: ""
                             data_source:
                               type: data_view_spec
                               index_pattern: kibana_sample_data_logs
@@ -1134,15 +1176,15 @@ actions:
                                 value:
                                   sizing: auto
                                   alignment: right
-                          id: a1b2c3d4-0001-4000-8000-000000000001
+                          id: a1b2c3d4-0001-4000-8000-000000000002
                           type: vis
                         - grid:
                             x: 12
-                            y: 0
+                            y: 10
                             w: 12
-                            h: 8
+                            h: 5
                           config:
-                            title: Average response size
+                            title: ""
                             data_source:
                               type: data_view_spec
                               index_pattern: kibana_sample_data_logs
@@ -1162,11 +1204,11 @@ actions:
                                 value:
                                   sizing: auto
                                   alignment: right
-                          id: a1b2c3d4-0001-4000-8000-000000000002
+                          id: a1b2c3d4-0001-4000-8000-000000000003
                           type: vis
                         - grid:
                             x: 0
-                            y: 8
+                            y: 15
                             w: 24
                             h: 10
                           config:
