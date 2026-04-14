@@ -2047,7 +2047,7 @@
     "webpack": "5.96.1",
     "webpack-bundle-analyzer": "4.10.2",
     "webpack-cli": "5.1.4",
-    "webpack-dev-server": "5.2.1",
+    "webpack-dev-server": "5.2.3",
     "webpack-merge": "6.0.1",
     "webpack-sources": "3.2.3",
     "whatwg-fetch": "3.6.20",
