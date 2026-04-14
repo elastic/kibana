@@ -7,7 +7,8 @@
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
-    "common/**/*"
+    "common/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -49,6 +50,7 @@
     "@kbn/core-execution-context-common",
     "@kbn/core-http-server",
     "@kbn/core-security-server",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }
