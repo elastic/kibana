@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { RuleProvider } from '../rule_context';
 import { RuleConditions } from './rule_conditions';
 
 jest.mock('@kbn/alerting-plugin/common', () => ({
@@ -59,7 +60,9 @@ const alertRule: RuleApiResponse = {
 const renderConditions = (rule: RuleApiResponse) =>
   render(
     <I18nProvider>
-      <RuleConditions rule={rule} />
+      <RuleProvider rule={rule}>
+        <RuleConditions />
+      </RuleProvider>
     </I18nProvider>
   );
 
