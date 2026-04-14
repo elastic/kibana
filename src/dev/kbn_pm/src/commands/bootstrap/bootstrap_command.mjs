@@ -51,6 +51,9 @@ export const command = {
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
+    --no-prebuilt        Skip building shared webpack bundles (ui-shared-deps, monaco). Use when a
+                          subsequent distribution build will rebuild them in production mode anyway.
+                          Also settable via KBN_BOOTSTRAP_NO_PREBUILT=true.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
@@ -66,6 +69,8 @@ export const command = {
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
     const allowRoot = args.getBooleanValue('allow-root') ?? false;
     const forceInstall = args.getBooleanValue('force-install');
+    const skipPrebuilt =
+      args.getBooleanValue('prebuilt') === false || !!process.env.KBN_BOOTSTRAP_NO_PREBUILT;
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
 
@@ -114,20 +119,24 @@ export const command = {
       await runInstallScripts(log, { quiet });
     });
 
-    await time('pre-build webpack bundles for packages', async () => {
-      log.info('pre-build webpack bundles for packages');
-      await run(
-        'yarn',
-        ['kbn', 'build-shared']
-          .concat(quiet ? ['--quiet'] : [])
-          .concat(forceInstall ? ['--no-cache'] : [])
-          .concat(allowRoot ? ['--allow-root'] : []),
-        {
-          pipe: true,
-        }
-      );
-      log.success('shared webpack bundles built');
-    });
+    if (skipPrebuilt) {
+      log.info('skipping pre-built webpack bundles (--no-prebuilt)');
+    } else {
+      await time('pre-build webpack bundles for packages', async () => {
+        log.info('pre-build webpack bundles for packages');
+        await run(
+          'yarn',
+          ['kbn', 'build-shared']
+            .concat(quiet ? ['--quiet'] : [])
+            .concat(forceInstall ? ['--no-cache'] : [])
+            .concat(allowRoot ? ['--allow-root'] : []),
+          {
+            pipe: true,
+          }
+        );
+        log.success('shared webpack bundles built');
+      });
+    }
 
     await time('sort package json', async () => {
       await sortPackageJson(log);
