@@ -9,14 +9,16 @@ import { schema } from '@kbn/config-schema';
 import { lensApiStateSchema } from '@kbn/lens-embeddable-utils';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
+import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management';
+
+const savedObjectProps = lensCommonSavedObjectSchemaV2.getPropSchemas();
+
 /**
  * The Lens response item returned from the server
  */
 export const lensResponseItemSchema = schema.object(
   {
-    id: schema.string({
-      meta: { description: 'Unique identifier for the visualization.' },
-    }),
+    id: savedObjectProps.id,
     data: lensApiStateSchema,
     meta: asCodeMetaSchema,
   },

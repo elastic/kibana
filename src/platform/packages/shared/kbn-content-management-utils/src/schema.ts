@@ -31,7 +31,7 @@ export const referencesSchema = schema.arrayOf(referenceSchema);
 export const savedObjectSchema = <T extends ObjectType<any>>(attributesSchema: T) =>
   schema.object(
     {
-      id: schema.string(),
+      id: schema.string({ meta: { description: 'Unique identifier.' } }),
       type: schema.string(),
       version: schema.maybe(schema.string()),
       createdAt: schema.maybe(schema.string()),
