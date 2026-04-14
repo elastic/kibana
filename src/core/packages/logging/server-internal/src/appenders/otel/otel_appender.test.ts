@@ -12,6 +12,8 @@ import {
   mockDetectResources,
   mockEmit,
   mockGetConfiguration,
+  mockLayoutFormat,
+  mockLayoutsCreate,
   mockLoggerProvider,
   mockMergeResource,
   mockOTLPLogExporter,
@@ -49,6 +51,8 @@ beforeEach(() => {
   mockDetectResources.mockClear();
   mockMergeResource.mockClear();
   mockGetConfiguration.mockClear();
+  mockLayoutsCreate.mockClear();
+  mockLayoutFormat.mockClear();
   jest.mocked(trace.setSpanContext).mockClear();
 });
 
@@ -60,7 +64,24 @@ describe('OtelAppender.configSchema', () => {
     });
     expect(result.url).toBe('http://collector:4318/v1/logs');
     expect(result.headers).toEqual({});
+    expect(result.layout).toBeUndefined();
     expect(result.attributes).toBeUndefined();
+  });
+
+  it('accepts a json layout config', () => {
+    const result = OtelAppender.configSchema.validate({
+      ...validConfig,
+      layout: { type: 'json' },
+    });
+    expect(result.layout).toEqual({ type: 'json' });
+  });
+
+  it('accepts a pattern layout config', () => {
+    const result = OtelAppender.configSchema.validate({
+      ...validConfig,
+      layout: { type: 'pattern', pattern: '[%p] %m' },
+    });
+    expect(result.layout).toEqual({ type: 'pattern', pattern: '[%p] %m' });
   });
 
   it('accepts optional user-provided attributes to override defaults', () => {
@@ -88,6 +109,27 @@ describe('OtelAppender constructor', () => {
       url: validConfig.url,
       headers: validConfig.headers,
     });
+  });
+
+  it('defaults to empty headers when none are provided', () => {
+    new OtelAppender({ type: 'otel', url: validConfig.url });
+
+    expect(mockOTLPLogExporter).toHaveBeenCalledWith({
+      url: validConfig.url,
+      headers: {},
+    });
+  });
+
+  it('creates a JSON layout by default', () => {
+    new OtelAppender(validConfig);
+
+    expect(mockLayoutsCreate).toHaveBeenCalledWith({ type: 'json' });
+  });
+
+  it('creates the layout specified in config', () => {
+    new OtelAppender({ ...validConfig, layout: { type: 'pattern', pattern: '%m' } });
+
+    expect(mockLayoutsCreate).toHaveBeenCalledWith({ type: 'pattern', pattern: '%m' });
   });
 
   it('derives service.name, service.version and deployment.environment from the APM config singleton', () => {
@@ -214,11 +256,28 @@ describe('OtelAppender.append() — severity mapping', () => {
 });
 
 describe('OtelAppender.append() — body', () => {
-  it('uses record.message as the body (plain text, not a JSON blob)', () => {
+  it('with JSON layout (default): passes the full LogRecord as structured body', () => {
     const appender = new OtelAppender(validConfig);
-    appender.append(makeRecord({ message: 'hello world' }));
+    const record = makeRecord({ message: 'hello world' });
+    appender.append(record);
 
-    expect(mockEmit).toHaveBeenCalledWith(expect.objectContaining({ body: 'hello world' }));
+    // The record itself is used as body (indexed as body.structured by Elastic)
+    expect(mockEmit).toHaveBeenCalledWith(expect.objectContaining({ body: record }));
+    // The layout's format() method is NOT invoked for JSON layout
+    expect(mockLayoutFormat).not.toHaveBeenCalled();
+  });
+
+  it('with pattern layout: passes the formatted string as body', () => {
+    mockLayoutFormat.mockReturnValue('formatted: hello world');
+    const appender = new OtelAppender({ ...validConfig, layout: { type: 'pattern' } });
+    const record = makeRecord({ message: 'hello world' });
+    appender.append(record);
+
+    expect(mockLayoutFormat).toHaveBeenCalledWith(record);
+    // The formatted string is used as body (indexed as body.text by Elastic)
+    expect(mockEmit).toHaveBeenCalledWith(
+      expect.objectContaining({ body: 'formatted: hello world' })
+    );
   });
 });
 
@@ -314,24 +373,35 @@ describe('OtelAppender.append() — attributes', () => {
     );
   });
 
-  it('JSON-serialises meta and includes it as log.meta attribute', () => {
-    const appender = new OtelAppender(validConfig);
-    const meta = { http: { method: 'GET' }, tags: ['api'] };
-    appender.append(makeRecord({ meta }));
+  describe('log.meta', () => {
+    it('with JSON layout (default): does not include log.meta in attributes (meta is in the structured body)', () => {
+      const appender = new OtelAppender(validConfig);
+      const meta = { http: { method: 'GET' }, tags: ['api'] };
+      appender.append(makeRecord({ meta }));
 
-    expect(mockEmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        attributes: expect.objectContaining({ 'log.meta': JSON.stringify(meta) }),
-      })
-    );
-  });
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty('log.meta');
+    });
 
-  it('omits log.meta when meta is not present', () => {
-    const appender = new OtelAppender(validConfig);
-    appender.append(makeRecord());
+    it('with pattern layout: JSON-serialises meta and includes it as log.meta attribute', () => {
+      const appender = new OtelAppender({ ...validConfig, layout: { type: 'pattern' } });
+      const meta = { http: { method: 'GET' }, tags: ['api'] };
+      appender.append(makeRecord({ meta }));
 
-    const { attributes } = mockEmit.mock.calls[0][0];
-    expect(attributes).not.toHaveProperty('log.meta');
+      expect(mockEmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({ 'log.meta': JSON.stringify(meta) }),
+        })
+      );
+    });
+
+    it('with pattern layout: omits log.meta when meta is not present', () => {
+      const appender = new OtelAppender({ ...validConfig, layout: { type: 'pattern' } });
+      appender.append(makeRecord());
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty('log.meta');
+    });
   });
 });
 
@@ -352,6 +422,27 @@ describe('OtelAppender.dispose()', () => {
     const disposePromise = appender.dispose();
     jest.runAllTimers();
     await expect(disposePromise).resolves.toBeUndefined();
+
+    jest.useRealTimers();
+  });
+
+  it('does not produce an unhandled rejection when shutdown rejects after the timeout', async () => {
+    jest.useFakeTimers();
+    let rejectShutdown!: (err: Error) => void;
+    mockShutdown.mockReturnValue(
+      new Promise<void>((_, rej) => {
+        rejectShutdown = rej;
+      })
+    );
+    const appender = new OtelAppender(validConfig);
+
+    const disposePromise = appender.dispose();
+    jest.runAllTimers();
+    await expect(disposePromise).resolves.toBeUndefined();
+
+    // Rejecting the shutdown promise after dispose() has already returned should not
+    // surface as an unhandled rejection because .catch(() => {}) is attached.
+    expect(() => rejectShutdown(new Error('late shutdown failure'))).not.toThrow();
 
     jest.useRealTimers();
   });
