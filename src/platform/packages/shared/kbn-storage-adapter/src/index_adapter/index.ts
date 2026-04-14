@@ -262,7 +262,6 @@ export class StorageIndexAdapter<
     const currentIndexSettings = await wrapEsCall(
       this.esClient.indices.getSettings({
         index: name,
-        flat_settings: true,
       })
     );
 
