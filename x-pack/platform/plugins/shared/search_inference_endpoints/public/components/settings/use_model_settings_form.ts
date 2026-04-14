@@ -23,6 +23,7 @@ export interface ModelSettingsForm {
   isDirty: boolean;
   assignments: Assignments;
   sections: FeatureSection[];
+  invalidEndpointIds: Set<string>;
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
   save: () => void;
   resetSection: (sectionId: string) => void;
@@ -135,6 +136,11 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     setAssignments(defaultAssignments);
   }, [defaultAssignments]);
 
+  const invalidEndpointIds = useMemo(
+    () => new Set<string>(settingsData?.invalidEndpoints ?? []),
+    [settingsData]
+  );
+
   const isDirty = useMemo(
     () => JSON.stringify(assignments) !== JSON.stringify(defaultAssignments),
     [assignments, defaultAssignments]
@@ -178,6 +184,7 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     isDirty,
     assignments,
     sections,
+    invalidEndpointIds,
     updateEndpoints,
     save,
     resetSection,
