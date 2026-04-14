@@ -28,6 +28,7 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { actionResultsResponseSchema } from './response_schemas';
 
 export const getActionResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -56,6 +57,11 @@ export const getActionResultsRoute = (
               typeof getActionResultsRequestParamsSchema,
               GetActionResultsRequestParamsSchema
             >(getActionResultsRequestParamsSchema),
+          },
+          response: {
+            200: {
+              body: () => actionResultsResponseSchema,
+            },
           },
         },
       },

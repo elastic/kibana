@@ -45,7 +45,63 @@ components:
 
     CreatePacksResponse:
       type: object
-      properties: { }
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - saved_object_id
+            - name
+          properties:
+            saved_object_id:
+              description: 'The saved object ID of the pack.'
+              type: string
+            name:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackName'
+            description:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackDescriptionOrUndefined'
+            queries:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
+            version:
+              description: 'The pack version number.'
+              type: integer
+            enabled:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/EnabledOrUndefined'
+            created_at:
+              description: 'The date and time the pack was created.'
+              type: string
+              format: date-time
+            created_by:
+              description: 'The user who created the pack.'
+              type: string
+              nullable: true
+            created_by_profile_uid:
+              description: 'The profile UID of the user who created the pack.'
+              type: string
+            updated_at:
+              description: 'The date and time the pack was last updated.'
+              type: string
+              format: date-time
+            updated_by:
+              description: 'The user who last updated the pack.'
+              type: string
+              nullable: true
+            updated_by_profile_uid:
+              description: 'The profile UID of the user who last updated the pack.'
+              type: string
+            policy_ids:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PolicyIdsOrUndefined'
+            shards:
+              description: 'Shard configuration as an array of key-value pairs.'
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: number
       example:
         data:
           name: my_pack

@@ -24,7 +24,52 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
     UpdatePacksResponse:
         type: object
-        properties: { }
+        properties:
+          data:
+            type: object
+            properties:
+              saved_object_id:
+                description: 'The saved object ID of the pack.'
+                type: string
+              name:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackName'
+              description:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackDescriptionOrUndefined'
+              queries:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
+              version:
+                description: 'The pack version number.'
+                type: integer
+              enabled:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/EnabledOrUndefined'
+              created_at:
+                type: string
+                format: date-time
+              created_by:
+                type: string
+                nullable: true
+              created_by_profile_uid:
+                type: string
+              updated_at:
+                type: string
+                format: date-time
+              updated_by:
+                type: string
+                nullable: true
+              updated_by_profile_uid:
+                type: string
+              policy_ids:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PolicyIdsOrUndefined'
+              shards:
+                description: 'Shard configuration as an array of key-value pairs.'
+                type: array
+                items:
+                  type: object
+                  properties:
+                    key:
+                      type: string
+                    value:
+                      type: number
         example:
           data:
             name: updated_my_pack_name

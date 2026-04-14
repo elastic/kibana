@@ -22,6 +22,7 @@ import { convertECSMappingToObject } from '../utils';
 import { getInstalledSavedQueriesMap } from './utils';
 import type { FindSavedQueryRequestQuerySchema } from '../../../common/api/saved_query/find_saved_query_route';
 import { findSavedQueryRequestQuerySchema } from '../../../common/api/saved_query/find_saved_query_route';
+import { findSavedQueryResponseSchema } from './response_schemas';
 
 export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -43,6 +44,11 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
               typeof findSavedQueryRequestQuerySchema,
               FindSavedQueryRequestQuerySchema
             >(findSavedQueryRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => findSavedQueryResponseSchema,
+            },
           },
         },
       },
