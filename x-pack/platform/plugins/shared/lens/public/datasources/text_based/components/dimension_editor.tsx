@@ -203,6 +203,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           style={{
             paddingLeft: euiTheme.size.base,
             paddingRight: euiTheme.size.base,
+            paddingBottom: euiTheme.size.base,
           }}
         >
           {props.dataSectionExtra}
