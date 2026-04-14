@@ -28,7 +28,15 @@ export function CollapseSetting({
   display?: 'rowCompressed' | 'columnCompressed';
 }) {
   return (
-    <>
+    <div
+      css={({
+        euiTheme: {
+          size: { base },
+        },
+      }) => ({
+        padding: `0 ${base} ${base} ${base}`,
+      })}
+    >
       <EuiFormRow
         id="lns-indexPattern-collapse-by"
         label={
@@ -63,6 +71,6 @@ export function CollapseSetting({
           }}
         />
       </EuiFormRow>
-    </>
+    </div>
   );
 }
