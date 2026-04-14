@@ -16,9 +16,13 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit } from '@kbn/std';
 
 import {
+  bootstrapBundledTypes,
+  bootstrapCircularConsumers,
   cleanTypeCheckCaches,
   createTypeCheckConfigs,
   detectLocalChanges,
+  getBundledTypesProjectsNeedingBootstrap,
+  getCircularConsumersNeedingBootstrap,
   runApiExtractorForProjects,
   TSC_LABEL,
 } from './execute_type_check_validation';
@@ -59,6 +63,19 @@ export const runLegacyTypeCheckCli = () => {
         (project) =>
           !project.isTypeCheckDisabled() && (!projectFilter || project.path === projectFilter)
       );
+
+      // Bootstrap bundledTypes packages if their bundled .d.ts doesn't exist yet
+      const needBootstrap = getBundledTypesProjectsNeedingBootstrap(TS_PROJECTS);
+      if (needBootstrap.length > 0) {
+        await bootstrapBundledTypes(log, procRunner, needBootstrap);
+      }
+
+      // Bootstrap circular consumers: projects that both consume bundledTypes and are
+      // referenced by bundledTypes packages. Their .d.ts must exist before the main build.
+      const circularConsumers = getCircularConsumersNeedingBootstrap(TS_PROJECTS);
+      if (circularConsumers.length > 0) {
+        await bootstrapCircularConsumers(log, procRunner, circularConsumers, TS_PROJECTS);
+      }
 
       const createdConfigs = await createTypeCheckConfigs(log, projects, TS_PROJECTS);
       let tscFailed = false;

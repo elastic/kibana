@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
 import Path from 'path';
 import Fsp from 'fs/promises';
 
@@ -119,6 +120,39 @@ export async function createTypeCheckConfigs(
 ) {
   const writes: Array<[path: string, content: string]> = [];
 
+  // Identify bundledTypes projects so consumers can use path mappings instead of project references
+  const bundledTypesProjects = allProjects.filter((p) => p.hasBundledTypes());
+  const bundledTypesSet = new Set(bundledTypesProjects);
+
+  // Resolve root paths upfront — consumers of bundledTypes packages need a full copy
+  // with overrides, so they can't inherit from the root (child `paths` fully overrides parent).
+  let rootPaths: Record<string, string[]> | undefined;
+  if (bundledTypesProjects.length > 0) {
+    const rootTsconfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
+    const rootTsconfigText = Fs.readFileSync(rootTsconfigPath, 'utf8')
+      .replace(/\/\/.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    const rootTsconfig = JSON.parse(rootTsconfigText);
+    rootPaths = rootTsconfig.compilerOptions?.paths;
+  }
+
+  // Identify consumers of bundledTypes — projects that reference a bundledTypes package.
+  // These are relevant for the bundledTypes package itself: if it references a consumer,
+  // we must use paths (not project references) to avoid the diamond dependency problem.
+  // In composite mode, project reference .d.ts imports are resolved using the PRODUCING
+  // project's settings. Using paths to pre-built .d.ts instead causes TypeScript to resolve
+  // imports using the CONSUMING project's settings, ensuring type identity.
+  const consumersOfBundledTypes = new Set<TsProject>();
+  if (bundledTypesProjects.length > 0) {
+    for (const p of allProjects) {
+      if (bundledTypesSet.has(p)) continue;
+      const refs = p.getKbnRefs(allProjects);
+      if (refs.some((ref) => bundledTypesSet.has(ref))) {
+        consumersOfBundledTypes.add(p);
+      }
+    }
+  }
+
   // write tsconfig.type_check.json files for each project that is not the root
   const queue = new Set(projects);
   for (const project of queue) {
@@ -126,6 +160,51 @@ export async function createTypeCheckConfigs(
     const base = project.getBase();
     if (base) {
       queue.add(base);
+    }
+
+    let paths =
+      project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined;
+
+    // Filter out project references to bundledTypes packages — consumers resolve
+    // these via per-project paths overrides to the bundled .d.ts instead.
+    const kbnRefs = project.getKbnRefs(allProjects);
+    const bundledTypesRefs = kbnRefs.filter((refd) => bundledTypesSet.has(refd));
+    let filteredRefs = kbnRefs.filter((refd) => !bundledTypesSet.has(refd));
+
+    // For consumers of a bundledTypes package: add per-project paths overrides mapping
+    // the bundledTypes package to its bundled .d.ts and remove the project reference.
+    if (bundledTypesRefs.length > 0 && !bundledTypesSet.has(project) && rootPaths) {
+      paths = { ...rootPaths };
+      for (const bp of bundledTypesRefs) {
+        const pkgName = bp.rootImportReq;
+        if (pkgName) {
+          const bundledDtsPath = Path.join(
+            Path.dirname(bp.repoRel),
+            'target/types-bundled/index.public.d.ts'
+          );
+          paths[pkgName] = [bundledDtsPath];
+        }
+      }
+    }
+
+    // For a bundledTypes package: if it references a consumer of itself, replace the
+    // project reference with a paths mapping to the consumer's pre-built .d.ts output.
+    // This avoids the diamond dependency: project reference .d.ts imports use the
+    // producing project's module resolution (which points to bundled .d.ts), but paths
+    // .d.ts imports use the consuming project's resolution (which points to source).
+    if (bundledTypesSet.has(project) && rootPaths) {
+      const circularConsumerRefs = filteredRefs.filter((ref) => consumersOfBundledTypes.has(ref));
+      if (circularConsumerRefs.length > 0) {
+        paths = paths ?? { ...rootPaths };
+        for (const cr of circularConsumerRefs) {
+          const pkgName = cr.rootImportReq;
+          if (pkgName) {
+            const compiledDtsPath = Path.join(Path.dirname(cr.repoRel), 'target/types/index.d.ts');
+            paths[pkgName] = [compiledDtsPath];
+          }
+        }
+        filteredRefs = filteredRefs.filter((ref) => !consumersOfBundledTypes.has(ref));
+      }
     }
 
     const typeCheckConfig = {
@@ -137,10 +216,10 @@ export async function createTypeCheckConfigs(
         rootDir: '.',
         noEmit: false,
         emitDeclarationOnly: true,
-        paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,
+        paths,
       },
       kbn_references: undefined,
-      references: project.getKbnRefs(allProjects).map((refd) => {
+      references: filteredRefs.map((refd) => {
         queue.add(refd);
 
         return {
@@ -171,6 +250,228 @@ export async function createTypeCheckConfigs(
     })
   );
 }
+
+/**
+ * Returns bundledTypes projects from allProjects that don't yet have a bundled .d.ts on disk.
+ * These need to be built (tsc + api-extractor) before consumers can resolve their path mappings.
+ */
+export const getBundledTypesProjectsNeedingBootstrap = (allProjects: TsProject[]): TsProject[] => {
+  return allProjects.filter((p) => {
+    if (!p.hasBundledTypes()) {
+      return false;
+    }
+    const bundledDtsPath = Path.resolve(p.directory, 'target/types-bundled/index.public.d.ts');
+    return !Fs.existsSync(bundledDtsPath);
+  });
+};
+
+/**
+ * Returns consumers of bundledTypes packages that are also referenced BY a bundledTypes package
+ * (creating a circular dependency) and don't yet have compiled .d.ts on disk.
+ * These need to be pre-built so the bundledTypes package can resolve them via paths.
+ */
+export const getCircularConsumersNeedingBootstrap = (allProjects: TsProject[]): TsProject[] => {
+  const bundledTypesProjects = allProjects.filter((p) => p.hasBundledTypes());
+  if (bundledTypesProjects.length === 0) return [];
+
+  const bundledTypesSet = new Set(bundledTypesProjects);
+
+  // Find consumers: projects that reference a bundledTypes package
+  const consumers = new Set<TsProject>();
+  for (const p of allProjects) {
+    if (bundledTypesSet.has(p)) continue;
+    if (p.getKbnRefs(allProjects).some((ref) => bundledTypesSet.has(ref))) {
+      consumers.add(p);
+    }
+  }
+
+  // Find circular consumers: consumers that are also referenced by a bundledTypes package
+  const circularConsumers: TsProject[] = [];
+  for (const bp of bundledTypesProjects) {
+    for (const ref of bp.getKbnRefs(allProjects)) {
+      if (consumers.has(ref)) {
+        const compiledDtsPath = Path.resolve(ref.directory, 'target/types/index.d.ts');
+        if (!Fs.existsSync(compiledDtsPath)) {
+          circularConsumers.push(ref);
+        }
+      }
+    }
+  }
+
+  return circularConsumers;
+};
+
+/**
+ * Bootstrap bundledTypes packages by building them with a non-composite tsc invocation
+ * followed by api-extractor. Non-composite mode can resolve circular imports between
+ * packages via source files, which is not possible in composite/tsc -b mode due to rootDir
+ * constraints. The resulting bundled .d.ts is then available for the main composite build.
+ */
+export const bootstrapBundledTypes = async (
+  log: ToolingLog,
+  procRunner: ProcRunnerLike,
+  bundledTypesProjects: TsProject[],
+  pretty = true
+): Promise<void> => {
+  if (bundledTypesProjects.length === 0) {
+    return;
+  }
+
+  log.info(
+    `Bootstrapping bundled types for ${
+      bundledTypesProjects.length
+    } package(s): ${bundledTypesProjects.map((p) => p.name).join(', ')}`
+  );
+
+  for (const project of bundledTypesProjects) {
+    const bootstrapConfigPath = Path.resolve(project.directory, 'tsconfig.bootstrap.json');
+    const bootstrapConfig = {
+      extends: '@kbn/tsconfig-base/tsconfig.json',
+      compilerOptions: {
+        outDir: 'target/types',
+        rootDir: '.',
+        declaration: true,
+        emitDeclarationOnly: true,
+        skipLibCheck: true,
+        noCheck: true,
+        types: ['jest', 'node'],
+      },
+      include: ['**/*.ts'],
+      exclude: ['target/**/*'],
+    };
+
+    // api-extractor reads tsconfig.type_check.json for compiler context — generate a
+    // matching config so it can resolve types from the bootstrap .d.ts output.
+    const typeCheckConfigPath = project.typeCheckConfigPath;
+    const typeCheckConfig = {
+      extends: '@kbn/tsconfig-base/tsconfig.json',
+      compilerOptions: {
+        outDir: 'target/types',
+        composite: true,
+        rootDir: '.',
+        noEmit: false,
+        emitDeclarationOnly: true,
+        types: ['jest', 'node'],
+      },
+      include: ['**/*.ts'],
+      exclude: ['target/**/*'],
+      references: [],
+    };
+
+    await Fsp.writeFile(bootstrapConfigPath, JSON.stringify(bootstrapConfig, null, 2));
+    await Fsp.writeFile(typeCheckConfigPath, JSON.stringify(typeCheckConfig, null, 2));
+
+    try {
+      await procRunner.run('tsc-bootstrap', {
+        cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
+        args: [
+          '-p',
+          Path.relative(REPO_ROOT, bootstrapConfigPath),
+          ...(pretty ? ['--pretty'] : []),
+        ],
+        env: {
+          NODE_OPTIONS: '--max-old-space-size=12288',
+        },
+        cwd: REPO_ROOT,
+        wait: true,
+      });
+
+      runApiExtractor(log, project);
+    } finally {
+      await Fsp.unlink(bootstrapConfigPath).catch(() => {});
+      // tsconfig.type_check.json will be regenerated by createTypeCheckConfigs
+    }
+  }
+};
+
+/**
+ * Bootstrap circular consumers by building their .d.ts with a non-composite noCheck tsc.
+ * These consumers depend on bundledTypes packages (resolved via bundled .d.ts) and are
+ * themselves referenced by bundledTypes packages. Pre-building their .d.ts allows the
+ * bundledTypes package to read them via paths instead of project references, avoiding
+ * the diamond dependency problem.
+ */
+export const bootstrapCircularConsumers = async (
+  log: ToolingLog,
+  procRunner: ProcRunnerLike,
+  consumers: TsProject[],
+  allProjects: TsProject[],
+  pretty = true
+): Promise<void> => {
+  if (consumers.length === 0) return;
+
+  const bundledTypesProjects = allProjects.filter((p) => p.hasBundledTypes());
+
+  log.info(`Bootstrapping circular consumers: ${consumers.map((p) => p.name).join(', ')}`);
+
+  for (const project of consumers) {
+    const bootstrapConfigPath = Path.resolve(project.directory, 'tsconfig.bootstrap.json');
+
+    // Build a paths override mapping bundledTypes packages to their bundled .d.ts
+    const rootTsconfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
+    const rootTsconfigText = Fs.readFileSync(rootTsconfigPath, 'utf8')
+      .replace(/\/\/.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    const rootPaths: Record<string, string[]> =
+      JSON.parse(rootTsconfigText).compilerOptions?.paths ?? {};
+
+    for (const bp of bundledTypesProjects) {
+      const pkgName = bp.rootImportReq;
+      if (pkgName) {
+        rootPaths[pkgName] = [
+          Path.relative(
+            REPO_ROOT,
+            Path.resolve(bp.directory, 'target/types-bundled/index.public.d.ts')
+          ),
+        ];
+      }
+    }
+
+    const bootstrapConfig = {
+      compilerOptions: {
+        baseUrl: REPO_ROOT,
+        paths: rootPaths,
+        outDir: 'target/types',
+        rootDir: '.',
+        declaration: true,
+        emitDeclarationOnly: true,
+        skipLibCheck: true,
+        noCheck: true,
+        types: ['jest', 'node'],
+        target: 'es2021',
+        module: 'node16',
+        moduleResolution: 'node16',
+        lib: ['es2021'],
+        strict: true,
+        esModuleInterop: true,
+        resolveJsonModule: true,
+        isolatedModules: true,
+      },
+      include: ['**/*.ts'],
+      exclude: ['target/**/*'],
+    };
+
+    await Fsp.writeFile(bootstrapConfigPath, JSON.stringify(bootstrapConfig, null, 2));
+
+    try {
+      await procRunner.run('tsc-bootstrap-consumer', {
+        cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
+        args: [
+          '-p',
+          Path.relative(REPO_ROOT, bootstrapConfigPath),
+          ...(pretty ? ['--pretty'] : []),
+        ],
+        env: {
+          NODE_OPTIONS: '--max-old-space-size=12288',
+        },
+        cwd: REPO_ROOT,
+        wait: true,
+      });
+    } finally {
+      await Fsp.unlink(bootstrapConfigPath).catch(() => {});
+    }
+  }
+};
 
 /** Detects uncommitted working-tree changes after a type-check run. */
 export async function detectLocalChanges(): Promise<string[]> {
@@ -344,6 +645,20 @@ export const executeTypeCheckValidation = async ({
       await restoreTSBuildArtifacts(log);
     } else {
       log.verbose('Skipping TypeScript cache restore because --with-archive was not provided.');
+    }
+
+    // Bootstrap bundledTypes packages if their bundled .d.ts doesn't exist yet.
+    // Consumers resolve these via path mappings, so the bundled output must be present.
+    const needBootstrap = getBundledTypesProjectsNeedingBootstrap(TS_PROJECTS);
+    if (needBootstrap.length > 0) {
+      await bootstrapBundledTypes(log, procRunner, needBootstrap, pretty);
+    }
+
+    // Bootstrap circular consumers: their .d.ts must exist for bundledTypes packages
+    // to resolve via paths (avoiding diamond dependency from project references).
+    const circularConsumers = getCircularConsumersNeedingBootstrap(TS_PROJECTS);
+    if (circularConsumers.length > 0) {
+      await bootstrapCircularConsumers(log, procRunner, circularConsumers, TS_PROJECTS, pretty);
     }
 
     createdConfigs = await createTypeCheckConfigs(log, selectedProjects, TS_PROJECTS);
