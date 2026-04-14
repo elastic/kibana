@@ -24,7 +24,7 @@ export const TIMELINES = '[data-test-subj="solutionSideNavItemLink-timelines"]';
 export const EXPLORE = '[data-test-subj="solutionSideNavItemLink-explore"]';
 export const EXPLORE_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-explore"]';
 
-export const RULES_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-rules-landing"]';
+export const RULES_NAV_LINK = '[data-test-subj="solutionSideNavItemLink-rules-landing"]';
 
 export const SETTINGS = '[data-test-subj="solutionSideNavItemLink-administration"]';
 export const SETTINGS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-administration"]';
@@ -101,6 +101,8 @@ export const TRANSLATED_DASHBOARDS_PAGE = getDataTestSubjectSelector(
   'solutionSideNavPanelLink-siem_migrations-dashboards'
 );
 
+export const SOLUTION_SIDE_NAV_PANEL = getDataTestSubjectSelector('solutionSideNavPanel');
+
 // opens the navigation panel for a given nested link
 export const openNavigationPanelFor = (page: string) => {
   let panel;
@@ -122,7 +124,7 @@ export const openNavigationPanelFor = (page: string) => {
     case RULES:
     case EXCEPTIONS:
     case CSP_BENCHMARKS: {
-      panel = RULES_PANEL_BTN;
+      panel = RULES_NAV_LINK;
       break;
     }
     case ENDPOINTS:

@@ -26,6 +26,8 @@ export const RESPONSE_ACTIONS_HISTORY = `app/security/administration/response_ac
 
 export const CSP_BENCHMARKS_URL = '/app/security/cloud_security_posture/benchmarks';
 export const CSP_DASHBOARD_URL = '/app/security/cloud_security_posture/dashboard';
+export const CLOUD_NATIVE_VULN_MGMT_URL =
+  '/app/security/cloud_security_posture/vulnerability_dashboard';
 export const CSP_FINDINGS_URL = '/app/security/cloud_security_posture/findings/configurations';
 export const CSP_VULNERABILITIES_URL =
   '/app/security/cloud_security_posture/findings/vulnerabilities';
@@ -39,6 +41,10 @@ export const NETWORK_URL = '/app/security/network/events';
 export const OVERVIEW_URL = '/app/security/overview';
 
 export const ENTITY_ANALYTICS_URL = '/app/security/entity_analytics';
+
+export const KUBERNETES_URL = '/app/security/kubernetes';
+
+export const DATA_QUALITY_URL = '/app/security/data_quality';
 
 export const THREAT_INTELLIGENCE_URL = '/app/security/threat_intelligence';
 export const INDICATORS_URL = '/app/security/threat_intelligence/indicators';

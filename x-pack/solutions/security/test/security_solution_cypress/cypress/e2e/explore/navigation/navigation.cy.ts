@@ -12,27 +12,27 @@ import {
   ENDPOINTS,
   ARTIFACTS,
   NETWORK,
-  OVERVIEW,
   TIMELINES,
-  RULES,
   EXCEPTIONS,
   USERS,
-  DETECTION_RESPONSE,
   DASHBOARDS,
-  CSP_DASHBOARD,
   INDICATORS,
   CSP_BENCHMARKS,
   CSP_FINDINGS,
   POLICIES,
   EXPLORE,
   SETTINGS,
-  ENTITY_ANALYTICS,
+  SOLUTION_SIDE_NAV_PANEL,
+  RULES_NAV_LINK,
 } from '../../../screens/security_header';
 import * as ServerlessHeaders from '../../../screens/serverless_security_header';
 
 import { login } from '../../../tasks/login';
 import { visit, visitGetStartedPage, visitWithTimeRange } from '../../../tasks/navigation';
-import { navigateFromHeaderTo } from '../../../tasks/security_header';
+import {
+  verifyNavigatesFromDashboardLandingTo,
+  navigateFromHeaderTo,
+} from '../../../tasks/security_header';
 
 import {
   ALERTS_URL,
@@ -62,6 +62,9 @@ import {
   RULES_COVERAGE_URL,
   OSQUERY_URL,
   HOSTS_URL,
+  CLOUD_NATIVE_VULN_MGMT_URL,
+  DATA_QUALITY_URL,
+  KUBERNETES_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
@@ -90,24 +93,44 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('navigates to the Overview page', () => {
-    navigateFromHeaderTo(OVERVIEW);
-    cy.url().should('include', OVERVIEW_URL);
+  it('navigates to the Overview page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('overview', OVERVIEW_URL);
   });
 
-  it('navigates to the Detection & Response page', () => {
-    navigateFromHeaderTo(DETECTION_RESPONSE);
-    cy.url().should('include', DETECTION_AND_RESPONSE_URL);
+  it('navigates to the Detection & Response page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('detection_response', DETECTION_AND_RESPONSE_URL);
   });
 
-  it('navigates to the Entity Analytics page', () => {
-    navigateFromHeaderTo(ENTITY_ANALYTICS);
+  it('navigates to Kubernetes page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('kubernetes', KUBERNETES_URL);
+  });
+
+  it('navigates to the CSP page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('cloud_security_posture-dashboard', CSP_DASHBOARD_URL);
+  });
+
+  it('navigates to the Cloud Native Vulnerability Management page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo(
+      'cloud_security_posture-vulnerability_dashboard',
+      CLOUD_NATIVE_VULN_MGMT_URL
+    );
+  });
+
+  it('navigates to the Entity Analytics page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('entity_analytics', ENTITY_ANALYTICS_URL);
     cy.url().should('include', ENTITY_ANALYTICS_URL);
   });
 
-  it('navigates to the CSP dashboard page', () => {
-    navigateFromHeaderTo(CSP_DASHBOARD);
-    cy.url().should('include', CSP_DASHBOARD_URL);
+  it('navigates to Data quality page from dashboard', () => {
+    cy.visit(DASHBOARDS_URL);
+    verifyNavigatesFromDashboardLandingTo('data_quality', DATA_QUALITY_URL);
+    cy.url().should('include', DATA_QUALITY_URL);
   });
 
   it('navigates to the Alerts page', () => {
@@ -125,9 +148,12 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     cy.url().should('include', TIMELINES_URL);
   });
 
-  it('navigates to the Explore landing page', () => {
+  it('opens the Explore sub nav panel', () => {
     navigateFromHeaderTo(EXPLORE);
-    cy.url().should('include', EXPLORE_URL);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Hosts');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Network');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Users');
   });
 
   it('navigates to the Hosts page', () => {
@@ -150,9 +176,13 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     cy.url().should('include', INDICATORS_URL);
   });
 
-  it('navigates to the Rules page', () => {
-    navigateFromHeaderTo(RULES);
-    cy.url().should('include', RULES_MANAGEMENT_URL);
+  it('opens the Rules sub nav panel', () => {
+    navigateFromHeaderTo(RULES_NAV_LINK);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Detection rules (SIEM)');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Benchmarks');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Shared exception lists');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'MITRE ATT&CK® Coverage');
   });
 
   it('navigates to the Exceptions page', () => {
@@ -165,9 +195,12 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Manage landing page', () => {
+  it('opens the Manage sub nav panel', () => {
     navigateFromHeaderTo(SETTINGS);
-    cy.url().should('include', MANAGE_URL);
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('be.visible');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Entity analytics');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Endpoints');
+    cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Investigations');
   });
 
   it('navigates to the Endpoints page', () => {
