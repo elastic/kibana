@@ -267,6 +267,7 @@ const ChartItem = React.memo(
           titleHighlight={searchTerm}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           userMessages={userMessages}
+          profileId="metrics-data-source-profile"
         />
       </A11yGridCell>
     );

@@ -60,6 +60,7 @@ export const useLensProps = ({
   yBounds,
   error,
   userMessages,
+  profileId,
 }: {
   title: string;
   query: string;
@@ -69,6 +70,7 @@ export const useLensProps = ({
   yBounds?: LensYBoundsConfig;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  profileId: string;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
@@ -104,6 +106,7 @@ export const useLensProps = ({
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
         userMessages,
+        profileId,
       });
     },
     [
@@ -112,6 +115,7 @@ export const useLensProps = ({
       fetchParams.lastReloadRequestTime,
       fetchParams.esqlVariables,
       userMessages,
+      profileId,
     ]
   );
 
@@ -210,6 +214,7 @@ const getLensProps = ({
   lastReloadRequestTime,
   esqlVariables,
   userMessages,
+  profileId,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
@@ -217,17 +222,24 @@ const getLensProps = ({
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
   userMessages?: EmbeddableComponentProps['userMessages'];
-}): LensProps => ({
-  id: 'metricsExperienceLensComponent',
-  viewMode: 'view',
-  timeRange,
-  attributes,
-  noPadding: true,
-  esqlVariables,
-  searchSessionId,
-  executionContext: {
-    description: 'metrics experience chart data',
-  },
-  lastReloadRequestTime,
-  userMessages,
-});
+  profileId: string;
+}): LensProps => {
+  return {
+    id: 'metricsExperienceLensComponent',
+    viewMode: 'view',
+    timeRange,
+    attributes,
+    noPadding: true,
+    esqlVariables,
+    searchSessionId,
+    executionContext: {
+      description: 'metrics experience chart data',
+      meta: {
+        metric_name: attributes.title,
+        profileId,
+      },
+    },
+    lastReloadRequestTime,
+    userMessages,
+  };
+};

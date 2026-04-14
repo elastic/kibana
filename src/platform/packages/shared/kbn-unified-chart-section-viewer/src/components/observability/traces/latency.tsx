@@ -17,13 +17,7 @@ import { getLatencyChart } from './trace_charts_definition';
 
 type LatencyChartContentProps = NonNullable<ReturnType<typeof getLatencyChart>>;
 
-const LatencyChartContent = ({
-  esqlQuery,
-  seriesType,
-  unit,
-  color,
-  title,
-}: LatencyChartContentProps) => {
+const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyChartContentProps) => {
   const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter, actions } =
     useTraceMetricsContext();
 
@@ -55,6 +49,7 @@ const LatencyChartContent = ({
       syncCursor
       syncTooltips
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId="observability-traces-data-source-profile"
     />
   );
 };

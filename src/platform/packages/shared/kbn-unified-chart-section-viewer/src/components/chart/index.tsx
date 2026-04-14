@@ -36,6 +36,7 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];
+    profileId: string;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -59,6 +60,7 @@ export const Chart = ({
   isLoading = false,
   error,
   userMessages,
+  profileId,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -77,6 +79,7 @@ export const Chart = ({
     yBounds,
     error,
     userMessages,
+    profileId,
   });
 
   return (

@@ -56,6 +56,7 @@ const ThroughputChartContent = ({
       syncTooltips
       syncCursor
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId="observability-traces-data-source-profile"
     />
   );
 };

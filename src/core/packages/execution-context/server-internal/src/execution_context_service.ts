@@ -165,11 +165,19 @@ export class ExecutionContextService
     if (!this.enabled) return {};
     const executionContext = this.contextStore.getStore()?.toJSON();
 
+    const metaLabels = executionContext?.meta
+      ? Object.entries(executionContext.meta).reduce((acc, [key, value]) => {
+          acc[`kibana.meta.${key}`] = value;
+          return acc;
+        }, {} as Record<string, any>)
+      : {};
+
     return omitBy(
       {
         name: executionContext?.name,
         id: executionContext?.id,
         page: executionContext?.page,
+        ...metaLabels,
       },
       isUndefined
     );

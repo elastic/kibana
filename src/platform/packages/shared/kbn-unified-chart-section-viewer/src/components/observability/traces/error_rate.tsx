@@ -69,6 +69,7 @@ const ErrorRateChartContent = ({
       isLoading={isLoadingColumns}
       error={columnsError}
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId="observability-traces-data-source-profile"
     />
   );
 };
