@@ -620,6 +620,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                   isClearable
                   isInvalid={field.errors.length > 0}
                   data-test-subj="dataCollectionMethodSelect"
+                  aria-label={i18n.DATA_COLLECTION_METHOD_LABEL}
                   css={styles.comboBox}
                   fullWidth
                 />
@@ -686,7 +687,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                   fullWidth
                   isInvalid={!!indexValidationError}
                   error={indexValidationError}
-                  aria-label={i18n.ARIA_LABELS.selectIndex}
                 >
                   <EuiComboBox
                     key={field.value ?? ''}
@@ -701,6 +701,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                       )
                     }
                     data-test-subj="indexSelect"
+                    aria-label={i18n.ARIA_LABELS.selectIndex}
                     isDisabled={logsSourceOption !== 'index'}
                     isLoading={isLoadingIndices || isValidatingIndex}
                     isInvalid={!!indexValidationError}
