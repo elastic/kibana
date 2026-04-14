@@ -430,7 +430,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS timeseries-rich-metrics-primary
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -443,7 +443,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS timeseries-rich-metrics-primary
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100), \`service.name\`
 `.trim()
       );
     });
@@ -464,7 +464,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS SUM(RATE(TO_LONG(requests.count))) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS SUM(RATE(TO_LONG(requests.count))) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -485,7 +485,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(TO_DOUBLE(metric.value)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(TO_DOUBLE(metric.value)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -499,7 +499,7 @@ TS metrics-*
         `
 TS timeseries-rich-metrics-primary
   | WHERE service.name == "api-server"
-  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -520,7 +520,7 @@ TS timeseries-rich-metrics-primary
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS AVG(cpu.usage) BY TBUCKET(100)
 `.trim()
       );
     });
@@ -543,7 +543,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | STATS PERCENTILE(request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+  | STATS PERCENTILE(request.duration, 95) BY TBUCKET(100)
 `.trim()
       );
     });
