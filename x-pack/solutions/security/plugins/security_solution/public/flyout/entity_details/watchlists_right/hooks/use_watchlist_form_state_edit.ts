@@ -9,10 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { useGetWatchlistFormData } from './use_get_watchlist_form_data';
 import type { WatchlistFormState } from './use_watchlist_form_state';
-import {
-  getDefaultWatchlist,
-  useResetEditsOnFlyoutOpen,
-} from './use_watchlist_form_state_shared';
+import { getDefaultWatchlist, useResetEditsOnFlyoutOpen } from './use_watchlist_form_state_shared';
 
 export interface UseEditWatchlistFormStateParams {
   watchlistId?: string;
