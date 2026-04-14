@@ -21,9 +21,12 @@ export const ORDERED_DIAGNOSTICS_SECTION_KEYS: string[] = [
   'syntheticsServiceSyncErrors',
 ];
 
-export const jsonStringifyDiagnostics = (value: unknown): string => {
+export const jsonStringifyDiagnostics = (
+  value: unknown,
+  options?: { compact?: boolean }
+): string => {
   try {
-    return JSON.stringify(value, null, 2);
+    return options?.compact ? JSON.stringify(value) : JSON.stringify(value, null, 2);
   } catch {
     return String(value);
   }

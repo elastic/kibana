@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -17,19 +17,19 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiLoadingSpinner,
+  EuiProgress,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fetchSyntheticsDiagnostics } from './hooks/api';
-import {
-  getDiagnosticsSectionKeysInOrder,
-  jsonStringifyDiagnostics,
-} from './synthetics_diagnostics_utils';
+import { getDiagnosticsSectionKeysInOrder } from './synthetics_diagnostics_utils';
 import {
   downloadSyntheticsDiagnosticsZip,
   showDiagnosticsZipErrorToast,
 } from './synthetics_diagnostics_zip_download';
+import { buildDiagnosticsSectionPreview } from './synthetics_diagnostics_preview';
 
 const getSectionTitle = (key: string): string => {
   const titles: Record<string, string> = {
@@ -82,12 +82,41 @@ const getSectionTitle = (key: string): string => {
   return titles[key] ?? key;
 };
 
+/** Lets React paint loading state before heavy main-thread work (ZIP build). */
+const yieldToBrowserForPaint = (): Promise<void> =>
+  new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+  });
+
 export function SyntheticsDiagnosticsFlyoutLauncher() {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [zipExporting, setZipExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<Record<string, unknown> | null>(null);
+  const [accordionOpenByKey, setAccordionOpenByKey] = useState<Record<string, boolean>>({});
+  const [sectionPreviewByKey, setSectionPreviewByKey] = useState<Record<string, string>>({});
+  const [sectionPreviewLoadingByKey, setSectionPreviewLoadingByKey] = useState<
+    Record<string, boolean>
+  >({});
+  const sectionPreviewByKeyRef = useRef<Record<string, string>>({});
+  const sectionPreviewInFlightRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    sectionPreviewByKeyRef.current = sectionPreviewByKey;
+  }, [sectionPreviewByKey]);
+
+  useEffect(() => {
+    setAccordionOpenByKey({});
+    setSectionPreviewByKey({});
+    setSectionPreviewLoadingByKey({});
+    sectionPreviewByKeyRef.current = {};
+    sectionPreviewInFlightRef.current.clear();
+  }, [data]);
 
   const loadDiagnostics = useCallback(async () => {
     setLoading(true);
@@ -109,6 +138,9 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
   };
 
   const onClose = () => {
+    if (zipExporting) {
+      return;
+    }
     setIsOpen(false);
   };
 
@@ -117,6 +149,7 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
       return;
     }
     setZipExporting(true);
+    await yieldToBrowserForPaint();
     try {
       await downloadSyntheticsDiagnosticsZip(data);
     } catch (e) {
@@ -144,6 +177,8 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
           onClose={onClose}
           size="l"
           aria-labelledby="syntheticsDiagnosticsFlyoutTitle"
+          aria-busy={zipExporting}
+          closeButtonProps={{ disabled: zipExporting }}
           data-test-subj="syntheticsDiagnosticsFlyout"
         >
           <EuiFlyoutHeader hasBorder>
@@ -170,6 +205,29 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
                 {error}
               </EuiCallOut>
             ) : null}
+            {zipExporting && data ? (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="primary"
+                  iconType="download"
+                  title={i18n.translate('xpack.synthetics.diagnostics.zipPreparingTitle', {
+                    defaultMessage: 'Preparing download',
+                  })}
+                  data-test-subj="syntheticsDiagnosticsZipPreparingCallout"
+                >
+                  <EuiText size="s">
+                    {i18n.translate('xpack.synthetics.diagnostics.zipPreparingBody', {
+                      defaultMessage:
+                        'Building the ZIP file. This can take a moment for large environments.',
+                    })}
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <EuiProgress size="xs" color="primary" />
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
             {!loading && !error && data
               ? getDiagnosticsSectionKeysInOrder(data).map((key) => (
                   <React.Fragment key={key}>
@@ -177,16 +235,56 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
                       id={`synthetics-diagnostics-${key}`}
                       buttonContent={getSectionTitle(key)}
                       paddingSize="m"
+                      onToggle={(isAccordionOpen) => {
+                        setAccordionOpenByKey((prev) => ({
+                          ...prev,
+                          [key]: isAccordionOpen,
+                        }));
+                        if (!isAccordionOpen) {
+                          return;
+                        }
+                        if (sectionPreviewByKeyRef.current[key] !== undefined) {
+                          return;
+                        }
+                        if (sectionPreviewInFlightRef.current.has(key)) {
+                          return;
+                        }
+                        sectionPreviewInFlightRef.current.add(key);
+                        setSectionPreviewLoadingByKey((prev) => ({ ...prev, [key]: true }));
+                        void yieldToBrowserForPaint()
+                          .then(() => buildDiagnosticsSectionPreview(key, data[key]))
+                          .then((text) => {
+                            setSectionPreviewByKey((prev) => ({ ...prev, [key]: text }));
+                          })
+                          .finally(() => {
+                            sectionPreviewInFlightRef.current.delete(key);
+                            setSectionPreviewLoadingByKey((prev) => ({ ...prev, [key]: false }));
+                          });
+                      }}
                     >
-                      <EuiCodeBlock
-                        language="json"
-                        isCopyable
-                        overflowHeight={360}
-                        fontSize="s"
-                        data-test-subj={`syntheticsDiagnosticsSection-${key}`}
-                      >
-                        {jsonStringifyDiagnostics(data[key])}
-                      </EuiCodeBlock>
+                      {!accordionOpenByKey[key] ? (
+                        <EuiText size="s" color="subdued">
+                          {i18n.translate('xpack.synthetics.diagnostics.expandForPreview', {
+                            defaultMessage:
+                              'Expand to load preview (large sections are summarized).',
+                          })}
+                        </EuiText>
+                      ) : sectionPreviewLoadingByKey[key] ? (
+                        <EuiLoadingSpinner
+                          size="l"
+                          data-test-subj={`syntheticsDiagnosticsSectionLoading-${key}`}
+                        />
+                      ) : (
+                        <EuiCodeBlock
+                          language="json"
+                          isCopyable
+                          overflowHeight={360}
+                          fontSize="s"
+                          data-test-subj={`syntheticsDiagnosticsSection-${key}`}
+                        >
+                          {sectionPreviewByKey[key] ?? ''}
+                        </EuiCodeBlock>
+                      )}
                     </EuiAccordion>
                     <EuiSpacer size="s" />
                   </React.Fragment>

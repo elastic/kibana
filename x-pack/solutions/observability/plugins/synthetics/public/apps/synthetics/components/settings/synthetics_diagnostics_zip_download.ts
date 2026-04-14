@@ -38,7 +38,9 @@ export const downloadSyntheticsDiagnosticsZip = async (
 
   const keys = getDiagnosticsSectionKeysInOrder(payload);
   for (const key of keys) {
-    root.file(`${key}.json`, jsonStringifyDiagnostics(payload[key]));
+    root.file(`${key}.json`, jsonStringifyDiagnostics(payload[key], { compact: true }), {
+      compression: 'STORE',
+    });
   }
 
   root.file(
@@ -48,11 +50,17 @@ export const downloadSyntheticsDiagnosticsZip = async (
       `Generated (UTC): ${new Date().toISOString()}`,
       `Sections: ${keys.join(', ')}`,
       '',
-      'Each section is a separate JSON file. Values are redacted on the server; do not expect secrets in this export.',
-    ].join('\n')
+      'Each section is a separate minified JSON file (single line per file in editors). Values are redacted on the server; do not expect secrets in this export.',
+    ].join('\n'),
+    { compression: 'STORE' }
   );
 
-  const blob = await zip.generateAsync({ type: 'blob' });
+  // STORE skips DEFLATE — much faster for large JSON; bundle size is slightly larger.
+  const blob = await zip.generateAsync({
+    type: 'blob',
+    compression: 'STORE',
+    streamFiles: true,
+  });
   const dateStamp = new Date().toISOString().slice(0, 10);
   triggerBlobDownload(blob, `synthetics-diagnostics-${dateStamp}.zip`);
 };
