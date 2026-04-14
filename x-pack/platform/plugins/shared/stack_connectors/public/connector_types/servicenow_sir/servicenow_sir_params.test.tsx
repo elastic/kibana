@@ -151,9 +151,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('all params fields is rendered', () => {
-    renderWithI18n(
-      <ServiceNowSIRParamsFields {...defaultProps} />
-    );
+    renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
     });
@@ -172,9 +170,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
       ...defaultProps,
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
-    renderWithI18n(
-      <ServiceNowSIRParamsFields {...newProps} />
-    );
+    renderWithI18n(<ServiceNowSIRParamsFields {...newProps} />);
     // EuiFieldText with isInvalid renders aria-invalid on the input
     const titleInput = screen.getByTestId('short_descriptionInput');
     expect(titleInput).toHaveAttribute('aria-invalid', 'true');
@@ -187,9 +183,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    renderWithI18n(
-      <ServiceNowSIRParamsFields {...newProps} />
-    );
+    renderWithI18n(<ServiceNowSIRParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {
         correlation_id: '{{rule.id}}:{{alert.id}}',
@@ -205,24 +199,20 @@ describe('ServiceNowSIRParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    renderWithI18n(
-      <ServiceNowSIRParamsFields {...newProps} />
-    );
+    renderWithI18n(<ServiceNowSIRParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual('pushToService');
   });
 
   test('Resets fields when connector changes', () => {
-    const { rerender } = renderWithI18n(
-      <ServiceNowSIRParamsFields {...defaultProps} />
-    );
+    const { rerender } = renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
     rerender(
-        <I18nProvider>
-          <ServiceNowSIRParamsFields
-            {...defaultProps}
-            actionConnector={{ ...connector, id: '1234' }}
-          />
-        </I18nProvider>
+      <I18nProvider>
+        <ServiceNowSIRParamsFields
+          {...defaultProps}
+          actionConnector={{ ...connector, id: '1234' }}
+        />
+      </I18nProvider>
     );
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
@@ -234,9 +224,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('it transforms the categories to options correctly', async () => {
-    renderWithI18n(
-      <ServiceNowSIRParamsFields {...defaultProps} />
-    );
+    renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
     });
@@ -260,9 +248,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('it transforms the subcategories to options correctly', async () => {
-    renderWithI18n(
-      <ServiceNowSIRParamsFields {...defaultProps} />
-    );
+    renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
     });
@@ -291,9 +277,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
   });
 
   test('it transforms the priorities to options correctly', async () => {
-    renderWithI18n(
-      <ServiceNowSIRParamsFields {...defaultProps} />
-    );
+    renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
     });
@@ -340,9 +324,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
         },
       },
     });
-    renderWithI18n(
-      <ServiceNowSIRParamsFields {...newProps} />
-    );
+    renderWithI18n(<ServiceNowSIRParamsFields {...newProps} />);
     act(() => {
       onChoicesSuccess(choicesResponse.choices);
     });
@@ -397,9 +379,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
 
     simpleFields.forEach((field) =>
       test(`${field.key} update triggers editAction :D`, async () => {
-        renderWithI18n(
-          <ServiceNowSIRParamsFields {...defaultProps} />
-        );
+        renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
         act(() => {
           onChoicesSuccess(choicesResponse.choices);
         });
@@ -416,9 +396,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
     );
 
     test('A comment triggers editAction', async () => {
-      renderWithI18n(
-        <ServiceNowSIRParamsFields {...defaultProps} />
-      );
+      renderWithI18n(<ServiceNowSIRParamsFields {...defaultProps} />);
       const commentsTextArea = screen.getByTestId('commentsTextArea');
       await userEvent.tripleClick(commentsTextArea);
       await userEvent.paste('Bug');

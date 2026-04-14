@@ -99,9 +99,7 @@ const mount = () => {
   };
 
   return {
-    result: renderWithI18n(
-      <DataViewSelectPopover {...props} />
-    ),
+    result: renderWithI18n(<DataViewSelectPopover {...props} />),
     dataViewsMock,
   };
 };

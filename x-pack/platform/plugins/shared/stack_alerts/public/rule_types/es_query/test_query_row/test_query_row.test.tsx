@@ -167,9 +167,9 @@ describe('TestQueryRow', () => {
       });
 
     rerender(
-        <I18nProvider>
-          <TestQueryRow fetch={newFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
-        </I18nProvider>
+      <I18nProvider>
+        <TestQueryRow fetch={newFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
+      </I18nProvider>
     );
     expect(screen.queryByTestId('copyQueryError')).not.toBeInTheDocument();
   });

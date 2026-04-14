@@ -57,9 +57,9 @@ describe('event_log_list_status_filter', () => {
     expect(onChangeMock).toHaveBeenCalledWith(['success']);
 
     rerender(
-        <I18nProvider>
-          <EventLogListStatusFilter selectedOptions={['success']} onChange={onChangeMock} />
-        </I18nProvider>
+      <I18nProvider>
+        <EventLogListStatusFilter selectedOptions={['success']} onChange={onChangeMock} />
+      </I18nProvider>
     );
 
     const badge1 = container.querySelector('.euiNotificationBadge');
@@ -69,12 +69,12 @@ describe('event_log_list_status_filter', () => {
     expect(onChangeMock).toHaveBeenCalledWith(['success', 'failure']);
 
     rerender(
-        <I18nProvider>
-          <EventLogListStatusFilter
-            selectedOptions={['success', 'failure']}
-            onChange={onChangeMock}
-          />
-        </I18nProvider>
+      <I18nProvider>
+        <EventLogListStatusFilter
+          selectedOptions={['success', 'failure']}
+          onChange={onChangeMock}
+        />
+      </I18nProvider>
     );
 
     const badge2 = container.querySelector('.euiNotificationBadge');

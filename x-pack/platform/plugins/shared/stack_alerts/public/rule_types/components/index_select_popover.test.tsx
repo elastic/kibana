@@ -116,9 +116,7 @@ describe('IndexSelectPopover', () => {
   });
 
   test('renders closed popover initially and opens on click', async () => {
-    renderWithI18n(
-      <IndexSelectPopover {...props} />
-    );
+    renderWithI18n(<IndexSelectPopover {...props} />);
 
     const selectIndexExpression = screen.getByTestId('selectIndexExpression');
     expect(selectIndexExpression).toBeInTheDocument();
@@ -132,9 +130,7 @@ describe('IndexSelectPopover', () => {
   });
 
   test('renders search input', async () => {
-    renderWithI18n(
-      <IndexSelectPopover {...props} />
-    );
+    renderWithI18n(<IndexSelectPopover {...props} />);
 
     const selectIndexExpression = screen.getByTestId('selectIndexExpression');
     expect(selectIndexExpression).toBeInTheDocument();
@@ -174,9 +170,7 @@ describe('IndexSelectPopover', () => {
       index: [index],
       timeField,
     };
-    renderWithI18n(
-      <IndexSelectPopover {...indexSelectProps} />
-    );
+    renderWithI18n(<IndexSelectPopover {...indexSelectProps} />);
     const selectIndexExpression = screen.getByTestId('selectIndexExpression');
     expect(selectIndexExpression).toHaveTextContent(`index ${index}`);
 
