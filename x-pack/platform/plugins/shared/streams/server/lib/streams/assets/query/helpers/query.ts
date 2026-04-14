@@ -10,7 +10,7 @@ import { v5 } from 'uuid';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToESQLAst } from '@kbn/streamlang';
 import { BasicPrettyPrinter, Builder } from '@elastic/esql';
-import { buildMetadataOption } from '@kbn/streams-schema';
+import { buildMetadataOption } from '@kbn/streams-schema/src/helpers/esql_helpers';
 
 export function computeRuleId(assetUuid: string, query: string): string {
   const queryHash = objectHash([assetUuid, query]);
