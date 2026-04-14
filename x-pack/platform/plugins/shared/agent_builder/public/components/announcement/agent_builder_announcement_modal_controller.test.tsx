@@ -231,8 +231,11 @@ describe('AgentBuilderAnnouncementModalController', () => {
       expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/Only a user with permission to change space-level Gen AI settings/i)
-    ).toBeInTheDocument();
+    expect(screen.queryByText('Need your history?')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementLearnMoreCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementDocumentationLink')).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/explore-analyze/ai-features/elastic-agent-builder'
+    );
   });
 });
