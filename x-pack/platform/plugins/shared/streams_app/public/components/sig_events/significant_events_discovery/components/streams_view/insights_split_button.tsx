@@ -11,6 +11,7 @@ import {
   CONNECTOR_LOAD_ERROR,
   DISCOVER_INSIGHTS_BUTTON_LABEL,
   DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL,
+  STOP_DISCOVERING_INSIGHTS_BUTTON_LABEL,
 } from './translations';
 import { buildConnectorMenuItem, buildConnectorSelectionPanel } from './context_menu_helpers';
 import { ContextMenuSplitButton } from './context_menu_split_button';
@@ -23,7 +24,10 @@ interface InsightsSplitButtonProps {
   displayConnectorId: string | undefined;
   onConnectorChange: (connectorId: string) => void;
   onRun: () => void;
-  isLoading: boolean;
+  onStopDiscovering: () => void | Promise<void>;
+  isDiscovering: boolean;
+  isCancellingDiscovering: boolean;
+  isSecondaryLoading: boolean;
   isDisabled: boolean;
 }
 
@@ -34,7 +38,10 @@ export const InsightsSplitButton = ({
   displayConnectorId,
   onConnectorChange,
   onRun,
-  isLoading,
+  onStopDiscovering,
+  isDiscovering,
+  isCancellingDiscovering,
+  isSecondaryLoading,
   isDisabled,
 }: InsightsSplitButtonProps) => {
   const discoveryConnector = useMemo(
@@ -62,19 +69,22 @@ export const InsightsSplitButton = ({
 
   return (
     <ContextMenuSplitButton
-      primaryLabel={DISCOVER_INSIGHTS_BUTTON_LABEL}
-      onPrimaryClick={onRun}
-      primaryIconType="sparkles"
-      isPrimaryDisabled={isDisabled || isLoading}
+      primaryLabel={
+        isDiscovering ? STOP_DISCOVERING_INSIGHTS_BUTTON_LABEL : DISCOVER_INSIGHTS_BUTTON_LABEL
+      }
+      onPrimaryClick={() => (isDiscovering ? onStopDiscovering() : onRun())}
+      primaryIconType={isDiscovering ? 'stop' : 'sparkles'}
+      isPrimaryDisabled={isDisabled || (isDiscovering && isCancellingDiscovering)}
       primaryDataTestSubj="significant_events_discover_insights_button"
       secondaryAriaLabel={DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL}
+      isSecondaryDisabled={isDisabled || isDiscovering}
       secondaryDataTestSubj="significant_events_insights_connector_trigger"
       buildPanels={buildPanels}
       error={connectorError}
       errorTitle={CONNECTOR_LOAD_ERROR}
       color="primary"
       size="s"
-      isLoading={isLoading}
+      isSecondaryLoading={isSecondaryLoading}
       data-test-subj="significant_events_discover_insights_split_button"
     />
   );

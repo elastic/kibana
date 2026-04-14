@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { TaskStatus } from '@kbn/streams-schema';
@@ -48,8 +48,11 @@ export function SignificantEventsDiscoveryDiscoverButton({
     displayDiscoveryConnectorId,
   } = connectorConfig;
 
-  const { scheduleInsightsDiscoveryTask, getInsightsDiscoveryTaskStatus } =
-    useInsightsDiscoveryApi();
+  const {
+    scheduleInsightsDiscoveryTask,
+    getInsightsDiscoveryTaskStatus,
+    cancelInsightsDiscoveryTask,
+  } = useInsightsDiscoveryApi();
   const [{ value: insightsTask }, getInsightsTaskStatus] = useAsyncFn(
     getInsightsDiscoveryTaskStatus
   );
@@ -58,11 +61,16 @@ export function SignificantEventsDiscoveryDiscoverButton({
     getInsightsTaskStatus();
   }, [getInsightsTaskStatus]);
 
-  useTaskPolling({
+  const { cancelTask, isCancellingTask } = useTaskPolling({
     task: insightsTask,
     onPoll: getInsightsDiscoveryTaskStatus,
     onRefresh: getInsightsTaskStatus,
+    onCancel: cancelInsightsDiscoveryTask,
   });
+
+  const onStopDiscovering = useCallback(async () => {
+    await cancelTask();
+  }, [cancelTask]);
 
   const [{ loading: isSchedulingInsights }, scheduleInsightsTask] = useAsyncFn(async () => {
     const streamNames = undefined;
@@ -85,7 +93,13 @@ export function SignificantEventsDiscoveryDiscoverButton({
 
   useEffect(() => {
     if (!isWaitingForInsightsTask || !insightsTask) return;
-    if (insightsTask.status !== TaskStatus.Completed && insightsTask.status !== TaskStatus.Failed) {
+
+    const isTerminal =
+      insightsTask.status === TaskStatus.Completed ||
+      insightsTask.status === TaskStatus.Failed ||
+      insightsTask.status === TaskStatus.Canceled;
+
+    if (!isTerminal) {
       return;
     }
     setIsWaitingForInsightsTask(false);
@@ -129,6 +143,12 @@ export function SignificantEventsDiscoveryDiscoverButton({
     }
   }, [isWaitingForInsightsTask, insightsTask, toasts, router, core]);
 
+  const isDiscovering =
+    isSchedulingInsights ||
+    isWaitingForInsightsTask ||
+    insightsTask?.status === TaskStatus.InProgress ||
+    insightsTask?.status === TaskStatus.BeingCanceled;
+
   return (
     <InsightsSplitButton
       allConnectors={allConnectors}
@@ -137,11 +157,10 @@ export function SignificantEventsDiscoveryDiscoverButton({
       displayConnectorId={displayDiscoveryConnectorId}
       onConnectorChange={setDiscoveryConnectorOverride}
       onRun={scheduleInsightsTask}
-      isLoading={
-        isSchedulingInsights ||
-        isWaitingForInsightsTask ||
-        insightsTask?.status === TaskStatus.InProgress
-      }
+      onStopDiscovering={onStopDiscovering}
+      isDiscovering={isDiscovering}
+      isCancellingDiscovering={isCancellingTask}
+      isSecondaryLoading={isDiscovering}
       isDisabled={isConnectorCatalogUnavailable || discoveryConnectors.loading}
     />
   );

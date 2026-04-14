@@ -75,6 +75,8 @@ interface ContextMenuSplitButtonProps {
   color?: ComponentProps<typeof EuiSplitButton>['color'];
   fill?: ComponentProps<typeof EuiSplitButton>['fill'];
   size?: ComponentProps<typeof EuiSplitButton>['size'];
+  /** When set, loading spinner appears only on the secondary action (not the primary). */
+  isSecondaryLoading?: boolean;
   isLoading?: boolean;
   'data-test-subj'?: string;
 }
@@ -94,9 +96,14 @@ export const ContextMenuSplitButton = ({
   color,
   fill,
   size = 'm',
+  isSecondaryLoading,
   isLoading,
   'data-test-subj': dataTestSubj,
 }: ContextMenuSplitButtonProps) => {
+  const splitButtonIsLoading =
+    isSecondaryLoading !== undefined ? false : Boolean(isLoading);
+  const secondaryIsLoading =
+    isSecondaryLoading !== undefined ? Boolean(isSecondaryLoading) : Boolean(isLoading);
   const { euiTheme } = useEuiTheme();
   const [isOpen, { off: close, toggle }] = useBoolean(false);
   const [menuResetKey, setMenuResetKey] = useState(0);
@@ -152,7 +159,7 @@ export const ContextMenuSplitButton = ({
       size={size}
       color={color}
       fill={fill}
-      isLoading={isLoading}
+      isLoading={splitButtonIsLoading}
       data-test-subj={dataTestSubj}
       css={splitButtonPopoverAnchorStretchCss}
     >
@@ -168,6 +175,7 @@ export const ContextMenuSplitButton = ({
         iconType="arrowDown"
         aria-label={secondaryAriaLabel}
         isDisabled={isSecondaryDisabled}
+        isLoading={secondaryIsLoading}
         data-test-subj={secondaryDataTestSubj}
         onClick={toggle}
         popoverProps={{

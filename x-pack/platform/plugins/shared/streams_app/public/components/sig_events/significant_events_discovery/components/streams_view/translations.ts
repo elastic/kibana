@@ -114,6 +114,13 @@ export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
   }
 );
 
+export const STOP_DISCOVERING_INSIGHTS_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.stopDiscoveringInsightsButtonLabel',
+  {
+    defaultMessage: 'Stop discovering',
+  }
+);
+
 export const INSIGHTS_SCHEDULING_FAILURE_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.insightsSchedulingErrorTitle',
   {
