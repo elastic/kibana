@@ -12,12 +12,8 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
 } from '../constants';
 import { PackagePolicyValidationError } from '../errors';
-import type {
-  AgentlessDeploymentReleaseStatus,
-  NewPackagePolicyInput,
-  PackageInfo,
-  RegistryPolicyTemplate,
-} from '../types';
+import { AgentlessDeploymentReleaseStatus } from '../types';
+import type { NewPackagePolicyInput, PackageInfo, RegistryPolicyTemplate } from '../types';
 
 export interface RegistryInputForDeploymentMode {
   type: string;
@@ -189,19 +185,51 @@ export function validateDeploymentModesForInputs(
 /**
  * Returns the agentless-specific release status for a package or integration.
  * Returns `undefined` if agentless is not enabled for the package/integration.
- * Defaults to `'beta'` when agentless is enabled but no release field is specified.
+ * Returns `AgentlessDeploymentReleaseStatus.GA` as-is — callers decide whether to defer to package semver instead.
+ * Defaults to `AgentlessDeploymentReleaseStatus.Beta` when agentless is enabled but no release field is specified.
+ * When no specific integration is provided, returns the least mature release across all agentless-enabled templates.
  */
-export const getAgentlessReleaseForPackage = (
+export const getAgentlessRelease = (
   packageInfo?: Pick<PackageInfo, 'policy_templates'>,
   integrationToEnable?: string
 ): AgentlessDeploymentReleaseStatus | undefined => {
-  const template = integrationToEnable
-    ? packageInfo?.policy_templates?.find(({ name }) => name === integrationToEnable)
-    : packageInfo?.policy_templates?.find((t) => t.deployment_modes?.agentless?.enabled === true);
+  if (integrationToEnable) {
+    const template = packageInfo?.policy_templates?.find(
+      ({ name }) => name === integrationToEnable
+    );
+    if (!template?.deployment_modes?.agentless?.enabled) return undefined;
+    return template.deployment_modes.agentless.release ?? AgentlessDeploymentReleaseStatus.Beta;
+  }
 
-  if (!template?.deployment_modes?.agentless?.enabled) return undefined;
+  const agentlessTemplates = packageInfo?.policy_templates?.filter(
+    (t) => t.deployment_modes?.agentless?.enabled === true
+  );
 
-  return template.deployment_modes.agentless.release ?? 'beta';
+  if (!agentlessTemplates?.length) return undefined;
+
+  // Return the least mature release across all agentless templates:
+  // any non-GA template takes precedence over GA.
+  const hasNonGA = agentlessTemplates.some(
+    (t) =>
+      (t.deployment_modes?.agentless?.release ?? AgentlessDeploymentReleaseStatus.Beta) !==
+      AgentlessDeploymentReleaseStatus.GA
+  );
+  return hasNonGA ? AgentlessDeploymentReleaseStatus.Beta : AgentlessDeploymentReleaseStatus.GA;
+};
+
+export const isDefaultAgentlessIntegration = (
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>,
+  integrationToEnable?: string
+): boolean => {
+  if (integrationToEnable) {
+    return Boolean(
+      packageInfo?.policy_templates?.find(({ name }) => name === integrationToEnable)
+        ?.deployment_modes?.agentless?.is_default === true
+    );
+  }
+  return Boolean(
+    packageInfo?.policy_templates?.some((t) => t.deployment_modes?.agentless?.is_default === true)
+  );
 };
 
 /**

@@ -26,6 +26,7 @@ import { hasDeferredInstallations } from '../../../../../../services/has_deferre
 import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
+import { AgentlessDeploymentReleaseStatus } from '../../../../../../../common/types';
 import type {
   DeprecationInfo,
   EpmPackageInstallStatus,
@@ -34,7 +35,8 @@ import type {
   PackageSpecIcon,
 } from '../../../../../../../common/types';
 import {
-  getAgentlessReleaseForPackage,
+  getAgentlessRelease,
+  isDefaultAgentlessIntegration,
   isOnlyAgentlessIntegration,
 } from '../../../../../../../common/services/agentless_policy_helper';
 
@@ -183,14 +185,18 @@ export const mapToCard = ({
     cardResult.supportsAgentless = true;
   }
 
-  // Use the agentless-specific release when agentless is the only deployment mode,
+  // Use the agentless-specific release when agentless is the only or default deployment mode,
   // or when the caller is displaying an agentless-filtered view.
   if (
     isOnlyAgentlessIntegration(packageItem, integration || undefined) ||
+    isDefaultAgentlessIntegration(packageItem, integration || undefined) ||
     filterState?.onlyAgentless
   ) {
-    const agentlessRelease = getAgentlessReleaseForPackage(packageItem, integration || undefined);
-    if (agentlessRelease !== undefined && agentlessRelease !== 'ga') {
+    const agentlessRelease = getAgentlessRelease(packageItem, integration || undefined);
+    if (
+      agentlessRelease !== undefined &&
+      agentlessRelease !== AgentlessDeploymentReleaseStatus.GA
+    ) {
       cardResult.release = agentlessRelease;
     }
   }

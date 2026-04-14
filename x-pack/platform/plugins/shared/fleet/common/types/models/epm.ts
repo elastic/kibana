@@ -216,7 +216,10 @@ export interface DeploymentsModesDefault {
   is_default?: boolean;
 }
 
-export type AgentlessDeploymentReleaseStatus = 'beta' | 'ga';
+export enum AgentlessDeploymentReleaseStatus {
+  Beta = 'beta',
+  GA = 'ga',
+}
 
 export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
   organization?: string;
