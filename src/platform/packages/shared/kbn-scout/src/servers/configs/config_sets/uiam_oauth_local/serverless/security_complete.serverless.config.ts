@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { MOCK_IDP_UIAM_OAUTH_BASE_URL } from '@kbn/mock-idp-utils';
 import { servers as uiamConfig } from '../../uiam_local/serverless/security_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
-
-const uiamOAuthPort = process.env.UIAM_OAUTH_SERVICE_PORT || '8444';
-const uiamOAuthBaseUrl = `https://localhost:${uiamOAuthPort}/oauth2`;
 
 export const servers: ScoutServerConfig = {
   ...uiamConfig,
@@ -24,7 +22,7 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...uiamConfig.kbnTestServer.serverArgs,
       `--xpack.security.mcp.oauth2.metadata.authorization_servers=${JSON.stringify([
-        uiamOAuthBaseUrl,
+        MOCK_IDP_UIAM_OAUTH_BASE_URL,
       ])}`,
       `--xpack.security.mcp.oauth2.metadata.resource=http://localhost:5620`,
     ],

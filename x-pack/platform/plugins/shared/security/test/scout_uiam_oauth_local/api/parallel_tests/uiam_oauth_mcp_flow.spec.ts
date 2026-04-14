@@ -14,15 +14,13 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { Agent } from 'undici';
 
-import { createUiamOAuthAccessToken, MOCK_IDP_UIAM_SERVICE_URL } from '@kbn/mock-idp-utils';
+import { createUiamOAuthAccessToken, MOCK_IDP_UIAM_OAUTH_BASE_URL } from '@kbn/mock-idp-utils';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { COMMON_HEADERS } from '../fixtures';
 
 const MCP_ENDPOINT = 'api/agent_builder/mcp';
-const UIAM_OAUTH_PORT = +new URL(MOCK_IDP_UIAM_SERVICE_URL).port + 1;
-const UIAM_OAUTH_BASE_URL = `https://localhost:${UIAM_OAUTH_PORT}/oauth2`;
 
 const tlsAgent = new Agent({ connect: { rejectUnauthorized: false } });
 
@@ -60,7 +58,7 @@ apiTest.describe(
         );
 
         expect(resourceMetadata.authorization_servers).toBeDefined();
-        expect(resourceMetadata.authorization_servers).toContain(UIAM_OAUTH_BASE_URL);
+        expect(resourceMetadata.authorization_servers).toContain(MOCK_IDP_UIAM_OAUTH_BASE_URL);
 
         // Verify apiClient can also reach the well-known endpoint
         const response = await apiClient.get('.well-known/oauth-protected-resource', {
