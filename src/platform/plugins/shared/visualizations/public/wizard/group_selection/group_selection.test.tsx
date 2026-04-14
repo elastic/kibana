@@ -128,6 +128,7 @@ describe('GroupSelection', () => {
     renderGroupSelectionComponent();
     expect(screen.queryByRole('tab', { name: /legacy/i })).toBeNull();
     expect(screen.queryByRole('tab', { name: /recommended/i })).toBeNull();
+    expect(screen.queryByText(/^0$/)).not.toBeInTheDocument();
   });
 
   it('should render tabs and the aggBased group card if an aggBased group vis is registered', async () => {

@@ -19,6 +19,7 @@ import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import {
+  deriveQueryType,
   LOGS_ROOT_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
   LOGS_ECS_STREAM_NAME,
@@ -78,8 +79,8 @@ export class StreamsClient {
       esClientAsInternalUser: ElasticsearchClient;
       esClient: ElasticsearchClient;
       attachmentClient: AttachmentClient;
-      queryClient?: QueryClient;
-      featureClient?: FeatureClient;
+      getQueryClient?: () => Promise<QueryClient>;
+      getFeatureClient?: () => Promise<FeatureClient>;
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
@@ -321,9 +322,10 @@ export class StreamsClient {
         }
       );
 
-      const { attachmentClient, queryClient, storageClient } = this.dependencies;
-      const cleanOps = [attachmentClient.clean(), storageClient.clean()];
-      if (queryClient) {
+      const { attachmentClient, getQueryClient, storageClient } = this.dependencies;
+      const cleanOps: Array<Promise<unknown>> = [attachmentClient.clean(), storageClient.clean()];
+      if (getQueryClient) {
+        const queryClient = await getQueryClient();
         cleanOps.push(queryClient.clean());
       }
       await Promise.all(cleanOps);
@@ -1013,8 +1015,14 @@ export class StreamsClient {
       ),
     ];
 
-    if (this.dependencies.queryClient) {
-      ops.push(this.dependencies.queryClient.syncQueries(definition, queries));
+    if (this.dependencies.getQueryClient) {
+      const queryClient = await this.dependencies.getQueryClient();
+      ops.push(
+        queryClient.syncQueries(
+          definition,
+          queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
+        )
+      );
     }
 
     await Promise.all(ops);
