@@ -6,7 +6,7 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
-
+import type { apiTest } from '@kbn/scout-security';
 import type { GetStatusResult } from '../../../../server/domain/types';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
@@ -19,26 +19,9 @@ import {
   UPDATES_INDEX,
 } from './constants';
 
-export interface ApiClientOptions {
-  headers?: Record<string, string>;
-  responseType?: 'json' | 'text' | 'buffer';
-  body?: any;
-}
-export interface ApiClientResponse {
-  statusCode: number;
-  statusMessage: string;
-  headers: Record<string, string | string[]>;
-  body: any;
-}
-export interface ApiClientFixture {
-  get(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  post(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  put(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  delete(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  patch(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  head(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-}
-
+type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
+type ApiClientFixture = ApiWorkerFixtures['apiClient'];
+type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>; // ApiClientResponse is the same for all methods
 /**
  * Normalizes values that may be stored as a single keyword or as keyword[] after
  * log extraction (e.g. `entity.relationships.*` bags).
