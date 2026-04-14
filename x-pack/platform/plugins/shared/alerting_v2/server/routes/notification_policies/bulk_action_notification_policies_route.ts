@@ -7,6 +7,7 @@
 
 import {
   bulkActionNotificationPoliciesBodySchema,
+  bulkActionNotificationPoliciesResponseSchema,
   type BulkActionNotificationPoliciesBody,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
@@ -36,7 +37,16 @@ export class BulkActionNotificationPoliciesRoute extends BaseAlertingRoute {
     request: {
       body: buildRouteValidationWithZod(bulkActionNotificationPoliciesBodySchema),
     },
-  } as const;
+    response: {
+      200: {
+        body: () => bulkActionNotificationPoliciesResponseSchema,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates invalid request body.',
+      },
+    },
+  };
 
   protected readonly routeName = 'bulk action notification policies';
 
