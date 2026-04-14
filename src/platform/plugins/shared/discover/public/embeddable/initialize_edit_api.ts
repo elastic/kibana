@@ -59,6 +59,7 @@ export function initializeEditApi({
   isEditable,
   discoverServices,
   getTitle,
+  getControls,
 }: {
   uuid: string;
   parentApi?: unknown;
@@ -68,6 +69,7 @@ export function initializeEditApi({
     PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
   isEditable: () => boolean;
   getTitle: () => string | undefined;
+  getControls: () => string | undefined;
   discoverServices: DiscoverServices;
 }): HasEditCapabilities | undefined {
   /**
@@ -99,7 +101,7 @@ export function initializeEditApi({
                   defaultMessage: 'By-value Discover session',
                 }),
             },
-            savedSearch: partialApi.savedSearch$.getValue(),
+            savedSearch: { ...partialApi.savedSearch$.getValue(), controlGroupJson: getControls() },
             services: discoverServices,
           });
       let app: string;

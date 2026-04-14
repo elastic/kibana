@@ -94,6 +94,7 @@ export const deserializeState = async ({
       ...panelState,
       ...savedObjectOverride,
       nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
+      controlGroupJson: storedState.attributes.controlGroupJson,
     };
   }
 };
@@ -174,6 +175,7 @@ export const serializeState = ({
       ...savedSearchAttributes,
       ...(serializedTitles.title && { title: serializedTitles.title }),
       ...(serializedTitles.description && { description: serializedTitles.description }),
+      controlGroupJson: initialState.controlGroupJson,
     },
   };
   return embeddableTransformsEnabled ? fromStoredSearchEmbeddableByValue(stored, []) : stored;

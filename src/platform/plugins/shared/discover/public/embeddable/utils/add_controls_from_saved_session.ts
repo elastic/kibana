@@ -11,7 +11,6 @@ import type { PublishesESQLVariables } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { omit } from 'lodash';
 
 export const addControlsFromSavedSession = async (
   container: CanAddNewPanel & Partial<PublishesESQLVariables>,
@@ -28,13 +27,13 @@ export const addControlsFromSavedSession = async (
   for (const panel of Object.values(controlsState)) {
     const variableName = panel.variable_name;
     const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
+    const { width, grow, order, ...serializedState } = panel;
+
     if (!variableExists) {
       await container.addNewPanel(
         {
           panelType: ESQL_CONTROL,
-          serializedState: {
-            ...omit(panel, ['width', 'grow', 'order']),
-          },
+          serializedState,
         },
         { beside: uuid, scrollToPanel: false }
       );

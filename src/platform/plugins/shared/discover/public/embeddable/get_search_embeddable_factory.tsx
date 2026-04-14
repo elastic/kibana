@@ -24,11 +24,14 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
   initializeUnsavedChanges,
+  apiCanAddNewPanel,
+  apiPublishesEditablePauseFetch,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import {
   getDiscoverSessionEmbeddableComparators,
@@ -49,6 +52,7 @@ import { deserializeState, serializeState } from './utils/serialization_utils';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 import { isTabDeleted } from './utils/is_tab_deleted';
+import { addControlsFromSavedSession } from './utils/add_controls_from_saved_session';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -81,6 +85,21 @@ export const getSearchEmbeddableFactory = ({
         serializedState: initialState,
         discoverServices,
       });
+
+      const mightHaveVariables =
+        apiPublishesESQLVariables(parentApi) &&
+        runtimeState.controlGroupJson &&
+        runtimeState.controlGroupJson.length > 0;
+
+      if (
+        apiCanAddNewPanel(parentApi) &&
+        mightHaveVariables &&
+        apiPublishesEditablePauseFetch(parentApi)
+      ) {
+        parentApi.setFetchPaused(true);
+        await addControlsFromSavedSession(parentApi, runtimeState.controlGroupJson!, uuid);
+        parentApi.setFetchPaused(false);
+      }
 
       /** One Discover context awareness */
       const solutionNavId =
@@ -210,6 +229,7 @@ export const getSearchEmbeddableFactory = ({
         discoverServices,
         isEditable: startServices.isEditable,
         getTitle: () => titleManager.api.title$.getValue(),
+        getControls: () => runtimeState.controlGroupJson,
       });
 
       const api: SearchEmbeddableApi = finalizeApi({

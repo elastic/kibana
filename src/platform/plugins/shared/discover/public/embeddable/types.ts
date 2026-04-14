@@ -90,6 +90,7 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
     selectedTabId?: string;
     tabs?: DiscoverSessionTab[];
+    controlGroupJson?: string;
   };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiState> &

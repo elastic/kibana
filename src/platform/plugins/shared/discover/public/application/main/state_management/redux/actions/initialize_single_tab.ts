@@ -92,12 +92,14 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       tabInitialInternalState = cloneDeep(tabState.initialInternalState);
     }
 
-    if (esqlControls) {
+    const embeddedControls = esqlControls || tabState.attributes.controlGroupState;
+
+    if (embeddedControls) {
       dispatch(
         updateAttributes({
           tabId,
           attributes: {
-            controlGroupState: esqlControls,
+            controlGroupState: embeddedControls,
           },
         })
       );
@@ -105,7 +107,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dispatch(
         internalStateSlice.actions.setEsqlVariables({
           tabId,
-          esqlVariables: extractEsqlVariables(esqlControls),
+          esqlVariables: extractEsqlVariables(embeddedControls),
         })
       );
     }

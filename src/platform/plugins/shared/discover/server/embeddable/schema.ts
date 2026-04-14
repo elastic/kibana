@@ -319,6 +319,13 @@ const esqlTabSchema = schema.allOf([
   schema.object(
     {
       data_source: esqlDataSourceSchema,
+      controlGroupJson: schema.maybe(
+        schema.string({
+          minLength: 0,
+          maxLength: 10000,
+          meta: { description: 'Controls that are required by the by value tab' },
+        })
+      ),
     },
     {
       meta: {
