@@ -76,7 +76,7 @@ export const standardDashboards: DashboardExample[] = [
     metadata: {
       category: 'standard' as const,
       has_lookups: true,
-      has_markdown_panels: false,
+      has_markdown_panels: true,
       panel_count: 0,
       complexity: 'medium' as const,
     },

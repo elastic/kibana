@@ -30,7 +30,7 @@ import {
 // Skip stats registry
 // ---------------------------------------------------------------------------
 
-export interface RuleDatasetSkipSummary {
+export interface RuleDatasetSummary {
   datasetName: string;
   totalExamples: number;
   succeeded: number;
@@ -38,17 +38,17 @@ export interface RuleDatasetSkipSummary {
   failureReasons: string[];
 }
 
-const ruleDatasetSkipSummaries = new Map<string, RuleDatasetSkipSummary>();
+const ruleDatasetSummaries = new Map<string, RuleDatasetSummary>();
 
-export function getRuleDatasetSkipSummaries(): RuleDatasetSkipSummary[] {
-  return Array.from(ruleDatasetSkipSummaries.values());
+export function getRuleDatasetSummaries(): RuleDatasetSummary[] {
+  return Array.from(ruleDatasetSummaries.values());
 }
 
-export function clearRuleDatasetSkipSummaries(): void {
-  ruleDatasetSkipSummaries.clear();
+export function clearRuleDatasetSummaries(): void {
+  ruleDatasetSummaries.clear();
 }
 
-export function formatRuleEvalSummary(summaries: RuleDatasetSkipSummary[]): string {
+export function formatRuleEvalSummary(summaries: RuleDatasetSummary[]): string {
   if (summaries.length === 0) return '';
 
   const lines: string[] = ['═══ RULE MIGRATION EVALUATION SUMMARY ═══', ''];
@@ -155,7 +155,7 @@ export function createRuleEvaluateDataset({
       allEvaluators
     );
 
-    ruleDatasetSkipSummaries.set(dataset.name, {
+    ruleDatasetSummaries.set(dataset.name, {
       datasetName: dataset.name,
       totalExamples,
       succeeded,

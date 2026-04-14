@@ -21,7 +21,7 @@ export function createTranslationFidelityEvaluator(
         return { score: 0, label: 'FAIL', explanation: 'No translated dashboards in output' };
       }
 
-      if (!input?.original_dashboard_export) {
+      if (!input?.original_dashboard_export?.result) {
         return { score: null, label: 'N/A', explanation: 'No source dashboard in input' };
       }
 

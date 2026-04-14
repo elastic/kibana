@@ -18,8 +18,8 @@ import type { DashboardExample } from './datasets/dashboards/types';
 import { RuleMigrationClient } from './src/rules/migration_client';
 import {
   createRuleEvaluateDataset,
-  getRuleDatasetSkipSummaries,
-  clearRuleDatasetSkipSummaries,
+  getRuleDatasetSummaries,
+  clearRuleDatasetSummaries,
   formatRuleEvalSummary,
 } from './src/rules/evaluate_dataset';
 import type { RuleExample } from './datasets/rules/types';
@@ -165,11 +165,11 @@ export const evaluate = base.extend<{}, WorkerFixtures>({
         }
         clearDatasetSkipSummaries();
 
-        const ruleSummary = formatRuleEvalSummary(getRuleDatasetSkipSummaries());
+        const ruleSummary = formatRuleEvalSummary(getRuleDatasetSummaries());
         if (ruleSummary) {
           log.info(`\n${ruleSummary}`);
         }
-        clearRuleDatasetSkipSummaries();
+        clearRuleDatasetSummaries();
       });
     },
     { scope: 'worker' },
