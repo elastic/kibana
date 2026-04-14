@@ -23,12 +23,14 @@ export { NOOP_TASK_TYPE };
 
 const taskSchema = schema.object({
   task: schema.object({
-    taskType: schema.string(),
-    id: schema.maybe(schema.string()),
+    taskType: schema.string({ minLength: 1, maxLength: 200 }),
+    id: schema.maybe(schema.string({ maxLength: 200 })),
     enabled: schema.boolean({ defaultValue: true }),
     params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
     state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-    scope: schema.maybe(schema.arrayOf(schema.string())),
+    scope: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 200 }), { maxSize: 10 })
+    ),
     schedule: schema.maybe(
       schema.oneOf([
         schema.object({
@@ -37,18 +39,26 @@ const taskSchema = schema.object({
         schema.object({
           rrule: schema.object({
             dtstart: schema.maybe(schema.string()),
-            freq: schema.number(),
-            interval: schema.number(),
+            freq: schema.number({ min: 0, max: 3 }),
+            interval: schema.number({ min: 1 }),
             tzid: schema.string({ defaultValue: 'UTC' }),
-            byhour: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 }))),
-            byminute: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 }))),
-            byweekday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 7 }))),
-            bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }))),
+            byhour: schema.maybe(
+              schema.arrayOf(schema.number({ min: 0, max: 23 }), { maxSize: 24 })
+            ),
+            byminute: schema.maybe(
+              schema.arrayOf(schema.number({ min: 0, max: 59 }), { maxSize: 60 })
+            ),
+            byweekday: schema.maybe(
+              schema.arrayOf(schema.number({ min: 1, max: 7 }), { maxSize: 7 })
+            ),
+            bymonthday: schema.maybe(
+              schema.arrayOf(schema.number({ min: 1, max: 31 }), { maxSize: 31 })
+            ),
           }),
         }),
       ])
     ),
-    timeoutOverride: schema.maybe(schema.string()),
+    timeoutOverride: schema.maybe(schema.string({ maxLength: 50 })),
     cost: schema.maybe(
       schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
     ),
