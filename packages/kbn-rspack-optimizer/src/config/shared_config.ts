@@ -22,6 +22,16 @@ export function getSharedResolveConfig(repoRoot: string): Configuration['resolve
     mainFields: ['browser', 'module', 'main'],
     mainFiles: ['index'],
     alias: {
+      // Redirect ALL @elastic/eui subpath imports to optimize/es/ so they match the
+      // DLL manifest. The DLL (kbn-ui-shared-deps-npm) is compiled with
+      // '@elastic/eui$' → '@elastic/eui/optimize/es', so ALL EUI module paths in the
+      // DLL manifest use the optimize/es/ prefix. Non-externalized subpath imports
+      // (icons via /es/, styles via /lib/, services via /lib/) resolve to paths that
+      // don't match the manifest, causing RSPack to re-bundle them — duplicating React
+      // contexts like CurrentEuiBreakpointContext and breaking useContext().
+      '@elastic/eui$': '@elastic/eui/optimize/es',
+      '@elastic/eui/es': Path.resolve(repoRoot, 'node_modules/@elastic/eui/optimize/es'),
+      '@elastic/eui/lib': Path.resolve(repoRoot, 'node_modules/@elastic/eui/optimize/es'),
       'react-dom$': 'react-dom/profiling',
       'scheduler/tracing': 'scheduler/tracing-profiling',
       buffer: [
