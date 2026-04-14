@@ -11,7 +11,13 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
+import {
+  applyColorToSchema,
+  colorByValueSchema,
+  colorMappingSchema,
+  autoColorSchema,
+  AUTO_COLOR,
+} from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
@@ -240,7 +246,11 @@ const datatableStateRowsOptionsNoESQLSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(colorMappingSchema),
+  color: schema.maybe(
+    schema.oneOf([colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   /**
    * Whether to enable the one click filter
    */
@@ -264,7 +274,8 @@ const datatableStateRowsOptionsESQLSchema = {
    * Color configuration
    */
   color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
+    schema.oneOf([colorByValueSchema, colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
       meta: {
         description:
           'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
@@ -279,7 +290,8 @@ const datatableStateMetricsOptionsSchema = {
    * Color configuration
    */
   color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
+    schema.oneOf([colorByValueSchema, colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
       meta: {
         description:
           'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',

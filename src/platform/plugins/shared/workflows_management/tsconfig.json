@@ -96,7 +96,8 @@
     "@kbn/management-settings-ids",
     "@kbn/use-observable",
     "@kbn/cloud-plugin",
-    "@kbn/kbn-client"
+    "@kbn/kbn-client",
+    "@kbn/rule-data-utils"
   ],
   "exclude": ["target/**/*"]
 }

@@ -99,6 +99,7 @@ dependsOn:
   - '@kbn/use-observable'
   - '@kbn/cloud-plugin'
   - '@kbn/kbn-client'
+  - '@kbn/rule-data-utils'
 tags:
   - plugin
   - prod

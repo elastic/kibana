@@ -65,6 +65,11 @@ jest.mock('./provider_registry', () => ({
   getMonacoConnectorHandler: (...args: unknown[]) => mockGetMonacoConnectorHandler(...args),
 }));
 
+jest.mock('@kbn/workflows', () => ({
+  resolveKibanaStepTypeAlias: (type: string) =>
+    type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
+}));
+
 jest.mock('../../../../trigger_schemas', () => ({
   triggerSchemas: {
     getTriggerDefinition: jest.fn().mockReturnValue(null),
@@ -77,6 +82,7 @@ jest.mock('../utils', () => ({
 }));
 
 const { evaluateExpression } = jest.requireMock('../template_expression/evaluate_expression');
+const { getInterceptedHover } = jest.requireMock('../hover/get_intercepted_hover');
 
 const createMockModel = (content: string = '  message: "{{ steps.search.output.hits }}"') =>
   ({
@@ -484,6 +490,97 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
       );
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('deprecated step hover deduplication', () => {
+    it('should let Monaco show the warning marker and only append rich connector info', async () => {
+      jest.spyOn(monaco.editor, 'getModelMarkers').mockReturnValue([
+        {
+          owner: 'custom-yaml-validation',
+          source: 'deprecated-step-validation',
+          startLineNumber: 2,
+          startColumn: 12,
+          endLineNumber: 2,
+          endColumn: 41,
+          message: 'Step type "kibana.createCaseDefaultSpace" is deprecated.',
+          severity: monaco.MarkerSeverity.Warning,
+        },
+      ] as monaco.editor.IMarker[]);
+      getInterceptedHover.mockResolvedValue({
+        contents: [{ value: 'schema hover' }],
+      });
+
+      const mockHandler = {
+        generateHoverContent: jest.fn().mockResolvedValue({
+          value: 'rich hover',
+          isTrusted: true,
+        }),
+      };
+      mockGetMonacoConnectorHandler.mockReturnValue(mockHandler);
+      mockGetPathAtOffset.mockReturnValue(['steps', 0, 'type']);
+      mockPerformComputation.mockReturnValue({
+        workflowLookup: {
+          steps: {
+            legacy_case: {
+              stepId: 'legacy_case',
+              stepType: 'kibana.createCaseDefaultSpace',
+              lineStart: 1,
+              lineEnd: 4,
+              isInWithBlock: false,
+              stepYamlNode: {},
+              propInfos: { type: { valueNode: {} } },
+            },
+          },
+        },
+      });
+
+      const deprecatedHoverProvider = new UnifiedHoverProvider({
+        getYamlDocument: () =>
+          ({
+            getIn: jest.fn().mockReturnValue(null),
+          } as never),
+      });
+
+      const result = await deprecatedHoverProvider.provideHover(
+        createMockModel('steps:\n  - type: kibana.createCaseDefaultSpace'),
+        createMockPosition(2, 20),
+        {} as monaco.CancellationToken
+      );
+
+      expect(result).toEqual({
+        contents: [
+          {
+            value: 'rich hover',
+            isTrusted: true,
+          },
+        ],
+      });
+      expect(mockHandler.generateHoverContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorType: 'kibana.createCase',
+          stepContext: expect.objectContaining({
+            stepType: 'kibana.createCase',
+          }),
+        })
+      );
+      expect(getInterceptedHover).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('provideHover cancellation', () => {
+    it('should return null without querying markers when the request is already cancelled', async () => {
+      const getModelMarkersSpy = jest.spyOn(monaco.editor, 'getModelMarkers');
+
+      const result = await provider.provideHover(
+        createMockModel('type: kibana.createCaseDefaultSpace'),
+        createMockPosition(1, 15),
+        { isCancellationRequested: true } as monaco.CancellationToken
+      );
+
+      expect(result).toBeNull();
+      expect(getModelMarkersSpy).not.toHaveBeenCalled();
+      expect(getInterceptedHover).not.toHaveBeenCalled();
     });
   });
 

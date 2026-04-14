@@ -93,6 +93,10 @@ describe(
 
       connectorSelectorExists();
       scanButtonShouldBe('enabled');
+
+      // Override pending stub to return running execution BEFORE clicking scan.
+      // Without this, the post-click poll immediately gets [] and completes the scan.
+      fetchRunningWorkflowInsights();
       clickScanButton();
 
       cy.wait('@createWorkflowInsights', { timeout: 30 * 1000 });
