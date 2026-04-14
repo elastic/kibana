@@ -77,7 +77,9 @@ import {
   fetchAnomaliesTableData$,
   getModelPlotEnabledForDetector,
   getSmvContextLoadErrorMessages,
+  getSmvDataReloadPlan,
   loadSingleMetricContextData,
+  smvReloadSnapshotFromSmvHostProps,
   subscribeSmvBrushToFocusZoom,
 } from './timeseriesexplorer_chart_controller';
 
@@ -632,25 +634,11 @@ export class TimeSeriesExplorer extends React.Component {
       }
     }
 
-    if (
-      previousProps === undefined ||
-      !isEqual(previousProps.bounds, this.props.bounds) ||
-      (!isEqual(previousProps.lastRefresh, this.props.lastRefresh) &&
-        previousProps.lastRefresh !== 0) ||
-      !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
-      !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-      previousProps.selectedForecastId !== this.props.selectedForecastId ||
-      previousProps.selectedJobId !== this.props.selectedJobId ||
-      previousProps.functionDescription !== this.props.functionDescription
-    ) {
-      const fullRefresh =
-        previousProps === undefined ||
-        !isEqual(previousProps.bounds, this.props.bounds) ||
-        !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
-        !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-        previousProps.selectedForecastId !== this.props.selectedForecastId ||
-        previousProps.selectedJobId !== this.props.selectedJobId ||
-        previousProps.functionDescription !== this.props.functionDescription;
+    const { shouldReload, fullRefresh } = getSmvDataReloadPlan(
+      previousProps === undefined ? undefined : smvReloadSnapshotFromSmvHostProps(previousProps),
+      smvReloadSnapshotFromSmvHostProps(this.props)
+    );
+    if (shouldReload) {
       this.loadSingleMetricData(fullRefresh);
     }
 

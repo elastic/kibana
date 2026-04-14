@@ -66,3 +66,10 @@ export {
   type ConsumeSmvContextLoadResultOptions,
   type SmvBrushToFocusZoomHost,
 } from './smv_host_wiring';
+export {
+  getSmvDataReloadPlan,
+  smvReloadSnapshotFromSmvHostProps,
+  type SmvDataReloadPlan,
+  type SmvDataReloadSnapshot,
+  type SmvReloadHostPropsInput,
+} from './smv_data_reload_plan';

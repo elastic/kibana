@@ -16,7 +16,10 @@ import { normalizeSeverityThresholdForApi } from './normalize_table_severity';
 
 export interface AnomaliesTableEnrichmentJobService {
   source: 'jobService';
-  detectorsByJob: Record<string, Record<number, { detector_description?: string; custom_rules?: unknown[] }>>;
+  detectorsByJob: Record<
+    string,
+    Record<number, { detector_description?: string; custom_rules?: unknown[] }>
+  >;
   customUrlsByJob: Record<string, unknown>;
 }
 
@@ -25,7 +28,9 @@ export interface AnomaliesTableEnrichmentSingleJob {
   selectedJob: Pick<Job, 'job_id' | 'analysis_config' | 'custom_settings'>;
 }
 
-export type AnomaliesTableEnrichment = AnomaliesTableEnrichmentJobService | AnomaliesTableEnrichmentSingleJob;
+export type AnomaliesTableEnrichment =
+  | AnomaliesTableEnrichmentJobService
+  | AnomaliesTableEnrichmentSingleJob;
 
 export interface FetchAnomaliesTableDataParams {
   mlApi: MlApi;
@@ -42,7 +47,13 @@ export interface FetchAnomaliesTableDataParams {
 }
 
 function enrichAnomalies(
-  anomalies: Array<Record<string, unknown> & { jobId: string; detectorIndex: number; source: { function_description?: string } }>,
+  anomalies: Array<
+    Record<string, unknown> & {
+      jobId: string;
+      detectorIndex: number;
+      source: { function_description?: string };
+    }
+  >,
   enrichment: AnomaliesTableEnrichment
 ) {
   anomalies.forEach((anomaly) => {
@@ -56,11 +67,7 @@ function enrichAnomalies(
       detector = jobDetectors[anomaly.detectorIndex];
     }
 
-    anomaly.detector = get(
-      detector,
-      ['detector_description'],
-      anomaly.source.function_description
-    );
+    anomaly.detector = get(detector, ['detector_description'], anomaly.source.function_description);
 
     const customRules = detector && 'custom_rules' in detector ? detector.custom_rules : undefined;
     if (Array.isArray(customRules)) {
@@ -83,7 +90,18 @@ function enrichAnomalies(
 /**
  * Shared anomalies table pipeline for SMV page and embeddable chart.
  */
-export function fetchAnomaliesTableData$(params: FetchAnomaliesTableDataParams): Observable<{
+export function fetchAnomaliesTableData$({
+  tableSeverity,
+  mlApi,
+  jobId,
+  criteriaFields,
+  tableInterval,
+  earliestMs,
+  latestMs,
+  dateFormatTz,
+  functionDescription,
+  enrichment,
+}: FetchAnomaliesTableDataParams): Observable<{
   tableData: {
     anomalies: unknown[];
     interval: unknown;
@@ -91,27 +109,27 @@ export function fetchAnomaliesTableData$(params: FetchAnomaliesTableDataParams):
     showViewSeriesLink: boolean;
   };
 }> {
-  const threshold = normalizeSeverityThresholdForApi(params.tableSeverity);
+  const threshold = normalizeSeverityThresholdForApi(tableSeverity);
 
-  return params.mlApi.results
+  return mlApi.results
     .getAnomaliesTableData(
-      [params.jobId],
-      params.criteriaFields as unknown as string[],
+      [jobId],
+      criteriaFields as unknown as string[],
       [],
-      params.tableInterval,
+      tableInterval,
       threshold,
-      params.earliestMs,
-      params.latestMs,
-      params.dateFormatTz,
+      earliestMs,
+      latestMs,
+      dateFormatTz,
       ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
       undefined,
       undefined,
-      params.functionDescription
+      functionDescription
     )
     .pipe(
       map((resp) => {
         const anomalies = resp.anomalies as Parameters<typeof enrichAnomalies>[0];
-        enrichAnomalies(anomalies, params.enrichment);
+        enrichAnomalies(anomalies, enrichment);
         return {
           tableData: {
             anomalies,
