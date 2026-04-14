@@ -323,6 +323,7 @@ export enum RegistryInputKeys {
   deprecated = 'deprecated',
   migrate_from = 'migrate_from',
   dynamic_signal_types = 'dynamic_signal_types',
+  show_divider = 'show_divider',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -344,6 +345,8 @@ export interface RegistryInput {
   [RegistryInputKeys.migrate_from]?: string;
   /** When true the data stream signal type (logs/metrics/traces) is determined at runtime by the agent. Valid for OTel collector inputs in composable integrations. */
   [RegistryInputKeys.dynamic_signal_types]?: boolean;
+  /** When false, suppresses the automatic horizontal divider rendered after the input-level config section. Defaults to true. */
+  [RegistryInputKeys.show_divider]?: boolean;
 }
 
 export enum RegistryStreamKeys {
@@ -548,7 +551,8 @@ export type RegistryVarType =
   | 'string'
   | 'textarea'
   | 'duration'
-  | 'url';
+  | 'url'
+  | 'section_header';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',

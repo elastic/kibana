@@ -103,6 +103,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/timerange'
   - '@kbn/inference-common'
+  - '@kbn/inference-connectors'
   - '@kbn/esql'
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/stack-connectors-plugin'
@@ -111,6 +112,9 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/deeplinks-management'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/inference-connectors'
 tags:
   - plugin
   - prod

@@ -57,7 +57,7 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerles
       it('should be able to run saved queries but not add new ones', () => {
         navigateTo('/app/osquery/saved_queries');
         cy.contains(savedQueryName);
-        cy.contains('Add saved query').should('be.disabled');
+        cy.contains('Create query').should('be.disabled');
         cy.get(`[aria-label="Run ${savedQueryName}"]`).should('not.be.disabled');
         cy.get(`[aria-label="Run ${savedQueryName}"]`).click();
 
@@ -75,20 +75,19 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerles
 
       it('should be able to play in live queries history', () => {
         navigateTo('/app/osquery/live_queries');
-        cy.contains('New live query').should('not.be.disabled');
+        cy.contains('Run query').should('not.be.disabled');
         cy.contains(liveQueryQuery);
         cy.get(`[aria-label="Run query"]`).first().should('not.be.disabled');
         cy.get(`[aria-label="Run query"]`).first().click();
-        cy.get('[data-test-subj="savedQuerySelect"]')
-          .find('input')
-          .should('have.value', savedQueryName);
+        cy.contains(liveQueryQuery);
+        selectAllAgents();
         submitQuery();
         checkResults();
       });
 
       it('should be able to use saved query in a new query', () => {
         navigateTo('/app/osquery/live_queries');
-        cy.contains('New live query').should('not.be.disabled').click();
+        cy.contains('Run query').should('not.be.disabled').click();
         selectAllAgents();
         cy.getBySel('savedQuerySelect').type(`${savedQueryName}{downArrow} {enter}`);
         cy.contains('select * from uptime');
@@ -98,9 +97,7 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerles
 
       it('should not be able to add nor edit packs', () => {
         navigateTo('/app/osquery/packs');
-        cy.getBySel('tablePaginationPopoverButton').click();
-        cy.getBySel('tablePagination-50-rows').click();
-        cy.contains('Add pack').should('be.disabled');
+        cy.contains('Create pack').should('be.disabled');
         cy.get(`[aria-label="${packName}"]`).should('be.disabled');
 
         cy.contains(packName).click();
@@ -113,7 +110,7 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerles
       it('should not be able to create new liveQuery from scratch', () => {
         navigateTo('/app/osquery');
 
-        cy.contains('New live query').click();
+        cy.contains('Run query').click();
         selectAllAgents();
         cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
         submitQuery();

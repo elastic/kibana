@@ -19,12 +19,16 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.darkMode',
   'userSettings.contrastMode',
+  'userSettings.agentBuilderAnnouncementModalSeenBySpaceJson',
   'userSettings.locale',
 ];
 
 const MAX_STRING_FIELD_LENGTH = 1024;
 
 const MAX_USER_PROFILE_DATA_SIZE_BYTES = 1000 * 1024;
+
+/** Stringified JSON map (space id → seen); cap is defensive and stays well under {@link MAX_USER_PROFILE_DATA_SIZE_BYTES}. */
+const MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS = 64 * 1024;
 
 const userProfileUpdateSchema = schema.object({
   avatar: schema.maybe(
@@ -46,6 +50,9 @@ const userProfileUpdateSchema = schema.object({
       ),
       contrastMode: schema.maybe(
         schema.oneOf([schema.literal('system'), schema.literal('standard'), schema.literal('high')])
+      ),
+      agentBuilderAnnouncementModalSeenBySpaceJson: schema.maybe(
+        schema.string({ maxLength: MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS })
       ),
       locale: schema.maybe(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
     })

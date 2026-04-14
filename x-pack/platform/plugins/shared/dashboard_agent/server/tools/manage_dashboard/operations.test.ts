@@ -16,6 +16,7 @@ import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { ResolveVisualizationConfig, VisualizationAttempt } from './inline_visualization';
 import type { VisualizationContent } from '@kbn/dashboard-agent-common';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const createMockLogger = (): Logger =>
   ({
@@ -45,7 +46,7 @@ const getPanelsOnly = (panels: DashboardAttachmentData['panels']): AttachmentPan
 describe('executeDashboardOperations', () => {
   const logger = createMockLogger();
   const createLensPanel = (id: string, gridY = 0): AttachmentPanel => ({
-    type: 'lens',
+    type: LENS_EMBEDDABLE_TYPE,
     id,
     config: { type: 'metric' },
     grid: { x: 0, y: gridY, w: 24, h: 9 },
@@ -74,7 +75,7 @@ describe('executeDashboardOperations', () => {
   ): ResolveVisualizationConfig => {
     return async ({ identifier }) =>
       resultsByIdentifier[identifier] ??
-      createResolvedVisualization({ type: 'lens', config: { type: 'metric' } });
+      createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric' } });
   };
 
   it('executes operations in order', async () => {
@@ -277,11 +278,11 @@ describe('executeDashboardOperations', () => {
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       resolveVisualizationConfig: createResolveVisualizationConfig({
         'show total requests': createResolvedVisualization({
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'metric' },
         }),
         'show error rate': createResolvedVisualization({
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'bar' },
         }),
       }),
@@ -299,12 +300,12 @@ describe('executeDashboardOperations', () => {
       grid: { y: 12 },
       panels: [
         expect.objectContaining({
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: { attributes: { type: 'metric' } },
           grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
         expect.objectContaining({
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: { attributes: { type: 'bar' } },
           grid: { x: 24, y: 0, w: 24, h: 9 },
         }),
@@ -340,7 +341,7 @@ describe('executeDashboardOperations', () => {
       resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       resolveVisualizationConfig: createResolveVisualizationConfig({
         'show total requests': createResolvedVisualization({
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'metric' },
         }),
         'show p95 latency': {
@@ -359,7 +360,7 @@ describe('executeDashboardOperations', () => {
     expect(sections).toHaveLength(1);
     expect(sections[0].panels).toEqual([
       expect.objectContaining({
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { attributes: { type: 'metric' } },
         grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
@@ -442,13 +443,13 @@ describe('executeDashboardOperations', () => {
 
     secondSectionPanel.resolve(
       createResolvedVisualization({
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'bar' },
       })
     );
     firstSectionPanel.resolve(
       createResolvedVisualization({
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
       })
     );
@@ -534,13 +535,13 @@ describe('executeDashboardOperations', () => {
 
     topLevelPanel.resolve(
       createResolvedVisualization({
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'bar' },
       })
     );
     sectionPanel.resolve(
       createResolvedVisualization({
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
       })
     );
@@ -911,11 +912,11 @@ describe('executeDashboardOperations', () => {
         resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: createResolveVisualizationConfig({
           'show total requests': createResolvedVisualization({
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'metric' },
           }),
           'show error rate': createResolvedVisualization({
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'bar' },
           }),
         }),
@@ -926,14 +927,14 @@ describe('executeDashboardOperations', () => {
 
       expect(topLevelPanels).toEqual([
         expect.objectContaining({
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: { attributes: { type: 'metric' } },
           grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
       ]);
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: { attributes: { type: 'bar' } },
           grid: { x: 24, y: 0, w: 24, h: 9 },
         }),
@@ -962,9 +963,12 @@ describe('executeDashboardOperations', () => {
         logger,
         resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: createResolveVisualizationConfig({
-          'panel-1': createResolvedVisualization({ type: 'lens', config: { type: 'bar' } }),
+          'panel-1': createResolvedVisualization({
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'bar' },
+          }),
           'section-panel-1': createResolvedVisualization({
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'line' },
           }),
         }),
@@ -1020,13 +1024,13 @@ describe('executeDashboardOperations', () => {
 
           if (nlQuery === 'make this a bar chart') {
             return createResolvedVisualization({
-              type: 'lens',
+              type: LENS_EMBEDDABLE_TYPE,
               config: { type: 'metric', testStep: 'after-first-edit' },
             });
           }
 
           return createResolvedVisualization({
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: {
               type: 'metric',
               testStep: configStep === 'after-first-edit' ? 'after-second-edit' : 'stale-edit',
@@ -1049,7 +1053,9 @@ describe('executeDashboardOperations', () => {
       const resolveVisualizationConfig = jest.fn<
         ReturnType<ResolveVisualizationConfig>,
         Parameters<ResolveVisualizationConfig>
-      >(async () => createResolvedVisualization({ type: 'lens', config: { type: 'bar' } }));
+      >(async () =>
+        createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
+      );
 
       const result = await executeDashboardOperations({
         dashboardData: {
@@ -1106,7 +1112,7 @@ describe('executeDashboardOperations', () => {
         resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: createResolveVisualizationConfig({
           'show total requests': createResolvedVisualization({
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: { type: 'metric' },
           }),
           'show p95 latency': {

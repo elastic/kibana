@@ -24,16 +24,16 @@ export class StreamsService {
 
   async getClient({
     attachmentClient,
-    queryClient,
-    featureClient,
+    getQueryClient,
+    getFeatureClient,
     esClient,
     esClientAsInternalUser,
     uiSettingsClient,
     isSecurityEnabled,
   }: {
     attachmentClient: AttachmentClient;
-    queryClient: QueryClient;
-    featureClient: FeatureClient;
+    getQueryClient?: () => Promise<QueryClient>;
+    getFeatureClient?: () => Promise<FeatureClient>;
     esClient: ElasticsearchClient;
     esClientAsInternalUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
@@ -50,9 +50,9 @@ export class StreamsService {
 
     return new StreamsClient({
       attachmentClient,
-      queryClient,
+      getQueryClient,
       logger,
-      featureClient,
+      getFeatureClient,
       esClient,
       esClientAsInternalUser,
       lockManager: new LockManagerService(this.coreSetup, logger),

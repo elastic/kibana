@@ -26,6 +26,7 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
 const mosaicStateSharedSchema = {
@@ -189,7 +190,7 @@ export const mosaicStateSchemaESQL = schema.object(
   }
 );
 
-export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
+export const mosaicStateSchema = objectUnion([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
   meta: {
     id: 'mosaicChart',
     title: 'Mosaic Chart',

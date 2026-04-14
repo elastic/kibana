@@ -17,11 +17,12 @@ import type { CorrelationsDetailsProps } from '../../../../flyout_v2/correlation
 jest.mock('@kbn/expandable-flyout');
 
 jest.mock('../../../../flyout_v2/correlations', () => ({
-  CorrelationsDetails: ({ scopeId, isRulePreview }: CorrelationsDetailsProps) => (
+  CorrelationsDetails: ({ scopeId, isRulePreview, onShowAttack }: CorrelationsDetailsProps) => (
     <div
       data-test-subj="correlationsDetailsV2Mock"
       data-scope-id={scopeId}
       data-is-rule-preview={String(isRulePreview)}
+      data-has-on-show-attack={String(typeof onShowAttack === 'function')}
     />
   ),
 }));
@@ -49,5 +50,14 @@ describe('CorrelationsDetails', () => {
     expect(el).toBeInTheDocument();
     expect(el).toHaveAttribute('data-scope-id', mockContextValue.scopeId);
     expect(el).toHaveAttribute('data-is-rule-preview', String(mockContextValue.isRulePreview));
+  });
+
+  it('passes onShowAttack callback to CorrelationsDetailsV2', () => {
+    const { getByTestId } = renderCorrelationDetails();
+
+    expect(getByTestId('correlationsDetailsV2Mock')).toHaveAttribute(
+      'data-has-on-show-attack',
+      'true'
+    );
   });
 });

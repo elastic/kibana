@@ -35,6 +35,11 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
 - **Auth**: Auth type matches the service. **Auth format** (e.g. header value) must match the vendor's official docs;
   document or link how to obtain tokens. For OAuth, use defaults/overrides so users only fill instance URL, client ID,
   client secret where possible.
+- **OAuth defaults vs placeholders**: Every `defaults` value must be paired with `{ hidden: true }` in `overrides.meta`
+  so the field is invisible in the form. Defaults for visible fields will overwrite encrypted user values on "Edit".
+  For fields where the user must enter their own value (e.g. tenant-specific URLs), use `placeholder` in
+  `overrides.meta` instead of a `default`. For fields that should never be edited (e.g. fixed OAuth endpoints, scopes),
+  use both a `default` and `{ hidden: true }`. Flag any visible auth field that has a `default` without `{ hidden: true }`.
 - Spec is exported from `all_specs.ts`. Do not add unused/cargo-culted flags; only set flags the platform or this
   connector actually uses.
 - **Input schemas & types**: Action input schemas and their `z.infer<>` types must live in a separate

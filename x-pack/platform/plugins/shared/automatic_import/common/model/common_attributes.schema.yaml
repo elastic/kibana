@@ -18,11 +18,11 @@ components:
           properties:
             integrationId:
               description: The ID of the integration
-              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
             dataStreams:
               type: array
               description: The data streams of the integration
-              maxItems: 50
+              maxItems: 10
               items:
                 $ref: "#/components/schemas/DataStream"
             logo:
@@ -47,7 +47,7 @@ components:
           properties:
             dataStreamId:
               description: The ID of the data stream
-              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+              $ref: "../../common/model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
             title:
               description: The title of the data stream
               $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
@@ -170,6 +170,9 @@ components:
               $ref: "../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString"
             version:
               description: The version of the integration
+              type: string
+            connectorId:
+              description: The ID of the connector associated with this integration
               type: string
             createdBy:
               description: The username of the user who created the integration

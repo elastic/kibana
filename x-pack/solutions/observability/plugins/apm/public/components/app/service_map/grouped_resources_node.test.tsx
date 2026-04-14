@@ -127,6 +127,11 @@ describe('GroupedResourcesNode', () => {
     ).toBeInTheDocument();
   });
 
+  it('exposes a stable diamond hit target for e2e', () => {
+    renderGroupedResourcesNode();
+    expect(screen.getByTestId('serviceMapNodeDiamondHit')).toBeInTheDocument();
+  });
+
   it('applies primary color when selected', () => {
     renderGroupedResourcesNode(createGroupedNodeData(), true);
     const label = screen.getByText('5 external resources');

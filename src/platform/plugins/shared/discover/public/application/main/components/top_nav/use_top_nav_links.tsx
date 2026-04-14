@@ -236,13 +236,13 @@ export const useTopNavLinks = ({
     // Only show the ES|QL button in classic mode (not in ES|QL mode)
     // The "Switch to Classic" option is now in the tab menu when in ES|QL mode
     if (services.uiSettings.get(ENABLE_ESQL) && !isEsqlMode) {
-      newAppMenuRegistry.setSecondaryActionItem({
+      newAppMenuRegistry.registerItem({
         id: 'esql',
+        order: 2,
         label: i18n.translate('discover.localMenu.tryESQLTitle', {
           defaultMessage: 'ES|QL',
         }),
         iconType: 'code',
-        color: 'success',
         tooltipContent: i18n.translate('discover.localMenu.esqlTooltipLabel', {
           defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
         }),
@@ -404,12 +404,6 @@ export const useTopNavLinks = ({
       primaryActionItem: config.primaryActionItem
         ? enhanceAppMenuItemWithRunAction({
             appMenuItem: config.primaryActionItem,
-            services,
-          })
-        : undefined,
-      secondaryActionItem: config.secondaryActionItem
-        ? enhanceAppMenuItemWithRunAction({
-            appMenuItem: config.secondaryActionItem,
             services,
           })
         : undefined,

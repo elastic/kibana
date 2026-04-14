@@ -19,13 +19,22 @@ import {
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
+  DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
 } from '../../transforms/charts/metric/defaults';
 import {
   metricOperationDefinitionSchema,
   esqlColumnSchema,
   esqlColumnWithFormatSchema,
 } from '../metric_ops';
-import { staticColorSchema, applyColorToSchema, colorByValueSchema } from '../color';
+import {
+  staticColorSchema,
+  applyColorToSchema,
+  colorByValueSchema,
+  autoColorSchema,
+  AUTO_COLOR,
+  NO_COLOR,
+  noColorSchema,
+} from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
@@ -44,10 +53,16 @@ import {
   placementSchema,
 } from '../alignments';
 import { builderEnums } from '../enums';
+import { objectUnion } from './utils/object_union';
 
 const compareToSchemaShared = schema.object(
   {
-    palette: schema.maybe(schema.string({ meta: { description: 'Palette' } })),
+    palette: schema.maybe(
+      schema.string({
+        meta: { description: 'Palette' },
+        defaultValue: DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
+      })
+    ),
     icon: schema.maybe(schema.boolean({ meta: { description: 'Show icon' }, defaultValue: true })),
     value: schema.maybe(
       schema.boolean({ meta: { description: 'Show value' }, defaultValue: true })
@@ -317,7 +332,11 @@ const metricStatePrimaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueSchema, staticColorSchema])),
+  color: schema.maybe(
+    schema.oneOf([colorByValueSchema, staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   /**
    * Where to apply the color (background or value)
    */
@@ -352,7 +371,11 @@ const metricStateSecondaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(staticColorSchema),
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, noColorSchema], {
+      defaultValue: NO_COLOR,
+    })
+  ),
 };
 
 const metricStateBreakdownByOptionsSchema = {
@@ -444,6 +467,15 @@ export const metricStateSchemaNoESQL = schema.object(
       title: 'Metric Chart (DSL)',
       description: 'Metric chart configuration for standard queries',
     },
+    validate: ({ metrics, breakdown_by }) => {
+      const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
+
+      if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
+        if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
+          return 'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.';
+        }
+      }
+    },
   }
 );
 
@@ -483,20 +515,20 @@ export const esqlMetricState = schema.object(
       title: 'Metric Chart (ES|QL)',
       description: 'Metric chart configuration for ES|QL queries',
     },
+    validate: ({ metrics, breakdown_by }) => {
+      const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
+
+      if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
+        if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
+          return 'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.';
+        }
+      }
+    },
   }
 );
 
-export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
+export const metricStateSchema = objectUnion([metricStateSchemaNoESQL, esqlMetricState], {
   meta: { id: 'metricChart', title: 'Metric Chart' },
-  validate: ({ metrics, breakdown_by }) => {
-    const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
-
-    if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
-      if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
-        return 'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.';
-      }
-    }
-  },
 });
 
 export type MetricState = TypeOf<typeof metricStateSchema>;

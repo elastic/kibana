@@ -12,6 +12,7 @@ import type { AlertData } from './alert_data';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ReferencedPanelManager } from './referenced_panel_manager';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 describe('RelatedDashboardsClient', () => {
   const mockGetDashboard = jest.fn();
@@ -117,7 +118,7 @@ describe('RelatedDashboardsClient', () => {
             title: 'Dashboard 1',
             panels: [
               {
-                type: 'lens',
+                type: LENS_EMBEDDABLE_TYPE,
                 config: {
                   attributes: {
                     references: [
@@ -131,7 +132,7 @@ describe('RelatedDashboardsClient', () => {
                         },
                       },
                     },
-                    type: 'lens',
+                    type: LENS_EMBEDDABLE_TYPE,
                   },
                 },
               },
@@ -142,7 +143,7 @@ describe('RelatedDashboardsClient', () => {
             title: 'Dashboard 2',
             panels: [
               {
-                type: 'lens',
+                type: LENS_EMBEDDABLE_TYPE,
                 config: {
                   attributes: {
                     references: [
@@ -156,7 +157,7 @@ describe('RelatedDashboardsClient', () => {
                         },
                       },
                     },
-                    type: 'lens',
+                    type: LENS_EMBEDDABLE_TYPE,
                   },
                 },
               },
@@ -199,7 +200,7 @@ describe('RelatedDashboardsClient', () => {
           title: `Dashboard ${i + 1}`,
           panels: [
             {
-              type: 'lens',
+              type: LENS_EMBEDDABLE_TYPE,
               config: {
                 attributes: {
                   references: [
@@ -211,7 +212,7 @@ describe('RelatedDashboardsClient', () => {
                       formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
                     },
                   },
-                  type: 'lens',
+                  type: LENS_EMBEDDABLE_TYPE,
                 },
               },
             },
@@ -244,7 +245,7 @@ describe('RelatedDashboardsClient', () => {
             title: 'Dashboard 1',
             panels: [
               {
-                type: 'lens',
+                type: LENS_EMBEDDABLE_TYPE,
                 uid: '123',
                 config: {
                   attributes: {
@@ -254,7 +255,7 @@ describe('RelatedDashboardsClient', () => {
                         formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] }, // matches by field which is handled by getDashboardsByField
                       },
                     },
-                    type: 'lens',
+                    type: LENS_EMBEDDABLE_TYPE,
                   },
                 },
               },
@@ -313,7 +314,7 @@ describe('RelatedDashboardsClient', () => {
 
     it('should fetch referenced panels when fetching dashboards', async () => {
       const PANEL_SO_ID = 'panelSOId';
-      const PANEL_TYPE = 'lens';
+      const PANEL_TYPE = LENS_EMBEDDABLE_TYPE;
       const PANEL_UID = 'panelUid';
       const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
       mockScanDashboards.mockResolvedValue({
@@ -346,7 +347,7 @@ describe('RelatedDashboardsClient', () => {
 
     it('should not refetch a referenced panel if it was fetched before', async () => {
       const PANEL_SO_ID = 'panelSOId';
-      const PANEL_TYPE = 'lens';
+      const PANEL_TYPE = LENS_EMBEDDABLE_TYPE;
       const PANEL_UID = 'panelUid';
       const OTHER_PANEL_UID = 'otherPanelUid';
       const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
@@ -392,10 +393,10 @@ describe('RelatedDashboardsClient', () => {
         title: 'Dashboard 1',
         panels: [
           {
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: {
               attributes: {
-                type: 'lens',
+                type: LENS_EMBEDDABLE_TYPE,
                 references: [
                   { name: 'indexpattern', id: 'index2' },
                   { name: 'irrelevant', id: 'index1' },
@@ -426,7 +427,7 @@ describe('RelatedDashboardsClient', () => {
         title: 'Dashboard 1',
         panels: [
           {
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: {
               attributes: null, // Lens attributes are not available
             },
@@ -450,7 +451,7 @@ describe('RelatedDashboardsClient', () => {
         title: 'Dashboard missing attributes',
         panels: [
           {
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             id: PANEL_UID,
             config: {},
           },
@@ -481,7 +482,7 @@ describe('RelatedDashboardsClient', () => {
         title: 'Dashboard 1',
         panels: [
           {
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             config: {
               attributes: null, // Lens attributes are not available
             },
@@ -503,7 +504,7 @@ describe('RelatedDashboardsClient', () => {
         title: 'Dashboard missing state',
         panels: [
           {
-            type: 'lens',
+            type: LENS_EMBEDDABLE_TYPE,
             id: PANEL_UID,
             config: {},
           },
@@ -762,7 +763,7 @@ describe('RelatedDashboardsClient', () => {
             title: 'Dashboard 1',
             panels: [
               {
-                type: 'lens',
+                type: LENS_EMBEDDABLE_TYPE,
                 uid: '123',
                 config: {
                   attributes: {
@@ -772,7 +773,7 @@ describe('RelatedDashboardsClient', () => {
                         formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] }, // matches by field which is handled by getDashboardsByField
                       },
                     },
-                    type: 'lens',
+                    type: LENS_EMBEDDABLE_TYPE,
                   },
                 },
               },
@@ -783,7 +784,7 @@ describe('RelatedDashboardsClient', () => {
             title: 'Dashboard 2',
             panels: [
               {
-                type: 'lens',
+                type: LENS_EMBEDDABLE_TYPE,
                 uid: '123',
                 config: {
                   attributes: {
@@ -793,7 +794,7 @@ describe('RelatedDashboardsClient', () => {
                         formBased: { layers: [{ columns: [{ sourceField: 'field2' }] }] },
                       },
                     },
-                    type: 'lens',
+                    type: LENS_EMBEDDABLE_TYPE,
                   },
                 },
               },

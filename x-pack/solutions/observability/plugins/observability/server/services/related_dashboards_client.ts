@@ -13,7 +13,7 @@ import type {
   ScanDashboardsResult,
   DashboardReadResponseBody,
 } from '@kbn/dashboard-plugin/server';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -75,7 +75,7 @@ export class RelatedDashboardsClient {
     SuggestedDashboardsValidPanelType,
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
-    lens: (panel: DashboardPanel) => {
+    [LENS_EMBEDDABLE_TYPE]: (panel: DashboardPanel) => {
       let references = this.isLensVizAttributes(panel.type, panel.config)
         ? panel.config.attributes.references
         : undefined;
@@ -94,7 +94,7 @@ export class RelatedDashboardsClient {
     SuggestedDashboardsValidPanelType,
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
-    lens: (panel: DashboardPanel) => {
+    [LENS_EMBEDDABLE_TYPE]: (panel: DashboardPanel) => {
       let state: unknown = this.isLensVizAttributes(panel.type, panel.config)
         ? panel.config.attributes.state
         : undefined;

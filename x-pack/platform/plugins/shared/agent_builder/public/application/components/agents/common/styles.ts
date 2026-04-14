@@ -41,6 +41,7 @@ export const useListDetailPageStyles = () => {
       `,
       detailPanelWrapper: css`
         overflow: hidden;
+        margin-bottom: ${euiTheme.size.m};
       `,
       noSelectionPlaceholder: css`
         height: 100%;

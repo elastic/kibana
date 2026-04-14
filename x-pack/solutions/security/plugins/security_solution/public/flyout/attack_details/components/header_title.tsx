@@ -10,6 +10,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { flyoutHeaderBlockStyles } from '../../../flyout_v2/document/constants/styles';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { Status } from './status';
@@ -25,11 +26,6 @@ import {
 import { useHeaderData } from '../hooks/use_header_data';
 import { useAttackDetailsContext } from '../context';
 import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
-
-// minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
-const blockStyles = {
-  minWidth: 280,
-};
 
 const ATTACK_HEADER_BADGE = i18n.translate(
   'xpack.securitySolution.attackDetailsFlyout.header.badge.attackLabel',
@@ -66,7 +62,7 @@ export const HeaderTitle = memo(() => {
       <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="s" responsive={false} wrap>
-        <EuiFlexItem css={blockStyles}>
+        <EuiFlexItem css={flyoutHeaderBlockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem>
               <Status />

@@ -30,7 +30,6 @@ export class SuggestionBuilder {
     ignoredColumns?: string[];
     addComma?: boolean;
     addSpaceAfterField?: boolean;
-    promoteToTop?: boolean;
     openSuggestions?: boolean;
     values?: boolean;
     canBeMultiValue?: boolean;
@@ -38,7 +37,6 @@ export class SuggestionBuilder {
     const types = options?.types ?? ['any'];
     const addComma = options?.addComma ?? false;
     const addSpaceAfterField = options?.addSpaceAfterField ?? addComma;
-    const promoteToTop = options?.promoteToTop ?? true;
     const ignoredColumns = options?.ignoredColumns ?? [];
     const openSuggestions = options?.openSuggestions ?? (addSpaceAfterField || addComma);
     const values = options?.values;
@@ -51,7 +49,6 @@ export class SuggestionBuilder {
       addSpaceAfterField,
       openSuggestions,
       addComma,
-      promoteToTop,
       values,
       canBeMultiValue,
     });

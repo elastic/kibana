@@ -15,7 +15,6 @@ import {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 
-import type { XScaleSchemaType } from '../../../schema/charts/shared';
 import { DEFAULT_LAYER_ID } from '../../../constants';
 import {
   getDatasourceLayers,
@@ -25,7 +24,7 @@ import {
   stripUndefined,
 } from '../utils';
 import type { HeatmapState } from '../../../schema';
-import { fromColorByValueLensStateToAPI } from '../../coloring';
+import { AUTO_COLOR, fromColorByValueLensStateToAPI } from '../../coloring';
 import { type LensAttributes } from '../../../types';
 import {
   buildDataSourceStateESQL,
@@ -39,6 +38,7 @@ import { getValueApiColumn } from '../../columns/esql_column';
 import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
 import { legendSizeCompat } from '../legend_sizes';
 import { axisLabelOrientationCompat } from '../common';
+import type { XScaleSchemaType } from '../../../schema/charts/shared';
 
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
   return {
@@ -68,7 +68,7 @@ function getGridConfigProps(
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
-      ...(xAxisScale ? { scale: xAxisScale } : {}),
+      scale: xAxisScale ?? 'ordinal',
     },
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },
@@ -111,9 +111,9 @@ function reverseBuildVisualizationState(
   } satisfies Partial<HeatmapState>;
 
   const paletteProps = {
-    ...(visualization.palette && {
-      color: fromColorByValueLensStateToAPI(visualization.palette),
-    }),
+    color: visualization.palette
+      ? fromColorByValueLensStateToAPI(visualization.palette)
+      : AUTO_COLOR,
   } satisfies Partial<HeatmapState['metric']>;
 
   if (isTextBasedLayer(layer)) {

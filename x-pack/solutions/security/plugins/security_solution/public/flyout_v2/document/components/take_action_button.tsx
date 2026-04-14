@@ -6,7 +6,14 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -22,6 +29,9 @@ import { useAlertTagsActions } from '../../../detections/components/alerts_table
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
+import { useRunDocumentWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { useKibana } from '../../../common/lib/kibana';
+import { getExploreUrl } from '../utils/get_explore_url';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -31,6 +41,16 @@ const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeA
 const ADD_NOTE = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeAction.addNoteLabel', {
   defaultMessage: 'Add note',
 });
+
+const EXPLORE_IN_ALERTS = i18n.translate(
+  'xpack.securitySolution.flyoutV2.footer.takeAction.exploreInAlertsLabel',
+  { defaultMessage: 'Explore in Alerts' }
+);
+
+const EXPLORE_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.footer.takeAction.exploreInTimelineLabel',
+  { defaultMessage: 'Explore in Timeline' }
+);
 
 export interface TakeActionButtonProps {
   /**
@@ -72,6 +92,8 @@ export const TakeActionButton = memo(
     onAlertUpdated,
     onShowNotes,
   }: TakeActionButtonProps) => {
+    const { services } = useKibana();
+
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen((open) => !open);
@@ -82,7 +104,7 @@ export const TakeActionButton = memo(
 
     const isInSecurityApp = useIsInSecurityApp();
 
-    const eventId = hit.raw._id as string;
+    const documentId = hit.raw._id as string;
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -102,7 +124,7 @@ export const TakeActionButton = memo(
     const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
       alertStatus,
       closePopover: closePopoverHandler,
-      eventId,
+      eventId: documentId,
       scopeId: '',
       refetch: onAlertUpdated,
     });
@@ -135,7 +157,6 @@ export const TakeActionButton = memo(
           'data-test-subj': 'add-note-action',
           key: 'add-note-action',
           name: ADD_NOTE,
-          size: 's' as const,
           onClick: () => {
             closePopoverHandler();
             onShowNotes();
@@ -150,26 +171,67 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
+    const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
+      useRunDocumentWorkflowPanel({
+        closePopover: closePopoverHandler,
+        documents: [
+          {
+            _id: documentId,
+            _index: hit.raw._index ?? '',
+            ...hit.flattened,
+          },
+        ],
+      });
+
+    const exploreActionItems = useMemo(() => {
+      const timelinesURL = services.application.getUrlForApp('securitySolutionUI', {
+        path: 'alerts',
+      });
+      const exploreUrl = getExploreUrl(hit, timelinesURL);
+      const label = isAlert ? EXPLORE_IN_ALERTS : EXPLORE_IN_TIMELINE;
+      return [
+        {
+          'data-test-subj': 'explore-in-alerts-or-timeline',
+          key: 'explore-action',
+          name: (
+            <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexStart">
+              <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="external" size="m" aria-hidden={true} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          onClick: () => {
+            closePopoverHandler();
+            window.open(exploreUrl, '_blank', 'noopener,noreferrer');
+          },
+        },
+      ];
+    }, [closePopoverHandler, hit, isAlert, services.application]);
+
     const items = useMemo(
       () => [
         ...addToCaseActionItems,
         ...(isAlert ? statusActionItems : []),
-        ...(isAlert ? alertAssigneesItems : []),
         ...(isAlert ? alertTagsItems : []),
-        ...(isAlert ? runWorkflowMenuItem : []),
+        ...(isAlert ? alertAssigneesItems : []),
+        ...(isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem),
         ...(isAlert ? [] : noteItems),
         ...(isInSecurityApp ? investigateInTimelineActionItems : []),
+        ...(!isInSecurityApp ? exploreActionItems : []),
       ],
       [
         addToCaseActionItems,
+        alertAssigneesItems,
         alertTagsItems,
+        documentWorkflowMenuItem,
+        exploreActionItems,
         investigateInTimelineActionItems,
         isAlert,
         isInSecurityApp,
         noteItems,
         runWorkflowMenuItem,
         statusActionItems,
-        alertAssigneesItems,
       ]
     );
 
@@ -179,15 +241,16 @@ export const TakeActionButton = memo(
         ...(isAlert ? statusActionPanels : []),
         ...(isAlert ? alertAssigneesPanels : []),
         ...(isAlert ? alertTagsPanels : []),
-        ...(isAlert ? runAlertWorkflowPanel : []),
+        ...(isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel),
       ],
       [
         alertAssigneesPanels,
         alertTagsPanels,
         isAlert,
         items,
-        statusActionPanels,
         runAlertWorkflowPanel,
+        runDocumentWorkflowPanel,
+        statusActionPanels,
       ]
     );
 
