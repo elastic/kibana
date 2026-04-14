@@ -76,6 +76,16 @@ const createMockEsClient = () => {
         template: { mappings: {} },
       }),
       putMapping: jest.fn().mockResolvedValue({}),
+      getSettings: jest.fn().mockResolvedValue({
+        'test_index-000001': {
+          settings: {
+            index: {
+              auto_expand_replicas: '0-1',
+            },
+          },
+        },
+      }),
+      putSettings: jest.fn().mockResolvedValue({}),
     },
   } as unknown as jest.Mocked<ElasticsearchClient>;
   return client;
@@ -160,6 +170,69 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
       expect.objectContaining({ terminate_after: 1 }),
       transportOptions
     );
+  });
+
+  it('includes settings in the index template', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({
+            auto_expand_replicas: '0-1',
+            number_of_shards: 1,
+          }),
+        }),
+      })
+    );
+  });
+
+  it('updates settings on an existing write index when auto_expand_replicas differs', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    (esClient.indices.getSettings as jest.Mock).mockResolvedValue({
+      'test_index-000001': {
+        settings: {
+          index: {
+            auto_expand_replicas: '1-1',
+          },
+        },
+      },
+    });
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'test_index-000001',
+        settings: {
+          auto_expand_replicas: '0-1',
+        },
+      })
+    );
+  });
+
+  it('does not update settings when auto_expand_replicas is already 0-1', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    (esClient.indices.getSettings as jest.Mock).mockResolvedValue({
+      'test_index-000001': {
+        settings: {
+          index: {
+            auto_expand_replicas: '0-1',
+          },
+        },
+      },
+    });
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putSettings).not.toHaveBeenCalled();
   });
 
   it('works without transport options (backward compatible)', async () => {

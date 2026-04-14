@@ -315,6 +315,57 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
+  describe('when writing/bootstrapping with an existing index missing auto_expand_replicas', () => {
+    const LEGACY_INDEX_NAME = 'test_legacy_settings_index';
+
+    afterAll(async () => {
+      await esClient.indices.delete({ index: `${LEGACY_INDEX_NAME}*` }).catch(() => {});
+      await esClient.indices.deleteIndexTemplate({ name: LEGACY_INDEX_NAME }).catch(() => {});
+    });
+
+    it('updates auto_expand_replicas on the existing index', async () => {
+      const legacySettings = {
+        name: LEGACY_INDEX_NAME,
+        schema: {
+          properties: {
+            foo: {
+              type: 'keyword',
+            },
+          },
+        },
+      } satisfies StorageSettings;
+
+      const legacyAdapter = createStorageIndexAdapter(legacySettings);
+      const legacyClient = legacyAdapter.getClient();
+
+      await legacyClient.index({ id: 'doc1', document: { foo: 'bar' } });
+
+      const writeIndexName = `${LEGACY_INDEX_NAME}-000001`;
+
+      const beforeUpdate = await esClient.indices.get({ index: LEGACY_INDEX_NAME });
+      expect(beforeUpdate[writeIndexName].settings?.index?.auto_expand_replicas).toEqual('0-1');
+
+      await esClient.indices.putSettings({
+        index: writeIndexName,
+        settings: {
+          auto_expand_replicas: '1-1',
+        },
+      });
+
+      const afterManualChange = await esClient.indices.get({ index: LEGACY_INDEX_NAME });
+      expect(afterManualChange[writeIndexName].settings?.index?.auto_expand_replicas).toEqual(
+        '1-1'
+      );
+
+      await legacyClient.index({ id: 'doc2', document: { foo: 'baz' } });
+
+      const afterSecondWrite = await esClient.indices.get({ index: LEGACY_INDEX_NAME });
+      expect(afterSecondWrite[writeIndexName].settings?.index?.auto_expand_replicas).toEqual('0-1');
+
+      await legacyClient.clean();
+    });
+  });
+
   describe('when writing/bootstrapping with an legacy index', () => {
     beforeAll(async () => {
       await client.index({ id: 'foo', document: { foo: 'bar' } });
@@ -576,6 +627,10 @@ describe('StorageIndexAdapter', () => {
         is_write_index: true,
       },
     });
+
+    expect(getIndexResponse[writeIndexName].settings?.index?.auto_expand_replicas).toEqual('0-1');
+
+    expect(getIndexResponse[writeIndexName].settings?.index?.number_of_shards).toEqual('1');
   }
 
   async function verifyClean() {

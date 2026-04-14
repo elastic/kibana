@@ -122,7 +122,7 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
  */
 export class StorageIndexAdapter<
   TStorageSettings extends IndexStorageSettings,
-  TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>
+  TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>,
 > {
   private readonly logger: Logger;
   constructor(
@@ -146,6 +146,10 @@ export class StorageIndexAdapter<
     const version = getSchemaVersion(this.storage);
 
     const template: IndicesPutIndexTemplateIndexTemplateMapping = {
+      settings: {
+        auto_expand_replicas: '0-1',
+        number_of_shards: 1,
+      },
       mappings: {
         _meta: {
           version,
@@ -254,6 +258,30 @@ export class StorageIndexAdapter<
     ).catch(catchConflictError);
   }
 
+  private async updateSettingsOfExistingIndex({ name }: { name: string }) {
+    const currentIndexSettings = await wrapEsCall(
+      this.esClient.indices.getSettings({
+        index: name,
+        flat_settings: true,
+      })
+    );
+
+    const indexSettings = currentIndexSettings[name]?.settings?.index;
+    const currentAutoExpandReplicas = indexSettings?.auto_expand_replicas;
+
+    if (currentAutoExpandReplicas !== '0-1') {
+      this.logger.debug(`Updating settings of existing index to set auto_expand_replicas=0-1`);
+      await wrapEsCall(
+        this.esClient.indices.putSettings({
+          index: name,
+          settings: {
+            auto_expand_replicas: '0-1',
+          },
+        })
+      );
+    }
+  }
+
   private async updateMappingsOfExistingIndex({ name }: { name: string }) {
     const simulateIndexTemplateResponse = await this.esClient.indices.simulateIndexTemplate({
       name: getIndexName(this.storage.name, 999999),
@@ -282,11 +310,17 @@ export class StorageIndexAdapter<
     if (!writeIndex) {
       this.logger.debug(`Creating index`);
       await this.createIndex();
-    } else if (writeIndex?.state.mappings?._meta?.version !== expectedSchemaVersion) {
-      this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
-      await this.updateMappingsOfExistingIndex({
+    } else {
+      await this.updateSettingsOfExistingIndex({
         name: writeIndex.name,
       });
+
+      if (writeIndex.state.mappings?._meta?.version !== expectedSchemaVersion) {
+        this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
+        await this.updateMappingsOfExistingIndex({
+          name: writeIndex.name,
+        });
+      }
     }
 
     return await cb();
