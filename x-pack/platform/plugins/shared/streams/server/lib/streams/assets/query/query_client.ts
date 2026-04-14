@@ -73,6 +73,7 @@ const LEGACY_RUNTIME_MAPPINGS = {
 export interface QueryLinkFilters {
   ruleUnbacked?: RuleUnbackedFilter;
   queryIds?: string[];
+  minSeverityScore?: number;
 }
 
 interface TermQueryOpts {
@@ -124,6 +125,11 @@ function termsQuery<T extends string>(
   const filteredValues = values.filter((value) => value !== undefined) as TermQueryFieldValue[];
 
   return [{ terms: { [field]: filteredValues } }];
+}
+
+function rangeGteQuery(field: string, value?: number): QueryDslQueryContainer[] {
+  if (value === undefined) return [];
+  return [{ range: { [field]: { gte: value } } }];
 }
 
 function escapeWildcard(input: string): string {
@@ -439,6 +445,7 @@ export class QueryClient {
       ...termQuery(ASSET_TYPE, 'query'),
       ...termsQuery(ASSET_ID, filters?.queryIds),
       ...ruleUnbackedFilter(filters?.ruleUnbacked),
+      ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
     ];
 
     const queriesResponse = await this.dependencies.storageClient.search({
@@ -470,8 +477,12 @@ export class QueryClient {
    * introduced alongside the type field, so any doc without it is a match query.
    * syncQueries backfills the type for all docs it touches.
    */
-  async getUnbackedQueriesCount(): Promise<number> {
-    const filter = [...termQuery(ASSET_TYPE, 'query'), ...termQuery(RULE_BACKED, false)];
+  async getUnbackedQueriesCount(filters?: { minSeverityScore?: number }): Promise<number> {
+    const filter = [
+      ...termQuery(ASSET_TYPE, 'query'),
+      ...termQuery(RULE_BACKED, false),
+      ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
+    ];
 
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 0,
@@ -491,8 +502,11 @@ export class QueryClient {
   /**
    * Returns all query links across streams that do not have a backing Kibana rule.
    */
-  async getAllUnbackedQueries(): Promise<QueryLink[]> {
-    return this.getQueryLinks([], { ruleUnbacked: 'only' });
+  async getAllUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<QueryLink[]> {
+    return this.getQueryLinks([], {
+      ruleUnbacked: 'only',
+      minSeverityScore: filters?.minSeverityScore,
+    });
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
