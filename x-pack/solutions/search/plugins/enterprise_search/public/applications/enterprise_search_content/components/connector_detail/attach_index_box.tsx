@@ -370,7 +370,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               <EuiButton
                 data-telemetry-id="entSearchContent-connector-connectorDetail-createAttachIndexButton"
                 data-test-subj="entSearchContent-connector-connectorDetail-createAttachIndexButton"
-                iconType="sparkles"
+                iconType="listCheck"
                 color="primary"
                 fill
                 onClick={() => {
