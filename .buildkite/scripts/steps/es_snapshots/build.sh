@@ -124,6 +124,23 @@ cat << EOF | buildkite-agent annotate --style "info"
   - \`ES_SNAPSHOT_ID\` - \`$(buildkite-agent meta-data get ES_SNAPSHOT_ID)\`
 EOF
 
+if [ "$BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG" = "kibana-version-bump" ]; then
+  echo "--- Uploading snapshot metadata for use in version bump pipeline"
+  ES_SNAPSHOT_VERSION=$(buildkite-agent meta-data get ES_SNAPSHOT_VERSION)
+  ES_SNAPSHOT_ID=$(buildkite-agent meta-data get ES_SNAPSHOT_ID)
+  JSON_FILE="snapshot_info-${BUILDKITE_TRIGGERED_FROM_BUILD_ID}.json"
+
+  cat > "snapshot_info-${BUILDKITE_TRIGGERED_FROM_BUILD_ID}.env" << EOF
+  ES_SNAPSHOT_MANIFEST=$ES_SNAPSHOT_MANIFEST
+  ES_SNAPSHOT_VERSION=$(buildkite-agent meta-data get ES_SNAPSHOT_VERSION)
+  ES_SNAPSHOT_ID=$(buildkite-agent meta-data get ES_SNAPSHOT_ID)
+  ELASTICSEARCH_BRANCH=$ELASTICSEARCH_BRANCH
+  ELASTICSEARCH_GIT_COMMIT=$ELASTICSEARCH_GIT_COMMIT
+  EOF
+
+  buildkite-agent artifact upload "$JSON_FILE"
+fi
+
 cat << EOF | buildkite-agent pipeline upload
 steps:
   - trigger: 'kibana-elasticsearch-snapshot-verify'

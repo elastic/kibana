@@ -1,25 +1,23 @@
 steps:
-  # Step 1: Run the ES Snapshot Build
-  # TODO: the snapshot manifest is stored as metadata so it should be accessible to the promote step without needing to pass it through buildkite. Confirm that
-  - command: .buildkite/scripts/steps/es_snapshots/build.sh
-    key: build-es-snapshot
+  - key: build-es-snapshot
     label: Build ES Snapshot
-    timeout_in_minutes: 30
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      localSsds: 1
-      localSsdInterface: nvme
-      machineType: c2-standard-8
-      diskSizeGb: 130
+    trigger: kibana-elasticsearch-snapshot-build
+    async: false
+    build:
+      branch: $BRANCH
 
-  # Step 2: Run the ES Promote
-  - label: Promote Snapshot
-    command: .buildkite/scripts/steps/es_snapshots/promote.sh
-    depends_on: build-es-snapshot
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
+  - name: 'Upload promote step'
+    command: |
+      buildkite-agent artifact download "snapshot_info-$${BUILDKITE_BUILD_ID}.env" .
+      source "snapshot_info-${BUILDKITE_BUILD_ID}.env"
+
+      buildkite-agent pipeline upload << PIPELINE
+      steps:
+        - name: 'Promote ES Snapshot'
+          trigger: kibana-elasticsearch-snapshot-promote
+          async: false
+          build:
+            branch: '$${BRANCH}'
+            env:
+              ES_SNAPSHOT_MANIFEST: '$${ES_SNAPSHOT_MANIFEST}'
+      PIPELINE
