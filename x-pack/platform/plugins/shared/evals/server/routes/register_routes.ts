@@ -22,12 +22,14 @@ import { registerAddExamplesRoute } from './datasets/add_examples';
 import { registerUpdateExampleRoute } from './datasets/update_example';
 import { registerDeleteExampleRoute } from './datasets/delete_example';
 import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
+import { registerSuiteRoutes, type SuiteRouteDependencies } from './suites';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
 
 export interface RouteDependencies {
   router: EvalsRouter;
   logger: Logger;
+  suiteRouteDeps?: Omit<SuiteRouteDependencies, 'router' | 'logger'>;
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
@@ -48,4 +50,12 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpdateExampleRoute(dependencies);
   registerDeleteExampleRoute(dependencies);
   registerUpsertDatasetRoute(dependencies);
+
+  if (dependencies.suiteRouteDeps) {
+    registerSuiteRoutes({
+      router: dependencies.router,
+      logger: dependencies.logger,
+      ...dependencies.suiteRouteDeps,
+    });
+  }
 };

@@ -15,6 +15,7 @@ import { RunsListPage } from './pages/runs_list';
 import { RunDetailPage } from './pages/run_detail';
 import { DatasetsListPage } from './pages/datasets_list';
 import { DatasetDetailPage } from './pages/dataset_detail';
+import { SuitesListPage } from './pages/suites_list';
 import { TracingProjectsListPage } from './pages/tracing_projects_list';
 import { TracingProjectDetailPage } from './pages/tracing_project_detail';
 
@@ -30,12 +31,17 @@ const datasetsTabLabel = i18n.translate('xpack.evals.navigation.datasets', {
   defaultMessage: 'Datasets',
 });
 
+const suitesTabLabel = i18n.translate('xpack.evals.navigation.suites', {
+  defaultMessage: 'Suites',
+});
+
 const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
   defaultMessage: 'Tracing',
 });
 
 const ROOT_PATH = '/' as const;
 const DATASETS_PATH = '/datasets' as const;
+const SUITES_PATH = '/suites' as const;
 const TRACING_PATH = '/tracing' as const;
 
 const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
@@ -44,6 +50,10 @@ const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDeta
 
 const datasetDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.datasetDetail', {
   defaultMessage: 'Dataset details',
+});
+
+const suitesBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.suites', {
+  defaultMessage: 'Suites',
 });
 
 const EvalsHeader: React.FC = () => {
@@ -101,6 +111,10 @@ const getBreadcrumbs = ({
     return [{ text: runsTabLabel, href: runsHref }, { text: runDetailBreadcrumbLabel }];
   }
 
+  if (pathname === SUITES_PATH) {
+    return [{ text: suitesBreadcrumbLabel }];
+  }
+
   return [{ text: runsTabLabel }];
 };
 
@@ -109,7 +123,8 @@ const EvalsNavigation: React.FC = () => {
   const { pathname } = useLocation();
   const isTracingSelected = pathname.startsWith(TRACING_PATH);
   const isDatasetsSelected = pathname.startsWith(DATASETS_PATH);
-  const isRunsSelected = !isTracingSelected && !isDatasetsSelected;
+  const isSuitesSelected = pathname === SUITES_PATH;
+  const isRunsSelected = !isTracingSelected && !isDatasetsSelected && !isSuitesSelected;
 
   return (
     <div style={{ flex: '0 0 auto' }}>
@@ -119,6 +134,9 @@ const EvalsNavigation: React.FC = () => {
         </EuiTab>
         <EuiTab isSelected={isDatasetsSelected} onClick={() => history.push(DATASETS_PATH)}>
           {datasetsTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isSuitesSelected} onClick={() => history.push(SUITES_PATH)}>
+          {suitesTabLabel}
         </EuiTab>
         <EuiTab isSelected={isTracingSelected} onClick={() => history.push(TRACING_PATH)}>
           {tracingTabLabel}
@@ -164,6 +182,7 @@ export const EvalsApp: React.FC<{
             <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
             <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
             <Route path="/runs/:runId" component={RunDetailPage} />
+            <Route exact path={SUITES_PATH} component={SuitesListPage} />
             <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
             <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
           </Routes>

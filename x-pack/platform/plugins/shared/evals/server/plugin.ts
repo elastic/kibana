@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -19,6 +20,7 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
+import { SuiteRunner } from './lib/suite_runner';
 
 export class EvalsPlugin
   implements
@@ -26,11 +28,14 @@ export class EvalsPlugin
 {
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
+  private readonly repoRoot: string;
   private datasetService?: DatasetService;
+  private suiteRunner?: SuiteRunner;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.repoRoot = process.cwd();
   }
 
   setup(
@@ -90,7 +95,47 @@ export class EvalsPlugin
     });
 
     const router = coreSetup.http.createRouter<EvalsRequestHandlerContext>();
-    registerRoutes({ router, logger: this.logger });
+
+    try {
+      this.suiteRunner = new SuiteRunner(this.repoRoot, this.logger);
+
+      // Sync .scout/servers/local.json with the live Kibana/ES URLs so Scout-based
+      // eval suites connect to THIS Kibana (not the default port 5683 that Scout
+      // uses when no local config exists). Fire-and-forget: the ES legacy config$
+      // observable resolves after setup() returns, but the write is cheap and the
+      // suite runs start via an HTTP route so they'll see the updated file.
+      void firstValueFrom(coreSetup.elasticsearch.legacy.config$)
+        .then((esConfig) => {
+          const httpInfo = coreSetup.http.getServerInfo();
+          if (httpInfo.protocol !== 'http' && httpInfo.protocol !== 'https') {
+            return; // socket or unknown protocol — nothing meaningful to write
+          }
+          const kibanaUrl = `${httpInfo.protocol}://${httpInfo.hostname}:${httpInfo.port}`;
+          const elasticsearchUrl = esConfig.hosts[0];
+          if (!elasticsearchUrl) return;
+          this.suiteRunner?.syncScoutConfig({ kibanaUrl, elasticsearchUrl });
+        })
+        .catch((err) => {
+          this.logger.warn(
+            `[Evals] Failed to resolve server info for SuiteRunner: ${
+              err instanceof Error ? err.message : err
+            }`
+          );
+        });
+    } catch (err) {
+      this.logger.warn(
+        `[Evals] Failed to initialize SuiteRunner: ${err instanceof Error ? err.message : err}`
+      );
+    }
+
+    registerRoutes({
+      router,
+      logger: this.logger,
+      suiteRouteDeps: {
+        suiteRunner: this.suiteRunner,
+        repoRoot: this.repoRoot,
+      },
+    });
 
     return {};
   }
