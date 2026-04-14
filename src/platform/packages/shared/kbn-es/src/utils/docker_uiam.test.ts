@@ -100,8 +100,6 @@ describe(`#runUiamContainer()`, () => {
             "LOG_LEVEL=error",
             "--health-cmd",
             "curl -sk http://127.0.0.1:8080/ready | grep -q \\"\\\\\\"overall\\\\\\": true\\"",
-            "--env",
-            "UIAM_SERVICE_BOUNDARY=external",
             "--name",
             "uiam-cosmosdb",
             "docker.elastic.co/kibana-ci/uiam-azure-cosmos-emulator:latest-verified",
