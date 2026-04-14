@@ -33,7 +33,10 @@ export interface Query {
 }
 
 export interface KIQueryGenerationEvaluationExample {
-  input: { sample_logs: string[] } & Record<string, unknown>;
+  input: { sample_logs: string[]; sample_docs?: Array<Record<string, unknown>> } & Record<
+    string,
+    unknown
+  >;
   output: {
     expected_categories?: string[];
     expect_stats?: boolean;

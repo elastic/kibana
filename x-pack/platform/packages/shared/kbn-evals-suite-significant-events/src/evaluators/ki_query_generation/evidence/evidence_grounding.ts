@@ -7,22 +7,45 @@
 
 import type { KIQueryGenerationEvaluator } from '../types';
 import { getQueriesFromOutput } from '../types';
+import { isEvidenceGrounded } from '../../ki_feature_extraction/evidence/is_evidence_grounded';
 import { matchesEvidenceText } from '../../common/matches_evidence_text';
 
 /**
+ * Strips LLM-added annotations and wrapping quotes from evidence strings.
+ *
+ * LLMs often append contextual annotations to evidence, e.g.:
+ *   `attributes.msg: "Charge request received." (4% of sampled logs)`
+ *   `body.text: "payment went through..." — normal path; absence signals failure`
+ *
+ * They also wrap values in quotes (`key: "value"`), which prevents
+ * `isEvidenceGrounded`'s key-value matching from succeeding because the parsed
+ * value retains the surrounding quotes.
+ */
+function stripEvidenceAnnotations(evidence: string): string {
+  let cleaned = evidence
+    .replace(/\s*\([^)]*\)\s*$/, '')
+    .replace(/\s*[—–]\s+.*$/, '')
+    .trimEnd();
+
+  cleaned = cleaned.replace(/^([^:=]+[=:]\s*)"(.*)"$/, '$1$2');
+
+  return cleaned;
+}
+
+/**
  * Checks that every evidence string in every generated query is grounded
- * in the input sample logs. Only scores queries that provide evidence.
+ * in the input sample documents. Uses full `_source` documents when available
+ * for structured field-path matching (via `isEvidenceGrounded`), falling back
+ * to text substring matching against `sample_logs`.
+ *
  * Returns `null` if no evidence strings are present across all queries.
- * Returns `0` if no evidence strings are grounded in the sample logs.
- * Returns `1` if all evidence strings are grounded in the sample logs.
- * Returns a score between `0` and `1` based on the proportion of evidence strings that are grounded in the sample logs.
  */
 export const evidenceGroundingEvaluator: KIQueryGenerationEvaluator = {
   name: 'evidence_grounding',
   kind: 'CODE' as const,
   evaluate: async ({ input, output }) => {
     const queries = getQueriesFromOutput(output);
-    const { sample_logs: sampleLogs } = input;
+    const { sample_logs: sampleLogs, sample_docs: sampleDocs } = input;
 
     let totalEvidence = 0;
     let groundedEvidence = 0;
@@ -32,12 +55,18 @@ export const evidenceGroundingEvaluator: KIQueryGenerationEvaluator = {
       const evidence = query.evidence ?? [];
       if (evidence.length === 0) continue;
 
-      for (const ev of evidence) {
+      for (const rawEv of evidence) {
         totalEvidence++;
-        if (sampleLogs.some((logLine) => matchesEvidenceText(logLine, ev))) {
+        const ev = stripEvidenceAnnotations(rawEv);
+
+        const grounded = sampleDocs?.length
+          ? isEvidenceGrounded(ev, sampleDocs)
+          : sampleLogs.some((logLine) => matchesEvidenceText(logLine, ev));
+
+        if (grounded) {
           groundedEvidence++;
         } else {
-          ungroundedItems.push(`"${query.title}": "${ev}"`);
+          ungroundedItems.push(`"${query.title}": "${rawEv}"`);
         }
       }
     }
@@ -52,8 +81,8 @@ export const evidenceGroundingEvaluator: KIQueryGenerationEvaluator = {
       score,
       explanation:
         ungroundedItems.length > 0
-          ? `Evidence not found in sample logs: ${ungroundedItems.slice(0, 5).join(', ')}`
-          : `All ${totalEvidence} evidence strings are grounded in sample logs`,
+          ? `Evidence not found in sample docs: ${ungroundedItems.slice(0, 5).join(', ')}`
+          : `All ${totalEvidence} evidence strings are grounded in sample docs`,
       details: {
         totalEvidence,
         groundedEvidence,

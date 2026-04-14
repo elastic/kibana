@@ -63,6 +63,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
     for (const kiSource of KI_FEATURE_SOURCES_TO_RUN) {
       evaluate.describe(`${dataset.id} / ${scenario.input.scenario_id} (${kiSource})`, () => {
         let sampleLogs: string[] = [];
+        let sampleDocs: Array<Record<string, unknown>> = [];
         let kis: Feature[] = [];
 
         evaluate.beforeAll(async ({ esClient, apiServices, log }) => {
@@ -150,12 +151,14 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             log,
           });
 
-          sampleLogs = sampleHits.map((hit) => extractLogTextFromSourceDoc(hit._source));
+          sampleDocs = sampleHits
+            .map((hit) => hit._source)
+            .filter((doc): doc is Record<string, unknown> => doc != null);
+
+          sampleLogs = sampleDocs.map((doc) => extractLogTextFromSourceDoc(doc));
 
           if (shouldUseCanonicalKIs) {
-            const sourceDocs = sampleHits
-              .map((hit) => hit._source)
-              .filter((doc): doc is Record<string, unknown> => doc != null);
+            const sourceDocs = sampleDocs;
 
             const computedKIs = getComputedKIFeaturesFromDocs({
               streamName: scenario.input.stream_name,
@@ -200,6 +203,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                         ...scenario.input,
                         features: kis,
                         sample_logs: sampleLogs,
+                        sample_docs: sampleDocs,
                       },
                       output: {
                         ...scenario.output,
