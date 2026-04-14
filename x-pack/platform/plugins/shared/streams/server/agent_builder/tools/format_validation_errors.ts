@@ -32,13 +32,11 @@ import {
   jsonExtractProcessorSchema,
   enrichProcessorSchema,
   manualIngestPipelineProcessorSchema,
+  setProcessorSchema,
   type StreamlangDSL,
   type Condition,
 } from '@kbn/streamlang';
 
-// setProcessorSchema is not exported from @kbn/streamlang — for `set`
-// actions that fail validation, we fall back to the full union error
-// (still better than no validation at all).
 const processorSchemasByAction: Record<string, z.ZodType<unknown>> = {
   grok: grokProcessorSchema,
   dissect: dissectProcessorSchema,
@@ -46,6 +44,7 @@ const processorSchemasByAction: Record<string, z.ZodType<unknown>> = {
   drop_document: dropDocumentProcessorSchema,
   math: mathProcessorSchema,
   rename: renameProcessorSchema,
+  set: setProcessorSchema,
   append: appendProcessorSchema,
   convert: convertProcessorSchema,
   remove_by_prefix: removeByPrefixProcessorSchema,

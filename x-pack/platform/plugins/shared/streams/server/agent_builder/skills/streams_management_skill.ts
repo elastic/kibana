@@ -99,6 +99,12 @@ export const streamsManagementSkill = defineSkillType({
     Hierarchical processing (wired streams): processing is inherited top-down. An ancestor's steps run first, then routing conditions are evaluated, then the child's own processing runs. A broken processor on an ancestor affects all descendants. ${GET_STREAM} only returns a stream's OWN steps, not ancestor steps — check ancestors when diagnosing failures that don't match the child's own pipeline.
 
     Data quality, failure stores, and schema are per-stream — not inherited. A healthy parent does not imply healthy children.
+
+    Unmapped fields are NOT errors. In Elasticsearch, "unmapped" means a field exists in document _source but has no explicit mapping in the stream's schema. Common reasons fields appear unmapped:
+    - Dynamic mapping: ES auto-detects the type at index time. The field is fully searchable and aggregatable — mapping it explicitly via the Streams API is optional.
+    - Keyword fields with ignore_above: long text stored in _source is intentionally not indexed.
+    - Classic streams: field_overrides only cover fields the user explicitly overrides; all other fields use the underlying data stream's mappings (which may be dynamic).
+    Degraded documents occur when _source contains fields not in the mapping, but this often reflects normal dynamic mapping behavior, not a broken configuration. Only suggest mapping fields when the user asks to fix a specific issue (e.g. a field not appearing in ES|QL queries or aggregations). Do not proactively treat unmapped fields as problems to fix.
     </streams_domain>
 
     <tool_selection>
@@ -143,7 +149,8 @@ export const streamsManagementSkill = defineSkillType({
 
     Unmapped fields / degraded documents:
     1. Call ${GET_SCHEMA} to identify unmapped fields.
-    2. Call ${MAP_FIELDS} with appropriate types.
+    2. Explain that unmapped fields are often normal (dynamic mapping) and only need explicit mapping if the user wants to change the field type or use it in ES|QL.
+    3. If the user wants to map them, call ${MAP_FIELDS} with appropriate types.
 
     These are distinct issues. Failed documents → processing errors → fix with ${UPDATE_PROCESSORS}. Degraded documents → unmapped fields → fix with ${MAP_FIELDS}. Do not conflate them.
     </remediation_workflows>

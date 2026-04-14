@@ -8,8 +8,12 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
- * Async serial queue that serializes write operations to avoid lock contention
- * on the global streams lock ('streams/apply_changes').
+ * Process-global async serial queue that serializes write operations to avoid
+ * lock contention on the global streams lock ('streams/apply_changes').
+ *
+ * A single instance is created in `registerAgentBuilderTools` and shared across
+ * all concurrent agent runs on this Kibana node. In multi-instance deployments,
+ * cross-node serialization is handled by the Streams API's own distributed lock.
  *
  * Multiple tool handlers may be dispatched concurrently by LangGraph's ToolNode
  * (via Promise.all). Confirmations happen in parallel before any write, but the
