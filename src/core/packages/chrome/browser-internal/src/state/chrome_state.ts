@@ -18,6 +18,7 @@ import type {
   ChromeBreadcrumbsBadge,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  GlobalSearchConfig,
   ChromeNavLink,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
@@ -62,6 +63,7 @@ export interface ChromeState {
   /** UI elements */
   headerBanner: State<ChromeUserBanner | undefined>;
   globalFooter: State<ReactNode>;
+  globalSearch: State<GlobalSearchConfig | undefined>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
 
@@ -107,6 +109,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
+  const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
 
   // Help System
@@ -130,6 +133,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     },
     headerBanner,
     globalFooter,
+    globalSearch,
     customNavLink,
     appMenu,
     help: {

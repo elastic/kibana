@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ChromeNext } from './chrome_next';
-export type { GlobalSearchConfig } from './global_search';
+/**
+ * Configuration for the global search button in the global header.
+ * @public
+ */
+export interface GlobalSearchConfig {
+  /** Called when the search button in the global header is clicked. */
+  onClick: () => void;
+  /** The keyboard shortcut key (combined with Cmd/Ctrl) to trigger global search. */
+  shortcutKey?: string;
+}
