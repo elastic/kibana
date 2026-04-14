@@ -129,7 +129,9 @@ export const command = {
               quiet,
               noCache: forceInstall,
             });
-            log.success('relevant versions extracted for packages and shared webpack bundles built');
+            log.success(
+              'relevant versions extracted for packages and shared webpack bundles built'
+            );
           }),
       shouldInstall
         ? time('run install scripts', async () => {
