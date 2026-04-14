@@ -21,6 +21,15 @@ import { CHARTS_POINT_TARGET } from '../timeseriesexplorer_constants';
 import type { TimeSeriesExplorerZoomState } from './resolve_context_finish_focus_range';
 import { resolveContextFinishFocusRange } from './resolve_context_finish_focus_range';
 
+/*
+ * Loads context (wide bounds) data for Single Metric Viewer: metric series, swimlane scores,
+ * chart metadata, optional forecast. Returns a statePatch for React hosts and an optional
+ * zoomSelection so the host can drive the focus chart / URL brush via resolveContextFinishFocusRange.
+ *
+ * Fail-fast: any parallel request rejection cancels the whole load (no partial UI). Rejection
+ * indices must stay aligned with `errorLabels` in executeLoadSingleMetricContextData.
+ */
+
 /**
  * Forecast aggregation override for context / focus loads when model plot is off
  * and the detector uses sum or count (matches SMV + embeddable behavior).
@@ -60,6 +69,7 @@ async function safeRunTask<T>(task: () => Promise<T | null>): Promise<T | null> 
   try {
     return await task();
   } catch (e) {
+    // Fetch layers that honor fetch() abort may reject with AbortError; treat as cancelled load.
     if (e instanceof DOMException && e.name === 'AbortError') {
       return null;
     }
@@ -210,6 +220,7 @@ async function executeLoadSingleMetricContextData(
     criteriaFields,
   } = params;
 
+  // Host should not call the loader until metric function is chosen; silent no-op matches legacy SMV.
   if (isMetricDetector(selectedJob, detectorIndex) && functionDescription === undefined) {
     return null;
   }
@@ -221,6 +232,7 @@ async function executeLoadSingleMetricContextData(
     isSourceDataChartableForDetector(selectedJob, detectorIndex) === false &&
     nonBlankEntities.length > 0
   ) {
+    // Partitioning on a low-cardinality metric without model plot / chartable source cannot be plotted reliably.
     return {
       statePatch: {
         hasResults: false,
@@ -231,6 +243,7 @@ async function executeLoadSingleMetricContextData(
     };
   }
 
+  // Bucket width for the full bounds window (context chart), then align query edges to whole buckets.
   const contextAggregationInterval = deps.mlTimeSeriesExplorer.calculateAggregationInterval(
     bounds,
     CHARTS_POINT_TARGET,
@@ -246,6 +259,7 @@ async function executeLoadSingleMetricContextData(
   const earliestMs = searchBounds.min.valueOf();
   const latestMs = searchBounds.max.valueOf();
 
+  // Four parallel requests — order MUST match `errorLabels` after `allSettled` (rejection index → toast).
   const metricPromise = lastValueFrom(
     deps.mlTimeSeriesSearchService.getMetricData(
       selectedJob,
@@ -287,6 +301,7 @@ async function executeLoadSingleMetricContextData(
             earliestMs,
             latestMs,
             intervalMs,
+            // If `detectorIndex` is out of range, `detectors[detectorIndex]` is undefined and this throws.
             getForecastAggTypeForContextLoad(modelPlotEnabled, {
               function: selectedJob.analysis_config.detectors[detectorIndex].function ?? '',
             })
@@ -309,6 +324,7 @@ async function executeLoadSingleMetricContextData(
   const errorMessageByLabel: Record<(typeof errorLabels)[number], string> = {
     metric: errorMessages.metric,
     swimlane: errorMessages.swimlane,
+    // Third slot is chart-details / entity-counts query; host-facing key is `entityCounts` in params.
     details: errorMessages.entityCounts,
     forecast: errorMessages.forecast,
   };
@@ -334,6 +350,7 @@ async function executeLoadSingleMetricContextData(
   const detailsResp = settled[2].status === 'fulfilled' ? settled[2].value : undefined;
   const forecastRaw = settled[3].status === 'fulfilled' ? settled[3].value : undefined;
 
+  // Defensive: all entries should be fulfilled after the rejection loop above.
   if (!metricResp || !swimResp || !detailsResp) {
     return null;
   }
@@ -365,6 +382,7 @@ async function executeLoadSingleMetricContextData(
     loading: false,
   };
 
+  // No default focus / brush until there is context series data and partition dropdowns are satisfied.
   if (!contextChartData.length || !arePartitioningFieldsProvided) {
     return {
       statePatch,
@@ -372,6 +390,7 @@ async function executeLoadSingleMetricContextData(
     };
   }
 
+  // Derive focus range from URL zoom vs defaults; host applies `zoomSelection` via `contextChartSelected`.
   const { focusRange, shouldUpdatePreviousSelectedForecastId } = resolveContextFinishFocusRange({
     zoom,
     contextAggregationInterval,

@@ -70,13 +70,14 @@ function enrichAnomalies(
     }
 
     anomaly.detector = get(detector, ['detector_description'], anomaly.source.function_description);
-
+    // For detectors with rules, add a property with the rule count.
     const customRules = detector && 'custom_rules' in detector ? detector.custom_rules : undefined;
     if (Array.isArray(customRules)) {
       anomaly.rulesLength = customRules.length;
     }
 
     if (enrichment.source === 'jobService') {
+      // Add properties used for building the links menu.
       if (has(enrichment.customUrlsByJob, jobId)) {
         anomaly.customUrls = enrichment.customUrlsByJob[
           jobId

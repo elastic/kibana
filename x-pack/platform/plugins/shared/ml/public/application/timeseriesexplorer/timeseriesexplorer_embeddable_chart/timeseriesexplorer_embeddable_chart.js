@@ -506,6 +506,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   }
 
   componentWillUnmount() {
+    this.contextLoadAbortController?.abort();
     this.subscriptions.unsubscribe();
     this.unmounted = true;
   }

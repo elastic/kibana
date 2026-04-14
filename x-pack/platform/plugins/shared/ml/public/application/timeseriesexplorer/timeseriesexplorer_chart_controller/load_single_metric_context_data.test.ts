@@ -202,4 +202,144 @@ describe('loadSingleMetricContextData', () => {
     expect(result?.zoomSelection).toEqual({ from: new Date(1000), to: new Date(2000) });
     expect(result?.shouldUpdatePreviousSelectedForecastId).toBe(true);
   });
+
+  it('calls displayError with swimlane message and returns null when swimlane rejects but metric succeeds', async () => {
+    const displayError = jest.fn();
+    const result = await loadSingleMetricContextData({
+      bounds,
+      selectedJob,
+      detectorIndex: 0,
+      entityControls: [{ fieldName: 'host', fieldValue: 'h1' }],
+      modelPlotEnabled: true,
+      selectedForecastId: undefined,
+      functionToPlotByIfMetric: undefined,
+      functionDescription: undefined,
+      zoom: undefined,
+      previousSelectedForecastId: undefined,
+      autoZoomDuration: 1000,
+      arePartitioningFieldsProvided: true,
+      criteriaFields: [],
+      displayError,
+      errorMessages: {
+        metric: 'metric-err',
+        swimlane: 'swim-err',
+        entityCounts: 'details-err',
+        forecast: 'fc-err',
+      },
+      deps: {
+        ...baseDeps,
+        mlResultsService: {
+          getRecordMaxScoreByTime: async () => {
+            throw new Error('swimlane down');
+          },
+        },
+      },
+    });
+
+    expect(result).toBeNull();
+    expect(displayError).toHaveBeenCalledWith(expect.any(Error), 'swim-err');
+  });
+
+  it('calls displayError with entityCounts message and returns null when chart details rejects', async () => {
+    const displayError = jest.fn();
+    const result = await loadSingleMetricContextData({
+      bounds,
+      selectedJob,
+      detectorIndex: 0,
+      entityControls: [{ fieldName: 'host', fieldValue: 'h1' }],
+      modelPlotEnabled: true,
+      selectedForecastId: undefined,
+      functionToPlotByIfMetric: undefined,
+      functionDescription: undefined,
+      zoom: undefined,
+      previousSelectedForecastId: undefined,
+      autoZoomDuration: 1000,
+      arePartitioningFieldsProvided: true,
+      criteriaFields: [],
+      displayError,
+      errorMessages: {
+        metric: 'metric-err',
+        swimlane: 'swim-err',
+        entityCounts: 'details-err',
+        forecast: 'fc-err',
+      },
+      deps: {
+        ...baseDeps,
+        mlTimeSeriesSearchService: {
+          ...baseDeps.mlTimeSeriesSearchService,
+          getChartDetails: async () => {
+            throw new Error('details down');
+          },
+        },
+      },
+    });
+
+    expect(result).toBeNull();
+    expect(displayError).toHaveBeenCalledWith(expect.any(Error), 'details-err');
+  });
+
+  it('calls displayError with forecast message and returns null when forecast load rejects', async () => {
+    const displayError = jest.fn();
+    const result = await loadSingleMetricContextData({
+      bounds,
+      selectedJob,
+      detectorIndex: 0,
+      entityControls: [{ fieldName: 'host', fieldValue: 'h1' }],
+      modelPlotEnabled: true,
+      selectedForecastId: 'forecast-1',
+      functionToPlotByIfMetric: undefined,
+      functionDescription: undefined,
+      zoom: undefined,
+      previousSelectedForecastId: undefined,
+      autoZoomDuration: 1000,
+      arePartitioningFieldsProvided: true,
+      criteriaFields: [],
+      displayError,
+      errorMessages: {
+        metric: 'metric-err',
+        swimlane: 'swim-err',
+        entityCounts: 'details-err',
+        forecast: 'fc-err',
+      },
+      deps: {
+        ...baseDeps,
+        mlForecastService: {
+          getForecastData: () => throwError(() => new Error('forecast down')),
+        },
+      },
+    });
+
+    expect(result).toBeNull();
+    expect(displayError).toHaveBeenCalledWith(expect.any(Error), 'fc-err');
+  });
+
+  it('rejects when detectorIndex is out of range and a forecast id is set', async () => {
+    const displayError = jest.fn();
+    await expect(
+      loadSingleMetricContextData({
+        bounds,
+        selectedJob,
+        detectorIndex: 1,
+        entityControls: [{ fieldName: 'host', fieldValue: 'h1' }],
+        modelPlotEnabled: true,
+        selectedForecastId: 'forecast-1',
+        functionToPlotByIfMetric: undefined,
+        functionDescription: undefined,
+        zoom: undefined,
+        previousSelectedForecastId: undefined,
+        autoZoomDuration: 1000,
+        arePartitioningFieldsProvided: true,
+        criteriaFields: [],
+        displayError,
+        errorMessages: {
+          metric: 'metric-err',
+          swimlane: 'swim-err',
+          entityCounts: 'details-err',
+          forecast: 'fc-err',
+        },
+        deps: baseDeps,
+      })
+    ).rejects.toThrow();
+    expect(displayError).not.toHaveBeenCalled();
+  });
 });

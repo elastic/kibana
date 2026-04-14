@@ -668,6 +668,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentWillUnmount() {
+    this.contextLoadAbortController?.abort();
     this.subscriptions.unsubscribe();
     this.resizeChecker.destroy();
     this.unmounted = true;
