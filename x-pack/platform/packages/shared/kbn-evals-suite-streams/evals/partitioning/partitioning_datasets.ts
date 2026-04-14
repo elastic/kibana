@@ -17,7 +17,7 @@ export interface PartitioningGroundTruth {
   max_partitions: number;
   coverage_threshold: number;
   max_overlap_threshold: number;
-  expected_reason?: 'no_clusters' | 'no_samples' | 'all_data_partitioned';
+  expected_reason?: 'no_clusters' | 'no_samples';
 }
 
 export interface PartitioningEvaluationExample {
@@ -176,48 +176,6 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
           difficulty: 'medium',
           notes:
             'Tests that the LLM follows user guidance to partition by the filepath field, creating one partition per distinct filepath value.',
-        },
-      },
-    ],
-  },
-  {
-    name: 'All Data Partitioned - Partition Suggestion',
-    description: 'Edge case where existing partitions already cover all data in the stream.',
-    examples: [
-      {
-        input: {
-          stream_name: 'logs.otel.partition-eval',
-          existing_partitions: [
-            {
-              name: 'hadoop',
-              condition: { field: 'attributes.filepath', eq: 'Hadoop.log' },
-            },
-            {
-              name: 'proxifier',
-              condition: { field: 'attributes.filepath', eq: 'Proxifier.log' },
-            },
-            {
-              name: 'android',
-              condition: { field: 'attributes.filepath', eq: 'Android.log' },
-            },
-            {
-              name: 'openstack',
-              condition: { field: 'attributes.filepath', eq: 'OpenStack.log' },
-            },
-          ],
-        },
-        output: {
-          expected_partitions: [],
-          min_partitions: 0,
-          max_partitions: 0,
-          coverage_threshold: 1.0,
-          max_overlap_threshold: 0,
-          expected_reason: 'all_data_partitioned',
-        },
-        metadata: {
-          difficulty: 'easy',
-          notes:
-            'All data is already covered by existing partitions. The API should return all_data_partitioned reason with no new partitions.',
         },
       },
     ],

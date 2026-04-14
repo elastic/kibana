@@ -65,7 +65,7 @@ const suggestPartitions = async (
   const rawResponse = response.data as string;
   const data = findSSEEventData<{
     partitions: Array<{ name: string; condition: Condition }>;
-    reason?: 'no_clusters' | 'no_samples' | 'all_data_partitioned';
+    reason?: 'no_clusters' | 'no_samples';
   }>(rawResponse, 'suggested_partitions');
 
   return {
