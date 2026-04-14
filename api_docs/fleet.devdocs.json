@@ -2461,7 +2461,7 @@
         "label": "InputFieldProps",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-        "lineNumber": 55,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2483,7 +2483,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2499,7 +2499,7 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2515,7 +2515,7 @@
               "(newValue: any) => void"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2531,7 +2531,7 @@
                   "any"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-                "lineNumber": 58,
+                "lineNumber": 59,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2551,7 +2551,7 @@
               "string[] | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2567,7 +2567,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2583,7 +2583,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2599,7 +2599,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2615,7 +2615,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2638,7 +2638,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2654,7 +2654,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2670,7 +2670,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27313,7 +27313,7 @@
         "label": "AssetParts",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 419,
+        "lineNumber": 422,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -27326,7 +27326,7 @@
             "label": "pkgkey",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 420,
+            "lineNumber": 423,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27342,7 +27342,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 421,
+            "lineNumber": 424,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27358,7 +27358,7 @@
               "\"kibana\" | \"elasticsearch\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 422,
+            "lineNumber": 425,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27397,7 +27397,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 423,
+            "lineNumber": 426,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -27410,7 +27410,7 @@
             "label": "file",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 424,
+            "lineNumber": 427,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28403,7 +28403,7 @@
         "label": "EpmPackageAdditions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 643,
+        "lineNumber": 647,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -28416,7 +28416,7 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 644,
+            "lineNumber": 648,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28429,7 +28429,7 @@
             "label": "latestVersion",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 645,
+            "lineNumber": 649,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28461,7 +28461,7 @@
               " | undefined>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 646,
+            "lineNumber": 650,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28477,7 +28477,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 647,
+            "lineNumber": 651,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28493,7 +28493,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 648,
+            "lineNumber": 652,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28509,7 +28509,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 649,
+            "lineNumber": 653,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28525,7 +28525,7 @@
         "label": "EsAssetReference",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 834,
+        "lineNumber": 838,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -28538,7 +28538,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 835,
+            "lineNumber": 839,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28560,7 +28560,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 836,
+            "lineNumber": 840,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -28576,7 +28576,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 837,
+            "lineNumber": 841,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30645,7 +30645,7 @@
         "label": "Installation",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 749,
+        "lineNumber": 753,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -30668,7 +30668,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 750,
+            "lineNumber": 754,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30692,7 +30692,7 @@
               "[]> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 751,
+            "lineNumber": 755,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30715,7 +30715,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 752,
+            "lineNumber": 756,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30738,7 +30738,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 753,
+            "lineNumber": 757,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30754,7 +30754,7 @@
               "{ [x: string]: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 754,
+            "lineNumber": 758,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30767,7 +30767,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 755,
+            "lineNumber": 759,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30780,7 +30780,7 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 756,
+            "lineNumber": 760,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30796,7 +30796,7 @@
               "\"installed\" | \"installing\" | \"install_failed\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 757,
+            "lineNumber": 761,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30809,7 +30809,7 @@
             "label": "install_version",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 758,
+            "lineNumber": 762,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30822,7 +30822,7 @@
             "label": "install_started_at",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 759,
+            "lineNumber": 763,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30838,7 +30838,7 @@
               "\"custom\" | \"upload\" | \"registry\" | \"bundled\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 760,
+            "lineNumber": 764,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30854,7 +30854,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 761,
+            "lineNumber": 765,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30870,7 +30870,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 762,
+            "lineNumber": 766,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30886,7 +30886,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 763,
+            "lineNumber": 767,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30902,7 +30902,7 @@
               "\"unknown\" | \"verified\" | \"unverified\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 764,
+            "lineNumber": 768,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30918,7 +30918,7 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 765,
+            "lineNumber": 769,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30935,7 +30935,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 766,
+            "lineNumber": 770,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30951,7 +30951,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 767,
+            "lineNumber": 771,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30967,7 +30967,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 768,
+            "lineNumber": 772,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30984,7 +30984,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 769,
+            "lineNumber": 773,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31001,7 +31001,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 770,
+            "lineNumber": 774,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31018,7 +31018,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 771,
+            "lineNumber": 775,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31036,7 +31036,7 @@
               "; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 772,
+            "lineNumber": 776,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31052,7 +31052,7 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 773,
+            "lineNumber": 777,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31068,7 +31068,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 774,
+            "lineNumber": 778,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31084,7 +31084,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 775,
+            "lineNumber": 779,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31102,7 +31102,7 @@
               " | undefined; action?: \"pending\" | \"accepted\" | \"declined\" | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 776,
+            "lineNumber": 780,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31119,7 +31119,7 @@
               " | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 783,
+            "lineNumber": 787,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31138,7 +31138,7 @@
               " | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 784,
+            "lineNumber": 788,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31156,7 +31156,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 786,
+            "lineNumber": 790,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31290,7 +31290,7 @@
         "label": "KibanaAssetReference",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 828,
+        "lineNumber": 832,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -31303,7 +31303,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 829,
+            "lineNumber": 833,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31319,7 +31319,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 830,
+            "lineNumber": 834,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31341,7 +31341,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 831,
+            "lineNumber": 835,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31357,7 +31357,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 832,
+            "lineNumber": 836,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33049,7 +33049,7 @@
         "label": "PackageAssetReference",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 840,
+        "lineNumber": 844,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -33062,7 +33062,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 841,
+            "lineNumber": 845,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33078,7 +33078,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 842,
+            "lineNumber": 846,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33094,7 +33094,7 @@
               "\"epm-packages-assets\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 843,
+            "lineNumber": 847,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33645,7 +33645,7 @@
         "label": "PackageSpecConditions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-        "lineNumber": 167,
+        "lineNumber": 168,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -33662,7 +33662,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 168,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33678,7 +33678,7 @@
               "{ version?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 169,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33694,7 +33694,7 @@
               "{ subscription?: string | undefined; capabilities?: string[] | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33710,7 +33710,7 @@
               "{ version?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33726,7 +33726,7 @@
         "label": "PackageSpecIcon",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-        "lineNumber": 181,
+        "lineNumber": 182,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -33739,7 +33739,7 @@
             "label": "src",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 182,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33755,7 +33755,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 183,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33771,7 +33771,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 184,
+            "lineNumber": 185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33787,7 +33787,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 185,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33803,7 +33803,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 186,
+            "lineNumber": 187,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33819,7 +33819,7 @@
         "label": "PackageSpecManifest",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -33835,7 +33835,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33848,7 +33848,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33861,7 +33861,7 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33877,7 +33877,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33890,7 +33890,7 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33906,7 +33906,7 @@
               "\"basic\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33922,7 +33922,7 @@
               "{ license: string; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33939,7 +33939,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33956,7 +33956,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33972,7 +33972,7 @@
               "\"experimental\" | \"beta\" | \"ga\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33996,7 +33996,7 @@
               " | undefined)[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34019,7 +34019,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34042,7 +34042,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34065,7 +34065,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34081,7 +34081,7 @@
               "\"all\" | \"combined_policy\" | \"individual_policies\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34104,7 +34104,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34127,7 +34127,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34150,7 +34150,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34166,7 +34166,7 @@
               "{ github?: string | undefined; type?: \"elastic\" | \"partner\" | \"community\" | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34190,7 +34190,7 @@
               ", \"index_template.settings\" | \"index_template.mappings\" | \"index_template.data_stream\"> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34206,7 +34206,7 @@
               "{ privileges?: { root?: boolean | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34223,7 +34223,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34241,7 +34241,7 @@
               "[] | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34258,7 +34258,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34274,7 +34274,7 @@
         "label": "PackageSpecScreenshot",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-        "lineNumber": 189,
+        "lineNumber": 190,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34287,7 +34287,7 @@
             "label": "src",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 190,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34300,7 +34300,7 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 191,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34316,7 +34316,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 192,
+            "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34332,7 +34332,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 193,
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34348,7 +34348,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 194,
+            "lineNumber": 195,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34409,7 +34409,7 @@
         "label": "RegistryDataStream",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 467,
+        "lineNumber": 470,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34425,7 +34425,7 @@
               "[key: string]:  any"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 468,
+            "lineNumber": 471,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34438,7 +34438,7 @@
             "label": "[RegistryDataStreamKeys.type]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 469,
+            "lineNumber": 472,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34454,7 +34454,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 470,
+            "lineNumber": 473,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34470,7 +34470,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 471,
+            "lineNumber": 474,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34483,7 +34483,7 @@
             "label": "[RegistryDataStreamKeys.dataset]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 472,
+            "lineNumber": 475,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34496,7 +34496,7 @@
             "label": "[RegistryDataStreamKeys.title]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 473,
+            "lineNumber": 476,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34512,7 +34512,7 @@
               "\"experimental\" | \"beta\" | \"ga\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 474,
+            "lineNumber": 477,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34535,7 +34535,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 475,
+            "lineNumber": 478,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34548,7 +34548,7 @@
             "label": "[RegistryDataStreamKeys.package]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 476,
+            "lineNumber": 479,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34561,7 +34561,7 @@
             "label": "[RegistryDataStreamKeys.path]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 477,
+            "lineNumber": 480,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34577,7 +34577,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 478,
+            "lineNumber": 481,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34600,7 +34600,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 479,
+            "lineNumber": 482,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34616,7 +34616,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 480,
+            "lineNumber": 483,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34633,7 +34633,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 481,
+            "lineNumber": 484,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34650,7 +34650,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 482,
+            "lineNumber": 485,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34667,7 +34667,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 483,
+            "lineNumber": 486,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34684,7 +34684,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 484,
+            "lineNumber": 487,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34700,7 +34700,7 @@
         "label": "RegistryDataStreamPrivileges",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 514,
+        "lineNumber": 517,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34716,7 +34716,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 515,
+            "lineNumber": 518,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34732,7 +34732,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 516,
+            "lineNumber": 519,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34748,7 +34748,7 @@
         "label": "RegistryElasticsearch",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 498,
+        "lineNumber": 501,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34771,7 +34771,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 499,
+            "lineNumber": 502,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34788,7 +34788,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 500,
+            "lineNumber": 503,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34805,7 +34805,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 501,
+            "lineNumber": 504,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34822,7 +34822,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 502,
+            "lineNumber": 505,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34838,7 +34838,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 503,
+            "lineNumber": 506,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34854,7 +34854,7 @@
               "\"default\" | \"synthetic\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 504,
+            "lineNumber": 507,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34870,7 +34870,7 @@
               "\"time_series\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 505,
+            "lineNumber": 508,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34886,7 +34886,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 506,
+            "lineNumber": 509,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34902,7 +34902,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 507,
+            "lineNumber": 510,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34964,7 +34964,7 @@
         "label": "RegistryInput",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 330,
+        "lineNumber": 331,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34977,7 +34977,7 @@
             "label": "[RegistryInputKeys.type]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 331,
+            "lineNumber": 332,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34990,7 +34990,7 @@
             "label": "[RegistryInputKeys.title]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 332,
+            "lineNumber": 333,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35003,7 +35003,7 @@
             "label": "[RegistryInputKeys.description]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 333,
+            "lineNumber": 334,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35019,7 +35019,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 334,
+            "lineNumber": 335,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35035,7 +35035,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 335,
+            "lineNumber": 336,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35051,7 +35051,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 336,
+            "lineNumber": 337,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35074,7 +35074,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 337,
+            "lineNumber": 338,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35091,7 +35091,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 338,
+            "lineNumber": 339,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35114,7 +35114,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 339,
+            "lineNumber": 340,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35137,7 +35137,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 340,
+            "lineNumber": 341,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35153,7 +35153,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 341,
+            "lineNumber": 342,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35169,7 +35169,7 @@
               "Record<string, string[]> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 342,
+            "lineNumber": 343,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35186,7 +35186,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 343,
+            "lineNumber": 344,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35202,7 +35202,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 344,
+            "lineNumber": 345,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35220,7 +35220,25 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 345,
+            "lineNumber": 346,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryInput.RegistryInputKeys.show_divider",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[RegistryInputKeys.show_divider]",
+            "description": [
+              "When false, suppresses the automatic horizontal divider rendered after the input-level config section. Defaults to true."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "lineNumber": 348,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35236,7 +35254,7 @@
         "label": "RegistryStream",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 364,
+        "lineNumber": 367,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35249,7 +35267,7 @@
             "label": "[RegistryStreamKeys.input]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 365,
+            "lineNumber": 368,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35262,7 +35280,7 @@
             "label": "[RegistryStreamKeys.title]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 366,
+            "lineNumber": 369,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35278,7 +35296,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 367,
+            "lineNumber": 370,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35294,7 +35312,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 368,
+            "lineNumber": 371,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35311,7 +35329,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 369,
+            "lineNumber": 372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35334,7 +35352,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 370,
+            "lineNumber": 373,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35350,7 +35368,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 371,
+            "lineNumber": 374,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35366,7 +35384,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 372,
+            "lineNumber": 375,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35382,7 +35400,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 373,
+            "lineNumber": 376,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35405,7 +35423,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 374,
+            "lineNumber": 377,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35422,7 +35440,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 375,
+            "lineNumber": 378,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35438,7 +35456,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 376,
+            "lineNumber": 379,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35532,6 +35550,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.RegistryVarGroup.show_divider",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "show_divider",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.RegistryVarGroup.options",
             "type": "Array",
             "tags": [],
@@ -35548,7 +35582,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35670,7 +35704,7 @@
         "label": "RegistryVarsEntry",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 575,
+        "lineNumber": 579,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35683,7 +35717,7 @@
             "label": "[RegistryVarsEntryKeys.name]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 576,
+            "lineNumber": 580,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35699,7 +35733,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 577,
+            "lineNumber": 581,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35715,7 +35749,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 578,
+            "lineNumber": 582,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35728,10 +35762,10 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"bool\" | \"text\" | \"integer\" | \"password\" | \"duration\" | \"select\" | \"textarea\" | \"url\" | \"yaml\""
+              "\"string\" | \"bool\" | \"text\" | \"integer\" | \"password\" | \"duration\" | \"select\" | \"textarea\" | \"url\" | \"yaml\" | \"section_header\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 579,
+            "lineNumber": 583,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35747,7 +35781,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 580,
+            "lineNumber": 584,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35763,7 +35797,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 581,
+            "lineNumber": 585,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35779,7 +35813,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 582,
+            "lineNumber": 586,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35795,7 +35829,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 583,
+            "lineNumber": 587,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35811,7 +35845,7 @@
               "{ value: string; text: string; }[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 584,
+            "lineNumber": 588,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35827,7 +35861,7 @@
               "string | boolean | string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 585,
+            "lineNumber": 589,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35843,7 +35877,7 @@
               "{ [key: string]: { default: string | string[]; }; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 586,
+            "lineNumber": 590,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35859,7 +35893,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 591,
+            "lineNumber": 595,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35875,7 +35909,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 592,
+            "lineNumber": 596,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35891,7 +35925,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 593,
+            "lineNumber": 597,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35907,7 +35941,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 594,
+            "lineNumber": 598,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35923,7 +35957,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 595,
+            "lineNumber": 599,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35940,7 +35974,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-            "lineNumber": 596,
+            "lineNumber": 600,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -36609,7 +36643,7 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 826,
+        "lineNumber": 830,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -36659,7 +36693,7 @@
           " | undefined>"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 427,
+        "lineNumber": 430,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -36676,7 +36710,7 @@
           "\"aws.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 48,
+        "lineNumber": 74,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -36710,7 +36744,7 @@
           "\"azure.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 49,
+        "lineNumber": 75,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37026,7 +37060,7 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 438,
+        "lineNumber": 441,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37115,7 +37149,7 @@
           "[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 444,
+        "lineNumber": 447,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37484,7 +37518,7 @@
           "\"gcp.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 50,
+        "lineNumber": 76,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37627,7 +37661,7 @@
           "<T>"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 795,
+        "lineNumber": 799,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37679,7 +37713,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 806,
+        "lineNumber": 810,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37696,7 +37730,7 @@
           "T & { status: \"install_failed\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 822,
+        "lineNumber": 826,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37717,7 +37751,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 812,
+        "lineNumber": 816,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37734,7 +37768,7 @@
           "T & { status: undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 802,
+        "lineNumber": 806,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37783,7 +37817,7 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 433,
+        "lineNumber": 436,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37920,7 +37954,7 @@
           "[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 443,
+        "lineNumber": 446,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37994,7 +38028,7 @@
           "KafkaOutput"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/output.ts",
-        "lineNumber": 73,
+        "lineNumber": 74,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38046,7 +38080,7 @@
           "T & { status: \"not_installed\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 818,
+        "lineNumber": 822,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38063,7 +38097,7 @@
           "\"organization-account\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 55,
+        "lineNumber": 81,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -38087,7 +38121,7 @@
           " & { id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/output.ts",
-        "lineNumber": 79,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38199,7 +38233,7 @@
           ">>"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 667,
+        "lineNumber": 671,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38223,7 +38257,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 656,
+        "lineNumber": 660,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38259,7 +38293,7 @@
           " | undefined; packagePoliciesInfo?: { count: number; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 659,
+        "lineNumber": 663,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38318,7 +38352,7 @@
           "\"connector\" | \"monitoring\" | \"security\" | \"siem\" | \"observability\" | \"custom\" | \"infrastructure\" | \"kubernetes\" | \"opentelemetry\" | \"cloud\" | \"web\" | \"advanced_analytics_ueba\" | \"analytics_engine\" | \"application_observability\" | \"asset_inventory\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"containers\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"cloudsecurity_cdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"misconfiguration_workflow\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"vulnerability_workflow\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search_content_source\" | \"app_search\" | \"enterprise_search\" | \"workplace_search\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
-        "lineNumber": 94,
+        "lineNumber": 95,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38394,7 +38428,7 @@
           "\"metrics\" | \"logs\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 328,
+        "lineNumber": 329,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38500,7 +38534,7 @@
           "[] | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
-        "lineNumber": 386,
+        "lineNumber": 389,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38569,7 +38603,7 @@
           "\"single-account\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 54,
+        "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
