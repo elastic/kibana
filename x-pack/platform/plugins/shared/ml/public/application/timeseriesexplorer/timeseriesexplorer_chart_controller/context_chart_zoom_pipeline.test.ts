@@ -10,7 +10,10 @@ import { Subject, forkJoin, of } from 'rxjs';
 import { createContextChartZoomSubscription } from './context_chart_zoom_pipeline';
 
 describe('createContextChartZoomSubscription', () => {
-  const selection = { from: new Date('2020-01-01T00:00:00Z'), to: new Date('2020-01-02T00:00:00Z') };
+  const selection = {
+    from: new Date('2020-01-01T00:00:00Z'),
+    to: new Date('2020-01-02T00:00:00Z'),
+  };
 
   const baseHandlers = {
     onZoomPreview: jest.fn(),

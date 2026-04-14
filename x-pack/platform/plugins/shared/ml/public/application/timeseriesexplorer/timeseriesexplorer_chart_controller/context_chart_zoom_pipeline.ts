@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Subject} from 'rxjs';
+import type { Subject } from 'rxjs';
 import {
   type Observable,
   type Subscription,
@@ -38,7 +37,10 @@ export interface ContextChartZoomHandlers<TFocus = unknown, TTable = unknown> {
   /** Read mutable chart + focus state (typically React state snapshot). */
   getChartState: () => ContextChartZoomChartState;
   /** True when init needs focus load or brush range changed vs last loaded focus. */
-  shouldTriggerFocusLoad: (selection: ContextChartSelection, state: ContextChartZoomChartState) => boolean;
+  shouldTriggerFocusLoad: (
+    selection: ContextChartSelection,
+    state: ContextChartZoomChartState
+  ) => boolean;
   /** Set loading before focus queries (fullRefresh false, loading true). */
   onFocusLoadStart: () => void;
   /** Mark init flag true when entering focus load path (legacy contextChartSelectedInitCallDone). */
@@ -49,7 +51,9 @@ export interface ContextChartZoomHandlers<TFocus = unknown, TTable = unknown> {
    * - When **false**, return **only** the focus observable; the factory merges `{ tableData: undefined }` so
    *   `onFocusPipelineResult` keeps the same tuple shape without running a table request.
    */
-  getFocusPipeline$: (selection: ContextChartSelection) => Observable<[TFocus, TTable] | TFocus> | null;
+  getFocusPipeline$: (
+    selection: ContextChartSelection
+  ) => Observable<[TFocus, TTable] | TFocus> | null;
   /** Merge focus + optional table payload into component state. */
   onFocusPipelineResult: (data: [TFocus, TTable], selection: ContextChartSelection) => void;
 }

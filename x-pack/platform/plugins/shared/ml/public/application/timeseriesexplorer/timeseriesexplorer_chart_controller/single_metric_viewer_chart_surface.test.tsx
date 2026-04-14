@@ -11,8 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { SingleMetricViewerChartSurface } from './single_metric_viewer_chart_surface';
 
-const renderWithI18n = (ui: React.ReactElement) =>
-  render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('SingleMetricViewerChartSurface', () => {
   it('renders children and optional controls after the partition gate', () => {

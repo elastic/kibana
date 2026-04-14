@@ -136,9 +136,7 @@ function buildSmvFocusPipelineStatePatch(args: {
     showModelBoundsCheckbox: modelPlotEnabled && focusChartLength > 0,
     zoomFromFocusLoaded: selection.from,
     zoomToFocusLoaded: selection.to,
-    showForecastCheckbox: Boolean(
-      selectedForecastId && refreshFocusData.showForecastCheckbox
-    ),
+    showForecastCheckbox: Boolean(selectedForecastId && refreshFocusData.showForecastCheckbox),
     ...refreshFocusData,
     ...(tableData ?? {}),
   };
