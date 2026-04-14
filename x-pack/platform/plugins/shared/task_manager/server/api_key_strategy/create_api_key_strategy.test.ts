@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ApiKeyType } from '../config';
 import { createApiKeyStrategy } from './create_api_key_strategy';
 import { EsApiKeyStrategy } from './es_api_key_strategy';
 import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
 
 describe('createApiKeyStrategy', () => {
+  const logger = loggingSystemMock.createLogger();
+
   test('returns EsApiKeyStrategy when UIAM is not available', () => {
     const coreStart = coreMock.createStart();
     coreStart.security.authc.apiKeys.uiam = null as never;
 
-    const strategy = createApiKeyStrategy(ApiKeyType.ES, coreStart.security);
+    const strategy = createApiKeyStrategy(ApiKeyType.ES, coreStart.security, logger);
     expect(strategy).toBeInstanceOf(EsApiKeyStrategy);
   });
 
@@ -28,7 +30,7 @@ describe('createApiKeyStrategy', () => {
       convert: jest.fn(),
     } as never;
 
-    const strategy = createApiKeyStrategy(ApiKeyType.ES, coreStart.security);
+    const strategy = createApiKeyStrategy(ApiKeyType.ES, coreStart.security, logger);
     expect(strategy).toBeInstanceOf(EsAndUiamApiKeyStrategy);
   });
 
@@ -40,7 +42,7 @@ describe('createApiKeyStrategy', () => {
       convert: jest.fn(),
     } as never;
 
-    const strategy = createApiKeyStrategy(ApiKeyType.UIAM, coreStart.security);
+    const strategy = createApiKeyStrategy(ApiKeyType.UIAM, coreStart.security, logger);
     expect(strategy.typeToUse).toBe(ApiKeyType.UIAM);
   });
 });

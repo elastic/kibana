@@ -12,7 +12,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { isUiamCredential } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { truncate } from 'lodash';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { ApiKeyType } from '../config';
@@ -20,6 +20,7 @@ import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import { createApiKey, requestHasApiKey, getApiKeyFromRequest } from '../lib/api_key_utils';
 import type { ApiKeySOFields, ApiKeyStrategy, InvalidationTarget } from './api_key_strategy';
 import { markApiKeysForInvalidation } from './api_key_strategy';
+import { UIAM_LOGS_CREDENTIALS_TAGS, UIAM_LOGS_GRANT_TAGS } from '../constants';
 
 interface UiamApiKeyResult {
   apiKey: string;
@@ -30,10 +31,12 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
   public readonly shouldGrantUiam = true;
   public readonly typeToUse: ApiKeyType;
   private readonly security: SecurityServiceStart;
+  private readonly logger: Logger;
 
-  constructor(apiKeyType: ApiKeyType, security: SecurityServiceStart) {
+  constructor(apiKeyType: ApiKeyType, security: SecurityServiceStart, logger: Logger) {
     this.typeToUse = apiKeyType;
     this.security = security;
+    this.logger = logger;
   }
 
   async grantApiKeys(
@@ -95,6 +98,15 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       return uiamKeyByTaskIdMap;
     }
 
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+      this.logger.debug(
+        'Request credential is not UIAM-compatible, skipping UIAM API key grant. Only ES API keys will be used.',
+        { tags: UIAM_LOGS_CREDENTIALS_TAGS }
+      );
+      return uiamKeyByTaskIdMap;
+    }
+
     const user = security.authc.getCurrentUser(request);
     const taskTypes = [...new Set(taskInstances.map((task) => task.taskType))];
     const uiamKeyByTaskTypeMap = new Map<string, UiamApiKeyResult>();
@@ -103,15 +115,27 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       const apiKeyNamePrefix = `TaskManager-UIAM: ${taskType}`;
       const apiKeyName = user ? `${apiKeyNamePrefix} - ${user.username}` : apiKeyNamePrefix;
 
-      const uiamResult = await uiam.grant(request, {
-        name: truncate(apiKeyName, { length: 256 }),
-      });
-
-      if (uiamResult) {
-        uiamKeyByTaskTypeMap.set(taskType, {
-          apiKey: uiamResult.api_key,
-          apiKeyId: uiamResult.id,
+      try {
+        const uiamResult = await uiam.grant(request, {
+          name: truncate(apiKeyName, { length: 256 }),
         });
+
+        if (uiamResult) {
+          uiamKeyByTaskTypeMap.set(taskType, {
+            apiKey: uiamResult.api_key,
+            apiKeyId: uiamResult.id,
+          });
+        } else {
+          this.logger.error(`Failed to create UIAM API key for task type: ${taskType}`, {
+            tags: UIAM_LOGS_GRANT_TAGS,
+          });
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        this.logger.error(
+          `Failed to create UIAM API key for task type: ${taskType}: ${errorMessage}`,
+          { tags: UIAM_LOGS_GRANT_TAGS }
+        );
       }
     }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityServiceStart } from '@kbn/core/server';
+import type { Logger, SecurityServiceStart } from '@kbn/core/server';
 import type { ApiKeyType } from '../config';
 import type { ApiKeyStrategy } from './api_key_strategy';
 import { EsApiKeyStrategy } from './es_api_key_strategy';
@@ -13,10 +13,11 @@ import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
 
 export const createApiKeyStrategy = (
   apiKeyType: ApiKeyType,
-  security: SecurityServiceStart
+  security: SecurityServiceStart,
+  logger: Logger
 ): ApiKeyStrategy => {
   if (security.authc.apiKeys.uiam) {
-    return new EsAndUiamApiKeyStrategy(apiKeyType, security);
+    return new EsAndUiamApiKeyStrategy(apiKeyType, security, logger);
   }
   return new EsApiKeyStrategy();
 };

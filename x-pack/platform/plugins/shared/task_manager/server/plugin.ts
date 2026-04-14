@@ -359,7 +359,7 @@ export class TaskManagerPlugin
     }
 
     const serializer = savedObjects.createSerializer();
-    const apiKeyStrategy = createApiKeyStrategy(this.config.api_key_type, security);
+    const apiKeyStrategy = createApiKeyStrategy(this.config.api_key_type, security, this.logger);
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
