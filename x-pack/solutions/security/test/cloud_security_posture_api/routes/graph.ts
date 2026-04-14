@@ -767,7 +767,7 @@ export default function (providerContext: FtrProviderContext) {
                 entity: expectExpect.objectContaining({
                   availableInEntityStore: false,
                   sourceFields: expectExpect.objectContaining({
-                    'entity.target.id': 'projects/your-project-id/roles/customRole',
+                    'entity.id': 'projects/your-project-id/roles/customRole',
                   }),
                 }),
               })
@@ -1116,7 +1116,7 @@ export default function (providerContext: FtrProviderContext) {
             entity: expectExpect.objectContaining({
               availableInEntityStore: false,
               sourceFields: expectExpect.objectContaining({
-                'entity.target.id': 'target-mv-1',
+                'entity.id': 'target-mv-1',
               }),
             }),
           })
@@ -1128,7 +1128,7 @@ export default function (providerContext: FtrProviderContext) {
             entity: expectExpect.objectContaining({
               availableInEntityStore: false,
               sourceFields: expectExpect.objectContaining({
-                'entity.target.id': 'target-mv-2',
+                'entity.id': 'target-mv-2',
               }),
             }),
           })
@@ -1140,7 +1140,7 @@ export default function (providerContext: FtrProviderContext) {
             entity: expectExpect.objectContaining({
               availableInEntityStore: false,
               sourceFields: expectExpect.objectContaining({
-                'entity.target.id': 'target-mv-3',
+                'entity.id': 'target-mv-3',
               }),
             }),
           })
@@ -1784,7 +1784,7 @@ export default function (providerContext: FtrProviderContext) {
                 entity: expectExpect.objectContaining({
                   availableInEntityStore: false,
                   sourceFields: expectExpect.objectContaining({
-                    'entity.target.id': 'projects/your-project-id/roles/customRole',
+                    'entity.id': 'projects/your-project-id/roles/customRole',
                   }),
                 }),
               })
@@ -1930,6 +1930,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Service',
                     sub_type: 'GCP Service Account',
                     availableInEntityStore: true,
+                    engine_type: 'service',
                     sourceFields: expectExpect.objectContaining({
                       'service.name': 'ServiceAccount123',
                     }),
@@ -1959,8 +1960,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Container',
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id': 'host-instance-1',
+                      'host.id': 'host-instance-1',
                     }),
                   }),
                 })
@@ -1974,8 +1976,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Container',
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id': 'host-instance-2',
+                      'host.id': 'host-instance-2',
                     }),
                   }),
                 })
@@ -2021,6 +2024,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Identity',
                     sub_type: 'GCP IAM User',
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     sourceFields: expectExpect.objectContaining({
                       'user.id': 'entity-user@example.com',
                     }),
@@ -2046,8 +2050,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Compute',
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
+                    engine_type: 'generic',
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id': 'entity-service-target-1',
+                      'entity.id': 'entity-service-target-1',
                     }),
                   }),
                 })
@@ -2127,6 +2132,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Identity',
                     sub_type: 'GCP IAM User',
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     sourceFields: expectExpect.objectContaining({
                       'user.id': 'multi-target-user@example.com',
                     }),
@@ -2155,9 +2161,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Storage',
                     sub_type: 'GCP Storage Bucket',
                     availableInEntityStore: true,
+                    engine_type: 'generic',
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id':
-                        'projects/multi-target-project-id/buckets/target-bucket-a',
+                      'entity.id': 'projects/multi-target-project-id/buckets/target-bucket-a',
                     }),
                   }),
                 })
@@ -2171,9 +2177,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Storage',
                     sub_type: 'GCP Storage Bucket',
                     availableInEntityStore: true,
+                    engine_type: 'generic',
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id':
-                        'projects/multi-target-project-id/buckets/target-bucket-b',
+                      'entity.id': 'projects/multi-target-project-id/buckets/target-bucket-b',
                     }),
                   }),
                 })
@@ -2187,9 +2193,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Storage',
                     sub_type: 'GCP Storage Bucket',
                     availableInEntityStore: true,
+                    engine_type: 'generic',
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id':
-                        'projects/multi-target-project-id/buckets/target-bucket-c',
+                      'entity.id': 'projects/multi-target-project-id/buckets/target-bucket-c',
                     }),
                   }),
                 })
@@ -2215,8 +2221,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Service',
                     sub_type: 'GCP Service Account',
                     availableInEntityStore: true,
+                    engine_type: 'service',
                     sourceFields: expectExpect.objectContaining({
-                      'service.target.name': 'TargetServiceDifferent',
+                      'service.name': 'TargetServiceDifferent',
                     }),
                   }),
                 })
@@ -2287,6 +2294,7 @@ export default function (providerContext: FtrProviderContext) {
                   entity: expectExpect.objectContaining({
                     name: 'PartialUserNameOnly',
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     sourceFields: expectExpect.objectContaining({
                       'user.id': 'partial-user@example.com',
                     }),
@@ -2315,8 +2323,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Container',
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id': 'partial-host-instance-1',
+                      'host.id': 'partial-host-instance-1',
                     }),
                   }),
                 })
@@ -2445,6 +2454,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     name: 'Relationships Test User',
                     type: 'Identity',
                     sub_type: 'AWS IAM User',
@@ -2473,8 +2483,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Service',
                     sub_type: 'AWS Lambda',
                     availableInEntityStore: true,
+                    engine_type: 'service',
                     sourceFields: expectExpect.objectContaining({
-                      'service.target.name': 'Relationships Target Service',
+                      'service.name': 'Relationships Target Service',
                     }),
                   }),
                 })
@@ -2499,6 +2510,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Host',
                     sub_type: 'AWS EC2 Instance',
                     availableInEntityStore: true,
+                    engine_type: 'host',
                   }),
                 })
               );
@@ -2573,6 +2585,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     name: 'Relationships Test User',
                     type: 'Identity',
                     sub_type: 'AWS IAM User',
@@ -2599,6 +2612,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Host',
                     sub_type: 'AWS EC2 Instance',
                     availableInEntityStore: true,
+                    engine_type: 'host',
                   }),
                 })
               );
@@ -2742,6 +2756,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     name: 'GCP Admin User',
                     type: 'Service Account',
                     sub_type: 'GCP Service Account',
@@ -2770,6 +2785,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     name: 'GCP Compute Operator',
                     type: 'Identity',
                     sub_type: 'GCP IAM User',
@@ -2798,11 +2814,12 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     name: 'data-pipeline Service Account',
                     type: 'Service Account',
                     sub_type: 'GCP Service Account',
                     sourceFields: expectExpect.objectContaining({
-                      'user.target.id': 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
+                      'user.id': 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
                     }),
                   }),
                 })
@@ -2827,11 +2844,12 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     name: 'database-server-prod-1',
                     type: 'Host',
                     sub_type: 'GCP Compute Instance',
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id':
+                      'host.id':
                         'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1',
                     }),
                   }),
@@ -2854,6 +2872,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     name: 'web-server-prod-1',
                     type: 'Host',
                     sub_type: 'GCP Compute Instance',
@@ -2866,6 +2885,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     name: 'api-gateway-prod-1',
                     type: 'Host',
                     sub_type: 'GCP Compute Instance',
@@ -3013,6 +3033,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Identity',
                     sub_type: 'AWS IAM User',
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     sourceFields: expectExpect.objectContaining({
                       'user.id': 'rel-hierarchy-root-user',
                     }),
@@ -3128,8 +3149,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'User',
                     sub_type: 'AWS Organizations Admin',
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     sourceFields: expectExpect.objectContaining({
-                      'user.target.id': 'rel-hierarchy-delegate-1',
+                      'user.id': 'rel-hierarchy-delegate-1',
                     }),
                   }),
                 })
@@ -3155,6 +3177,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Service',
                     sub_type: 'AWS Lambda Function',
                     availableInEntityStore: true,
+                    engine_type: 'service',
                   }),
                 })
               );
