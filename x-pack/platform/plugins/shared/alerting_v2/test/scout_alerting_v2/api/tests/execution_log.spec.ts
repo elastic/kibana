@@ -226,4 +226,57 @@ apiTest.describe('Rule execution log APIs', { tag: tags.stateful.classic }, () =
     expect(kpi.succeeded).toBe(0);
     expect(kpi.failed).toBe(0);
   });
+
+  apiTest(
+    '_execution_breakdown: returns time-bucketed counts with 1 hour interval',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${RULE_API_PATH}/${TEST_RULE_ID}/_execution_breakdown?date_start=2026-04-10T00:00:00.000Z&date_end=2026-04-10T23:59:59.999Z&bucket_interval=1 hour`,
+        {
+          headers: { ...adminCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+
+      expect(response.statusCode).toBe(200);
+
+      const buckets = response.body as Array<{
+        bucket: string;
+        succeeded: number;
+        failed: number;
+      }>;
+
+      // All 4 events fall within 10:00-10:15, so 1-hour bucket = 1 bucket
+      expect(buckets).toHaveLength(1);
+      expect(buckets[0].succeeded).toBe(3);
+      expect(buckets[0].failed).toBe(1);
+    }
+  );
+
+  apiTest(
+    '_execution_breakdown: returns multiple buckets with 5 minute interval',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${RULE_API_PATH}/${TEST_RULE_ID}/_execution_breakdown?date_start=2026-04-10T00:00:00.000Z&date_end=2026-04-10T23:59:59.999Z&bucket_interval=5 minutes`,
+        {
+          headers: { ...adminCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+
+      expect(response.statusCode).toBe(200);
+
+      const buckets = response.body as Array<{
+        bucket: string;
+        succeeded: number;
+        failed: number;
+      }>;
+
+      // Events at 10:00, 10:05, 10:10, 10:15 = 4 separate 5-min buckets
+      expect(buckets).toHaveLength(4);
+      // Sorted ASC — first bucket has the 10:00 success
+      expect(buckets[0].succeeded).toBe(1);
+      expect(buckets[0].failed).toBe(0);
+    }
+  );
 });

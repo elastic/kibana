@@ -41,6 +41,7 @@ import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_field
 import { NotificationPolicyTagsRoute } from '../routes/suggestions/notification_policy_tags_route';
 import { GetRuleExecutionLogRoute } from '../routes/rules/get_rule_execution_log_route';
 import { GetRuleExecutionKpiRoute } from '../routes/rules/get_rule_execution_kpi_route';
+import { GetRuleExecutionBreakdownRoute } from '../routes/rules/get_rule_execution_breakdown_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
@@ -77,4 +78,5 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(NotificationPolicyTagsRoute);
   bind(Route).toConstantValue(GetRuleExecutionLogRoute);
   bind(Route).toConstantValue(GetRuleExecutionKpiRoute);
+  bind(Route).toConstantValue(GetRuleExecutionBreakdownRoute);
 }

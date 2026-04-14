@@ -44,9 +44,23 @@ export interface GetExecutionKpiParams {
   readonly dateEnd: string;
 }
 
+export interface ExecutionBreakdownBucket {
+  readonly bucket: string;
+  readonly succeeded: number;
+  readonly failed: number;
+}
+
+export interface GetExecutionBreakdownParams {
+  readonly ruleId: string;
+  readonly dateStart: string;
+  readonly dateEnd: string;
+  readonly bucketInterval: string;
+}
+
 export interface ExecutionLogServiceContract {
   getExecutionLog(params: GetExecutionLogParams): Promise<ExecutionLogEntry[]>;
   getExecutionKpi(params: GetExecutionKpiParams): Promise<ExecutionKpiResponse>;
+  getExecutionBreakdown(params: GetExecutionBreakdownParams): Promise<ExecutionBreakdownBucket[]>;
 }
 
 export const ExecutionLogServiceToken = Symbol.for(
@@ -65,6 +79,12 @@ interface ExecutionLogRow {
 interface ExecutionKpiRow {
   count: number;
   'event.outcome': string;
+}
+
+interface ExecutionBreakdownRow {
+  count: number;
+  'event.outcome': string;
+  bucket: string;
 }
 
 @injectable()
@@ -145,5 +165,41 @@ export class ExecutionLogService implements ExecutionLogServiceContract {
     }
 
     return { succeeded, failed };
+  }
+
+  public async getExecutionBreakdown(
+    params: GetExecutionBreakdownParams
+  ): Promise<ExecutionBreakdownBucket[]> {
+    const { ruleId, dateStart, dateEnd, bucketInterval } = params;
+
+    const query = `FROM ${EVENT_LOG_INDEX}
+      | WHERE event.provider == "${EVENT_LOG_PROVIDER}"
+        AND event.action == "${EVENT_LOG_ACTIONS.execute}"
+        AND kibana.alerting.instance_id == ?
+        AND @timestamp >= ?
+        AND @timestamp <= ?
+      | STATS count = COUNT(*) BY event.outcome, bucket = BUCKET(@timestamp, ?)
+      | SORT bucket ASC`;
+
+    const rows = await this.queryService.executeQueryRows<ExecutionBreakdownRow>({
+      query,
+      params: [ruleId, dateStart, dateEnd, bucketInterval],
+    });
+
+    const bucketMap = new Map<string, { bucket: string; succeeded: number; failed: number }>();
+
+    for (const row of rows) {
+      const existing = bucketMap.get(row.bucket) ?? { bucket: row.bucket, succeeded: 0, failed: 0 };
+
+      if (row['event.outcome'] === 'success') {
+        existing.succeeded = row.count;
+      } else if (row['event.outcome'] === 'failure') {
+        existing.failed = row.count;
+      }
+
+      bucketMap.set(row.bucket, existing);
+    }
+
+    return Array.from(bucketMap.values());
   }
 }

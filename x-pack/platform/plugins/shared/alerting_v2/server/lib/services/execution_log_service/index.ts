@@ -12,4 +12,6 @@ export type {
   GetExecutionLogParams,
   ExecutionKpiResponse,
   GetExecutionKpiParams,
+  ExecutionBreakdownBucket,
+  GetExecutionBreakdownParams,
 } from './execution_log_service';
