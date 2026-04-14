@@ -29,6 +29,29 @@ type PackagePolicyStream = RegistryStream & {
   data_stream: { type?: string; dataset: string };
 };
 
+/**
+ * Returns the effective discriminator for an input, regardless of whether it comes from
+ * the registry (`RegistryInput`) or a stored package policy (`NewPackagePolicyInput`).
+ *
+ * Uses the explicit `name` field when present, falling back to `type`. This value is
+ * used as the keying and matching discriminator throughout Fleet so that multiple inputs
+ * of the same `type` within one policy template can be distinguished.
+ */
+export const getInputEffectiveName = (input: { name?: string; type: string }): string =>
+  input.name ?? input.type;
+
+/**
+ * Builds the composite key used to index input validation results and var definitions.
+ * For packages with integrations (multiple policy templates), the key is prefixed with
+ * the policy template name to avoid collisions across templates.
+ */
+export const buildInputKey = (
+  effectiveName: string,
+  policyTemplateName: string | undefined,
+  hasIntegrations: boolean
+): string =>
+  hasIntegrations && policyTemplateName ? `${policyTemplateName}-${effectiveName}` : effectiveName;
+
 export const getStreamsForInputType = (
   inputType: string,
   packageInfo: PackageInfo,
@@ -119,7 +142,7 @@ export const packageToPackagePolicyInputs = (
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
     const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
     normalizedInputs?.forEach((packageInput) => {
-      const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
+      const inputKey = `${packagePolicyTemplate.name}-${getInputEffectiveName(packageInput)}`;
       const input = {
         ...packageInput,
         ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
@@ -135,9 +158,13 @@ export const packageToPackagePolicyInputs = (
     const streamsForInput: NewPackagePolicyInputStream[] = [];
     let varsForInput: PackagePolicyConfigRecord = {};
 
+    // Use the input's id as the discriminator for stream matching when present,
+    // so that stream.input values reference the input id rather than the type.
+    const streamMatchKey = getInputEffectiveName(packageInput);
+
     // Map each package input stream into package policy input stream
     const streams = getStreamsForInputType(
-      packageInput.type,
+      streamMatchKey,
       packageInfo,
       packageInput.data_streams
     ).map((packageStream) => {
@@ -182,6 +209,7 @@ export const packageToPackagePolicyInputs = (
 
     const input: NewPackagePolicyInput = {
       type: packageInput.type,
+      ...(packageInput.name ? { name: packageInput.name } : {}),
       policy_template: packageInput.policy_template,
       enabled: enableInput,
       streams: streamsForInput,

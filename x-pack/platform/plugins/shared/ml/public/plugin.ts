@@ -84,6 +84,7 @@ import { MlManagementLocatorInternal } from './locator/ml_management_locator';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';
 import type { ITelemetryClient } from './application/services/telemetry/types';
 import { registerEmbeddables } from './embeddables';
+import { registerMlUiActions } from './ui_actions';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -279,8 +280,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
             }
 
-            const { registerMlUiActions, registerSearchLinks, registerCasesAttachments } =
-              await import('./register_helper');
+            if (fullLicense && mlCapabilities.canGetMlInfo) {
+              registerMlUiActions(pluginsSetup.uiActions, core);
+            }
+
+            const { registerSearchLinks, registerCasesAttachments } = await import(
+              './register_helper'
+            );
             registerSearchLinks(
               this.appUpdater$,
               fullLicense,
@@ -308,8 +314,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             }
 
             if (fullLicense && mlCapabilities.canGetMlInfo) {
-              registerMlUiActions(pluginsSetup.uiActions, core);
-
               if (this.enabledFeatures.ad) {
                 if (pluginsSetup.cases) {
                   registerCasesAttachments(

@@ -456,18 +456,40 @@ export const initCmd: Command<void> = {
   Examples:
     node scripts/evals init
     node scripts/evals init config
+    node scripts/evals init config --profile local
     node scripts/evals init --skip-discovery
   `,
   flags: {
     boolean: ['skip-discovery'],
     string: ['profile'],
     default: { 'skip-discovery': false },
+    help: `
+      --profile <name>   Write config to config.<name>.json instead of config.json
+                          (e.g. --profile local creates config.local.json)
+      --skip-discovery    Skip EIS model discovery (only applies to full init)
+    `,
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
     const positionals = flagsReader.getPositionals();
     const configOnly = positionals.includes('config');
     const profile = flagsReader.string('profile') ?? undefined;
+
+    const knownPositionals = new Set(['config']);
+    const unknownPositionals = positionals.filter((p) => !knownPositionals.has(p));
+    if (unknownPositionals.length > 0) {
+      const hint = unknownPositionals.length === 1 && !profile ? unknownPositionals[0] : null;
+      throw new Error(
+        [
+          `Unknown argument${unknownPositionals.length > 1 ? 's' : ''}: ${unknownPositionals.join(
+            ', '
+          )}`,
+          hint
+            ? `Did you mean --profile ${hint}? (e.g. node scripts/evals init config --profile ${hint})`
+            : 'Use --profile <name> to specify a config profile name.',
+        ].join('\n')
+      );
+    }
 
     log.info('Welcome to kbn-evals setup!');
     log.info('');

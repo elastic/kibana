@@ -156,7 +156,7 @@ export const listFeaturesRoute = createServerRoute({
       include_excluded: includeExcluded,
     } = params.query ?? {};
     const { hits: features } = query
-      ? await featureClient.findFeatures(params.path.name, query, { searchMode })
+      ? await featureClient.findFeatures(params.path.name, query, { searchMode, includeExcluded })
       : await featureClient.getFeatures(params.path.name, { includeExcluded });
 
     return { features };
@@ -180,6 +180,7 @@ export const listAllFeaturesRoute = createServerRoute({
       .object({
         query: z.string().optional().describe('Free-text query for semantic/keyword search'),
         search_mode: searchModeSchema.optional(),
+        include_excluded: BooleanFromString.optional(),
       })
       .optional(),
   }),
@@ -201,10 +202,14 @@ export const listAllFeaturesRoute = createServerRoute({
     const streamNames = streams.map((stream) => stream.name);
 
     const featureClient = await getFeatureClient();
-    const { query, search_mode: searchMode } = params?.query ?? {};
+    const {
+      query,
+      search_mode: searchMode,
+      include_excluded: includeExcluded,
+    } = params?.query ?? {};
     const { hits: features } = query
-      ? await featureClient.findFeatures(streamNames, query, { searchMode })
-      : await featureClient.getFeatures(streamNames);
+      ? await featureClient.findFeatures(streamNames, query, { searchMode, includeExcluded })
+      : await featureClient.getFeatures(streamNames, { includeExcluded });
 
     return { features };
   },

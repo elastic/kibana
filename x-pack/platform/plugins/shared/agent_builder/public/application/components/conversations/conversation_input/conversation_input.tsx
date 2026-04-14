@@ -72,7 +72,7 @@ const InputContainer: React.FC<
   const inputContainerStyles = css`
     width: 100%;
     min-height: ${isCollapsed ? '0' : INPUT_MIN_HEIGHT};
-    padding: ${euiTheme.size.base};
+    padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base};
     flex-grow: 0;
     transition: box-shadow 250ms, border-color 250ms, min-height 250ms ease-out;
     background-color: ${euiTheme.colors.backgroundBasePlain};
