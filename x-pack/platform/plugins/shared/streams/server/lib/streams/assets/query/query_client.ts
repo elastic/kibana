@@ -14,13 +14,13 @@ import type {
   StorageClientSearchRequest,
   StorageClientSearchResponse,
 } from '@kbn/storage-adapter';
+import { deriveQueryType } from '@kbn/streams-schema/src/helpers/esql_helpers';
+import type { Streams } from '@kbn/streams-schema/src/models/streams';
 import {
   type QueryType,
   type StreamQuery,
-  type Streams,
   QUERY_TYPE_STATS,
-  deriveQueryType,
-} from '@kbn/streams-schema';
+} from '@kbn/streams-schema/src/queries';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
