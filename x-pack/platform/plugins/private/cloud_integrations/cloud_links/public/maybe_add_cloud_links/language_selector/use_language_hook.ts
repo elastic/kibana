@@ -5,23 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useUpdateUserProfile, type LocaleValue as Locale } from '@kbn/user-profile-components';
+import type { LocaleValue as Locale } from '@kbn/user-profile-components';
+import { useUserProfileSetting } from '../use_user_profile_setting';
 
-const DEFAULT_LOCALE = 'en';
-
-interface LanguageAPI {
-  locale: Locale;
-  initialLocaleValue: Locale;
-  isVisible: boolean;
-  isLoading: boolean;
-  onChange: (locale: Locale, updateUserProfile: boolean) => void;
-}
-
-export const useLanguage = (): LanguageAPI => {
-  const { userProfileData, isLoading, update, userProfileLoaded } = useUpdateUserProfile({
-    notificationSuccess: {
+export const useLanguage = () => {
+  return useUserProfileSetting<Locale>({
+    settingKey: 'locale',
+    defaultValue: 'en',
+    notification: {
       title: i18n.translate('xpack.cloudLinks.userMenuLinks.language.successNotificationTitle', {
         defaultMessage: 'Language settings updated',
       }),
@@ -32,54 +24,5 @@ export const useLanguage = (): LanguageAPI => {
         }
       ),
     },
-    pageReloadChecker: (prev, next) => {
-      return prev?.userSettings?.locale !== next.userSettings?.locale;
-    },
   });
-
-  const { userSettings: { locale: localeUserProfile = DEFAULT_LOCALE } = {} } = userProfileData ?? {
-    userSettings: {},
-  };
-
-  const [locale, setLocale] = useState<Locale>(localeUserProfile);
-  const [initialLocaleValue, setInitialLocaleValue] = useState<Locale>(localeUserProfile);
-
-  const onChange = useCallback(
-    (updatedLocale: Locale, persist: boolean) => {
-      if (isLoading) {
-        return;
-      }
-
-      setLocale(updatedLocale);
-
-      if (!persist) {
-        return;
-      }
-
-      return update({
-        userSettings: {
-          locale: updatedLocale,
-        },
-      });
-    },
-    [isLoading, update]
-  );
-
-  useEffect(() => {
-    setLocale(localeUserProfile);
-    if (userProfileLoaded) {
-      const storedLocale = userProfileData?.userSettings?.locale;
-      if (storedLocale) {
-        setInitialLocaleValue(storedLocale);
-      }
-    }
-  }, [localeUserProfile, userProfileData, userProfileLoaded]);
-
-  return {
-    locale,
-    initialLocaleValue,
-    isVisible: Boolean(userProfileData),
-    isLoading,
-    onChange,
-  };
 };

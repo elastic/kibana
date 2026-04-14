@@ -30,7 +30,7 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
   const modalTitleId = useGeneratedHtmlId();
   const selectId = useGeneratedHtmlId();
 
-  const { locale, initialLocaleValue, isLoading, onChange } = useLanguage();
+  const { value: locale, initialValue: initialLocaleValue, isLoading, onChange } = useLanguage();
 
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
