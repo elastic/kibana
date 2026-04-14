@@ -16,7 +16,6 @@ trash
 /optimize
 /built_assets
 target
-target/types-bundled/
 /build
 .jruby
 .idea

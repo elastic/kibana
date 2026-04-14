@@ -366,4 +366,35 @@ export class TsProject {
       );
     });
   }
+
+  /**
+   * Get the typecheck-only refs for this project. These are dependencies that
+   * should be resolved via paths (not project references) during type-checking
+   * and are NOT included in Moon's project graph (avoiding cycles).
+   */
+  public getTypeCheckOnlyRefs(tsProjects: TsProject[]): TsProject[] {
+    const refs = this.config.typecheck_only_references;
+    if (!refs || !Array.isArray(refs)) {
+      return [];
+    }
+
+    const importMap = this.getImportMap(tsProjects);
+    return refs.flatMap((ref: string) => {
+      const project = importMap.get(ref);
+      if (!project) {
+        throw new Error(
+          `invalid typecheck_only_references in ${this.name}: ${ref} does not point to another TS project`
+        );
+      }
+
+      return (
+        TsProject.createFromCache(
+          this.cache,
+          project.path,
+          {},
+          `typecheck_only_references: ${JSON.stringify(ref)}`
+        ) ?? []
+      );
+    });
+  }
 }

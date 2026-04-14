@@ -11,7 +11,6 @@ import Fs from 'fs';
 import Path from 'path';
 import Fsp from 'fs/promises';
 
-import { Extractor, ExtractorConfig } from '@microsoft/api-extractor';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import {
@@ -35,56 +34,6 @@ import { isCiEnvironment } from './src/archive/utils';
 import { formatPathForLog } from './src/normalize_project_path';
 
 export const TSC_LABEL = 'tsc';
-
-const API_EXTRACTOR_BASE_CONFIG = Path.resolve(__dirname, 'api_extractor.base.json');
-
-/**
- * Runs api-extractor for a single project that has opted into bundled .d.ts generation.
- * Returns true if extraction succeeded, false otherwise.
- */
-const runApiExtractor = (log: ToolingLog, project: TsProject): boolean => {
-  const configObject = ExtractorConfig.loadFile(API_EXTRACTOR_BASE_CONFIG);
-
-  const extractorConfig = ExtractorConfig.prepare({
-    configObject,
-    configObjectFullPath: API_EXTRACTOR_BASE_CONFIG,
-    projectFolderLookupToken: project.directory,
-    packageJsonFullPath: Path.resolve(project.directory, 'package.json'),
-  });
-
-  const result = Extractor.invoke(extractorConfig, {
-    localBuild: true,
-    showVerboseMessages: false,
-  });
-
-  if (result.succeeded) {
-    log.info(`api-extractor succeeded for ${project.name}`);
-    return true;
-  }
-
-  log.warning(
-    `api-extractor completed with ${result.errorCount} error(s) and ${result.warningCount} warning(s) for ${project.name}`
-  );
-  return false;
-};
-
-/**
- * Runs api-extractor for all projects in the list that have opted into bundled .d.ts generation.
- * Failures are logged as warnings but do not throw.
- */
-export const runApiExtractorForProjects = (log: ToolingLog, projects: TsProject[]): void => {
-  const bundledTypesProjects = projects.filter((p) => p.hasBundledTypes());
-  if (bundledTypesProjects.length === 0) {
-    return;
-  }
-
-  log.info(
-    `Running api-extractor for ${bundledTypesProjects.length} project(s) with bundledTypes enabled`
-  );
-  for (const project of bundledTypesProjects) {
-    runApiExtractor(log, project);
-  }
-};
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
@@ -162,8 +111,10 @@ export async function createTypeCheckConfigs(
       queue.add(base);
     }
 
-    let paths =
-      project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined;
+    let paths: Record<string, string[]> | undefined =
+      project.repoRel === 'tsconfig.base.json'
+        ? (config.compilerOptions?.paths as Record<string, string[]> | undefined)
+        : undefined;
 
     // Filter out project references to bundledTypes packages — consumers resolve
     // these via per-project paths overrides to the bundled .d.ts instead.
@@ -172,31 +123,54 @@ export async function createTypeCheckConfigs(
     let filteredRefs = kbnRefs.filter((refd) => !bundledTypesSet.has(refd));
 
     // For consumers of a bundledTypes package: add per-project paths overrides mapping
-    // the bundledTypes package to its bundled .d.ts and remove the project reference.
-    if (bundledTypesRefs.length > 0 && !bundledTypesSet.has(project) && rootPaths) {
-      paths = { ...rootPaths };
+    // the bundledTypes package to its pre-built .d.ts and remove the project reference.
+    // We also need to add the bundledTypes package's transitive dependencies as project
+    // references so that their .d.ts output is available when TypeScript resolves imports
+    // inside the pre-built .d.ts files.
+    if (bundledTypesRefs.length > 0 && !bundledTypesSet.has(project)) {
+      paths = undefined;
       for (const bp of bundledTypesRefs) {
         const pkgName = bp.rootImportReq;
         if (pkgName) {
-          const bundledDtsPath = Path.join(
-            Path.dirname(bp.repoRel),
-            'target/types-bundled/index.public.d.ts'
-          );
+          paths = paths ?? {};
+          const bundledDtsPath = Path.join(Path.dirname(bp.repoRel), 'target/types/index.d.ts');
           paths[pkgName] = [bundledDtsPath];
+          // Also override the wildcard subpath mapping so that imports like
+          // @kbn/pkg/mocks or @kbn/pkg/internal resolve to compiled .d.ts
+          // in target/types/ instead of source files.
+          const typesWildcard = Path.join(Path.dirname(bp.repoRel), 'target/types/*');
+          paths[`${pkgName}/*`] = [typesWildcard];
+
+          // Add the bundledTypes package's own kbn_references as project references
+          // to this consumer so their compiled .d.ts is available when TypeScript resolves
+          // imports inside the pre-built .d.ts files.
+          for (const transitiveDep of bp.getKbnRefs(allProjects)) {
+            if (
+              !bundledTypesSet.has(transitiveDep) &&
+              !filteredRefs.includes(transitiveDep) &&
+              transitiveDep !== project
+            ) {
+              filteredRefs.push(transitiveDep);
+            }
+          }
         }
       }
     }
 
-    // For a bundledTypes package: if it references a consumer of itself, replace the
-    // project reference with a paths mapping to the consumer's pre-built .d.ts output.
-    // This avoids the diamond dependency: project reference .d.ts imports use the
-    // producing project's module resolution (which points to bundled .d.ts), but paths
-    // .d.ts imports use the consuming project's resolution (which points to source).
+    // For a bundledTypes package: resolve circular dependencies via paths instead
+    // of project references to avoid the diamond dependency problem.
     if (bundledTypesSet.has(project) && rootPaths) {
+      // kbn_references that are consumers of this bundledTypes package
       const circularConsumerRefs = filteredRefs.filter((ref) => consumersOfBundledTypes.has(ref));
-      if (circularConsumerRefs.length > 0) {
+
+      // typecheck_only_references: dependencies excluded from kbn_references (and Moon)
+      // to avoid project graph cycles, but still needed for type-checking.
+      const typeCheckOnlyRefs = project.getTypeCheckOnlyRefs(allProjects);
+
+      const allCircularRefs = [...circularConsumerRefs, ...typeCheckOnlyRefs];
+      if (allCircularRefs.length > 0) {
         paths = paths ?? { ...rootPaths };
-        for (const cr of circularConsumerRefs) {
+        for (const cr of allCircularRefs) {
           const pkgName = cr.rootImportReq;
           if (pkgName) {
             const compiledDtsPath = Path.join(Path.dirname(cr.repoRel), 'target/types/index.d.ts');
@@ -219,6 +193,7 @@ export async function createTypeCheckConfigs(
         paths,
       },
       kbn_references: undefined,
+      typecheck_only_references: undefined,
       references: filteredRefs.map((refd) => {
         queue.add(refd);
 
@@ -252,15 +227,15 @@ export async function createTypeCheckConfigs(
 }
 
 /**
- * Returns bundledTypes projects from allProjects that don't yet have a bundled .d.ts on disk.
- * These need to be built (tsc + api-extractor) before consumers can resolve their path mappings.
+ * Returns bundledTypes projects from allProjects that don't yet have pre-built .d.ts on disk.
+ * These need to be built (tsc --noCheck) before consumers can resolve their path mappings.
  */
 export const getBundledTypesProjectsNeedingBootstrap = (allProjects: TsProject[]): TsProject[] => {
   return allProjects.filter((p) => {
     if (!p.hasBundledTypes()) {
       return false;
     }
-    const bundledDtsPath = Path.resolve(p.directory, 'target/types-bundled/index.public.d.ts');
+    const bundledDtsPath = Path.resolve(p.directory, 'target/types/index.d.ts');
     return !Fs.existsSync(bundledDtsPath);
   });
 };
@@ -286,10 +261,14 @@ export const getCircularConsumersNeedingBootstrap = (allProjects: TsProject[]): 
   }
 
   // Find circular consumers: consumers that are also referenced by a bundledTypes package
+  // (via kbn_references or typecheck_only_references)
   const circularConsumers: TsProject[] = [];
+  const seen = new Set<string>();
   for (const bp of bundledTypesProjects) {
-    for (const ref of bp.getKbnRefs(allProjects)) {
-      if (consumers.has(ref)) {
+    const allRefs = [...bp.getKbnRefs(allProjects), ...bp.getTypeCheckOnlyRefs(allProjects)];
+    for (const ref of allRefs) {
+      if (consumers.has(ref) && !seen.has(ref.path)) {
+        seen.add(ref.path);
         const compiledDtsPath = Path.resolve(ref.directory, 'target/types/index.d.ts');
         if (!Fs.existsSync(compiledDtsPath)) {
           circularConsumers.push(ref);
@@ -302,10 +281,11 @@ export const getCircularConsumersNeedingBootstrap = (allProjects: TsProject[]): 
 };
 
 /**
- * Bootstrap bundledTypes packages by building them with a non-composite tsc invocation
- * followed by api-extractor. Non-composite mode can resolve circular imports between
- * packages via source files, which is not possible in composite/tsc -b mode due to rootDir
- * constraints. The resulting bundled .d.ts is then available for the main composite build.
+ * Bootstrap bundledTypes packages by building them with a non-composite
+ * tsc --noCheck --emitDeclarationOnly invocation. Non-composite mode can resolve
+ * circular imports between packages via source files, which is not possible in
+ * composite/tsc -b mode due to rootDir constraints. The resulting .d.ts output in
+ * target/types/ is then available for the main composite build via path mappings.
  */
 export const bootstrapBundledTypes = async (
   log: ToolingLog,
@@ -340,26 +320,7 @@ export const bootstrapBundledTypes = async (
       exclude: ['target/**/*'],
     };
 
-    // api-extractor reads tsconfig.type_check.json for compiler context — generate a
-    // matching config so it can resolve types from the bootstrap .d.ts output.
-    const typeCheckConfigPath = project.typeCheckConfigPath;
-    const typeCheckConfig = {
-      extends: '@kbn/tsconfig-base/tsconfig.json',
-      compilerOptions: {
-        outDir: 'target/types',
-        composite: true,
-        rootDir: '.',
-        noEmit: false,
-        emitDeclarationOnly: true,
-        types: ['jest', 'node'],
-      },
-      include: ['**/*.ts'],
-      exclude: ['target/**/*'],
-      references: [],
-    };
-
     await Fsp.writeFile(bootstrapConfigPath, JSON.stringify(bootstrapConfig, null, 2));
-    await Fsp.writeFile(typeCheckConfigPath, JSON.stringify(typeCheckConfig, null, 2));
 
     try {
       await procRunner.run('tsc-bootstrap', {
@@ -375,11 +336,8 @@ export const bootstrapBundledTypes = async (
         cwd: REPO_ROOT,
         wait: true,
       });
-
-      runApiExtractor(log, project);
     } finally {
       await Fsp.unlink(bootstrapConfigPath).catch(() => {});
-      // tsconfig.type_check.json will be regenerated by createTypeCheckConfigs
     }
   }
 };
@@ -419,10 +377,11 @@ export const bootstrapCircularConsumers = async (
       const pkgName = bp.rootImportReq;
       if (pkgName) {
         rootPaths[pkgName] = [
-          Path.relative(
-            REPO_ROOT,
-            Path.resolve(bp.directory, 'target/types-bundled/index.public.d.ts')
-          ),
+          Path.relative(REPO_ROOT, Path.resolve(bp.directory, 'target/types/index.d.ts')),
+        ];
+        // Override wildcard subpath to resolve to compiled .d.ts instead of source
+        rootPaths[`${pkgName}/*`] = [
+          Path.relative(REPO_ROOT, Path.resolve(bp.directory, 'target/types/*')),
         ];
       }
     }
@@ -495,10 +454,6 @@ export async function detectLocalChanges(): Promise<string[]> {
 export async function cleanTypeCheckCaches(log: ToolingLog, projects: TsProject[]) {
   await asyncForEachWithLimit(projects, 10, async (proj) => {
     await Fsp.rm(Path.resolve(proj.directory, 'target/types'), {
-      force: true,
-      recursive: true,
-    });
-    await Fsp.rm(Path.resolve(proj.directory, 'target/types-bundled'), {
       force: true,
       recursive: true,
     });
@@ -688,9 +643,6 @@ export const executeTypeCheckValidation = async ({
         wait: true,
       });
     }
-
-    // Run api-extractor for projects that opted into bundled .d.ts generation
-    runApiExtractorForProjects(log, selectedProjects);
   } catch (_error) {
     // Error details are surfaced via captured ToolingLog output from procRunner
     tscFailed = true;
