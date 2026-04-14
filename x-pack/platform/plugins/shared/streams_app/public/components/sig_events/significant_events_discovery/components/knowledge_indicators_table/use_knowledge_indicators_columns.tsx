@@ -67,6 +67,7 @@ export const useKnowledgeIndicatorsColumns = ({
       {
         name: TITLE_COLUMN_LABEL,
         truncateText: true,
+        width: '20em',
         render: (ki: KnowledgeIndicator) => {
           const title = getKnowledgeIndicatorTitle(ki);
           const isExpanded = selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(ki);
@@ -90,7 +91,7 @@ export const useKnowledgeIndicatorsColumns = ({
       },
       {
         name: EVENTS_COLUMN_LABEL,
-        width: '110px',
+        width: '7em',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind !== 'query' || !ki.rule.backed) {
             return null;
@@ -115,7 +116,7 @@ export const useKnowledgeIndicatorsColumns = ({
       },
       {
         name: TYPE_COLUMN_LABEL,
-        width: '90px',
+        width: '7.5em',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind === 'feature') {
             return (
@@ -129,7 +130,7 @@ export const useKnowledgeIndicatorsColumns = ({
       },
       {
         name: CONFIDENCE_COLUMN_LABEL,
-        width: '70px',
+        width: '6.5em',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind !== 'feature') return null;
           return (
@@ -141,14 +142,14 @@ export const useKnowledgeIndicatorsColumns = ({
       },
       {
         name: STREAM_COLUMN_LABEL,
-        width: '110px',
+        width: '9.5em',
         render: (ki: KnowledgeIndicator) => {
           return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
         },
       },
       {
         name: BACKED_STATUS_COLUMN,
-        width: '100px',
+        width: '7.5em',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind !== 'query') return null;
           return (
@@ -166,7 +167,7 @@ export const useKnowledgeIndicatorsColumns = ({
       },
       {
         name: ACTIONS_COLUMN_LABEL,
-        width: '60px',
+        width: '4em',
         align: 'right',
         render: (ki: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell
