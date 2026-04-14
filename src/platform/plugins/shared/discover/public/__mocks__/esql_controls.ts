@@ -8,18 +8,24 @@
  */
 
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
-import type { ESQLControlState, EsqlControlType } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import {
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
+import { EsqlControlType } from '@kbn/esql-types';
 
-export const mockControlState: ControlPanelsState<ESQLControlState> = {
+export const mockControlState: ControlPanelsState<OptionsListESQLControlState> = {
   panel1: {
+    ...DEFAULT_PINNED_CONTROL_STATE,
+    ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
     type: 'esqlControl',
-    availableOptions: ['bar', 'baz'],
-    variableType: 'values' as ESQLControlState['variableType'],
-    variableName: 'foo',
+    available_options: ['bar', 'baz'],
+    variable_type: 'values' as OptionsListESQLControlState['variable_type'],
+    variable_name: 'foo',
     title: 'Panel 1',
-    selectedOptions: ['bar'],
-    esqlQuery: '',
-    controlType: 'STATIC_VALUES' as EsqlControlType,
+    selected_options: ['bar'],
+    control_type: EsqlControlType.STATIC_VALUES,
     order: 0,
   },
 };

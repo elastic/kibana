@@ -61,6 +61,7 @@ import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
 import { EmailNotificationService } from './services/notifications/email_notification_service';
+import { handleGenerateSystemReportRequest } from './routes/common/request_handler/generate_system_report_request_handler';
 import { API_PRIVILEGES } from './features';
 
 export interface ReportingInternalSetup {
@@ -142,6 +143,14 @@ export class ReportingCore {
     this.getContract = () => ({
       registerExportTypes: (id) => id,
       getSpaceId: this.getSpaceId.bind(this),
+      handleGenerateSystemReportRequest: (path, requestParams, handleResponseFunc) =>
+        handleGenerateSystemReportRequest(
+          this,
+          this.logger,
+          path,
+          requestParams,
+          handleResponseFunc
+        ),
     });
 
     this.executing = new Set();
@@ -363,6 +372,10 @@ export class ReportingCore {
 
   public async scheduleTask(request: KibanaRequest, report: ReportTaskParams) {
     return await this.runSingleReportTask.scheduleTask(request, report);
+  }
+
+  public async scheduleTaskWithInternalES(request: KibanaRequest, report: ReportTaskParams) {
+    return await this.runSingleReportTask.scheduleTask(request, report, { useInternalUser: true });
   }
 
   public async scheduleRecurringTask(

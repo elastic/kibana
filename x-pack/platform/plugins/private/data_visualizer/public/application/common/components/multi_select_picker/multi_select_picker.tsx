@@ -35,7 +35,7 @@ const SELECT_PICKER_HEIGHT = '250px';
 const NoFilterItems = () => {
   return (
     <EuiSelectableMessage>
-      <EuiIcon type="minusInCircle" />
+      <EuiIcon type="minusCircle" />
       <EuiSpacer size="xs" />
       <p>
         <FormattedMessage
@@ -101,7 +101,7 @@ export const MultiSelectPicker: FC<{
   const button = (
     <EuiFilterButton
       data-test-subj={`${dataTestSubj}-button`}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={items.length}

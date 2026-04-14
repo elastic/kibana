@@ -38,6 +38,11 @@ jest.mock('../../../../../common/components/local_storage', () => ({
   useLocalStorage: jest.fn(),
 }));
 
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+
+jest.mock('../../../../../common/lib/kibana');
+
 describe('AttackDetailsContainer', () => {
   const mockAttack = getMockAttackDiscoveryAlerts()[0];
   const defaultProps = {
@@ -49,6 +54,7 @@ describe('AttackDetailsContainer', () => {
     filteredAlertsCount: 5,
   };
   const mockSetSelectedTabId = jest.fn();
+  const reportEventMock = jest.fn();
 
   const renderContainer = (props = {}) =>
     render(
@@ -60,6 +66,13 @@ describe('AttackDetailsContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useLocalStorage as jest.Mock).mockReturnValue([ATTACK_SUMMARY_TAB, mockSetSelectedTabId]);
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent: reportEventMock,
+        },
+      },
+    });
   });
 
   describe('tab rendering', () => {
@@ -119,6 +132,9 @@ describe('AttackDetailsContainer', () => {
       fireEvent.click(screen.getByText('Alerts'));
 
       expect(mockSetSelectedTabId).toHaveBeenCalledWith(ALERTS_TAB);
+      expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.ExpandedViewTabClicked, {
+        tab: 'alerts',
+      });
     });
 
     it('updates stored value to summary tab when tab is clicked', () => {
@@ -128,6 +144,9 @@ describe('AttackDetailsContainer', () => {
       fireEvent.click(screen.getByText('Attack summary'));
 
       expect(mockSetSelectedTabId).toHaveBeenCalledWith(ATTACK_SUMMARY_TAB);
+      expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.ExpandedViewTabClicked, {
+        tab: 'summary',
+      });
     });
   });
 });

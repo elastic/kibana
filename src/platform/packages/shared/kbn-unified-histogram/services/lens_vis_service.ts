@@ -16,7 +16,7 @@ import {
   hasTransformationalCommand,
   getCategorizeField,
   convertTimeseriesCommandToFrom,
-  hasDateBreakdown,
+  hasTimeseriesInfoCommand,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -27,7 +27,7 @@ import type {
   Suggestion,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
-  XYState,
+  XYVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
@@ -39,7 +39,7 @@ import {
   computeInterval,
 } from '@kbn/visualization-utils';
 import type { LegendSize } from '@kbn/chart-expressions-common';
-import type { XYState as XYConfiguration } from '@kbn/lens-common';
+import type { XYVisualizationState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
@@ -261,6 +261,14 @@ export class LensVisService {
               type: UnifiedHistogramSuggestionType.lensSuggestion,
             });
           }
+        } else if (hasTimeseriesInfoCommand(queryParams.query.esql)) {
+          // skip chart suggestions for info commands
+          return {
+            currentSuggestionContext: {
+              type: UnifiedHistogramSuggestionType.unsupported,
+              suggestion: undefined,
+            },
+          };
         } else {
           // appends an ES|QL histogram if available
           const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
@@ -497,7 +505,9 @@ export class LensVisService {
     let preferredVisAttributes = originalPreferredVisAttributes;
 
     if (preferredVisAttributes && breakdownColumn) {
-      const visualization = preferredVisAttributes?.state?.visualization as XYState | undefined;
+      const visualization = preferredVisAttributes?.state?.visualization as
+        | XYVisualizationState
+        | undefined;
       const layers = Array.isArray(visualization?.layers) ? visualization.layers : [];
       if (
         !layers.some(
@@ -520,7 +530,7 @@ export class LensVisService {
     }
 
     if (
-      dataView.isTimeBased() &&
+      dataView.timeFieldName &&
       timeRange &&
       isOfAggregateQueryType(query) &&
       !hasTransformationalCommand(query.esql)
@@ -659,14 +669,9 @@ export class LensVisService {
       return [];
     }
 
-    const mappedPreferredChartType = preferredVisAttributes
+    const preferredChartType = preferredVisAttributes
       ? mapVisToChartType(preferredVisAttributes.visualizationType)
       : undefined;
-
-    const preferredChartType =
-      !mappedPreferredChartType && hasDateBreakdown(query.esql, columns)
-        ? ChartType.Line
-        : mappedPreferredChartType;
 
     let visAttributes = preferredVisAttributes;
 

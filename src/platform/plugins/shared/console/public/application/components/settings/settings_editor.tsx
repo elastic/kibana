@@ -27,6 +27,7 @@ import { SettingsGroup } from './settings_group';
 import { SettingsFormRow } from './settings_form_row';
 import type { DevToolsSettings } from '../../../services';
 import type { EsHostService } from '../../lib';
+import { normalizeUrl } from '../../../lib/utils';
 
 const styles = {
   minWidthControl: css`
@@ -101,8 +102,13 @@ export const SettingsEditor = (props: Props) => {
         await props.esHostService.waitForInitialization();
         const hosts = props.esHostService.getAllHosts();
         setAvailableHosts(hosts);
-        // If no host is selected, default to the first one
-        if (!props.settings.selectedHost && hosts.length > 0) {
+
+        const storedHost = props.settings.selectedHost;
+        const isStoredHostValid =
+          storedHost != null && hosts.some((h) => normalizeUrl(h) === normalizeUrl(storedHost));
+
+        // Reset to first available host if nothing is selected OR if stored host is stale
+        if (!isStoredHostValid && hosts.length > 0) {
           setSelectedHost(hosts[0]);
         }
       }

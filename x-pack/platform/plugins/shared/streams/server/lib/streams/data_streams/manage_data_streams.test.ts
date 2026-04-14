@@ -5,12 +5,26 @@
  * 2.0.
  */
 
-import { getTemplateLifecycle, updateDataStreamsFailureStore } from './manage_data_streams';
+import {
+  getTemplateLifecycle,
+  updateDataStreamsFailureStore,
+  updateDataStreamsLifecycle,
+} from './manage_data_streams';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { Streams } from '@kbn/streams-schema';
 
+type MockLogger = Pick<Logger, 'debug' | 'error' | 'info' | 'warn'>;
+
+const createMockLogger = (): jest.Mocked<MockLogger> => ({
+  debug: jest.fn(),
+  error: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+});
+
 const createMockWiredStream = (name: string): Streams.WiredStream.Definition => ({
+  type: 'wired',
   name,
   description: 'Test wired stream',
   updated_at: new Date().toISOString(),
@@ -24,6 +38,7 @@ const createMockWiredStream = (name: string): Streams.WiredStream.Definition => 
 });
 
 const createMockClassicStream = (name: string): Streams.ClassicStream.Definition => ({
+  type: 'classic',
   name,
   description: 'Test classic stream',
   updated_at: new Date().toISOString(),
@@ -106,9 +121,73 @@ describe('getTemplateLifecycle', () => {
   });
 });
 
+describe('updateDataStreamsLifecycle downsampling', () => {
+  interface DownsamplingEsClient {
+    indices: Pick<ElasticsearchClient['indices'], 'putDataLifecycle'>;
+  }
+
+  let mockEsClient: jest.Mocked<DownsamplingEsClient>;
+  let mockLogger: jest.Mocked<MockLogger>;
+
+  beforeEach(() => {
+    mockEsClient = {
+      indices: {
+        putDataLifecycle: jest.fn().mockResolvedValue({}),
+      },
+    };
+
+    mockLogger = createMockLogger();
+  });
+
+  it('passes downsampling settings when provided', async () => {
+    await updateDataStreamsLifecycle({
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
+      names: ['test-stream'],
+      lifecycle: {
+        dsl: {
+          data_retention: '30d',
+          downsample: [{ after: '1d', fixed_interval: '1h' }],
+        },
+      },
+      isServerless: true,
+    });
+
+    expect(mockEsClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: ['test-stream'],
+      data_retention: '30d',
+      downsampling: [{ after: '1d', fixed_interval: '1h' }],
+    });
+  });
+
+  it('omits downsampling when no steps are provided', async () => {
+    await updateDataStreamsLifecycle({
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
+      names: ['test-stream'],
+      lifecycle: {
+        dsl: {
+          data_retention: '30d',
+          downsample: [],
+        },
+      },
+      isServerless: true,
+    });
+
+    expect(mockEsClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: ['test-stream'],
+      data_retention: '30d',
+    });
+  });
+});
+
 describe('updateDataStreamsFailureStore', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockLogger: jest.Mocked<Logger>;
+  interface FailureStoreEsClient {
+    indices: Pick<ElasticsearchClient['indices'], 'putDataStreamOptions' | 'simulateIndexTemplate'>;
+  }
+
+  let mockEsClient: jest.Mocked<FailureStoreEsClient>;
+  let mockLogger: jest.Mocked<MockLogger>;
 
   beforeEach(() => {
     mockEsClient = {
@@ -122,14 +201,9 @@ describe('updateDataStreamsFailureStore', () => {
           },
         }),
       },
-    } as any;
+    };
 
-    mockLogger = {
-      debug: jest.fn(),
-      error: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-    } as any;
+    mockLogger = createMockLogger();
   });
 
   it('enables failure store with lifecycle data retention', async () => {
@@ -138,8 +212,8 @@ describe('updateDataStreamsFailureStore', () => {
     };
 
     await updateDataStreamsFailureStore({
-      esClient: mockEsClient,
-      logger: mockLogger,
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
       failureStore,
       stream: createMockWiredStream('test-stream'),
       isServerless: false,
@@ -163,8 +237,8 @@ describe('updateDataStreamsFailureStore', () => {
     };
 
     await updateDataStreamsFailureStore({
-      esClient: mockEsClient,
-      logger: mockLogger,
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
       failureStore,
       stream: createMockWiredStream('test-stream'),
       isServerless: false,
@@ -187,8 +261,8 @@ describe('updateDataStreamsFailureStore', () => {
     };
 
     await updateDataStreamsFailureStore({
-      esClient: mockEsClient,
-      logger: mockLogger,
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
       failureStore,
       stream: createMockWiredStream('test-stream'),
       isServerless: false,
@@ -209,8 +283,8 @@ describe('updateDataStreamsFailureStore', () => {
     };
 
     await updateDataStreamsFailureStore({
-      esClient: mockEsClient,
-      logger: mockLogger,
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
       failureStore,
       stream: createMockWiredStream('test-stream'),
       isServerless: true,
@@ -233,8 +307,8 @@ describe('updateDataStreamsFailureStore', () => {
     };
 
     await updateDataStreamsFailureStore({
-      esClient: mockEsClient,
-      logger: mockLogger,
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
       failureStore,
       stream: createMockWiredStream('test-stream'),
       isServerless: false,
@@ -257,8 +331,8 @@ describe('updateDataStreamsFailureStore', () => {
     };
 
     await updateDataStreamsFailureStore({
-      esClient: mockEsClient,
-      logger: mockLogger,
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
       failureStore,
       stream: createMockClassicStream('test-stream'),
       isServerless: false,
@@ -290,8 +364,8 @@ describe('updateDataStreamsFailureStore', () => {
     };
 
     await updateDataStreamsFailureStore({
-      esClient: mockEsClient,
-      logger: mockLogger,
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
       failureStore,
       stream: createMockClassicStream('test-stream'),
       isServerless: false,
@@ -322,8 +396,8 @@ describe('updateDataStreamsFailureStore', () => {
 
     await expect(
       updateDataStreamsFailureStore({
-        esClient: mockEsClient,
-        logger: mockLogger,
+        esClient: mockEsClient as unknown as ElasticsearchClient,
+        logger: mockLogger as unknown as Logger,
         failureStore,
         stream: createMockWiredStream('test-stream'),
         isServerless: false,
@@ -341,8 +415,8 @@ describe('updateDataStreamsFailureStore', () => {
 
     await expect(
       updateDataStreamsFailureStore({
-        esClient: mockEsClient,
-        logger: mockLogger,
+        esClient: mockEsClient as unknown as ElasticsearchClient,
+        logger: mockLogger as unknown as Logger,
         failureStore: { inherit: {} },
         stream: createMockClassicStream('test-stream'),
         isServerless: false,

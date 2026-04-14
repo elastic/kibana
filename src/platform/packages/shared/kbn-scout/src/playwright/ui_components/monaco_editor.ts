@@ -9,6 +9,7 @@
 
 import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '..';
+import { expect } from '../../../ui';
 
 /**
  * Page object that wraps common interactions with the Kibana Monaco-based code editor.
@@ -18,6 +19,15 @@ import type { ScoutPage } from '..';
  */
 export class KibanaCodeEditorWrapper {
   constructor(private readonly page: ScoutPage) {}
+
+  /**
+   * Waits for the Monaco textarea inside the container (visible + enabled), like FTR
+   * `waitCodeEditorReady`.
+   */
+  async waitCodeEditorReady(dataTestSubjId: string): Promise<void> {
+    const editor = this.page.getByTestId(dataTestSubjId).getByTestId('kibanaCodeEditor');
+    await expect(editor).toBeVisible();
+  }
 
   /**
    * Returns the current value of the Monaco editor model at the given index.
@@ -30,28 +40,34 @@ export class KibanaCodeEditorWrapper {
    *   an empty string is returned.
    */
   async getCodeEditorValue(nthIndex: number = 0): Promise<string> {
-    return await this.page.evaluate((index) => {
-      const monacoEnv = (window as any).MonacoEnvironment;
+    let result = '';
 
-      if (!monacoEnv?.monaco?.editor) {
-        throw new Error('MonacoEnvironment.monaco.editor is not available');
-      }
+    await expect(async () => {
+      result = await this.page.evaluate((index) => {
+        const monacoEnv = (window as any).MonacoEnvironment;
 
-      const values: string[] = monacoEnv.monaco.editor
-        .getModels()
-        .map((model: any) => model.getValue() as string);
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
 
-      if (!values.length) {
-        return '';
-      }
+        const values: string[] = monacoEnv.monaco.editor
+          .getModels()
+          .map((model: any) => model.getValue() as string);
 
-      if (index >= 0 && index < values.length) {
-        return values[index]!;
-      }
+        if (!values.length) {
+          return '';
+        }
 
-      // Fallback to the first model value if the requested index is out of range
-      return values[0]!;
-    }, nthIndex);
+        if (index >= 0 && index < values.length) {
+          return values[index]!;
+        }
+
+        // Fallback to the first model value if the requested index is out of range
+        return values[0]!;
+      }, nthIndex);
+    }).toPass({ timeout: 30_000 });
+
+    return result;
   }
 
   /**

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -20,12 +20,14 @@ import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../commo
 import type { CloudConnectorUsageItem } from '../hooks/use_cloud_connector_usage';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 import { useUpdateCloudConnector } from '../hooks/use_update_cloud_connector';
+import { useDeleteCloudConnector } from '../hooks/use_delete_cloud_connector';
 
 import { CloudConnectorPoliciesFlyout } from '.';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_cloud_connector_usage');
 jest.mock('../hooks/use_update_cloud_connector');
+jest.mock('../hooks/use_delete_cloud_connector');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseCloudConnectorUsage = useCloudConnectorUsage as jest.MockedFunction<
@@ -33,6 +35,9 @@ const mockUseCloudConnectorUsage = useCloudConnectorUsage as jest.MockedFunction
 >;
 const mockUseUpdateCloudConnector = useUpdateCloudConnector as jest.MockedFunction<
   typeof useUpdateCloudConnector
+>;
+const mockUseDeleteCloudConnector = useDeleteCloudConnector as jest.MockedFunction<
+  typeof useDeleteCloudConnector
 >;
 
 describe('CloudConnectorPoliciesFlyout', () => {
@@ -96,6 +101,12 @@ describe('CloudConnectorPoliciesFlyout', () => {
       isLoading: false,
     } as unknown as ReturnType<typeof useUpdateCloudConnector>);
 
+    const mockDeleteMutate = jest.fn();
+    mockUseDeleteCloudConnector.mockReturnValue({
+      mutate: mockDeleteMutate,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useDeleteCloudConnector>);
+
     mockOnClose.mockClear();
     mockNavigateToApp.mockClear();
   });
@@ -150,7 +161,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     expect(
       screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.EMPTY_STATE)
     ).toBeInTheDocument();
-    expect(screen.getByText('No integrations using this cloud connector')).toBeInTheDocument();
+    expect(screen.getByText('No integrations using this federated identity')).toBeInTheDocument();
   });
 
   it('should show loading state', () => {
@@ -183,20 +194,23 @@ describe('CloudConnectorPoliciesFlyout', () => {
   });
 
   it('should enable save button when name is changed', async () => {
-    const user = userEvent.setup();
     renderFlyout();
 
-    const nameInput = screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT);
+    const nameInput = screen.getByTestId(
+      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
+    ) as HTMLInputElement;
     const saveButton = screen.getByTestId(
-      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
     );
 
     expect(saveButton).toBeDisabled();
 
-    await user.clear(nameInput);
-    await user.type(nameInput, 'New Name');
+    // Use fireEvent.change for controlled inputs - more reliable than userEvent
+    fireEvent.change(nameInput, { target: { value: 'New Name' } });
 
-    expect(saveButton).toBeEnabled();
+    await waitFor(() => {
+      expect(saveButton).toBeEnabled();
+    });
   });
 
   it('should call mutate when save button is clicked', async () => {
@@ -209,13 +223,15 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     renderFlyout();
 
-    const nameInput = screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT);
+    const nameInput = screen.getByTestId(
+      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
+    ) as HTMLInputElement;
     const saveButton = screen.getByTestId(
-      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
     );
 
-    await user.clear(nameInput);
-    await user.type(nameInput, 'New Name');
+    // Use fireEvent.change for controlled inputs - more reliable than userEvent
+    fireEvent.change(nameInput, { target: { value: 'New Name' } });
     await user.click(saveButton);
 
     expect(mockMutate).toHaveBeenCalledWith({ name: 'New Name' });
@@ -262,7 +278,27 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     expect(
       screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IDENTIFIER_TEXT)
-    ).toHaveTextContent('Cloud Connector ID: subscription-123');
+    ).toHaveTextContent('Federated Identity ID: subscription-123');
+  });
+
+  it('should display GCP service account email with Service Account Email label', () => {
+    renderFlyout({
+      provider: 'gcp',
+      cloudConnectorVars: {
+        'gcp.credentials.service_account_email': {
+          value: 'cspm-sa@my-project.iam.gserviceaccount.com',
+        },
+        'gcp.credentials.audience': {
+          value:
+            '//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+        },
+        gcp_credentials_cloud_connector_id: { value: { isSecretRef: true, id: 'secret-1' } },
+      },
+    });
+
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IDENTIFIER_TEXT)
+    ).toHaveTextContent('Service Account Email: cspm-sa@my-project.iam.gserviceaccount.com');
   });
 
   describe('pagination', () => {
@@ -387,7 +423,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       await user.paste('a'.repeat(256));
 
       expect(
-        screen.getByText('Cloud Connector Name must be 255 characters or less')
+        screen.getByText('Federated Identity Name must be 255 characters or less')
       ).toBeInTheDocument();
     });
 
@@ -399,7 +435,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
       );
       const saveButton = screen.getByTestId(
-        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
       );
 
       await user.clear(nameInput);
@@ -419,7 +455,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
       await user.clear(nameInput);
 
-      expect(screen.getByText('Cloud Connector Name is required')).toBeInTheDocument();
+      expect(screen.getByText('Federated Identity Name is required')).toBeInTheDocument();
     });
 
     it('should keep save button disabled when name is empty', async () => {
@@ -430,7 +466,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
       );
       const saveButton = screen.getByTestId(
-        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
       );
 
       await user.clear(nameInput);
@@ -446,7 +482,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
       );
       const saveButton = screen.getByTestId(
-        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
       );
 
       await user.clear(nameInput);
@@ -454,9 +490,9 @@ describe('CloudConnectorPoliciesFlyout', () => {
       await user.paste('Valid New Name');
 
       expect(saveButton).toBeEnabled();
-      expect(screen.queryByText('Cloud Connector Name is required')).not.toBeInTheDocument();
+      expect(screen.queryByText('Federated Identity Name is required')).not.toBeInTheDocument();
       expect(
-        screen.queryByText('Cloud Connector Name must be 255 characters or less')
+        screen.queryByText('Federated Identity Name must be 255 characters or less')
       ).not.toBeInTheDocument();
     });
 
@@ -468,7 +504,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT
       );
       const saveButton = screen.getByTestId(
-        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
       );
 
       await user.clear(nameInput);
@@ -477,7 +513,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
       expect(saveButton).toBeEnabled();
       expect(
-        screen.queryByText('Cloud Connector Name must be 255 characters or less')
+        screen.queryByText('Federated Identity Name must be 255 characters or less')
       ).not.toBeInTheDocument();
     });
   });
@@ -507,6 +543,180 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
       const badge = container.querySelector('.euiBadge');
       expect(badge?.className).toMatch(/euiBadge-default/);
+    });
+  });
+
+  describe('delete cloud connector', () => {
+    it('should render delete connector button', () => {
+      renderFlyout();
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONNECTOR_BUTTON)
+      ).toBeInTheDocument();
+    });
+
+    it('should disable delete button when there are integrations using the connector', () => {
+      renderFlyout();
+
+      const deleteButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONNECTOR_BUTTON
+      );
+      expect(deleteButton).toBeDisabled();
+    });
+
+    it('should enable delete button when no integrations are using the connector', () => {
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: { items: [], total: 0, page: 1, perPage: 10 },
+        isLoading: false,
+        error: null,
+      } as unknown as UseQueryResult<{
+        items: CloudConnectorUsageItem[];
+        total: number;
+        page: number;
+        perPage: number;
+      }>);
+
+      renderFlyout();
+
+      const deleteButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONNECTOR_BUTTON
+      );
+      expect(deleteButton).toBeEnabled();
+    });
+
+    it('should open confirmation modal when delete button is clicked', async () => {
+      const user = userEvent.setup();
+      mockUseDeleteCloudConnector.mockReturnValue({
+        mutate: jest.fn(),
+        isLoading: false,
+      } as unknown as ReturnType<typeof useDeleteCloudConnector>);
+
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: { items: [], total: 0, page: 1, perPage: 10 },
+        isLoading: false,
+        error: null,
+      } as unknown as UseQueryResult<{
+        items: CloudConnectorUsageItem[];
+        total: number;
+        page: number;
+        perPage: number;
+      }>);
+
+      renderFlyout();
+
+      const deleteButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONNECTOR_BUTTON
+      );
+      await user.click(deleteButton);
+
+      // Confirmation modal should be visible
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONFIRM_MODAL)
+      ).toBeInTheDocument();
+    });
+
+    it('should call delete mutate when confirm button is clicked in modal', async () => {
+      const user = userEvent.setup();
+      const mockDeleteMutate = jest.fn();
+      mockUseDeleteCloudConnector.mockReturnValue({
+        mutate: mockDeleteMutate,
+        isLoading: false,
+      } as unknown as ReturnType<typeof useDeleteCloudConnector>);
+
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: { items: [], total: 0, page: 1, perPage: 10 },
+        isLoading: false,
+        error: null,
+      } as unknown as UseQueryResult<{
+        items: CloudConnectorUsageItem[];
+        total: number;
+        page: number;
+        perPage: number;
+      }>);
+
+      renderFlyout();
+
+      // Click delete button to open modal
+      const deleteButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONNECTOR_BUTTON
+      );
+      await user.click(deleteButton);
+
+      // Click confirm button in modal
+      const confirmButton = screen.getByText('Delete identity');
+      await user.click(confirmButton);
+
+      expect(mockDeleteMutate).toHaveBeenCalledWith({});
+    });
+
+    it('should close modal when cancel button is clicked', async () => {
+      const user = userEvent.setup();
+      mockUseDeleteCloudConnector.mockReturnValue({
+        mutate: jest.fn(),
+        isLoading: false,
+      } as unknown as ReturnType<typeof useDeleteCloudConnector>);
+
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: { items: [], total: 0, page: 1, perPage: 10 },
+        isLoading: false,
+        error: null,
+      } as unknown as UseQueryResult<{
+        items: CloudConnectorUsageItem[];
+        total: number;
+        page: number;
+        perPage: number;
+      }>);
+
+      renderFlyout();
+
+      // Click delete button to open modal
+      const deleteButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONNECTOR_BUTTON
+      );
+      await user.click(deleteButton);
+
+      // Modal should be visible
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONFIRM_MODAL)
+      ).toBeInTheDocument();
+
+      // Click cancel button
+      const cancelButton = screen.getByText('Cancel');
+      await user.click(cancelButton);
+
+      // Modal should be closed
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONFIRM_MODAL)
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show loading state on delete button when deletion is in progress', () => {
+      mockUseDeleteCloudConnector.mockReturnValue({
+        mutate: jest.fn(),
+        isLoading: true,
+      } as unknown as ReturnType<typeof useDeleteCloudConnector>);
+
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: { items: [], total: 0, page: 1, perPage: 10 },
+        isLoading: false,
+        error: null,
+      } as unknown as UseQueryResult<{
+        items: CloudConnectorUsageItem[];
+        total: number;
+        page: number;
+        perPage: number;
+      }>);
+
+      renderFlyout();
+
+      // The delete button should show loading state
+      const deleteButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONNECTOR_BUTTON
+      );
+
+      // Check for loading spinner on the button
+      const loadingSpinner = deleteButton.querySelector('.euiLoadingSpinner');
+      expect(loadingSpinner).toBeInTheDocument();
     });
   });
 });

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+//
+// Do not change constant value - part of public REST APIs
+//
 export const APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE =
-  'APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE';
-export const APM_ALERTING_LATENCY_CHART_EMBEDDABLE = 'APM_ALERTING_LATENCY_CHART_EMBEDDABLE';
-export const APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE = 'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE';
+  'apm_alerting_failed_transactions_chart';
+export const APM_ALERTING_LATENCY_CHART_EMBEDDABLE = 'apm_alerting_latency_chart';
+export const APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE = 'apm_alerting_throughput_chart';

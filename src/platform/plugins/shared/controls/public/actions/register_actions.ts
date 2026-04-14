@@ -11,12 +11,15 @@ import {
   ACTION_CREATE_CONTROL,
   ACTION_CREATE_ESQL_CONTROL,
   ACTION_CREATE_TIME_SLIDER,
+} from '@kbn/controls-constants';
+import { ACTION_EDIT_PANEL, ACTION_REMOVE_PANEL } from '@kbn/presentation-panel-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  ADD_PANEL_TRIGGER,
+  ON_OPEN_PANEL_MENU,
   CONTROL_HOVER_TRIGGER_ID,
   CONTROL_MENU_TRIGGER,
-} from '@kbn/controls-constants';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ACTION_EDIT_PANEL, ACTION_REMOVE_PANEL } from '@kbn/presentation-panel-plugin/public';
-import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   ACTION_CLEAR_CONTROL,
   ACTION_EDIT_CONTROL_DISPLAY_SETTINGS,
@@ -24,22 +27,19 @@ import {
   OPTIONS_LIST_ACTION,
   RANGE_SLIDER_ACTION,
 } from './constants';
-import { controlHoverTrigger } from './controls_hover_trigger';
 
 export function registerActions(uiActions: UiActionsStart) {
-  uiActions.registerTrigger(controlHoverTrigger);
-
   uiActions.registerActionAsync(ACTION_CLEAR_CONTROL, async () => {
     const { ClearControlAction } = await import('../controls_module');
     return new ClearControlAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CLEAR_CONTROL);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_CLEAR_CONTROL);
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_CLEAR_CONTROL);
   uiActions.registerActionAsync(ACTION_PIN_CONTROL, async () => {
     const { PinControlAction } = await import('../controls_module');
     return new PinControlAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_PIN_CONTROL);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_PIN_CONTROL);
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_PIN_CONTROL);
 
   uiActions.registerActionAsync(ACTION_EDIT_CONTROL_DISPLAY_SETTINGS, async () => {

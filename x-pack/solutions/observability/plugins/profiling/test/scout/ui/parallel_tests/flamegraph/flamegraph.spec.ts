@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
-test.describe('Flamegraph page', { tag: ['@ess'] }, () => {
+test.describe('Flamegraph page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom, rangeTo } = testData.PROFILING_TEST_DATES;
 
   test.beforeEach(async ({ browserAuth }) => {

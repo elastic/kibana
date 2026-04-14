@@ -53,7 +53,8 @@ export const prepareEventHandler =
       eventHandler = callbacks.onAlertRule;
       if (shouldExecuteDefaultTriggers) {
         // this runs the function that we define in addTriggerActionAsync in the plugin.ts file in alertRulesDefinition
-        uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+        uiActions.executeTriggerActions(
+          VIS_EVENT_TO_TRIGGER[event.name],
           {
             data: event.data,
             embeddable: api,
@@ -73,7 +74,7 @@ export const prepareEventHandler =
 
     if (isLensFilterEvent(event) || isLensMultiFilterEvent(event) || isLensBrushEvent(event)) {
       if (shouldExecuteDefaultTriggers) {
-        uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+        uiActions.executeTriggerActions(VIS_EVENT_TO_TRIGGER[event.name], {
           data: {
             ...event.data,
             timeFieldName:
@@ -87,7 +88,8 @@ export const prepareEventHandler =
 
     if (isLensTableRowContextMenuClickEvent(event)) {
       if (shouldExecuteDefaultTriggers) {
-        uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+        uiActions.executeTriggerActions(
+          VIS_EVENT_TO_TRIGGER[event.name],
           {
             data: event.data,
             embeddable: api,

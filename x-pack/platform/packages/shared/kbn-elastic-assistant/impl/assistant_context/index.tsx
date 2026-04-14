@@ -143,6 +143,8 @@ export interface UseAssistantContext {
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<ModalSettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
+  isOverlayOpen: boolean;
+  setIsOverlayOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setTraceOptions: (traceOptions: {
     apmUrl: string;
     langSmithProject: string;
@@ -285,6 +287,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
    * Global Assistant Overlay actions
    */
   const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
   /**
    * Current User Avatar
@@ -357,6 +360,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       >,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
+      isOverlayOpen,
+      setIsOverlayOpen,
       setTraceOptions: setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,
@@ -400,6 +405,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       setShowAnonymizedValues,
       contentReferencesVisible,
       setContentReferencesVisible,
+      isOverlayOpen,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,

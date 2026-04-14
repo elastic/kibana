@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EntityStoreEuid } from '@kbn/entity-store/common/euid_helpers';
 import type { VulnSeverity } from './types/vulnerabilities';
 import type { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 
@@ -105,20 +106,43 @@ export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
 
-// space plachoder - to be replaced by the specific kibana space
-export const GENERIC_ENTITY_INDEX_ENRICH_POLICY =
-  'entity_store_field_retention_generic_<space>_v1.0.0';
-
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 
 /**
- * Entity store latest index pattern for LOOKUP JOIN queries.
- * The <space> placeholder should be replaced with the actual space ID.
+ * Relationship fields available in the generic entities index.
+ * These represent static/configuration-based relationships between entities.
+ *
+ * WARNING: ES|QL FORK supports a maximum of 8 branches. If more than 8 fields are added here,
+ * the relationship fetching logic in fetch_entity_relationships_graph.ts will need to be updated
+ * to batch the FORK queries.
  */
-export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_generic_<space>';
+export const ENTITY_RELATIONSHIP_FIELDS = [
+  'accesses_frequently',
+  'accesses_infrequently',
+  'communicates_with',
+  'depends_on',
+  'owns',
+  'owns_inferred',
+  'resolution.resolved_to',
+  'supervises',
+] as const;
+
+export const ENTITY_RELATIONSHIP_LABELS: Record<
+  (typeof ENTITY_RELATIONSHIP_FIELDS)[number],
+  string
+> = {
+  accesses_frequently: 'Accesses frequently',
+  accesses_infrequently: 'Accesses infrequently',
+  communicates_with: 'Communicates with',
+  depends_on: 'Depends on',
+  owns: 'Owns',
+  owns_inferred: 'Owns (inferred)',
+  'resolution.resolved_to': 'Resolved to',
+  supervises: 'Supervises',
+};
 
 /**
- * ECS entity actor fields used for graph visualization.
+ * ECS entity actor fields used for graph visualization (entity store v1 / pre-populated IDs).
  * NOTE: The order has meaning - it represents the fallback mechanism for detecting the actor field.
  */
 export const GRAPH_ACTOR_ENTITY_FIELDS = [
@@ -129,7 +153,7 @@ export const GRAPH_ACTOR_ENTITY_FIELDS = [
 ] as const;
 
 /**
- * ECS entity target fields used for graph visualization.
+ * ECS entity target fields used for graph visualization (entity store v1 / pre-populated IDs).
  * NOTE: The order does NOT have meaning - all target fields are captured and aggregated together.
  */
 export const GRAPH_TARGET_ENTITY_FIELDS = [
@@ -138,3 +162,37 @@ export const GRAPH_TARGET_ENTITY_FIELDS = [
   'service.target.entity.id',
   'entity.target.id',
 ] as const;
+/**
+ * Raw source fields used to compute actor EUIDs in entity store v2.
+ * These mirror the identity fields from Entity Store definitions.
+ * Server-side code derives these dynamically via euid.getEuidSourceFields().
+ */
+export const getGraphActorEuidSourceFields = (euid: EntityStoreEuid) => {
+  return {
+    user: [...euid.getEuidSourceFields('user').identitySourceFields],
+    host: [...euid.getEuidSourceFields('host').identitySourceFields],
+    service: [...euid.getEuidSourceFields('service').identitySourceFields],
+    generic: [...euid.getEuidSourceFields('generic').identitySourceFields],
+    all: ['event.dataset', 'event.module', 'data_stream.dataset'],
+  };
+};
+
+function toTargetField(field: string): string {
+  return field.replace('.', '.target.');
+}
+
+/**
+ * Raw source fields used to compute target EUIDs in entity store v2.
+ * Target-namespace equivalents of GRAPH_ACTOR_EUID_SOURCE_FIELDS.
+ */
+export const getGraphTargetEuidSourceFields = (euid: EntityStoreEuid) => {
+  return {
+    user: [...euid.getEuidSourceFields('user').identitySourceFields.map(toTargetField)],
+    host: [...euid.getEuidSourceFields('host').identitySourceFields.map(toTargetField)],
+    service: [...euid.getEuidSourceFields('service').identitySourceFields.map(toTargetField)],
+    generic: [...euid.getEuidSourceFields('generic').identitySourceFields.map(toTargetField)],
+    all: ['event.dataset', 'event.module', 'data_stream.dataset'],
+  };
+};
+
+export type EuidSourceFields = ReturnType<typeof getGraphActorEuidSourceFields>;

@@ -6,18 +6,23 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server';
-import type { ConnectorItem } from '../../common/http_api/tools';
+import type { ConnectorItem, OAuthStatus } from '../../common/http_api/tools';
 
 export const getTechnicalPreviewWarning = (featureName: string) => {
   return `${featureName} is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.`;
 };
 
 /**
- * Timeout for agentic features
+ * Timeout for agentic HTTP APIs - 15 mins
  */
-export const AGENT_SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
+export const AGENT_SOCKET_TIMEOUT_MS = 15 * 60 * 1000;
 
-export const toConnectorItem = (connector: Connector): ConnectorItem => {
+export const toConnectorItem = (
+  connector: Connector,
+  options?: {
+    oauthStatus?: OAuthStatus;
+  }
+): ConnectorItem => {
   return {
     id: connector.id,
     name: connector.name,
@@ -28,5 +33,7 @@ export const toConnectorItem = (connector: Connector): ConnectorItem => {
     isMissingSecrets: connector.isMissingSecrets,
     isConnectorTypeDeprecated: connector.isConnectorTypeDeprecated,
     config: connector.config,
+    authMode: connector.authMode,
+    oauthStatus: options?.oauthStatus,
   };
 };

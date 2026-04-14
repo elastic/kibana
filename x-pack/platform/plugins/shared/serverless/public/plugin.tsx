@@ -57,11 +57,10 @@ export class ServerlessPlugin
     });
 
     return {
-      initNavigation: (id, navigationTree$, config) => {
-        project.initNavigation(id, navigationTree$, config);
+      initNavigation: (id, navigationTree$) => {
+        project.initNavigation(id, navigationTree$);
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
-      setProjectHome: (homeHref: string) => project.setHome(homeHref),
       getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
         if (!roleManagementEnabled) return extendCardNavDefinitions;
 

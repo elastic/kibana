@@ -4,7 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getField, getFieldArray, getEventTitle, getAlertTitle } from './utils';
+
+import type { GetFieldsData } from './hooks/use_get_fields_data';
+import {
+  getField,
+  getFieldArray,
+  isRiskSeverity,
+  mergeLegacyIdentityWhenStoreEntityMissing,
+  normalizeRiskLevel,
+  resolveHostNameForEntityInsights,
+  resolveUserNameForEntityInsights,
+} from './utils';
 
 describe('getField', () => {
   it('should return the string value if field is a string', () => {
@@ -48,42 +58,112 @@ describe('getFieldArray', () => {
   });
 });
 
-describe('getEventTitle', () => {
-  it('should return event title based on category when event kind is event', () => {
+const emptyGetFieldsData: GetFieldsData = () => [];
+
+describe('resolveUserNameForEntityInsights', () => {
+  it('prefers user.name from document over user.id in identity map', () => {
     expect(
-      getEventTitle({
-        eventKind: 'event',
-        eventCategory: 'process',
-        getFieldsData: (field) => (field === 'process.name' ? 'process name' : ''),
-      })
-    ).toBe('process name');
+      resolveUserNameForEntityInsights({ 'user.id': 'id-1', 'entity.id': 'e-1' }, (field: string) =>
+        field === 'user.name' ? ['alice'] : []
+      )
+    ).toBe('alice');
   });
 
-  it('should return External alert details when event kind is alert', () => {
+  it('prefers user.name in identity map over user.id', () => {
     expect(
-      getEventTitle({ eventKind: 'alert', eventCategory: null, getFieldsData: jest.fn() })
-    ).toBe('External alert details');
+      resolveUserNameForEntityInsights(
+        { 'user.id': 'id-1', 'user.name': 'bob' },
+        emptyGetFieldsData
+      )
+    ).toBe('bob');
   });
 
-  it('should return generic event details when event kind is not event or alert', () => {
-    expect(
-      getEventTitle({ eventKind: 'metric', eventCategory: null, getFieldsData: jest.fn() })
-    ).toBe('Metric details');
-  });
-
-  it('should return Event details when event kind is null', () => {
-    expect(getEventTitle({ eventKind: null, eventCategory: null, getFieldsData: jest.fn() })).toBe(
-      'Event details'
+  it('falls back to user.id when no name fields exist', () => {
+    expect(resolveUserNameForEntityInsights({ 'user.id': 'uid-9' }, emptyGetFieldsData)).toBe(
+      'uid-9'
     );
   });
 });
 
-describe('getAlertTitle', () => {
-  it('should return Document details when ruleName is undefined', () => {
-    expect(getAlertTitle({ ruleName: undefined })).toBe('Document details');
+describe('resolveHostNameForEntityInsights', () => {
+  it('prefers host.name from document over host.id in identity map', () => {
+    expect(
+      resolveHostNameForEntityInsights({ 'host.id': 'h-1' }, (field: string) =>
+        field === 'host.name' ? ['srv'] : []
+      )
+    ).toBe('srv');
   });
 
-  it('should return ruleName when ruleName is defined', () => {
-    expect(getAlertTitle({ ruleName: 'test rule' })).toBe('test rule');
+  it('falls back to host.id when no name fields exist', () => {
+    expect(resolveHostNameForEntityInsights({ 'host.id': 'uuid-host' }, emptyGetFieldsData)).toBe(
+      'uuid-host'
+    );
+  });
+});
+
+describe('isRiskSeverity', () => {
+  it('returns true for valid severity values', () => {
+    expect(isRiskSeverity('Unknown')).toBe(true);
+    expect(isRiskSeverity('Low')).toBe(true);
+    expect(isRiskSeverity('Moderate')).toBe(true);
+    expect(isRiskSeverity('High')).toBe(true);
+    expect(isRiskSeverity('Critical')).toBe(true);
+  });
+
+  it('returns false for unrecognised values', () => {
+    expect(isRiskSeverity('critical')).toBe(false);
+    expect(isRiskSeverity('CRITICAL')).toBe(false);
+    expect(isRiskSeverity('')).toBe(false);
+    expect(isRiskSeverity('invalid')).toBe(false);
+  });
+});
+
+describe('normalizeRiskLevel', () => {
+  it('returns null for empty or undefined input', () => {
+    expect(normalizeRiskLevel(undefined)).toBeNull();
+    expect(normalizeRiskLevel('')).toBeNull();
+  });
+
+  it('normalises lowercase input', () => {
+    expect(normalizeRiskLevel('critical')).toBe('Critical');
+    expect(normalizeRiskLevel('high')).toBe('High');
+    expect(normalizeRiskLevel('moderate')).toBe('Moderate');
+    expect(normalizeRiskLevel('low')).toBe('Low');
+    expect(normalizeRiskLevel('unknown')).toBe('Unknown');
+  });
+
+  it('normalises uppercase input', () => {
+    expect(normalizeRiskLevel('CRITICAL')).toBe('Critical');
+    expect(normalizeRiskLevel('HIGH')).toBe('High');
+  });
+
+  it('passes through already-canonical values', () => {
+    expect(normalizeRiskLevel('Critical')).toBe('Critical');
+    expect(normalizeRiskLevel('High')).toBe('High');
+  });
+
+  it('returns null for unrecognised values', () => {
+    expect(normalizeRiskLevel('extreme')).toBeNull();
+    expect(normalizeRiskLevel('none')).toBeNull();
+  });
+});
+
+describe('mergeLegacyIdentityWhenStoreEntityMissing', () => {
+  it('returns store fields when they have usable values', () => {
+    expect(
+      mergeLegacyIdentityWhenStoreEntityMissing({ 'host.name': 'h1' }, { 'host.name': 'legacy' })
+    ).toEqual({ 'host.name': 'h1' });
+  });
+
+  it('falls back to legacy ECS pairs when store map is empty', () => {
+    expect(
+      mergeLegacyIdentityWhenStoreEntityMissing({}, { 'user.name': 'alice', 'host.name': 'srv' })
+    ).toEqual({ 'user.name': 'alice', 'host.name': 'srv' });
+  });
+
+  it('falls back when store map has only whitespace values', () => {
+    expect(
+      mergeLegacyIdentityWhenStoreEntityMissing({ 'host.name': '  ' }, { 'host.name': 'ok' })
+    ).toEqual({ 'host.name': 'ok' });
   });
 });

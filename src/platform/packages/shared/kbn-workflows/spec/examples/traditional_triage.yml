@@ -1,0 +1,213 @@
+version: '1'
+name: Traditional Triage
+description: Automates malware alert response — scans file hash with VirusTotal, creates a case, isolates the host, runs historical search, notifies on-call via Slack. Closes as false positive if benign.
+enabled: true
+
+triggers:
+  - type: manual
+  - type: alert
+
+inputs:
+  - name: description
+    type: string
+    default: this is a test case
+  - name: title
+    type: string
+    default: Test Case
+  - name: tags
+    type: array
+    default:
+      - automation
+      - test
+  - name: severity
+    type: string
+
+consts:
+  slack_token: 'YOUR-SECRET-HERE'
+
+steps:
+  - name: SendHashtoVT
+    type: virustotal.scanFileHash
+    connector-id: cfe97ee5-d881-4dc0-9a83-1ca39d9bc218
+    with:
+      hash: '{{event.alerts[0].file.hash.sha256}}'
+
+  - name: if_step
+    type: if
+    condition: steps.SendHashtoVT.output.stats.malicious > 10
+    steps:
+      - name: createCase
+        type: kibana.createCaseDefaultSpace
+        with:
+          connector:
+            fields: null
+            id: none
+            name: none
+            type: .none
+          description: This case is automatically being created due to a confirmed malicious file being detected.
+          owner: securitySolution
+          settings:
+            syncAlerts: false
+          severity: high
+          tags:
+            - automation
+          title: 'Malware Detected with SHA256 Hash: {{event.alerts[0].file.hash.sha256}}'
+
+      - name: create_alert_comment
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/cases/{{steps.createCase.output.id}}/comments
+          body:
+            type: alert
+            alertId: '{{event.alerts[0]._id}}'
+            index: '{{event.alerts[0]._index}}'
+            rule:
+              id: '{{event.rule.id}}'
+              name: '{{event.rule.name}}'
+            owner: securitySolution
+
+      - name: isolate_host
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/endpoint/action/isolate
+          body:
+            endpoint_ids:
+              - '{{event.alerts[0].elastic.agent.id}}'
+            comment: Automated Isolation due to Malware Infection - Case ID {{steps.createCase.output.id}}
+            case_ids:
+              - '{{steps.createCase.output.id}}'
+            alert_ids:
+              - '{{event.alerts[0]._id}}'
+
+      - name: Historical_search
+        type: elasticsearch.esql.query
+        with:
+          query: >-
+            FROM logs-* | WHERE file.hash.sha256 == "{{event.alerts[0].file.hash.sha256}}" | stats history_count =
+            count() | LIMIT 100
+          format: json
+
+      - name: add_history_search_comment
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/cases/{{steps.createCase.output.id}}/comments
+          body:
+            type: user
+            owner: securitySolution
+            comment: >
+              This hash is present {{steps.Historical_search.output.values[0][0]}} times in our logs. Run the following
+              query to get more details:
+
+                ```
+                FROM logs-* | WHERE file.hash.sha256 == "{{event.alerts[0].file.hash.sha256}}" | KEEP @timestamp,process.name,process.parent.name,host.name,user.name,file.hash.sha256 | LIMIT 1000
+                ```
+
+      - name: get_on_call
+        type: elasticsearch.esql.query
+        with:
+          query: FROM on-call-schedule | WHERE user.name IS NOT NULL
+          format: json
+
+      - name: create-slack-channel
+        type: http
+        with:
+          url: https://slack.com/api/conversations.create
+          method: POST
+          headers:
+            Content-Type: application/json; charset=utf-8
+            Authorization: Bearer {{ consts.slack_token }}
+          body:
+            name: "malware-incident-{{ 'now' | date: '%Y-%m-%d' }}"
+            is_private: false
+          timeout: 30s
+
+      - name: lookup_user_by_email
+        type: http
+        with:
+          url: https://slack.com/api/users.lookupByEmail?email={{ steps.get_on_call.output.values[0][0] }}
+          method: GET
+          headers:
+            Authorization: Bearer {{ consts.slack_token }}
+          timeout: 30s
+
+      - name: invite-users-to-channel
+        type: http
+        with:
+          url: https://slack.com/api/conversations.invite
+          method: POST
+          headers:
+            Content-Type: application/json; charset=utf-8
+            Authorization: Bearer {{ consts.slack_token }}
+          body:
+            channel: '{{steps.create-slack-channel.output.data.channel.id}}'
+            users: '{{ steps.lookup_user_by_email.output.data.user.id }}'
+          timeout: 30s
+
+      - name: post-welcome-message
+        type: http
+        with:
+          url: https://slack.com/api/chat.postMessage
+          method: POST
+          headers:
+            Content-Type: application/json; charset=utf-8
+            Authorization: Bearer {{ consts.slack_token }}
+          body:
+            channel: '{{steps.create-slack-channel.output.data.channel.id}}'
+            text: >-
+              <@{{ steps.lookup_user_by_email.output.data.user.id | replace: ',', '> <@' }}>  You have been added to
+              this channel to deal with an <{{kibanaUrl}}/app/security/cases/{{steps.createCase.output.id}}|Elastic
+              Security Case>
+          timeout: 30s
+
+      - name: suggest_oncall_user_profile
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /_security/profile/_suggest
+          body:
+            name: '{{ steps.get_on_call.output.values[0][0] }}'
+            size: 1
+
+      - name: get_latest_case_version
+        type: kibana.request
+        with:
+          method: GET
+          path: /api/cases/{{steps.createCase.output.id}}
+
+      - name: assign_case_to_oncall
+        type: kibana.request
+        with:
+          method: PATCH
+          path: /api/cases
+          body:
+            cases:
+              - id: '{{steps.createCase.output.id}}'
+                version: '{{steps.get_latest_case_version.output.version}}'
+                assignees:
+                  - uid: '{{steps.suggest_oncall_user_profile.output.profiles[0].uid}}'
+
+      - name: add_comment
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/cases/{{steps.createCase.output.id}}/comments
+          body:
+            type: user
+            owner: securitySolution
+            comment: >
+              {{steps.lookup_user_by_email.output.data.user.real_name}} is currently on call. Slack Channel
+              [malware-incident-{{ 'now' | date: '%Y-%m-%d'
+              }}](https://swiftcrypto.slack.com/archives/{{steps.create-slack-channel.output.data.channel.id}}) has been
+              created, and *{{steps.lookup_user_by_email.output.data.user.real_name}}* added. They have also been
+              assigned to this case.
+    else:
+      - name: close_alert_false_positive
+        type: kibana.SetAlertsStatus
+        with:
+          status: closed
+          reason: false_positive
+          signal_ids:
+            - '{{event.alerts[0]._id}}'

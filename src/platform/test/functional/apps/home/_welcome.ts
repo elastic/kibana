@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'home']);
 
-  describe('Welcome interstitial', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/243410
+  describe.skip('Welcome interstitial', () => {
     beforeEach(async () => {
       // Need to navigate to page first to clear storage before test can be run
       await PageObjects.common.navigateToUrl('home', undefined);

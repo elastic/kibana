@@ -109,7 +109,6 @@ inputs:
             type: string
           minItems: 1
           maxItems: 50
-          uniqueItems: true
           description: List of affected system hostnames or IPs
         tags:
           type: array
@@ -125,7 +124,6 @@ inputs:
               - data-exfiltration
           minItems: 1
           maxItems: 10
-          uniqueItems: true
           description: Incident classification tags
         enrichment:
           type: object
@@ -151,10 +149,7 @@ inputs:
               description: Associated threat actor groups
             iocs:
               type: object
-              additionalProperties:
-                type: array
-                items:
-                  type: string
+              additionalProperties: false
               description: Additional indicators of compromise
           additionalProperties: false
       required:

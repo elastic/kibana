@@ -3,11 +3,10 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "@kbn/ambient-ui-types",
       "jest",
       "node",
-      "react",
-      "@emotion/react/types/css-prop",
-      "../../../../../../typings/emotion.d.ts"
+      "react"
     ]
   },
   "include": [

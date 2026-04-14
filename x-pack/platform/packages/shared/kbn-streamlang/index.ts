@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-export type { StreamlangDSL, StreamType, StreamlangConditionBlock } from './types/streamlang';
-export { streamlangDSLSchema, isActionBlock, isConditionBlock } from './types/streamlang';
+export type {
+  StreamlangDSL,
+  StreamlangDSLWithUpdatedAt,
+  StreamType,
+  StreamlangConditionBlock,
+} from './types/streamlang';
+export {
+  streamlangDSLSchema,
+  streamlangDSLSchemaStrict,
+  isActionBlock,
+  isConditionBlock,
+} from './types/streamlang';
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
 export {
   transpile as transpileEsql,
@@ -17,12 +27,16 @@ export * from './types/processors';
 export * from './types/conditions';
 export type * from './types/ui';
 export * from './src/conditions/helpers';
+export * from './src/conditions/combine_conditions';
 export * from './src/conditions/condition_to_query_dsl';
 export * from './src/conditions/condition_to_painless';
 export * from './src/transpilers/shared/convert_for_ui';
 export * from './src/utilities';
 export { ACTION_METADATA_MAP, type ActionMetadata } from './src/actions/action_metadata';
-export { getJsonSchemaFromStreamlangSchema } from './src/schema/get_json_schema_from_streamlang_schema';
+export {
+  getJsonSchemaFromStreamlangSchema,
+  getConditionMonacoSchemaConfig,
+} from './src/schema/get_json_schema_from_streamlang_schema';
 export * from './src/validation';
 export {
   validateMathExpression,
@@ -34,3 +48,13 @@ export {
   getMathParameterNames,
 } from './src/transpilers/shared/math';
 export type { MathFunctionDefinition } from './src/transpilers/shared/math';
+export {
+  getAvailableGrokPatterns,
+  compileGrokPatternToRegex,
+  compileGrokPatternsToRegex,
+  isKnownGrokPattern,
+  BASE_GROK_PATTERNS,
+} from './types/utils/grok_to_regex';
+export type { CompiledRedactPattern } from './types/utils/grok_to_regex';
+export { streamlangOasDefinitions } from './src/oas_definitions';
+export type { StreamlangOasDefinitions } from './src/oas_definitions';

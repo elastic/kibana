@@ -61,6 +61,10 @@ export function ScheduleItemField({
 
     .euiFormControlLayout__append {
       padding-inline: 0 !important;
+
+      &:has(.euiSelect:focus) {
+        z-index: 1; // ensure focus outline is layered correctly in nested form layout
+      }
     }
 
     .euiFormControlLayoutIcons {
@@ -70,8 +74,12 @@ export function ScheduleItemField({
   const timeUnitSelectStyles = css`
     min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
     box-shadow: none;
-    background: ${euiTheme.colors.backgroundBasePrimary} !important;
+    background: transparent;
     color: ${euiTheme.colors.primary};
+
+    &:hover:not(:focus) {
+      outline: none !important;
+    }
   `;
 
   const onChangeTimeType = useCallback<NonNullable<EuiSelectProps['onChange']>>(

@@ -40,11 +40,19 @@ export {
   isAgentEligibleForPrivilegeLevelChange,
 } from './agent_privilege_level_change_helpers';
 export {
+  addUseAPMVarIfNotPresent,
+  DATA_STREAM_USE_APM_VAR,
+  shouldIncludeUseAPMVar,
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
   filterPolicyTemplatesTiles,
+  hasMultipleEnabledPolicyTemplates,
+  getPolicyTemplateInputDefinition,
+  registryInputAllowsDynamicSignalTypes,
+  packagePolicyInputAllowsUndefinedDataStreamType,
+  hasDynamicSignalTypes,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
 export type {
@@ -107,5 +115,24 @@ export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from '
 
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
 
+// Generic var_group helpers
+export type { VarGroupSelection } from './var_group_helpers';
+export {
+  getSelectedOption,
+  getVisibleVarsForOption,
+  getVarsControlledByVarGroups,
+  shouldShowVar,
+  isVarRequiredByVarGroup,
+  isVarInSelectedVarGroupOption,
+} from './var_group_helpers';
+
 // Cloud Connector accessor module
 export * from './cloud_connectors';
+
+export type { YamlModule } from './yaml_utils';
+export { createYamlKeysSorter, toYaml } from './yaml_utils';
+export {
+  packageInfoHasOtelInputs,
+  packagePolicyHasOtelInputs,
+  OTEL_INPUTS_MINIMUM_VERSION,
+} from './otelcol_helpers';

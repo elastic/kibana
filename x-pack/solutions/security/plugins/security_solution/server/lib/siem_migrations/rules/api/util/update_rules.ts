@@ -12,15 +12,9 @@ import { type UpdateRuleMigrationRule } from '../../../../../../common/siem_migr
 import type { InternalUpdateRuleMigrationRule } from '../../types';
 
 export const isValidEsqlQuery = (esqlQuery: string) => {
-  const { isEsqlQueryAggregating, hasMetadataOperator, errors } = parseEsqlQuery(esqlQuery);
+  const { errors } = parseEsqlQuery(esqlQuery);
 
-  // Check if there are any syntax errors
   if (errors.length) {
-    return false;
-  }
-
-  // non-aggregating query which does not have metadata, is not a valid one
-  if (!isEsqlQueryAggregating && !hasMetadataOperator) {
     return false;
   }
 

@@ -15,10 +15,7 @@ import type {
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ES_SEARCH_PLAYGROUND_ID,
-  SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
   SEARCH_HOMEPAGE,
-  SEARCH_INDICES,
-  SEARCH_INDICES_CREATE_INDEX,
   ES_SEARCH_SYNONYMS_ID,
   SEARCH_QUERY_RULES_ID,
   SEARCH_INDEX_MANAGEMENT,
@@ -32,11 +29,9 @@ export type EnterpriseSearchAnalyticsApp = typeof ENTERPRISE_SEARCH_ANALYTICS_AP
 export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 export type ServerlessWebCrawlers = typeof SERVERLESS_ES_WEB_CRAWLERS_ID;
 export type SearchPlaygroundId = typeof ES_SEARCH_PLAYGROUND_ID;
-export type SearchInferenceEndpointsId = typeof SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID;
 export type SearchSynonymsId = typeof ES_SEARCH_SYNONYMS_ID;
 export type SearchQueryRulesId = typeof SEARCH_QUERY_RULES_ID;
 export type SearchHomepage = typeof SEARCH_HOMEPAGE;
-export type SearchIndices = typeof SEARCH_INDICES;
 export type SearchIndexManagement = typeof SEARCH_INDEX_MANAGEMENT;
 export type SearchGettingStarted = typeof SEARCH_GETTING_STARTED;
 
@@ -44,11 +39,7 @@ export type ContentLinkId = 'connectors' | 'webCrawlers';
 
 export type ApplicationsLinkId = 'searchApplications';
 
-export type SearchInferenceEndpointsLinkId = 'inferenceEndpoints';
-
 export type SynonymsLinkId = 'synonyms';
-
-export type SearchIndicesLinkId = typeof SEARCH_INDICES_CREATE_INDEX;
 
 export type DeepLinkId =
   | EnterpriseSearchApp
@@ -58,15 +49,11 @@ export type DeepLinkId =
   | ConnectorsId
   | ServerlessWebCrawlers
   | SearchPlaygroundId
-  | SearchInferenceEndpointsId
   | SearchSynonymsId
   | SearchQueryRulesId
   | SearchHomepage
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
-  | `${SearchInferenceEndpointsId}:${SearchInferenceEndpointsLinkId}`
   | `${SearchSynonymsId}:${SynonymsLinkId}`
-  | SearchIndices
   | SearchIndexManagement
-  | SearchGettingStarted
-  | `${SearchIndices}:${SearchIndicesLinkId}`;
+  | SearchGettingStarted;

@@ -28,6 +28,7 @@
       "{index}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-create",
     "availability": {
       "stack": true,
       "serverless": true

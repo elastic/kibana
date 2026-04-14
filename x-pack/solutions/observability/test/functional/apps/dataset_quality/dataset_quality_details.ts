@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import originalExpect from 'expect';
 import moment from 'moment';
 import { IndexTemplateName } from '@kbn/synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import type { DatasetQualityFtrProviderContext } from './config';
@@ -59,7 +58,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   };
 
   const regularDatasetName = datasetNames[0];
-  const regularDataStreamName = `logs-${datasetNames[0]}-${defaultNamespace}`;
+  const regularDataStreamName = `logs-${regularDatasetName}-${defaultNamespace}`;
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
   const failedDatasetName = datasetNames[1];
@@ -261,12 +260,19 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
       });
 
-      it('should go to discover for failed docs when the button next to breakdown selector is clicked', async () => {
+      it('should go to discover in ES|QL mode for failed docs when the button next to breakdown selector is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: failedDataStreamName,
         });
 
         await PageObjects.datasetQuality.selectQualityIssueChart('failed');
+
+        // Wait for the URL to reflect the chart selection before clicking the link,
+        // otherwise the Discover link may still hold the degraded-docs query.
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          expect(decodeURIComponent(currentUrl)).to.contain('qualityIssuesChart:failed');
+        });
 
         // This line is required to solve problems where rendered lens visualisation below gets the hover bringing additional action icons
         // which over lap with the button on top of the visualisation causing ElementClickInterceptedError to happen
@@ -278,10 +284,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in discover
+        // Confirm URL contains ES|QL query for failure store
         await retry.tryForTime(5000, async () => {
-          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-          originalExpect(datasetSelectorText).toMatch(`${failedDataStreamName}::failures`);
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
+
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${failedDataStreamName}::failures`);
         });
       });
 
@@ -467,10 +477,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         await discoverButton.click();
 
-        // Confirm dataset selector text in observability logs explorer
-        await retry.try(async () => {
-          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-          originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        // Confirm URL contains ES|QL query for the data stream
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
+
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${regularDataStreamName}`);
+          expect(decodedUrl).to.contain('_ignored');
+          expect(decodedUrl).to.contain('IS NOT NULL');
         });
       });
 
@@ -489,10 +505,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in observability logs explorer
-        await retry.try(async () => {
-          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-          originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+        // Confirm URL contains ES|QL query for degraded docs
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
+
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${apacheAccessDataStreamName}`);
+          expect(decodedUrl).to.contain('_ignored');
+          expect(decodedUrl).to.contain('IS NOT NULL');
         });
       });
     });

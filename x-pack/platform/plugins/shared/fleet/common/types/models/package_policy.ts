@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
+import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
 import type { SecretReference } from './secret';
 
 export interface PackagePolicyPackage {
@@ -32,7 +32,7 @@ export interface NewPackagePolicyInputStream {
   keep_enabled?: boolean;
   data_stream: {
     dataset: string;
-    type: string;
+    type?: string;
     elasticsearch?: {
       // TODO: these don't really need to be defined in the package policy schema and could be pulled directly from
       // the package where needed.
@@ -51,6 +51,7 @@ export interface NewPackagePolicyInputStream {
   vars?: PackagePolicyConfigRecord;
   var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
+  migrate_from?: string;
 }
 
 export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
@@ -65,8 +66,11 @@ export interface NewPackagePolicyInput {
   enabled: boolean;
   keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
+  deprecated?: DeprecationInfo;
+  migrate_from?: string;
 }
 
 export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams'> {
@@ -121,6 +125,7 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   updated_by: string;
   created_at: string;
   created_by: string;
+  package_agent_version_condition?: string;
 }
 
 export type DryRunPackagePolicy = NewPackagePolicy & {

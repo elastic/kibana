@@ -3,7 +3,17 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
+  "include": [
+    "*.ts",
+    ".storybook/**/*.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/scout/**/*",
+    "test/scout_oas_schema/**/*",
+    "test/scout_oas_schema/**/*.json",
+    "test/scout_anonymous_authc/**/*",
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -56,7 +66,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/logging",
     "@kbn/presentation-publishing",
-    "@kbn/presentation-containers",
     "@kbn/presentation-panel-plugin",
     "@kbn/content-management-table-list-view-common",
     "@kbn/shared-ux-utility",
@@ -97,12 +106,24 @@
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
     "@kbn/cps",
+    "@kbn/as-code-filters-schema",
+    "@kbn/as-code-filters-transforms",
     "@kbn/scout",
     "@kbn/test",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-app-menu",
     "@kbn/test-jest-helpers",
-    "@kbn/image-embeddable-plugin",
+    "@kbn/scout",
+    "@kbn/cps-utils",
+    "@kbn/code-editor-mock",
+    "@kbn/monaco",
+    "@kbn/code-editor",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/as-code-shared-transforms",
+    "@kbn/core-http-common",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/lens-common"
   ],
   "exclude": ["target/**/*"]
 }

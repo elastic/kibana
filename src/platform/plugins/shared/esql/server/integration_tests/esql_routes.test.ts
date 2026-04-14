@@ -32,7 +32,7 @@ describe('ESQL routes', () => {
 
     expect(item1).toMatchObject({
       name: 'lookup_index1',
-      mode: 'lookup',
+      mode: 'Lookup',
       aliases: [],
     });
 
@@ -40,7 +40,7 @@ describe('ESQL routes', () => {
 
     expect(item2).toMatchObject({
       name: 'lookup_index2',
-      mode: 'lookup',
+      mode: 'Lookup',
       aliases: ['lookup_index2_alias1', 'lookup_index2_alias2'],
     });
   });
@@ -54,7 +54,7 @@ describe('ESQL routes', () => {
 
     expect(item1).toMatchObject({
       name: 'ts_index1',
-      mode: 'time_series',
+      mode: 'Timeseries',
       aliases: [],
     });
 
@@ -62,7 +62,7 @@ describe('ESQL routes', () => {
 
     expect(item2).toMatchObject({
       name: 'ts_index2',
-      mode: 'time_series',
+      mode: 'Timeseries',
       aliases: ['ts_index2_alias1', 'ts_index2_alias2'],
     });
   });
@@ -79,6 +79,20 @@ describe('ESQL routes', () => {
         expect.objectContaining({ name: 'ts_index2', type: 'Timeseries' }),
       ])
     );
+  });
+
+  it('can load ES|QL views (GET /internal/esql/views)', async () => {
+    const url = '/internal/esql/views';
+    const result = await testbed.GET(url).send().expect(200);
+
+    expect(result.body).toHaveProperty('views');
+    expect(Array.isArray(result.body.views)).toBe(true);
+    result.body.views.forEach((view: { name: string; query: string }) => {
+      expect(view).toHaveProperty('name');
+      expect(view).toHaveProperty('query');
+      expect(typeof view.name).toBe('string');
+      expect(typeof view.query).toBe('string');
+    });
   });
 
   it('can load the inference endpoints by type', async () => {
@@ -205,6 +219,152 @@ describe('ESQL routes', () => {
       // Cleanup
       await client.indices.delete({ index: index1 });
       await client.indices.delete({ index: index2 });
+    });
+
+    it('should return @timestamp for multiple indices without subqueries when all have @timestamp', async () => {
+      const index1 = 'multi_ts_index1';
+      const index2 = 'multi_ts_index2';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: index1,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            field1: { type: 'keyword' },
+          },
+        },
+      });
+
+      await client.indices.create({
+        index: index2,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            field2: { type: 'keyword' },
+          },
+        },
+      });
+
+      const query = `FROM ${index1}, ${index2}`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe('@timestamp');
+
+      // Cleanup
+      await client.indices.delete({ index: index1 });
+      await client.indices.delete({ index: index2 });
+    });
+
+    it('should return @timestamp for multiple indices without subqueries when only some have @timestamp', async () => {
+      const index1 = 'mixed_ts_index1';
+      const index2 = 'mixed_no_ts_index2';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: index1,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            field1: { type: 'keyword' },
+          },
+        },
+      });
+
+      await client.indices.create({
+        index: index2,
+        mappings: {
+          properties: {
+            created_at: { type: 'date' },
+            field2: { type: 'keyword' },
+          },
+        },
+      });
+
+      const query = `FROM ${index1}, ${index2}`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe('@timestamp');
+
+      // Cleanup
+      await client.indices.delete({ index: index1 });
+      await client.indices.delete({ index: index2 });
+    });
+
+    it('should return @timestamp when ES|QL source is a view that returns @timestamp', async () => {
+      const indexName = 'test_timefield_view_index';
+      const viewName = 'test-timefield-view';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: indexName,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            message: { type: 'text' },
+          },
+        },
+      });
+
+      await client.transport.request({
+        method: 'PUT',
+        path: `/_query/view/${encodeURIComponent(viewName)}`,
+        body: {
+          query: `FROM ${indexName}`,
+        },
+      });
+
+      const query = `FROM ${viewName}`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe('@timestamp');
+
+      // Cleanup
+      await client.transport.request({
+        method: 'DELETE',
+        path: `/_query/view/${encodeURIComponent(viewName)}`,
+      });
+      await client.indices.delete({ index: indexName });
+    });
+
+    it('should return undefined when ES|QL source is a view that does not return @timestamp', async () => {
+      const indexName = 'test_no_timefield_view_index';
+      const viewName = 'test-no-timefield-view';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: indexName,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            message: { type: 'text' },
+          },
+        },
+      });
+
+      await client.transport.request({
+        method: 'PUT',
+        path: `/_query/view/${encodeURIComponent(viewName)}`,
+        body: {
+          query: `FROM ${indexName} | KEEP message`,
+        },
+      });
+
+      const query = `FROM ${viewName}`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe(undefined);
+
+      // Cleanup
+      await client.transport.request({
+        method: 'DELETE',
+        path: `/_query/view/${encodeURIComponent(viewName)}`,
+      });
+      await client.indices.delete({ index: indexName });
     });
   });
 

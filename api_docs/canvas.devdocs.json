@@ -59,7 +59,7 @@
         "CanvasApi"
       ],
       "path": "x-pack/platform/plugins/private/canvas/public/plugin.tsx",
-      "lineNumber": 74,
+      "lineNumber": 73,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -77,7 +77,7 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/private/canvas/public/plugin.tsx",
-      "lineNumber": 82,
+      "lineNumber": 81,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

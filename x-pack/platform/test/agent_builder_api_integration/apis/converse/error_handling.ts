@@ -17,59 +17,82 @@ import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
-import { createAgentBuilderApiClient } from '../../utils/agent_builder_client';
+import { createAgentBuilderApiClient, type ExecutionMode } from '../../utils/agent_builder_client';
 import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
 
-export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
-  const supertest = getService('supertest');
-  const log = getService('log');
-  const agentBuilderApiClient = createAgentBuilderApiClient(supertest);
+export function createErrorHandlingTests(executionMode: ExecutionMode) {
+  return function ({ getService }: AgentBuilderApiFtrProviderContext) {
+    const supertest = getService('supertest');
+    const log = getService('log');
+    const agentBuilderApiClient = createAgentBuilderApiClient(supertest, { executionMode });
 
-  describe('POST /api/agent_builder/converse: error handling', () => {
-    let llmProxy: LlmProxy;
-    let connectorId: string;
+    describe(`[${executionMode}] error handling`, () => {
+      let llmProxy: LlmProxy;
+      let connectorId: string;
 
-    const USER_PROMPT = 'Please do something';
-    const MOCKED_LLM_TITLE = 'Mocked conversation title';
-    const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
+      const USER_PROMPT = 'Please do something';
+      const MOCKED_LLM_TITLE = 'Mocked conversation title';
+      const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
 
-    before(async () => {
-      llmProxy = await createLlmProxy(log);
-      connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
-    });
-
-    after(async () => {
-      llmProxy.close();
-      await deleteActionConnector(getService, { actionId: connectorId });
-    });
-
-    it('recovers and calls the LLM again when the answer agent tries calling a tool', async () => {
-      await setupAnswerAgentCallsInvalidTool({
-        proxy: llmProxy,
-        title: MOCKED_LLM_TITLE,
-        response: MOCKED_LLM_RESPONSE,
+      before(async () => {
+        llmProxy = await createLlmProxy(log);
+        connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
       });
 
-      const body = await agentBuilderApiClient.converse({
-        input: USER_PROMPT,
-        connector_id: connectorId,
+      after(async () => {
+        llmProxy.close();
+        await deleteActionConnector(getService, { actionId: connectorId });
       });
 
-      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+      it('recovers and calls the LLM again when the answer agent tries calling a tool', async () => {
+        await setupAnswerAgentCallsInvalidTool({
+          proxy: llmProxy,
+          title: MOCKED_LLM_TITLE,
+          response: MOCKED_LLM_RESPONSE,
+        });
 
-      expect(body.response.message).to.eql(MOCKED_LLM_RESPONSE);
+        const body = await agentBuilderApiClient.converse({
+          input: USER_PROMPT,
+          connector_id: connectorId,
+        });
 
-      const retryRequest = llmProxy.interceptedRequests.find(
-        (request) => request.matchingInterceptorName === 'final-assistant-response'
-      )!.requestBody;
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      const messages = retryRequest.messages;
+        expect(body.response.message).to.eql(MOCKED_LLM_RESPONSE);
 
-      const errorMessage = JSON.parse(messages[messages.length - 1].content as string).response;
+        const retryRequest = llmProxy.interceptedRequests.find(
+          (request) => request.matchingInterceptorName === 'final-assistant-response'
+        )?.requestBody;
 
-      expect(errorMessage).to.contain('ERROR: called a tool which was not available');
+        expect(retryRequest).to.not.be(undefined);
+
+        const messages = (retryRequest as { messages: Array<{ role?: string; content?: unknown }> })
+          .messages;
+
+        // The retry request includes a mix of human/assistant/tool messages.
+        // We want the tool-result message that carries the "tool not available" error.
+        const lastToolMessage = [...messages]
+          .reverse()
+          .find((m) => m?.role === 'tool' && typeof m?.content === 'string');
+
+        expect(lastToolMessage).to.not.be(undefined);
+
+        const toolContent = lastToolMessage!.content as string;
+        let errorMessage = toolContent;
+        // Some layers may wrap tool result content in a JSON string.
+        try {
+          const parsed = JSON.parse(toolContent) as { response?: unknown };
+          if (parsed && typeof parsed === 'object' && typeof parsed.response === 'string') {
+            errorMessage = parsed.response;
+          }
+        } catch {
+          // Non-JSON tool content; use as-is.
+        }
+
+        expect(errorMessage).to.contain('ERROR: called a tool which was not available');
+      });
     });
-  });
+  };
 }
 
 /**

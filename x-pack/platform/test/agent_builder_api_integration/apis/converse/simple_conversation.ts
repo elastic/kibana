@@ -15,69 +15,71 @@ import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
-import { createAgentBuilderApiClient } from '../../utils/agent_builder_client';
+import { createAgentBuilderApiClient, type ExecutionMode } from '../../utils/agent_builder_client';
 
-export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
-  const supertest = getService('supertest');
+export function createSimpleConversationTests(executionMode: ExecutionMode) {
+  return function ({ getService }: AgentBuilderApiFtrProviderContext) {
+    const supertest = getService('supertest');
 
-  const log = getService('log');
-  const agentBuilderApiClient = createAgentBuilderApiClient(supertest);
+    const log = getService('log');
+    const agentBuilderApiClient = createAgentBuilderApiClient(supertest, { executionMode });
 
-  describe('POST /api/agent_builder/converse: simple conversation', function () {
-    let llmProxy: LlmProxy;
-    let connectorId: string;
-
-    before(async () => {
-      llmProxy = await createLlmProxy(log);
-      connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
-    });
-
-    after(async () => {
-      llmProxy.close();
-      await deleteActionConnector(getService, { actionId: connectorId });
-    });
-
-    describe('when the payload is valid', () => {
-      const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
-      const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
-      let body: ChatResponse;
+    describe(`[${executionMode}] simple conversation`, function () {
+      let llmProxy: LlmProxy;
+      let connectorId: string;
 
       before(async () => {
-        await setupAgentDirectAnswer({
-          proxy: llmProxy,
-          title: MOCKED_LLM_TITLE,
-          response: MOCKED_LLM_RESPONSE,
+        llmProxy = await createLlmProxy(log);
+        connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
+      });
+
+      after(async () => {
+        llmProxy.close();
+        await deleteActionConnector(getService, { actionId: connectorId });
+      });
+
+      describe('when the payload is valid', () => {
+        const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
+        const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
+        let body: ChatResponse;
+
+        before(async () => {
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            title: MOCKED_LLM_TITLE,
+            response: MOCKED_LLM_RESPONSE,
+          });
+
+          body = await agentBuilderApiClient.converse({
+            input: 'Hello AgentBuilder',
+            connector_id: connectorId,
+          });
+
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         });
 
-        body = await agentBuilderApiClient.converse({
-          input: 'Hello AgentBuilder',
-          connector_id: connectorId,
+        it('returns the response from the LLM', async () => {
+          expect(body.response.message).to.eql(MOCKED_LLM_RESPONSE);
         });
 
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        it('persists the conversation with a title', async () => {
+          const conversation = await agentBuilderApiClient.getConversation(body.conversation_id);
+          expect(conversation.title).to.eql(MOCKED_LLM_TITLE);
+        });
+
+        it('persists the final LLM response in the conversation', async () => {
+          const conversation = await agentBuilderApiClient.getConversation(body.conversation_id);
+          expect(conversation.rounds[0].response.message).to.eql(MOCKED_LLM_RESPONSE);
+        });
       });
 
-      it('returns the response from the LLM', async () => {
-        expect(body.response.message).to.eql(MOCKED_LLM_RESPONSE);
-      });
+      describe('Error cases', () => {
+        it('returns 400 when payload is invalid', async () => {
+          const res = (await agentBuilderApiClient.converse({} as any)) as unknown as Payload;
 
-      it('persists the conversation with a title', async () => {
-        const conversation = await agentBuilderApiClient.getConversation(body.conversation_id);
-        expect(conversation.title).to.eql(MOCKED_LLM_TITLE);
-      });
-
-      it('persists the final LLM response in the conversation', async () => {
-        const conversation = await agentBuilderApiClient.getConversation(body.conversation_id);
-        expect(conversation.rounds[0].response.message).to.eql(MOCKED_LLM_RESPONSE);
-      });
-    });
-
-    describe('Error cases', () => {
-      it('returns 400 when payload is invalid', async () => {
-        const res = (await agentBuilderApiClient.converse({} as any)) as unknown as Payload;
-
-        expect(res.error).to.eql('Bad Request');
+          expect(res.error).to.eql('Bad Request');
+        });
       });
     });
-  });
+  };
 }

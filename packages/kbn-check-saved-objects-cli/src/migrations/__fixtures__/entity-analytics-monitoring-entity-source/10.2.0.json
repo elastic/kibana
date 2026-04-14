@@ -1,0 +1,58 @@
+{
+  "10.1.0": [
+    {
+      "type": "entity-analytics-integration",
+      "name": ".entity_analytics.monitoring.sources.entityanalytics_okta-default",
+      "managed": true,
+      "enabled": true,
+      "integrationName": "entityanalytics_okta",
+      "matchers": [
+        {
+          "fields": [
+            "user.roles"
+          ],
+          "values": [
+            "Super Administrator",
+            "Organization Administrator",
+            "Group Administrator",
+            "Application Administrator",
+            "Mobile Administrator",
+            "Help Desk Administrator",
+            "Report Administrator",
+            "API Access Management Administrator",
+            "Group Membership Administrator",
+            "Read-only Administrator"
+          ]
+        }        
+      ]
+    }
+  ],
+  "10.2.0": [
+    {
+      "type": "entity-analytics-integration",
+      "name": ".entity_analytics.monitoring.sources.entityanalytics_okta-default",
+      "managed": true,
+      "enabled": true,
+      "integrationName": "entityanalytics_okta",
+      "matchers": [
+        {
+          "fields": ["user.roles"],
+          "values": [
+            "Super Administrator",
+            "Organization Administrator",
+            "Group Administrator",
+            "Application Administrator",
+            "Mobile Administrator",
+            "Help Desk Administrator",
+            "Report Administrator",
+            "API Access Management Administrator",
+            "Group Membership Administrator",
+            "Read-only Administrator"
+          ]
+        }
+      ],
+      "matchersModifiedByUser": false,
+      "managedVersion": 1
+    }
+  ]
+}

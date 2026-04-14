@@ -49,10 +49,13 @@ export const NotebookCatalogSchema = schema.object(
           unknowns: 'allow',
         }
       ),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 100 }
     ),
     lists: schema.maybe(
-      schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { minSize: 1 }))
+      schema.recordOf(
+        schema.string(),
+        schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })
+      )
     ),
   },
   {
@@ -66,11 +69,11 @@ const NotebookCellSchema = schema.object(
     cell_type: schema.maybe(schema.string()),
     execution_count: schema.maybe(schema.nullable(schema.number())),
     id: schema.maybe(schema.string()),
-    input: schema.maybe(schema.arrayOf(schema.string())),
+    input: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
     metadata: schema.maybe(schema.any()),
-    outputs: schema.maybe(schema.arrayOf(schema.any())),
+    outputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 10000 })),
     prompt_number: schema.maybe(schema.number()),
-    source: schema.maybe(schema.arrayOf(schema.string())),
+    source: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
   },
   {
     unknowns: 'allow',
@@ -79,7 +82,7 @@ const NotebookCellSchema = schema.object(
 
 export const NotebookSchema = schema.object(
   {
-    cells: schema.arrayOf(NotebookCellSchema, { minSize: 1 }),
+    cells: schema.arrayOf(NotebookCellSchema, { minSize: 1, maxSize: 1000 }),
     metadata: schema.maybe(schema.any()),
   },
   {

@@ -49,11 +49,14 @@ const pathToHotPhaseSearchableSnapshot =
 const pathToColdPhaseSearchableSnapshot =
   'phases.cold.actions.searchable_snapshot.snapshot_repository';
 
+const pathToHotPhaseEnabled = '_meta.hot.enabled';
+
 export const ConfigurationProvider: FunctionComponent<{ children?: React.ReactNode }> = ({
   children,
 }) => {
   const [formData] = useFormData({
     watch: [
+      pathToHotPhaseEnabled,
       pathToHotPhaseSearchableSnapshot,
       pathToColdPhaseSearchableSnapshot,
       isUsingCustomRolloverPath,
@@ -63,15 +66,21 @@ export const ConfigurationProvider: FunctionComponent<{ children?: React.ReactNo
       isUsingDownsamplePath('cold'),
     ],
   });
+  const hotEnabled = Boolean(get(formData, pathToHotPhaseEnabled, true));
   const isUsingDefaultRollover = get(formData, isUsingDefaultRolloverPath);
   // Provide default value, as path may become undefined if removed from the DOM
   const isUsingCustomRollover = get(formData, isUsingCustomRolloverPath, true);
 
   const context: Configuration = {
-    isUsingRollover: isUsingDefaultRollover === false ? isUsingCustomRollover : true,
-    isUsingSearchableSnapshotInHotPhase: get(formData, pathToHotPhaseSearchableSnapshot) != null,
+    isUsingRollover: hotEnabled
+      ? isUsingDefaultRollover === false
+        ? isUsingCustomRollover
+        : true
+      : false,
+    isUsingSearchableSnapshotInHotPhase:
+      hotEnabled && get(formData, pathToHotPhaseSearchableSnapshot) != null,
     isUsingSearchableSnapshotInColdPhase: get(formData, pathToColdPhaseSearchableSnapshot) != null,
-    isUsingDownsampleInHotPhase: !!get(formData, isUsingDownsamplePath('hot')),
+    isUsingDownsampleInHotPhase: hotEnabled && !!get(formData, isUsingDownsamplePath('hot')),
     isUsingDownsampleInWarmPhase: !!get(formData, isUsingDownsamplePath('warm')),
     isUsingDownsampleInColdPhase: !!get(formData, isUsingDownsamplePath('cold')),
   };

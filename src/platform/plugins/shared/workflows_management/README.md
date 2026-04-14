@@ -8,6 +8,7 @@ The workflows management plugin provides the user interface and management capab
 
 ## Table of Contents
 
+- [Requirements](#requirements)
 - [Enable the Feature Flag](#enable-the-feature-flag)
 - [Overview](#overview)
 - [Features](#features)
@@ -19,22 +20,28 @@ The workflows management plugin provides the user interface and management capab
 
 ---
 
-## Enable the Feature Flag
+## Requirements
 
-The workflows management UI is developed behind a UI setting (feature flag). By default, the feature is disabled. To enable it for development or testing, add the following to your `kibana.dev.yml`:
+To use workflows, you need an **active Enterprise license**. Workflows are not available on Basic or Standard licenses.
+
+---
+
+## The Feature Flag
+
+The workflows feature UI setting is enabled by default, it can be disabled via Kibana config with:
 
 ```yml
 uiSettings.overrides:
-  workflows:ui:enabled: true
+  workflows:ui:enabled: false
 ```
 
-If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
+If running in Serverless or Cloud dev environments, you can disable it via API:
 
 ```bash
 POST kbn://internal/kibana/settings
 {
    "changes": {
-      "workflows:ui:enabled": true
+      "workflows:ui:enabled": false
    }
 }
 ```
@@ -341,6 +348,7 @@ POST /api/workflows/testStep
 ```json
 {
   "stepId": "step-1",
+  "workflowId": "workflow-0d8d376e-07f9-47a2-b8a2-852081d75ddc",
   "contextOverride": {
     "spaceId": "default",
     "inputs": {...}

@@ -9,7 +9,7 @@
 
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -154,6 +154,8 @@ export const registerExportRoute = (
 
 Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
+NOTE: The exported saved objects include \`coreMigrationVersion\` and \`typeMigrationVersion\` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forward compatibility across Kibana versions.
+
 NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the number of saved objects which may be exported.`,
         oasOperationObject: () => path.resolve(__dirname, './export.examples.yaml'),
       },
@@ -167,10 +169,10 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
         request: {
           body: schema.object({
             hasReference: schema.maybe(
-              schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+              schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
             ),
             type: schema.maybe(
-              schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+              schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
                 meta: {
                   description:
                     'The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.',
@@ -264,7 +266,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
         const docsToExport: string[] = await createPromiseFromStreams([
           exportStream,
           createMapStream((obj: unknown) => {
-            return stringify(obj);
+            return stableStringify(obj);
           }),
           createConcatStream([]),
         ]);

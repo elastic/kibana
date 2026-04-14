@@ -26,7 +26,7 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should validate the form', () => {
-    cy.contains('New live query').click();
+    cy.contains('Run query').click();
     submitQuery();
     cy.contains('Agents is a required field');
     cy.contains('Query is a required field');
@@ -37,12 +37,12 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('Query is a required field').should('not.exist');
     checkResults();
     getAdvancedButton().click();
-    fillInQueryTimeout('86410');
+    fillInQueryTimeout('86401');
     submitQuery();
-    cy.contains('The timeout value must be 86400 seconds or or lower.');
-    fillInQueryTimeout('890');
+    cy.contains('The timeout value must be 86400 seconds or lower.');
+    fillInQueryTimeout('120');
     submitQuery();
-    cy.contains('The timeout value must be 86400 seconds or or lower.').should('not.exist');
+    cy.contains('The timeout value must be 86400 seconds or lower.').should('not.exist');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
     submitQuery();
     cy.contains('ECS field is required.');
@@ -53,15 +53,11 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('ECS field is required.').should('not.exist');
     cy.wait('@postQuery').then((interception) => {
       expect(interception.request.body).to.have.property('query', 'select * from uptime;');
-      expect(interception.request.body).to.have.property('timeout', 890);
+      expect(interception.request.body).to.have.property('timeout', 120);
       expect(interception.response?.statusCode).to.eq(200);
-      expect(interception.response?.body.data.queries[0]).to.have.property('timeout', 890);
+      expect(interception.response?.body.data.queries[0]).to.have.property('timeout', 120);
     });
     checkResults();
-    const firstCell = '[data-gridcell-column-index="0"][data-gridcell-row-index="0"]';
-    cy.get(firstCell).should('exist');
-    cy.get(firstCell).find('[data-euigrid-tab-managed="true"]').click();
-    cy.url().should('include', 'app/fleet/agents/');
   });
 
   it('should run multiline query', () => {
@@ -82,7 +78,7 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
       '    on pos.pid=p.pid{esc}{shift+enter}' +
       "where pos.remote_port !='0' {shift+enter}" +
       'limit 1000;';
-    cy.contains('New live query').click();
+    cy.contains('Run query').click();
     cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').and('be.gt', 99).and('be.lt', 110);
     cy.getBySel(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
 

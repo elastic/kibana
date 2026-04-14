@@ -241,13 +241,35 @@ const registerHttpRequestMockHelpers = (
 
   const setInferenceModels = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/inference/all`, response, error);
+
   const setUserStartPrivilegesResponse = (
     indexName: string,
     response?: HttpResponse,
     error?: ResponseError
   ) => {
-    mockResponse('GET', `${API_BASE_PATH}/start_privileges/${indexName}`, response, error);
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/start_privileges/${encodeURIComponent(indexName)}`,
+      response,
+      error
+    );
   };
+
+  const setLoadIndexDocumentsSampleResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'GET',
+      `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}/sample`,
+      response,
+      error
+    );
+
+  const setLoadIndexDocCountResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/index_doc_count`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesStatsResponse,
@@ -281,6 +303,8 @@ const registerHttpRequestMockHelpers = (
     setInferenceModels,
     setGetMatchingDataStreams,
     setUserStartPrivilegesResponse,
+    setLoadIndexDocumentsSampleResponse,
+    setLoadIndexDocCountResponse,
   };
 };
 

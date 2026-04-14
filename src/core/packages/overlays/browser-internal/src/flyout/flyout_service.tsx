@@ -114,7 +114,7 @@ export class FlyoutService {
         const getWrapper = (children: JSX.Element) => {
           return (
             <EuiFlyout
-              resizable={options.isResizable}
+              resizable={options.resizable ?? options.isResizable}
               {...options}
               aria-label={options['aria-label']}
               aria-labelledby={options['aria-labelledby']}
@@ -141,6 +141,12 @@ export class FlyoutService {
         return flyout;
       },
     };
+  }
+
+  public closeAllFlyouts(): void {
+    if (this.activeFlyout) {
+      this.activeFlyout.close();
+    }
   }
 
   /**

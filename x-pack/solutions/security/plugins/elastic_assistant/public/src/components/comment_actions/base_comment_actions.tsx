@@ -46,7 +46,7 @@ const BaseCommentActionsComponent: React.FC<Props> = ({ message, children }) => 
               <EuiButtonIcon
                 aria-label={COPY_TO_CLIPBOARD}
                 color="primary"
-                iconType="copyClipboard"
+                iconType="copy"
                 onClick={copy}
               />
             )}

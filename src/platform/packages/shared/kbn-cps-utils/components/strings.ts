@@ -29,11 +29,11 @@ export const strings = {
     }),
   getProjectPickerPopoverTitle: () =>
     i18n.translate('cpsUtils.projectPicker.projectPickerPopoverTitle', {
-      defaultMessage: 'Cross-project search scope',
+      defaultMessage: 'Cross-project search (CPS) scope',
     }),
   getManageCrossProjectSearchLabel: () =>
     i18n.translate('cpsUtils.projectPicker.manageCrossProjectSearchLabel', {
-      defaultMessage: 'Manage cross-project search',
+      defaultMessage: 'Manage Cross-project search',
     }),
   getOriginProjectLabel: () =>
     i18n.translate('cpsUtils.projectPicker.thisProjectLabel', {
@@ -41,12 +41,12 @@ export const strings = {
     }),
   getProjectPickerTourTitle: () =>
     i18n.translate('cpsUtils.projectPicker.tour.title', {
-      defaultMessage: 'Cross-project search now enabled',
+      defaultMessage: 'Cross-project search (CPS) is now available',
     }),
   getProjectPickerTourContent: () =>
     i18n.translate('cpsUtils.projectPicker.tour.content', {
       defaultMessage:
-        'By default, you will now be searching across this project’s data and all linked project data as configured for this space. You may further adjust the scope of your own cross-project search here.',
+        'Your searches now include data from this project and all linked projects by default. Use this selector to toggle your search scope between all projects or just this one. You can change the default scope in your space settings.',
     }),
   getProjectPickerTourCloseButton: () =>
     i18n.translate('cpsUtils.projectPicker.tour.closeButton', {
@@ -55,14 +55,19 @@ export const strings = {
   getProjectPickerDisabledTooltip: () =>
     i18n.translate('cpsUtils.projectPicker.disabledTooltip', {
       defaultMessage:
-        'Cross-project search is not available here. Unless otherwise informed, your project scope will be limited to this project alone.',
+        'Cross-project search is not available for this page. Unless otherwise specified, this page only uses data from this project.',
     }),
   getProjectPickerReadonlyCallout: () =>
     i18n.translate('cpsUtils.projectPicker.readonlyCallout', {
-      defaultMessage: 'This page automatically inherits project scope from space defaults.',
+      defaultMessage:
+        'Your default CPS scope controls which linked projects are searched. You can adjust it for your space, or override it for individual queries.',
     }),
   getProjectPickerReadonlyLensCallout: () =>
     i18n.translate('cpsUtils.projectPicker.readonlyLensCallout', {
       defaultMessage: 'Please adjust project scope for each layer in the Lens editor.',
+    }),
+  getProjectPickerFetchError: () =>
+    i18n.translate('cpsUtils.projectPicker.fetchError', {
+      defaultMessage: 'Failed to load projects. Try refreshing the page.',
     }),
 };

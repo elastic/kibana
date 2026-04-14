@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/custom-branding-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/custom-branding-plugin'
+  title: '@kbn/custom-branding-plugin'
   description: Moon project for @kbn/custom-branding-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/custom_branding
+  sourceRoot: x-pack/platform/plugins/private/custom_branding
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
@@ -28,6 +27,7 @@ dependsOn:
   - '@kbn/core-ui-settings-common'
   - '@kbn/config-schema'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -38,5 +38,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
+    - test/**/*
     - '!target/**/*'
 tasks: {}

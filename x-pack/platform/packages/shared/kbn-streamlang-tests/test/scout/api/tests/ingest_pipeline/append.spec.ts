@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { AppendProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Append Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should append values to a field', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-append';
@@ -27,14 +28,14 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ tags: ['existing_tag'] }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag', 'new_tag']);
+      expect(ingestedDocs[0]?.tags).toStrictEqual(['existing_tag', 'new_tag']);
     });
 
     apiTest('should append values to a non-existent field', async ({ testBed }) => {
@@ -50,14 +51,14 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'a' }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('tags', ['new_tag']);
+      expect(ingestedDocs[0]?.tags).toStrictEqual(['new_tag']);
     });
 
     apiTest(
@@ -76,14 +77,14 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ tags: ['existing_tag'] }]; // Ingest already existing tag
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
-        expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag']);
+        expect(ingestedDocs[0]?.tags).toStrictEqual(['existing_tag']);
       }
     );
 
@@ -101,14 +102,14 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ tags: ['existing_tag'] }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('tags', ['existing_tag', 'existing_tag']);
+      expect(ingestedDocs[0]?.tags).toStrictEqual(['existing_tag', 'existing_tag']);
     });
 
     // Template validation tests - should reject Mustache templates
@@ -136,7 +137,7 @@ apiTest.describe(
         };
 
         // Should throw validation error for Mustache templates
-        expect(() => transpile(streamlangDSL)).toThrow(
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
       });

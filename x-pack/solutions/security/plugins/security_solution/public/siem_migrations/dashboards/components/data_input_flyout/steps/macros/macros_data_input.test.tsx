@@ -41,6 +41,13 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   }),
 }));
 jest.mock('../../../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../../../common/experimental_features_service', () => ({
+  ExperimentalFeaturesService: {
+    get: () => ({
+      splunkV2DashboardsEnabled: false,
+    }),
+  },
+}));
 
 describe('MacrosDataInput', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;

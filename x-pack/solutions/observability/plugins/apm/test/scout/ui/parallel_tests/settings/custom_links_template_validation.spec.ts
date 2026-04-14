@@ -7,6 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import {
@@ -21,180 +22,184 @@ const templateUrl =
 const getExpectedUrl = (serviceName: string, environment: string) =>
   `http://scoutURLExample.com/ftw/app/apm/services/${serviceName}/transactions/view?comparisonEnabled=true&environment=${environment}`;
 
-test.describe.serial('Custom links template validation', { tag: ['@ess', '@svlOblt'] }, () => {
-  const uniqueLabel = `template-test-${randomUUID()}`;
-  const defaultLabel = `template-test-default-${randomUUID()}`;
-  const expectedUrl = getExpectedUrl(SERVICE_OPBEANS_JAVA, PRODUCTION_ENVIRONMENT);
+test.describe.serial(
+  'Custom links template validation',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    const uniqueLabel = `template-test-${randomUUID()}`;
+    const defaultLabel = `template-test-default-${randomUUID()}`;
+    const expectedUrl = getExpectedUrl(SERVICE_OPBEANS_JAVA, PRODUCTION_ENVIRONMENT);
 
-  test('Create custom link with template URL and filters', async ({
-    page,
-    pageObjects: { customLinksPage },
-    browserAuth,
-  }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await customLinksPage.goto();
-    await customLinksPage.clickCreateCustomLink();
-    await expect(page.getByRole('heading', { name: 'Create link', level: 2 })).toBeVisible();
+    test('Create custom link with template URL and filters', async ({
+      page,
+      pageObjects: { customLinksPage },
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await customLinksPage.goto();
+      await customLinksPage.clickCreateCustomLink();
+      await expect(page.getByRole('heading', { name: 'Create link', level: 2 })).toBeVisible();
 
-    await customLinksPage.fillLabel(uniqueLabel);
-    await customLinksPage.fillUrl(templateUrl);
+      await customLinksPage.fillLabel(uniqueLabel);
+      await customLinksPage.fillUrl(templateUrl);
 
-    // Add first filter (uses existing empty filter row)
-    await customLinksPage.addFirstFilter('service.name', SERVICE_OPBEANS_JAVA);
+      // Add first filter (uses existing empty filter row)
+      await customLinksPage.addFirstFilter('service.name', SERVICE_OPBEANS_JAVA);
 
-    // Add additional filter (explicitly adds new filter row)
-    await customLinksPage.addAdditionalFilter('service.environment', PRODUCTION_ENVIRONMENT);
+      // Add additional filter (explicitly adds new filter row)
+      await customLinksPage.addAdditionalFilter('service.environment', PRODUCTION_ENVIRONMENT);
 
-    await expect(page.getByTestId('preview-url')).toContainText(expectedUrl);
+      await expect(page.getByTestId('preview-url')).toContainText(expectedUrl);
 
-    await expect(customLinksPage.saveButton).toBeEnabled();
-    await customLinksPage.clickSave();
+      await expect(customLinksPage.saveButton).toBeEnabled();
+      await customLinksPage.clickSave();
 
-    // Verify we're back on the main page and our link row appears in the table
-    await expect(page).toHaveURL(/.*custom-links$/);
-    await expect(customLinksPage.getCustomLinkRow(uniqueLabel)).toBeVisible({
-      timeout: EXTENDED_TIMEOUT,
-    });
-  });
-
-  test('Verify template variables are populated correctly in custom link URLs', async ({
-    pageObjects: { transactionDetailsPage },
-    page,
-    browserAuth,
-  }) => {
-    await browserAuth.loginAsPrivilegedUser();
-
-    await transactionDetailsPage.goToTransactionDetails({
-      serviceName: testData.SERVICE_OPBEANS_JAVA,
-      transactionName: testData.PRODUCT_TRANSACTION_NAME,
-      start: testData.START_DATE,
-      end: testData.END_DATE,
+      // Verify we're back on the main page and our link row appears in the table
+      await expect(page).toHaveURL(/.*custom-links$/);
+      await expect(customLinksPage.getCustomLinkRow(uniqueLabel)).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
     });
 
-    await page
-      .getByRole('switch', { name: 'Show critical path' })
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    test('Verify template variables are populated correctly in custom link URLs', async ({
+      pageObjects: { transactionDetailsPage },
+      page,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
 
-    // Open action menu and verify template population
-    await transactionDetailsPage.openActionMenu();
+      await transactionDetailsPage.goToTransactionDetails({
+        serviceName: testData.SERVICE_OPBEANS_JAVA,
+        transactionName: testData.PRODUCT_TRANSACTION_NAME,
+        start: testData.START_DATE,
+        end: testData.END_DATE,
+      });
 
-    // Get the href attribute of the custom link
-    const actualHref = await transactionDetailsPage.getCustomLinkHref(uniqueLabel);
+      await page
+        .getByRole('switch', { name: 'Show critical path' })
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
-    // Verify the template variables are populated correctly
-    expect(actualHref).toBe(expectedUrl);
-  });
+      // Open action menu and verify template population
+      await transactionDetailsPage.openActionMenu();
 
-  test('Delete custom link with template URL', async ({
-    page,
-    pageObjects: { customLinksPage },
-    browserAuth,
-  }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await customLinksPage.goto();
-    await customLinksPage.clickEditCustomLinkForRow(uniqueLabel);
-    await customLinksPage.clickDelete();
+      // Get the href attribute of the custom link
+      const actualHref = await transactionDetailsPage.getCustomLinkHref(uniqueLabel);
 
-    // Verify deletion
-    await expect(page).toHaveURL(/.*custom-links$/);
-    await expect(customLinksPage.getCustomLinkRow(uniqueLabel)).toBeHidden({
-      timeout: EXTENDED_TIMEOUT,
+      // Verify the template variables are populated correctly
+      expect(actualHref).toBe(expectedUrl);
     });
 
-    await expect(page.getByTestId('euiToastHeader__title')).toHaveText('Deleted custom link.');
-  });
+    test('Delete custom link with template URL', async ({
+      page,
+      pageObjects: { customLinksPage },
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await customLinksPage.goto();
+      await customLinksPage.clickEditCustomLinkForRow(uniqueLabel);
+      await customLinksPage.clickDelete();
 
-  // Open transaction and validate the default url when creating a custom link
-  test('Open transaction and validate the default url when creating a custom link', async ({
-    page,
-    pageObjects: { transactionDetailsPage, customLinksPage },
-    browserAuth,
-  }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await transactionDetailsPage.goToTransactionDetails({
-      serviceName: testData.SERVICE_OPBEANS_JAVA,
-      transactionName: testData.PRODUCT_TRANSACTION_NAME,
-      start: testData.START_DATE,
-      end: testData.END_DATE,
+      // Verify deletion
+      await expect(page).toHaveURL(/.*custom-links$/);
+      await expect(customLinksPage.getCustomLinkRow(uniqueLabel)).toBeHidden({
+        timeout: EXTENDED_TIMEOUT,
+      });
+
+      await expect(page.getByTestId('euiToastHeader__title')).toHaveText('Deleted custom link.');
     });
 
-    await page
-      .getByRole('switch', { name: 'Show critical path' })
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await transactionDetailsPage.openActionMenu();
+    // Open transaction and validate the default url when creating a custom link
+    test('Open transaction and validate the default url when creating a custom link', async ({
+      page,
+      pageObjects: { transactionDetailsPage, customLinksPage },
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await transactionDetailsPage.goToTransactionDetails({
+        serviceName: testData.SERVICE_OPBEANS_JAVA,
+        transactionName: testData.PRODUCT_TRANSACTION_NAME,
+        start: testData.START_DATE,
+        end: testData.END_DATE,
+      });
 
-    // Click the create custom link button from action menu
-    const createButton = page
-      .getByTestId('apmCustomLinkToolbarCreateButton')
-      .or(page.getByTestId('apmBottomSectionCreateCustomLinkButton'));
-    await createButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await createButton.click();
+      await page
+        .getByRole('switch', { name: 'Show critical path' })
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      await transactionDetailsPage.openActionMenu();
 
-    // Verify the flyout opens
-    await expect(page.getByRole('heading', { name: 'Create link', level: 2 })).toBeVisible();
+      // Click the create custom link button from action menu
+      const createButton = page
+        .getByTestId('apmCustomLinkToolbarCreateButton')
+        .or(page.getByTestId('apmBottomSectionCreateCustomLinkButton'));
+      await createButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      await createButton.click();
 
-    // Verify pre-populated filters
-    // Verify service.name filter value is pre-populated with SERVICE_OPBEANS_JAVA
-    await page
-      .getByTestId('service.name.value')
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    const serviceNameComboBox = new EuiComboBoxWrapper(page, {
-      dataTestSubj: 'service.name.value',
-    });
-    const serviceNameValue = await serviceNameComboBox.getSelectedValue();
-    expect(serviceNameValue).toBe(SERVICE_OPBEANS_JAVA);
+      // Verify the flyout opens
+      await expect(page.getByRole('heading', { name: 'Create link', level: 2 })).toBeVisible();
 
-    // Verify service.environment filter value is pre-populated with PRODUCTION_ENVIRONMENT
-    await page
-      .getByTestId('service.environment.value')
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    const serviceEnvComboBox = new EuiComboBoxWrapper(page, {
-      dataTestSubj: 'service.environment.value',
-    });
-    const serviceEnvValue = await serviceEnvComboBox.getSelectedValue();
-    expect(serviceEnvValue).toBe(PRODUCTION_ENVIRONMENT);
+      // Verify pre-populated filters
+      // Verify service.name filter value is pre-populated with SERVICE_OPBEANS_JAVA
+      await page
+        .getByTestId('service.name.value')
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      const serviceNameComboBox = new EuiComboBoxWrapper(page, {
+        dataTestSubj: 'service.name.value',
+      });
+      const serviceNameValue = await serviceNameComboBox.getSelectedValue();
+      expect(serviceNameValue).toBe(SERVICE_OPBEANS_JAVA);
 
-    // Fill in label and URL
-    await customLinksPage.fillLabel(defaultLabel);
-    await customLinksPage.fillUrl(templateUrl);
+      // Verify service.environment filter value is pre-populated with PRODUCTION_ENVIRONMENT
+      await page
+        .getByTestId('service.environment.value')
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      const serviceEnvComboBox = new EuiComboBoxWrapper(page, {
+        dataTestSubj: 'service.environment.value',
+      });
+      const serviceEnvValue = await serviceEnvComboBox.getSelectedValue();
+      expect(serviceEnvValue).toBe(PRODUCTION_ENVIRONMENT);
 
-    // Verify preview URL shows correctly populated template variables
-    await expect(page.getByTestId('preview-url')).toContainText(expectedUrl);
+      // Fill in label and URL
+      await customLinksPage.fillLabel(defaultLabel);
+      await customLinksPage.fillUrl(templateUrl);
 
-    // Save the custom link
-    await expect(customLinksPage.saveButton).toBeEnabled();
-    await customLinksPage.clickSave();
+      // Verify preview URL shows correctly populated template variables
+      await expect(page.getByTestId('preview-url')).toContainText(expectedUrl);
 
-    await page
-      .getByRole('switch', { name: 'Show critical path' })
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      // Save the custom link
+      await expect(customLinksPage.saveButton).toBeEnabled();
+      await customLinksPage.clickSave();
 
-    await transactionDetailsPage.openActionMenu();
-    await expect(page.getByRole('link', { name: defaultLabel })).toBeVisible({
-      timeout: EXTENDED_TIMEOUT,
-    });
+      await page
+        .getByRole('switch', { name: 'Show critical path' })
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
-    // Verify the link has the correct href with populated template variables
-    const actualHref = await transactionDetailsPage.getCustomLinkHref(defaultLabel);
-    expect(actualHref).toBe(expectedUrl);
-  });
+      await transactionDetailsPage.openActionMenu();
+      await expect(page.getByRole('link', { name: defaultLabel })).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
 
-  test('Delete custom link created from transaction details', async ({
-    page,
-    pageObjects: { customLinksPage },
-    browserAuth,
-  }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await customLinksPage.goto();
-    await customLinksPage.clickEditCustomLinkForRow(defaultLabel);
-    await customLinksPage.clickDelete();
-
-    // Verify deletion
-    await expect(page).toHaveURL(/.*custom-links$/);
-    await expect(customLinksPage.getCustomLinkRow(defaultLabel)).toBeHidden({
-      timeout: EXTENDED_TIMEOUT,
+      // Verify the link has the correct href with populated template variables
+      const actualHref = await transactionDetailsPage.getCustomLinkHref(defaultLabel);
+      expect(actualHref).toBe(expectedUrl);
     });
 
-    await expect(page.getByTestId('euiToastHeader__title')).toHaveText('Deleted custom link.');
-  });
-});
+    test('Delete custom link created from transaction details', async ({
+      page,
+      pageObjects: { customLinksPage },
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await customLinksPage.goto();
+      await customLinksPage.clickEditCustomLinkForRow(defaultLabel);
+      await customLinksPage.clickDelete();
+
+      // Verify deletion
+      await expect(page).toHaveURL(/.*custom-links$/);
+      await expect(customLinksPage.getCustomLinkRow(defaultLabel)).toBeHidden({
+        timeout: EXTENDED_TIMEOUT,
+      });
+
+      await expect(page.getByTestId('euiToastHeader__title')).toHaveText('Deleted custom link.');
+    });
+  }
+);

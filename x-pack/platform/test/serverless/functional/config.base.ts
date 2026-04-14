@@ -45,8 +45,6 @@ export function createTestConfig<
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
           ...(options.kbnServerArgs ?? []),
-          // Disable tours globally for all tests
-          '--uiSettings.globalOverrides.hideAnnouncements=true',
           ...(enableFleetDockerRegistry && dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
@@ -57,6 +55,10 @@ export function createTestConfig<
         defaults: {
           'accessibility:disableAnimations': true,
           'dateFormat:tz': 'UTC',
+        },
+        globalDefaults: {
+          // Disable tours globally for all tests
+          hideAnnouncements: true,
         },
       },
       // the apps section defines the urls that

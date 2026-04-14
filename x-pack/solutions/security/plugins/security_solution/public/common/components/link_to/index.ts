@@ -17,6 +17,18 @@ import type { SecurityPageName } from '../../../app/types';
 
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
 export { getHostDetailsUrl, getTabsOnHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
+export {
+  getUsersDetailsUrl,
+  getTabsOnUsersDetailsUrl,
+  getTabsOnUsersUrl,
+  parseEntityIdentifiersFromUrlParam,
+} from './redirect_to_users';
+export {
+  mergeEntityResolutionIntoUrlState,
+  parseEntityResolutionFromUrlState,
+  ENTITY_ID_URL_PARAM,
+  IDENTITY_FIELDS_URL_PARAM,
+} from './entity_resolution_query_params';
 export { getKubernetesUrl, getKubernetesDetailsUrl } from './redirect_to_kubernetes';
 export { getNetworkUrl, getNetworkDetailsUrl } from './redirect_to_network';
 export { getTimelineTabsUrl, getTimelineUrl } from './redirect_to_timelines';
@@ -65,9 +77,9 @@ export type GetSecuritySolutionUrl = (param: {
   skipSearch?: boolean;
 }) => string;
 
-export const useGetSecuritySolutionUrl = () => {
+export const useGetSecuritySolutionUrl = (override?: Record<string, unknown>) => {
   const getLinkUrl = useGetLinkUrl();
-  const getUrlStateQueryParams = useGetUrlStateQueryParams();
+  const getUrlStateQueryParams = useGetUrlStateQueryParams(override);
 
   const getSecuritySolutionUrl = useCallback<GetSecuritySolutionUrl>(
     ({ deepLinkId, path = '', absolute = false, skipSearch = false }) => {

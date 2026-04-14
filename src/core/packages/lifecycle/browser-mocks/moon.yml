@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-lifecycle-browser-mocks'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-lifecycle-browser-mocks'
+  title: '@kbn/core-lifecycle-browser-mocks'
   description: Moon project for @kbn/core-lifecycle-browser-mocks
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/core/packages/lifecycle/browser-mocks
+  sourceRoot: src/core/packages/lifecycle/browser-mocks
 dependsOn:
   - '@kbn/core-doc-links-browser-mocks'
   - '@kbn/core-theme-browser-mocks'
@@ -51,16 +50,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

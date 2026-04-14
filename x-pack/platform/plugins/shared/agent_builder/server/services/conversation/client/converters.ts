@@ -15,11 +15,17 @@ import type {
   UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
+  LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
 } from './types';
@@ -70,35 +76,81 @@ function serializeStepResults(rounds: ConversationRound[]): PersistentConversati
   }));
 }
 
+/**
+ * Migrates legacy tool result types to their current names.
+ * This handles backward compatibility when tool result types are renamed.
+ */
+const migrateToolResultType = (result: ToolResult): ToolResult => {
+  // Migration: 'tabular_data' was renamed to 'esql_results'
+  if (result.type === 'tabular_data') {
+    return {
+      ...result,
+      type: ToolResultType.esqlResults,
+    };
+  }
+  return result;
+};
+
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
-  return rounds.map<ConversationRound>((round) => ({
-    ...round,
-    status: round.status ?? ConversationRoundStatus.completed,
-    started_at: round.started_at ?? new Date(0).toISOString(),
-    time_to_first_token: round.time_to_first_token ?? 0,
-    time_to_last_token: round.time_to_last_token ?? 0,
-    model_usage: round.model_usage ?? {
-      llm_calls: 0,
-      input_tokens: 0,
-      output_tokens: 0,
-    },
-    steps: round.steps.map<ConversationRoundStep>((step) => {
-      if (step.type === ConversationRoundStepType.toolCall) {
-        return {
-          ...step,
-          results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
-            return {
-              ...result,
-              tool_result_id: result.tool_result_id ?? getToolResultId(),
-            };
-          }),
-          progression: step.progression ?? [],
-        };
-      } else {
-        return step;
-      }
-    }),
-  }));
+  return rounds.map<ConversationRound>((round) => {
+    // Migration: pending_prompt (singular) -> pending_prompts (array)
+    const { pending_prompt: legacyPendingPrompt, ...roundWithoutLegacy } = round;
+    const pendingPrompts =
+      round.pending_prompts ?? (legacyPendingPrompt ? [legacyPendingPrompt] : undefined);
+
+    return {
+      ...roundWithoutLegacy,
+      pending_prompts: pendingPrompts,
+      state: round.state ? migrateRoundState(round.state) : undefined,
+      status: round.status ?? ConversationRoundStatus.completed,
+      started_at: round.started_at ?? new Date(0).toISOString(),
+      time_to_first_token: round.time_to_first_token ?? 0,
+      time_to_last_token: round.time_to_last_token ?? 0,
+      model_usage: round.model_usage ?? {
+        llm_calls: 0,
+        input_tokens: 0,
+        output_tokens: 0,
+      },
+      steps: round.steps.map<ConversationRoundStep>((step) => {
+        if (step.type === ConversationRoundStepType.toolCall) {
+          return {
+            ...step,
+            results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
+              return migrateToolResultType({
+                ...result,
+                tool_result_id: result.tool_result_id ?? getToolResultId(),
+              });
+            }),
+            progression: step.progression ?? [],
+          };
+        } else {
+          return step;
+        }
+      }),
+    };
+  });
+}
+
+/**
+ * Migrates legacy RoundState format.
+ * v1 stored a single `node`; current format uses `nodes` (array).
+ */
+function migrateRoundState(state: RoundState & { agent: LegacyAgentStateFields }): RoundState {
+  const { agent } = state;
+  if (agent.nodes) {
+    return state;
+  }
+  if (agent.node) {
+    const { node, ...agentWithoutLegacy } = agent;
+    return {
+      ...state,
+      agent: {
+        ...agentWithoutLegacy,
+        nodes: [node],
+      },
+    };
+  }
+  return state;
 }
 
 export const fromEs = (document: Document): Conversation => {

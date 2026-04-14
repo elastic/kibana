@@ -13,6 +13,16 @@ import { ContentBreakdown } from './content_breakdown';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiCodeBlock: ({ dangerouslySetInnerHTML }: { dangerouslySetInnerHTML?: { __html: string } }) => (
+    <pre>
+      {/* eslint-disable-next-line react/no-danger */}
+      <code data-test-subj="codeBlock" dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
+    </pre>
+  ),
+}));
+
 jest.mock('../hover_popover_action', () => ({
   HoverActionPopover: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -67,6 +77,27 @@ describe('ContentBreakdown', () => {
       render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
 
       expect(screen.getByText('message')).toBeInTheDocument();
+    });
+  });
+
+  describe('Message rendering', () => {
+    it('escapes angle brackets so log text is not treated as HTML', () => {
+      const hit = buildHit({
+        message:
+          '2026-02-06 04:41:12,718 INFO some.program.module(128):Search for <John Doe> found <48> items in <0.314> seconds',
+      });
+      const formattedDoc = { message: 'log message' } as any;
+
+      const { container } = render(
+        <ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />
+      );
+
+      expect(screen.getByTestId('codeBlock')).toHaveTextContent(
+        '2026-02-06 04:41:12,718 INFO some.program.module(128):Search for <John Doe> found <48> items in <0.314> seconds'
+      );
+
+      // Ensure the browser didn't interpret `<John Doe>` as a real element
+      expect(container.querySelector('john')).toBeNull();
     });
   });
 });

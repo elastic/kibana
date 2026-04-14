@@ -23,6 +23,7 @@
       "_transform/{transform_id}/_stats"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-get-transform-stats",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-transform-get-transform-stats",
     "availability": {
       "stack": true,
       "serverless": true

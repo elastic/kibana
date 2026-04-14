@@ -31,12 +31,14 @@ import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
-import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journeys';
+import { createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
+import { resetSyntheticsMonitorRoute } from './monitor_cruds/reset_monitor';
+import { resetSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/reset_monitor_bulk';
 import {
   disableSyntheticsRoute,
   getSyntheticsEnablementRoute,
@@ -67,6 +69,8 @@ import { getLocationMonitors } from './settings/private_locations/get_location_m
 import { addSyntheticsParamsRoute } from './settings/params/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 import { createOverviewTrendsRoute } from './overview_trends/overview_trends';
+import { getMonitorsHealthRoute } from './monitor_health/get_monitor_health';
+import { getMonitorHealthRoute } from './monitor_health/get_monitor_health_single';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -89,7 +93,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createJourneyRoute,
   createLastSuccessfulCheckRoute,
   createJourneyScreenshotBlocksRoute,
-  createJourneyFailedStepsRoute,
   createNetworkEventsRoute,
   createJourneyScreenshotRoute,
   deletePackagePolicyRoute,
@@ -108,9 +111,13 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   syntheticsInspectStatusRuleRoute,
   syntheticsInspectTLSRuleRoute,
   getSyntheticsTriggerTaskRun,
+  resetSyntheticsMonitorRoute,
+  resetSyntheticsMonitorBulkRoute,
   cleanupPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
   syncParamsSettingsParamsRoute,
+  getMonitorsHealthRoute,
+  getMonitorHealthRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [

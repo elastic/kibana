@@ -52,6 +52,18 @@ export interface ConnectorIdLineParseResult extends BaseLineParseResult {
   valueStartIndex: number;
 }
 
+export interface WorkflowLineParseResult extends BaseLineParseResult {
+  matchType: 'workflow-id';
+  match: RegExpMatchArray;
+  valueStartIndex: number;
+}
+
+export interface WorkflowInputsLineParseResult extends BaseLineParseResult {
+  matchType: 'workflow-inputs';
+  match: RegExpMatchArray | null;
+  valueStartIndex?: number;
+}
+
 export interface TypeLineParseResult extends BaseLineParseResult {
   matchType: 'type';
   match: RegExpMatchArray;
@@ -70,6 +82,8 @@ export type LineParseResult =
   | LiquidLineParseResult
   | LiquidSyntaxLineParseResult
   | ConnectorIdLineParseResult
+  | WorkflowLineParseResult
+  | WorkflowInputsLineParseResult
   | TypeLineParseResult
   | TimezoneLineParseResult;
 
@@ -79,13 +93,15 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     /^(?<prefix>\s*(?:tzid|timezone)\s*:\s*)(?<value>.*)$/
   );
   if (timezoneFieldMatch && timezoneFieldMatch.groups) {
-    const timezonePrefix = timezoneFieldMatch.groups.value.trim();
+    const groups = timezoneFieldMatch.groups;
+    const prefix = groups.prefix;
+    const timezonePrefix = groups.value.trim();
+    // Explicit prefix length for TypeScript strictness (groups.prefix may be undefined)
     return {
       matchType: 'timezone',
       fullKey: timezonePrefix,
       match: timezoneFieldMatch,
-      // @ts-expect-error upgrade typescript v5.9.3
-      valueStartIndex: timezoneFieldMatch.groups?.prefix.length + 1 ?? 0,
+      valueStartIndex: (typeof prefix === 'string' ? prefix.length : 0) + 1,
     };
   }
 
@@ -111,6 +127,30 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       valueStartIndex: connectorIdMatch.groups.prefix.length + 1,
     };
   }
+
+  const workflowIdMatch = lineUpToCursor.match(/^(?<prefix>\s*workflow-id:)\s*(?<value>.*)$/);
+  if (workflowIdMatch && workflowIdMatch.groups) {
+    const workflowValue = workflowIdMatch.groups?.value.trim() ?? '';
+    return {
+      matchType: 'workflow-id',
+      fullKey: workflowValue,
+      match: workflowIdMatch,
+      valueStartIndex: workflowIdMatch.groups.prefix.length + 1,
+    };
+  }
+
+  // Check for inputs: field in workflow.execute or workflow.executeAsync step
+  const workflowInputsMatch = lineUpToCursor.match(/^(?<prefix>\s*inputs:)\s*(?<value>.*)$/);
+  if (workflowInputsMatch && workflowInputsMatch.groups) {
+    const inputsValue = workflowInputsMatch.groups?.value.trim() ?? '';
+    return {
+      matchType: 'workflow-inputs',
+      fullKey: inputsValue,
+      match: workflowInputsMatch,
+      valueStartIndex: workflowInputsMatch.groups.prefix.length + 1,
+    };
+  }
+
   // Try @ trigger first (e.g., "@const" or "@steps.step1")
   // If we're inside {{ }} braces, extract the path before @ and use it as the context
   const isInsideBraces =

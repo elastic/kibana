@@ -57,6 +57,8 @@
     "@kbn/esql-composer",
     "@kbn/deeplinks-analytics",
     "@kbn/lens-embeddable-utils",
+    "@kbn/restorable-state",
+    "@kbn/lens-common",
   ],
   "exclude": ["target/**/*"]
 }

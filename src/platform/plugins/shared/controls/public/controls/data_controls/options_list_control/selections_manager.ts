@@ -9,11 +9,10 @@
 
 import deepEqual from 'react-fast-compare';
 
-import type { OptionsListControlState, OptionsListSelection } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlState, OptionsListSelection } from '@kbn/controls-schemas';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-
-import { OPTIONS_LIST_DEFAULT_SORT } from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 function areSelectedOptionsEqual(
   a: OptionsListSelection[] | undefined,
@@ -23,32 +22,29 @@ function areSelectedOptionsEqual(
 }
 
 export const selectionComparators: StateComparators<
-  Pick<OptionsListControlState, 'exclude' | 'existsSelected' | 'selectedOptions' | 'sort'>
+  Pick<OptionsListDSLControlState, 'exclude' | 'exists_selected' | 'selected_options' | 'sort'>
 > = {
   exclude: 'referenceEquality',
-  existsSelected: 'referenceEquality',
-  selectedOptions: areSelectedOptionsEqual,
+  exists_selected: 'referenceEquality',
+  selected_options: areSelectedOptionsEqual,
   sort: 'deepEquality',
 };
 
 export const defaultSelectionState = {
-  exclude: false,
-  existsSelected: false,
-  selectedOptions: [],
-  sort: OPTIONS_LIST_DEFAULT_SORT,
+  exclude: DEFAULT_DSL_OPTIONS_LIST_STATE.exclude,
+  exists_selected: DEFAULT_DSL_OPTIONS_LIST_STATE.exists_selected,
+  selected_options: DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options,
+  sort: DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
 };
 
 export type SelectionsState = Pick<
-  OptionsListControlState,
-  'exclude' | 'existsSelected' | 'selectedOptions' | 'sort'
+  OptionsListDSLControlState,
+  'exclude' | 'exists_selected' | 'selected_options' | 'sort'
 >;
 
 export function initializeSelectionsManager(initialState: SelectionsState) {
   const selectionsManager = initializeStateManager<SelectionsState>(
-    {
-      ...initialState,
-      selectedOptions: initialState.selectedOptions ?? [],
-    },
+    initialState,
     defaultSelectionState,
     selectionComparators
   );
@@ -57,7 +53,7 @@ export function initializeSelectionsManager(initialState: SelectionsState) {
     ...selectionsManager,
     internalApi: {
       hasInitialSelections: Boolean(
-        initialState.selectedOptions?.length || initialState.existsSelected
+        initialState.selected_options?.length || initialState.exists_selected
       ),
     },
   };

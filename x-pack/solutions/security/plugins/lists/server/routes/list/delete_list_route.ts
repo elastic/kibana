@@ -17,7 +17,7 @@ import type {
 import { exceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DeleteListRequestQuery, DeleteListResponse } from '@kbn/securitysolution-lists-common/api';
 import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 

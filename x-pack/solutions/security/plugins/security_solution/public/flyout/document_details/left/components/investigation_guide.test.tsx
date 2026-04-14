@@ -6,86 +6,97 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { InvestigationGuide } from './investigation_guide';
-import { DocumentDetailsContext } from '../../shared/context';
-import { TestProviders } from '../../../../common/mock';
-import { INVESTIGATION_GUIDE_TEST_ID, INVESTIGATION_GUIDE_LOADING_TEST_ID } from './test_ids';
+import { INVESTIGATION_GUIDE_LOADING_TEST_ID, INVESTIGATION_GUIDE_TEST_ID } from './test_ids';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
-jest.mock('../../shared/hooks/use_investigation_guide');
+jest.mock('../../shared/context');
+jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
-const NO_DATA_TEXT =
-  "There's no investigation guide for this rule. Edit the rule's settings(external, opens in a new tab or window) to add one.";
 const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
+const NO_DATA_MESSAGE = "There's no investigation guide for this rule.";
 
-const renderInvestigationGuide = (context: DocumentDetailsContext = mockContextValue) => (
-  <TestProviders>
-    <DocumentDetailsContext.Provider value={context}>
+const renderInvestigationGuide = () =>
+  render(
+    <IntlProvider locale="en">
       <InvestigationGuide />
-    </DocumentDetailsContext.Provider>
-  </TestProviders>
-);
+    </IntlProvider>
+  );
 
 describe('<InvestigationGuide />', () => {
-  it('should render investigation guide', () => {
-    (useInvestigationGuide as jest.Mock).mockReturnValue({
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(useDocumentDetailsContext).mockReturnValue(mockContextValue);
+  });
+
+  it('should render preview message when flyout is in alert preview', () => {
+    jest.mocked(useDocumentDetailsContext).mockReturnValue({
+      ...mockContextValue,
+      isRulePreview: true,
+    });
+    jest.mocked(useRuleWithFallback).mockReturnValue({
       loading: false,
       error: false,
-      basicAlertData: { ruleId: 'ruleId' },
-      ruleNote: 'test note',
-    });
+      rule: { note: 'test note' } as never,
+    } as never);
 
-    const { queryByTestId, getByText, queryByText } = render(renderInvestigationGuide());
-    expect(getByText('test note')).toBeInTheDocument();
-    expect(queryByText(NO_DATA_TEXT)).not.toBeInTheDocument();
-    expect(queryByTestId(INVESTIGATION_GUIDE_LOADING_TEST_ID)).not.toBeInTheDocument();
+    const { getByTestId } = renderInvestigationGuide();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });
 
   it('should render loading', () => {
-    (useInvestigationGuide as jest.Mock).mockReturnValue({
+    jest.mocked(useRuleWithFallback).mockReturnValue({
       loading: true,
-    });
-    const { getByTestId } = render(renderInvestigationGuide());
+      error: false,
+      rule: null,
+    } as never);
+
+    const { getByTestId } = renderInvestigationGuide();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(INVESTIGATION_GUIDE_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render no data message when there is no ruleId', () => {
-    (useInvestigationGuide as jest.Mock).mockReturnValue({
-      basicAlertData: {},
-      ruleNote: 'test note',
+  it('should render full investigation guide when a rule note exists', () => {
+    jest.mocked(useRuleWithFallback).mockReturnValue({
+      loading: false,
+      error: false,
+      rule: { note: 'test note' } as never,
+    } as never);
+
+    const { getByTestId } = renderInvestigationGuide();
+    expect(getByTestId('investigation-guide-full-view')).toHaveTextContent('test note');
+  });
+
+  it('should render no data message when there is no ruleId in the document', () => {
+    jest.mocked(useDocumentDetailsContext).mockReturnValue({
+      ...mockContextValue,
+      searchHit: {
+        ...mockContextValue.searchHit,
+        fields: {},
+      },
     });
-    const { getByTestId } = render(renderInvestigationGuide());
-    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_TEXT);
+    jest.mocked(useRuleWithFallback).mockReturnValue({
+      loading: false,
+      error: false,
+      rule: { note: 'test note' } as never,
+    } as never);
+
+    const { getByTestId } = renderInvestigationGuide();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);
   });
 
   it('should render no data message when there is no rule note', () => {
-    (useInvestigationGuide as jest.Mock).mockReturnValue({
-      basicAlertData: { ruleId: 'ruleId' },
-      ruleNote: undefined,
-    });
-    const { getByTestId } = render(renderInvestigationGuide());
-    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_TEXT);
-  });
-
-  it('should render no data message when useInvestigationGuide errors out', () => {
-    (useInvestigationGuide as jest.Mock).mockReturnValue({
+    jest.mocked(useRuleWithFallback).mockReturnValue({
       loading: false,
-      error: true,
-    });
-    const { getByTestId } = render(renderInvestigationGuide());
-    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_TEXT);
-  });
+      error: false,
+      rule: { note: undefined } as never,
+    } as never);
 
-  it('should render preview message when flyout is in preview', () => {
-    (useInvestigationGuide as jest.Mock).mockReturnValue({
-      loading: false,
-      error: true,
-    });
-    const { getByTestId } = render(
-      renderInvestigationGuide({ ...mockContextValue, isRulePreview: true })
-    );
-    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
+    const { getByTestId } = renderInvestigationGuide();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);
   });
 });

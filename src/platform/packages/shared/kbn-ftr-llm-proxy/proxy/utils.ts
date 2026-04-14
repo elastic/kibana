@@ -29,3 +29,20 @@ export function createToolCallMessage(
     ],
   };
 }
+
+export function createMultiToolCallMessage(
+  toolCalls: Array<{ name: string; args: Record<string, any> }>
+): Omit<ChatCompletionMessage, 'refusal'> {
+  return {
+    role: 'assistant' as const,
+    content: '',
+    tool_calls: toolCalls.map(({ name, args }) => ({
+      function: {
+        name,
+        arguments: JSON.stringify(args),
+      },
+      id: `call_${uuidv4()}`,
+      type: 'function' as const,
+    })),
+  };
+}

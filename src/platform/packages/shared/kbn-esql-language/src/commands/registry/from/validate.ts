@@ -8,16 +8,16 @@
  */
 import type {
   ESQLAst,
-  ESQLMessage,
   ESQLCommandOption,
   ESQLSource,
   ESQLAstAllCommands,
-} from '../../../types';
-import { isColumn, isOptionNode, isSource } from '../../../ast/is';
+} from '@elastic/esql/types';
+import { isColumn, isOptionNode, isSource } from '@elastic/esql';
 import type { ICommandContext } from '../types';
 import { METADATA_FIELDS } from '../options/metadata';
 import { getMessageFromId } from '../../definitions/utils';
 import { validateSources } from '../../definitions/utils/validation/sources';
+import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
   command: ESQLAstAllCommands,
@@ -46,7 +46,9 @@ export const validate = (
     }
   }
   const sources = command.args.filter((arg) => isSource(arg)) as ESQLSource[];
-  messages.push(...validateSources(sources, context));
+  // Use "Unknown data source" only at root FROM; in subqueries use "Unknown index"
+  const isRootFrom = Array.isArray(ast) && ast.length > 0 && ast[0] === command;
+  messages.push(...validateSources(sources, context, { useGenericDataSourceError: isRootFrom }));
 
   return messages;
 };

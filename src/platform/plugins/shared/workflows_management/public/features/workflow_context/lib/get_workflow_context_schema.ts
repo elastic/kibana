@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSONSchema7 } from 'json-schema';
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { DynamicWorkflowContextSchema } from '@kbn/workflows';
-import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import {
+  AlertEventPropsSchema,
+  BaseEventSchema,
+  DynamicWorkflowContextSchema,
+  EventTimestampSchema,
+  isTriggerType,
+} from '@kbn/workflows';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import { z } from '@kbn/zod/v4';
-import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 import { inferZodType } from '../../../../common/lib/zod';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
 export type WorkflowDefinitionForContext =
@@ -25,69 +31,79 @@ export type WorkflowDefinitionForContext =
         | Array<{ name: string; type: string; [key: string]: unknown }>;
     });
 
+function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
+  return schema instanceof z.ZodObject;
+}
+
+/**
+ * Build event schema from workflow triggers: base (spaceId) + alert props when present + custom trigger event schemas.
+ * Custom trigger event schemas are resolved via the triggerSchemas singleton (same pattern as stepSchemas for steps).
+ * Uses shape spread instead of deprecated Zod v4 .merge().
+ */
+function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.ZodType {
+  const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
+  let eventSchema: z.ZodType = hasAlertTrigger
+    ? z.object({
+        ...(BaseEventSchema as z.ZodObject<z.ZodRawShape>).shape,
+        ...(AlertEventPropsSchema as z.ZodObject<z.ZodRawShape>).shape,
+      })
+    : BaseEventSchema;
+  for (const trigger of triggers) {
+    const type = trigger?.type;
+    if (typeof type === 'string' && !isTriggerType(type)) {
+      const def = triggerSchemas.getTriggerDefinition(type);
+      if (def?.eventSchema && isZodObject(eventSchema) && isZodObject(def.eventSchema)) {
+        eventSchema = z.object({
+          ...eventSchema.shape,
+          ...def.eventSchema.shape,
+          ...(EventTimestampSchema as z.ZodObject<z.ZodRawShape>).shape,
+        });
+      }
+    }
+  }
+  return eventSchema.optional();
+}
+
+/**
+ * Extracts a field value from the definition, falling back to the YAML document if not present.
+ */
+function extractFieldFromYaml<T>(
+  definitionValue: T | undefined,
+  yamlDocument: Document | null | undefined,
+  fieldName: string
+): T | undefined {
+  if (definitionValue !== undefined) {
+    return definitionValue;
+  }
+  if (!yamlDocument) {
+    return undefined;
+  }
+  try {
+    const yamlJson = yamlDocument.toJSON();
+    if (yamlJson && typeof yamlJson === 'object' && fieldName in yamlJson) {
+      return (yamlJson as Record<string, unknown>)[fieldName] as T;
+    }
+  } catch {
+    // Ignore errors when extracting from YAML
+  }
+  return undefined;
+}
+
 export function getWorkflowContextSchema(
   definition: WorkflowDefinitionForContext,
   yamlDocument?: Document | null
-) {
-  // If inputs is undefined, try to extract it from the YAML document
-  let inputs = definition.inputs;
-  if (inputs === undefined && yamlDocument) {
-    try {
-      const yamlJson = yamlDocument.toJSON();
-      if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
-        inputs = (yamlJson as Record<string, unknown>).inputs as typeof inputs;
-      }
-    } catch (e) {
-      // Ignore errors when extracting from YAML
-    }
-  }
+): typeof DynamicWorkflowContextSchema {
+  const inputs = extractFieldFromYaml(definition.inputs, yamlDocument, 'inputs');
+  const outputs = extractFieldFromYaml(definition.outputs, yamlDocument, 'outputs');
 
-  // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  // This handles both array (legacy) and object (new) formats
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
+  const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
+  const normalizedOutputs = normalizeFieldsToJsonSchema(outputs);
 
-  // Build the inputs object from the normalized JSON Schema structure
-  const inputsObject: Record<string, z.ZodType> = {};
+  const eventSchema = buildEventSchemaFromTriggers(definition.triggers ?? []);
 
-  if (normalizedInputs?.properties) {
-    for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
-      // Skip null/undefined schemas (can happen when YAML is partially parsed)
-      if (propertySchema && typeof propertySchema === 'object') {
-        const jsonSchema = propertySchema as JSONSchema7;
-
-        // Convert JSON Schema to Zod schema
-        // Note: convertJsonSchemaToZod already handles defaults and optional for nested properties
-        // We only need to apply defaults/optional at the top level here
-        let valueSchema: z.ZodType = convertJsonSchemaToZod(jsonSchema);
-
-        // Check if this property is required at the top level
-        const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
-
-        // Apply default value if present (default() automatically makes the field optional)
-        if (jsonSchema.default !== undefined) {
-          valueSchema = valueSchema.default(jsonSchema.default);
-        } else if (!isRequired) {
-          // Only apply optional if no default and not required
-          // (default() already makes it optional, so we don't need both)
-          valueSchema = valueSchema.optional();
-        }
-
-        inputsObject[propertyName] = valueSchema;
-      }
-    }
-  }
-
-  // Use DynamicWorkflowContextSchema instead of WorkflowContextSchema
-  // This ensures compatibility with DynamicStepContextSchema.merge() in getContextSchemaForPath
-  // The merge() method requires both schemas to have the same base structure
   return DynamicWorkflowContextSchema.extend({
-    // transform inputs properties to an object
-    // with the property name as the key and the Zod schema as the value
-    // Always create an object, even if empty, to ensure proper schema structure
-    inputs: Object.keys(inputsObject).length > 0 ? z.object(inputsObject) : z.object({}),
-    // transform an object of consts to an object
-    // with the const name as the key and inferred type as the value
+    inputs: buildFieldsZodValidator(normalizedInputs),
+    output: buildFieldsZodValidator(normalizedOutputs),
     consts: z.object({
       ...Object.fromEntries(
         Object.entries(definition.consts ?? {}).map(([key, value]) => [
@@ -96,5 +112,6 @@ export function getWorkflowContextSchema(
         ])
       ),
     }),
-  });
+    event: eventSchema,
+  }) as typeof DynamicWorkflowContextSchema;
 }

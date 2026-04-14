@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  type FC,
+  type MouseEventHandler,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   EuiButtonEmpty,
@@ -57,6 +65,8 @@ import {
 } from '../../../alerting/transform_alerting_flyout';
 import { DanglingTasksWarning } from './components/dangling_task_warning/dangling_task_warning';
 
+const CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY = 'transform.cpsUnsupportedCalloutDismissed';
+
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -103,12 +113,22 @@ const ErrorMessageCallout: FC<{
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
-  const { dataViewEditor } = useAppDependencies();
+  const { dataViewEditor, cps, storage } = useAppDependencies();
   const styles = useStyles();
   const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
     'transform',
     getDefaultTransformListState()
   );
+
+  const isCpsEnabled = Boolean(cps?.cpsManager);
+  const [isCpsUnsupportedCalloutDismissed, setIsCpsUnsupportedCalloutDismissed] = useState(() => {
+    return isCpsEnabled ? storage.get(CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY) === true : false;
+  });
+
+  const onDismissCpsUnsupportedCallout = useCallback(() => {
+    setIsCpsUnsupportedCalloutDismissed(true);
+    storage.set(CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY, true);
+  }, [storage]);
 
   const {
     isInitialLoading: transformNodesInitialLoading,
@@ -186,7 +206,7 @@ export const TransformManagement: FC = () => {
     return (
       <>
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           color="warning"
           data-test-subj="transformPageReauthorizeCallout"
           title={`${insufficientPermissionsMsg} ${actionMsg}`}
@@ -199,8 +219,37 @@ export const TransformManagement: FC = () => {
   const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
   const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
 
-  const onCloseModal = useCallback(() => setIsSearchSelectionVisible(false), []);
-  const onOpenModal = () => setIsSearchSelectionVisible(true);
+  const createTransformTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const setTriggerFromEvent = useCallback<MouseEventHandler<HTMLButtonElement>>((event) => {
+    createTransformTriggerRef.current = event.currentTarget;
+  }, []);
+  const focusTrigger = useCallback(() => {
+    const trigger = createTransformTriggerRef.current;
+    if (!trigger || !trigger.isConnected) {
+      return;
+    }
+
+    requestAnimationFrame(() => trigger.focus());
+  }, []);
+
+  const closeModal = useCallback(
+    ({ restoreFocus }: { restoreFocus: boolean }) => {
+      setIsSearchSelectionVisible(false);
+      if (restoreFocus) {
+        focusTrigger();
+      }
+    },
+    [focusTrigger]
+  );
+
+  const onCloseModal = useCallback(() => closeModal({ restoreFocus: true }), [closeModal]);
+  const onOpenModal: MouseEventHandler<HTMLButtonElement> = useCallback(
+    (event) => {
+      setTriggerFromEvent(event);
+      setIsSearchSelectionVisible(true);
+    },
+    [setTriggerFromEvent]
+  );
 
   const onSearchSelected = useCallback((id: string, type: string) => {
     setSavedObjectId(id);
@@ -211,17 +260,20 @@ export const TransformManagement: FC = () => {
   const closeDataViewEditorRef = useRef<() => void | undefined>();
 
   const createNewDataView = useCallback(() => {
-    onCloseModal();
+    closeModal({ restoreFocus: false });
     closeDataViewEditorRef.current = dataViewEditor?.openEditor({
       onSave: async (dataView) => {
         if (dataView.id) {
           onSearchSelected(dataView.id, 'index-pattern');
+        } else {
+          focusTrigger();
         }
       },
+      onCancel: focusTrigger,
 
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, onCloseModal, onSearchSelected]);
+  }, [closeModal, dataViewEditor, focusTrigger, onSearchSelected]);
 
   useEffect(function cleanUpDataViewEditorFlyout() {
     return () => {
@@ -320,6 +372,30 @@ export const TransformManagement: FC = () => {
               />
             ) : null}
             <EuiSpacer size="s" />
+
+            {isCpsEnabled && !isCpsUnsupportedCalloutDismissed && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut
+                  title={i18n.translate('xpack.transform.cpsUnsupportedCallout.title', {
+                    defaultMessage: 'Cross-project search for transforms coming soon',
+                  })}
+                  iconType="info"
+                  onDismiss={onDismissCpsUnsupportedCallout}
+                  dismissButtonProps={{ 'data-test-subj': 'transformCpsUnsupportedCalloutDismiss' }}
+                  data-test-subj="transformCpsUnsupportedCallout"
+                  announceOnMount
+                >
+                  <p>
+                    <FormattedMessage
+                      id="xpack.transform.cpsUnsupportedCallout.description"
+                      defaultMessage="While we're working on this feature, all transform search scope will be limited to the current project."
+                    />
+                  </p>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
 
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
             <EuiSpacer size="s" />

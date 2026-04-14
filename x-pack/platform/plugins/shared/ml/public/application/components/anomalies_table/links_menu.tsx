@@ -40,13 +40,13 @@ import {
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
 import { isDefined } from '@kbn/ml-is-defined';
 import { escapeQuotes } from '@kbn/es-query';
 import { isQuery } from '@kbn/data-plugin/public';
 
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -788,7 +788,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         items.push(
           <EuiContextMenuItem
             key={`custom_url_${index}`}
-            icon="popout"
+            icon="external"
             onClick={() => {
               closePopover();
               openCustomUrl(customUrl);
@@ -898,7 +898,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="view_examples"
-          icon="popout"
+          icon="external"
           onClick={() => {
             closePopover();
             viewExamples();
@@ -927,7 +927,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="create_rule"
-          icon="controlsHorizontal"
+          icon="controls"
           onClick={() => {
             closePopover();
             props.showRuleEditorFlyout(anomaly, focusTrapProps);
@@ -981,11 +981,11 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="run_pattern_analysis"
-          icon="logPatternAnalysis"
+          icon="pattern"
           onClick={() => {
             closePopover();
             const additionalField = getAdditionalField(anomaly);
-            uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec({
+            uiActions.executeTriggerActions(CATEGORIZE_FIELD_TRIGGER, {
               dataView: messageField.dataView,
               field: messageField.field,
               originatingApp: PLUGIN_ID,

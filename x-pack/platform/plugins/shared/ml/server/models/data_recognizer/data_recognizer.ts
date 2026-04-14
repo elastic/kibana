@@ -20,7 +20,6 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { CompatibleModule } from '../../../common/constants/app';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
-import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
 import type { RecognizeModuleResultDataView } from '../../../common/types/modules';
 import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
@@ -109,7 +108,6 @@ export class DataRecognizer {
   private _dataViewsService: DataViewsService;
   private _request: KibanaRequest;
 
-  private _authorizationHeader: object;
   private _modulesDir = `${__dirname}/modules`;
   private _indexPatternName: string = '';
   private _indexPatternId: string | undefined = undefined;
@@ -150,7 +148,6 @@ export class DataRecognizer {
     this._dataViewsService = dataViewsService;
     this._mlSavedObjectService = mlSavedObjectService;
     this._request = request;
-    this._authorizationHeader = getAuthorizationHeader(request);
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
     this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
@@ -917,13 +914,10 @@ export class DataRecognizer {
   }
 
   private async _saveDatafeed(datafeed: ModuleDatafeed) {
-    return this._mlClient.putDatafeed(
-      {
-        datafeed_id: datafeed.id,
-        ...datafeed.config,
-      },
-      this._authorizationHeader
-    );
+    return this._mlClient.putDatafeed({
+      datafeed_id: datafeed.id,
+      ...datafeed.config,
+    });
   }
 
   private async _startDatafeeds(

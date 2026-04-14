@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, type UseInfiniteQueryOptions } from '@kbn/react-query';
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 
 const DEFAULT_PAGE_SIZE = 100;
 const MAX_RETRIES = 3;
@@ -19,7 +19,9 @@ interface UseWorkflowExecutionsParams {
   workflowId: string | null;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
+  executedBy?: string[];
   size?: number;
+  omitStepRuns?: boolean;
 }
 
 export function useWorkflowExecutions(
@@ -30,27 +32,39 @@ export function useWorkflowExecutions(
       unknown,
       WorkflowExecutionListDto,
       WorkflowExecutionListDto,
-      (string | number | ExecutionStatus[] | ExecutionType[] | null | undefined)[]
+      (string | number | ExecutionStatus[] | ExecutionType[] | string[] | null | undefined)[]
     >,
     'queryKey' | 'queryFn' | 'getNextPageParam'
   > = {}
 ) {
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
   const currentSize = params.size ?? DEFAULT_PAGE_SIZE;
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
-      return http.get<WorkflowExecutionListDto>(`/api/workflowExecutions`, {
-        query: {
-          workflowId: params.workflowId,
-          statuses: params.statuses,
-          executionTypes: params.executionTypes,
-          page: pageParam,
-          size: currentSize,
-        },
+      if (!params.workflowId) {
+        throw new Error('Workflow ID is required');
+      }
+      return api.getWorkflowExecutions(params.workflowId, {
+        statuses: params.statuses,
+        executionTypes: params.executionTypes,
+        ...(params.executedBy && params.executedBy.length > 0
+          ? { executedBy: params.executedBy }
+          : {}),
+        ...(params.omitStepRuns != null && { omitStepRuns: params.omitStepRuns }),
+        page: pageParam,
+        size: currentSize,
       });
     },
-    [http, params.workflowId, params.statuses, params.executionTypes, currentSize]
+    [
+      api,
+      params.workflowId,
+      params.statuses,
+      params.executionTypes,
+      params.executedBy,
+      params.omitStepRuns,
+      currentSize,
+    ]
   );
 
   const getNextPageParam = useCallback((lastPage: WorkflowExecutionListDto) => {
@@ -81,6 +95,7 @@ export function useWorkflowExecutions(
       'executions',
       params.statuses,
       params.executionTypes,
+      params.executedBy,
       currentSize,
     ],
     queryFn,

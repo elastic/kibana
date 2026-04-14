@@ -10,6 +10,7 @@ import {
   customActionEditSavedQuerySelector,
   customActionRunSavedQuerySelector,
   formFieldInputSelector,
+  rowActionsMenuSelector,
 } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -54,9 +55,10 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
   it('should not be able to add nor run saved queries', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.contains(savedQueryName);
-    cy.contains('Add saved query').should('be.disabled');
-    cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
-    cy.get(customActionEditSavedQuerySelector(savedQueryName)).click();
+    cy.contains('Create query').should('be.disabled');
+    cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('be.disabled');
+    cy.get(rowActionsMenuSelector(savedQueryName)).click();
+    cy.contains('Edit query').click();
     cy.get(formFieldInputSelector('id')).should('be.disabled');
     cy.get(formFieldInputSelector('description')).should('be.disabled');
 
@@ -71,7 +73,7 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
 
   it('should not be able to play in live queries history', () => {
     navigateTo('/app/osquery/live_queries');
-    cy.contains('New live query').should('be.disabled');
+    cy.contains('Run query').should('be.disabled');
     cy.contains(liveQueryQuery);
     cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
     cy.get(`[aria-label="Details"]`).should('exist');
@@ -79,7 +81,7 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
 
   it('should not be able to add nor edit packs', () => {
     navigateTo('/app/osquery/packs');
-    cy.contains('Add pack').should('be.disabled');
+    cy.contains('Create pack').should('be.disabled');
     cy.getBySel('tablePaginationPopoverButton').click();
     cy.getBySel('tablePagination-50-rows').click();
 

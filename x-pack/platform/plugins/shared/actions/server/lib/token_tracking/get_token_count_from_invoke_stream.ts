@@ -142,7 +142,7 @@ export const parseGeminiStreamForUsageMetadata = async ({
 }: {
   responseStream: Readable;
   logger: Logger;
-}): Promise<UsageMetadata> => {
+}): Promise<UsageMetadata | null> => {
   let responseBody = '';
 
   const onData = (chunk: Buffer) => {
@@ -163,7 +163,7 @@ export const parseGeminiStreamForUsageMetadata = async ({
 };
 
 /** Parse Gemini stream response body */
-const parseGeminiUsageMetadata = (responseBody: string): UsageMetadata => {
+const parseGeminiUsageMetadata = (responseBody: string): UsageMetadata | null => {
   const parsedLines = responseBody
     .split('\n')
     .filter((line) => line.startsWith('data: ') && !line.endsWith('[DONE]'))
@@ -189,6 +189,9 @@ const parseGeminiUsageMetadata = (responseBody: string): UsageMetadata => {
 
   // Extract usage metadata from the last chunk
   const lastChunk = parsedLines[parsedLines.length - 1];
+  if (!lastChunk) {
+    return null;
+  }
   const usageMetadata = 'usageMetadata' in lastChunk ? lastChunk.usageMetadata : null;
 
   return usageMetadata;

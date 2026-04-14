@@ -157,8 +157,11 @@ export function assertTelemetryPayload(
   try {
     ossTelemetryValidationSchema.validate(stats);
   } catch (err) {
-    // "[path.to.key]: definition for this key is missing"
-    const [, pathToKey] = err.message.match(/^\[(.*)\]\: definition for this key is missing/) ?? [];
+    // "[path.to.key]: Additional properties are not allowed ('key' was unexpected)"
+    const [, pathToKey] =
+      err.message.match(
+        /^\[(.*)\]\: Additional properties are not allowed \('[^']+' was unexpected\)/
+      ) ?? [];
     if (pathToKey) {
       err.message += `. Received \`${JSON.stringify(get(stats, pathToKey))}\``;
     }

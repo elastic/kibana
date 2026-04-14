@@ -13,6 +13,7 @@ import type { AddDataService, AddDataServiceSetup } from './add_data_service';
 const createSetupMock = (): jest.Mocked<AddDataServiceSetup> => {
   const setup = {
     registerAddDataTab: jest.fn(),
+    registerCloudConnectStatusHook: jest.fn(),
   };
   return setup;
 };
@@ -21,6 +22,10 @@ const createMock = (): jest.Mocked<PublicMethodsOf<AddDataService>> => {
   const service = {
     setup: jest.fn(),
     getAddDataTabs: jest.fn(() => []),
+    getCloudConnectStatusHook: jest.fn(() => () => ({
+      isCloudConnected: false,
+      isLoading: false,
+    })),
   };
   service.setup.mockImplementation(createSetupMock);
   return service;

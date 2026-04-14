@@ -164,14 +164,18 @@ export class DatasourceComponent extends PureComponent {
         <div className="canvasDataSource__section">
           <EuiButtonEmpty
             iconSide="right"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             onClick={() => setSelecting(!selecting)}
             className="canvasDataSource__triggerButton"
             flush="left"
             size="s"
             data-test-subj="canvasChangeDatasourceButton"
           >
-            <EuiIcon type={stateDatasource.image} className="canvasDataSource__triggerButtonIcon" />
+            <EuiIcon
+              type={stateDatasource.image}
+              className="canvasDataSource__triggerButtonIcon"
+              aria-hidden
+            />
             {stateDatasource.displayName}
           </EuiButtonEmpty>
           <EuiSpacer size="s" />

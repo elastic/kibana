@@ -43,18 +43,20 @@
       "cases",
       "cloud",
       "discover",
-      "embeddableEnhanced",
       "observabilityAIAssistant",
       "security",
       "serverless",
-      "spaces"
+      "spaces",
+      "agentBuilder",
+      "observabilityAgentBuilder"
     ],
     "requiredBundles": [
       "embeddable",
       "ingestPipelines",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch"
+      "unifiedSearch",
+      "observabilityAgentBuilder"
     ]
   }
 }

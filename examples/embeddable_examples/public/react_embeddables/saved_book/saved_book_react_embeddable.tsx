@@ -20,18 +20,17 @@ import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators, PresentationContainer } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   initializeTitleManager,
   useBatchedPublishingSubjects,
   initializeStateManager,
   titleComparators,
+  apiIsPresentationContainer,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { BookState } from '../../../server';

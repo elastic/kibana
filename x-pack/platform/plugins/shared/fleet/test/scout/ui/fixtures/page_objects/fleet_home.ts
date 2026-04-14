@@ -33,8 +33,17 @@ export class FleetHomePage {
     return this.page.testSubj.locator('fleet-agents-tab');
   }
 
+  getAddAgentMenuButton() {
+    return this.page.testSubj.locator('addAgentMenuButton');
+  }
+
   getAddAgentButton() {
     return this.page.testSubj.locator('addAgentButton');
+  }
+
+  async openAddAgentMenu() {
+    const menuButton = this.getAddAgentMenuButton();
+    await menuButton.click();
   }
 
   getAddFleetServerHeader() {

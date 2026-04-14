@@ -24,6 +24,7 @@ import type {
   PersistableStateAttachmentState,
   ExternalReferenceAttachmentType,
 } from './types';
+import { UnifiedAttachmentTypeRegistry } from './unified_attachment_registry';
 
 export const getPersistableAttachment = (): PersistableStateAttachmentTypeSetup => ({
   id: '.test',
@@ -151,3 +152,8 @@ export const createExternalReferenceAttachmentTypeRegistryMock =
 
     return externalReferenceAttachmentTypeRegistry;
   };
+
+export const createUnifiedAttachmentTypeRegistryMock = (): UnifiedAttachmentTypeRegistry => {
+  const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+  return unifiedAttachmentTypeRegistry;
+};

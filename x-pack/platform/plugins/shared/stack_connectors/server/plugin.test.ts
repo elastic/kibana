@@ -43,7 +43,7 @@ describe('Stack Connectors Plugin', () => {
       plugin.setup(coreSetup, { actions: actionsSetup });
 
       const specConnectorTypes = Object.values(connectorsSpecs);
-      const builtInConnectorTypesCount = 16;
+      const builtInConnectorTypesCount = 18;
 
       expect(actionsSetup.registerType).toHaveBeenCalledTimes(
         builtInConnectorTypesCount + specConnectorTypes.length
@@ -100,54 +100,68 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         9,
         expect.objectContaining({
+          id: '.http',
+          name: 'HTTP',
+        })
+      );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        10,
+        expect.objectContaining({
+          id: '.http-system',
+          name: 'HTTP',
+        })
+      );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        11,
+        expect.objectContaining({
           id: '.cases-webhook',
           name: 'Webhook - Case Management',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        10,
+        12,
         expect.objectContaining({
           id: '.xmatters',
           name: 'xMatters',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        11,
+        13,
         expect.objectContaining({
           id: '.servicenow',
           name: 'ServiceNow ITSM',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        12,
+        14,
         expect.objectContaining({
           id: '.servicenow-sir',
           name: 'ServiceNow SecOps',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        13,
+        15,
         expect.objectContaining({
           id: '.servicenow-itom',
           name: 'ServiceNow ITOM',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        14,
+        16,
         expect.objectContaining({
           id: '.jira',
           name: 'Jira',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        15,
+        17,
         expect.objectContaining({
           id: '.teams',
           name: 'Microsoft Teams',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        16,
+        18,
         expect.objectContaining({
           id: '.torq',
           name: 'Torq',

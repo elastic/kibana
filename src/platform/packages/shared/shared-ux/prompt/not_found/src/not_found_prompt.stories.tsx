@@ -58,7 +58,7 @@ export const CustomActions: StoryObj<{ onClick: () => void }> = {
                 <EuiButton fill color="primary" onClick={args.onClick}>
                   Go home
                 </EuiButton>
-                <EuiButton iconType="search" onClick={args.onClick}>
+                <EuiButton iconType="magnify" onClick={args.onClick}>
                   Go to discover
                 </EuiButton>
               </>

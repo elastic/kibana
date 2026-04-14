@@ -13,20 +13,21 @@ import { i18n } from '@kbn/i18n';
 import {
   apiCanBePinned,
   apiCanPinPanels,
-  type CanPinPanels,
-  type IsPinnable,
-  type PresentationContainer,
-} from '@kbn/presentation-containers';
-import type { HasParentApi, HasType } from '@kbn/presentation-publishing';
-import {
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasType,
   apiHasUniqueId,
   getInheritedViewMode,
   getViewModeSubject,
-  type EmbeddableApiContext,
-  type HasUniqueId,
+} from '@kbn/presentation-publishing';
+import type {
+  HasParentApi,
+  HasType,
+  CanPinPanels,
+  IsPinnable,
+  PresentationContainer,
+  EmbeddableApiContext,
+  HasUniqueId,
 } from '@kbn/presentation-publishing';
 import type { FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
@@ -70,7 +71,7 @@ export class PinControlAction
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-    return embeddable.parentApi.panelIsPinned(embeddable.uuid) ? 'pinFilled' : 'pin';
+    return embeddable.parentApi.panelIsPinned(embeddable.uuid) ? 'pinFill' : 'pin';
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {

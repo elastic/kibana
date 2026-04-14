@@ -8,11 +8,11 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DashboardDrilldown, StoredDashboardDrilldown } from './types';
+import type { DashboardDrilldownState, StoredDashboardDrilldownState } from './types';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 
-export function transformIn(state: DashboardDrilldown): {
-  state: StoredDashboardDrilldown;
+export function transformIn(state: DashboardDrilldownState): {
+  state: StoredDashboardDrilldownState;
   references?: Reference[];
 } {
   const { dashboard_id, ...rest } = state;
@@ -32,9 +32,9 @@ export function transformIn(state: DashboardDrilldown): {
 }
 
 export function transformOut(
-  storedState: StoredDashboardDrilldown,
+  storedState: StoredDashboardDrilldownState,
   references?: Reference[]
-): DashboardDrilldown {
+): DashboardDrilldownState {
   const { dashboardRefName, ...rest } = storedState;
   const reference = references?.find(({ name }) => name === dashboardRefName);
   return {

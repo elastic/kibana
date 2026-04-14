@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getRuleTagsAggregation } from '../../../../../../common';
 import { defaultRuleAggregationFactory } from '..';
 
@@ -91,7 +92,7 @@ describe('validateAggregationTerms', () => {
             },
           },
         },
-      });
+      } as unknown as Record<string, AggregationsAggregationContainer>);
     }).not.toThrowError();
   });
 
@@ -263,7 +264,7 @@ describe('validateAggregationTerms', () => {
             field: 'alert.attributes.executionStatus.status',
           },
         },
-      });
+      } as unknown as Record<string, AggregationsAggregationContainer>);
     }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation type: max"`);
   });
 

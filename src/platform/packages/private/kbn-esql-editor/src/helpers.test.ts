@@ -10,9 +10,11 @@
 import {
   filterDataErrors,
   filterOutWarningsOverlappingWithErrors,
+  getToggleCommentLines,
   parseErrors,
   parseWarning,
   filterDuplicatedWarnings,
+  shouldAutoTriggerSuggestions,
 } from './helpers';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
@@ -344,6 +346,56 @@ describe('helpers', function () {
         createMessage('unmappedColumnWarning', 'Field a is unmapped'),
         createMessage('unmappedColumnWarning', 'Field b is unmapped'),
       ]);
+    });
+  });
+
+  describe('getToggleCommentLines', function () {
+    it('should comment all lines when none are commented', function () {
+      const lines = ['FROM logs-*', '| WHERE host.name == "server1"', '| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        '//FROM logs-*',
+        '//| WHERE host.name == "server1"',
+        '//| LIMIT 10',
+      ]);
+    });
+
+    it('should uncomment all lines when all are commented', function () {
+      const lines = ['//FROM logs-*', '//| WHERE host.name == "server1"', '//| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        'FROM logs-*',
+        '| WHERE host.name == "server1"',
+        '| LIMIT 10',
+      ]);
+    });
+
+    it('should comment all lines when selection has a mix of commented and uncommented', function () {
+      const lines = ['//| WHERE host.name == "server1"', '| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        '//| WHERE host.name == "server1"',
+        '//| LIMIT 10',
+      ]);
+    });
+
+    it('should comment the single uncommented line', function () {
+      expect(getToggleCommentLines(['| LIMIT 10'])).toEqual(['//| LIMIT 10']);
+    });
+
+    it('should uncomment the single commented line', function () {
+      expect(getToggleCommentLines(['//| LIMIT 10'])).toEqual(['| LIMIT 10']);
+    });
+  });
+
+  describe('shouldAutoTriggerSuggestions', function () {
+    it.each([
+      ['space', 'FROM ', true],
+      ['inline cast ::', 'field::', true],
+      ['dot', 'index.', true],
+      ['word character', 'FRO', true],
+      ['backtick', 'FROM `', true],
+      ['empty string', '', false],
+      ['comma', 'field1,', false],
+    ])('should return %s for %s', (_label, input, expected) => {
+      expect(shouldAutoTriggerSuggestions(input as string)).toBe(expected);
     });
   });
 });

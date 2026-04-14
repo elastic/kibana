@@ -186,10 +186,16 @@ describe('ConfigPanel', () => {
       'updated'
     );
 
-    updateAll('formBased', newDatasourceState, props.visualizationState);
+    updateAll({
+      datasourceId: 'formBased',
+      newDatasourceState,
+      layerId: 'first',
+      groupId: 'a',
+      columnId: 'col1',
+    });
     // wait for one tick so async updater has a chance to trigger
     await waitMs(0);
-    expect(lensStore.dispatch).toHaveBeenCalledTimes(3);
+    expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
     expect((lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.newDatasourceState).toEqual(
       'updated'
     );

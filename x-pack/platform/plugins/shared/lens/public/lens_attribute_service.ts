@@ -40,17 +40,25 @@ export function getLensAttributeService(http: HttpStart): LensAttributesService 
       sharingSavedObjectProps: SharingSavedObjectProps;
       managed: boolean;
     }> => {
-      const { item, meta } = await lensDocumentService.load(savedObjectId);
+      // The item.id property returned from lensDocumentService.load is the savedObjectId
+      const {
+        item: { id, ...attributesWithoutId },
+        meta,
+      } = await lensDocumentService.load(savedObjectId);
+
+      // TypeScript's excess property checking doesn't catch extra properties in spreads
+      const attributes = ensureExactAttributes({
+        ...attributesWithoutId,
+        state: attributesWithoutId.state satisfies LensSavedObjectAttributes['state'],
+      });
+
       return {
-        attributes: {
-          ...item,
-          state: item.state as LensSavedObjectAttributes['state'],
-        },
+        attributes,
         sharingSavedObjectProps: {
           aliasTargetId: meta.aliasTargetId,
           outcome: meta.outcome,
           aliasPurpose: meta.aliasPurpose,
-          sourceId: item.id,
+          sourceId: id,
         },
         managed: Boolean(meta.managed),
       };
@@ -92,4 +100,10 @@ export function getLensAttributeService(http: HttpStart): LensAttributesService 
       };
     },
   };
+}
+
+function ensureExactAttributes<T extends LensSavedObjectAttributes>(
+  attrs: T & Record<Exclude<keyof T, keyof LensSavedObjectAttributes>, never>
+): LensSavedObjectAttributes {
+  return attrs;
 }

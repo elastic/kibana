@@ -1,0 +1,189 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useMemo } from 'react';
+import type { ReactNode } from 'react';
+import { EuiBasicTable, useEuiTheme } from '@elastic/eui';
+import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
+import {
+  useContentListConfig,
+  useContentListItems,
+  useDeleteConfirmation,
+  type ContentListItem,
+} from '@kbn/content-list-provider';
+import {
+  Column as BaseColumn,
+  NameColumn,
+  UpdatedAtColumn,
+  ActionsColumn,
+  StarredColumn,
+} from './column';
+import { Action as BaseAction, EditAction, DeleteAction } from './action';
+import { useColumns, useSorting, useSelection } from './hooks';
+import { EmptyState } from './empty_state';
+
+/**
+ * Props for ContentListTable component.
+ */
+export interface ContentListTableProps {
+  /** Accessible title for the table (used as table caption for screen readers). */
+  title: string;
+  /** Table layout mode. */
+  tableLayout?: 'fixed' | 'auto';
+  /** Compressed table style. */
+  compressed?: boolean;
+  /**
+   * Custom empty state component.
+   * If not provided, uses default empty state.
+   */
+  emptyState?: ReactNode;
+  /**
+   * Column components as children.
+   * If no children provided, defaults to Name column.
+   */
+  children?: ReactNode;
+  /**
+   * Optional filter function to filter items from the provider.
+   * Useful when multiple tables share a single provider but display different subsets.
+   *
+   * **Important:** This function should be memoized (e.g., with `useCallback`) to prevent
+   * unnecessary re-filtering on every render.
+   *
+   * @example
+   * ```tsx
+   * const filter = useCallback(
+   *   (item: ContentListItem) => item.type === 'dashboard',
+   *   []
+   * );
+   * <ContentListTable filter={filter} />
+   * ```
+   */
+  filter?: (item: ContentListItem) => boolean;
+  /** Test subject for testing. */
+  'data-test-subj'?: string;
+}
+
+/**
+ * Get a stable row ID for EuiBasicTable's `itemId` prop.
+ *
+ * @param id - The item's ID.
+ * @returns A stable row ID string.
+ */
+export const getRowId = (id: string): string => `content-list-table-row-${id}`;
+
+/**
+ * ContentListTable - Table renderer for content listings.
+ *
+ * Integrates with EUI's EuiBasicTable and ContentListProvider for state management.
+ * Supports configurable columns via compound components, row selection with
+ * checkboxes, and empty states.
+ *
+ * Selection checkboxes are automatically added when `features.selection` is enabled
+ * (the default). Selection state is managed by the provider and accessible to the
+ * toolbar for bulk actions via {@link useContentListSelection}.
+ *
+ * @example Basic usage (defaults to Name column)
+ * ```tsx
+ * <ContentListProvider {...config}>
+ *   <ContentListTable title="Dashboards" />
+ * </ContentListProvider>
+ * ```
+ *
+ * @example With actions column
+ * ```tsx
+ * const { Column, Action } = ContentListTable;
+ *
+ * <ContentListTable title="My Dashboards">
+ *   <Column.Name width="40%" />
+ *   <Column.Actions>
+ *     <Action.Edit />
+ *     <Action.Delete />
+ *   </Column.Actions>
+ * </ContentListTable>
+ * ```
+ *
+ * @example With selection and toolbar
+ * ```tsx
+ * <ContentListProvider {...config}>
+ *   <ContentListToolbar />
+ *   <ContentListTable title="Dashboards" />
+ * </ContentListProvider>
+ * ```
+ */
+const ContentListTableComponent = ({
+  title,
+  tableLayout = 'auto',
+  compressed = false,
+  emptyState: customEmptyState,
+  children,
+  filter,
+  'data-test-subj': dataTestSubj = 'content-list-table',
+}: ContentListTableProps) => {
+  const { supports } = useContentListConfig();
+  const { euiTheme } = useEuiTheme();
+  const { items: rawItems, isLoading: loading, error } = useContentListItems();
+  const items = useMemo(() => (filter ? rawItems.filter(filter) : rawItems), [rawItems, filter]);
+
+  const { requestDelete, deleteModal } = useDeleteConfirmation();
+
+  const columns = useColumns(children, requestDelete);
+  const { sorting, onChange } = useSorting();
+  const { selection } = useSelection();
+
+  const starredHoverCss = supports.starred
+    ? cssFavoriteHoverWithinEuiTableRow(euiTheme)
+    : undefined;
+
+  const isTableEmpty = !loading && !error && items.length === 0;
+
+  if (isTableEmpty) {
+    // TODO: Move this to the `ContentList` component, once it exists, as a part.
+    return <>{customEmptyState ?? <EmptyState />}</>;
+  }
+
+  return (
+    <>
+      <EuiBasicTable
+        tableCaption={title}
+        columns={columns}
+        compressed={compressed}
+        css={starredHoverCss}
+        error={error?.message}
+        itemId={(item) => getRowId(item.id)}
+        items={items}
+        loading={loading}
+        onChange={onChange}
+        sorting={sorting}
+        selection={selection}
+        tableLayout={tableLayout}
+        data-test-subj={dataTestSubj}
+      />
+      {deleteModal}
+    </>
+  );
+};
+
+// Create Column namespace with sub-components.
+export const Column = Object.assign(BaseColumn, {
+  Name: NameColumn,
+  UpdatedAt: UpdatedAtColumn,
+  Actions: ActionsColumn,
+  Starred: StarredColumn,
+});
+
+// Create Action namespace with sub-components.
+export const Action = Object.assign(BaseAction, {
+  Edit: EditAction,
+  Delete: DeleteAction,
+});
+
+export const ContentListTable = Object.assign(ContentListTableComponent, {
+  Column,
+  Action,
+});

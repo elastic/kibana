@@ -15,7 +15,7 @@ export type { EmbeddableRegistryDefinition } from './types';
 
 export type {
   DrilldownState,
-  DrilldownsState,
+  SerializedDrilldowns,
   GetDrilldownsSchemaFnType,
 } from './drilldowns/types';
 
@@ -25,6 +25,8 @@ export type {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
 } from './persistable_state';
+
+export { transformType } from '../common/bwc/transform_type';
 
 export const plugin = async () => {
   const { EmbeddableServerPlugin } = await import('./plugin');

@@ -18,7 +18,7 @@ import {
   EuiLink,
   EuiCallOut,
   EuiFieldText,
-  EuiButtonIcon,
+  EuiFormAppend,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -148,15 +148,10 @@ export const ConfigureStandaloneAgentStep = ({
                   append={
                     <EuiCopy textToCopy={apiKey}>
                       {(copy) => (
-                        <EuiButtonIcon
-                          iconType="copyClipboard"
+                        <EuiFormAppend
+                          element="button"
+                          iconLeft="copy"
                           onClick={copy}
-                          color="success"
-                          css={{
-                            '> svg.euiIcon': {
-                              borderRadius: '0 !important',
-                            },
-                          }}
                           aria-label={i18n.translate('xpack.fleet.apiKeyBanner.field.copyButton', {
                             defaultMessage: 'Copy to clipboard',
                           })}
@@ -185,7 +180,7 @@ export const ConfigureStandaloneAgentStep = ({
                         copy();
                         if (onCopy) onCopy();
                       }}
-                      iconType="copyClipboard"
+                      iconType="copy"
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentEnrollment.copyPolicyButton"

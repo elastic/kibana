@@ -73,28 +73,6 @@ describe('createPolicyDataStreamsIfNeeded()', () => {
     );
   });
 
-  it('should create heartbeat index when running in serverless', async () => {
-    (endpointServicesMock.isServerless as jest.Mock).mockReturnValue(true);
-    await createPolicyDataStreamsIfNeeded({
-      endpointServices: endpointServicesMock,
-      endpointPolicyIds: ['123'],
-    });
-
-    expect(esClientMock.indices.createDataStream).toHaveBeenCalledTimes(6);
-    [
-      '.logs-endpoint.diagnostic.collection-foo1',
-      '.logs-endpoint.diagnostic.collection-foo2',
-      '.logs-endpoint.action.responses-foo1',
-      '.logs-endpoint.action.responses-foo2',
-      '.logs-endpoint.heartbeat-foo1',
-      '.logs-endpoint.heartbeat-foo2',
-    ].forEach((indexName) => {
-      expect(esClientMock.indices.createDataStream).toHaveBeenCalledWith({
-        name: indexName,
-      });
-    });
-  });
-
   it('should not call ES if index existence was already checked', async () => {
     createPolicyDataStreamsIfNeeded.cache.set('.logs-endpoint.action.responses-foo1', true);
     await createPolicyDataStreamsIfNeeded({

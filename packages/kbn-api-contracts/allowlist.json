@@ -1,0 +1,68 @@
+{
+  "$schema": "./allowlist.schema.json",
+  "description": "Approved API breaking changes that should be ignored by the contract checker",
+  "entries": [
+    {
+      "path": "/api/fleet/outputs",
+      "method": "post",
+      "reason": "POST request body uses NewOutputSchema with meta IDs, changing inline anyOf members to $ref components. Data shape is identical. Approved: https://github.com/elastic/kibana/pull/258986#discussion_r2978192160",
+      "approvedBy": "@elastic/terraform-provider",
+      "prUrl": "https://github.com/elastic/kibana/pull/258986"
+    },
+    {
+      "path": "/api/fleet/outputs/{outputId}",
+      "method": "put",
+      "reason": "PUT request body uses UpdateOutputSchema with meta IDs, changing inline anyOf members to $ref components. Data shape is identical; adds otel_exporter_config_yaml field.",
+      "approvedBy": "elastic/fleet",
+      "prUrl": "https://github.com/elastic/kibana/pull/259308"
+    },
+    {
+      "path": "/api/fleet/agent_policies",
+      "method": "get",
+      "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
+      "approvedBy": "elastic/fleet"
+    },
+    {
+      "path": "/api/fleet/agent_policies",
+      "method": "post",
+      "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
+      "approvedBy": "elastic/fleet"
+    },
+    {
+      "path": "/api/fleet/agent_policies/{agentPolicyId}",
+      "method": "get",
+      "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
+      "approvedBy": "elastic/fleet"
+    },
+    {
+      "path": "/api/fleet/agent_policies/{agentPolicyId}",
+      "method": "put",
+      "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
+      "approvedBy": "elastic/fleet"
+    },
+    {
+      "path": "/api/fleet/package_policies",
+      "method": "get",
+      "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
+      "approvedBy": "elastic/fleet"
+    },
+    {
+      "path": "/api/fleet/package_policies",
+      "method": "post",
+      "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
+      "approvedBy": "elastic/fleet"
+    },
+    {
+      "path": "/api/fleet/package_policies/{packagePolicyId}",
+      "method": "get",
+      "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
+      "approvedBy": "elastic/fleet"
+    },
+    {
+      "path": "/api/fleet/package_policies/{packagePolicyId}",
+      "method": "put",
+      "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
+      "approvedBy": "elastic/fleet"
+    }
+  ]
+}

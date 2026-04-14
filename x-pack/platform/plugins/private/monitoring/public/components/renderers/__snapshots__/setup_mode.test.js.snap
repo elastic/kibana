@@ -52,9 +52,11 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
             <MemoizedFormattedMessage
               defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
               id="xpack.monitoring.setupMode.description"
+              tagName="span"
               values={
                 Object {
                   "flagIcon": <EuiIcon
+                    aria-label="Flag icon"
                     type="flag"
                   />,
                 }
@@ -141,9 +143,11 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
             <MemoizedFormattedMessage
               defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
               id="xpack.monitoring.setupMode.description"
+              tagName="span"
               values={
                 Object {
                   "flagIcon": <EuiIcon
+                    aria-label="Flag icon"
                     type="flag"
                   />,
                 }

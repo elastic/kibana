@@ -116,7 +116,7 @@ describe('useAgentless', () => {
     expect(result.current.isAgentlessEnabled).toBeFalsy();
   });
 
-  it('should return isAgentlessIntegration that returns false when agentless custom integrations are not enabled, and a custom integration is provided', () => {
+  it('should return getAgentlessStatusForPackage that returns isAgentless false when agentless custom integrations are not enabled, and a custom integration is provided', () => {
     (useStartServices as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -130,14 +130,17 @@ describe('useAgentless', () => {
 
     const {
       result: {
-        current: { isAgentlessIntegration },
+        current: { getAgentlessStatusForPackage },
       },
     } = renderHook(() => useAgentless());
 
-    expect(isAgentlessIntegration(mockPackageInfo)).toBe(false);
+    expect(getAgentlessStatusForPackage(mockPackageInfo)).toEqual({
+      isAgentless: false,
+      isDefaultDeploymentMode: false,
+    });
   });
 
-  it('should return isAgentlessIntegration that returns true when agentless custom integrations are enabled, and a custom integration is provided', () => {
+  it('should return getAgentlessStatusForPackage that returns isAgentless false when agentless custom integrations are enabled, and a custom integration is provided', () => {
     (useStartServices as MockFn).mockReturnValue({
       agentless: {
         enabled: true,
@@ -151,11 +154,14 @@ describe('useAgentless', () => {
 
     const {
       result: {
-        current: { isAgentlessIntegration },
+        current: { getAgentlessStatusForPackage },
       },
     } = renderHook(() => useAgentless());
 
-    expect(isAgentlessIntegration(mockPackageInfo)).toBe(false);
+    expect(getAgentlessStatusForPackage(mockPackageInfo)).toEqual({
+      isAgentless: false,
+      isDefaultDeploymentMode: false,
+    });
   });
 
   it('should return isAgentlessDefault as falsey when agentless is disabled and isDefault is true', () => {

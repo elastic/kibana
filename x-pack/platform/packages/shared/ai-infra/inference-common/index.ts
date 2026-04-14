@@ -59,6 +59,8 @@ export {
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
+  type ChatCompleteAnonymizationMetadata,
+  type ChatCompleteAnonymizationTarget,
   type AnonymizationRule,
   type RegexAnonymizationRule,
   type NamedEntityRecognitionRule,
@@ -69,6 +71,9 @@ export {
   type DeanonymizationOutput,
   type DeanonymizedMessage,
   type AnonymizationSettings,
+  type AnonymizationEntityClass,
+  type AnonymizationResponseMetadata,
+  type DeanonymizedMessageData,
   type CustomToolChoice,
   type ToolCallArgumentsOfToolDefinition,
   type ToolCallOfToolDefinitions,
@@ -78,6 +83,7 @@ export {
   type ToolsOfChoice,
   type ToolCallArguments,
   type ToolCallbackResult,
+  type InferenceCallbacks,
   type InferenceEventEmitter,
 } from './src/chat_complete';
 
@@ -144,12 +150,19 @@ export {
   contextWindowFromModelName,
   type InferenceConnector,
   type InferenceConnectorCapabilities,
+  type RawConnector,
+  type RawInferenceConnector,
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
   InferenceEndpointProvider,
   elasticModelIds,
 } from './src/inference_endpoints';
+
+export {
+  INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+  type InferenceConnectorsApiResponseBody,
+} from './src/inference_connectors_api';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 

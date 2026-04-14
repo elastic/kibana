@@ -105,12 +105,13 @@ globalSetupHook('Ingest data to Elasticsearch', async ({ esArchiver, log }) => {
 
 export function generateApiSpecContent(scoutPackage: string, copyrightHeader: string): string {
   return `${copyrightHeader}import type { RoleApiCredentials } from '${scoutPackage}';
-import { apiTest, expect, tags } from '${scoutPackage}';
-import { testData } from '../fixtures';
+import { tags } from '${scoutPackage}';
+import { expect } from '${scoutPackage}/api';
+import { apiTest, testData } from '../fixtures';
 
-apiTest.describe('Scout API test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+apiTest.describe('Scout API test suite example', { tag: tags.deploymentAgnostic }, () => {
   let viewerApiCredentials: RoleApiCredentials;
-  
+
   apiTest.beforeAll(async ({ requestAuth }) => {
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
   });
@@ -153,10 +154,11 @@ export * as testData from './constants';
 }
 
 export function generateUiSpecContent(scoutPackage: string, copyrightHeader: string): string {
-  return `${copyrightHeader}import { expect, tags } from '${scoutPackage}';
+  return `${copyrightHeader}import { tags } from '${scoutPackage}';
+import { expect } from '${scoutPackage}/ui';
 import { test, testData } from '../fixtures';
 
-test.describe('Scout ui test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('Scout ui test suite example', { tag: tags.deploymentAgnostic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.SOME_ARCHIVE);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.SOME_ARCHIVE);
@@ -178,12 +180,13 @@ export function generateUiParallelSpecContent(
   scoutPackage: string,
   copyrightHeader: string
 ): string {
-  return `${copyrightHeader}import { expect, tags } from '${scoutPackage}';
+  return `${copyrightHeader}import { tags } from '${scoutPackage}';
+import { expect } from '${scoutPackage}/ui';
 import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
   'Scout parallel UI test suite example',
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.SOME_ARCHIVE);

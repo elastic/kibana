@@ -1,0 +1,13 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export {
+  SERVICE_PROVIDER,
+  TASK_TYPE,
+  SERVICE_PROVIDER_ARIA_LABEL,
+  TASK_TYPE_ARIA_LABEL,
+} from '../../../../common/translations';

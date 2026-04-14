@@ -9,21 +9,20 @@
 
 import type { CodeEditorProps, monaco } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
-import React, { useRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useResizeChecker } from '@kbn/react-hooks';
-import type { DraftGrokExpression, GrokCollection } from '../models';
+import { DraftGrokExpression, type GrokCollection } from '../models';
 
 export const Expression = ({
   grokCollection,
-  draftGrokExpression,
+  pattern,
   onChange,
   height = '100px',
   dataTestSubj,
 }: {
   grokCollection: GrokCollection;
-  draftGrokExpression: DraftGrokExpression;
-  onChange?: (expression: DraftGrokExpression) => void;
+  pattern: string;
+  onChange?: (pattern: string) => void;
   height?: CodeEditorProps['height'];
   dataTestSubj?: string;
 }) => {
@@ -31,7 +30,18 @@ export const Expression = ({
     return grokCollection.getSuggestionProvider();
   });
 
-  const expression = useObservable(draftGrokExpression.getExpression$());
+  const draftGrokExpression = useMemo(() => {
+    return new DraftGrokExpression(grokCollection, pattern);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [grokCollection]);
+
+  // Sync pattern prop with internal DraftGrokExpression
+  useEffect(() => {
+    const currentExpression = draftGrokExpression.getExpression();
+    if (currentExpression !== pattern) {
+      draftGrokExpression.updateExpression(pattern);
+    }
+  }, [pattern, draftGrokExpression]);
 
   const grokEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
@@ -49,7 +59,7 @@ export const Expression = ({
 
   const onGrokEditorChange: CodeEditorProps['onChange'] = (value) => {
     draftGrokExpression.updateExpression(value);
-    onChange?.(draftGrokExpression);
+    onChange?.(value);
   };
 
   return (
@@ -64,7 +74,7 @@ export const Expression = ({
     >
       <CodeEditor
         languageId="grok"
-        value={expression ?? ''}
+        value={pattern}
         height={height}
         fullWidth={true}
         editorDidMount={onGrokEditorMount}

@@ -86,27 +86,44 @@ export class SiemMigrationsDataBaseClient {
     keepAlive: Duration = DEFAULT_PIT_KEEP_ALIVE
   ) {
     const pitPromise = this.getIndexName().then((index) =>
-      this.esClient
-        .openPointInTime({ index, keep_alive: keepAlive })
-        .then(({ id }) => ({ id, keep_alive: keepAlive }))
+      this.esClient.openPointInTime({ index, keep_alive: keepAlive }).then(({ id }) => id)
     );
+
+    let pitId: string;
 
     let currentBatchSearch: Promise<SearchResponse<T>> | undefined;
     /* Returns the next batch of search results */
     const next = async (): Promise<Array<Stored<T>>> => {
-      const pit = await pitPromise;
+      if (!pitId) {
+        // eslint-disable-next-line require-atomic-updates
+        pitId = await pitPromise;
+      }
       if (!currentBatchSearch) {
-        currentBatchSearch = this.esClient.search<T>({ ...search, pit });
+        currentBatchSearch = this.esClient.search<T>({
+          ...search,
+          pit: { id: pitId, keep_alive: keepAlive },
+        });
       } else {
         currentBatchSearch = currentBatchSearch.then((previousResponse) => {
+          if (previousResponse.pit_id) {
+            pitId = previousResponse.pit_id;
+          }
           if (previousResponse.hits.hits.length === 0) {
             return previousResponse;
           }
           const lastSort = previousResponse.hits.hits[previousResponse.hits.hits.length - 1].sort;
-          return this.esClient.search<T>({ ...search, pit, search_after: lastSort });
+          return this.esClient.search<T>({
+            ...search,
+            pit: { id: pitId, keep_alive: keepAlive },
+            search_after: lastSort,
+          });
         });
       }
       const response = await currentBatchSearch;
+      if (response.pit_id) {
+        // eslint-disable-next-line require-atomic-updates
+        pitId = response.pit_id;
+      }
       return this.processResponseHits(response);
     };
 

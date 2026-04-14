@@ -27,6 +27,7 @@
       "kibanaReact",
       "kibanaUtils",
       "lens",
+      "licensing",
       "share",
       "triggersActionsUi",
       "unifiedSearch",

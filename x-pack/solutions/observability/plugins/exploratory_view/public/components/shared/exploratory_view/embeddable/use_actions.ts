@@ -63,7 +63,7 @@ export function useActions({
       lens.navigateToPrefilledEditor(
         {
           id: '',
-          timeRange,
+          time_range: timeRange,
           attributes: lensAttributes,
         },
         {
@@ -108,7 +108,7 @@ const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => 
       });
     },
     getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'visArea';
+      return 'chartArea';
     },
     type: 'link',
     async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
@@ -130,7 +130,7 @@ const getExploreAction = ({ href, callback }: { href: string; callback: () => vo
       });
     },
     getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'visArea';
+      return 'chartArea';
     },
     type: 'link',
     async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {

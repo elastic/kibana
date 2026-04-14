@@ -246,12 +246,13 @@ export class APMPlugin
     );
 
     plugins.observability.alertDetailsContextualInsightsService.registerHandler(
-      getAlertDetailsContextHandler(getCoreStart(), resourcePlugins, logger)
+      getAlertDetailsContextHandler({ setup: core, start: getCoreStart }, resourcePlugins, logger)
     );
 
     registerDataProviders({
       core,
       plugins,
+      config: currentConfig,
       logger: this.logger!.get('observabilityAgentBuilder'),
     });
 

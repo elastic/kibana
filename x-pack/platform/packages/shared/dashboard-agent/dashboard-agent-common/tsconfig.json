@@ -1,0 +1,23 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/agent-builder-common",
+    "@kbn/zod",
+    "@kbn/dashboard-plugin",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/lens-common"
+  ]
+}

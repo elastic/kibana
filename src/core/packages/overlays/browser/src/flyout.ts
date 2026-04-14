@@ -45,6 +45,10 @@ export type OverlayFlyoutOpenOptions = Omit<
    */
   session?: 'never';
   /**
+   * Whether the flyout should be resizable. See {@link EuiFlyoutProps.resizable}
+   */
+  resizable?: boolean;
+  /**
    * @deprecated Use `resizable` instead.
    */
   isResizable?: boolean;

@@ -12,7 +12,7 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { RunRuleParams, TaskRunnerContext } from './types';
+import { ApiKeyType, type RunRuleParams, type TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import type { RawRule, RuleTypeRegistry, RuleTypeParamsValidator } from '../types';
 import { RuleExecutionStatusErrorReasons } from '../types';
@@ -20,6 +20,7 @@ import type { RuleTypeParams } from '../../common';
 import { MONITORING_HISTORY_LIMIT } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getAlertFromRaw } from '../rules_client/lib';
+import { UIAM_LOGS_USAGE_TAGS } from '../constants';
 
 interface RuleData {
   rawRule: RawRule;
@@ -56,7 +57,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     spaceId,
   } = params;
 
-  const { enabled, apiKey, alertTypeId: ruleTypeId } = rawRule;
+  const { enabled, apiKey, uiamApiKey, alertTypeId: ruleTypeId } = rawRule;
 
   if (!enabled) {
     throw createTaskRunError(
@@ -68,7 +69,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     );
   }
 
-  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
+  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey, uiamApiKey);
   const rule = getAlertFromRaw({
     id: ruleId,
     includeLegacyId: false,
@@ -109,6 +110,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
 
   return {
     apiKey,
+    uiamApiKey,
     fakeRequest,
     rule,
     validatedParams,
@@ -152,11 +154,27 @@ export async function getDecryptedRule(
 export function getFakeKibanaRequest(
   context: TaskRunnerContext,
   spaceId: string,
-  apiKey: RawRule['apiKey']
+  apiKey: RawRule['apiKey'],
+  uiamApiKey?: RawRule['uiamApiKey']
 ) {
   const requestHeaders: Headers = {};
 
-  if (apiKey) {
+  const shouldUseUiamApiKey = context.shouldGrantUiam && context.apiKeyType === ApiKeyType.UIAM;
+
+  if (shouldUseUiamApiKey) {
+    if (!uiamApiKey) {
+      requestHeaders.authorization = `ApiKey ${apiKey}`;
+      context.logger.warn(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        {
+          tags: UIAM_LOGS_USAGE_TAGS,
+        }
+      );
+    } else {
+      const [_, uiamApiKeyValue] = Buffer.from(uiamApiKey, 'base64').toString().split(':');
+      requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
+    }
+  } else if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
   }
 
@@ -164,7 +182,8 @@ export function getFakeKibanaRequest(
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    path: '/',
+    path,
+    url: new URL(`https://fake-request${path}`),
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);

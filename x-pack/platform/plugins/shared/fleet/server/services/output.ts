@@ -6,7 +6,7 @@
  */
 import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepEqual from 'fast-deep-equal';
 import { indexBy } from 'lodash/fp';
 
@@ -462,10 +462,6 @@ class OutputService {
             !allowEditFields.includes(key) &&
             !deepEqual(originalOutput[key], data[key])
           ) {
-            // Allow editing the write_to_logs_streams field
-            if (key === 'write_to_logs_streams') {
-              continue;
-            }
             // Allow ssl to differ if set to default empty values
             if (
               key === 'ssl' &&
@@ -561,7 +557,7 @@ class OutputService {
     if (outputTypeSupportPresets(data.type)) {
       if (
         data.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', load)
+        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -638,11 +634,11 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
     if (output.config_yaml) {
-      const configJs = load(output.config_yaml);
+      const configJs = parse(output.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && output.shipper) {
@@ -952,7 +948,7 @@ class OutputService {
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
         updateData.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', load)
+        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -1146,7 +1142,7 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
+      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
@@ -1154,7 +1150,7 @@ class OutputService {
       updateData.shipper = null;
     }
     if (data.config_yaml) {
-      const configJs = load(data.config_yaml);
+      const configJs = parse(data.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && data.shipper) {
@@ -1230,7 +1226,7 @@ class OutputService {
     await pMap(
       outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
       async (output) => {
-        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', load);
+        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', parse);
 
         await outputService.update(
           soClient,

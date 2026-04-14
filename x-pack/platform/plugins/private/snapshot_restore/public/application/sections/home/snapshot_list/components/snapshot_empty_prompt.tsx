@@ -61,7 +61,7 @@ export const SnapshotEmptyPrompt: React.FunctionComponent<{ policiesCount: numbe
                     <EuiButton
                       {...reactRouterNavigate(history, linkToAddPolicy())}
                       fill
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       data-test-subj="addPolicyButton"
                     >
                       <FormattedMessage
@@ -73,7 +73,7 @@ export const SnapshotEmptyPrompt: React.FunctionComponent<{ policiesCount: numbe
                     <EuiButton
                       {...reactRouterNavigate(history, linkToPolicies())}
                       fill
-                      iconType="list"
+                      iconType="listBullet"
                       data-test-subj="goToPoliciesButton"
                     >
                       <FormattedMessage

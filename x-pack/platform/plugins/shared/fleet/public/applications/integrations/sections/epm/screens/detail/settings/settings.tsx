@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
-import type { PackageInfo, PackageMetadata } from '../../../../../types';
+import type { PackageInfo, PackageMetadata, RegistryPolicyTemplate } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
   useGetPackagePoliciesQuery,
@@ -47,6 +47,10 @@ import { KeepPoliciesUpToDateSwitch } from '../components';
 import { useChangelog } from '../hooks';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
+
+import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/deprecation_callout';
+
+import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
@@ -91,10 +95,11 @@ interface Props {
   packageMetadata?: PackageMetadata;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
   isCustomPackage: boolean;
+  integrationInfo?: RegistryPolicyTemplate;
 }
 
 export const SettingsPage: React.FC<Props> = memo(
-  ({ packageInfo, packageMetadata, startServices, isCustomPackage }: Props) => {
+  ({ packageInfo, packageMetadata, startServices, isCustomPackage, integrationInfo }: Props) => {
     const authz = useAuthz();
     const canInstallPackages = authz.integrations.installPackages;
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
@@ -157,6 +162,10 @@ export const SettingsPage: React.FC<Props> = memo(
     const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
       keepPoliciesUpToDate ?? false
     );
+
+    useEffect(() => {
+      setKeepPoliciesUpToDateSwitchValue(keepPoliciesUpToDate ?? false);
+    }, [keepPoliciesUpToDate]);
 
     const handleKeepPoliciesUpToDateSwitchChange = useCallback(() => {
       setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
@@ -240,15 +249,9 @@ export const SettingsPage: React.FC<Props> = memo(
           <SideBarColumn grow={1} />
           <EuiFlexItem grow={7}>
             <EuiText>
-              <EuiTitle>
-                <h3>
-                  <FormattedMessage
-                    id="xpack.fleet.integrations.settings.packageSettingsTitle"
-                    defaultMessage="Settings"
-                  />
-                </h3>
-              </EuiTitle>
               <EuiSpacer size="s" />
+              <DeprecationCallout packageInfo={packageInfo} integrationInfo={integrationInfo} />
+              <DeprecatedFeaturesCallout packageInfo={packageInfo} />
               {installedVersion !== null && (
                 <div>
                   <EuiTitle>
@@ -325,6 +328,8 @@ export const SettingsPage: React.FC<Props> = memo(
                       <p>
                         <UpdateButton
                           {...packageInfo}
+                          name={packageInfo.name}
+                          title={wrapTitleWithDeprecated({ packageInfo })}
                           version={latestVersion}
                           agentPolicyIds={agentPolicyIds}
                           packagePolicyIds={packagePolicyIds}
