@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
+import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { ServiceNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
@@ -27,6 +28,18 @@ jest.mock('@elastic/eui', () => {
 // Mock the agent icon
 jest.mock('@kbn/custom-icons', () => ({
   getAgentIcon: jest.fn(() => 'mock-icon-url.svg'),
+}));
+
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      application: {
+        capabilities: {
+          slo: { read: true },
+        },
+      },
+    },
+  }),
 }));
 
 // Mock getServiceHealthStatusColor
@@ -142,6 +155,53 @@ describe('ServiceNode', () => {
       });
       renderServiceNode(data);
       expect(screen.getByText('Test Service')).toBeInTheDocument();
+    });
+  });
+
+  describe('SLO badge (service map only)', () => {
+    it('does not render SLO badge when status is noSLOs', () => {
+      renderServiceNode(createServiceNodeData({ sloStatus: 'noSLOs', sloCount: 0 }));
+      expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
+    });
+
+    it('does not render SLO badge for healthy status', () => {
+      renderServiceNode(createServiceNodeData({ sloStatus: 'healthy', sloCount: 2 }));
+      expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
+    });
+
+    it('does not render SLO badge for noData status', () => {
+      renderServiceNode(createServiceNodeData({ sloStatus: 'noData', sloCount: 1 }));
+      expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
+    });
+
+    it('renders SLO badge for violated status', () => {
+      renderServiceNode(createServiceNodeData({ sloStatus: 'violated', sloCount: 2 }));
+      expect(screen.getByTestId('apmSloBadge')).toBeInTheDocument();
+      expect(screen.getByTestId('apmSloBadge')).toHaveAttribute('data-slo-status', 'violated');
+    });
+
+    it('renders SLO badge for degrading status', () => {
+      renderServiceNode(createServiceNodeData({ sloStatus: 'degrading', sloCount: 1 }));
+      expect(screen.getByTestId('apmSloBadge')).toBeInTheDocument();
+      expect(screen.getByTestId('apmSloBadge')).toHaveAttribute('data-slo-status', 'degrading');
+    });
+
+    it('calls onSloBadgeClick with service name and agent when the badge is clicked', () => {
+      const onSloBadgeClick = jest.fn();
+      render(
+        <ReactFlowProvider>
+          <ServiceMapSloFlyoutProvider onSloBadgeClick={onSloBadgeClick}>
+            <ServiceNode
+              {...defaultNodeProps}
+              data={createServiceNodeData({ sloStatus: 'violated', sloCount: 2 })}
+              selected={false}
+              draggable
+            />
+          </ServiceMapSloFlyoutProvider>
+        </ReactFlowProvider>
+      );
+      fireEvent.click(screen.getByTestId('apmSloBadge'));
+      expect(onSloBadgeClick).toHaveBeenCalledWith('Test Service', 'java');
     });
   });
 });

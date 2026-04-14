@@ -19,12 +19,12 @@ deploy_to_bump() {
   npm install
 
   echo "Checking diff for doc '$doc_name' against file '$file_path' on branch '$branch'..."
-  local result=$(npx bump diff $file_path --doc $doc_name --token $doc_token --branch $branch --format=json)
+  local result=$(./node_modules/.bin/bump diff $file_path --doc $doc_name --token $doc_token --branch $branch --format=json)
   local change_count=$(jq '. | length' <<<$result)
   if [[ ! -z $change_count && $change_count -gt 0 ]]; then
     echo "Found $change_count changes..."
     echo "About to deploy file '$file_path' to doc '$doc_name' to '$branch' on bump.sh..."
-    npx bump deploy $file_path \
+    ./node_modules/.bin/bump deploy $file_path \
       --branch $branch \
       --doc $doc_name \
       --token $doc_token ;
@@ -46,6 +46,13 @@ if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
   BUMP_KIBANA_SERVERLESS_DOC_NAME="$(vault_get kibana-serverless-bump-sh kibana-serverless-doc-name)"
   BUMP_KIBANA_SERVERLESS_DOC_TOKEN="$(vault_get kibana-serverless-bump-sh kibana-serverless-token)"
   deploy_to_bump "$(pwd)/oas_docs/output/kibana.serverless.yaml" $BUMP_KIBANA_SERVERLESS_DOC_NAME $BUMP_KIBANA_SERVERLESS_DOC_TOKEN main;
+  exit 0;
+fi
+
+if [[ "$BUILDKITE_BRANCH" == "9.4" ]]; then
+  BUMP_KIBANA_DOC_NAME="$(vault_get kibana-bump-sh kibana-doc-name)"
+  BUMP_KIBANA_DOC_TOKEN="$(vault_get kibana-bump-sh kibana-token)"
+  deploy_to_bump "$(pwd)/oas_docs/output/kibana.yaml" $BUMP_KIBANA_DOC_NAME $BUMP_KIBANA_DOC_TOKEN 9x-unreleased;
   exit 0;
 fi
 

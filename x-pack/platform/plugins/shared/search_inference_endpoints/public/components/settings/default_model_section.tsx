@@ -76,7 +76,7 @@ const getSelectedOptions = (
 
 export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) => {
   const { state, setDefaultModelId, setDisallowOtherModels } = defaultModelSettings;
-  const { connectors, loading: connectorsLoading } = useConnectors();
+  const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const { exists: connectorExists, loading: connectorExistsLoading } = useConnectorExists(
     state.defaultModelId
   );
@@ -113,6 +113,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
         <EuiDescribedFormGroup
           data-test-subj="defaultModelSection"
           fullWidth
+          gutterSize="xl"
           title={
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem>

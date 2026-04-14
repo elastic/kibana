@@ -28,6 +28,7 @@ jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
 
 jest.mock('../../../hooks/use_last_agent_id', () => ({
   useLastAgentId: () => 'test-agent',
+  getLastAgentId: () => 'test-agent',
 }));
 
 jest.mock('../../../hooks/use_conversation_list', () => ({
@@ -35,7 +36,7 @@ jest.mock('../../../hooks/use_conversation_list', () => ({
 }));
 
 jest.mock('../../../hooks/use_feature_flags', () => ({
-  useFeatureFlags: () => ({ experimental: false, connectors: false }),
+  useFeatureFlags: () => ({ experimental: false }),
 }));
 
 jest.mock('./shared/sidebar_header', () => ({
@@ -84,12 +85,6 @@ describe('UnifiedSidebar', () => {
 
     it('renders for plugins route', () => {
       renderSidebar('/agents/my-agent/plugins');
-      expect(screen.getByTestId('agentBuilderSidebar-conversation')).toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-manage')).not.toBeInTheDocument();
-    });
-
-    it('renders for connectors route', () => {
-      renderSidebar('/agents/my-agent/connectors');
       expect(screen.getByTestId('agentBuilderSidebar-conversation')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-manage')).not.toBeInTheDocument();
     });

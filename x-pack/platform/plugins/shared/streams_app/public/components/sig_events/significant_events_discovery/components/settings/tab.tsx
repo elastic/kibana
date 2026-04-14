@@ -5,246 +5,145 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBottomBar,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiLink,
-  EuiLoadingElastic,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
-import { useAbortController } from '@kbn/react-hooks';
 import { i18n } from '@kbn/i18n';
-import { useLoadConnectors } from '@kbn/inference-connectors';
 import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
+  OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
 } from '@kbn/management-settings-ids';
+import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
-  DEFAULT_INDEX_PATTERNS,
-  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-} from '@kbn/streams-schema';
+  DEFAULT_EXTRACTION_INTERVAL_HOURS,
+  MIN_EXTRACTION_INTERVAL_HOURS,
+  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+  type SigEventsTuningConfig,
+} from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
-
-const NOT_SET_VALUE = '';
-
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
-
-function toFormValue(saved: string | undefined): string {
-  return saved ?? NOT_SET_VALUE;
-}
-
-const GEN_AI_SETTINGS_PATH = '/ai/genAiSettings';
-
-function buildConnectorSelectOptions(connectors: { id: string; name: string }[] | undefined) {
-  return [
-    {
-      value: NOT_SET_VALUE,
-      text: i18n.translate('xpack.streams.significantEventsDiscovery.settings.useDefaultOption', {
-        defaultMessage: 'Use default (genAiSettings:defaultAIConnector)',
-      }),
-    },
-    ...(connectors ?? []).map((c) => ({ value: c.id, text: c.name })),
-  ];
-}
-
-function isSavedConnectorStale(
-  savedId: string | undefined,
-  connectors: { id: string }[] | undefined
-): boolean {
-  if (!savedId || connectors === undefined) {
-    return false;
-  }
-  return !connectors.some((c) => c.id === savedId);
-}
+import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
+import { getFormattedError } from '../../../../../util/errors';
+import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
+import {
+  SigEventsTuningConfigEditor,
+  configToAnnotatedYaml,
+} from './sig_events_tuning_config_editor';
 
 export function SettingsTab() {
-  const {
-    dependencies: {
-      start: { streams },
-    },
-    core,
-  } = useKibana();
+  const { core } = useKibana();
+  const modelSettingsUrl = useModelSettingsUrl();
 
-  const genAiSettingsUrl = core.application.getUrlForApp('management', {
-    path: GEN_AI_SETTINGS_PATH,
-  });
-
-  const { signal: abortSignal } = useAbortController();
-
-  const kiExtractionConnectors = useLoadConnectors({
-    http: core.http,
-    settings: core.settings,
-    featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-    toasts: core.notifications.toasts,
-  });
-
-  const kiQueryGenerationConnectors = useLoadConnectors({
-    http: core.http,
-    settings: core.settings,
-    featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-    toasts: core.notifications.toasts,
-  });
-
-  const discoveryConnectors = useLoadConnectors({
-    http: core.http,
-    settings: core.settings,
-    featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-    toasts: core.notifications.toasts,
-  });
-
-  const defaultConnectorSetting = core.uiSettings.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-  const defaultConnectorOnly = core.uiSettings.get<boolean>(
-    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-    false
+  const [savedIndexPatterns, setSavedIndexPatterns] = useState<string>(() =>
+    core.settings.client.get<string>(
+      OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
+      DEFAULT_INDEX_PATTERNS
+    )
   );
-  const defaultConnector =
-    defaultConnectorSetting && defaultConnectorSetting !== NO_DEFAULT_CONNECTOR
-      ? defaultConnectorSetting
-      : undefined;
+  const [indexPatterns, setIndexPatterns] = useState<string>(savedIndexPatterns);
 
-  const settingsFetch = useStreamsAppFetch(
-    async ({ signal }) =>
-      streams.streamsRepositoryClient.fetch('GET /internal/streams/_significant_events/settings', {
-        signal,
-      }),
-    [streams.streamsRepositoryClient]
-  );
+  const continuousExtraction = useContinuousExtractionSettings({
+    globalClient: core.settings.globalClient,
+    http: core.http,
+  });
 
-  const [kiExtraction, setKiExtraction] = useState<string>('');
-  const [kiQueryGeneration, setKiQueryGeneration] = useState<string>('');
-  const [discovery, setDiscovery] = useState<string>('');
-  const [indexPatterns, setIndexPatterns] = useState<string>('');
+  const savedConfigYaml = useMemo(() => {
+    try {
+      const raw = core.settings.globalClient.get<unknown>(
+        OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
+        DEFAULT_SIG_EVENTS_TUNING_CONFIG
+      );
+      const parsed =
+        typeof raw === 'string'
+          ? (JSON.parse(raw) as Partial<SigEventsTuningConfig>)
+          : (raw as Partial<SigEventsTuningConfig>);
+      return configToAnnotatedYaml({ ...DEFAULT_SIG_EVENTS_TUNING_CONFIG, ...parsed });
+    } catch {
+      return configToAnnotatedYaml(DEFAULT_SIG_EVENTS_TUNING_CONFIG);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [draftConfigYaml, setDraftConfigYaml] = useState<string>(savedConfigYaml);
+  const [parsedTuningConfig, setParsedTuningConfig] = useState<SigEventsTuningConfig | null>(null);
+  const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
+
   const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    if (!settingsFetch.value) return;
-    const v = settingsFetch.value;
-    setKiExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
-    setKiQueryGeneration(toFormValue(v.connectorIdRuleGeneration));
-    setDiscovery(toFormValue(v.connectorIdDiscovery));
-    setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
-  }, [settingsFetch.value]);
-
-  const hasChanges = useMemo(() => {
-    if (!settingsFetch.value) return false;
-    const v = settingsFetch.value;
-    return (
-      kiExtraction !== toFormValue(v.connectorIdKnowledgeIndicatorExtraction) ||
-      kiQueryGeneration !== toFormValue(v.connectorIdRuleGeneration) ||
-      discovery !== toFormValue(v.connectorIdDiscovery) ||
-      indexPatterns !== (v.indexPatterns || DEFAULT_INDEX_PATTERNS)
-    );
-  }, [settingsFetch.value, kiExtraction, kiQueryGeneration, discovery, indexPatterns]);
+  const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
+  const hasChanges =
+    indexPatterns !== savedIndexPatterns ||
+    continuousExtraction.hasChanged ||
+    hasTuningConfigChanges;
 
   const handleCancel = useCallback(() => {
-    if (!settingsFetch.value) return;
-    const v = settingsFetch.value;
-    setKiExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
-    setKiQueryGeneration(toFormValue(v.connectorIdRuleGeneration));
-    setDiscovery(toFormValue(v.connectorIdDiscovery));
-    setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
-    setSaveError(null);
-  }, [settingsFetch.value]);
+    setIndexPatterns(savedIndexPatterns);
+    continuousExtraction.reset();
+    setDraftConfigYaml(savedConfigYamlState);
+    setParsedTuningConfig(null);
+  }, [savedIndexPatterns, savedConfigYamlState, continuousExtraction]);
 
   const handleSave = useCallback(async () => {
-    setSaveError(null);
     setIsSaving(true);
     try {
-      await streams.streamsRepositoryClient.fetch(
-        'PUT /internal/streams/_significant_events/settings',
-        {
-          signal: abortSignal,
-          params: {
-            body: {
-              connectorIdKnowledgeIndicatorExtraction: kiExtraction,
-              connectorIdRuleGeneration: kiQueryGeneration,
-              connectorIdDiscovery: discovery,
-              indexPatterns,
-            },
-          },
-        }
-      );
-      settingsFetch.refresh();
+      if (indexPatterns !== savedIndexPatterns) {
+        await core.settings.client.set(
+          OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
+          indexPatterns
+        );
+        setSavedIndexPatterns(indexPatterns);
+      }
+
+      if (continuousExtraction.hasChanged) {
+        await continuousExtraction.save();
+      }
+
+      if (hasTuningConfigChanges && parsedTuningConfig) {
+        const fullConfig = { ...DEFAULT_SIG_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
+        await core.settings.globalClient.set(
+          OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
+          JSON.stringify(fullConfig)
+        );
+        const newSavedYaml = configToAnnotatedYaml(fullConfig);
+        setSavedConfigYamlState(newSavedYaml);
+        setDraftConfigYaml(newSavedYaml);
+        setParsedTuningConfig(null);
+      }
     } catch (err) {
-      setSaveError(err instanceof Error ? err : new Error(String(err)));
+      core.notifications.toasts.addDanger({
+        title: i18n.translate('xpack.streams.significantEventsDiscovery.settings.saveErrorTitle', {
+          defaultMessage: 'Failed to save settings',
+        }),
+        text: getFormattedError(err).message,
+      });
     } finally {
       setIsSaving(false);
     }
   }, [
-    streams.streamsRepositoryClient,
-    abortSignal,
-    kiExtraction,
-    kiQueryGeneration,
-    discovery,
+    core.settings.client,
+    core.settings.globalClient,
+    core.notifications.toasts,
     indexPatterns,
-    settingsFetch,
+    savedIndexPatterns,
+    continuousExtraction,
+    hasTuningConfigChanges,
+    parsedTuningConfig,
   ]);
-
-  const kiExtractionConnectorSelectOptions = useMemo(
-    () => buildConnectorSelectOptions(kiExtractionConnectors.data),
-    [kiExtractionConnectors.data]
-  );
-  const kiQueryGenerationConnectorSelectOptions = useMemo(
-    () => buildConnectorSelectOptions(kiQueryGenerationConnectors.data),
-    [kiQueryGenerationConnectors.data]
-  );
-  const discoveryConnectorSelectOptions = useMemo(
-    () => buildConnectorSelectOptions(discoveryConnectors.data),
-    [discoveryConnectors.data]
-  );
-
-  const connectorsLoading =
-    kiExtractionConnectors.isLoading ||
-    kiQueryGenerationConnectors.isLoading ||
-    discoveryConnectors.isLoading;
-
-  const showStaleSavedConnectorCallout = useMemo(() => {
-    const v = settingsFetch.value;
-    if (!v) {
-      return false;
-    }
-    return (
-      isSavedConnectorStale(
-        v.connectorIdKnowledgeIndicatorExtraction,
-        kiExtractionConnectors.data
-      ) ||
-      isSavedConnectorStale(v.connectorIdRuleGeneration, kiQueryGenerationConnectors.data) ||
-      isSavedConnectorStale(v.connectorIdDiscovery, discoveryConnectors.data)
-    );
-  }, [
-    settingsFetch.value,
-    kiExtractionConnectors.data,
-    kiQueryGenerationConnectors.data,
-    discoveryConnectors.data,
-  ]);
-
-  if (settingsFetch.loading && !settingsFetch.value) {
-    return <EuiLoadingElastic />;
-  }
-
-  const hasDefaultConnector = Boolean(defaultConnector);
-  const anyUsesDefault =
-    kiExtraction === NOT_SET_VALUE ||
-    kiQueryGeneration === NOT_SET_VALUE ||
-    discovery === NOT_SET_VALUE;
-  const showNoDefaultCallout =
-    !connectorsLoading && !hasDefaultConnector && !defaultConnectorOnly && anyUsesDefault;
 
   return (
     <>
@@ -259,152 +158,28 @@ export function SettingsTab() {
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
-          {showStaleSavedConnectorCallout && (
+          <EuiText size="s">
+            <p>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.modelSettingsDescription',
+                {
+                  defaultMessage:
+                    'LLM models for Significant Events features are managed centrally in the Model Settings page under Stack Management.',
+                }
+              )}
+            </p>
+          </EuiText>
+          {modelSettingsUrl && (
             <>
-              <EuiCallOut
-                announceOnMount
-                title={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.staleConnectorTitle',
-                  {
-                    defaultMessage: 'Saved model is no longer available for this task',
-                  }
+              <EuiSpacer size="s" />
+              <EuiLink href={modelSettingsUrl} external>
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.modelSettingsLink',
+                  { defaultMessage: 'Go to Model Settings' }
                 )}
-                color="warning"
-                iconType="warning"
-                data-test-subj="streams-settings-stale-connector-callout"
-              >
-                <p>
-                  {i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.staleConnectorDescription',
-                    {
-                      defaultMessage:
-                        'A previously selected connector is not in the current list for this feature (for example after Model Settings changed). Choose a model below or use the default, then save.',
-                    }
-                  )}
-                </p>
-              </EuiCallOut>
-              <EuiSpacer size="m" />
+              </EuiLink>
             </>
           )}
-          {showNoDefaultCallout && (
-            <>
-              <EuiCallOut
-                announceOnMount
-                title={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.noDefaultConnectorTitle',
-                  { defaultMessage: 'No default connector configured' }
-                )}
-                color="warning"
-                iconType="warning"
-                data-test-subj="streams-settings-no-default-connector-callout"
-              >
-                <p>
-                  {i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.noDefaultConnectorDescription',
-                    {
-                      defaultMessage:
-                        'Processes that use "Use default" require a default connector. Open GenAI Settings to configure one.',
-                    }
-                  )}{' '}
-                  <EuiLink href={genAiSettingsUrl} external>
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.genAiSettingsLink',
-                      { defaultMessage: 'Open GenAI Settings' }
-                    )}
-                  </EuiLink>
-                </p>
-              </EuiCallOut>
-              <EuiSpacer size="m" />
-            </>
-          )}
-          <EuiFlexGroup alignItems="flexStart" gutterSize="l">
-            <EuiFlexItem grow={2}>
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                <EuiFlexItem>
-                  <EuiText size="m">
-                    <h4>
-                      {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.defaultLlmLabel',
-                        { defaultMessage: 'Default LLM' }
-                      )}
-                    </h4>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText color="subdued" size="s">
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.defaultLlmDescription',
-                      {
-                        defaultMessage:
-                          'You can pick one default LLM for all tasks, or specify each per step.',
-                      }
-                    )}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={5}>
-              <EuiForm component="div">
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.knowledgeIndicatorExtractionLabel',
-                    { defaultMessage: 'Knowledge Indicator Feature extraction' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.knowledgeIndicatorExtractionHelp',
-                    { defaultMessage: 'Model used to extract knowledge indicators.' }
-                  )}
-                >
-                  <EuiSelect
-                    data-test-subj="streams-settings-connector-knowledge-indicator-extraction"
-                    options={kiExtractionConnectorSelectOptions}
-                    value={kiExtraction}
-                    onChange={(e) => setKiExtraction(e.target.value)}
-                    isLoading={connectorsLoading}
-                  />
-                </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.ruleGenerationLabel',
-                    { defaultMessage: 'Knowledge Indicator Query generation' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.ruleGenerationHelp',
-                    { defaultMessage: 'Model used for Knowledge Indicator Query generation.' }
-                  )}
-                >
-                  <EuiSelect
-                    data-test-subj="streams-settings-connector-rule-generation"
-                    options={kiQueryGenerationConnectorSelectOptions}
-                    value={kiQueryGeneration}
-                    onChange={(e) => setKiQueryGeneration(e.target.value)}
-                    isLoading={connectorsLoading}
-                  />
-                </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.discoveryLabel',
-                    { defaultMessage: 'Discovery & Significant Event generation' }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.discoveryHelp',
-                    {
-                      defaultMessage:
-                        'Model used during Discovery phase and Significant Event generation',
-                    }
-                  )}
-                >
-                  <EuiSelect
-                    data-test-subj="streams-settings-connector-discovery"
-                    options={discoveryConnectorSelectOptions}
-                    value={discovery}
-                    onChange={(e) => setDiscovery(e.target.value)}
-                    isLoading={connectorsLoading}
-                  />
-                </EuiFormRow>
-              </EuiForm>
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </EuiPanel>
       </EuiPanel>
 
@@ -470,21 +245,216 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
-      {saveError && (
-        <>
-          <EuiSpacer size="m" />
+      <EuiSpacer />
+
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiText size="s">
+            <h3>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionTitle',
+                { defaultMessage: 'Continuous KI extraction' }
+              )}
+            </h3>
+          </EuiText>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          {continuousExtraction.saved.enabled && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="success"
+                iconType="check"
+                title={
+                  (continuousExtraction.saved.intervalHours ??
+                    DEFAULT_EXTRACTION_INTERVAL_HOURS) === 0
+                    ? i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionActiveStatusEveryRun',
+                        {
+                          defaultMessage:
+                            'Continuous extraction is active. Streams have no cooldown and are re-eligible for extraction immediately after each run.',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionActiveStatus',
+                        {
+                          defaultMessage:
+                            'Continuous extraction is active. Streams are re-extracted at most every {hours} hours.',
+                          values: {
+                            hours:
+                              continuousExtraction.saved.intervalHours ??
+                              DEFAULT_EXTRACTION_INTERVAL_HOURS,
+                          },
+                        }
+                      )
+                }
+                data-test-subj="streams-settings-continuous-extraction-status"
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <EuiFlexGroup alignItems="flexStart" gutterSize="l">
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiText size="m">
+                    <h4>
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionLabel',
+                        { defaultMessage: 'Automatic extraction' }
+                      )}
+                    </h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText color="subdued" size="s">
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionHelp',
+                      {
+                        defaultMessage:
+                          'When enabled, knowledge indicator extraction runs automatically on managed streams at the configured interval.',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              <EuiForm component="div">
+                <EuiFormRow>
+                  <EuiSwitch
+                    data-test-subj="streams-settings-continuous-extraction-toggle"
+                    label={i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.enableContinuousExtraction',
+                      { defaultMessage: 'Enable continuous KI extraction' }
+                    )}
+                    checked={continuousExtraction.draft.enabled}
+                    onChange={(e) =>
+                      continuousExtraction.setDraft((prev) => ({
+                        ...prev,
+                        enabled: e.target.checked,
+                      }))
+                    }
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.extractionIntervalLabel',
+                    { defaultMessage: 'Extraction interval (hours)' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.extractionIntervalHelp',
+                    {
+                      defaultMessage:
+                        'Minimum period in hours between extractions for a given stream. Set to 0 for no cooldown between runs.',
+                    }
+                  )}
+                >
+                  <EuiFieldNumber
+                    data-test-subj="streams-settings-extraction-interval"
+                    value={continuousExtraction.draft.intervalHours}
+                    onChange={(e) =>
+                      continuousExtraction.setDraft((prev) => ({
+                        ...prev,
+                        intervalHours: Math.max(
+                          MIN_EXTRACTION_INTERVAL_HOURS,
+                          Number(e.target.value) || 0
+                        ),
+                      }))
+                    }
+                    min={MIN_EXTRACTION_INTERVAL_HOURS}
+                    disabled={!continuousExtraction.draft.enabled}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsLabel',
+                    { defaultMessage: 'Excluded streams' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsHelp',
+                    {
+                      defaultMessage:
+                        'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to skip during continuous extraction.',
+                    }
+                  )}
+                >
+                  <EuiTextArea
+                    data-test-subj="streams-settings-excluded-streams"
+                    value={continuousExtraction.draft.excludedStreamPatterns}
+                    onChange={(e) =>
+                      continuousExtraction.setDraft((prev) => ({
+                        ...prev,
+                        excludedStreamPatterns: e.target.value,
+                      }))
+                    }
+                    disabled={!continuousExtraction.draft.enabled}
+                    placeholder={i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsPlaceholder',
+                      { defaultMessage: 'logs.debug.*' }
+                    )}
+                    rows={2}
+                  />
+                </EuiFormRow>
+              </EuiForm>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiPanel>
+
+      <EuiSpacer />
+
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <h3>
+                  {i18n.translate('xpack.streams.significantEventsDiscovery.settings.tuningTitle', {
+                    defaultMessage: 'Significant Events tuning',
+                  })}
+                </h3>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="refresh"
+                onClick={() => {
+                  const defaultYaml = configToAnnotatedYaml(DEFAULT_SIG_EVENTS_TUNING_CONFIG);
+                  setDraftConfigYaml(defaultYaml);
+                  setParsedTuningConfig(DEFAULT_SIG_EVENTS_TUNING_CONFIG);
+                }}
+              >
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.resetToDefaults',
+                  { defaultMessage: 'Reset to defaults' }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
           <EuiCallOut
-            title={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.saveErrorTitle',
-              { defaultMessage: 'Failed to save settings' }
-            )}
-            color="danger"
-            iconType="error"
-          >
-            <p>{saveError.message}</p>
-          </EuiCallOut>
-        </>
-      )}
+            size="s"
+            color="warning"
+            iconType="warning"
+            title={i18n.translate('xpack.streams.significantEventsDiscovery.settings.tuningInfo', {
+              defaultMessage:
+                'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade extraction quality or cause unexpected behavior. Changes take effect on the next run.',
+            })}
+          />
+          <EuiSpacer size="m" />
+          <SigEventsTuningConfigEditor
+            value={draftConfigYaml}
+            onChange={(yaml, parsed) => {
+              setDraftConfigYaml(yaml);
+              setParsedTuningConfig(parsed);
+            }}
+          />
+        </EuiPanel>
+      </EuiPanel>
 
       {hasChanges && (
         <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">
@@ -513,7 +483,7 @@ export function SettingsTab() {
                     size="s"
                     onClick={handleSave}
                     isLoading={isSaving}
-                    isDisabled={connectorsLoading}
+                    isDisabled={hasTuningConfigChanges && parsedTuningConfig === null}
                   >
                     {i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',

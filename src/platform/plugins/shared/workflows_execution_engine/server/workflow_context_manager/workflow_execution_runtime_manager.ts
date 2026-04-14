@@ -11,6 +11,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import agent from 'elastic-apm-node';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import {
@@ -58,6 +59,8 @@ interface WorkflowExecutionRuntimeManagerInit {
  * This class assumes that workflow steps are represented as nodes in a directed acyclic graph (DAG),
  * and uses topological sorting to determine execution order.
  */
+const LOOP_STEP_TYPES = new Set(['foreach', 'while']);
+
 export class WorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
@@ -353,8 +356,9 @@ export class WorkflowExecutionRuntimeManager {
 
         this.workflowTransaction = workflowTransaction;
 
-        // Add workflow-specific labels
-        workflowTransaction.addLabels({
+        (agent as any).setCurrentTransaction(workflowTransaction);
+
+        addTransactionLabels({
           workflow_execution_id: this.workflowExecution.id,
           workflow_id: this.workflowExecution.workflowId,
           service_name: 'kibana',
@@ -362,9 +366,6 @@ export class WorkflowExecutionRuntimeManager {
           triggered_by: 'alerting',
           parent_alerting_rule_id: (existingTransaction as any)._labels?.alerting_rule_id,
         });
-
-        // Make the workflow transaction the current transaction for subsequent spans
-        (agent as any).setCurrentTransaction(workflowTransaction);
 
         // Store the workflow transaction ID (not the alerting transaction ID)
         const workflowTransactionId = workflowTransaction.ids?.['transaction.id'];
@@ -417,8 +418,7 @@ export class WorkflowExecutionRuntimeManager {
           taskManagerLabels.event_trigger_id = triggeredBy;
         }
 
-        // Add workflow-specific labels to the existing transaction (additive; keep triggered_by: task_manager)
-        existingTransaction.addLabels(taskManagerLabels);
+        addTransactionLabels(taskManagerLabels);
 
         // Store the task transaction ID in the workflow execution
         const taskTransactionId = existingTransaction.ids?.['transaction.id'];
@@ -478,11 +478,40 @@ export class WorkflowExecutionRuntimeManager {
 
   public async resume(): Promise<void> {
     await this.workflowExecutionState.load();
+    this.evictCompletedLoopOutputs();
     this.nextNodeId = this.workflowExecution.currentNodeId;
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
+  }
+
+  /**
+   * Re-applies stale output eviction for loops that completed before the workflow
+   * suspended. Called after load() so that resume tasks don't carry the full output
+   * of every past loop iteration in memory — matching the in-memory state the initial
+   * task had at the point of suspension.
+   */
+  private evictCompletedLoopOutputs(): void {
+    // De-duplicate by stepId: a nested loop has multiple executions (one per outer
+    // iteration), all COMPLETED, but getInnerStepIds is called per step ID not per
+    // execution — deduplication avoids redundant evictStaleLoopOutputs calls.
+    const completedLoopStepIds = new Set(
+      this.workflowExecutionState
+        .getAllStepExecutions()
+        .filter(
+          (exec) =>
+            exec.stepType != null &&
+            LOOP_STEP_TYPES.has(exec.stepType) &&
+            exec.status === ExecutionStatus.COMPLETED
+        )
+        .map((exec) => exec.stepId)
+    );
+
+    for (const loopStepId of completedLoopStepIds) {
+      const innerStepIds = this.workflowGraph.getInnerStepIds(loopStepId);
+      this.workflowExecutionState.evictStaleLoopOutputs(innerStepIds);
+    }
   }
 
   public async saveState(): Promise<void> {
