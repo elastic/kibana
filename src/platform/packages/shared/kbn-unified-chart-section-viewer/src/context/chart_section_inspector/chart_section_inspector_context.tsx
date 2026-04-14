@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useCallback, useMemo } from 'react';
+import React, { createContext, useCallback, useEffect, useMemo } from 'react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 export interface TrackRequestResult<T> {
@@ -43,8 +43,27 @@ export const ChartSectionInspectorContext = createContext<ChartSectionInspectorC
   null
 );
 
-export const ChartSectionInspectorProvider = ({ children }: { children: React.ReactNode }) => {
+interface ChartSectionInspectorProviderProps {
+  children: React.ReactNode;
+  /**
+   * Optional callback for registering the request adapter with the Inspector.
+   * When provided, the adapter is synced on mount and cleared on unmount.
+   */
+  setLensRequestAdapter?: (adapter: RequestAdapter | undefined) => void;
+}
+
+export const ChartSectionInspectorProvider = ({
+  children,
+  setLensRequestAdapter,
+}: ChartSectionInspectorProviderProps) => {
   const requestAdapter = useMemo(() => new RequestAdapter(), []);
+
+  useEffect(() => {
+    setLensRequestAdapter?.(requestAdapter);
+    return () => {
+      setLensRequestAdapter?.(undefined);
+    };
+  }, [setLensRequestAdapter, requestAdapter]);
 
   const trackRequest = useCallback(
     async <T,>(

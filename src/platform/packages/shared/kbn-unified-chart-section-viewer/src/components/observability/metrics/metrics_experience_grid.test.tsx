@@ -9,11 +9,9 @@
 
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from './hooks';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
-import * as chartSectionInspector from '../../../context/chart_section_inspector';
 
 const useFetchMetricsDataMock = useFetchMetricsData as jest.MockedFunction<
   typeof useFetchMetricsData
@@ -29,7 +27,6 @@ import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../..
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 
-jest.mock('../../../context/chart_section_inspector');
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('@kbn/ebt-tools', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -80,11 +77,6 @@ const useMetricFieldsFilterMock = hooks.useMetricFieldsFilter as jest.MockedFunc
 const useDiscoverFieldForBreakdownMock = hooks.useDiscoverFieldForBreakdown as jest.MockedFunction<
   typeof hooks.useDiscoverFieldForBreakdown
 >;
-
-const useChartSectionInspectorMock =
-  chartSectionInspector.useChartSectionInspector as jest.MockedFunction<
-    typeof chartSectionInspector.useChartSectionInspector
-  >;
 
 const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 const metricItems: ParsedMetricItem[] = [
@@ -146,11 +138,6 @@ describe('MetricsExperienceGrid', () => {
       fetch$,
       isComponentVisible: true,
     };
-
-    useChartSectionInspectorMock.mockReturnValue({
-      requestAdapter: new RequestAdapter(),
-      trackRequest: jest.fn(),
-    });
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,

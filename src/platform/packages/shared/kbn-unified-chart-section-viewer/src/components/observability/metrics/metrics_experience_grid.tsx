@@ -11,7 +11,6 @@ import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
-import { useChartSectionInspector } from '../../../context/chart_section_inspector';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { ChartsGrid } from '../../charts_grid';
@@ -35,19 +34,9 @@ export const MetricsExperienceGrid = ({
   fetch$: discoverFetch$,
   fetchParams,
   isComponentVisible,
-  setLensRequestAdapter,
   breakdownField,
   onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) => {
-  const { requestAdapter } = useChartSectionInspector();
-
-  useEffect(() => {
-    setLensRequestAdapter?.(requestAdapter);
-    return () => {
-      setLensRequestAdapter?.(undefined);
-    };
-  }, [setLensRequestAdapter, requestAdapter]);
-
   const {
     searchTerm,
     isFullscreen,

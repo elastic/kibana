@@ -20,7 +20,7 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
   return (
     <PerformanceContextProvider>
       <EventBasedTelemetryProvider analytics={props.services.analytics}>
-        <ChartSectionInspectorProvider>
+        <ChartSectionInspectorProvider setLensRequestAdapter={props.setLensRequestAdapter}>
           <MetricsExperienceGrid {...props} />
         </ChartSectionInspectorProvider>
       </EventBasedTelemetryProvider>
