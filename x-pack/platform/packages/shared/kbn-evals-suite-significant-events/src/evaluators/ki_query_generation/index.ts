@@ -40,18 +40,16 @@ export const createKIQueryGenerationEvaluators = (
   scenarioCriteria?: ScenarioCriteriaConfig,
   logger?: Logger
 ) => {
-  const base = [
-    ...selectEvaluators([
-      createSyntaxValidationEvaluator(esClient, logger),
-      categoryComplianceEvaluator,
-      expectedCategoryCoverageEvaluator,
-      severityComplianceEvaluator,
-      evidenceGroundingEvaluator,
-      queryTypeDistributionEvaluator,
-      statsStructureValidationEvaluator,
-    ]),
+  const base = selectEvaluators([
+    createSyntaxValidationEvaluator(esClient, logger),
+    categoryComplianceEvaluator,
+    expectedCategoryCoverageEvaluator,
+    severityComplianceEvaluator,
+    evidenceGroundingEvaluator,
+    queryTypeDistributionEvaluator,
+    statsStructureValidationEvaluator,
     createToolUsageEvaluator(),
-  ];
+  ]);
 
   if (!scenarioCriteria) {
     return base;

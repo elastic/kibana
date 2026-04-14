@@ -17,16 +17,15 @@ interface StatsQueryDetail {
   hints: string[];
 }
 
-const CHECKS_PER_QUERY = 5;
-
 /**
  * Validates the structural quality of STATS-type queries using the same
- * guardrails enforced `getStatsQueryHints`
+ * guardrails enforced by `getStatsQueryHints`.
  *
  * For each STATS query, checks:
  * - Has temporal bucketing (BUCKET(@timestamp, ...))
  * - Has threshold filter after STATS (| WHERE ...)
  * - Has sample-size floor (heuristic)
+ * - Denominator is filtered (IS NOT NULL for mixed streams)
  * - No forbidden commands after STATS (SORT, LIMIT, KEEP)
  * - No excessive GROUP BY dimensions (>2 non-temporal)
  *
@@ -48,23 +47,21 @@ export const statsStructureValidationEvaluator: KIQueryGenerationEvaluator = {
     for (const query of statsQueries) {
       const hints = getStatsQueryHints(query.esql);
 
-      const hasBucketingIssue = hints.some((h) => h.includes('no temporal bucketing'));
-      const hasThresholdIssue = hints.some((h) => h.includes('No threshold filter'));
-      const hasSampleFloorIssue = hints.some((h) => h.includes('sample-size floor'));
-      const hasForbiddenCmds = hints.some((h) => /SORT|LIMIT|KEEP.*should not be used/.test(h));
-      const hasGroupByIssue = hints.some((h) => h.includes('GROUP BY dimensions'));
-
-      let checksPassed = CHECKS_PER_QUERY;
-      if (hasBucketingIssue) checksPassed--;
-      if (hasThresholdIssue) checksPassed--;
-      if (hasSampleFloorIssue) checksPassed--;
-      if (hasForbiddenCmds) checksPassed--;
-      if (hasGroupByIssue) checksPassed--;
+      const issues = [
+        hints.some((h) => h.includes('no temporal bucketing')),
+        hints.some((h) => h.includes('No threshold filter')),
+        hints.some((h) => h.includes('sample-size floor')),
+        hints.some((h) => h.includes('IS NOT NULL')),
+        hints.some((h) => h.includes('should not be used')),
+        hints.some((h) => h.includes('GROUP BY dimensions')),
+      ];
+      const checksTotal = issues.length;
+      const checksPassed = issues.filter((issue) => !issue).length;
 
       perQueryDetails.push({
         esql: query.esql,
         title: query.title,
-        checksTotal: CHECKS_PER_QUERY,
+        checksTotal,
         checksPassed,
         hints,
       });

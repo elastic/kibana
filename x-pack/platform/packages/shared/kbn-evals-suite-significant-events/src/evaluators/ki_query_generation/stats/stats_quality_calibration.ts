@@ -29,33 +29,41 @@ const STATS_QUALITY_CRITERIA: EvaluationCriterion[] = [
   },
 ];
 
+const getStatsQueries = (output: KIQueryGenerationOutput): Query[] => {
+  const queries = getQueriesFromOutput(output);
+  return queries.filter((q: Query) => deriveQueryType(q.esql) === QUERY_TYPE_STATS);
+};
+
 /**
  * LLM-judge evaluator that checks the quality of STATS queries:
  * threshold reasoning, signal diversity, and detection+evidence pairing.
  *
- * Only runs when STATS queries are present in output. Returns `null` otherwise.
+ * Short-circuits with `score: null` when no STATS queries are present.
  * Analogous to `confidence_calibration` in feature extraction.
  */
 export const createStatsQualityCalibrationEvaluator = ({
   criteriaFn,
 }: {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
-}): KIQueryGenerationOutput extends infer O
-  ? Evaluator<KIQueryGenerationEvaluationExample, O & KIQueryGenerationOutput>
-  : never =>
-  createScenarioCriteriaLlmEvaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput>({
+}): Evaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput> => {
+  const inner = createScenarioCriteriaLlmEvaluator<
+    KIQueryGenerationEvaluationExample,
+    KIQueryGenerationOutput
+  >({
     name: 'stats_quality_calibration',
     criteriaFn: (c) =>
       criteriaFn(c) as Evaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput>,
     criteria: STATS_QUALITY_CRITERIA,
-    transformOutput: (output) => {
-      const queries = getQueriesFromOutput(output);
-      const statsQueries = queries.filter(
-        (q: Query) => deriveQueryType(q.esql) === QUERY_TYPE_STATS
-      );
-      if (statsQueries.length === 0) {
-        return [] as unknown as KIQueryGenerationOutput;
+    transformOutput: (output) => getStatsQueries(output) as unknown as KIQueryGenerationOutput,
+  });
+
+  return {
+    ...inner,
+    evaluate: async (params) => {
+      if (getStatsQueries(params.output).length === 0) {
+        return { score: null, explanation: 'No STATS queries to evaluate' };
       }
-      return statsQueries as unknown as KIQueryGenerationOutput;
+      return inner.evaluate(params);
     },
-  }) as Evaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput>;
+  };
+};
