@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/es-errors'
   - '@kbn/alerting-v2-schemas'
+  - '@kbn/alerting-v2-alert-actions'
   - '@kbn/alerting-v2-rule-form'
   - '@kbn/data-views-plugin'
   - '@kbn/zod'
