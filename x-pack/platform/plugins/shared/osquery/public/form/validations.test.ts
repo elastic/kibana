@@ -18,19 +18,20 @@ describe('validateTimeout', () => {
   });
 
   it('should accept a value within range', () => {
-    expect(validateTimeout(300)).toBeUndefined();
+    const mid = Math.floor((QUERY_TIMEOUT.DEFAULT + QUERY_TIMEOUT.MAX) / 2);
+    expect(validateTimeout(mid)).toBeUndefined();
   });
 
-  it('should reject a value above MAX (900)', () => {
-    const result = validateTimeout(901);
+  it('should reject a value above MAX', () => {
+    const result = validateTimeout(QUERY_TIMEOUT.MAX + 1);
     expect(result).toBeDefined();
-    expect(result).toContain('900');
+    expect(result).toContain(String(QUERY_TIMEOUT.MAX));
   });
 
-  it('should reject a value below DEFAULT (60)', () => {
-    const result = validateTimeout(1);
+  it('should reject a value below DEFAULT', () => {
+    const result = validateTimeout(QUERY_TIMEOUT.DEFAULT - 1);
     expect(result).toBeDefined();
-    expect(result).toContain('60');
+    expect(result).toContain(String(QUERY_TIMEOUT.DEFAULT));
   });
 
   it('should reject zero', () => {
