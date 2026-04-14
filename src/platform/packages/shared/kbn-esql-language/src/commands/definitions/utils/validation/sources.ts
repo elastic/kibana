@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage, ESQLSource } from '@elastic/esql/types';
+import type { ESQLSource } from '@elastic/esql/types';
 import type { ICommandContext } from '../../../registry/types';
 import { sourceExists } from '../sources';
 import { errors } from '../errors';
+import type { ESQLMessage } from '../../types';
 
 function hasWildcard(name: string) {
   return /\*/.test(name);
