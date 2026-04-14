@@ -8,6 +8,7 @@
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
+import { alertActionTypeDefinitions } from '@kbn/alerting-v2-alert-actions';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
@@ -68,6 +69,7 @@ import {
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import { AlertActionTypeDefinitionToken, AlertActionTypeRegistry } from '../lib/alert_action_types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -249,4 +251,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   // Order matters: specialized strategies first, fallback (BasicTransitionStrategy) last.
   bind(TransitionStrategyToken).to(CountTimeframeStrategy).inSingletonScope();
   bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
+
+  bindAlertActionServices(bind);
+}
+
+function bindAlertActionServices(bind: ContainerModuleLoadOptions['bind']) {
+  for (const def of alertActionTypeDefinitions) {
+    bind(AlertActionTypeDefinitionToken).toConstantValue(def);
+  }
+
+  bind(AlertActionTypeRegistry).toSelf().inSingletonScope();
 }

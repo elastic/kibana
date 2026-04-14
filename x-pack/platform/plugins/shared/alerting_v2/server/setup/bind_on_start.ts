@@ -9,6 +9,7 @@ import { Logger, OnStart, PluginStart } from '@kbn/core-di';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
+import { AlertActionTypeRegistry } from '../lib/alert_action_types';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { initializeResources } from '../resources/register_resources';
@@ -23,6 +24,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
     const resourceManager = container.get(ResourceManager);
     const logger = container.get(Logger);
     const esClient = container.get(EsServiceInternalToken);
+    const alertActionTypeRegistry = container.get(AlertActionTypeRegistry);
     const taskManager = container.get(
       PluginStart<AlertingServerStartDependencies['taskManager']>('taskManager')
     );
@@ -34,6 +36,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       resourceManager,
       esClient,
       logger,
+      alertActionTypeRegistry,
     });
 
     scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {

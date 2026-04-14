@@ -21,30 +21,17 @@ import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 
-interface CreateAlertActionRouteForTypeOptions<
-  TAction extends CreateAlertActionBody['action_type']
-> {
-  actionType: TAction;
+interface CreateAlertActionRouteForTypeOptions {
+  actionType: string;
   pathSuffix: string;
-  bodySchema: z.ZodType<
-    Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>
-  >;
+  bodySchema: z.ZodType<Record<string, unknown>>;
 }
 
-export const createAlertActionRouteForType = <
-  TAction extends CreateAlertActionBody['action_type']
->({
+export const createAlertActionRouteForType = ({
   actionType,
   pathSuffix,
   bodySchema,
-}: CreateAlertActionRouteForTypeOptions<TAction>): RouteDefinition<
-  CreateAlertActionParams,
-  unknown,
-  Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>,
-  'post'
-> => {
-  type ActionBody = Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>;
-
+}: CreateAlertActionRouteForTypeOptions): RouteDefinition => {
   @injectable()
   class CreateTypedAlertActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
@@ -70,7 +57,11 @@ export const createAlertActionRouteForType = <
     constructor(
       @inject(AlertingRouteContext) ctx: AlertingRouteContext,
       @inject(Request)
-      private readonly request: KibanaRequest<CreateAlertActionParams, unknown, ActionBody>,
+      private readonly request: KibanaRequest<
+        CreateAlertActionParams,
+        unknown,
+        Record<string, unknown>
+      >,
       @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
     ) {
       super(ctx);
@@ -82,7 +73,7 @@ export const createAlertActionRouteForType = <
         action: {
           action_type: actionType,
           ...this.request.body,
-        } as Extract<CreateAlertActionBody, { action_type: TAction }>,
+        } as CreateAlertActionBody,
       });
 
       return this.ctx.response.noContent();

@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { AlertActionTypeRegistry } from '../../lib/alert_action_types';
 import { DatastreamInitializer } from '../../lib/services/resource_service/datastream_initializer';
 import type { ResourceManagerContract } from '../../lib/services/resource_service/resource_manager';
 import { getAlertActionsResourceDefinition } from './alert_actions';
@@ -17,20 +18,22 @@ export interface RegisterDatastreamsOptions {
   resourceManager: ResourceManagerContract;
   esClient: ElasticsearchClient;
   logger: Logger;
+  alertActionTypeRegistry: AlertActionTypeRegistry;
 }
 
 export function registerDatastreams({
   resourceManager,
   esClient,
   logger,
+  alertActionTypeRegistry,
 }: RegisterDatastreamsOptions): void {
-  for (const resourceDefinition of getDataStreamResourceDefinitions()) {
+  for (const resourceDefinition of getDataStreamResourceDefinitions(alertActionTypeRegistry)) {
     const initializer = new DatastreamInitializer(logger, esClient, resourceDefinition);
 
     resourceManager.registerResource(resourceDefinition.key, initializer);
   }
 }
 
-function getDataStreamResourceDefinitions(): ResourceDefinition[] {
-  return [getAlertEventsResourceDefinition(), getAlertActionsResourceDefinition()];
+function getDataStreamResourceDefinitions(registry: AlertActionTypeRegistry): ResourceDefinition[] {
+  return [getAlertEventsResourceDefinition(), getAlertActionsResourceDefinition(registry)];
 }

@@ -6,8 +6,8 @@
  */
 
 import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
-import type { MappingsDefinition } from '@kbn/es-mappings';
 import { z } from '@kbn/zod/v4';
+import type { AlertActionTypeRegistry } from '../../lib/alert_action_types';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
@@ -26,26 +26,6 @@ export const ALERT_ACTIONS_ILM_POLICY: IlmPolicy = {
         },
       },
     },
-  },
-};
-
-const mappings: MappingsDefinition = {
-  dynamic: false,
-  properties: {
-    '@timestamp': { type: 'date' },
-    last_series_event_timestamp: { type: 'date' },
-    expiry: { type: 'date' },
-    actor: { type: 'keyword' },
-    action_type: { type: 'keyword' },
-    group_hash: { type: 'keyword' },
-    episode_id: { type: 'keyword' },
-    episode_status: { type: 'keyword' },
-    rule_id: { type: 'keyword' },
-    tags: { type: 'keyword' },
-    notification_group_id: { type: 'keyword' },
-    source: { type: 'keyword' },
-    reason: { type: 'text' },
-    space_id: { type: 'keyword' },
   },
 };
 
@@ -68,10 +48,12 @@ export const alertActionSchema = z.object({
 
 export type AlertAction = z.infer<typeof alertActionSchema>;
 
-export const getAlertActionsResourceDefinition = (): ResourceDefinition => ({
+export const getAlertActionsResourceDefinition = (
+  registry: AlertActionTypeRegistry
+): ResourceDefinition => ({
   key: `data_stream:${ALERT_ACTIONS_DATA_STREAM}`,
   dataStreamName: ALERT_ACTIONS_DATA_STREAM,
   version: ALERT_ACTIONS_DATA_STREAM_VERSION,
-  mappings,
+  mappings: registry.getComposedMappings(),
   ilmPolicy: { name: ALERT_ACTIONS_ILM_POLICY_NAME, policy: ALERT_ACTIONS_ILM_POLICY },
 });

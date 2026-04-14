@@ -22,10 +22,10 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
 };
 
 export const module = new ContainerModule((options) => {
+  bindServices(options);
   bindOnSetup(options);
   bindOnStart(options);
   bindRoutes(options);
-  bindServices(options);
   bindRuleExecutionServices(options);
   bindDispatcherExecutionServices(options);
   bindTasks(options);
