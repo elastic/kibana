@@ -19,205 +19,27 @@ import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
-import { collectEnvFromLabels, expandAgentQueue } from '#pipeline-utils';
+import {
+  getAffectedPackages,
+  listChangedFiles,
+  filterFilesByPackages,
+  SELECTIVE_TESTS_LABEL,
+  CRITICAL_FILES_JEST_UNIT_TESTS,
+  touchedCriticalFiles,
+  CRITICAL_FILES_JEST_INTEGRATION_TESTS,
+} from '../affected-packages';
+import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
+
+// TODO: this is always false on on-merge, when switching to enable this by default, check if this is a PR
+const USE_SELECTIVE_TESTING = process.env.GITHUB_PR_LABELS?.includes(SELECTIVE_TESTS_LABEL);
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
-
-const getRequiredEnv = (name: string) => {
-  const value = process.env[name];
-  if (typeof value !== 'string' || !value) {
-    throw new Error(`Missing required environment variable "${name}"`);
-  }
-  return value;
-};
-
-function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup[] {
-  const types = allTypes.filter((t) => t.type === typeName);
-  if (!types.length) {
-    throw new Error(`missing test group run order for group [${typeName}]`);
-  }
-
-  const uniqueTooLongMin = [
-    ...new Set(
-      types.map((t) => t.tooLongMin).filter((value): value is number => typeof value === 'number')
-    ),
-  ];
-  const tooLongThresholdLabel =
-    uniqueTooLongMin.length > 0
-      ? `configured warning threshold${
-          uniqueTooLongMin.length === 1 ? ` of ${uniqueTooLongMin[0]} minutes` : ''
-        }`
-      : 'maximum amount of time desired for a single CI job';
-
-  const misses = types.flatMap((t) => t.namesWithoutDurations);
-  if (misses.length > 0) {
-    bk.setAnnotation(
-      `test-group-missing-durations:${typeName}`,
-      'warning',
-      [
-        misses.length === 1
-          ? `The following "${typeName}" config doesn't have a recorded time in ci-stats so the automatically-determined test groups might be a little unbalanced.`
-          : `The following "${typeName}" configs don't have recorded times in ci-stats so the automatically-determined test groups might be a little unbalanced.`,
-        misses.length === 1
-          ? `If this is a new config then this warning can be ignored as times will be reported soon.`
-          : `If these are new configs then this warning can be ignored as times will be reported soon.`,
-        misses.length === 1
-          ? `The other possibility is that there aren't any tests in this config, so times are never reported.`
-          : `The other possibility is that there aren't any tests in these configs, so times are never reported.`,
-        'Empty test configs should be removed',
-        '',
-        ...misses.map((n) => ` - ${n}`),
-      ].join('\n')
-    );
-  }
-
-  const tooLongs = types.flatMap((t) => t.tooLong ?? []);
-  if (tooLongs.length > 0) {
-    bk.setAnnotation(
-      `test-group-too-long:${typeName}`,
-      'warning',
-      [
-        tooLongs.length === 1
-          ? `The following "${typeName}" config has a duration that exceeds the ${tooLongThresholdLabel}. ` +
-            `This is not an error, and if you don't own this config then you can ignore this warning. ` +
-            `If you own this config please split it up ASAP and ask Operations if you have questions about how to do that.`
-          : `The following "${typeName}" configs have durations that exceed the ${tooLongThresholdLabel}. ` +
-            `This is not an error, and if you don't own any of these configs then you can ignore this warning.` +
-            `If you own any of these configs please split them up ASAP and ask Operations if you have questions about how to do that.`,
-        '',
-        ...tooLongs.map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
-      ].join('\n')
-    );
-  }
-
-  return types;
-}
-
-function getRunGroup(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup {
-  const groups = getRunGroups(bk, allTypes, typeName);
-  if (groups.length !== 1) {
-    throw new Error(`expected to find exactly 1 "${typeName}" run group`);
-  }
-  return groups[0];
-}
-
-function getTrackedBranch(): string {
-  let pkg;
-  try {
-    pkg = JSON.parse(Fs.readFileSync('package.json', 'utf8'));
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to read kibana's package.json file: ${error.message}`);
-  }
-
-  const branch = pkg.branch;
-  if (typeof branch !== 'string') {
-    throw new Error('missing `branch` field from package.json file');
-  }
-
-  return branch;
-}
-
-function isObj(x: unknown): x is Record<string, unknown> {
-  return typeof x === 'object' && x !== null;
-}
-
 interface FtrConfigsManifest {
   defaultQueue?: string;
   disabled?: string[];
   enabled?: Array<string | { [configPath: string]: { queue: string } }>;
-}
-
-function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
-  const configs: {
-    enabled: Array<string | { [configPath: string]: { queue: string } }>;
-    defaultQueue: string | undefined;
-  } = { enabled: [], defaultQueue: undefined };
-  const uniqueQueues = new Set<string>();
-
-  const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
-  for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
-    if (
-      mappedSolutions &&
-      !(
-        mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`)) ||
-        // When applying the solution filter, still allow platform tests
-        manifestRelPath.includes('ftr_platform_') ||
-        manifestRelPath.includes('ftr_base_')
-      )
-    ) {
-      continue;
-    }
-    try {
-      const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
-      if (!isObj(ymlData)) {
-        throw new Error('expected yaml file to parse to an object');
-      }
-      const manifest = ymlData as FtrConfigsManifest;
-
-      configs.enabled.push(...(manifest?.enabled ?? []));
-      if (manifest.defaultQueue) {
-        uniqueQueues.add(manifest.defaultQueue);
-      }
-    } catch (_) {
-      const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-      throw new Error(`unable to parse ${manifestRelPath} file: ${error.message}`);
-    }
-  }
-
-  try {
-    if (configs.enabled.length === 0) {
-      throw new Error('expected yaml files to have at least 1 "enabled" key');
-    }
-    if (uniqueQueues.size !== 1) {
-      throw Error(
-        `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
-          ...uniqueQueues,
-        ].join(' ')}`
-      );
-    }
-    configs.defaultQueue = uniqueQueues.values().next().value;
-
-    if (
-      !Array.isArray(configs.enabled) ||
-      !configs.enabled.every(
-        (p): p is string | { [configPath: string]: { queue: string } } =>
-          typeof p === 'string' ||
-          (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
-      )
-    ) {
-      throw new Error(`expected "enabled" value to be an array of strings or objects shaped as:\n
-  - {configPath}:
-      queue: {queueName}`);
-    }
-    if (typeof configs.defaultQueue !== 'string') {
-      throw new Error('expected yaml file to have a string "defaultQueue" key');
-    }
-
-    const defaultQueue = configs.defaultQueue;
-    const ftrConfigsByQueue = new Map<string, string[]>();
-    for (const enabled of configs.enabled) {
-      const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
-      const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
-
-      if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
-        continue;
-      }
-
-      const group = ftrConfigsByQueue.get(queue);
-      if (group) {
-        group.push(path);
-      } else {
-        ftrConfigsByQueue.set(queue, [path]);
-      }
-    }
-    return { defaultQueue, ftrConfigsByQueue };
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
-  }
 }
 
 export async function pickTestGroupRunOrder() {
@@ -350,7 +172,7 @@ export async function pickTestGroupRunOrder() {
     );
   };
 
-  const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
+  let jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
     ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
@@ -358,13 +180,20 @@ export async function pickTestGroupRunOrder() {
       })
     : [];
 
-  const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
+  let jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
     ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
+
+  if (USE_SELECTIVE_TESTING && process.env.GITHUB_PR_MERGE_BASE) {
+    const { filteredJestUnitConfigs, filteredJestIntegrationConfigs } =
+      await filterConfigsByAffectedPackages(jestUnitConfigs, jestIntegrationConfigs);
+    jestUnitConfigs = filteredJestUnitConfigs;
+    jestIntegrationConfigs = filteredJestIntegrationConfigs;
+  }
 
   if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
     throw new Error('unable to find any unit, integration, or FTR configs');
@@ -625,4 +454,237 @@ export async function pickTestGroupRunOrder() {
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(steps);
+}
+
+function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup[] {
+  const types = allTypes.filter((t) => t.type === typeName);
+  if (!types.length) {
+    throw new Error(`missing test group run order for group [${typeName}]`);
+  }
+
+  const uniqueTooLongMin = [
+    ...new Set(
+      types.map((t) => t.tooLongMin).filter((value): value is number => typeof value === 'number')
+    ),
+  ];
+  const tooLongThresholdLabel =
+    uniqueTooLongMin.length > 0
+      ? `configured warning threshold${
+          uniqueTooLongMin.length === 1 ? ` of ${uniqueTooLongMin[0]} minutes` : ''
+        }`
+      : 'maximum amount of time desired for a single CI job';
+
+  const misses = types.flatMap((t) => t.namesWithoutDurations);
+  if (misses.length > 0) {
+    bk.setAnnotation(
+      `test-group-missing-durations:${typeName}`,
+      'warning',
+      [
+        misses.length === 1
+          ? `The following "${typeName}" config doesn't have a recorded time in ci-stats so the automatically-determined test groups might be a little unbalanced.`
+          : `The following "${typeName}" configs don't have recorded times in ci-stats so the automatically-determined test groups might be a little unbalanced.`,
+        misses.length === 1
+          ? `If this is a new config then this warning can be ignored as times will be reported soon.`
+          : `If these are new configs then this warning can be ignored as times will be reported soon.`,
+        misses.length === 1
+          ? `The other possibility is that there aren't any tests in this config, so times are never reported.`
+          : `The other possibility is that there aren't any tests in these configs, so times are never reported.`,
+        'Empty test configs should be removed',
+        '',
+        ...misses.map((n) => ` - ${n}`),
+      ].join('\n')
+    );
+  }
+
+  const tooLongs = types.flatMap((t) => t.tooLong ?? []);
+  if (tooLongs.length > 0) {
+    bk.setAnnotation(
+      `test-group-too-long:${typeName}`,
+      'warning',
+      [
+        tooLongs.length === 1
+          ? `The following "${typeName}" config has a duration that exceeds the ${tooLongThresholdLabel}. ` +
+            `This is not an error, and if you don't own this config then you can ignore this warning. ` +
+            `If you own this config please split it up ASAP and ask Operations if you have questions about how to do that.`
+          : `The following "${typeName}" configs have durations that exceed the ${tooLongThresholdLabel}. ` +
+            `This is not an error, and if you don't own any of these configs then you can ignore this warning.` +
+            `If you own any of these configs please split them up ASAP and ask Operations if you have questions about how to do that.`,
+        '',
+        ...tooLongs.map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
+      ].join('\n')
+    );
+  }
+
+  return types;
+}
+
+function getRunGroup(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup {
+  const groups = getRunGroups(bk, allTypes, typeName);
+  if (groups.length !== 1) {
+    throw new Error(`expected to find exactly 1 "${typeName}" run group`);
+  }
+  return groups[0];
+}
+
+function getTrackedBranch(): string {
+  let pkg;
+  try {
+    pkg = JSON.parse(Fs.readFileSync('package.json', 'utf8'));
+  } catch (_) {
+    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+    throw new Error(`unable to read kibana's package.json file: ${error.message}`);
+  }
+
+  const branch = pkg.branch;
+  if (typeof branch !== 'string') {
+    throw new Error('missing `branch` field from package.json file');
+  }
+
+  return branch;
+}
+
+function isObj(x: unknown): x is Record<string, unknown> {
+  return typeof x === 'object' && x !== null;
+}
+
+function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
+  const configs: {
+    enabled: Array<string | { [configPath: string]: { queue: string } }>;
+    defaultQueue: string | undefined;
+  } = { enabled: [], defaultQueue: undefined };
+  const uniqueQueues = new Set<string>();
+
+  const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
+  for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
+    if (
+      mappedSolutions &&
+      !(
+        mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`)) ||
+        // When applying the solution filter, still allow platform tests
+        manifestRelPath.includes('ftr_platform_') ||
+        manifestRelPath.includes('ftr_base_')
+      )
+    ) {
+      continue;
+    }
+    try {
+      const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
+      if (!isObj(ymlData)) {
+        throw new Error('expected yaml file to parse to an object');
+      }
+      const manifest = ymlData as FtrConfigsManifest;
+
+      configs.enabled.push(...(manifest?.enabled ?? []));
+      if (manifest.defaultQueue) {
+        uniqueQueues.add(manifest.defaultQueue);
+      }
+    } catch (_) {
+      const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+      throw new Error(`unable to parse ${manifestRelPath} file: ${error.message}`);
+    }
+  }
+
+  try {
+    if (configs.enabled.length === 0) {
+      throw new Error('expected yaml files to have at least 1 "enabled" key');
+    }
+    if (uniqueQueues.size !== 1) {
+      throw Error(
+        `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
+          ...uniqueQueues,
+        ].join(' ')}`
+      );
+    }
+    configs.defaultQueue = uniqueQueues.values().next().value;
+
+    if (
+      !Array.isArray(configs.enabled) ||
+      !configs.enabled.every(
+        (p): p is string | { [configPath: string]: { queue: string } } =>
+          typeof p === 'string' ||
+          (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
+      )
+    ) {
+      throw new Error(`expected "enabled" value to be an array of strings or objects shaped as:\n
+  - {configPath}:
+      queue: {queueName}`);
+    }
+    if (typeof configs.defaultQueue !== 'string') {
+      throw new Error('expected yaml file to have a string "defaultQueue" key');
+    }
+
+    const defaultQueue = configs.defaultQueue;
+    const ftrConfigsByQueue = new Map<string, string[]>();
+    for (const enabled of configs.enabled) {
+      const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
+      const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
+
+      if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
+        continue;
+      }
+
+      const group = ftrConfigsByQueue.get(queue);
+      if (group) {
+        group.push(path);
+      } else {
+        ftrConfigsByQueue.set(queue, [path]);
+      }
+    }
+    return { defaultQueue, ftrConfigsByQueue };
+  } catch (_) {
+    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+    throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
+  }
+}
+
+async function filterConfigsByAffectedPackages(
+  jestUnitConfigs: string[],
+  jestIntegrationConfigs: string[]
+) {
+  const mergeBase = process.env.GITHUB_PR_MERGE_BASE!;
+  const affectedPackages = await getAffectedPackages(mergeBase, {
+    strategy: 'git',
+    includeDownstream: true,
+    ignorePatterns: [], // might want to exclude metadata/text changes in the future
+    ignoreUncategorizedChanges: true,
+  }).catch((error) => {
+    console.error('Error getting affected packages', error);
+    return null;
+  });
+
+  const shouldFilterByAffected = Boolean(affectedPackages);
+  if (!shouldFilterByAffected) {
+    console.log('Not filtering Jest unit/integration tests because no affected packages found');
+    return {
+      filteredJestUnitConfigs: jestUnitConfigs,
+      filteredJestIntegrationConfigs: jestIntegrationConfigs,
+    };
+  }
+
+  const prChangedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
+  console.log('Filtering Jest unit/integration tests for affected packages:', affectedPackages);
+
+  let filteredJestUnitConfigs = jestUnitConfigs;
+  let filteredJestIntegrationConfigs = jestIntegrationConfigs;
+  if (!touchedCriticalFiles(prChangedFiles, CRITICAL_FILES_JEST_UNIT_TESTS)) {
+    filteredJestUnitConfigs = filterFilesByPackages(jestUnitConfigs, affectedPackages);
+    console.log(
+      `Filtering Jest unit tests: ${jestUnitConfigs.length} -> ${filteredJestUnitConfigs.length}`
+    );
+  } else {
+    console.log('Not filtering Jest unit tests because critical files changed');
+  }
+
+  if (!touchedCriticalFiles(prChangedFiles, CRITICAL_FILES_JEST_INTEGRATION_TESTS)) {
+    filteredJestIntegrationConfigs = filterFilesByPackages(
+      jestIntegrationConfigs,
+      affectedPackages
+    );
+    console.log(
+      `Filtering Jest integration tests: ${jestIntegrationConfigs.length} -> ${filteredJestIntegrationConfigs.length}`
+    );
+  } else {
+    console.log('Not filtering Jest integration tests because critical files changed');
+  }
+  return { filteredJestUnitConfigs, filteredJestIntegrationConfigs };
 }
