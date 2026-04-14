@@ -13,7 +13,6 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
@@ -35,7 +34,6 @@ import { queryKeys } from '../../../query_keys';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
 import { labels } from '../../../utils/i18n';
-import { ICON_DIMENSIONS } from '../common/constants';
 import { PageWrapper } from '../common/page_wrapper';
 import { useListDetailPageStyles } from '../common/styles';
 import { ActiveSkillRow } from './active_skill_row';
@@ -233,16 +231,9 @@ export const AgentSkills: React.FC = () => {
       <div css={styles.header}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="bolt" aria-hidden={true} css={ICON_DIMENSIONS} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.skills.title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiTitle size="l">
+              <h1>{labels.skills.title}</h1>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -299,8 +290,8 @@ export const AgentSkills: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
+        <EuiSpacer size="m" />
+        <EuiText size="m" color="default">
           {labels.agentSkills.pageDescription}
         </EuiText>
       </div>
