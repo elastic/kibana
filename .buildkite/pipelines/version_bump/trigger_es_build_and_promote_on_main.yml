@@ -15,6 +15,7 @@ steps:
       steps:
         - name: 'Promote ES Snapshot'
           trigger: kibana-elasticsearch-snapshot-promote
+          depends_on: build-es-snapshot
           async: false
           build:
             branch: 'main'
