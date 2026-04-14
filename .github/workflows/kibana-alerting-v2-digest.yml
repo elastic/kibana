@@ -1,0 +1,27 @@
+name: Kibana Alerting V2 digest (Slack)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  discussions: write
+  issues: read
+  pull-requests: read
+
+jobs:
+  run:
+    uses: uses: elastic/docs-actions/.github/workflows/gh-aw-alerting-v2-digest.lock.yml@test-alerting-digest
+    with:
+      target-repo: elastic/kibana
+      hours-back: "24"
+      search-query: 'alerting OR "Rules v2" OR label:"Feature:AlertingV2"'
+      additional-instructions: |
+        Treat "Alerting v2" / "Rules v2" as Stack Management alerting and related server/UI surfaces.
+        Title prefixes and labels are signals, not requirements—use judgment on ambiguous PRs.
+        Exclude PRs that only touch Elastic Agent, Fleet, or unrelated plugins unless the
+        title/body clearly ties them to Stack alerting behavior.
+    secrets:
+      COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
