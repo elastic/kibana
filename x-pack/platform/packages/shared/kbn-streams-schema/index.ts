@@ -60,9 +60,17 @@ export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fie
 export { getInheritedSettings } from './src/helpers/get_inherited_settings';
 export {
   buildMetadataOption,
+  deriveQueryType,
   ensureMetadata,
+  extractBucketColumnName,
+  extractBucketIntervalMs,
+  extractBucketTargetField,
+  extractStatsGroupColumns,
   extractWhereExpression,
   getFromSources,
+  getStatsQueryHints,
+  hasStatsCommand,
+  MS_PER_UNIT,
   normalizeEsqlQuery,
   replaceFromSources,
   rewriteFromSources,
@@ -118,9 +126,14 @@ export {
   esqlQuerySchema,
   type StreamQuery,
   type QueryLink,
+  type QueryType,
+  QUERY_TYPE_MATCH,
+  QUERY_TYPE_STATS,
+  queryTypeSchema,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
+  bulkStreamQueryInputSchema,
   streamQuerySchema,
 } from './src/queries';
 

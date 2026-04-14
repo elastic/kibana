@@ -20,6 +20,12 @@ import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
 } from './query_builder_commons';
 import {
+  buildLogPaginationCursorProbeEsql,
+  interpretLogPaginationCursorRows,
+  type LogPaginationCursor,
+  parseLogPaginationCursorRow,
+} from './log_pagination_probe_query_builder';
+import {
   buildLogsExtractionEsqlQuery,
   buildRemainingLogsCountQuery,
   extractMainPaginationParams,
@@ -156,6 +162,10 @@ export class LogsExtractionClient {
           // window
           paginationTimestamp: undefined,
           paginationId: undefined,
+          logsPageCursorStartTimestamp: undefined,
+          logsPageCursorStartId: undefined,
+          logsPageCursorEndTimestamp: undefined,
+          logsPageCursorEndId: undefined,
           // Store last searched timestamp to start window from here
           lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
         },
@@ -186,12 +196,17 @@ export class LogsExtractionClient {
       const { fromDateISO } = this.getExtractionWindow(config, engineState, delayMs);
       const toDateISO = moment().utc().toISOString();
       const recoveryId = engineState.paginationId;
+      const logsPageCursorStart = paginationFromOptionalFields(
+        engineState.logsPageCursorStartTimestamp,
+        engineState.logsPageCursorStartId
+      );
       const query = buildRemainingLogsCountQuery({
         indexPatterns,
         type,
         fromDateISO,
         toDateISO,
         recoveryId,
+        logsPageCursorStart,
       });
       const esqlResponse = await executeEsqlQuery({
         esClient: this.esClient,
@@ -232,7 +247,7 @@ export class LogsExtractionClient {
     lastSearchTimestamp: string;
     ccsError?: Error;
   }> {
-    const { docsLimit } = config;
+    const { docsLimit, maxLogsPerPage } = config;
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       config.additionalIndexPatterns
     );
@@ -252,6 +267,7 @@ export class LogsExtractionClient {
       fromDateISO,
       toDateISO,
       docsLimit,
+      maxLogsPerPage,
       entityDefinition,
     });
 
@@ -278,15 +294,19 @@ export class LogsExtractionClient {
     return await mainPromise;
   }
 
+  /**
+   * Main LOOKUP extraction: outer loop over capped raw-log slices, inner loop over entity pages per slice.
+   */
   private async runMainExtractionLoop({
     type,
-    engineState,
+    engineState: initialEngineState,
     opts,
     indexPatterns,
     latestIndex,
     fromDateISO,
     toDateISO,
     docsLimit,
+    maxLogsPerPage,
     entityDefinition,
   }: {
     type: EntityType;
@@ -297,21 +317,245 @@ export class LogsExtractionClient {
     fromDateISO: string;
     toDateISO: string;
     docsLimit: number;
+    maxLogsPerPage: number;
     entityDefinition: ManagedEntityDefinition;
   }) {
     let totalCount = 0;
     let pages = 0;
-    let pagination: PaginationParams | undefined;
+    let state: EngineLogExtractionState = { ...initialEngineState };
 
     const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
     opts?.abortController?.signal.addEventListener('abort', onAbort);
 
-    let recoveryId: string | undefined = engineState.paginationId;
+    /** One-shot `recoveryId` for corrupt state: consumed by the probe or the first bounded extraction batch. */
+    let recoveryId = initialEngineState.paginationId;
     if (recoveryId) {
       this.logger.warn(
         `Recovering from corrupt state, using paginationTimestamp ${fromDateISO} and paginationId ${recoveryId} beginning of the window.`
       );
     }
+
+    try {
+      let lastLogsPages = false;
+      do {
+        const {
+          logsPageCursorStart,
+          logsPageCursorEnd: logsPageCursorEndFromState,
+          entityPagination,
+          skipProbe,
+        } = this.readMainLoopCursorsFromState(state);
+
+        let logsPageCursorEnd = logsPageCursorEndFromState;
+
+        if (!skipProbe) {
+          const probePromise = this.runLogPaginationCursorProbeForNextPage({
+            indexPatterns,
+            type,
+            fromDateISO,
+            toDateISO,
+            logsPageCursorStart,
+            maxLogsPerPage,
+            recoveryId,
+            opts,
+          });
+          // One-shot id is consumed when the probe query is built (before ES runs), matching prior clear-before-await behavior.
+          recoveryId = undefined;
+          const probeOutcome = await probePromise;
+
+          if (!probeOutcome.hasLogsToProcess) {
+            break;
+          }
+
+          logsPageCursorEnd = probeOutcome.logsPaginationCursor;
+          lastLogsPages = probeOutcome.isLastLogsPage;
+          state = {
+            ...state,
+            logsPageCursorEndTimestamp: logsPageCursorEnd.timestampCursor,
+            logsPageCursorEndId: logsPageCursorEnd.idCursor,
+          };
+        }
+
+        const sliceIngestOutcome = await this.ingestEntityPagesWithinCurrentLogPage({
+          type,
+          opts,
+          indexPatterns,
+          latestIndex,
+          entityDefinition,
+          docsLimit,
+          fromDateISO,
+          toDateISO,
+          logsPageCursorStart,
+          logsPageCursorEnd: logsPageCursorEnd!,
+          skipProbe,
+          entityPagination,
+          recoveryId,
+          state,
+        });
+
+        totalCount += sliceIngestOutcome.addedToTotalCount;
+        pages += sliceIngestOutcome.addedToPageCount;
+        state = sliceIngestOutcome.state;
+
+        recoveryId = undefined;
+
+        state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd!);
+        await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
+      } while (!lastLogsPages);
+    } finally {
+      opts?.abortController?.signal.removeEventListener('abort', onAbort);
+    }
+
+    return {
+      count: totalCount,
+      pages,
+      indexPatterns,
+      lastSearchTimestamp: toDateISO,
+    };
+  }
+
+  /**
+   * Hydrates raw-log slice cursors and entity pagination from the engine descriptor for one outer iteration.
+   * `skipProbe` is true when both entity pagination and slice end are present (interrupted run), so the boundary ESQL probe query is skipped.
+   */
+  private readMainLoopCursorsFromState(state: EngineLogExtractionState): {
+    logsPageCursorStart: PaginationParams | undefined;
+    logsPageCursorEnd: PaginationParams | undefined;
+    entityPagination: PaginationParams | undefined;
+    skipProbe: boolean;
+  } {
+    // Exclusive lower bound on (@timestamp, _id) for raw logs: end of the previous slice, or unset at window start.
+    const logsPageCursorStart = paginationFromOptionalFields(
+      state.logsPageCursorStartTimestamp,
+      state.logsPageCursorStartId
+    );
+    // Inclusive upper bound of the current raw-log slice; from disk when we skip the probe (interrupted mid-entity-pages), else filled by the probe.
+    const logsPageCursorEnd = paginationFromOptionalFields(
+      state.logsPageCursorEndTimestamp,
+      state.logsPageCursorEndId
+    );
+    // Entity-row pagination inside the current slice (post-STATS LIMIT); both fields required.
+    const entityPagination = paginationFromOptionalFields(
+      state.paginationTimestamp,
+      state.paginationId
+    );
+    // When both slice end and entity cursor are on disk, skip the boundary probe and continue bounded extraction for this slice.
+    const skipProbe = !!(entityPagination && logsPageCursorEnd);
+
+    return {
+      logsPageCursorStart,
+      logsPageCursorEnd,
+      entityPagination,
+      skipProbe,
+    };
+  }
+
+  /**
+   * Locates the inclusive upper bound of the next raw-log page (probe ESQL). Clears corrupt `recoveryId` after scheduling the query.
+   */
+  private async runLogPaginationCursorProbeForNextPage({
+    indexPatterns,
+    type,
+    fromDateISO,
+    toDateISO,
+    logsPageCursorStart,
+    maxLogsPerPage,
+    recoveryId,
+    opts,
+  }: {
+    indexPatterns: string[];
+    type: EntityType;
+    fromDateISO: string;
+    toDateISO: string;
+    logsPageCursorStart: PaginationParams | undefined;
+    maxLogsPerPage: number;
+    recoveryId: string | undefined;
+    opts?: LogsExtractionOptions;
+  }): Promise<LogPaginationCursor> {
+    const logPaginationCursorProbeQuery = buildLogPaginationCursorProbeEsql({
+      indexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      recoveryId,
+      logsPageCursorStart,
+      maxLogsPerPage,
+    });
+
+    const logPaginationCursorProbeResponse = await executeEsqlQuery({
+      esClient: this.esClient,
+      query: logPaginationCursorProbeQuery,
+      abortController: opts?.abortController,
+    });
+
+    const parsedLogPaginationCursor = parseLogPaginationCursorRow(logPaginationCursorProbeResponse);
+
+    const interpretedLogPaginationCursor = interpretLogPaginationCursorRows(
+      parsedLogPaginationCursor,
+      maxLogsPerPage
+    );
+
+    if (parsedLogPaginationCursor) {
+      this.logger.debug(
+        `Log pagination cursor probe: missing logs to process ${parsedLogPaginationCursor.missingLogsToProcess}, next page starts at ${parsedLogPaginationCursor.logsPaginationCursor.timestampCursor} | ${parsedLogPaginationCursor.logsPaginationCursor.idCursor}`
+      );
+    }
+
+    if (!interpretedLogPaginationCursor.hasLogsToProcess) {
+      return { hasLogsToProcess: false };
+    }
+
+    return {
+      hasLogsToProcess: true,
+      logsPaginationCursor: interpretedLogPaginationCursor.logsPaginationCursor,
+      isLastLogsPage: interpretedLogPaginationCursor.isLastLogsPage,
+    };
+  }
+
+  /**
+   * Bounded extraction ESQL + ingest for each entity page within one raw-log slice.
+   */
+  private async ingestEntityPagesWithinCurrentLogPage({
+    type,
+    opts,
+    indexPatterns,
+    latestIndex,
+    entityDefinition,
+    docsLimit,
+    fromDateISO,
+    toDateISO,
+    logsPageCursorStart,
+    logsPageCursorEnd,
+    skipProbe,
+    entityPagination,
+    recoveryId,
+    state: initialSliceState,
+  }: {
+    type: EntityType;
+    opts?: LogsExtractionOptions;
+    indexPatterns: string[];
+    latestIndex: string;
+    entityDefinition: ManagedEntityDefinition;
+    docsLimit: number;
+    fromDateISO: string;
+    toDateISO: string;
+    logsPageCursorStart: PaginationParams | undefined;
+    logsPageCursorEnd: PaginationParams;
+    skipProbe: boolean;
+    entityPagination: PaginationParams | undefined;
+    recoveryId: string | undefined;
+    state: EngineLogExtractionState;
+  }): Promise<{
+    addedToTotalCount: number;
+    addedToPageCount: number;
+    state: EngineLogExtractionState;
+  }> {
+    let state = initialSliceState;
+    let addedToTotalCount = 0;
+    let addedToPageCount = 0;
+
+    let pagination = skipProbe ? entityPagination : undefined;
+    let recoveryIdForBounded = skipProbe ? recoveryId : undefined;
+
     do {
       const query = buildLogsExtractionEsqlQuery({
         indexPatterns,
@@ -321,10 +565,11 @@ export class LogsExtractionClient {
         fromDateISO,
         toDateISO,
         pagination,
-        recoveryId,
+        recoveryId: recoveryIdForBounded,
+        logsPageCursorStart,
+        logsPageCursorEnd,
       });
-
-      recoveryId = undefined;
+      recoveryIdForBounded = undefined;
 
       this.logger.debug(
         `Running query to extract logs from ${fromDateISO} to ${toDateISO} ${
@@ -340,10 +585,10 @@ export class LogsExtractionClient {
         abortController: opts?.abortController,
       });
 
-      totalCount += esqlResponse.values.length;
+      addedToTotalCount += esqlResponse.values.length;
       pagination = extractMainPaginationParams(esqlResponse, docsLimit);
       if (esqlResponse.values.length > 0) {
-        pages++;
+        addedToPageCount++;
       }
 
       this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
@@ -358,23 +603,51 @@ export class LogsExtractionClient {
       });
 
       if (pagination) {
-        await this.engineDescriptorClient.update(type, {
-          logExtractionState: {
-            paginationTimestamp: pagination?.timestampCursor,
-            paginationId: pagination?.idCursor,
-          },
-        });
+        state = {
+          ...state,
+          paginationTimestamp: pagination.timestampCursor,
+          paginationId: pagination.idCursor,
+          logsPageCursorEndTimestamp: logsPageCursorEnd.timestampCursor,
+          logsPageCursorEndId: logsPageCursorEnd.idCursor,
+          logsPageCursorStartTimestamp: logsPageCursorStart?.timestampCursor,
+          logsPageCursorStartId: logsPageCursorStart?.idCursor,
+        };
+        await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
       }
     } while (pagination);
 
-    opts?.abortController?.signal.removeEventListener('abort', onAbort);
+    return { addedToTotalCount, addedToPageCount, state };
+  }
 
+  /**
+   * After all entity pages for a slice: drop entity + slice-end fields and move the exclusive raw-log cursor to the slice end.
+   */
+  private advanceEngineStateAfterLogPageCompletes(
+    state: EngineLogExtractionState,
+    logsPageCursorEnd: PaginationParams
+  ): EngineLogExtractionState {
     return {
-      count: totalCount,
-      pages,
-      indexPatterns,
-      lastSearchTimestamp: toDateISO,
+      ...state,
+      paginationTimestamp: undefined,
+      paginationId: undefined,
+      logsPageCursorEndTimestamp: undefined,
+      logsPageCursorEndId: undefined,
+      logsPageCursorStartTimestamp: logsPageCursorEnd.timestampCursor,
+      logsPageCursorStartId: logsPageCursorEnd.idCursor,
     };
+  }
+
+  private async persistMainLogExtractionStateIfNotManualWindow(
+    type: EntityType,
+    opts: LogsExtractionOptions | undefined,
+    logExtractionState: Partial<EngineLogExtractionState>
+  ): Promise<void> {
+    if (opts?.specificWindow) {
+      return;
+    }
+    await this.engineDescriptorClient.update(type, {
+      logExtractionState: logExtractionState as EngineLogExtractionState,
+    });
   }
 
   private validateExtractionWindow(fromDateISO: string, toDateISO: string) {
@@ -389,22 +662,48 @@ export class LogsExtractionClient {
   // 2. PaginationTimestamp is present:
   //    fromDate = paginationTimestamp | toDate = now - delay
   // 3. LastExecutionTimestamp is present:
-  //    fromDate = lastExecutionTimestamp | toDate = now - delay
+  //    fromDate = lastExecutionTimestamp - delay | toDate = now - delay
+  // 4. Log page cursors present without lastExecutionTimestamp (e.g. interrupted before first full run):
+  //    fromDate = logsPageCursorStartTimestamp | toDate = now - delay — avoids shifting to lookback and skipping data before the cursor.
+  //
+  // Mid log-page: prefer persisted slice start over lastExecutionTimestamp so `from` tracks in-flight slice bounds.
+  // (lastExecution alone can sit ahead of the cursor and narrow the window past data we still owe.)
+  // Lookback remains only as a fallback when we have log-page progress (start or end on disk) but neither
+  // slice start nor lastExecution is set — e.g. slice end persisted before start in a narrow window.
   private getExtractionWindow(
     config: LogExtractionConfig,
     engineState: EngineLogExtractionState,
     delayMs: number
   ): { fromDateISO: string; toDateISO: string } {
-    const { paginationTimestamp } = engineState;
+    const hasLogPaginationCursorProgress = !!(
+      engineState.logsPageCursorStartTimestamp || engineState.logsPageCursorEndTimestamp
+    );
 
-    const fromDateISO =
-      paginationTimestamp ||
-      this.getDelayedLastExecutionTimestamp(engineState, delayMs) ||
-      this.getFromDateBasedOnLookback(config);
+    let fromDateISO: string;
+    if (hasLogPaginationCursorProgress) {
+      // Mid log-page: use persisted cursor start, then last run, else lookback—so `from` stays before the cursor.
+      fromDateISO =
+        this.getFromDateISOFromPersistedLogPageCursorStart(engineState) ||
+        this.getDelayedLastExecutionTimestamp(engineState, delayMs) ||
+        this.getFromDateBasedOnLookback(config);
+    } else {
+      // No log-page cursor: entity pagination, then last run, then lookback.
+      fromDateISO =
+        engineState.paginationTimestamp ||
+        this.getDelayedLastExecutionTimestamp(engineState, delayMs) ||
+        this.getFromDateBasedOnLookback(config);
+    }
 
     const toDateISO = moment().utc().subtract(delayMs, 'millisecond').toISOString();
 
     return { fromDateISO, toDateISO };
+  }
+
+  /** Persisted log-page slice start; used so `fromDateISO` does not jump past an in-flight cursor. */
+  private getFromDateISOFromPersistedLogPageCursorStart(
+    engineState: EngineLogExtractionState
+  ): string | undefined {
+    return engineState.logsPageCursorStartTimestamp || undefined;
   }
 
   private getDelayedLastExecutionTimestamp(
@@ -499,4 +798,14 @@ export class LogsExtractionClient {
 
     return indexPatterns;
   }
+}
+
+function paginationFromOptionalFields(
+  ts: string | undefined,
+  id: string | undefined
+): PaginationParams | undefined {
+  if (id && ts) {
+    return { timestampCursor: ts, idCursor: id };
+  }
+  return undefined;
 }
