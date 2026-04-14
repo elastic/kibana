@@ -30,6 +30,14 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(200);
     expect(response.body.locale).toBe('en');
     expect(response).toHaveHeaders({ 'content-type': 'application/json; charset=utf-8' });
+
+    // Distributable builds serve pre-built translations with immutable caching and no etag
+    if (process.env.CI) {
+      expect(response).toHaveHeaders({
+        'cache-control': 'public, max-age=31536000, immutable',
+      });
+      expect(response.headers.etag).toBeUndefined();
+    }
   });
 
   apiTest('returns a 404 when not using the correct locale', async ({ apiClient }) => {
