@@ -50,6 +50,7 @@ export interface InferenceSettingsResponse {
     updatedAt?: string;
   };
   data: InferenceSettingsAttributes;
+  invalidEndpoints?: string[];
 }
 
 export interface InferenceFeaturesResponse {
