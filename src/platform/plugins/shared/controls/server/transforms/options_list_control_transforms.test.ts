@@ -104,21 +104,4 @@ describe('options list control transforms', () => {
       ).toThrow('Must include a non-empty field name');
     });
   });
-
-  describe('transformIn', () => {
-    it('throws on empty required fields', () => {
-      expect(() =>
-        transformIn({
-          data_view_id: '',
-        })
-      ).toThrow('Must include a non-empty data view ID');
-
-      expect(() =>
-        transformIn({
-          data_view_id: 'test',
-          field_name: '',
-        })
-      ).toThrow('Must include a non-empty field name');
-    });
-  });
 });
