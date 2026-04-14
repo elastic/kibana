@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // If time is stored with a dashboard, it's supposed to override the current time settings when opened.
       // However, if the URL also contains time in the global state, then the global state
       // time should take precedence.
-      it.skip('should be overwritten by global state', async function () {
+      it('should be overwritten by global state', async function () {
         const currentUrl = await browser.getCurrentUrl();
         const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await dashboard.getDashboardIdFromCurrentUrl();
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await pieChart.expectEmptyPieChart();
       });
 
-      it.skip('should use unsaved saved time from session storage, if time is missing in global state, but _g is present in the url', async function () {
+      it('should use unsaved saved time from session storage, if time is missing in global state, but _g is present in the url', async function () {
         const currentUrl = await browser.getCurrentUrl();
         const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await dashboard.getDashboardIdFromCurrentUrl();
@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.end).to.equal('now');
       });
 
-      it.skip('should use saved time after time change is undone', async function () {
+      it('should use saved time after time change is undone', async function () {
         const currentUrl = await browser.getCurrentUrl();
         const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await dashboard.getDashboardIdFromCurrentUrl();
@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // when it's opened. However, if the user then changes the time, navigates to visualize, then navigates
     // back to dashboard, the overridden time should be preserved. The time is *only* reset on open, not
     // during navigation or page refreshes.
-    describe.skip('time changes', function () {
+    describe('time changes', function () {
       it('preserved during navigation', async function () {
         await dashboard.loadSavedDashboard(dashboardName);
 
