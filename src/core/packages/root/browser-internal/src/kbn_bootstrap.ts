@@ -30,8 +30,7 @@ export async function __kbnBootstrap__() {
   // 2. kibana.yml config (already embedded in injectedMetadata.i18n.translationsUrl)
   // 3. browser Accept-Language (injected as injectedMetadata.i18n.browserLocale)
   let translationsUrl = injectedMetadata.i18n.translationsUrl;
-  const configLocale = injectedMetadata.i18n.translationsUrl.match(/\/([^/]+)\.json$/)?.[1];
-  const isDefaultConfig = !configLocale || configLocale === 'en';
+  const isDefaultConfig = injectedMetadata.i18n.configLocale === 'en';
   // Only use browserLocale as fallback when kibana.yml hasn't set an explicit locale
   const resolvedLocale =
     injectedMetadata.i18n.userLocale ?? (isDefaultConfig ? injectedMetadata.i18n.browserLocale : undefined);

@@ -369,7 +369,10 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
+          // Per-locale content hashes for cache-busting URLs. Currently 5 locales (~60 bytes);
+          // if the supported locale list grows significantly, consider lazy injection.
           translationHashes,
+          configLocale: locale,
           ...(browserLocale ? { browserLocale } : {}),
           ...(userSettingLocale ? { userLocale: userSettingLocale } : {}),
         },

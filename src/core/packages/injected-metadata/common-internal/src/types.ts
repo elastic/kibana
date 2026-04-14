@@ -74,6 +74,7 @@ export interface InjectedMetadata {
   i18n: {
     translationsUrl: string;
     translationHashes: Record<string, string>;
+    configLocale: string;
     browserLocale?: string;
     userLocale?: string;
   };
