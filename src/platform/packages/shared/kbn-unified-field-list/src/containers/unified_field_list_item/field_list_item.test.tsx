@@ -45,11 +45,13 @@ async function getComponent({
   field,
   canFilter = true,
   isBreakdownSupported = true,
+  searchMode = 'documents',
 }: {
   selected?: boolean;
   field?: DataViewField;
   canFilter?: boolean;
   isBreakdownSupported?: boolean;
+  searchMode?: 'documents' | 'text-based';
 }) {
   const finalField =
     field ??
@@ -75,7 +77,7 @@ async function getComponent({
   const props: UnifiedFieldListItemProps = {
     services: getServicesMock(),
     stateService,
-    searchMode: 'documents',
+    searchMode,
     dataView: stubDataView,
     field: finalField,
     ...(canFilter && { onAddFilter: jest.fn() }),
@@ -284,5 +286,39 @@ describe('UnifiedFieldListItem', function () {
     expect(
       comp.find('[data-test-subj="fieldPopoverHeader_addField-extension.keyword"]').exists()
     ).toBeFalsy();
+  });
+
+  it('should allow selecting _source field in text-based mode', async function () {
+    const field = new DataViewField({
+      name: '_source',
+      type: '_source',
+      esTypes: ['_source'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
+    const { comp, props } = await getComponent({
+      field,
+      searchMode: 'text-based',
+    });
+    findTestSubject(comp, 'fieldToggle-_source').simulate('click');
+    expect(props.onAddFieldToWorkspace).toHaveBeenCalledWith(props.field);
+  });
+
+  it('should not allow selecting _source field in documents mode', async function () {
+    const field = new DataViewField({
+      name: '_source',
+      type: '_source',
+      esTypes: ['_source'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
+    const { comp, props } = await getComponent({
+      field,
+      searchMode: 'documents',
+    });
+    expect(findTestSubject(comp, 'fieldToggle-_source').length).toBe(0);
+    expect(props.onAddFieldToWorkspace).not.toHaveBeenCalled();
   });
 });

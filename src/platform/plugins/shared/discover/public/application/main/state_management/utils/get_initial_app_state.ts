@@ -77,7 +77,8 @@ export function getInitialAppState({
     mergedState.dataSource = createEsqlDataSource();
   }
 
-  return handleSourceColumnState(mergedState, services.uiSettings);
+  const isEsql = isOfAggregateQueryType(mergedState.query) || isEsqlSource(mergedState.dataSource);
+  return handleSourceColumnState(mergedState, services.uiSettings, isEsql);
 }
 
 function getDefaultColumns(

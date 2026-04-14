@@ -20,12 +20,14 @@ export function shouldShowField(
   searchMode: SearchMode | undefined,
   disableMultiFieldsGroupingByParent: boolean | undefined
 ): boolean {
-  if (!field?.type || field.type === '_source') {
+  if (!field?.type) {
     return false;
   }
   if (searchMode === 'text-based') {
-    // exclude only `_source` for plain records
     return true;
+  }
+  if (field.type === '_source') {
+    return false;
   }
   if (disableMultiFieldsGroupingByParent) {
     // include subfields
@@ -86,7 +88,11 @@ export function getSelectedFields({
 
   result.selectedFields = uniqBy(result.selectedFields, 'name');
 
-  if (result.selectedFields.length === 1 && result.selectedFields[0].name === '_source') {
+  if (
+    searchMode !== 'text-based' &&
+    result.selectedFields.length === 1 &&
+    result.selectedFields[0].name === '_source'
+  ) {
     return INITIAL_SELECTED_FIELDS_RESULT;
   }
 

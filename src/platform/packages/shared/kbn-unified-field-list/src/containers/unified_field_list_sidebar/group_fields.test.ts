@@ -141,6 +141,17 @@ describe('group_fields', function () {
     });
   });
 
+  it('should keep _source as selected in text-based mode', function () {
+    const actual = getSelectedFields({
+      dataView,
+      workspaceSelectedFieldNames: ['_source'],
+      allFields: [{ name: '_source', type: '_source' }] as DataViewField[],
+      searchMode: 'text-based',
+    });
+    expect(actual.selectedFields.map((field) => field.name)).toEqual(['_source']);
+    expect(actual.selectedFieldsMap).toStrictEqual({ _source: true });
+  });
+
   it('should pick fields only from allFields instead of data view fields for a text based query', function () {
     const actual = getSelectedFields({
       dataView,
@@ -175,7 +186,7 @@ describe('group_fields', function () {
     ).toBe(true);
     expect(
       shouldShowField({ type: '_source', name: 'source' } as DataViewField, 'text-based', false)
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('should show fields excluding subfields', function () {

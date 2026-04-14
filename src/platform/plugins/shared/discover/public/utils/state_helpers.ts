@@ -18,9 +18,10 @@ import { DEFAULT_COLUMNS_SETTING } from '@kbn/discover-utils';
  */
 export function handleSourceColumnState<TState extends { columns?: string[] }>(
   state: TState,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  isEsql?: boolean
 ): TState {
-  if (!state.columns) {
+  if (!state.columns || isEsql) {
     return state;
   }
   const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING);

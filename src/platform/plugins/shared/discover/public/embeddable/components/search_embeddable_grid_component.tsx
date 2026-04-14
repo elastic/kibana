@@ -148,6 +148,7 @@ export function SearchEmbeddableGridComponent({
     columns: originalColumns,
     sort,
     settings: grid,
+    keepSourceColumn: isEsql,
   });
 
   const dataSource = useMemo(

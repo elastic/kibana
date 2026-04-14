@@ -196,6 +196,7 @@ function DiscoverDocumentsComponent({
     columns,
     sort,
     settings: grid,
+    keepSourceColumn: isEsqlMode,
   });
 
   const onAddColumnWithTracking = useCallback(

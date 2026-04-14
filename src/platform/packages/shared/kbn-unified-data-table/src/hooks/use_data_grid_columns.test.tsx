@@ -56,4 +56,28 @@ describe('useColumns', () => {
     });
     expect(result.current.columns).toEqual([]);
   });
+
+  test('should preserve _source column when keepSourceColumn is true', () => {
+    const { result } = renderHook(() => {
+      return useColumns({
+        ...defaultProps,
+        columns: ['Time', '_source'],
+        keepSourceColumn: true,
+      });
+    });
+
+    expect(result.current.columns).toEqual(['Time', '_source']);
+  });
+
+  test('should still skip _source when keepSourceColumn is false', () => {
+    const { result } = renderHook(() => {
+      return useColumns({
+        ...defaultProps,
+        columns: ['Time', '_source'],
+        keepSourceColumn: false,
+      });
+    });
+
+    expect(result.current.columns).toEqual(['Time']);
+  });
 });

@@ -23,6 +23,7 @@ export function getStateColumnActions({
   sort,
   defaultOrder,
   settings,
+  keepSourceColumn = false,
 }: {
   capabilities: Capabilities;
   dataView: DataView;
@@ -36,10 +37,11 @@ export function getStateColumnActions({
   sort: string[][] | undefined;
   defaultOrder: string;
   settings?: UnifiedDataTableSettings;
+  keepSourceColumn?: boolean;
 }) {
   function onAddColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
-    const nextColumns = addColumn(columns || [], columnName);
+    const nextColumns = addColumn(columns || [], columnName, keepSourceColumn);
     const nextSort = columnName === '_score' && !sort?.length ? [['_score', defaultOrder]] : sort;
     setAppState({ columns: nextColumns, sort: nextSort, settings });
   }
@@ -47,7 +49,7 @@ export function getStateColumnActions({
   function onRemoveColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
 
-    const nextColumns = removeColumn(columns || [], columnName);
+    const nextColumns = removeColumn(columns || [], columnName, keepSourceColumn);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const nextSort = sort && sort.length ? sort.filter((subArr) => subArr[0] !== columnName) : [];
 
@@ -97,8 +99,8 @@ export function getStateColumnActions({
  * is empty, and removes _source if there are more than 1 columns given
  * @param columns
  */
-function buildColumns(columns: string[]) {
-  if (columns.length > 1 && columns.indexOf('_source') !== -1) {
+function buildColumns(columns: string[], keepSourceColumn = false) {
+  if (!keepSourceColumn && columns.length > 1 && columns.indexOf('_source') !== -1) {
     return columns.filter((col) => col !== '_source');
   } else if (columns.length !== 0) {
     return columns;
@@ -106,18 +108,21 @@ function buildColumns(columns: string[]) {
   return [];
 }
 
-function addColumn(columns: string[], columnName: string) {
+function addColumn(columns: string[], columnName: string, keepSourceColumn = false) {
   if (columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns([...columns, columnName]);
+  return buildColumns([...columns, columnName], keepSourceColumn);
 }
 
-function removeColumn(columns: string[], columnName: string) {
+function removeColumn(columns: string[], columnName: string, keepSourceColumn = false) {
   if (!columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns(columns.filter((col) => col !== columnName));
+  return buildColumns(
+    columns.filter((col) => col !== columnName),
+    keepSourceColumn
+  );
 }
 
 function moveColumn(columns: string[], columnName: string, newIndex: number) {

@@ -28,6 +28,7 @@ export interface UseColumnsProps {
   sort?: string[][];
   defaultOrder?: string;
   settings?: UnifiedDataTableSettings;
+  keepSourceColumn?: boolean;
 }
 
 export const useColumns = ({
@@ -39,15 +40,16 @@ export const useColumns = ({
   sort,
   defaultOrder = 'desc',
   settings,
+  keepSourceColumn = false,
 }: UseColumnsProps) => {
-  const [usedColumns, setUsedColumns] = useState(getColumns(columns));
+  const [usedColumns, setUsedColumns] = useState(getColumns(columns, keepSourceColumn));
   useEffect(() => {
-    const nextColumns = getColumns(columns);
+    const nextColumns = getColumns(columns, keepSourceColumn);
     if (isEqual(usedColumns, nextColumns)) {
       return;
     }
     setUsedColumns(nextColumns);
-  }, [columns, usedColumns]);
+  }, [columns, keepSourceColumn, usedColumns]);
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
@@ -59,8 +61,19 @@ export const useColumns = ({
         sort,
         defaultOrder,
         settings,
+        keepSourceColumn,
       }),
-    [capabilities, dataView, dataViews, defaultOrder, setAppState, settings, sort, usedColumns]
+    [
+      capabilities,
+      dataView,
+      dataViews,
+      defaultOrder,
+      keepSourceColumn,
+      setAppState,
+      settings,
+      sort,
+      usedColumns,
+    ]
   );
 
   return {
@@ -72,9 +85,12 @@ export const useColumns = ({
   };
 };
 
-function getColumns(columns: string[] | undefined) {
+function getColumns(columns: string[] | undefined, keepSourceColumn: boolean) {
   if (!columns) {
     return [];
+  }
+  if (keepSourceColumn) {
+    return columns;
   }
   return columns.filter((col) => col !== '_source');
 }

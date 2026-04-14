@@ -437,6 +437,16 @@ function ButtonVariant({
   const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
   const styles = useMemoCss(componentStyles);
 
+  const hasOnlyClassicSourceSelected =
+    commonSidebarProps.searchMode !== 'text-based' &&
+    workspaceSelectedFieldNames?.length === 1 &&
+    workspaceSelectedFieldNames[0] === '_source';
+
+  const selectedFieldsCount =
+    !workspaceSelectedFieldNames?.length || hasOnlyClassicSourceSelected
+      ? 0
+      : workspaceSelectedFieldNames.length;
+
   return (
     <>
       <div className="unifiedFieldListSidebar__mobile" css={styles.sidebarMobile}>
@@ -456,11 +466,9 @@ function ButtonVariant({
           <EuiBadge
             className="unifiedFieldListSidebar__mobileBadge"
             css={styles.sidebarMobileBadge}
-            color={workspaceSelectedFieldNames?.[0] === '_source' ? 'default' : 'accent'}
+            color={hasOnlyClassicSourceSelected ? 'default' : 'accent'}
           >
-            {!workspaceSelectedFieldNames?.length || workspaceSelectedFieldNames[0] === '_source'
-              ? 0
-              : workspaceSelectedFieldNames.length}
+            {selectedFieldsCount}
           </EuiBadge>
         </EuiButton>
       </div>

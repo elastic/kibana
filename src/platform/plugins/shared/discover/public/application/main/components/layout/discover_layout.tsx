@@ -173,6 +173,7 @@ export function DiscoverLayout() {
     columns,
     sort,
     settings: grid,
+    keepSourceColumn: isEsqlMode,
   });
 
   const onAddColumnWithTracking = useCallback(

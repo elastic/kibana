@@ -42,6 +42,7 @@ interface GetCommonFieldItemButtonPropsParams {
   size: FieldItemButtonProps<DataViewField>['size'];
   isSelected: boolean;
   toggleDisplay: (field: DataViewField, isSelected?: boolean) => void;
+  searchMode?: SearchMode | undefined;
 }
 
 function getCommonFieldItemButtonProps({
@@ -50,6 +51,7 @@ function getCommonFieldItemButtonProps({
   size,
   isSelected,
   toggleDisplay,
+  searchMode,
 }: GetCommonFieldItemButtonPropsParams): {
   field: FieldItemButtonProps<DataViewField>['field'];
   size: FieldItemButtonProps<DataViewField>['size'];
@@ -60,7 +62,9 @@ function getCommonFieldItemButtonProps({
   onRemoveFieldFromWorkspace: FieldItemButtonProps<DataViewField>['onRemoveFieldFromWorkspace'];
 } {
   const handler =
-    field.name === '_source' ? undefined : (f: DataViewField) => toggleDisplay(f, isSelected);
+    field.name === '_source' && searchMode !== 'text-based'
+      ? undefined
+      : (f: DataViewField) => toggleDisplay(f, isSelected);
   return {
     field,
     size,
@@ -244,6 +248,8 @@ function UnifiedFieldListItemComponent({
 }: UnifiedFieldListItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
+  const allowsSourceFieldInteractions = searchMode === 'text-based' || field.type !== '_source';
+
   const isBreakdownSupported =
     searchMode === 'documents' ? fieldSupportsBreakdown(field) : isESQLFieldGroupable(field);
 
@@ -394,13 +400,14 @@ function UnifiedFieldListItemComponent({
             withDragIcon={!isDragDisabled}
             flush={alwaysShowActionButton ? 'both' : undefined}
             shouldAlwaysShowAction={alwaysShowActionButton}
-            onClick={field.type !== '_source' ? togglePopover : undefined}
+            onClick={allowsSourceFieldInteractions ? togglePopover : undefined}
             {...getCommonFieldItemButtonProps({
               stateService,
               field,
               isSelected,
               toggleDisplay,
               size,
+              searchMode,
             })}
           />
         </Draggable>
