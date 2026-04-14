@@ -26,11 +26,14 @@ apiTest.describe('POST /api/logstash/pipelines/delete', { tag: tags.stateful.cla
   });
 
   apiTest.afterAll(async ({ apiClient }) => {
-    // Best-effort cleanup in case the test failed before completing all deletions
+    // Guard: if beforeAll threw before credentials was assigned, there is nothing to clean up
+    if (!credentials) return;
     for (const id of [testData.PIPELINE_IDS.BULK_DELETE_1, testData.PIPELINE_IDS.BULK_DELETE_2]) {
-      await apiClient.delete(testData.API_PATHS.PIPELINE(id), {
-        headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-      });
+      await apiClient
+        .delete(testData.API_PATHS.PIPELINE(id), {
+          headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
+        })
+        .catch(() => {});
     }
   });
 

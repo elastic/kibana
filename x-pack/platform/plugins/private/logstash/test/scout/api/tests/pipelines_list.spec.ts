@@ -49,9 +49,12 @@ apiTest.describe('GET /api/logstash/pipelines', { tag: tags.stateful.classic }, 
   });
 
   apiTest.afterAll(async ({ esClient }) => {
-    await esClient.logstash.deletePipeline({ id: testData.PIPELINE_IDS.TWEETS_AND_BEATS });
+    // Best-effort: pipelines may not exist if beforeAll threw partway through seeding
+    await esClient.logstash
+      .deletePipeline({ id: testData.PIPELINE_IDS.TWEETS_AND_BEATS })
+      .catch(() => {});
     for (let i = 1; i <= 21; i++) {
-      await esClient.logstash.deletePipeline({ id: `empty_pipeline_${i}` });
+      await esClient.logstash.deletePipeline({ id: `empty_pipeline_${i}` }).catch(() => {});
     }
   });
 

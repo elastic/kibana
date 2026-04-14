@@ -32,8 +32,11 @@ apiTest.describe('/api/logstash/pipeline/{id}', { tag: tags.stateful.classic }, 
   });
 
   apiTest.afterAll(async ({ esClient }) => {
-    await esClient.logstash.deletePipeline({ id: testData.PIPELINE_IDS.TWEETS_AND_BEATS });
-    // Best-effort cleanup: removes the pipeline if the PUT test failed before the DELETE step
+    // Both deletions are best-effort: if beforeAll threw before creating TWEETS_AND_BEATS,
+    // or if a test left FAST_GENERATOR behind, we don't want teardown to mask the original error
+    await esClient.logstash
+      .deletePipeline({ id: testData.PIPELINE_IDS.TWEETS_AND_BEATS })
+      .catch(() => {});
     await esClient.logstash
       .deletePipeline({ id: testData.PIPELINE_IDS.FAST_GENERATOR })
       .catch(() => {});
