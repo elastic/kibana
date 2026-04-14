@@ -10,7 +10,7 @@ import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import { BOOTSTRAP_EASE_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
-import { bootstrapEaseRulesHandler } from './bootstrap_promotion_rules_handler';
+import { bootstrapEaseRulesHandler } from './bootstrap_ease_rules_handler';
 import { throttleRequests } from '../../../../../utils/throttle_requests';
 
 export const bootstrapEaseRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {

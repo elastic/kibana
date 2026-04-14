@@ -47,7 +47,7 @@ export const bootstrapEaseRulesHandler = async (
     });
 
     logger.debug(
-      `bootstrapEaseRulesHandler: Promotion rules installed: ${ruleResults.installed}, updated: ${ruleResults.updated}, deleted: ${ruleResults.deleted}`
+      `bootstrapEaseRulesHandler: EASE rules installed: ${ruleResults.installed}, updated: ${ruleResults.updated}, deleted: ${ruleResults.deleted}`
     );
 
     return response.ok({
