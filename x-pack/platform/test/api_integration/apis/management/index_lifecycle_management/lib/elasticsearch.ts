@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  IndicesPutIndexTemplateRequest,
+  IndicesPutTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { JsonObject } from '@kbn/utility-types';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { getRandomString } from './random';
 
 /**
@@ -12,17 +18,17 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchHelpers = (getService) => {
+export const initElasticsearchHelpers = (getService: FtrProviderContext['getService']) => {
   const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  let indicesCreated = [];
-  let templatesCreated = [];
-  let composableTemplatesCreated = [];
-  let dataStreamsCreated = [];
+  let indicesCreated: string[] = [];
+  let templatesCreated: string[] = [];
+  let composableTemplatesCreated: string[] = [];
+  let dataStreamsCreated: string[] = [];
 
   // Indices
-  const getIndex = (index) => es.indices.get({ index });
+  const getIndex = (index: string) => es.indices.get({ index });
 
   const createIndex = (index = getRandomString()) => {
     indicesCreated.push(index);
@@ -35,12 +41,15 @@ export const initElasticsearchHelpers = (getService) => {
   };
 
   // Data streams
-  const createDataStream = (dataStream = getRandomString(), document) => {
+  const createDataStream = <TDocument extends JsonObject>(
+    dataStream = getRandomString(),
+    document: TDocument
+  ) => {
     dataStreamsCreated.push(dataStream);
     return es.index({ index: dataStream, document }, { meta: true });
   };
 
-  const deleteDataStream = (dataStream) => {
+  const deleteDataStream = (dataStream: string) => {
     dataStreamsCreated = dataStreamsCreated.filter((i) => i !== dataStream);
     return es.indices.deleteDataStream({ name: dataStream }, { meta: true });
   };
@@ -52,17 +61,23 @@ export const initElasticsearchHelpers = (getService) => {
   const getIndexTemplates = () => es.indices.getTemplate(undefined, { meta: true });
 
   // Create index template if it does not already exist
-  const createIndexTemplate = (name, template) => {
+  const createIndexTemplate = (
+    name: string,
+    template: Omit<IndicesPutTemplateRequest, 'name' | 'create' | 'master_timeout' | 'cause'>
+  ) => {
     templatesCreated.push(name);
-    return es.indices.putTemplate({ name, body: template }, { create: true, meta: true });
+    return es.indices.putTemplate({ name, create: true, ...template }, { meta: true });
   };
 
-  const createComposableIndexTemplate = (name, template) => {
+  const createComposableIndexTemplate = (
+    name: string,
+    template: Omit<IndicesPutIndexTemplateRequest, 'name' | 'create' | 'master_timeout' | 'cause'>
+  ) => {
     composableTemplatesCreated.push(name);
-    return es.indices.putIndexTemplate({ name, body: template }, { create: true, meta: true });
+    return es.indices.putIndexTemplate({ name, create: true, ...template }, { meta: true });
   };
 
-  const deleteIndexTemplate = (name) => {
+  const deleteIndexTemplate = (name: string) => {
     templatesCreated = templatesCreated.filter((i) => i !== name);
     return es.indices.deleteTemplate({ name }, { meta: true }).catch((err) => {
       // Silently fail templates not found
@@ -72,7 +87,7 @@ export const initElasticsearchHelpers = (getService) => {
     });
   };
 
-  const deleteComposableIndexTemplate = (name) => {
+  const deleteComposableIndexTemplate = (name: string) => {
     composableTemplatesCreated = composableTemplatesCreated.filter((i) => i !== name);
     return es.indices.deleteIndexTemplate({ name }, { meta: true }).catch((err) => {
       // Silently fail if templates not found
@@ -86,17 +101,16 @@ export const initElasticsearchHelpers = (getService) => {
     Promise.all(templatesCreated.map(deleteIndexTemplate)).then(() => (templatesCreated = []));
 
   const deleteAllComposableTemplates = () =>
-    Promise.all(templatesCreated.map(deleteComposableIndexTemplate)).then(
+    Promise.all(composableTemplatesCreated.map(deleteComposableIndexTemplate)).then(
       () => (composableTemplatesCreated = [])
     );
 
-  const cleanUp = () =>
-    Promise.all([
-      deleteAllIndices(),
-      deleteAllTemplates(),
-      deleteAllComposableTemplates(),
-      deleteAllDataStreams(),
-    ]);
+  const cleanUp = async () => {
+    await deleteAllDataStreams();
+    await deleteAllComposableTemplates();
+    await deleteAllTemplates();
+    await deleteAllIndices();
+  };
 
   const getNodesStats = () => es.nodes.stats();
 
