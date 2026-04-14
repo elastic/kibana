@@ -439,16 +439,16 @@ describe('ConditionalSnoozePanel', () => {
         target: { value: 'low' },
       });
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-1`));
-      const expires_at = moment(MOCKED_NOW).add(1, 'h').toISOString();
-      const expires_at_formatted = moment(expires_at).format(SNOOZE_DATE_DISPLAY_FORMAT);
+      const expiresAt = moment(MOCKED_NOW).add(1, 'h').toISOString();
+      const expiresAtFormatted = moment(expiresAt).format(SNOOZE_DATE_DISPLAY_FORMAT);
       expect(onScheduleChangeMock).toHaveBeenLastCalledWith({
-        expires_at: expires_at,
+        expires_at: expiresAt,
         conditions: [{ type: 'field_equals', field: 'severity', value: 'low', negate: false }],
         condition_operator: 'all',
       });
 
       expect(await screen.findByTestId('conditionsPreviewText')).toHaveTextContent(
-        `Alert will unsnooze if severity is low OR it is after ${expires_at_formatted}.`
+        `Alert will unsnooze if severity is low OR it is after ${expiresAtFormatted}.`
       );
     });
   });

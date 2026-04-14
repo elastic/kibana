@@ -72,7 +72,10 @@ export const ConditionalSnoozePanel = ({
   const isTimeConditionInvalid = isTimeDurationInvalid || isPastDateTime || isDateTimeMissing;
 
   const confirmedDataConditions = useMemo(
-    () => dataConditions.filter((condition) => condition.confirmed && condition.field && condition.value),
+    () =>
+      dataConditions.filter(
+        (condition) => condition.confirmed && condition.field && condition.value
+      ),
     [dataConditions]
   );
 
@@ -134,11 +137,11 @@ export const ConditionalSnoozePanel = ({
   }, []);
 
   const handleDataConditionChange = useCallback(
-    (id: string, newEntry: DataConditionEntry | null) => {
+    (id: string, newEntryDetails: DataConditionEntry | null) => {
       setDataConditions((prev) =>
-        newEntry === null
+        newEntryDetails === null
           ? prev.filter((c) => c.id !== id)
-          : prev.map((c) => (c.id === id ? newEntry : c))
+          : prev.map((c) => (c.id === id ? newEntryDetails : c))
       );
     },
     []
@@ -240,7 +243,7 @@ export const ConditionalSnoozePanel = ({
           <DataConditionPanel
             entry={entry}
             fieldOptions={fieldOptions}
-            onChange={(newEntry) => handleDataConditionChange(entry.id, newEntry)}
+            onChange={(newEntryDetails) => handleDataConditionChange(entry.id, newEntryDetails)}
           />
         </React.Fragment>
       ))}
