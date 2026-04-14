@@ -56,34 +56,6 @@ class ErrorBoundary extends React.Component<{
  *
  * Errors that are **not** `InvalidRouteParamsException` (including unrecoverable
  * decode failures) are always re-thrown upward.
- *
- * ### Placement in the React tree
- *
- * 1. **Below `RouterProvider`** — this component uses `useHistory` and
- *    `useLocation`, which require a router context to be present above it.
- *
- * 2. **Below any application-level error boundary** — this component intercepts
- *    `InvalidRouteParamsException` to attempt self-healing and re-throws all
- *    other errors (as well as unrecoverable ones) upward. Application error
- *    boundaries must be placed above so they do not intercept
- *    `InvalidRouteParamsException` prematurely and so they can catch errors
- *    re-thrown from here.
- *
- * 3. **Above any component that calls `useMatchRoutes` or `router.matchRoutes`
- *    directly** — `InvalidRouteParamsException` is thrown from within
- *    `router.matchRoutes`, so any component invoking these methods must be a
- *    descendant of this boundary for self-healing to work.
- *
- * @example
- * ```tsx
- * <RouterProvider router={router} history={history}>
- *   <AppErrorBoundary>
- *     <RouteSelfHealErrorBoundary>
- *       <RouteRenderer />
- *     </RouteSelfHealErrorBoundary>
- *   </AppErrorBoundary>
- * </RouterProvider>
- * ```
  */
 export function RouteSelfHealErrorBoundary({ children }: { children: React.ReactNode }) {
   const history = useHistory();

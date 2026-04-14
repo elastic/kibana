@@ -9,11 +9,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  RouteRenderer,
-  RouterProvider,
-  RouteSelfHealErrorBoundary,
-} from '@kbn/typed-react-router-config';
+import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/public';
@@ -70,9 +66,7 @@ export const mountManagementSection = async ({
             }}
           >
             <RouterProvider history={history} router={aIAssistantManagementSelectionRouter as any}>
-              <RouteSelfHealErrorBoundary>
-                <RouteRenderer />
-              </RouteSelfHealErrorBoundary>
+              <RouteRenderer />
             </RouterProvider>
           </AppContextProvider>
         </I18nProvider>

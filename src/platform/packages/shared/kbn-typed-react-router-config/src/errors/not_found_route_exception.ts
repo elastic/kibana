@@ -10,5 +10,6 @@
 export class NotFoundRouteException extends Error {
   constructor(message: string) {
     super(message);
+    this.name = 'NotFoundRouteException';
   }
 }

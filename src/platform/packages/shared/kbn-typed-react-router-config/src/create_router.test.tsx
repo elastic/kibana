@@ -442,7 +442,7 @@ describe('createRouter', () => {
   });
 
   describe('invalid query params recovery', () => {
-    it('throws InvalidParamsException when a query param has null value and a default exists', () => {
+    it('throws InvalidRouteParamsException when a query param has null value and a default exists', () => {
       // ?rangeFrom (bare key, parsed as null by query-string) + valid rangeTo
       history.push('/services?rangeFrom&rangeTo=now&transactionType=request');
 
@@ -465,7 +465,7 @@ describe('createRouter', () => {
       }
     });
 
-    it('throws InvalidParamsException preserving valid params when a codec fails and param is optional', () => {
+    it('throws InvalidRouteParamsException preserving valid params when a codec fails and param is optional', () => {
       const recoverableRoutes = {
         '/': {
           element: <></>,

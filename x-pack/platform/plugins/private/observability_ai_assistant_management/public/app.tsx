@@ -8,11 +8,7 @@
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  RouteRenderer,
-  RouterProvider,
-  RouteSelfHealErrorBoundary,
-} from '@kbn/typed-react-router-config';
+import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -61,9 +57,7 @@ export const mountManagementSection = async ({ core, mountParams, config }: Moun
                   history={history}
                   router={aIAssistantManagementObservabilityRouter as any}
                 >
-                  <RouteSelfHealErrorBoundary>
-                    <RouteRenderer />
-                  </RouteSelfHealErrorBoundary>
+                  <RouteRenderer />
                 </RouterProvider>
               </QueryClientProvider>
             </AppContextProvider>

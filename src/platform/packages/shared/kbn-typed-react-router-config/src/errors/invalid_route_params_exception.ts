@@ -13,5 +13,6 @@ export class InvalidRouteParamsException extends Error {
     public readonly patched: { path: Record<string, any>; query: Record<string, any> }
   ) {
     super(message);
+    this.name = 'InvalidRouteParamsException';
   }
 }
