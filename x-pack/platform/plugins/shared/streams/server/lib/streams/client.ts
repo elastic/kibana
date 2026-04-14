@@ -42,6 +42,7 @@ import { createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
+import { upsertDataStream } from './data_streams/manage_data_streams';
 import type { FeatureClient } from './feature';
 
 interface AcknowledgeResponse<TResult extends Result> {
@@ -244,6 +245,38 @@ export class StreamsClient {
 
     // Step 3: Check if this is a noop
     if (streamsToCreate.length === 0 && streamsToEnableInES.length === 0) {
+      if (!defer) {
+        const rootStreamNames = [
+          LOGS_ROOT_STREAM_NAME,
+          LOGS_OTEL_STREAM_NAME,
+          LOGS_ECS_STREAM_NAME,
+        ].filter((name) => kibanaStreams[name as keyof typeof kibanaStreams]);
+        const rootsNeedingMaterialization = (
+          await Promise.all(
+            rootStreamNames.map(async (name) => {
+              const dataStreamExists = await this.dependencies.esClient.indices.exists({
+                index: name,
+              });
+              return { name, exists: dataStreamExists as boolean };
+            })
+          )
+        )
+          .filter(({ exists }) => !exists)
+          .map(({ name }) => name);
+
+        if (rootsNeedingMaterialization.length > 0) {
+          await Promise.all(
+            rootsNeedingMaterialization.map((name) =>
+              upsertDataStream({
+                esClient: this.dependencies.esClient,
+                name,
+                logger: this.dependencies.logger,
+              })
+            )
+          );
+          return { acknowledged: true, result: 'created' };
+        }
+      }
       return { acknowledged: true, result: 'noop' };
     }
 
