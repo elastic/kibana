@@ -31,6 +31,7 @@ function isSpecEnabled(spec: ConnectorSpec, experimentalFeatures: ExperimentalFe
 export function registerConnectorTypesFromSpecs({
   connectorTypeRegistry,
   uiSettingsPromise,
+  isEarsEnabled,
   experimentalFeatures,
 }: {
   connectorTypeRegistry: TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'];
