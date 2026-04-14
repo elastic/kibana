@@ -267,7 +267,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
-    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
+    registerTools(
+      agentBuilder,
+      core,
+      logger,
+      experimentalFeatures,
+      plugins,
+      this.productFeaturesService
+    ).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
     registerAttachments(agentBuilder).catch((error) => {

@@ -23,3 +23,7 @@ export {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
 } from './create_detection_rule_tool';
+export {
+  installPrebuiltRulesTool,
+  SECURITY_INSTALL_PREBUILT_RULES_TOOL_ID,
+} from './install_prebuilt_rules_tool';
