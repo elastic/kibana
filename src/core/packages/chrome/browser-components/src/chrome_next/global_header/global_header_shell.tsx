@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '@kbn/core-chrome-navigation';
-import { useSideNavCollapsed } from '@kbn/core-chrome-browser-hooks';
+import { useSideNavWidth } from '@kbn/core-chrome-browser-hooks';
 import React, { useMemo } from 'react';
 
 const GLOBAL_HEADER_HEIGHT_PX = 48;
@@ -118,9 +118,9 @@ const useGlobalHeaderStyles = () => {
 
 export const GlobalHeaderShell = React.memo<GlobalHeaderShellProps>(
   ({ logo, switcher, search, help, actions, userMenu }) => {
-    const { isCollapsed } = useSideNavCollapsed();
+    const sideNavWidth = useSideNavWidth();
     const styles = useGlobalHeaderStyles();
-    const logoWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+    const logoWidth = sideNavWidth <= COLLAPSED_WIDTH ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
     return (
       <header css={styles.root} data-test-subj="chromeNextGlobalHeader">
