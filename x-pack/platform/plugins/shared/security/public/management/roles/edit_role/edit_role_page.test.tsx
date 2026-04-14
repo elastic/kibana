@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
-import type { ReactWrapper } from 'enzyme';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
@@ -18,22 +17,59 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import { createRawKibanaPrivileges } from '@kbn/security-role-management-model/src/__fixtures__';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import { EditRolePage } from './edit_role_page';
-import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
-import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
-import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 import type { Role } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import { userAPIClientMock } from '../../users/index.mock';
 import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
+
+const MockedElasticsearchPrivileges = jest.fn();
+jest.mock('./privileges', () => {
+  const actual = jest.requireActual('./privileges');
+  return {
+    ...actual,
+    ElasticsearchPrivileges: (props: any) => {
+      MockedElasticsearchPrivileges(props);
+      return (
+        <div data-test-subj="elasticsearchPrivilegesMock">
+          <div data-test-subj="indexPrivileges-indices" />
+          {props.canUseRemoteIndices && <div data-test-subj="indexPrivileges-remote_indices" />}
+        </div>
+      );
+    },
+  };
+});
+
+jest.mock('./privileges/kibana/simple_privilege_section', () => ({
+  SimplePrivilegeSection: () => <div data-test-subj="simplePrivilegeSectionMock" />,
+}));
+
+jest.mock('./privileges/kibana/space_aware_privilege_section', () => ({
+  SpaceAwarePrivilegeSection: ({ uiCapabilities }: any) => (
+    <div data-test-subj="spaceAwarePrivilegeSectionMock">
+      {!uiCapabilities?.spaces?.manage && <div data-test-subj="userCannotManageSpacesCallout" />}
+    </div>
+  ),
+}));
+
+jest.mock('./privileges/kibana/transform_error_section', () => ({
+  TransformErrorSection: () => <div data-test-subj="transformErrorSectionMock" />,
+}));
+
+jest.mock('./reserved_role_badge', () => ({
+  ReservedRoleBadge: ({ role }: any) =>
+    role?.metadata?._reserved ? (
+      <span data-test-subj="reservedRoleBadgeTooltip">Reserved</span>
+    ) : null,
+}));
 
 const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();
@@ -131,14 +167,14 @@ const buildSpaces = () => {
   ] as Space[];
 };
 
-const expectReadOnlyFormButtons = (wrapper: ReactWrapper<any, any>) => {
-  expect(wrapper.find('button[data-test-subj="roleFormReturnButton"]')).toHaveLength(1);
-  expect(wrapper.find('button[data-test-subj="roleFormSaveButton"]')).toHaveLength(0);
+const expectReadOnlyFormButtons = () => {
+  expect(screen.queryByTestId('roleFormReturnButton')).toBeInTheDocument();
+  expect(screen.queryByTestId('roleFormSaveButton')).not.toBeInTheDocument();
 };
 
-const expectSaveFormButtons = (wrapper: ReactWrapper<any, any>) => {
-  expect(wrapper.find('button[data-test-subj="roleFormReturnButton"]')).toHaveLength(0);
-  expect(wrapper.find('button[data-test-subj="roleFormSaveButton"]')).toHaveLength(1);
+const expectSaveFormButtons = () => {
+  expect(screen.queryByTestId('roleFormReturnButton')).not.toBeInTheDocument();
+  expect(screen.queryByTestId('roleFormSaveButton')).toBeInTheDocument();
 };
 
 function getProps({
@@ -229,6 +265,7 @@ describe('<EditRolePage />', () => {
   const coreStart = coreMock.createStart();
 
   beforeEach(() => {
+    jest.clearAllMocks();
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
       roles: {
@@ -246,101 +283,107 @@ describe('<EditRolePage />', () => {
         },
       };
 
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              role: {
-                name: 'my custom role',
-                metadata: {},
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                role: {
+                  name: 'my custom role',
+                  metadata: {},
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+                },
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
-      expectReadOnlyFormButtons(wrapper);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
+      expectReadOnlyFormButtons();
     });
 
     it('can render a reserved role', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              role: {
-                name: 'superuser',
-                metadata: { _reserved: true },
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                role: {
+                  name: 'superuser',
+                  metadata: { _reserved: true },
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+                },
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('EuiIconTip[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
-      expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
-      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
-      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
-      expectReadOnlyFormButtons(wrapper);
+      expect(screen.getByTestId('reservedRoleBadgeTooltip')).toBeInTheDocument();
+      expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
+      expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
+      expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
+      expectReadOnlyFormButtons();
     });
 
     it('can render a user defined role', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              role: {
-                name: 'my custom role',
-                metadata: {},
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                role: {
+                  name: 'my custom role',
+                  metadata: {},
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+                },
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
-      expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
-      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
-      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
-      expectSaveFormButtons(wrapper);
+      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+      expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
+      expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
+      expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
+      expectSaveFormButtons();
     });
 
     it('can render when creating a new role', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage {...getProps({ action: 'edit' })} />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...getProps({ action: 'edit' })} />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
-        false
-      );
-      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
-      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
-      expectSaveFormButtons(wrapper);
+      expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
+      expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
+      expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
+      expectSaveFormButtons();
     });
 
     it('redirects back to roles when creating a new role without privileges', async () => {
@@ -352,107 +395,111 @@ describe('<EditRolePage />', () => {
       };
 
       const props = getProps({ action: 'edit' });
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage {...props} />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
       expect(props.history.push).toHaveBeenCalledWith('/');
     });
 
     it('can render when cloning an existing role', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              role: {
-                name: '',
-                metadata: { _reserved: false },
-                elasticsearch: {
-                  cluster: ['all', 'manage'],
-                  indices: [
-                    {
-                      names: ['foo*'],
-                      privileges: ['all'],
-                      field_security: { except: ['f'], grant: ['b*'] },
-                    },
-                  ],
-                  run_as: ['elastic'],
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                role: {
+                  name: '',
+                  metadata: { _reserved: false },
+                  elasticsearch: {
+                    cluster: ['all', 'manage'],
+                    indices: [
+                      {
+                        names: ['foo*'],
+                        privileges: ['all'],
+                        field_security: { except: ['f'], grant: ['b*'] },
+                      },
+                    ],
+                    run_as: ['elastic'],
+                  },
+                  kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
                 },
-                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
-        false
-      );
-      expectSaveFormButtons(wrapper);
+      expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
+      expectSaveFormButtons();
     });
 
     it('renders an auth error when not authorized to manage spaces', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              canManageSpaces: false,
-              role: {
-                name: 'my custom role',
-                metadata: {},
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                canManageSpaces: false,
+                role: {
+                  name: 'my custom role',
+                  metadata: {},
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+                },
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
+      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
 
-      expect(
-        wrapper.find('EuiCallOut[data-test-subj="userCannotManageSpacesCallout"]')
-      ).toHaveLength(1);
+      expect(screen.getByTestId('userCannotManageSpacesCallout')).toBeInTheDocument();
 
-      expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
-      expectSaveFormButtons(wrapper);
+      expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
+      expectSaveFormButtons();
     });
 
     it('renders a partial read-only view when there is a transform error', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              canManageSpaces: false,
-              role: {
-                name: 'my custom role',
-                metadata: {},
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [],
-                _transform_error: [{ reason: 'kibana:reserved_privileges_mixed', state: [] }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                canManageSpaces: false,
+                role: {
+                  name: 'my custom role',
+                  metadata: {},
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [],
+                  _transform_error: [{ reason: 'kibana:reserved_privileges_mixed', state: [] }],
+                },
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
-      expectReadOnlyFormButtons(wrapper);
+      expect(screen.getByTestId('transformErrorSectionMock')).toBeInTheDocument();
+      expectReadOnlyFormButtons();
     });
   });
 
@@ -465,167 +512,170 @@ describe('<EditRolePage />', () => {
         },
       };
 
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              spacesEnabled: false,
-              role: {
-                name: 'my custom role',
-                metadata: {},
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                spacesEnabled: false,
+                role: {
+                  name: 'my custom role',
+                  metadata: {},
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+                },
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
-      expectReadOnlyFormButtons(wrapper);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
+      expectReadOnlyFormButtons();
     });
 
     it('can render a reserved role', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              spacesEnabled: false,
-              role: {
-                name: 'superuser',
-                metadata: { _reserved: true },
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                spacesEnabled: false,
+                role: {
+                  name: 'superuser',
+                  metadata: { _reserved: true },
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+                },
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('EuiIconTip[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
-      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
-      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
-      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
-      expectReadOnlyFormButtons(wrapper);
+      expect(screen.getByTestId('reservedRoleBadgeTooltip')).toBeInTheDocument();
+      expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
+      expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
+      expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
+      expectReadOnlyFormButtons();
     });
 
     it('can render a user defined role', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              spacesEnabled: false,
-              role: {
-                name: 'my custom role',
-                metadata: {},
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                spacesEnabled: false,
+                role: {
+                  name: 'my custom role',
+                  metadata: {},
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+                },
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
-      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
-      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
-      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
-      expectSaveFormButtons(wrapper);
+      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+      expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
+      expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
+      expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
+      expectSaveFormButtons();
     });
 
     it('can render a user defined role with description', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              spacesEnabled: false,
-              role: {
-                description: 'my custom role description',
-                name: 'my custom role',
-                metadata: {},
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                spacesEnabled: false,
+                role: {
+                  description: 'my custom role description',
+                  name: 'my custom role',
+                  metadata: {},
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [],
+                },
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('input[data-test-subj="roleFormDescriptionInput"]').prop('value')).toBe(
-        'my custom role description'
-      );
-      expect(
-        wrapper.find('input[data-test-subj="roleFormDescriptionInput"]').prop('disabled')
-      ).toBe(undefined);
-      expectSaveFormButtons(wrapper);
+      const descInput = screen.getByTestId('roleFormDescriptionInput') as HTMLInputElement;
+      expect(descInput.value).toBe('my custom role description');
+      expect(descInput.disabled).toBe(false);
+      expectSaveFormButtons();
     });
 
     it('can render a reserved role with description', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              spacesEnabled: false,
-              role: {
-                description: 'my reserved role description',
-                name: 'my custom role',
-                metadata: {
-                  _reserved: true,
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                spacesEnabled: false,
+                role: {
+                  description: 'my reserved role description',
+                  name: 'my custom role',
+                  metadata: {
+                    _reserved: true,
+                  },
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [],
                 },
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('[data-test-subj="roleFormDescriptionTooltip"]')).toHaveLength(1);
-
-      expect(wrapper.find('input[data-test-subj="roleFormDescriptionInput"]').prop('value')).toBe(
-        'my reserved role description'
-      );
-      expect(
-        wrapper.find('input[data-test-subj="roleFormDescriptionInput"]').prop('disabled')
-      ).toBe(true);
+      const descInput = screen.getByTestId('roleFormDescriptionInput') as HTMLInputElement;
+      expect(descInput.closest('.euiToolTipAnchor')).not.toBeNull();
+      expect(descInput.value).toBe('my reserved role description');
+      expect(descInput.disabled).toBe(true);
     });
 
     it('can render when creating a new role', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage {...getProps({ action: 'edit', spacesEnabled: false })} />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...getProps({ action: 'edit', spacesEnabled: false })} />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
-        false
-      );
-      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
-      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
-      expectSaveFormButtons(wrapper);
+      expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
+      expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
+      expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
+      expectSaveFormButtons();
     });
 
     it('redirects back to roles when creating a new role without privileges', async () => {
@@ -637,236 +687,258 @@ describe('<EditRolePage />', () => {
       };
 
       const props = getProps({ action: 'edit', spacesEnabled: false });
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage {...props} />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
       expect(props.history.push).toHaveBeenCalledWith('/');
     });
 
     it('can render when cloning an existing role', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              spacesEnabled: false,
-              role: {
-                name: '',
-                metadata: { _reserved: false },
-                elasticsearch: {
-                  cluster: ['all', 'manage'],
-                  indices: [
-                    {
-                      names: ['foo*'],
-                      privileges: ['all'],
-                      field_security: { except: ['f'], grant: ['b*'] },
-                    },
-                  ],
-                  run_as: ['elastic'],
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                spacesEnabled: false,
+                role: {
+                  name: '',
+                  metadata: { _reserved: false },
+                  elasticsearch: {
+                    cluster: ['all', 'manage'],
+                    indices: [
+                      {
+                        names: ['foo*'],
+                        privileges: ['all'],
+                        field_security: { except: ['f'], grant: ['b*'] },
+                      },
+                    ],
+                    run_as: ['elastic'],
+                  },
+                  kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
                 },
-                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
-        false
-      );
-      expectSaveFormButtons(wrapper);
+      expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
+      expectSaveFormButtons();
     });
 
     it('renders a partial read-only view when there is a transform error', async () => {
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage
-            {...getProps({
-              action: 'edit',
-              spacesEnabled: false,
-              canManageSpaces: false,
-              role: {
-                name: 'my custom role',
-                metadata: {},
-                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [],
-                _transform_error: [{ reason: 'kibana:reserved_privileges_mixed', state: [] }],
-              },
-            })}
-          />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage
+              {...getProps({
+                action: 'edit',
+                spacesEnabled: false,
+                canManageSpaces: false,
+                role: {
+                  name: 'my custom role',
+                  metadata: {},
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [],
+                  _transform_error: [{ reason: 'kibana:reserved_privileges_mixed', state: [] }],
+                },
+              })}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
-      expectReadOnlyFormButtons(wrapper);
+      expect(screen.getByTestId('transformErrorSectionMock')).toBeInTheDocument();
+      expectReadOnlyFormButtons();
     });
   });
 
   it('hides remote index privileges section when not supported', async () => {
-    const wrapper = mountWithIntl(
-      <KibanaContextProvider services={coreStart}>
-        <EditRolePage {...getProps({ action: 'edit', canUseRemoteIndices: false })} />
-      </KibanaContextProvider>
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...getProps({ action: 'edit', canUseRemoteIndices: false })} />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
-    await waitForRender(wrapper);
+    await waitForRender();
 
-    expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
-    expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
+    expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
+    expect(screen.queryByTestId('indexPrivileges-remote_indices')).not.toBeInTheDocument();
   });
 
   it('registers fatal error if features endpoint fails unexpectedly', async () => {
     const error = { response: { status: 500 } };
     const getFeatures = jest.fn().mockRejectedValue(error);
     const props = getProps({ action: 'edit' });
-    const wrapper = mountWithIntl(
-      <KibanaContextProvider services={coreStart}>
-        <EditRolePage {...props} getFeatures={getFeatures} />
-      </KibanaContextProvider>
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...props} getFeatures={getFeatures} />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
-    await waitForRender(wrapper);
+    await waitForRender();
     expect(props.fatalErrors.add).toHaveBeenLastCalledWith(error);
-    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);
+    expect(screen.queryByTestId('spaceAwarePrivilegeSectionMock')).not.toBeInTheDocument();
   });
 
   it('can render if features call is not allowed', async () => {
     const error = { response: { status: 403 } };
     const getFeatures = jest.fn().mockRejectedValue(error);
     const props = getProps({ action: 'edit' });
-    const wrapper = mountWithIntl(
-      <KibanaContextProvider services={coreStart}>
-        <EditRolePage {...props} getFeatures={getFeatures} />
-      </KibanaContextProvider>
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...props} getFeatures={getFeatures} />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
-    await waitForRender(wrapper);
+    await waitForRender();
     expect(props.fatalErrors.add).not.toHaveBeenCalled();
-    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-    expectSaveFormButtons(wrapper);
+    expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+    expectSaveFormButtons();
   });
 
   it('can render if index patterns are not available', async () => {
     const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
 
-    const wrapper = mountWithIntl(
-      <KibanaContextProvider services={coreStart}>
-        <EditRolePage {...{ ...getProps({ action: 'edit' }), dataViews }} />
-      </KibanaContextProvider>
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage {...{ ...getProps({ action: 'edit' }), dataViews }} />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
-    await waitForRender(wrapper);
+    await waitForRender();
 
-    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-    expectSaveFormButtons(wrapper);
+    expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+    expectSaveFormButtons();
   });
 
   it('can render for serverless buildFlavor', async () => {
     const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
 
-    const wrapper = mountWithIntl(
-      <KibanaContextProvider services={coreStart}>
-        <EditRolePage
-          {...{
-            ...getProps({
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...{
+              ...getProps({
+                action: 'edit',
+                spacesEnabled: true,
+                role: {
+                  name: 'my custom role',
+                  metadata: {},
+                  elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                  kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+                },
+                buildFlavor: 'serverless',
+              }),
+              dataViews,
+            }}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+
+    await waitForRender();
+
+    expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+    expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+    expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
+    expect(MockedElasticsearchPrivileges).toHaveBeenCalledWith(
+      expect.objectContaining({ buildFlavor: 'serverless' })
+    );
+    expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
+    expect(screen.queryByTestId('indexPrivileges-remote_indices')).not.toBeInTheDocument();
+    expectSaveFormButtons();
+  });
+
+  it('render role with wildcard base privilege without edit/delete actions', async () => {
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
               action: 'edit',
-              spacesEnabled: true,
               role: {
                 name: 'my custom role',
                 metadata: {},
                 elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-                kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+                kibana: [{ spaces: ['*'], base: ['*'], feature: {} }],
               },
-              buildFlavor: 'serverless',
-            }),
-            dataViews,
-          }}
-        />
-      </KibanaContextProvider>
+            })}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
-    await waitForRender(wrapper);
+    await waitForRender();
 
-    expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
-    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-    expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
-    expect(wrapper.find('ElasticsearchPrivileges').prop('buildFlavor')).toBe('serverless');
-    expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
-    expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
-    expectSaveFormButtons(wrapper);
-  });
-
-  it('render role with wildcard base privilege without edit/delete actions', async () => {
-    const wrapper = mountWithIntl(
-      <KibanaContextProvider services={coreStart}>
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            role: {
-              name: 'my custom role',
-              metadata: {},
-              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-              kibana: [{ spaces: ['*'], base: ['*'], feature: {} }],
-            },
-          })}
-        />
-      </KibanaContextProvider>
-    );
-
-    await waitForRender(wrapper);
-
-    expect(wrapper.find('[data-test-subj="privilegeEditAction-0"]')).toHaveLength(0);
-    expect(wrapper.find('[data-test-subj="privilegeDeleteAction-0"]')).toHaveLength(0);
-    expectReadOnlyFormButtons(wrapper);
+    expect(screen.queryByTestId('privilegeEditAction-0')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('privilegeDeleteAction-0')).not.toBeInTheDocument();
+    expectReadOnlyFormButtons();
   });
 
   describe('in create mode', () => {
     it('renders an error for existing role name', async () => {
       const props = getProps({ action: 'edit' });
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage {...props} />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      const nameInput = wrapper.find('input[name="name"]');
-      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
-      nameInput.simulate('blur');
+      const nameInput = screen.getByTestId('roleFormNameInput');
+      fireEvent.change(nameInput, { target: { value: 'system_indices_superuser' } });
+      fireEvent.blur(nameInput);
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
-        error: 'A role with this name already exists.',
-        isInvalid: true,
-      });
-      expectSaveFormButtons(wrapper);
-      expect(wrapper.find('EuiButton[data-test-subj="roleFormSaveButton"]').props().disabled);
+      const formRow = screen.getByTestId('roleNameFormRow');
+      expect(
+        within(formRow).getByText('A role with this name already exists.')
+      ).toBeInTheDocument();
+      expectSaveFormButtons();
+      expect(screen.getByTestId('roleFormSaveButton')).toBeDisabled();
     });
 
     it('renders an error on save of existing role name', async () => {
       const props = getProps({ action: 'edit' });
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage {...props} />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
       props.rolesAPIClient.saveRole.mockRejectedValue({
@@ -876,114 +948,119 @@ describe('<EditRolePage />', () => {
         },
       });
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      const nameInput = wrapper.find('input[name="name"]');
-      const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+      const nameInput = screen.getByTestId('roleFormNameInput');
+      const saveButton = screen.getByTestId('roleFormSaveButton');
 
-      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
-      saveButton.simulate('click');
+      fireEvent.change(nameInput, { target: { value: 'system_indices_superuser' } });
+      fireEvent.click(saveButton);
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
-        error: 'A role with this name already exists.',
-        isInvalid: true,
-      });
-      // A usual toast notification is not expected with this specific error
+      const formRow = screen.getByTestId('roleNameFormRow');
+      expect(
+        within(formRow).getByText('A role with this name already exists.')
+      ).toBeInTheDocument();
       expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
-      expectSaveFormButtons(wrapper);
-      expect(wrapper.find('EuiButton[data-test-subj="roleFormSaveButton"]').props().disabled);
+      expectSaveFormButtons();
+      expect(screen.getByTestId('roleFormSaveButton')).toBeDisabled();
     });
 
     it('does not render an error for new role name', async () => {
       const props = getProps({ action: 'edit' });
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage {...props} />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
       props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      const nameInput = wrapper.find('input[name="name"]');
-      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
-      nameInput.simulate('blur');
+      const nameInput = screen.getByTestId('roleFormNameInput');
+      fireEvent.change(nameInput, { target: { value: 'system_indices_superuser' } });
+      fireEvent.blur(nameInput);
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
-        isInvalid: false,
-      });
-      expectSaveFormButtons(wrapper);
+      const formRow = screen.getByTestId('roleNameFormRow');
+      expect(
+        within(formRow).queryByText('A role with this name already exists.')
+      ).not.toBeInTheDocument();
+      expectSaveFormButtons();
     });
 
     it('can render for serverless buildFlavor', async () => {
       const props = getProps({ action: 'edit', buildFlavor: 'serverless' });
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage {...props} />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
       props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      const nameInput = wrapper.find('input[name="name"]');
-      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
-      nameInput.simulate('blur');
+      const nameInput = screen.getByTestId('roleFormNameInput');
+      fireEvent.change(nameInput, { target: { value: 'system_indices_superuser' } });
+      fireEvent.blur(nameInput);
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
-        isInvalid: false,
-      });
-      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
-        false
+      const formRow = screen.getByTestId('roleNameFormRow');
+      expect(
+        within(formRow).queryByText('A role with this name already exists.')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
+      expect(MockedElasticsearchPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({ buildFlavor: 'serverless' })
       );
-      expect(wrapper.find('ElasticsearchPrivileges').prop('buildFlavor')).toBe('serverless');
-      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
-      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
-      expectSaveFormButtons(wrapper);
+      expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
+      expect(screen.queryByTestId('indexPrivileges-remote_indices')).not.toBeInTheDocument();
+      expectSaveFormButtons();
     });
 
     it('does not render a notification on save of new role name', async () => {
       const props = getProps({ action: 'edit' });
-      const wrapper = mountWithIntl(
-        <KibanaContextProvider services={coreStart}>
-          <EditRolePage {...props} />
-        </KibanaContextProvider>
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
       );
 
       props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      const nameInput = wrapper.find('input[name="name"]');
-      const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+      const nameInput = screen.getByTestId('roleFormNameInput');
+      const saveButton = screen.getByTestId('roleFormSaveButton');
 
-      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
-      saveButton.simulate('click');
+      fireEvent.change(nameInput, { target: { value: 'system_indices_superuser' } });
+      fireEvent.click(saveButton);
 
-      await waitForRender(wrapper);
+      await waitForRender();
 
-      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
-        isInvalid: false,
-      });
+      const formRow = screen.getByTestId('roleNameFormRow');
+      expect(
+        within(formRow).queryByText('A role with this name already exists.')
+      ).not.toBeInTheDocument();
       expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
-      expectSaveFormButtons(wrapper);
+      expectSaveFormButtons();
     });
   });
 });
 
-async function waitForRender(wrapper: ReactWrapper<any>) {
-  await act(async () => {
-    await nextTick();
-    wrapper.update();
-  });
+async function waitForRender() {
+  await waitFor(() => {});
 }

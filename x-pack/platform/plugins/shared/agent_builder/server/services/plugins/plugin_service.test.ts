@@ -96,6 +96,7 @@ describe('PluginsService', () => {
   let start: PluginsServiceStart;
   let mockClient: jest.Mocked<PluginClient>;
   let mockSkillClient: jest.Mocked<SkillClient>;
+  let mockToolRegistry: { has: jest.Mock };
   const mockRequest = {} as KibanaRequest;
 
   beforeEach(() => {
@@ -123,6 +124,10 @@ describe('PluginsService', () => {
       deleteByPluginId: jest.fn(),
     };
 
+    mockToolRegistry = {
+      has: jest.fn().mockResolvedValue(true),
+    };
+
     mockCreateClient.mockReturnValue(mockClient);
     mockCreateSkillClient.mockReturnValue(mockSkillClient);
 
@@ -139,7 +144,12 @@ describe('PluginsService', () => {
     start = service.start({
       logger: loggerMock.create(),
       elasticsearch: mockElasticsearch as any,
-      config: { enabled: true, githubBaseUrl: 'https://github.com' },
+      getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+      config: {
+        enabled: true,
+        githubBaseUrl: 'https://github.com',
+        topSnippets: { numSnippets: 2, numWords: 750 },
+      },
     });
   });
 
@@ -159,7 +169,11 @@ describe('PluginsService', () => {
       skills: [
         {
           dirName: 'pdf-processor',
-          meta: { name: 'PDF Processor', description: 'Processes PDFs' },
+          meta: {
+            name: 'PDF Processor',
+            description: 'Processes PDFs',
+            allowedTools: ['tool-1', 'tool-2'],
+          },
           content: 'Skill instructions for PDF.',
           referencedFiles: [{ relativePath: 'schema.json', content: '{}' }],
         },
@@ -206,7 +220,7 @@ describe('PluginsService', () => {
             referenced_content: [
               { name: 'schema.json', relativePath: 'schema.json', content: '{}' },
             ],
-            tool_ids: [],
+            tool_ids: ['tool-1', 'tool-2'],
             plugin_id: 'test-plugin-uuid',
           },
           {
@@ -398,6 +412,99 @@ describe('PluginsService', () => {
         );
 
         expect(result).toBe(persistedPlugin);
+      });
+    });
+
+    describe('allowed-tools propagation', () => {
+      it('maps allowedTools from skill meta to tool_ids in the create request', async () => {
+        const archive = createMockParsedArchive({
+          skills: [
+            {
+              dirName: 'with-tools',
+              meta: { name: 'With Tools', description: 'Has tools', allowedTools: ['x', 'y'] },
+              content: 'Content.',
+              referencedFiles: [],
+            },
+            {
+              dirName: 'no-tools',
+              meta: { name: 'No Tools', description: 'No tools' },
+              content: 'Content.',
+              referencedFiles: [],
+            },
+          ],
+        });
+
+        mockParsePluginFromUrl.mockResolvedValue(archive);
+        mockClient.findByName.mockResolvedValue(undefined);
+        mockClient.create.mockResolvedValue(createMockPersistedPlugin());
+        mockSkillClient.bulkCreate.mockResolvedValue([]);
+
+        await start.installPlugin({
+          request: mockRequest,
+          source: { type: 'url', url: 'https://example.com/plugin.zip' },
+        });
+
+        expect(mockSkillClient.bulkCreate).toHaveBeenCalledWith([
+          expect.objectContaining({ id: 'my-plugin-with-tools', tool_ids: ['x', 'y'] }),
+          expect.objectContaining({ id: 'my-plugin-no-tools', tool_ids: [] }),
+        ]);
+      });
+
+      it('throws when allowedTools references tools that do not exist', async () => {
+        const archive = createMockParsedArchive({
+          skills: [
+            {
+              dirName: 'bad-tools',
+              meta: {
+                name: 'Bad Tools',
+                description: 'References missing tools',
+                allowedTools: ['existing-tool', 'missing-tool'],
+              },
+              content: 'Content.',
+              referencedFiles: [],
+            },
+          ],
+        });
+
+        mockToolRegistry.has.mockImplementation(async (id: string) => id === 'existing-tool');
+        mockParsePluginFromUrl.mockResolvedValue(archive);
+        mockClient.findByName.mockResolvedValue(undefined);
+
+        await expect(
+          start.installPlugin({
+            request: mockRequest,
+            source: { type: 'url', url: 'https://example.com/plugin.zip' },
+          })
+        ).rejects.toThrow(/missing-tool/);
+
+        expect(mockSkillClient.bulkCreate).not.toHaveBeenCalled();
+        expect(mockClient.create).not.toHaveBeenCalled();
+      });
+
+      it('succeeds when skills have no allowedTools', async () => {
+        const archive = createMockParsedArchive({
+          skills: [
+            {
+              dirName: 'simple',
+              meta: { name: 'Simple', description: 'No tools' },
+              content: 'Content.',
+              referencedFiles: [],
+            },
+          ],
+        });
+
+        mockParsePluginFromUrl.mockResolvedValue(archive);
+        mockClient.findByName.mockResolvedValue(undefined);
+        mockClient.create.mockResolvedValue(createMockPersistedPlugin());
+        mockSkillClient.bulkCreate.mockResolvedValue([]);
+
+        await start.installPlugin({
+          request: mockRequest,
+          source: { type: 'url', url: 'https://example.com/plugin.zip' },
+        });
+
+        expect(mockToolRegistry.has).not.toHaveBeenCalled();
+        expect(mockSkillClient.bulkCreate).toHaveBeenCalledTimes(1);
       });
     });
   });

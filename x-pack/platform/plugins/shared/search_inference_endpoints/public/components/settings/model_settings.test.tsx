@@ -13,10 +13,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ModelSettings } from './model_settings';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
+import { useConnectors } from '../../hooks/use_connectors';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('./use_model_settings_form');
 jest.mock('../../hooks/use_default_model_settings');
+jest.mock('../../hooks/use_connectors');
+jest.mock('./no_models_empty_prompt', () => ({
+  NoModelsEmptyPrompt: () => <div data-test-subj="settings-no-models">NoModelsEmptyPrompt</div>,
+}));
 jest.mock('./feature_section', () => ({
   FeatureSection: ({ parentName, onReset }: { parentName: string; onReset: () => void }) => (
     <div data-test-subj={`featureSection-${parentName}`}>
@@ -32,6 +37,7 @@ jest.mock('./default_model_section', () => ({
 
 const mockUseModelSettingsForm = useModelSettingsForm as jest.Mock;
 const mockUseDefaultModelSettings = useDefaultModelSettings as jest.Mock;
+const mockUseConnectors = useConnectors as jest.Mock;
 
 const childFeature: InferenceFeatureConfig = {
   featureId: 'child_1',
@@ -57,6 +63,7 @@ const defaultFormState = {
       children: [childFeature],
     },
   ],
+  invalidEndpointIds: new Set<string>(),
   updateEndpoints: jest.fn(),
   save: jest.fn(),
   resetSection: jest.fn(),
@@ -85,6 +92,10 @@ describe('ModelSettings', () => {
     jest.clearAllMocks();
     mockUseModelSettingsForm.mockReturnValue(defaultFormState);
     mockUseDefaultModelSettings.mockReturnValue(defaultModelSettingsState);
+    mockUseConnectors.mockReturnValue({
+      data: [{ connectorId: 'test-connector', name: 'Test', isPreconfigured: true }],
+      isLoading: false,
+    });
   });
 
   it('renders loading spinner when loading', () => {
@@ -303,6 +314,32 @@ describe('ModelSettings', () => {
       expect(saveDefaultModel).toHaveBeenCalledTimes(1);
     });
     expect(saveFeatures).not.toHaveBeenCalled();
+  });
+
+  it('renders no-models empty prompt when connectors are empty', () => {
+    mockUseConnectors.mockReturnValue({ data: [], isLoading: false });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('settings-no-models')).toBeInTheDocument();
+    expect(screen.queryByTestId('defaultModelSection')).not.toBeInTheDocument();
+  });
+
+  it('renders loading spinner when connectors are loading', () => {
+    mockUseConnectors.mockReturnValue({ data: undefined, isLoading: true });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.queryByTestId('settings-no-models')).not.toBeInTheDocument();
   });
 
   it('calls defaultModelSettings.reset when discarding unsaved changes', async () => {

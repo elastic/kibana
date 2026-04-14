@@ -122,11 +122,6 @@ export const allowedExperimentalValues = Object.freeze({
   gapReasonDetectionEnabled: false,
 
   /**
-   * Enables the redesigned execution results table on the rule details page
-   */
-  newExecutionResultsTableEnabled: true,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
   filterProcessDescendantsForTrustedAppsEnabled: true,
@@ -257,6 +252,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.4
    */
   prebuiltRulesDeprecationUIEnabled: false,
+
+  /**
+   * Classic chrome only: refreshed Security side nav (Launchpad, Manage footer; unified row + panel behavior).
+   * Release: 9.4
+   */
+  securityClassicNavUpdate: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

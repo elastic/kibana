@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { labels } from '../../../utils/i18n';
 import { useToolService } from '../../../hooks/tools/use_tools';
+import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
 
 interface ToolReadOnlyFlyoutProps {
   toolId: string;
@@ -60,10 +61,10 @@ export const ToolReadOnlyFlyout: React.FC<ToolReadOnlyFlyoutProps> = ({ toolId, 
             </EuiFlexItem>
             <EuiHorizontalRule margin="none" />
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxxs">
-                <h4>{labels.agentTools.toolDetailDescriptionLabel}</h4>
-              </EuiTitle>
-              <EuiText size="s">{tool.description || '\u2014'}</EuiText>
+              <RenderMarkdownReadOnly
+                content={tool.description ?? ''}
+                label={labels.agentTools.toolDetailDescriptionLabel}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}

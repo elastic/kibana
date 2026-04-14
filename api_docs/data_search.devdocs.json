@@ -1597,7 +1597,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>"
+                  "Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; pollLength?: moment.Duration | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
                 "lineNumber": 84,
@@ -2828,66 +2828,6 @@
     ],
     "functions": [],
     "interfaces": [
-      {
-        "parentPluginId": "data",
-        "id": "def-server.AsyncSearchStatusResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "AsyncSearchStatusResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.AsyncSearchStatusResponse",
-            "text": "AsyncSearchStatusResponse"
-          },
-          " extends Omit<",
-          "AsyncSearchResponse",
-          "<unknown>, \"response\">"
-        ],
-        "path": "src/platform/plugins/shared/data/server/search/strategies/ese_search/types.ts",
-        "lineNumber": 30,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.AsyncSearchStatusResponse.completion_status",
-            "type": "number",
-            "tags": [],
-            "label": "completion_status",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/plugins/shared/data/server/search/strategies/ese_search/types.ts",
-            "lineNumber": 31,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.AsyncSearchStatusResponse._shards",
-            "type": "Object",
-            "tags": [],
-            "label": "_shards",
-            "description": [],
-            "signature": [
-              "ShardStatistics"
-            ],
-            "path": "src/platform/plugins/shared/data/server/search/strategies/ese_search/types.ts",
-            "lineNumber": 32,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "data",
         "id": "def-server.IScopedSearchClient",
@@ -18725,7 +18665,7 @@
           "<Response>"
         ],
         "path": "src/platform/plugins/shared/data/common/search/poll_search.ts",
-        "lineNumber": 29,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -18741,7 +18681,7 @@
               "() => Promise<Response>"
             ],
             "path": "src/platform/plugins/shared/data/common/search/poll_search.ts",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -18758,7 +18698,7 @@
               "(() => Promise<void>) | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/poll_search.ts",
-            "lineNumber": 31,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -18781,7 +18721,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/common/search/poll_search.ts",
-            "lineNumber": 32,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -30414,13 +30354,31 @@
             "tags": [],
             "label": "pollInterval",
             "description": [
-              "\nThe number of milliseconds to wait between receiving a response and sending another request\nIf not provided, then a default 1 second interval with back-off up to 5 seconds interval is used"
+              "\nThe number of milliseconds to wait between receiving a response and sending another request\nIf not provided, then it defaults to 0 (no wait time)"
             ],
             "signature": [
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/strategies/ese_search/types.ts",
             "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IAsyncSearchOptions.pollLength",
+            "type": "string",
+            "tags": [],
+            "label": "pollLength",
+            "description": [
+              "\nThe length of time to wait for results before initiating a new poll request."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/strategies/ese_search/types.ts",
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
