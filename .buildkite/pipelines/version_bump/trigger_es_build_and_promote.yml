@@ -7,6 +7,7 @@ steps:
       branch: $BRANCH
 
   - name: 'Upload promote step'
+    depends_on: build-es-snapshot
     command: |
       buildkite-agent artifact download "snapshot_info-$${BUILDKITE_BUILD_ID}.env" .
       source "snapshot_info-${BUILDKITE_BUILD_ID}.env"
@@ -15,7 +16,6 @@ steps:
       steps:
         - name: 'Promote ES Snapshot'
           trigger: kibana-elasticsearch-snapshot-promote
-          depends_on: build-es-snapshot
           async: false
           build:
             branch: '$${BRANCH}'
