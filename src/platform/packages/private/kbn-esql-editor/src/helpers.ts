@@ -405,9 +405,13 @@ export const filterQuickFixes = async (
   const result: MonacoMessage[] = [];
   for (const message of messages) {
     if (message.quickFix?.displayCondition) {
-      const shouldDisplayFix = await message.quickFix.displayCondition(query, callbacks);
-      if (!shouldDisplayFix) {
-        result.push(omit(message, 'quickFix'));
+      try {
+        const shouldDisplayFix = await message.quickFix.displayCondition(query, callbacks);
+        if (!shouldDisplayFix) {
+          result.push(omit(message, 'quickFix'));
+          continue;
+        }
+      } catch (error) {
         continue;
       }
     }
