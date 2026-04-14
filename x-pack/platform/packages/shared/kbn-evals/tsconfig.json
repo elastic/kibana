@@ -8,6 +8,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/dev-cli-runner",
+    "@kbn/evals-runner",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/scout",

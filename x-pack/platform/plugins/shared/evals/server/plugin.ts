@@ -19,6 +19,9 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
+import { OnlineSuiteRegistry } from './online_suites/registry';
+import { getEvalsRunSuiteStepDefinition } from './workflows_steps/run_suite';
+import { clusterHealthOnlineSuite } from './online_suites/built_in/cluster_health_suite';
 
 export class EvalsPlugin
   implements
@@ -27,6 +30,7 @@ export class EvalsPlugin
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
   private datasetService?: DatasetService;
+  private onlineSuiteRegistry?: OnlineSuiteRegistry;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -35,15 +39,28 @@ export class EvalsPlugin
 
   setup(
     coreSetup: CoreSetup<EvalsStartDependencies, EvalsPluginStart>,
-    { features }: EvalsSetupDependencies
+    { features, workflowsManagement, workflowsExtensions }: EvalsSetupDependencies
   ): EvalsPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('Evals plugin is disabled');
-      return {};
+      return {
+        registerOnlineSuite: () => undefined,
+      };
     }
 
     this.logger.info('Setting up Evals plugin');
     this.datasetService = new DatasetService(this.logger);
+    this.onlineSuiteRegistry = new OnlineSuiteRegistry();
+    this.onlineSuiteRegistry.register(clusterHealthOnlineSuite);
+
+    if (workflowsExtensions) {
+      workflowsExtensions.registerStepDefinition(
+        getEvalsRunSuiteStepDefinition({
+          coreSetup,
+          onlineSuiteRegistry: this.onlineSuiteRegistry,
+        })
+      );
+    }
 
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
       'evals',
@@ -90,9 +107,16 @@ export class EvalsPlugin
     });
 
     const router = coreSetup.http.createRouter<EvalsRequestHandlerContext>();
-    registerRoutes({ router, logger: this.logger });
+    registerRoutes({
+      router,
+      logger: this.logger,
+      onlineSuiteRegistry: this.onlineSuiteRegistry,
+      workflowsManagement,
+    });
 
-    return {};
+    return {
+      registerOnlineSuite: (definition) => this.onlineSuiteRegistry?.register(definition),
+    };
   }
 
   start(_core: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {

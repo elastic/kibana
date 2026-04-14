@@ -8,6 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
+import type { EvaluationScoreDocument } from '@kbn/evals-runner';
 import { buildRunFilterQuery, buildStatsAggregation, SCORES_SORT_ORDER } from '@kbn/evals-common';
 import { getEvalDoc } from '../evaluations_export/eval_doc';
 
@@ -23,67 +24,7 @@ interface BulkDroppedDocument<TDocument> {
   document?: TDocument;
 }
 
-export interface EvaluationScoreDocument {
-  '@timestamp': string;
-  run_id: string;
-  experiment_id: string;
-
-  /**
-   * Optional CI metadata to correlate scores back to a suite and Buildkite build/job.
-   * These fields are safe to omit in non-CI environments.
-   */
-  suite?: {
-    id?: string;
-  };
-  ci?: {
-    buildkite?: {
-      build_id?: string;
-      job_id?: string;
-      build_url?: string;
-      pipeline_slug?: string;
-      pull_request?: string;
-      branch?: string;
-      commit?: string;
-    };
-  };
-
-  example: {
-    id: string;
-    index: number;
-    input?: Record<string, unknown> | null;
-    dataset: {
-      id: string;
-      name: string;
-    };
-  };
-
-  task: {
-    trace_id: string | null;
-    repetition_index: number;
-    output?: unknown | null;
-    model: Model;
-  };
-
-  evaluator: {
-    name: string;
-    score: number | null;
-    label: string | null;
-    explanation: string | null;
-    metadata: Record<string, unknown> | null;
-    trace_id: string | null;
-    model: Model;
-  };
-
-  run_metadata: {
-    git_branch: string | null;
-    git_commit_sha: string | null;
-    total_repetitions: number;
-  };
-
-  environment: {
-    hostname: string;
-  };
-}
+export type { EvaluationScoreDocument } from '@kbn/evals-runner';
 
 type BuildkiteCiMetadata = NonNullable<NonNullable<EvaluationScoreDocument['ci']>['buildkite']>;
 

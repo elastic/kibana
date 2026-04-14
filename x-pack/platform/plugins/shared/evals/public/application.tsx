@@ -17,6 +17,7 @@ import { DatasetsListPage } from './pages/datasets_list';
 import { DatasetDetailPage } from './pages/dataset_detail';
 import { TracingProjectsListPage } from './pages/tracing_projects_list';
 import { TracingProjectDetailPage } from './pages/tracing_project_detail';
+import { OnlineEvaluationsPage } from './pages/online_evaluations';
 
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
@@ -34,9 +35,14 @@ const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
   defaultMessage: 'Tracing',
 });
 
+const onlineTabLabel = i18n.translate('xpack.evals.navigation.onlineEvaluations', {
+  defaultMessage: 'Online evaluations',
+});
+
 const ROOT_PATH = '/' as const;
 const DATASETS_PATH = '/datasets' as const;
 const TRACING_PATH = '/tracing' as const;
+const ONLINE_PATH = '/online' as const;
 
 const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
   defaultMessage: 'Run details',
@@ -101,6 +107,10 @@ const getBreadcrumbs = ({
     return [{ text: runsTabLabel, href: runsHref }, { text: runDetailBreadcrumbLabel }];
   }
 
+  if (pathname === ONLINE_PATH) {
+    return [{ text: onlineTabLabel }];
+  }
+
   return [{ text: runsTabLabel }];
 };
 
@@ -109,7 +119,8 @@ const EvalsNavigation: React.FC = () => {
   const { pathname } = useLocation();
   const isTracingSelected = pathname.startsWith(TRACING_PATH);
   const isDatasetsSelected = pathname.startsWith(DATASETS_PATH);
-  const isRunsSelected = !isTracingSelected && !isDatasetsSelected;
+  const isOnlineSelected = pathname.startsWith(ONLINE_PATH);
+  const isRunsSelected = !isTracingSelected && !isDatasetsSelected && !isOnlineSelected;
 
   return (
     <div style={{ flex: '0 0 auto' }}>
@@ -122,6 +133,9 @@ const EvalsNavigation: React.FC = () => {
         </EuiTab>
         <EuiTab isSelected={isTracingSelected} onClick={() => history.push(TRACING_PATH)}>
           {tracingTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isOnlineSelected} onClick={() => history.push(ONLINE_PATH)}>
+          {onlineTabLabel}
         </EuiTab>
       </EuiTabs>
     </div>
@@ -166,6 +180,7 @@ export const EvalsApp: React.FC<{
             <Route path="/runs/:runId" component={RunDetailPage} />
             <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
             <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
+            <Route exact path={ONLINE_PATH} component={OnlineEvaluationsPage} />
           </Routes>
         </div>
       </div>

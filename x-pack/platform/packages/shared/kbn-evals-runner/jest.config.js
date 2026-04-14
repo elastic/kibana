@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from '@kbn/evals-runner';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-evals-runner'],
+};

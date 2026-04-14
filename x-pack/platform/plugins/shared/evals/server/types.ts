@@ -7,18 +7,28 @@
 
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { DatasetService } from './storage/dataset_service';
+import type { OnlineSuiteDefinition } from './online_suites/types';
 
-export type EvalsPluginSetup = Record<string, never>;
+export interface EvalsPluginSetup {
+  registerOnlineSuite: (definition: OnlineSuiteDefinition) => void;
+}
 export interface EvalsPluginStart {
   datasetService?: DatasetService;
 }
 
 export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
-export type EvalsStartDependencies = Record<string, never>;
+export interface EvalsStartDependencies {
+  inference?: InferenceServerStart;
+}
 
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;

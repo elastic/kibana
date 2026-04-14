@@ -8,3 +8,10 @@
 export const PLUGIN_ID = 'evals' as const;
 export const PLUGIN_NAME = 'Evaluations' as const;
 export const APP_PATH = '/app/evals' as const;
+
+export {
+  EVALS_RUN_SUITE_STEP_TYPE,
+  evalsRunSuiteCommonStepDefinition,
+  type EvalsRunSuiteStepInput,
+  type EvalsRunSuiteStepOutput,
+} from './workflows_steps/run_suite';

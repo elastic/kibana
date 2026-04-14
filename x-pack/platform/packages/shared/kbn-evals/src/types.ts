@@ -9,103 +9,40 @@ import type { BoundInferenceClient, Model } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
+import type { Evaluator, EvalsExecutorClient } from '@kbn/evals-runner';
 import type { EvaluationCriterion } from './evaluators/criteria';
-import { type EvaluationReporter } from './utils/reporting/evaluation_reporter';
+import type { EvaluationReporter } from './utils/reporting/evaluation_reporter';
 import type {
   EvaluatorDisplayOptions,
   EvaluatorDisplayGroup,
 } from './utils/reporting/report_table';
 import type { EvaluatorStats } from './utils/score_repository';
 
-export interface EvaluationDataset<TExample extends Example = Example> {
-  name: string;
-  description: string;
-  examples: TExample[];
-  id?: undefined;
-}
-
-export interface EvaluationDatasetWithId<TExample extends Example = Example>
-  extends Omit<EvaluationDataset<TExample>, 'id'> {
-  id: string;
-}
-
-export type TaskOutput = unknown;
-
-export interface Example<
-  TInput extends Record<string, unknown> = Record<string, unknown>,
-  TExpected = any,
-  TMetadata extends Record<string, unknown> | null = Record<string, unknown> | null
-> {
-  /**
-   * Stable identifier for this example, typically a content hash.
-   * Optional because inline datasets may not have persisted IDs.
-   */
-  id?: string;
-  input?: TInput;
-  /**
-   * Expected output/ground truth for the example.
-   *
-   * Note: kept intentionally loose to stay compatible with existing datasets and
-   * the Phoenix-backed executor types.
-   */
-  output?: TExpected;
-  /**
-   * Phoenix may return `null` metadata in stored examples.
-   */
-  metadata?: TMetadata;
-}
-
-export interface EvaluatorParams<TExample extends Example, TTaskOutput extends TaskOutput> {
-  input: TExample['input'];
-  output: TTaskOutput;
-  expected: TExample['output'];
-  metadata: TExample['metadata'];
-}
-
 /**
- * Evaluation output returned by evaluators.
+ * Core evaluation contracts are runtime-safe and shared with online evals.
  *
- * Follows the trace-first evaluator contract (vision Section 5.2.1): evaluators produce
- * standardized score/label/explanation outputs. The `metadata` field can carry trace
- * references and evaluator-specific details for explainability.
- *
- * This shape is intentionally compatible with the existing evaluator implementations and
- * the Phoenix client types:
- * - `score` may be omitted or `null` for "unavailable"/"error" cases
- * - `label`/`explanation` are used widely in tests and reporting
+ * Note: these types are intended to stay compatible with the trace-first evaluator contract:
+ * evaluators produce standardized score/label/explanation outputs, and metadata can carry
+ * trace pointers and evaluator-specific details for explainability.
  */
-export interface EvaluationResult {
-  score?: number | null;
-  label?: string | null;
-  explanation?: string | null;
-  reasoning?: string;
-  details?: unknown;
-  metadata?: Record<string, unknown> | undefined;
-}
+export type {
+  EvaluationDataset,
+  EvaluationDatasetWithId,
+  Example,
+  ExampleWithId,
+  TaskOutput,
+  EvaluatorParams,
+  EvaluationResult,
+  Evaluator,
+  ExperimentTask,
+  EvalsExecutorClient,
+  RanExperiment,
+  TaskRun,
+  EvaluationRun,
+  EvaluationCompleteEvent,
+  OnEvaluationComplete,
+} from '@kbn/evals-runner';
 
-type EvaluatorCallback<TExample extends Example, TTaskOutput extends TaskOutput> = (
-  params: EvaluatorParams<TExample, TTaskOutput>
-) => Promise<EvaluationResult>;
-
-/**
- * Core evaluator interface.
- *
- * All evaluators — whether CODE-kind (deterministic) or LLM-kind (model-scored) — implement
- * this interface. Per the @kbn/evals vision (Section 5.2.1), evaluators should progressively
- * migrate to deriving signals from OTel traces stored in Elasticsearch rather than only
- * operating on in-memory task output. Use {@link createTraceBasedEvaluator} for trace-native
- * evaluators.
- *
- * @see TraceBasedEvaluatorConfig for the trace-first evaluator factory configuration
- */
-export interface Evaluator<
-  TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
-> {
-  name: string;
-  kind: 'LLM' | 'CODE';
-  evaluate: EvaluatorCallback<TExample, TTaskOutput>;
-}
 export interface DefaultEvaluators {
   criteria: (criteria: EvaluationCriterion[]) => Evaluator;
   correctnessAnalysis: () => Evaluator;
@@ -118,89 +55,6 @@ export interface DefaultEvaluators {
     cachedTokens: Evaluator;
   };
 }
-
-export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOutput> = (
-  example: TExample
-) => Promise<TTaskOutput>;
-
-/**
- * Shared executor interface implemented by both the in-Kibana and Phoenix-backed executors.
- *
- * Note: the eval suites should depend on this interface (or structural typing), not Phoenix-specific types.
- */
-export interface EvalsExecutorClient {
-  runExperiment<
-    TEvaluationDataset extends EvaluationDataset,
-    TTaskOutput extends TaskOutput = TaskOutput
-  >(
-    options: {
-      dataset: TEvaluationDataset;
-      metadata?: Record<string, unknown>;
-      task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
-      concurrency?: number;
-      /**
-       * Phoenix-only: when true, the executor may trust that the dataset already exists upstream
-       * and should be resolved/loaded externally (e.g. by name) rather than created from the
-       * provided examples.
-       *
-       * The in-Kibana executor ignores this option.
-       */
-      trustUpstreamDataset?: boolean;
-    },
-    evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
-  ): Promise<RanExperiment>;
-
-  getRanExperiments(): Promise<RanExperiment[]>;
-}
-
-export interface ExampleWithId extends Example {
-  id: string;
-}
-
-export interface TaskRun {
-  exampleIndex: number;
-  repetition: number;
-  input: Example['input'];
-  expected: Example['output'];
-  metadata: Example['metadata'];
-  output: TaskOutput;
-  traceId?: string | null;
-}
-
-export interface EvaluationRun {
-  name: string;
-  result?: EvaluationResult;
-  experimentRunId: string;
-  traceId?: string | null;
-  exampleId?: string;
-}
-
-export interface RanExperiment {
-  id: string;
-  datasetId: string;
-  datasetName: string;
-  datasetDescription?: string;
-  runs: Record<string, TaskRun>;
-  evaluationRuns: EvaluationRun[];
-  experimentMetadata?: Record<string, unknown>;
-}
-
-/**
- * Emitted by the executor client after each evaluator completes for a single
- * example+repetition. Consumers (e.g. the Playwright fixture) can use this to
- * incrementally export score documents to Elasticsearch so that results survive
- * worker crashes.
- */
-export interface EvaluationCompleteEvent {
-  experimentId: string;
-  datasetId: string;
-  datasetName: string;
-  taskRun: TaskRun;
-  evaluationRun: EvaluationRun;
-  exampleId: string;
-}
-
-export type OnEvaluationComplete = (event: EvaluationCompleteEvent) => Promise<void>;
 
 export interface ReportDisplayOptions {
   /**

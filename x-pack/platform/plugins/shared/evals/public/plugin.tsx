@@ -24,8 +24,14 @@ export class EvalsPublicPlugin
 {
   public setup(
     coreSetup: CoreSetup<EvalsStartDependencies>,
-    { management }: EvalsSetupDependencies
+    { management, workflowsExtensions }: EvalsSetupDependencies
   ): EvalsPublicSetup {
+    if (workflowsExtensions) {
+      workflowsExtensions.registerStepDefinition(() =>
+        import('./workflows_steps/run_suite').then((m) => m.evalsRunSuiteStepDefinition)
+      );
+    }
+
     if (management) {
       management.sections.section.ai.registerApp({
         id: PLUGIN_ID,

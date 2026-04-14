@@ -15,6 +15,7 @@
     "@kbn/storage-adapter",
     "@kbn/es-errors",
     "@kbn/evals-common",
+    "@kbn/evals-runner",
     "@kbn/i18n",
     "@kbn/react-query",
     "@kbn/shared-ux-router",
@@ -22,7 +23,12 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/code-editor",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/spaces-utils",
+    "@kbn/workflows",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows-extensions",
+    "@kbn/inference-plugin",
+    "@kbn/zod"
   ]
 }

@@ -6,7 +6,9 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { EvalsRouter } from '../types';
+import type { OnlineSuiteRegistry } from '../online_suites/registry';
 import { registerGetRunsRoute } from './runs/get_runs';
 import { registerGetRunRoute } from './runs/get_run';
 import { registerGetRunScoresRoute } from './runs/get_run_scores';
@@ -24,10 +26,18 @@ import { registerDeleteExampleRoute } from './datasets/delete_example';
 import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
+import { registerGetOnlineSuitesRoute } from './online/get_suites';
+import { registerRunOnlineSuiteRoute } from './online/post_run';
+import { registerRunOnlineSuiteNowRoute } from './online/post_run_now';
+import { registerCancelOnlineRunRoute } from './online/post_cancel_run';
+import { registerGetOnlineRunRoute } from './online/get_workflow_execution';
+import { registerGetOnlineRunLogsRoute } from './online/get_workflow_execution_logs';
 
 export interface RouteDependencies {
   router: EvalsRouter;
   logger: Logger;
+  onlineSuiteRegistry?: OnlineSuiteRegistry;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
@@ -48,4 +58,11 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpdateExampleRoute(dependencies);
   registerDeleteExampleRoute(dependencies);
   registerUpsertDatasetRoute(dependencies);
+
+  registerGetOnlineSuitesRoute(dependencies);
+  registerRunOnlineSuiteRoute(dependencies);
+  registerRunOnlineSuiteNowRoute(dependencies);
+  registerCancelOnlineRunRoute(dependencies);
+  registerGetOnlineRunRoute(dependencies);
+  registerGetOnlineRunLogsRoute(dependencies);
 };

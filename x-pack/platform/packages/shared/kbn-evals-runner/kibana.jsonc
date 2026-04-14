@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/evals-runner",
+  "owner": ["@elastic/obs-ai-team", "@elastic/security-generative-ai"],
+  "group": "platform",
+  "visibility": "shared"
+}
+

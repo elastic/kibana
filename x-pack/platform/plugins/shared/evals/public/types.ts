@@ -7,6 +7,7 @@
 
 import type { ComponentType } from 'react';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 export type EvalsPublicSetup = Record<string, never>;
 
@@ -16,6 +17,7 @@ export interface EvalsPublicStart {
 
 export interface EvalsSetupDependencies {
   management?: ManagementSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export type EvalsStartDependencies = Record<string, never>;

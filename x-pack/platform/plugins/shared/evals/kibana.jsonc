@@ -10,7 +10,7 @@
     "browser": true,
     "configPath": ["xpack", "evals"],
     "requiredPlugins": ["features"],
-    "optionalPlugins": ["management"],
-    "requiredBundles": ["kibanaReact"]
+    "optionalPlugins": ["management", "workflowsExtensions", "workflowsManagement", "inference"],
+    "requiredBundles": ["kibanaReact", "workflowsExtensions"]
   }
 }

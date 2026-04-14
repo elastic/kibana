@@ -56,4 +56,11 @@ export const queryKeys = {
       }
     ) => ['evals', 'tracing', 'projects', projectName, 'traces', filters] as const,
   },
+  online: {
+    all: ['evals', 'online'] as const,
+    suites: () => ['evals', 'online', 'suites'] as const,
+    run: (workflowExecutionId: string) => ['evals', 'online', 'run', workflowExecutionId] as const,
+    logs: (workflowExecutionId: string, options?: { page?: number; size?: number }) =>
+      ['evals', 'online', 'logs', workflowExecutionId, options] as const,
+  },
 };
