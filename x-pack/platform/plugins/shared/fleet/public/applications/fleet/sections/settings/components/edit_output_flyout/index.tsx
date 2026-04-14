@@ -32,6 +32,8 @@ import {
   EuiCode,
   useGeneratedHtmlId,
   EuiPanel,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -615,10 +617,22 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   <EuiFormRow fullWidth>
                     <EuiSwitch
                       label={
-                        <FormattedMessage
-                          id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthLabel"
-                          defaultMessage="Do not use beatsauth extension to translate output parameters"
-                        />
+                        <EuiToolTip
+                          content={
+                            <FormattedMessage
+                              id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthTooltip"
+                              defaultMessage="When enabled, the exporter will only include the host and any advanced exporter parameters specified below, giving you complete control over the exporter configuration."
+                            />
+                          }
+                        >
+                          <span>
+                            <FormattedMessage
+                              id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthLabel"
+                              defaultMessage="Do not use beatsauth extension to translate output parameters"
+                            />{' '}
+                            <EuiIcon type="question" color="subdued" aria-hidden={true} />
+                          </span>
+                        </EuiToolTip>
                       }
                       checked={inputs.otelDisableBeatsauthInput.value}
                       onChange={(e) => inputs.otelDisableBeatsauthInput.setValue(e.target.checked)}
