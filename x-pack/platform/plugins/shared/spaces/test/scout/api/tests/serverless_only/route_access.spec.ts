@@ -9,8 +9,8 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { COMMON_HEADERS, COMMON_HEADERS_NO_INTERNAL } from '../constants';
-import { apiTest } from '../fixtures';
+import { COMMON_HEADERS, COMMON_HEADERS_NO_INTERNAL } from '../../constants';
+import { apiTest } from '../../fixtures';
 
 apiTest.describe(
   'Spaces route access',

@@ -9,8 +9,8 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { COMMON_HEADERS } from '../constants';
-import { apiTest } from '../fixtures';
+import { COMMON_HEADERS } from '../../constants';
+import { apiTest } from '../../fixtures';
 
 /**
  * Serverless-specific spaces CRUD tests.
