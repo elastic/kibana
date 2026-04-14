@@ -240,6 +240,52 @@ describe('CreateDataStreamFlyout', () => {
 
       expect(getByTestId('analyzeLogsButton')).toBeDisabled();
     });
+
+    it('should keep analyze button disabled when integration title is a single character', async () => {
+      const Wrapper = createWrapper({
+        title: 'A',
+        description: 'Integration description',
+        connectorId: 'connector-1',
+        dataStreamTitle: 'Valid stream',
+        dataStreamDescription: 'Stream description',
+        dataCollectionMethod: ['filestream'],
+        logSample: '2024-01-01 level=info msg=test',
+      });
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
+
+    it('should keep analyze button disabled when data stream title is a single character', async () => {
+      const Wrapper = createWrapper({
+        title: 'Integration',
+        description: 'Integration description',
+        connectorId: 'connector-1',
+        dataStreamTitle: 'B',
+        dataStreamDescription: 'Stream description',
+        dataCollectionMethod: ['filestream'],
+        logSample: '2024-01-01 level=info msg=test',
+      });
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
   });
 
   describe('log source selection', () => {
