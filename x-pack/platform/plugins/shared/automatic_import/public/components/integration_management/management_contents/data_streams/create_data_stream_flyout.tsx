@@ -49,11 +49,11 @@ import {
   useCreateUpdateIntegration,
   useGetIntegrationById,
   useUploadSamples,
-  normalizeTitleName,
   isValidNameFormat,
   startsWithLetter,
   useKibana,
 } from '../../../../common';
+import { meetsMinLength, normalizeTitleName } from '../../../../common/lib/helper_functions';
 import { useTelemetry } from '../../../telemetry_context';
 
 interface CreateDataStreamFlyoutProps {
@@ -154,6 +154,9 @@ const getAnalyzeLogsValidationReasons = (params: AnalyzeLogsValidationParams): s
   if (!params.integrationTitle) {
     reasons.push(formI18n.TITLE_REQUIRED);
   } else {
+    if (!meetsMinLength(params.integrationTitle)) {
+      reasons.push(formI18n.NAME_TOO_SHORT);
+    }
     if (!isValidNameFormat(params.integrationTitle)) {
       reasons.push(formI18n.NAME_INVALID_FORMAT);
     }
@@ -170,6 +173,9 @@ const getAnalyzeLogsValidationReasons = (params: AnalyzeLogsValidationParams): s
   if (!params.dataStreamTitle) {
     reasons.push(formI18n.DATA_STREAM_TITLE_REQUIRED);
   } else {
+    if (!meetsMinLength(params.dataStreamTitle)) {
+      reasons.push(formI18n.NAME_TOO_SHORT);
+    }
     if (params.hasDuplicateDataStreamName) {
       reasons.push(formI18n.DATA_STREAM_TITLE_ALREADY_EXISTS);
     }
@@ -218,7 +224,7 @@ interface AnalyzeFormValidityParams {
 }
 
 const isValidTitle = (title: string): boolean =>
-  !!title && isValidNameFormat(title) && startsWithLetter(title);
+  !!title && meetsMinLength(title) && isValidNameFormat(title) && startsWithLetter(title);
 
 const checkIntegrationFieldsValid = (params: AnalyzeFormValidityParams): boolean =>
   isValidTitle(params.integrationTitle) &&
@@ -441,8 +447,14 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const handleAnalyzeLogs = useCallback(async () => {
     if (!formData) return;
 
-    const integrationId = currentIntegrationId ?? normalizeTitleName(formData.title);
-    const dataStreamId = normalizeTitleName(formData.dataStreamTitle);
+    const trimmedIntegrationTitle = formData.title?.trim() ?? '';
+    const trimmedDataStreamTitle = formData.dataStreamTitle?.trim() ?? '';
+    if (!isValidTitle(trimmedIntegrationTitle) || !isValidTitle(trimmedDataStreamTitle)) {
+      return;
+    }
+
+    const integrationId = currentIntegrationId ?? normalizeTitleName(trimmedIntegrationTitle);
+    const dataStreamId = normalizeTitleName(trimmedDataStreamTitle);
     const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
       name: method as InputType['name'],
     }));
@@ -501,7 +513,10 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       onClose();
 
       if (!currentIntegrationId && result.integration_id) {
-        application.navigateToApp(PLUGIN_ID, { path: `/edit/${result.integration_id}` });
+        application.navigateToApp(PLUGIN_ID, {
+          path: `/edit/${result.integration_id}`,
+          state: { isNew: true },
+        });
       }
     } catch (error) {
       notifications.toasts.addError(error instanceof Error ? error : new Error('Unknown error'), {
@@ -617,6 +632,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                   isClearable
                   isInvalid={field.errors.length > 0}
                   data-test-subj="dataCollectionMethodSelect"
+                  aria-label={i18n.DATA_COLLECTION_METHOD_LABEL}
                   css={styles.comboBox}
                   fullWidth
                 />
@@ -683,7 +699,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                   fullWidth
                   isInvalid={!!indexValidationError}
                   error={indexValidationError}
-                  aria-label={i18n.ARIA_LABELS.selectIndex}
                 >
                   <EuiComboBox
                     key={field.value ?? ''}
@@ -698,6 +713,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                       )
                     }
                     data-test-subj="indexSelect"
+                    aria-label={i18n.ARIA_LABELS.selectIndex}
                     isDisabled={logsSourceOption !== 'index'}
                     isLoading={isLoadingIndices || isValidatingIndex}
                     isInvalid={!!indexValidationError}

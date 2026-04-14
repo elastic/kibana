@@ -181,7 +181,7 @@ export function ValueControlForm({
 
       try {
         const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
-        getESQLResults({
+        const results = await getESQLResults({
           esqlQuery: query,
           search,
           signal: controller.signal,
@@ -190,30 +190,29 @@ export function ValueControlForm({
           timeRange,
           timezone,
           variables: esqlVariables,
-        }).then((results) => {
-          if (!isMounted() || controller.signal.aborted) {
-            return;
-          }
-          const columns = results.response.columns.map((col) => col.name);
-          setQueryColumns(columns);
-          setShowValuesPreview(true);
-
-          if (columns.length === 1) {
-            const valuesArray = results.response.values.map((value) => value[0]);
-            const options = valuesArray
-              .filter((v) => v)
-              .map((option) => {
-                return {
-                  label: String(option),
-                  key: String(option),
-                  'data-test-subj': String(option),
-                };
-              });
-            setSelectedValues(options);
-            setAvailableValuesOptions(options);
-            setEsqlQueryErrors([]);
-          }
         });
+        if (!isMounted() || controller.signal.aborted) {
+          return;
+        }
+        const columns = results.response.columns.map((col) => col.name);
+        setQueryColumns(columns);
+        setShowValuesPreview(true);
+
+        if (columns.length === 1) {
+          const valuesArray = results.response.values.map((value) => value[0]);
+          const options = valuesArray
+            .filter((v) => v)
+            .map((option) => {
+              return {
+                label: String(option),
+                key: String(option),
+                'data-test-subj': String(option),
+              };
+            });
+          setSelectedValues(options);
+          setAvailableValuesOptions(options);
+          setEsqlQueryErrors([]);
+        }
         setValuesQuery(query);
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') {

@@ -7,7 +7,7 @@
 
 import type { EuiFlexItemProps } from '@elastic/eui';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
-import { splitSizeAndUnits, toMillis } from '../../helpers/format_size_units';
+import { splitSizeAndUnits, toMillis } from '../../../../../../util/format_size_units';
 
 interface BaseLifecycleSegment {
   grow: EuiFlexItemProps['grow'];
