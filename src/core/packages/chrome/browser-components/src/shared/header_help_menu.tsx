@@ -44,7 +44,7 @@ const createCustomLink = (
 );
 
 interface HeaderHelpMenuProps {
-  renderButton?: (props: { isOpen: boolean; toggleMenu: () => void }) => React.ReactNode;
+  renderButton?: (props: { isOpen: boolean; toggleMenu: () => void }) => NonNullable<React.ReactNode>;
 }
 
 export const HeaderHelpMenu = ({ renderButton }: HeaderHelpMenuProps = {}) => {
