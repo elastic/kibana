@@ -12,6 +12,7 @@ JOINED_FILE = DATA_DIR / "joined.csv"
 ISSUES_FILE = DATA_DIR / "issues_enriched.csv"
 PRS_FILE = DATA_DIR / "prs.json"
 OUTPUT_FILE = DATA_DIR / "metrics.json"
+TEST_COVERAGE_FILE = DATA_DIR / "test_coverage_proxy.json"
 
 
 def load_joined() -> pd.DataFrame:
@@ -49,7 +50,17 @@ def load_issues() -> pd.DataFrame:
     df["resolution_time_hours"] = pd.to_numeric(
         df["resolution_time_hours"], errors="coerce"
     )
+    # New fields
+    df["is_regression"] = df["is_regression"].fillna(False).astype(bool)
+    df["impact"] = df["impact"].fillna("unknown")
     return df
+
+
+def load_test_coverage() -> dict:
+    if not TEST_COVERAGE_FILE.exists():
+        return {}
+    with open(TEST_COVERAGE_FILE) as f:
+        return json.load(f)
 
 
 def percentiles(series: pd.Series) -> dict:
@@ -72,6 +83,7 @@ def analyze():
     commits = load_joined()
     prs = load_prs()
     issues = load_issues()
+    test_coverage = load_test_coverage()
 
     # Filter out bot commits for human metrics
     human_commits = commits[~commits["is_bot"]]
@@ -117,6 +129,25 @@ def analyze():
         ai_prs = mp[mp["has_ai_signal"]]
         non_ai_prs = mp[~mp["has_ai_signal"]]
 
+        # --- Quality Metrics ---
+        regression_issues = mi[mi["is_regression"] == True]
+        regression_count = len(regression_issues)
+        regression_rate = round(regression_count / bug_count, 4) if bug_count > 0 else 0
+        regression_density = round(regression_count / pr_throughput, 4) if pr_throughput > 0 else 0
+
+        defect_density = round(bug_count / pr_throughput, 4) if pr_throughput > 0 else 0
+
+        # Weighted defect score using impact labels
+        impact_weights = {"critical": 4, "high": 3, "medium": 2, "low": 1, "unknown": 0}
+        impact_counts = mi["impact"].value_counts().to_dict()
+        weighted_defect_score = sum(
+            impact_weights.get(imp, 0) * count
+            for imp, count in impact_counts.items()
+        )
+
+        # Test coverage proxy for this month
+        tc = test_coverage.get(m_str, {})
+
         metrics["monthly"][m_str] = {
             "pr_cycle_time": pr_cycle,
             "pr_throughput": pr_throughput,
@@ -133,7 +164,26 @@ def analyze():
             "ai_pr_rate": round(ai_pr_rate, 4),
             "ai_pr_cycle_time": percentiles(ai_prs["cycle_time_hours"]),
             "non_ai_pr_cycle_time": percentiles(non_ai_prs["cycle_time_hours"]),
+            "regression_count": regression_count,
+            "regression_rate": regression_rate,
+            "regression_density": regression_density,
+            "defect_density": defect_density,
+            "weighted_defect_score": weighted_defect_score,
+            "impact_distribution": impact_counts,
+            "test_to_prod_ratio": tc.get("test_to_prod_ratio", 0),
+            "test_line_ratio": tc.get("test_line_ratio", 0),
+            "new_test_files": tc.get("new_test_files", 0),
         }
+
+    # Compute quality score (normalized 0-1, higher = better)
+    all_wds = [
+        metrics["monthly"][m]["weighted_defect_score"]
+        for m in metrics["monthly"]
+    ]
+    max_wds = max(all_wds) if all_wds and max(all_wds) > 0 else 1
+    for m in metrics["monthly"]:
+        wds = metrics["monthly"][m]["weighted_defect_score"]
+        metrics["monthly"][m]["quality_score"] = round(1 - (wds / max_wds), 4)
 
     # --- Summary Stats ---
     metrics["summary"] = {
@@ -147,6 +197,13 @@ def analyze():
         "overall_pr_cycle_time": percentiles(prs["cycle_time_hours"]),
         "overall_bug_resolution_time": percentiles(
             issues["resolution_time_hours"]
+        ),
+        "overall_defect_density": round(
+            len(issues) / len(prs), 4
+        ) if len(prs) > 0 else 0,
+        "overall_regression_count": int(issues["is_regression"].sum()),
+        "overall_regression_rate": round(
+            float(issues["is_regression"].mean()), 4
         ),
         "months_covered": len(months),
         "date_range": f"{months[0]} to {months[-1]}",
