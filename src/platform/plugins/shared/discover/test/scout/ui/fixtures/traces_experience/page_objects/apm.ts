@@ -8,8 +8,11 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import type { Waterfall } from './waterfall';
+import { createWaterfall } from './waterfall';
 
 export interface ApmPage {
+  readonly waterfall: Waterfall;
   clickManagedTableRowAction(
     rowText: string,
     actionTestSubj: string,
@@ -21,7 +24,11 @@ export interface ApmPage {
 }
 
 export function createApmPage(page: ScoutPage): ApmPage {
+  const waterfall = createWaterfall(page);
+
   return {
+    waterfall,
+
     async clickManagedTableRowAction(
       rowText: string,
       actionTestSubj: string,
@@ -47,7 +54,7 @@ export function createApmPage(page: ScoutPage): ApmPage {
     },
 
     async clickWaterfallItem(itemName: string) {
-      await page.testSubj.locator('waterfall').getByText(itemName).click();
+      await waterfall.container.getByText(itemName).click();
     },
 
     async dismissFlyout() {
