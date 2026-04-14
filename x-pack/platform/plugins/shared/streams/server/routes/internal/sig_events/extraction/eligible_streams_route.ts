@@ -144,6 +144,13 @@ const eligibleStreamsRoute = createServerRoute({
 
     const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
 
+    // The workflow API returns executions sorted by createdAt desc, not finishedAt desc.
+    // classifyStreams uses first-match-per-stream semantics, so sort by finishedAt desc
+    // to ensure the most recently finished execution is picked for each stream.
+    completedExecutions.sort(
+      (a, b) => new Date(b.finishedAt).getTime() - new Date(a.finishedAt).getTime()
+    );
+
     const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
       allStreams,
       runningExecutions,

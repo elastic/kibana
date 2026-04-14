@@ -181,6 +181,23 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
     return full ? { ...item, context: full.context } : item;
   };
 
+  const ENRICH_CONCURRENCY = 5;
+  const enrichBatch = async (
+    items: WorkflowExecutionListItemDto[]
+  ): Promise<WorkflowExecutionListItemDto[]> => {
+    const enriched: WorkflowExecutionListItemDto[] = [];
+    for (let i = 0; i < items.length; i += ENRICH_CONCURRENCY) {
+      const chunk = items.slice(i, i + ENRICH_CONCURRENCY);
+      const results = await Promise.all(chunk.map(enrichWithContext));
+      enriched.push(...results);
+    }
+    return enriched;
+  };
+
+  // NOTE: The workflow management API sorts by createdAt desc, not finishedAt desc.
+  // The cutoff check below is therefore approximate — an execution created before the
+  // cutoff might have finished after it. For short-lived workflows this is acceptable;
+  // callers that need exact finishedAt ordering should sort results client-side.
   const paginateCompletedExecutions = async (
     maxAgeMs: number | undefined,
     visitor: (exec: WorkflowExecutionListItemDto) => 'match' | 'continue'
@@ -200,11 +217,12 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
         DEFAULT_SPACE_ID
       );
 
-      for (const exec of results) {
-        if (cutoff && new Date(exec.finishedAt).getTime() < cutoff) {
-          return null;
-        }
-        const enriched = await enrichWithContext(exec);
+      const withinCutoff = cutoff
+        ? results.filter((exec) => new Date(exec.finishedAt).getTime() >= cutoff)
+        : results;
+
+      const enrichedPage = await enrichBatch(withinCutoff);
+      for (const enriched of enrichedPage) {
         if (visitor(enriched) === 'match') {
           return enriched;
         }
@@ -297,15 +315,15 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
 
     async getActiveExecution(predicate) {
       const { results } = await getNonTerminalExecutions();
+      const enrichedResults = await enrichBatch(results);
 
-      for (const item of results) {
-        const enriched = await enrichWithContext(item);
+      for (const enriched of enrichedResults) {
         if (predicate(enriched)) {
           return {
-            executionId: item.id,
-            status: item.status,
-            error: item.error?.message,
-            duration: item.duration,
+            executionId: enriched.id,
+            status: enriched.status,
+            error: enriched.error?.message,
+            duration: enriched.duration,
           };
         }
       }

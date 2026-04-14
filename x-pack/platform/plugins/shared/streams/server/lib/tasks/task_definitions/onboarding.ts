@@ -7,14 +7,12 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
-  BaseFeature,
   GeneratedSignificantEventQuery,
   IdentifyFeaturesResult,
   OnboardingResult,
   SignificantEventsQueriesGenerationResult,
   TaskResult,
 } from '@kbn/streams-schema';
-import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
@@ -36,12 +34,9 @@ import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
 } from '../../sig_events/tasks/significant_events_queries_generation';
-import {
-  type WorkflowClient,
-  type WorkflowExecutionResult,
-  streamNamePredicate,
-} from '../../workflows/workflow_client';
+import { type WorkflowClient, streamNamePredicate } from '../../workflows/workflow_client';
 import type { FeaturesIdentificationWorkflowInputs } from '../../../../common/constants';
+import { workflowExecutionToTaskResult } from '../../../routes/utils/workflow_execution_to_task_result';
 
 export interface OnboardingTaskParams {
   streamName: string;
@@ -63,22 +58,6 @@ export function getOnboardingTaskId(streamName: string, saveQueries: boolean = t
 }
 
 const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
-
-function toIdentifyFeaturesResult(
-  execution: WorkflowExecutionResult
-): TaskResult<IdentifyFeaturesResult> {
-  const output = execution.output ?? {};
-  const rawFeatures = output.discoveredFeatures;
-  const features = Array.isArray(rawFeatures) ? (rawFeatures as BaseFeature[]) : [];
-  const tokensUsed = output.tokensUsed as ChatCompletionTokenCount | undefined;
-
-  return {
-    status: TaskStatus.Completed,
-    features,
-    durationMs: execution.duration ?? 0,
-    totalTokensUsed: tokensUsed,
-  };
-}
 
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
   return {
@@ -129,7 +108,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                         if (lastExec) {
                           const status = await workflowClient.getStatus(lastExec.id);
-                          featuresTaskResult = toIdentifyFeaturesResult(status);
+                          featuresTaskResult = workflowExecutionToTaskResult(status);
                         }
                       }
 
@@ -331,19 +310,21 @@ async function waitForWorkflowExecution(
   }
 ): Promise<TaskResult<IdentifyFeaturesResult>> {
   const { workflowClient, taskClient } = deps;
+  let cancelRequested = false;
 
   while (true) {
     const parentTask = await taskClient.get(parentTaskId);
 
-    if (parentTask.status === TaskStatus.BeingCanceled) {
+    if (parentTask.status === TaskStatus.BeingCanceled && !cancelRequested) {
       await workflowClient.cancel(executionId);
+      cancelRequested = true;
     }
 
     const execution = await workflowClient.getStatus(executionId);
 
     if (isTerminalStatus(execution.status)) {
       if (execution.status === ExecutionStatus.COMPLETED) {
-        return toIdentifyFeaturesResult(execution);
+        return workflowExecutionToTaskResult(execution);
       }
 
       const errorMsg = execution.error ?? `Workflow execution ${executionId} ${execution.status}`;

@@ -39,6 +39,10 @@ import { fetchSampleDocuments } from '../../../../lib/tasks/task_definitions/fea
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/prompts_config_service';
+import {
+  tokensSchema,
+  iterationResultSchema,
+} from '../../../utils/workflow_execution_to_task_result';
 
 const EMPTY_TOKENS: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0, cached: 0 };
 const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
@@ -51,13 +55,6 @@ const searchHitSchema = z.looseObject({
 });
 
 const toFeatureSummary = ({ id, title }: Feature) => ({ id, title: title ?? id });
-
-const tokensSchema = z.object({
-  prompt: z.number(),
-  completion: z.number(),
-  total: z.number(),
-  cached: z.number().optional(),
-});
 
 function createFeatureMetadata(
   featureTtlDays: number = DEFAULT_SIG_EVENTS_TUNING_CONFIG.feature_ttl_days
@@ -162,15 +159,19 @@ const sampleRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: z.object({
-      start: z.number(),
-      end: z.number(),
-      discoveredFeatures: z.array(featureSchema),
-      sampleSize: z.number().optional(),
-      entityFilteredRatio: z.number().min(0).max(1).optional(),
-      diverseRatio: z.number().min(0).max(1).optional(),
-      maxEntityFilters: z.number().optional(),
-    }),
+    body: z
+      .object({
+        start: z.number(),
+        end: z.number(),
+        discoveredFeatures: z.array(featureSchema),
+        sampleSize: z.number().optional(),
+        entityFilteredRatio: z.number().min(0).max(1).optional(),
+        diverseRatio: z.number().min(0).max(1).optional(),
+        maxEntityFilters: z.number().optional(),
+      })
+      .refine((data) => (data.entityFilteredRatio ?? 0) + (data.diverseRatio ?? 0) <= 1, {
+        message: 'entityFilteredRatio + diverseRatio must be <= 1',
+      }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { scopedClusterClient, tuningConfig, licensing, uiSettingsClient } =
@@ -376,7 +377,7 @@ const reconcileRoute = createServerRoute({
       totalTokensUsed: tokensSchema.optional(),
       successCount: z.number().optional(),
       featureTtlDays: z.number().optional(),
-      iterationResults: z.array(z.record(z.string(), z.unknown())).optional().default([]),
+      iterationResults: z.array(iterationResultSchema).optional().default([]),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {

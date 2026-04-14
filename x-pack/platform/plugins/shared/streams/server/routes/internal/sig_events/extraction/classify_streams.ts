@@ -38,8 +38,9 @@ const matchesExcludePatterns = (name: string, patterns: string[]): boolean =>
  * by checking workflow execution state for each stream.
  *
  * `runningExecutions`: non-terminal workflow executions (used for "alreadyRunning")
- * `completedExecutions`: completed workflow executions sorted by finishedAt desc
- *   (used to determine freshness: "upToDate" vs "candidate")
+ * `completedExecutions`: completed workflow executions (used to determine freshness).
+ *   Must be pre-sorted by finishedAt desc by the caller — the first match per stream
+ *   is used as the most recent completion.
  */
 export const classifyStreams = ({
   allStreams,

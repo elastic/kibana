@@ -82,7 +82,6 @@ export const POLL_DELAY_SECONDS = 5;
 // KI features identification workflow
 export const KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
   'workflow-f1c2d3e4-a5b6-47c8-9d0e-1f2a3b4c5d6e';
-export const KI_FEATURES_IDENTIFICATION_WORKFLOW_TIMEOUT_MINUTES = 15;
 
 export interface FeaturesIdentificationWorkflowInputs extends Record<string, unknown> {
   streamName: string;

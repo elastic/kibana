@@ -7,59 +7,19 @@
 
 import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
-import type {
-  BaseFeature,
-  IdentifyFeaturesResult,
-  IterationResult,
-  TaskResult,
-} from '@kbn/streams-schema';
+import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import { TaskStatus, baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
-import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import { ExecutionStatus } from '@kbn/workflows';
 import { v4 as uuid } from 'uuid';
-import {
-  type WorkflowExecutionResult,
-  streamNamePredicate,
-} from '../../../../lib/workflows/workflow_client';
+import { streamNamePredicate } from '../../../../lib/workflows/workflow_client';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { workflowExecutionToTaskResult } from '../../../utils/workflow_execution_to_task_result';
 
 export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
 
 const dateFromString = z.string().transform((input) => new Date(input));
-
-function workflowExecutionToTaskResult(
-  execution: WorkflowExecutionResult
-): FeaturesIdentificationTaskResult {
-  if (execution.status === ExecutionStatus.COMPLETED) {
-    const output = execution.output ?? {};
-    const rawFeatures = output.discoveredFeatures;
-    const features = Array.isArray(rawFeatures) ? (rawFeatures as BaseFeature[]) : [];
-    const tokensUsed = output.tokensUsed as ChatCompletionTokenCount | undefined;
-    const iterations = output.iterations as IterationResult[] | undefined;
-    return {
-      status: TaskStatus.Completed,
-      features,
-      durationMs: execution.duration ?? 0,
-      totalTokensUsed: tokensUsed,
-      iterations,
-    };
-  }
-
-  if (
-    execution.status === ExecutionStatus.FAILED ||
-    execution.status === ExecutionStatus.CANCELLED
-  ) {
-    return {
-      status: TaskStatus.Failed,
-      error: execution.error ?? `Workflow execution ${execution.executionId} ${execution.status}`,
-    };
-  }
-
-  return { status: TaskStatus.InProgress };
-}
 
 export const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features',

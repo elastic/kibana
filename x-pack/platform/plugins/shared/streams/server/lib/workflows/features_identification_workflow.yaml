@@ -72,7 +72,7 @@ inputs:
     description: "Maximum number of previously identified features sent in the LLM prompt."
 steps:
   # -----------------------------------------------------------------------
-  # Step 1: Setup — resolve connector, fetch stream and already discoveredKI features.
+  # Step 1: Setup — resolve connector, fetch stream and already discovered KI features.
   # -----------------------------------------------------------------------
   - name: setup
     type: kibana.request
