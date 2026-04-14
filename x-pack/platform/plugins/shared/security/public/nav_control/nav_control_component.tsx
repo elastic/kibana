@@ -178,6 +178,9 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
       buffer={0}
+      aria-label={i18n.translate('xpack.security.navControlComponent.popoverAriaLabel', {
+        defaultMessage: 'Account menu',
+      })}
     >
       <EuiContextMenu
         className="chrNavControl__userMenu"
