@@ -54,7 +54,7 @@ export class WorkflowTaskManager {
   }: {
     executionId: string;
     spaceId: string;
-    fakeRequest: KibanaRequest;
+    fakeRequest?: KibanaRequest;
   }): Promise<{ taskId: string }> {
     const task = await this.taskManager.schedule(
       {
@@ -67,7 +67,7 @@ export class WorkflowTaskManager {
         state: {},
         scope: [`workflow:execution:${executionId}`],
       },
-      { request: fakeRequest }
+      fakeRequest ? { request: fakeRequest } : undefined
     );
 
     return {
@@ -75,7 +75,16 @@ export class WorkflowTaskManager {
     };
   }
 
-  async forceRunIdleTasks(workflowExecutionId: string): Promise<void> {
+  async forceRunIdleTasks(
+    workflowExecutionId: string,
+    options?: { spaceId: string; fakeRequest?: KibanaRequest }
+  ): Promise<void> {
+    const scopeTerm = {
+      term: {
+        'task.scope': `workflow:execution:${workflowExecutionId}`,
+      },
+    };
+
     const { docs: idleTasks } = await this.taskManager.fetch({
       query: {
         bool: {
@@ -85,11 +94,7 @@ export class WorkflowTaskManager {
                 'task.status': TaskStatus.Idle,
               },
             },
-            {
-              term: {
-                'task.scope': `workflow:execution:${workflowExecutionId}`,
-              },
-            },
+            scopeTerm,
           ],
         },
       },
@@ -98,6 +103,35 @@ export class WorkflowTaskManager {
     if (idleTasks.length) {
       // TODO: To use bulkRunSoon once available
       await Promise.all(idleTasks.map((idleTask) => this.taskManager.runSoon(idleTask.id)));
+      return;
+    }
+
+    const { docs: activeTasks } = await this.taskManager.fetch({
+      query: {
+        bool: {
+          must: [
+            scopeTerm,
+            {
+              terms: {
+                'task.status': [TaskStatus.Running, TaskStatus.Claiming],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    if (activeTasks.length) {
+      return;
+    }
+
+    if (options?.spaceId) {
+      const { taskId } = await this.scheduleImmediateResume({
+        executionId: workflowExecutionId,
+        spaceId: options.spaceId,
+        fakeRequest: options.fakeRequest,
+      });
+      await this.taskManager.runSoon(taskId);
     }
   }
 }

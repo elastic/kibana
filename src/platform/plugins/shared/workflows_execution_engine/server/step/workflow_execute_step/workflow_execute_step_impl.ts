@@ -185,7 +185,8 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
 
     await this.init.workflowsExecutionEngine.cancelWorkflowExecution(
       executionId,
-      this.init.spaceId
+      this.init.spaceId,
+      this.init.request
     );
   }
 

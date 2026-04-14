@@ -228,6 +228,22 @@ describe('WorkflowTaskManager', () => {
         })
       ).rejects.toThrow('Task manager unavailable');
     });
+
+    it('should schedule without request when fakeRequest is omitted', async () => {
+      mockTaskManager.schedule.mockResolvedValue({ id: 'no-req-task' } as any);
+
+      await workflowTaskManager.scheduleImmediateResume({
+        executionId: 'exec-no-req',
+        spaceId: 'default',
+      });
+
+      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { workflowRunId: 'exec-no-req', spaceId: 'default' },
+        }),
+        undefined
+      );
+    });
   });
 
   describe('forceRunIdleTasks', () => {
@@ -238,8 +254,8 @@ describe('WorkflowTaskManager', () => {
 
       await workflowTaskManager.forceRunIdleTasks(workflowExecutionId);
 
-      expect(mockTaskManager.fetch).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.fetch).toHaveBeenCalledWith({
+      expect(mockTaskManager.fetch).toHaveBeenCalledTimes(2);
+      expect(mockTaskManager.fetch.mock.calls[0][0]).toEqual({
         query: {
           bool: {
             must: [
@@ -259,13 +275,43 @@ describe('WorkflowTaskManager', () => {
       });
     });
 
-    it('should do nothing when no idle tasks are found', async () => {
+    it('should not schedule when no idle tasks and no spaceId options', async () => {
       mockTaskManager.fetch.mockResolvedValue({ docs: [] } as any);
 
       await workflowTaskManager.forceRunIdleTasks(workflowExecutionId);
 
-      expect(mockTaskManager.fetch).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.fetch).toHaveBeenCalledTimes(2);
+      expect(mockTaskManager.schedule).not.toHaveBeenCalled();
       expect(mockTaskManager.runSoon).not.toHaveBeenCalled();
+    });
+
+    it('should not schedule when a running task exists for the execution scope', async () => {
+      mockTaskManager.fetch
+        .mockResolvedValueOnce({ docs: [] } as any)
+        .mockResolvedValueOnce({ docs: [{ id: 'running-1', status: TaskStatus.Running }] } as any);
+
+      await workflowTaskManager.forceRunIdleTasks(workflowExecutionId, {
+        spaceId: 'default',
+        fakeRequest,
+      });
+
+      expect(mockTaskManager.fetch).toHaveBeenCalledTimes(2);
+      expect(mockTaskManager.schedule).not.toHaveBeenCalled();
+      expect(mockTaskManager.runSoon).not.toHaveBeenCalled();
+    });
+
+    it('should schedule immediate resume and runSoon when no idle or active tasks and spaceId is set', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [] } as any);
+      mockTaskManager.schedule.mockResolvedValue({ id: 'new-resume-task' } as any);
+
+      await workflowTaskManager.forceRunIdleTasks(workflowExecutionId, {
+        spaceId: 'default',
+        fakeRequest,
+      });
+
+      expect(mockTaskManager.fetch).toHaveBeenCalledTimes(2);
+      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith('new-resume-task');
     });
 
     it('should remove and reschedule idle tasks when found', async () => {

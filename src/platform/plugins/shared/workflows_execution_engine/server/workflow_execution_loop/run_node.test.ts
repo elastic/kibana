@@ -151,6 +151,38 @@ describe('runNode', () => {
   });
 
   describe('when workflow is cancelled before step starts', () => {
+    it('should apply cancel from memory and skip step when cancelRequested is true', async () => {
+      workflowExecution.cancelRequested = true;
+      workflowExecution.status = ExecutionStatus.RUNNING;
+
+      const workflowLogger = createMockWorkflowEventLogger();
+      const workflowExecutionRepository = {
+        getWorkflowExecutionById: jest.fn(),
+      };
+
+      (mockParams as unknown as WorkflowExecutionLoopParams).workflowLogger = workflowLogger;
+      (mockParams as unknown as WorkflowExecutionLoopParams).workflowExecutionRepository =
+        workflowExecutionRepository as unknown as WorkflowExecutionLoopParams['workflowExecutionRepository'];
+
+      const upsertStep = jest.fn();
+      const updateWorkflowExecution = jest.fn((patch: Partial<EsWorkflowExecution>) => {
+        Object.assign(workflowExecution, patch);
+      });
+      mockParams.workflowExecutionState = {
+        ...mockParams.workflowExecutionState,
+        getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
+        getStepExecution: jest.fn().mockReturnValue(undefined),
+        upsertStep,
+        updateWorkflowExecution,
+      } as unknown as jest.Mocked<WorkflowExecutionState>;
+
+      await runNode(mockParams);
+
+      expect(workflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+      expect(mockNodeImplementation.run).not.toHaveBeenCalled();
+      expect(workflowExecution.status).toBe(ExecutionStatus.CANCELLED);
+    });
+
     it('should skip step execution if workflow status is not RUNNING', async () => {
       workflowExecution.status = ExecutionStatus.CANCELLED;
 

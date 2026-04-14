@@ -9,6 +9,7 @@
 
 import apm from 'elastic-apm-node';
 import { ExecutionStatus } from '@kbn/workflows';
+import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
 import { catchError } from './catch_error';
 import { handleExecutionDelay } from './handle_execution_delay';
 import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
@@ -68,6 +69,16 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       nodeId: node.id,
       stackFrames: params.workflowRuntime.getCurrentNodeScope(),
     });
+
+    if (params.workflowExecutionState.getWorkflowExecution().cancelRequested) {
+      await cancelWorkflowIfRequested(
+        params.workflowExecutionRepository,
+        params.workflowExecutionState,
+        stepExecutionRuntime,
+        params.workflowLogger,
+        stepExecutionRuntime.abortController
+      );
+    }
 
     /**
      * Check in-memory workflow state to skip execution if workflow is no longer running.

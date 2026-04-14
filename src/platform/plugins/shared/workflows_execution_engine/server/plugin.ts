@@ -34,14 +34,12 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
-import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
-import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   CancelAllActiveWorkflowExecutions,
@@ -805,7 +803,8 @@ export class WorkflowsExecutionEnginePlugin
 
     const cancelWorkflowExecution: CancelWorkflowExecution = async (
       workflowExecutionId,
-      spaceId
+      spaceId,
+      schedulingRequest
     ) => {
       await checkLicense(plugins.licensing);
 
@@ -830,21 +829,6 @@ export class WorkflowsExecutionEnginePlugin
 
       const cancelledAt = new Date().toISOString();
 
-      if (
-        workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT ||
-        workflowExecution.status === ExecutionStatus.WAITING_FOR_CHILD
-      ) {
-        await cancelWaitingWorkflow({
-          workflowExecution,
-          workflowExecutionRepository,
-          stepExecutionRepository: new StepExecutionRepository(
-            coreStart.elasticsearch.client.asInternalUser
-          ),
-          cancelChildExecution: cancelWorkflowExecution,
-        });
-        return;
-      }
-
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
         cancelRequested: true,
@@ -852,7 +836,10 @@ export class WorkflowsExecutionEnginePlugin
         cancelledAt,
         cancelledBy: 'system', // TODO: set user if available
       });
-      await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
+      await workflowTaskManager.forceRunIdleTasks(workflowExecution.id, {
+        spaceId: workflowExecution.spaceId,
+        fakeRequest: schedulingRequest,
+      });
     };
 
     const cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions = async ({

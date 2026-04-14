@@ -502,7 +502,11 @@ describe('WorkflowExecuteStepImpl', () => {
 
       const engine =
         init.workflowsExecutionEngine as jest.Mocked<WorkflowsExecutionEnginePluginStart>;
-      expect(engine.cancelWorkflowExecution).toHaveBeenCalledWith('child-exec-1', 'default');
+      expect(engine.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'child-exec-1',
+        'default',
+        init.request
+      );
     });
 
     it('should do nothing when step state is undefined', async () => {
