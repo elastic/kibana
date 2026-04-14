@@ -158,7 +158,6 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
-  - '@kbn/apm-sources-access-plugin'
 tags:
   - plugin
   - prod
