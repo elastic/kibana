@@ -166,7 +166,6 @@ const previouslyRegisteredTypes = [
   'space',
   'spaces-usage-stats',
   'stream-prompts',
-  'synthetics-ccs-settings',
   'synthetics-monitor',
   'synthetics-monitor-multi-space',
   'synthetics-param',
