@@ -260,6 +260,19 @@ describe('DataStreams', () => {
       expect(getByTestId('addDataStreamButton')).toBeDisabled();
     });
 
+    it('disables add data stream when integration name has only one character', () => {
+      mockUseIntegrationForm.mockReturnValue({
+        formData: { title: 'A', description: 'Valid description' },
+      });
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: undefined,
+        isLoading: false,
+      });
+
+      const { getByTestId } = renderDataStreams();
+      expect(getByTestId('addDataStreamButton')).toBeDisabled();
+    });
+
     it('enables add data stream when name and description are set', () => {
       mockUseIntegrationForm.mockReturnValue({
         formData: { title: 'My integration', description: 'A description' },
