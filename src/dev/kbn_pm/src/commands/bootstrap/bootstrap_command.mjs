@@ -18,7 +18,6 @@ import {
   yarnInstallDeps,
   runInstallScripts,
 } from './yarn.mjs';
-import { applyNodeModulesPatches } from './apply_node_modules_patches.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
 import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
@@ -141,7 +140,12 @@ export const command = {
         : undefined,
       shouldInstall
         ? time('apply node_modules patches', async () => {
-            await applyNodeModulesPatches(log);
+            log.info('applying node_modules patches via patch-package');
+            await run('node', ['node_modules/.bin/patch-package', '--error-on-fail'], {
+              pipe: !quiet,
+              description: 'patch-package',
+            });
+            log.success('node_modules patches applied');
           })
         : undefined,
     ]);

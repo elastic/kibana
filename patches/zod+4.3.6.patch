@@ -1,0 +1,1578 @@
+diff --git a/node_modules/zod/v4/classic/schemas.cjs b/node_modules/zod/v4/classic/schemas.cjs
+index e928299..92b9574 100644
+--- a/node_modules/zod/v4/classic/schemas.cjs
++++ b/node_modules/zod/v4/classic/schemas.cjs
+@@ -126,6 +126,203 @@ const to_json_schema_js_1 = require("../core/to-json-schema.cjs");
+ const checks = __importStar(require("./checks.cjs"));
+ const iso = __importStar(require("./iso.cjs"));
+ const parse = __importStar(require("./parse.cjs"));
++// ─────────────────────────────────────────────────────────────────────────────
++// Shared method references (memory optimization)
++//
++// All Zod schema instances share these function objects instead of creating
++// a new closure per method per instance. This removes ~50 closure heap
++// allocations per schema instance while preserving full correctness.
++//
++// Rules:
++//   • Use `this` wherever the original code captured `inst`.
++//   • Declare with `function` (not arrow) so `this` is bound at call-site.
++//   • Keep `inst._zod.*` closures as-is — `this` there would be `_zod`.
++//   • Keep factory-result assignments (toJSONSchema, ~standard.jsonSchema) as-is.
++// ─────────────────────────────────────────────────────────────────────────────
++// ZodType – base methods
++const _sharedCheck = function (...checks) {
++    const def = this.def;
++    return this.clone(index_js_1.util.mergeDefs(def, {
++        checks: [
++            ...(def.checks ?? []),
++            ...checks.map((ch) => typeof ch === "function" ? { _zod: { check: ch, def: { check: "custom" }, onattach: [] } } : ch),
++        ],
++    }), { parent: true });
++};
++const _sharedClone = function (def, params) { return core.clone(this, def, params); };
++const _sharedBrand = function () { return this; };
++const _sharedRegister = function (reg, meta) { reg.add(this, meta); return this; };
++const _sharedParse = function (data, params) { return parse.parse(this, data, params, { callee: _sharedParse }); };
++const _sharedSafeParse = function (data, params) { return parse.safeParse(this, data, params); };
++const _sharedParseAsync = async function (data, params) { return parse.parseAsync(this, data, params, { callee: _sharedParseAsync }); };
++const _sharedSafeParseAsync = async function (data, params) { return parse.safeParseAsync(this, data, params); };
++const _sharedEncode = function (data, params) { return parse.encode(this, data, params); };
++const _sharedDecode = function (data, params) { return parse.decode(this, data, params); };
++const _sharedEncodeAsync = async function (data, params) { return parse.encodeAsync(this, data, params); };
++const _sharedDecodeAsync = async function (data, params) { return parse.decodeAsync(this, data, params); };
++const _sharedSafeEncode = function (data, params) { return parse.safeEncode(this, data, params); };
++const _sharedSafeDecode = function (data, params) { return parse.safeDecode(this, data, params); };
++const _sharedSafeEncodeAsync = async function (data, params) { return parse.safeEncodeAsync(this, data, params); };
++const _sharedSafeDecodeAsync = async function (data, params) { return parse.safeDecodeAsync(this, data, params); };
++const _sharedRefine = function (check, params) { return this.check(refine(check, params)); };
++const _sharedSuperRefine = function (refinement) { return this.check(superRefine(refinement)); };
++const _sharedOverwrite = function (fn) { return this.check(checks.overwrite(fn)); };
++const _sharedOptional = function () { return optional(this); };
++const _sharedExactOptional = function () { return exactOptional(this); };
++const _sharedNullable = function () { return nullable(this); };
++const _sharedNullish = function () { return optional(nullable(this)); };
++const _sharedNonoptional = function (params) { return nonoptional(this, params); };
++const _sharedArray = function () { return array(this); };
++const _sharedOr = function (arg) { return union([this, arg]); };
++const _sharedAnd = function (arg) { return intersection(this, arg); };
++const _sharedTransform = function (tx) { return pipe(this, transform(tx)); };
++const _sharedDefault = function (def) { return _default(this, def); };
++const _sharedPrefault = function (def) { return prefault(this, def); };
++const _sharedCatch = function (params) { return _catch(this, params); };
++const _sharedPipe = function (target) { return pipe(this, target); };
++const _sharedReadonly = function () { return readonly(this); };
++const _sharedDescribe = function (description) {
++    const cl = this.clone();
++    core.globalRegistry.add(cl, { description });
++    return cl;
++};
++const _sharedMeta = function (...args) {
++    if (args.length === 0) return core.globalRegistry.get(this);
++    const cl = this.clone();
++    core.globalRegistry.add(cl, args[0]);
++    return cl;
++};
++const _sharedIsOptional = function () { return this.safeParse(undefined).success; };
++const _sharedIsNullable = function () { return this.safeParse(null).success; };
++const _sharedApply = function (fn) { return fn(this); };
++// _ZodString – string validation methods
++const _sharedRegex = function (...args) { return this.check(checks.regex(...args)); };
++const _sharedIncludes = function (...args) { return this.check(checks.includes(...args)); };
++const _sharedStartsWith = function (...args) { return this.check(checks.startsWith(...args)); };
++const _sharedEndsWith = function (...args) { return this.check(checks.endsWith(...args)); };
++const _sharedStrMin = function (...args) { return this.check(checks.minLength(...args)); };
++const _sharedStrMax = function (...args) { return this.check(checks.maxLength(...args)); };
++const _sharedStrLength = function (...args) { return this.check(checks.length(...args)); };
++const _sharedStrNonempty = function (...args) { return this.check(checks.minLength(1, ...args)); };
++const _sharedLowercase = function (params) { return this.check(checks.lowercase(params)); };
++const _sharedUppercase = function (params) { return this.check(checks.uppercase(params)); };
++const _sharedTrim = function () { return this.check(checks.trim()); };
++const _sharedNormalize = function (...args) { return this.check(checks.normalize(...args)); };
++const _sharedToLowerCase = function () { return this.check(checks.toLowerCase()); };
++const _sharedToUpperCase = function () { return this.check(checks.toUpperCase()); };
++const _sharedSlugify = function () { return this.check(checks.slugify()); };
++// ZodString – format methods
++const _sharedEmail = function (params) { return this.check(core._email(exports.ZodEmail, params)); };
++const _sharedUrl = function (params) { return this.check(core._url(exports.ZodURL, params)); };
++const _sharedJwt = function (params) { return this.check(core._jwt(exports.ZodJWT, params)); };
++const _sharedEmoji = function (params) { return this.check(core._emoji(exports.ZodEmoji, params)); };
++const _sharedGuid = function (params) { return this.check(core._guid(exports.ZodGUID, params)); };
++const _sharedUuid = function (params) { return this.check(core._uuid(exports.ZodUUID, params)); };
++const _sharedUuidv4 = function (params) { return this.check(core._uuidv4(exports.ZodUUID, params)); };
++const _sharedUuidv6 = function (params) { return this.check(core._uuidv6(exports.ZodUUID, params)); };
++const _sharedUuidv7 = function (params) { return this.check(core._uuidv7(exports.ZodUUID, params)); };
++const _sharedNanoid = function (params) { return this.check(core._nanoid(exports.ZodNanoID, params)); };
++const _sharedCuid = function (params) { return this.check(core._cuid(exports.ZodCUID, params)); };
++const _sharedCuid2 = function (params) { return this.check(core._cuid2(exports.ZodCUID2, params)); };
++const _sharedUlid = function (params) { return this.check(core._ulid(exports.ZodULID, params)); };
++const _sharedBase64 = function (params) { return this.check(core._base64(exports.ZodBase64, params)); };
++const _sharedBase64url = function (params) { return this.check(core._base64url(exports.ZodBase64URL, params)); };
++const _sharedXid = function (params) { return this.check(core._xid(exports.ZodXID, params)); };
++const _sharedKsuid = function (params) { return this.check(core._ksuid(exports.ZodKSUID, params)); };
++const _sharedIpv4 = function (params) { return this.check(core._ipv4(exports.ZodIPv4, params)); };
++const _sharedIpv6 = function (params) { return this.check(core._ipv6(exports.ZodIPv6, params)); };
++const _sharedCidrv4 = function (params) { return this.check(core._cidrv4(exports.ZodCIDRv4, params)); };
++const _sharedCidrv6 = function (params) { return this.check(core._cidrv6(exports.ZodCIDRv6, params)); };
++const _sharedE164 = function (params) { return this.check(core._e164(exports.ZodE164, params)); };
++const _sharedDatetime = function (params) { return this.check(iso.datetime(params)); };
++const _sharedDate = function (params) { return this.check(iso.date(params)); };
++const _sharedTime = function (params) { return this.check(iso.time(params)); };
++const _sharedDuration = function (params) { return this.check(iso.duration(params)); };
++// ZodNumber – numeric methods
++const _sharedNumGt = function (value, params) { return this.check(checks.gt(value, params)); };
++const _sharedNumGte = function (value, params) { return this.check(checks.gte(value, params)); };
++const _sharedNumLt = function (value, params) { return this.check(checks.lt(value, params)); };
++const _sharedNumLte = function (value, params) { return this.check(checks.lte(value, params)); };
++const _sharedNumInt = function (params) { return this.check(int(params)); };
++const _sharedNumPositive = function (params) { return this.check(checks.gt(0, params)); };
++const _sharedNumNonnegative = function (params) { return this.check(checks.gte(0, params)); };
++const _sharedNumNegative = function (params) { return this.check(checks.lt(0, params)); };
++const _sharedNumNonpositive = function (params) { return this.check(checks.lte(0, params)); };
++const _sharedNumMultipleOf = function (value, params) { return this.check(checks.multipleOf(value, params)); };
++const _sharedNumFinite = function () { return this; };
++// ZodBigInt – bigint methods
++const _sharedBigIntGt = function (value, params) { return this.check(checks.gt(value, params)); };
++const _sharedBigIntGte = function (value, params) { return this.check(checks.gte(value, params)); };
++const _sharedBigIntLt = function (value, params) { return this.check(checks.lt(value, params)); };
++const _sharedBigIntLte = function (value, params) { return this.check(checks.lte(value, params)); };
++const _sharedBigIntPositive = function (params) { return this.check(checks.gt(BigInt(0), params)); };
++const _sharedBigIntNegative = function (params) { return this.check(checks.lt(BigInt(0), params)); };
++const _sharedBigIntNonpositive = function (params) { return this.check(checks.lte(BigInt(0), params)); };
++const _sharedBigIntNonnegative = function (params) { return this.check(checks.gte(BigInt(0), params)); };
++const _sharedBigIntMultipleOf = function (value, params) { return this.check(checks.multipleOf(value, params)); };
++// ZodDate – date validation methods
++const _sharedDateMin = function (value, params) { return this.check(checks.gte(value, params)); };
++const _sharedDateMax = function (value, params) { return this.check(checks.lte(value, params)); };
++// ZodArray – array methods
++const _sharedArrMin = function (minLength, params) { return this.check(checks.minLength(minLength, params)); };
++const _sharedArrNonempty = function (params) { return this.check(checks.minLength(1, params)); };
++const _sharedArrMax = function (maxLength, params) { return this.check(checks.maxLength(maxLength, params)); };
++const _sharedArrLength = function (len, params) { return this.check(checks.length(len, params)); };
++const _sharedArrUnwrap = function () { return this.element; };
++// ZodObject – object methods
++const _sharedObjKeyof = function () { return _enum(Object.keys(this._zod.def.shape)); };
++const _sharedObjCatchall = function (catchall) { return this.clone({ ...this._zod.def, catchall }); };
++const _sharedObjPassthrough = function () { return this.clone({ ...this._zod.def, catchall: unknown() }); };
++const _sharedObjLoose = function () { return this.clone({ ...this._zod.def, catchall: unknown() }); };
++const _sharedObjStrict = function () { return this.clone({ ...this._zod.def, catchall: never() }); };
++const _sharedObjStrip = function () { return this.clone({ ...this._zod.def, catchall: undefined }); };
++const _sharedObjExtend = function (incoming) { return index_js_1.util.extend(this, incoming); };
++const _sharedObjSafeExtend = function (incoming) { return index_js_1.util.safeExtend(this, incoming); };
++const _sharedObjMerge = function (other) { return index_js_1.util.merge(this, other); };
++const _sharedObjPick = function (mask) { return index_js_1.util.pick(this, mask); };
++const _sharedObjOmit = function (mask) { return index_js_1.util.omit(this, mask); };
++const _sharedObjPartial = function (...args) { return index_js_1.util.partial(exports.ZodOptional, this, args[0]); };
++const _sharedObjRequired = function (...args) { return index_js_1.util.required(exports.ZodNonOptional, this, args[0]); };
++// ZodTuple
++const _sharedTupleRest = function (rest) { return this.clone({ ...this._zod.def, rest }); };
++// ZodMap / ZodSet – size methods
++const _sharedSizeMin = function (...args) { return this.check(core._minSize(...args)); };
++const _sharedSizeNonempty = function (params) { return this.check(core._minSize(1, params)); };
++const _sharedSizeMax = function (...args) { return this.check(core._maxSize(...args)); };
++const _sharedSize = function (...args) { return this.check(core._size(...args)); };
++// ZodFile – file methods
++const _sharedFileMin = function (size, params) { return this.check(core._minSize(size, params)); };
++const _sharedFileMax = function (size, params) { return this.check(core._maxSize(size, params)); };
++const _sharedFileMime = function (types, params) { return this.check(core._mime(Array.isArray(types) ? types : [types], params)); };
++// ZodEnum – extract/exclude (recompute keys lazily from def at call time)
++const _sharedEnumExtract = function (values, params) {
++    const def = this._zod.def;
++    const keys = new Set(Object.keys(def.entries));
++    const newEntries = {};
++    for (const value of values) {
++        if (keys.has(value)) {
++            newEntries[value] = def.entries[value];
++        }
++        else throw new Error(`Key ${value} not found in enum`);
++    }
++    return new exports.ZodEnum({ ...def, checks: [], ...index_js_1.util.normalizeParams(params), entries: newEntries });
++};
++const _sharedEnumExclude = function (values, params) {
++    const def = this._zod.def;
++    const keys = new Set(Object.keys(def.entries));
++    const newEntries = { ...def.entries };
++    for (const value of values) {
++        if (keys.has(value)) {
++            delete newEntries[value];
++        }
++        else throw new Error(`Key ${value} not found in enum`);
++    }
++    return new exports.ZodEnum({ ...def, checks: [], ...index_js_1.util.normalizeParams(params), entries: newEntries });
++};
++// Wrapper types – shared unwrap
++const _sharedUnwrap = function () { return this._zod.def.innerType; };
++const _sharedLazyUnwrap = function () { return this._zod.def.getter(); };
++
+ exports.ZodType = core.$constructor("ZodType", (inst, def) => {
+     core.$ZodType.init(inst, def);
+     Object.assign(inst["~standard"], {
+@@ -139,82 +336,59 @@ exports.ZodType = core.$constructor("ZodType", (inst, def) => {
+     inst.type = def.type;
+     Object.defineProperty(inst, "_def", { value: def });
+     // base methods
+-    inst.check = (...checks) => {
+-        return inst.clone(index_js_1.util.mergeDefs(def, {
+-            checks: [
+-                ...(def.checks ?? []),
+-                ...checks.map((ch) => typeof ch === "function" ? { _zod: { check: ch, def: { check: "custom" }, onattach: [] } } : ch),
+-            ],
+-        }), {
+-            parent: true,
+-        });
+-    };
+-    inst.with = inst.check;
+-    inst.clone = (def, params) => core.clone(inst, def, params);
+-    inst.brand = () => inst;
+-    inst.register = ((reg, meta) => {
+-        reg.add(inst, meta);
+-        return inst;
+-    });
++    inst.check = _sharedCheck;
++    inst.with = _sharedCheck;
++    inst.clone = _sharedClone;
++    inst.brand = _sharedBrand;
++    inst.register = _sharedRegister;
+     // parsing
+-    inst.parse = (data, params) => parse.parse(inst, data, params, { callee: inst.parse });
+-    inst.safeParse = (data, params) => parse.safeParse(inst, data, params);
+-    inst.parseAsync = async (data, params) => parse.parseAsync(inst, data, params, { callee: inst.parseAsync });
+-    inst.safeParseAsync = async (data, params) => parse.safeParseAsync(inst, data, params);
+-    inst.spa = inst.safeParseAsync;
++    inst.parse = _sharedParse;
++    inst.safeParse = _sharedSafeParse;
++    inst.parseAsync = _sharedParseAsync;
++    inst.safeParseAsync = _sharedSafeParseAsync;
++    inst.spa = _sharedSafeParseAsync;
+     // encoding/decoding
+-    inst.encode = (data, params) => parse.encode(inst, data, params);
+-    inst.decode = (data, params) => parse.decode(inst, data, params);
+-    inst.encodeAsync = async (data, params) => parse.encodeAsync(inst, data, params);
+-    inst.decodeAsync = async (data, params) => parse.decodeAsync(inst, data, params);
+-    inst.safeEncode = (data, params) => parse.safeEncode(inst, data, params);
+-    inst.safeDecode = (data, params) => parse.safeDecode(inst, data, params);
+-    inst.safeEncodeAsync = async (data, params) => parse.safeEncodeAsync(inst, data, params);
+-    inst.safeDecodeAsync = async (data, params) => parse.safeDecodeAsync(inst, data, params);
++    inst.encode = _sharedEncode;
++    inst.decode = _sharedDecode;
++    inst.encodeAsync = _sharedEncodeAsync;
++    inst.decodeAsync = _sharedDecodeAsync;
++    inst.safeEncode = _sharedSafeEncode;
++    inst.safeDecode = _sharedSafeDecode;
++    inst.safeEncodeAsync = _sharedSafeEncodeAsync;
++    inst.safeDecodeAsync = _sharedSafeDecodeAsync;
+     // refinements
+-    inst.refine = (check, params) => inst.check(refine(check, params));
+-    inst.superRefine = (refinement) => inst.check(superRefine(refinement));
+-    inst.overwrite = (fn) => inst.check(checks.overwrite(fn));
++    inst.refine = _sharedRefine;
++    inst.superRefine = _sharedSuperRefine;
++    inst.overwrite = _sharedOverwrite;
+     // wrappers
+-    inst.optional = () => optional(inst);
+-    inst.exactOptional = () => exactOptional(inst);
+-    inst.nullable = () => nullable(inst);
+-    inst.nullish = () => optional(nullable(inst));
+-    inst.nonoptional = (params) => nonoptional(inst, params);
+-    inst.array = () => array(inst);
+-    inst.or = (arg) => union([inst, arg]);
+-    inst.and = (arg) => intersection(inst, arg);
+-    inst.transform = (tx) => pipe(inst, transform(tx));
+-    inst.default = (def) => _default(inst, def);
+-    inst.prefault = (def) => prefault(inst, def);
++    inst.optional = _sharedOptional;
++    inst.exactOptional = _sharedExactOptional;
++    inst.nullable = _sharedNullable;
++    inst.nullish = _sharedNullish;
++    inst.nonoptional = _sharedNonoptional;
++    inst.array = _sharedArray;
++    inst.or = _sharedOr;
++    inst.and = _sharedAnd;
++    inst.transform = _sharedTransform;
++    inst.default = _sharedDefault;
++    inst.prefault = _sharedPrefault;
+     // inst.coalesce = (def, params) => coalesce(inst, def, params);
+-    inst.catch = (params) => _catch(inst, params);
+-    inst.pipe = (target) => pipe(inst, target);
+-    inst.readonly = () => readonly(inst);
++    inst.catch = _sharedCatch;
++    inst.pipe = _sharedPipe;
++    inst.readonly = _sharedReadonly;
+     // meta
+-    inst.describe = (description) => {
+-        const cl = inst.clone();
+-        core.globalRegistry.add(cl, { description });
+-        return cl;
+-    };
++    inst.describe = _sharedDescribe;
+     Object.defineProperty(inst, "description", {
+         get() {
+-            return core.globalRegistry.get(inst)?.description;
++            return core.globalRegistry.get(this)?.description;
+         },
+         configurable: true,
+     });
+-    inst.meta = (...args) => {
+-        if (args.length === 0) {
+-            return core.globalRegistry.get(inst);
+-        }
+-        const cl = inst.clone();
+-        core.globalRegistry.add(cl, args[0]);
+-        return cl;
+-    };
++    inst.meta = _sharedMeta;
+     // helpers
+-    inst.isOptional = () => inst.safeParse(undefined).success;
+-    inst.isNullable = () => inst.safeParse(null).success;
+-    inst.apply = (fn) => fn(inst);
++    inst.isOptional = _sharedIsOptional;
++    inst.isNullable = _sharedIsNullable;
++    inst.apply = _sharedApply;
+     return inst;
+ });
+ /** @internal */
+@@ -227,54 +401,54 @@ exports._ZodString = core.$constructor("_ZodString", (inst, def) => {
+     inst.minLength = bag.minimum ?? null;
+     inst.maxLength = bag.maximum ?? null;
+     // validations
+-    inst.regex = (...args) => inst.check(checks.regex(...args));
+-    inst.includes = (...args) => inst.check(checks.includes(...args));
+-    inst.startsWith = (...args) => inst.check(checks.startsWith(...args));
+-    inst.endsWith = (...args) => inst.check(checks.endsWith(...args));
+-    inst.min = (...args) => inst.check(checks.minLength(...args));
+-    inst.max = (...args) => inst.check(checks.maxLength(...args));
+-    inst.length = (...args) => inst.check(checks.length(...args));
+-    inst.nonempty = (...args) => inst.check(checks.minLength(1, ...args));
+-    inst.lowercase = (params) => inst.check(checks.lowercase(params));
+-    inst.uppercase = (params) => inst.check(checks.uppercase(params));
++    inst.regex = _sharedRegex;
++    inst.includes = _sharedIncludes;
++    inst.startsWith = _sharedStartsWith;
++    inst.endsWith = _sharedEndsWith;
++    inst.min = _sharedStrMin;
++    inst.max = _sharedStrMax;
++    inst.length = _sharedStrLength;
++    inst.nonempty = _sharedStrNonempty;
++    inst.lowercase = _sharedLowercase;
++    inst.uppercase = _sharedUppercase;
+     // transforms
+-    inst.trim = () => inst.check(checks.trim());
+-    inst.normalize = (...args) => inst.check(checks.normalize(...args));
+-    inst.toLowerCase = () => inst.check(checks.toLowerCase());
+-    inst.toUpperCase = () => inst.check(checks.toUpperCase());
+-    inst.slugify = () => inst.check(checks.slugify());
++    inst.trim = _sharedTrim;
++    inst.normalize = _sharedNormalize;
++    inst.toLowerCase = _sharedToLowerCase;
++    inst.toUpperCase = _sharedToUpperCase;
++    inst.slugify = _sharedSlugify;
+ });
+ exports.ZodString = core.$constructor("ZodString", (inst, def) => {
+     core.$ZodString.init(inst, def);
+     exports._ZodString.init(inst, def);
+-    inst.email = (params) => inst.check(core._email(exports.ZodEmail, params));
+-    inst.url = (params) => inst.check(core._url(exports.ZodURL, params));
+-    inst.jwt = (params) => inst.check(core._jwt(exports.ZodJWT, params));
+-    inst.emoji = (params) => inst.check(core._emoji(exports.ZodEmoji, params));
+-    inst.guid = (params) => inst.check(core._guid(exports.ZodGUID, params));
+-    inst.uuid = (params) => inst.check(core._uuid(exports.ZodUUID, params));
+-    inst.uuidv4 = (params) => inst.check(core._uuidv4(exports.ZodUUID, params));
+-    inst.uuidv6 = (params) => inst.check(core._uuidv6(exports.ZodUUID, params));
+-    inst.uuidv7 = (params) => inst.check(core._uuidv7(exports.ZodUUID, params));
+-    inst.nanoid = (params) => inst.check(core._nanoid(exports.ZodNanoID, params));
+-    inst.guid = (params) => inst.check(core._guid(exports.ZodGUID, params));
+-    inst.cuid = (params) => inst.check(core._cuid(exports.ZodCUID, params));
+-    inst.cuid2 = (params) => inst.check(core._cuid2(exports.ZodCUID2, params));
+-    inst.ulid = (params) => inst.check(core._ulid(exports.ZodULID, params));
+-    inst.base64 = (params) => inst.check(core._base64(exports.ZodBase64, params));
+-    inst.base64url = (params) => inst.check(core._base64url(exports.ZodBase64URL, params));
+-    inst.xid = (params) => inst.check(core._xid(exports.ZodXID, params));
+-    inst.ksuid = (params) => inst.check(core._ksuid(exports.ZodKSUID, params));
+-    inst.ipv4 = (params) => inst.check(core._ipv4(exports.ZodIPv4, params));
+-    inst.ipv6 = (params) => inst.check(core._ipv6(exports.ZodIPv6, params));
+-    inst.cidrv4 = (params) => inst.check(core._cidrv4(exports.ZodCIDRv4, params));
+-    inst.cidrv6 = (params) => inst.check(core._cidrv6(exports.ZodCIDRv6, params));
+-    inst.e164 = (params) => inst.check(core._e164(exports.ZodE164, params));
++    inst.email = _sharedEmail;
++    inst.url = _sharedUrl;
++    inst.jwt = _sharedJwt;
++    inst.emoji = _sharedEmoji;
++    inst.guid = _sharedGuid;
++    inst.uuid = _sharedUuid;
++    inst.uuidv4 = _sharedUuidv4;
++    inst.uuidv6 = _sharedUuidv6;
++    inst.uuidv7 = _sharedUuidv7;
++    inst.nanoid = _sharedNanoid;
++    inst.guid = _sharedGuid;
++    inst.cuid = _sharedCuid;
++    inst.cuid2 = _sharedCuid2;
++    inst.ulid = _sharedUlid;
++    inst.base64 = _sharedBase64;
++    inst.base64url = _sharedBase64url;
++    inst.xid = _sharedXid;
++    inst.ksuid = _sharedKsuid;
++    inst.ipv4 = _sharedIpv4;
++    inst.ipv6 = _sharedIpv6;
++    inst.cidrv4 = _sharedCidrv4;
++    inst.cidrv6 = _sharedCidrv6;
++    inst.e164 = _sharedE164;
+     // iso
+-    inst.datetime = (params) => inst.check(iso.datetime(params));
+-    inst.date = (params) => inst.check(iso.date(params));
+-    inst.time = (params) => inst.check(iso.time(params));
+-    inst.duration = (params) => inst.check(iso.duration(params));
++    inst.datetime = _sharedDatetime;
++    inst.date = _sharedDate;
++    inst.time = _sharedTime;
++    inst.duration = _sharedDuration;
+ });
+ function string(params) {
+     return core._string(exports.ZodString, params);
+@@ -485,22 +659,22 @@ exports.ZodNumber = core.$constructor("ZodNumber", (inst, def) => {
+     core.$ZodNumber.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.numberProcessor(inst, ctx, json, params);
+-    inst.gt = (value, params) => inst.check(checks.gt(value, params));
+-    inst.gte = (value, params) => inst.check(checks.gte(value, params));
+-    inst.min = (value, params) => inst.check(checks.gte(value, params));
+-    inst.lt = (value, params) => inst.check(checks.lt(value, params));
+-    inst.lte = (value, params) => inst.check(checks.lte(value, params));
+-    inst.max = (value, params) => inst.check(checks.lte(value, params));
+-    inst.int = (params) => inst.check(int(params));
+-    inst.safe = (params) => inst.check(int(params));
+-    inst.positive = (params) => inst.check(checks.gt(0, params));
+-    inst.nonnegative = (params) => inst.check(checks.gte(0, params));
+-    inst.negative = (params) => inst.check(checks.lt(0, params));
+-    inst.nonpositive = (params) => inst.check(checks.lte(0, params));
+-    inst.multipleOf = (value, params) => inst.check(checks.multipleOf(value, params));
+-    inst.step = (value, params) => inst.check(checks.multipleOf(value, params));
++    inst.gt = _sharedNumGt;
++    inst.gte = _sharedNumGte;
++    inst.min = _sharedNumGte;
++    inst.lt = _sharedNumLt;
++    inst.lte = _sharedNumLte;
++    inst.max = _sharedNumLte;
++    inst.int = _sharedNumInt;
++    inst.safe = _sharedNumInt;
++    inst.positive = _sharedNumPositive;
++    inst.nonnegative = _sharedNumNonnegative;
++    inst.negative = _sharedNumNegative;
++    inst.nonpositive = _sharedNumNonpositive;
++    inst.multipleOf = _sharedNumMultipleOf;
++    inst.step = _sharedNumMultipleOf;
+     // inst.finite = (params) => inst.check(core.finite(params));
+-    inst.finite = () => inst;
++    inst.finite = _sharedNumFinite;
+     const bag = inst._zod.bag;
+     inst.minValue =
+         Math.max(bag.minimum ?? Number.NEGATIVE_INFINITY, bag.exclusiveMinimum ?? Number.NEGATIVE_INFINITY) ?? null;
+@@ -544,19 +718,19 @@ exports.ZodBigInt = core.$constructor("ZodBigInt", (inst, def) => {
+     core.$ZodBigInt.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.bigintProcessor(inst, ctx, json, params);
+-    inst.gte = (value, params) => inst.check(checks.gte(value, params));
+-    inst.min = (value, params) => inst.check(checks.gte(value, params));
+-    inst.gt = (value, params) => inst.check(checks.gt(value, params));
+-    inst.gte = (value, params) => inst.check(checks.gte(value, params));
+-    inst.min = (value, params) => inst.check(checks.gte(value, params));
+-    inst.lt = (value, params) => inst.check(checks.lt(value, params));
+-    inst.lte = (value, params) => inst.check(checks.lte(value, params));
+-    inst.max = (value, params) => inst.check(checks.lte(value, params));
+-    inst.positive = (params) => inst.check(checks.gt(BigInt(0), params));
+-    inst.negative = (params) => inst.check(checks.lt(BigInt(0), params));
+-    inst.nonpositive = (params) => inst.check(checks.lte(BigInt(0), params));
+-    inst.nonnegative = (params) => inst.check(checks.gte(BigInt(0), params));
+-    inst.multipleOf = (value, params) => inst.check(checks.multipleOf(value, params));
++    inst.gte = _sharedBigIntGte;
++    inst.min = _sharedBigIntGte;
++    inst.gt = _sharedBigIntGt;
++    inst.gte = _sharedBigIntGte;
++    inst.min = _sharedBigIntGte;
++    inst.lt = _sharedBigIntLt;
++    inst.lte = _sharedBigIntLte;
++    inst.max = _sharedBigIntLte;
++    inst.positive = _sharedBigIntPositive;
++    inst.negative = _sharedBigIntNegative;
++    inst.nonpositive = _sharedBigIntNonpositive;
++    inst.nonnegative = _sharedBigIntNonnegative;
++    inst.multipleOf = _sharedBigIntMultipleOf;
+     const bag = inst._zod.bag;
+     inst.minValue = bag.minimum ?? null;
+     inst.maxValue = bag.maximum ?? null;
+@@ -637,8 +811,8 @@ exports.ZodDate = core.$constructor("ZodDate", (inst, def) => {
+     core.$ZodDate.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.dateProcessor(inst, ctx, json, params);
+-    inst.min = (value, params) => inst.check(checks.gte(value, params));
+-    inst.max = (value, params) => inst.check(checks.lte(value, params));
++    inst.min = _sharedDateMin;
++    inst.max = _sharedDateMax;
+     const c = inst._zod.bag;
+     inst.minDate = c.minimum ? new Date(c.minimum) : null;
+     inst.maxDate = c.maximum ? new Date(c.maximum) : null;
+@@ -651,11 +825,11 @@ exports.ZodArray = core.$constructor("ZodArray", (inst, def) => {
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.arrayProcessor(inst, ctx, json, params);
+     inst.element = def.element;
+-    inst.min = (minLength, params) => inst.check(checks.minLength(minLength, params));
+-    inst.nonempty = (params) => inst.check(checks.minLength(1, params));
+-    inst.max = (maxLength, params) => inst.check(checks.maxLength(maxLength, params));
+-    inst.length = (len, params) => inst.check(checks.length(len, params));
+-    inst.unwrap = () => inst.element;
++    inst.min = _sharedArrMin;
++    inst.nonempty = _sharedArrNonempty;
++    inst.max = _sharedArrMax;
++    inst.length = _sharedArrLength;
++    inst.unwrap = _sharedArrUnwrap;
+ });
+ function array(element, params) {
+     return core._array(exports.ZodArray, element, params);
+@@ -672,23 +846,19 @@ exports.ZodObject = core.$constructor("ZodObject", (inst, def) => {
+     index_js_1.util.defineLazy(inst, "shape", () => {
+         return def.shape;
+     });
+-    inst.keyof = () => _enum(Object.keys(inst._zod.def.shape));
+-    inst.catchall = (catchall) => inst.clone({ ...inst._zod.def, catchall: catchall });
+-    inst.passthrough = () => inst.clone({ ...inst._zod.def, catchall: unknown() });
+-    inst.loose = () => inst.clone({ ...inst._zod.def, catchall: unknown() });
+-    inst.strict = () => inst.clone({ ...inst._zod.def, catchall: never() });
+-    inst.strip = () => inst.clone({ ...inst._zod.def, catchall: undefined });
+-    inst.extend = (incoming) => {
+-        return index_js_1.util.extend(inst, incoming);
+-    };
+-    inst.safeExtend = (incoming) => {
+-        return index_js_1.util.safeExtend(inst, incoming);
+-    };
+-    inst.merge = (other) => index_js_1.util.merge(inst, other);
+-    inst.pick = (mask) => index_js_1.util.pick(inst, mask);
+-    inst.omit = (mask) => index_js_1.util.omit(inst, mask);
+-    inst.partial = (...args) => index_js_1.util.partial(exports.ZodOptional, inst, args[0]);
+-    inst.required = (...args) => index_js_1.util.required(exports.ZodNonOptional, inst, args[0]);
++    inst.keyof = _sharedObjKeyof;
++    inst.catchall = _sharedObjCatchall;
++    inst.passthrough = _sharedObjPassthrough;
++    inst.loose = _sharedObjLoose;
++    inst.strict = _sharedObjStrict;
++    inst.strip = _sharedObjStrip;
++    inst.extend = _sharedObjExtend;
++    inst.safeExtend = _sharedObjSafeExtend;
++    inst.merge = _sharedObjMerge;
++    inst.pick = _sharedObjPick;
++    inst.omit = _sharedObjOmit;
++    inst.partial = _sharedObjPartial;
++    inst.required = _sharedObjRequired;
+ });
+ function object(shape, params) {
+     const def = {
+@@ -775,10 +945,7 @@ exports.ZodTuple = core.$constructor("ZodTuple", (inst, def) => {
+     core.$ZodTuple.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.tupleProcessor(inst, ctx, json, params);
+-    inst.rest = (rest) => inst.clone({
+-        ...inst._zod.def,
+-        rest: rest,
+-    });
++    inst.rest = _sharedTupleRest;
+ });
+ function tuple(items, _paramsOrRest, _params) {
+     const hasRest = _paramsOrRest instanceof core.$ZodType;
+@@ -832,10 +999,10 @@ exports.ZodMap = core.$constructor("ZodMap", (inst, def) => {
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.mapProcessor(inst, ctx, json, params);
+     inst.keyType = def.keyType;
+     inst.valueType = def.valueType;
+-    inst.min = (...args) => inst.check(core._minSize(...args));
+-    inst.nonempty = (params) => inst.check(core._minSize(1, params));
+-    inst.max = (...args) => inst.check(core._maxSize(...args));
+-    inst.size = (...args) => inst.check(core._size(...args));
++    inst.min = _sharedSizeMin;
++    inst.nonempty = _sharedSizeNonempty;
++    inst.max = _sharedSizeMax;
++    inst.size = _sharedSize;
+ });
+ function map(keyType, valueType, params) {
+     return new exports.ZodMap({
+@@ -849,10 +1016,10 @@ exports.ZodSet = core.$constructor("ZodSet", (inst, def) => {
+     core.$ZodSet.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.setProcessor(inst, ctx, json, params);
+-    inst.min = (...args) => inst.check(core._minSize(...args));
+-    inst.nonempty = (params) => inst.check(core._minSize(1, params));
+-    inst.max = (...args) => inst.check(core._maxSize(...args));
+-    inst.size = (...args) => inst.check(core._size(...args));
++    inst.min = _sharedSizeMin;
++    inst.nonempty = _sharedSizeNonempty;
++    inst.max = _sharedSizeMax;
++    inst.size = _sharedSize;
+ });
+ function set(valueType, params) {
+     return new exports.ZodSet({
+@@ -867,39 +1034,8 @@ exports.ZodEnum = core.$constructor("ZodEnum", (inst, def) => {
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.enumProcessor(inst, ctx, json, params);
+     inst.enum = def.entries;
+     inst.options = Object.values(def.entries);
+-    const keys = new Set(Object.keys(def.entries));
+-    inst.extract = (values, params) => {
+-        const newEntries = {};
+-        for (const value of values) {
+-            if (keys.has(value)) {
+-                newEntries[value] = def.entries[value];
+-            }
+-            else
+-                throw new Error(`Key ${value} not found in enum`);
+-        }
+-        return new exports.ZodEnum({
+-            ...def,
+-            checks: [],
+-            ...index_js_1.util.normalizeParams(params),
+-            entries: newEntries,
+-        });
+-    };
+-    inst.exclude = (values, params) => {
+-        const newEntries = { ...def.entries };
+-        for (const value of values) {
+-            if (keys.has(value)) {
+-                delete newEntries[value];
+-            }
+-            else
+-                throw new Error(`Key ${value} not found in enum`);
+-        }
+-        return new exports.ZodEnum({
+-            ...def,
+-            checks: [],
+-            ...index_js_1.util.normalizeParams(params),
+-            entries: newEntries,
+-        });
+-    };
++    inst.extract = _sharedEnumExtract;
++    inst.exclude = _sharedEnumExclude;
+ });
+ function _enum(values, params) {
+     const entries = Array.isArray(values) ? Object.fromEntries(values.map((v) => [v, v])) : values;
+@@ -948,9 +1084,9 @@ exports.ZodFile = core.$constructor("ZodFile", (inst, def) => {
+     core.$ZodFile.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.fileProcessor(inst, ctx, json, params);
+-    inst.min = (size, params) => inst.check(core._minSize(size, params));
+-    inst.max = (size, params) => inst.check(core._maxSize(size, params));
+-    inst.mime = (types, params) => inst.check(core._mime(Array.isArray(types) ? types : [types], params));
++    inst.min = _sharedFileMin;
++    inst.max = _sharedFileMax;
++    inst.mime = _sharedFileMime;
+ });
+ function file(params) {
+     return core._file(exports.ZodFile, params);
+@@ -1000,7 +1136,7 @@ exports.ZodOptional = core.$constructor("ZodOptional", (inst, def) => {
+     core.$ZodOptional.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.optionalProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ function optional(innerType) {
+     return new exports.ZodOptional({
+@@ -1012,7 +1148,7 @@ exports.ZodExactOptional = core.$constructor("ZodExactOptional", (inst, def) =>
+     core.$ZodExactOptional.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.optionalProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ function exactOptional(innerType) {
+     return new exports.ZodExactOptional({
+@@ -1024,7 +1160,7 @@ exports.ZodNullable = core.$constructor("ZodNullable", (inst, def) => {
+     core.$ZodNullable.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.nullableProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ function nullable(innerType) {
+     return new exports.ZodNullable({
+@@ -1040,8 +1176,8 @@ exports.ZodDefault = core.$constructor("ZodDefault", (inst, def) => {
+     core.$ZodDefault.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.defaultProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
+-    inst.removeDefault = inst.unwrap;
++    inst.unwrap = _sharedUnwrap;
++    inst.removeDefault = _sharedUnwrap;
+ });
+ function _default(innerType, defaultValue) {
+     return new exports.ZodDefault({
+@@ -1056,7 +1192,7 @@ exports.ZodPrefault = core.$constructor("ZodPrefault", (inst, def) => {
+     core.$ZodPrefault.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.prefaultProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ function prefault(innerType, defaultValue) {
+     return new exports.ZodPrefault({
+@@ -1071,7 +1207,7 @@ exports.ZodNonOptional = core.$constructor("ZodNonOptional", (inst, def) => {
+     core.$ZodNonOptional.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.nonoptionalProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ function nonoptional(innerType, params) {
+     return new exports.ZodNonOptional({
+@@ -1084,7 +1220,7 @@ exports.ZodSuccess = core.$constructor("ZodSuccess", (inst, def) => {
+     core.$ZodSuccess.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.successProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ function success(innerType) {
+     return new exports.ZodSuccess({
+@@ -1096,8 +1232,8 @@ exports.ZodCatch = core.$constructor("ZodCatch", (inst, def) => {
+     core.$ZodCatch.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.catchProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
+-    inst.removeCatch = inst.unwrap;
++    inst.unwrap = _sharedUnwrap;
++    inst.removeCatch = _sharedUnwrap;
+ });
+ function _catch(innerType, catchValue) {
+     return new exports.ZodCatch({
+@@ -1146,7 +1282,7 @@ exports.ZodReadonly = core.$constructor("ZodReadonly", (inst, def) => {
+     core.$ZodReadonly.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.readonlyProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ function readonly(innerType) {
+     return new exports.ZodReadonly({
+@@ -1170,7 +1306,7 @@ exports.ZodLazy = core.$constructor("ZodLazy", (inst, def) => {
+     core.$ZodLazy.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.lazyProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.getter();
++    inst.unwrap = _sharedLazyUnwrap;
+ });
+ function lazy(getter) {
+     return new exports.ZodLazy({
+@@ -1182,7 +1318,7 @@ exports.ZodPromise = core.$constructor("ZodPromise", (inst, def) => {
+     core.$ZodPromise.init(inst, def);
+     exports.ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.promiseProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ function promise(innerType) {
+     return new exports.ZodPromise({
+diff --git a/node_modules/zod/v4/classic/schemas.js b/node_modules/zod/v4/classic/schemas.js
+index a95b958..be4e796 100644
+--- a/node_modules/zod/v4/classic/schemas.js
++++ b/node_modules/zod/v4/classic/schemas.js
+@@ -5,6 +5,203 @@ import { createStandardJSONSchemaMethod, createToJSONSchemaMethod } from "../cor
+ import * as checks from "./checks.js";
+ import * as iso from "./iso.js";
+ import * as parse from "./parse.js";
++// ─────────────────────────────────────────────────────────────────────────────
++// Shared method references (memory optimization)
++//
++// All Zod schema instances share these function objects instead of creating
++// a new closure per method per instance. This removes ~50 closure heap
++// allocations per schema instance while preserving full correctness.
++//
++// Rules:
++//   • Use `this` wherever the original code captured `inst`.
++//   • Declare with `function` (not arrow) so `this` is bound at call-site.
++//   • Keep `inst._zod.*` closures as-is — `this` there would be `_zod`.
++//   • Keep factory-result assignments (toJSONSchema, ~standard.jsonSchema) as-is.
++// ─────────────────────────────────────────────────────────────────────────────
++// ZodType – base methods
++const _sharedCheck = function (...checks) {
++    const def = this.def;
++    return this.clone(util.mergeDefs(def, {
++        checks: [
++            ...(def.checks ?? []),
++            ...checks.map((ch) => typeof ch === "function" ? { _zod: { check: ch, def: { check: "custom" }, onattach: [] } } : ch),
++        ],
++    }), { parent: true });
++};
++const _sharedClone = function (def, params) { return core.clone(this, def, params); };
++const _sharedBrand = function () { return this; };
++const _sharedRegister = function (reg, meta) { reg.add(this, meta); return this; };
++const _sharedParse = function (data, params) { return parse.parse(this, data, params, { callee: _sharedParse }); };
++const _sharedSafeParse = function (data, params) { return parse.safeParse(this, data, params); };
++const _sharedParseAsync = async function (data, params) { return parse.parseAsync(this, data, params, { callee: _sharedParseAsync }); };
++const _sharedSafeParseAsync = async function (data, params) { return parse.safeParseAsync(this, data, params); };
++const _sharedEncode = function (data, params) { return parse.encode(this, data, params); };
++const _sharedDecode = function (data, params) { return parse.decode(this, data, params); };
++const _sharedEncodeAsync = async function (data, params) { return parse.encodeAsync(this, data, params); };
++const _sharedDecodeAsync = async function (data, params) { return parse.decodeAsync(this, data, params); };
++const _sharedSafeEncode = function (data, params) { return parse.safeEncode(this, data, params); };
++const _sharedSafeDecode = function (data, params) { return parse.safeDecode(this, data, params); };
++const _sharedSafeEncodeAsync = async function (data, params) { return parse.safeEncodeAsync(this, data, params); };
++const _sharedSafeDecodeAsync = async function (data, params) { return parse.safeDecodeAsync(this, data, params); };
++const _sharedRefine = function (check, params) { return this.check(refine(check, params)); };
++const _sharedSuperRefine = function (refinement) { return this.check(superRefine(refinement)); };
++const _sharedOverwrite = function (fn) { return this.check(checks.overwrite(fn)); };
++const _sharedOptional = function () { return optional(this); };
++const _sharedExactOptional = function () { return exactOptional(this); };
++const _sharedNullable = function () { return nullable(this); };
++const _sharedNullish = function () { return optional(nullable(this)); };
++const _sharedNonoptional = function (params) { return nonoptional(this, params); };
++const _sharedArray = function () { return array(this); };
++const _sharedOr = function (arg) { return union([this, arg]); };
++const _sharedAnd = function (arg) { return intersection(this, arg); };
++const _sharedTransform = function (tx) { return pipe(this, transform(tx)); };
++const _sharedDefault = function (def) { return _default(this, def); };
++const _sharedPrefault = function (def) { return prefault(this, def); };
++const _sharedCatch = function (params) { return _catch(this, params); };
++const _sharedPipe = function (target) { return pipe(this, target); };
++const _sharedReadonly = function () { return readonly(this); };
++const _sharedDescribe = function (description) {
++    const cl = this.clone();
++    core.globalRegistry.add(cl, { description });
++    return cl;
++};
++const _sharedMeta = function (...args) {
++    if (args.length === 0) return core.globalRegistry.get(this);
++    const cl = this.clone();
++    core.globalRegistry.add(cl, args[0]);
++    return cl;
++};
++const _sharedIsOptional = function () { return this.safeParse(undefined).success; };
++const _sharedIsNullable = function () { return this.safeParse(null).success; };
++const _sharedApply = function (fn) { return fn(this); };
++// _ZodString – string validation methods
++const _sharedRegex = function (...args) { return this.check(checks.regex(...args)); };
++const _sharedIncludes = function (...args) { return this.check(checks.includes(...args)); };
++const _sharedStartsWith = function (...args) { return this.check(checks.startsWith(...args)); };
++const _sharedEndsWith = function (...args) { return this.check(checks.endsWith(...args)); };
++const _sharedStrMin = function (...args) { return this.check(checks.minLength(...args)); };
++const _sharedStrMax = function (...args) { return this.check(checks.maxLength(...args)); };
++const _sharedStrLength = function (...args) { return this.check(checks.length(...args)); };
++const _sharedStrNonempty = function (...args) { return this.check(checks.minLength(1, ...args)); };
++const _sharedLowercase = function (params) { return this.check(checks.lowercase(params)); };
++const _sharedUppercase = function (params) { return this.check(checks.uppercase(params)); };
++const _sharedTrim = function () { return this.check(checks.trim()); };
++const _sharedNormalize = function (...args) { return this.check(checks.normalize(...args)); };
++const _sharedToLowerCase = function () { return this.check(checks.toLowerCase()); };
++const _sharedToUpperCase = function () { return this.check(checks.toUpperCase()); };
++const _sharedSlugify = function () { return this.check(checks.slugify()); };
++// ZodString – format methods
++const _sharedEmail = function (params) { return this.check(core._email(ZodEmail, params)); };
++const _sharedUrl = function (params) { return this.check(core._url(ZodURL, params)); };
++const _sharedJwt = function (params) { return this.check(core._jwt(ZodJWT, params)); };
++const _sharedEmoji = function (params) { return this.check(core._emoji(ZodEmoji, params)); };
++const _sharedGuid = function (params) { return this.check(core._guid(ZodGUID, params)); };
++const _sharedUuid = function (params) { return this.check(core._uuid(ZodUUID, params)); };
++const _sharedUuidv4 = function (params) { return this.check(core._uuidv4(ZodUUID, params)); };
++const _sharedUuidv6 = function (params) { return this.check(core._uuidv6(ZodUUID, params)); };
++const _sharedUuidv7 = function (params) { return this.check(core._uuidv7(ZodUUID, params)); };
++const _sharedNanoid = function (params) { return this.check(core._nanoid(ZodNanoID, params)); };
++const _sharedCuid = function (params) { return this.check(core._cuid(ZodCUID, params)); };
++const _sharedCuid2 = function (params) { return this.check(core._cuid2(ZodCUID2, params)); };
++const _sharedUlid = function (params) { return this.check(core._ulid(ZodULID, params)); };
++const _sharedBase64 = function (params) { return this.check(core._base64(ZodBase64, params)); };
++const _sharedBase64url = function (params) { return this.check(core._base64url(ZodBase64URL, params)); };
++const _sharedXid = function (params) { return this.check(core._xid(ZodXID, params)); };
++const _sharedKsuid = function (params) { return this.check(core._ksuid(ZodKSUID, params)); };
++const _sharedIpv4 = function (params) { return this.check(core._ipv4(ZodIPv4, params)); };
++const _sharedIpv6 = function (params) { return this.check(core._ipv6(ZodIPv6, params)); };
++const _sharedCidrv4 = function (params) { return this.check(core._cidrv4(ZodCIDRv4, params)); };
++const _sharedCidrv6 = function (params) { return this.check(core._cidrv6(ZodCIDRv6, params)); };
++const _sharedE164 = function (params) { return this.check(core._e164(ZodE164, params)); };
++const _sharedDatetime = function (params) { return this.check(iso.datetime(params)); };
++const _sharedDate = function (params) { return this.check(iso.date(params)); };
++const _sharedTime = function (params) { return this.check(iso.time(params)); };
++const _sharedDuration = function (params) { return this.check(iso.duration(params)); };
++// ZodNumber – numeric methods
++const _sharedNumGt = function (value, params) { return this.check(checks.gt(value, params)); };
++const _sharedNumGte = function (value, params) { return this.check(checks.gte(value, params)); };
++const _sharedNumLt = function (value, params) { return this.check(checks.lt(value, params)); };
++const _sharedNumLte = function (value, params) { return this.check(checks.lte(value, params)); };
++const _sharedNumInt = function (params) { return this.check(int(params)); };
++const _sharedNumPositive = function (params) { return this.check(checks.gt(0, params)); };
++const _sharedNumNonnegative = function (params) { return this.check(checks.gte(0, params)); };
++const _sharedNumNegative = function (params) { return this.check(checks.lt(0, params)); };
++const _sharedNumNonpositive = function (params) { return this.check(checks.lte(0, params)); };
++const _sharedNumMultipleOf = function (value, params) { return this.check(checks.multipleOf(value, params)); };
++const _sharedNumFinite = function () { return this; };
++// ZodBigInt – bigint methods
++const _sharedBigIntGt = function (value, params) { return this.check(checks.gt(value, params)); };
++const _sharedBigIntGte = function (value, params) { return this.check(checks.gte(value, params)); };
++const _sharedBigIntLt = function (value, params) { return this.check(checks.lt(value, params)); };
++const _sharedBigIntLte = function (value, params) { return this.check(checks.lte(value, params)); };
++const _sharedBigIntPositive = function (params) { return this.check(checks.gt(BigInt(0), params)); };
++const _sharedBigIntNegative = function (params) { return this.check(checks.lt(BigInt(0), params)); };
++const _sharedBigIntNonpositive = function (params) { return this.check(checks.lte(BigInt(0), params)); };
++const _sharedBigIntNonnegative = function (params) { return this.check(checks.gte(BigInt(0), params)); };
++const _sharedBigIntMultipleOf = function (value, params) { return this.check(checks.multipleOf(value, params)); };
++// ZodDate – date validation methods
++const _sharedDateMin = function (value, params) { return this.check(checks.gte(value, params)); };
++const _sharedDateMax = function (value, params) { return this.check(checks.lte(value, params)); };
++// ZodArray – array methods
++const _sharedArrMin = function (minLength, params) { return this.check(checks.minLength(minLength, params)); };
++const _sharedArrNonempty = function (params) { return this.check(checks.minLength(1, params)); };
++const _sharedArrMax = function (maxLength, params) { return this.check(checks.maxLength(maxLength, params)); };
++const _sharedArrLength = function (len, params) { return this.check(checks.length(len, params)); };
++const _sharedArrUnwrap = function () { return this.element; };
++// ZodObject – object methods
++const _sharedObjKeyof = function () { return _enum(Object.keys(this._zod.def.shape)); };
++const _sharedObjCatchall = function (catchall) { return this.clone({ ...this._zod.def, catchall }); };
++const _sharedObjPassthrough = function () { return this.clone({ ...this._zod.def, catchall: unknown() }); };
++const _sharedObjLoose = function () { return this.clone({ ...this._zod.def, catchall: unknown() }); };
++const _sharedObjStrict = function () { return this.clone({ ...this._zod.def, catchall: never() }); };
++const _sharedObjStrip = function () { return this.clone({ ...this._zod.def, catchall: undefined }); };
++const _sharedObjExtend = function (incoming) { return util.extend(this, incoming); };
++const _sharedObjSafeExtend = function (incoming) { return util.safeExtend(this, incoming); };
++const _sharedObjMerge = function (other) { return util.merge(this, other); };
++const _sharedObjPick = function (mask) { return util.pick(this, mask); };
++const _sharedObjOmit = function (mask) { return util.omit(this, mask); };
++const _sharedObjPartial = function (...args) { return util.partial(ZodOptional, this, args[0]); };
++const _sharedObjRequired = function (...args) { return util.required(ZodNonOptional, this, args[0]); };
++// ZodTuple
++const _sharedTupleRest = function (rest) { return this.clone({ ...this._zod.def, rest }); };
++// ZodMap / ZodSet – size methods
++const _sharedSizeMin = function (...args) { return this.check(core._minSize(...args)); };
++const _sharedSizeNonempty = function (params) { return this.check(core._minSize(1, params)); };
++const _sharedSizeMax = function (...args) { return this.check(core._maxSize(...args)); };
++const _sharedSize = function (...args) { return this.check(core._size(...args)); };
++// ZodFile – file methods
++const _sharedFileMin = function (size, params) { return this.check(core._minSize(size, params)); };
++const _sharedFileMax = function (size, params) { return this.check(core._maxSize(size, params)); };
++const _sharedFileMime = function (types, params) { return this.check(core._mime(Array.isArray(types) ? types : [types], params)); };
++// ZodEnum – extract/exclude (recompute keys lazily from def at call time)
++const _sharedEnumExtract = function (values, params) {
++    const def = this._zod.def;
++    const keys = new Set(Object.keys(def.entries));
++    const newEntries = {};
++    for (const value of values) {
++        if (keys.has(value)) {
++            newEntries[value] = def.entries[value];
++        }
++        else throw new Error(`Key ${value} not found in enum`);
++    }
++    return new ZodEnum({ ...def, checks: [], ...util.normalizeParams(params), entries: newEntries });
++};
++const _sharedEnumExclude = function (values, params) {
++    const def = this._zod.def;
++    const keys = new Set(Object.keys(def.entries));
++    const newEntries = { ...def.entries };
++    for (const value of values) {
++        if (keys.has(value)) {
++            delete newEntries[value];
++        }
++        else throw new Error(`Key ${value} not found in enum`);
++    }
++    return new ZodEnum({ ...def, checks: [], ...util.normalizeParams(params), entries: newEntries });
++};
++// Wrapper types – shared unwrap
++const _sharedUnwrap = function () { return this._zod.def.innerType; };
++const _sharedLazyUnwrap = function () { return this._zod.def.getter(); };
++
+ export const ZodType = /*@__PURE__*/ core.$constructor("ZodType", (inst, def) => {
+     core.$ZodType.init(inst, def);
+     Object.assign(inst["~standard"], {
+@@ -18,82 +215,59 @@ export const ZodType = /*@__PURE__*/ core.$constructor("ZodType", (inst, def) =>
+     inst.type = def.type;
+     Object.defineProperty(inst, "_def", { value: def });
+     // base methods
+-    inst.check = (...checks) => {
+-        return inst.clone(util.mergeDefs(def, {
+-            checks: [
+-                ...(def.checks ?? []),
+-                ...checks.map((ch) => typeof ch === "function" ? { _zod: { check: ch, def: { check: "custom" }, onattach: [] } } : ch),
+-            ],
+-        }), {
+-            parent: true,
+-        });
+-    };
+-    inst.with = inst.check;
+-    inst.clone = (def, params) => core.clone(inst, def, params);
+-    inst.brand = () => inst;
+-    inst.register = ((reg, meta) => {
+-        reg.add(inst, meta);
+-        return inst;
+-    });
++    inst.check = _sharedCheck;
++    inst.with = _sharedCheck;
++    inst.clone = _sharedClone;
++    inst.brand = _sharedBrand;
++    inst.register = _sharedRegister;
+     // parsing
+-    inst.parse = (data, params) => parse.parse(inst, data, params, { callee: inst.parse });
+-    inst.safeParse = (data, params) => parse.safeParse(inst, data, params);
+-    inst.parseAsync = async (data, params) => parse.parseAsync(inst, data, params, { callee: inst.parseAsync });
+-    inst.safeParseAsync = async (data, params) => parse.safeParseAsync(inst, data, params);
+-    inst.spa = inst.safeParseAsync;
++    inst.parse = _sharedParse;
++    inst.safeParse = _sharedSafeParse;
++    inst.parseAsync = _sharedParseAsync;
++    inst.safeParseAsync = _sharedSafeParseAsync;
++    inst.spa = _sharedSafeParseAsync;
+     // encoding/decoding
+-    inst.encode = (data, params) => parse.encode(inst, data, params);
+-    inst.decode = (data, params) => parse.decode(inst, data, params);
+-    inst.encodeAsync = async (data, params) => parse.encodeAsync(inst, data, params);
+-    inst.decodeAsync = async (data, params) => parse.decodeAsync(inst, data, params);
+-    inst.safeEncode = (data, params) => parse.safeEncode(inst, data, params);
+-    inst.safeDecode = (data, params) => parse.safeDecode(inst, data, params);
+-    inst.safeEncodeAsync = async (data, params) => parse.safeEncodeAsync(inst, data, params);
+-    inst.safeDecodeAsync = async (data, params) => parse.safeDecodeAsync(inst, data, params);
++    inst.encode = _sharedEncode;
++    inst.decode = _sharedDecode;
++    inst.encodeAsync = _sharedEncodeAsync;
++    inst.decodeAsync = _sharedDecodeAsync;
++    inst.safeEncode = _sharedSafeEncode;
++    inst.safeDecode = _sharedSafeDecode;
++    inst.safeEncodeAsync = _sharedSafeEncodeAsync;
++    inst.safeDecodeAsync = _sharedSafeDecodeAsync;
+     // refinements
+-    inst.refine = (check, params) => inst.check(refine(check, params));
+-    inst.superRefine = (refinement) => inst.check(superRefine(refinement));
+-    inst.overwrite = (fn) => inst.check(checks.overwrite(fn));
++    inst.refine = _sharedRefine;
++    inst.superRefine = _sharedSuperRefine;
++    inst.overwrite = _sharedOverwrite;
+     // wrappers
+-    inst.optional = () => optional(inst);
+-    inst.exactOptional = () => exactOptional(inst);
+-    inst.nullable = () => nullable(inst);
+-    inst.nullish = () => optional(nullable(inst));
+-    inst.nonoptional = (params) => nonoptional(inst, params);
+-    inst.array = () => array(inst);
+-    inst.or = (arg) => union([inst, arg]);
+-    inst.and = (arg) => intersection(inst, arg);
+-    inst.transform = (tx) => pipe(inst, transform(tx));
+-    inst.default = (def) => _default(inst, def);
+-    inst.prefault = (def) => prefault(inst, def);
++    inst.optional = _sharedOptional;
++    inst.exactOptional = _sharedExactOptional;
++    inst.nullable = _sharedNullable;
++    inst.nullish = _sharedNullish;
++    inst.nonoptional = _sharedNonoptional;
++    inst.array = _sharedArray;
++    inst.or = _sharedOr;
++    inst.and = _sharedAnd;
++    inst.transform = _sharedTransform;
++    inst.default = _sharedDefault;
++    inst.prefault = _sharedPrefault;
+     // inst.coalesce = (def, params) => coalesce(inst, def, params);
+-    inst.catch = (params) => _catch(inst, params);
+-    inst.pipe = (target) => pipe(inst, target);
+-    inst.readonly = () => readonly(inst);
++    inst.catch = _sharedCatch;
++    inst.pipe = _sharedPipe;
++    inst.readonly = _sharedReadonly;
+     // meta
+-    inst.describe = (description) => {
+-        const cl = inst.clone();
+-        core.globalRegistry.add(cl, { description });
+-        return cl;
+-    };
++    inst.describe = _sharedDescribe;
+     Object.defineProperty(inst, "description", {
+         get() {
+-            return core.globalRegistry.get(inst)?.description;
++            return core.globalRegistry.get(this)?.description;
+         },
+         configurable: true,
+     });
+-    inst.meta = (...args) => {
+-        if (args.length === 0) {
+-            return core.globalRegistry.get(inst);
+-        }
+-        const cl = inst.clone();
+-        core.globalRegistry.add(cl, args[0]);
+-        return cl;
+-    };
++    inst.meta = _sharedMeta;
+     // helpers
+-    inst.isOptional = () => inst.safeParse(undefined).success;
+-    inst.isNullable = () => inst.safeParse(null).success;
+-    inst.apply = (fn) => fn(inst);
++    inst.isOptional = _sharedIsOptional;
++    inst.isNullable = _sharedIsNullable;
++    inst.apply = _sharedApply;
+     return inst;
+ });
+ /** @internal */
+@@ -106,54 +280,54 @@ export const _ZodString = /*@__PURE__*/ core.$constructor("_ZodString", (inst, d
+     inst.minLength = bag.minimum ?? null;
+     inst.maxLength = bag.maximum ?? null;
+     // validations
+-    inst.regex = (...args) => inst.check(checks.regex(...args));
+-    inst.includes = (...args) => inst.check(checks.includes(...args));
+-    inst.startsWith = (...args) => inst.check(checks.startsWith(...args));
+-    inst.endsWith = (...args) => inst.check(checks.endsWith(...args));
+-    inst.min = (...args) => inst.check(checks.minLength(...args));
+-    inst.max = (...args) => inst.check(checks.maxLength(...args));
+-    inst.length = (...args) => inst.check(checks.length(...args));
+-    inst.nonempty = (...args) => inst.check(checks.minLength(1, ...args));
+-    inst.lowercase = (params) => inst.check(checks.lowercase(params));
+-    inst.uppercase = (params) => inst.check(checks.uppercase(params));
++    inst.regex = _sharedRegex;
++    inst.includes = _sharedIncludes;
++    inst.startsWith = _sharedStartsWith;
++    inst.endsWith = _sharedEndsWith;
++    inst.min = _sharedStrMin;
++    inst.max = _sharedStrMax;
++    inst.length = _sharedStrLength;
++    inst.nonempty = _sharedStrNonempty;
++    inst.lowercase = _sharedLowercase;
++    inst.uppercase = _sharedUppercase;
+     // transforms
+-    inst.trim = () => inst.check(checks.trim());
+-    inst.normalize = (...args) => inst.check(checks.normalize(...args));
+-    inst.toLowerCase = () => inst.check(checks.toLowerCase());
+-    inst.toUpperCase = () => inst.check(checks.toUpperCase());
+-    inst.slugify = () => inst.check(checks.slugify());
++    inst.trim = _sharedTrim;
++    inst.normalize = _sharedNormalize;
++    inst.toLowerCase = _sharedToLowerCase;
++    inst.toUpperCase = _sharedToUpperCase;
++    inst.slugify = _sharedSlugify;
+ });
+ export const ZodString = /*@__PURE__*/ core.$constructor("ZodString", (inst, def) => {
+     core.$ZodString.init(inst, def);
+     _ZodString.init(inst, def);
+-    inst.email = (params) => inst.check(core._email(ZodEmail, params));
+-    inst.url = (params) => inst.check(core._url(ZodURL, params));
+-    inst.jwt = (params) => inst.check(core._jwt(ZodJWT, params));
+-    inst.emoji = (params) => inst.check(core._emoji(ZodEmoji, params));
+-    inst.guid = (params) => inst.check(core._guid(ZodGUID, params));
+-    inst.uuid = (params) => inst.check(core._uuid(ZodUUID, params));
+-    inst.uuidv4 = (params) => inst.check(core._uuidv4(ZodUUID, params));
+-    inst.uuidv6 = (params) => inst.check(core._uuidv6(ZodUUID, params));
+-    inst.uuidv7 = (params) => inst.check(core._uuidv7(ZodUUID, params));
+-    inst.nanoid = (params) => inst.check(core._nanoid(ZodNanoID, params));
+-    inst.guid = (params) => inst.check(core._guid(ZodGUID, params));
+-    inst.cuid = (params) => inst.check(core._cuid(ZodCUID, params));
+-    inst.cuid2 = (params) => inst.check(core._cuid2(ZodCUID2, params));
+-    inst.ulid = (params) => inst.check(core._ulid(ZodULID, params));
+-    inst.base64 = (params) => inst.check(core._base64(ZodBase64, params));
+-    inst.base64url = (params) => inst.check(core._base64url(ZodBase64URL, params));
+-    inst.xid = (params) => inst.check(core._xid(ZodXID, params));
+-    inst.ksuid = (params) => inst.check(core._ksuid(ZodKSUID, params));
+-    inst.ipv4 = (params) => inst.check(core._ipv4(ZodIPv4, params));
+-    inst.ipv6 = (params) => inst.check(core._ipv6(ZodIPv6, params));
+-    inst.cidrv4 = (params) => inst.check(core._cidrv4(ZodCIDRv4, params));
+-    inst.cidrv6 = (params) => inst.check(core._cidrv6(ZodCIDRv6, params));
+-    inst.e164 = (params) => inst.check(core._e164(ZodE164, params));
++    inst.email = _sharedEmail;
++    inst.url = _sharedUrl;
++    inst.jwt = _sharedJwt;
++    inst.emoji = _sharedEmoji;
++    inst.guid = _sharedGuid;
++    inst.uuid = _sharedUuid;
++    inst.uuidv4 = _sharedUuidv4;
++    inst.uuidv6 = _sharedUuidv6;
++    inst.uuidv7 = _sharedUuidv7;
++    inst.nanoid = _sharedNanoid;
++    inst.guid = _sharedGuid;
++    inst.cuid = _sharedCuid;
++    inst.cuid2 = _sharedCuid2;
++    inst.ulid = _sharedUlid;
++    inst.base64 = _sharedBase64;
++    inst.base64url = _sharedBase64url;
++    inst.xid = _sharedXid;
++    inst.ksuid = _sharedKsuid;
++    inst.ipv4 = _sharedIpv4;
++    inst.ipv6 = _sharedIpv6;
++    inst.cidrv4 = _sharedCidrv4;
++    inst.cidrv6 = _sharedCidrv6;
++    inst.e164 = _sharedE164;
+     // iso
+-    inst.datetime = (params) => inst.check(iso.datetime(params));
+-    inst.date = (params) => inst.check(iso.date(params));
+-    inst.time = (params) => inst.check(iso.time(params));
+-    inst.duration = (params) => inst.check(iso.duration(params));
++    inst.datetime = _sharedDatetime;
++    inst.date = _sharedDate;
++    inst.time = _sharedTime;
++    inst.duration = _sharedDuration;
+ });
+ export function string(params) {
+     return core._string(ZodString, params);
+@@ -364,22 +538,22 @@ export const ZodNumber = /*@__PURE__*/ core.$constructor("ZodNumber", (inst, def
+     core.$ZodNumber.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.numberProcessor(inst, ctx, json, params);
+-    inst.gt = (value, params) => inst.check(checks.gt(value, params));
+-    inst.gte = (value, params) => inst.check(checks.gte(value, params));
+-    inst.min = (value, params) => inst.check(checks.gte(value, params));
+-    inst.lt = (value, params) => inst.check(checks.lt(value, params));
+-    inst.lte = (value, params) => inst.check(checks.lte(value, params));
+-    inst.max = (value, params) => inst.check(checks.lte(value, params));
+-    inst.int = (params) => inst.check(int(params));
+-    inst.safe = (params) => inst.check(int(params));
+-    inst.positive = (params) => inst.check(checks.gt(0, params));
+-    inst.nonnegative = (params) => inst.check(checks.gte(0, params));
+-    inst.negative = (params) => inst.check(checks.lt(0, params));
+-    inst.nonpositive = (params) => inst.check(checks.lte(0, params));
+-    inst.multipleOf = (value, params) => inst.check(checks.multipleOf(value, params));
+-    inst.step = (value, params) => inst.check(checks.multipleOf(value, params));
++    inst.gt = _sharedNumGt;
++    inst.gte = _sharedNumGte;
++    inst.min = _sharedNumGte;
++    inst.lt = _sharedNumLt;
++    inst.lte = _sharedNumLte;
++    inst.max = _sharedNumLte;
++    inst.int = _sharedNumInt;
++    inst.safe = _sharedNumInt;
++    inst.positive = _sharedNumPositive;
++    inst.nonnegative = _sharedNumNonnegative;
++    inst.negative = _sharedNumNegative;
++    inst.nonpositive = _sharedNumNonpositive;
++    inst.multipleOf = _sharedNumMultipleOf;
++    inst.step = _sharedNumMultipleOf;
+     // inst.finite = (params) => inst.check(core.finite(params));
+-    inst.finite = () => inst;
++    inst.finite = _sharedNumFinite;
+     const bag = inst._zod.bag;
+     inst.minValue =
+         Math.max(bag.minimum ?? Number.NEGATIVE_INFINITY, bag.exclusiveMinimum ?? Number.NEGATIVE_INFINITY) ?? null;
+@@ -423,19 +597,19 @@ export const ZodBigInt = /*@__PURE__*/ core.$constructor("ZodBigInt", (inst, def
+     core.$ZodBigInt.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.bigintProcessor(inst, ctx, json, params);
+-    inst.gte = (value, params) => inst.check(checks.gte(value, params));
+-    inst.min = (value, params) => inst.check(checks.gte(value, params));
+-    inst.gt = (value, params) => inst.check(checks.gt(value, params));
+-    inst.gte = (value, params) => inst.check(checks.gte(value, params));
+-    inst.min = (value, params) => inst.check(checks.gte(value, params));
+-    inst.lt = (value, params) => inst.check(checks.lt(value, params));
+-    inst.lte = (value, params) => inst.check(checks.lte(value, params));
+-    inst.max = (value, params) => inst.check(checks.lte(value, params));
+-    inst.positive = (params) => inst.check(checks.gt(BigInt(0), params));
+-    inst.negative = (params) => inst.check(checks.lt(BigInt(0), params));
+-    inst.nonpositive = (params) => inst.check(checks.lte(BigInt(0), params));
+-    inst.nonnegative = (params) => inst.check(checks.gte(BigInt(0), params));
+-    inst.multipleOf = (value, params) => inst.check(checks.multipleOf(value, params));
++    inst.gte = _sharedBigIntGte;
++    inst.min = _sharedBigIntGte;
++    inst.gt = _sharedBigIntGt;
++    inst.gte = _sharedBigIntGte;
++    inst.min = _sharedBigIntGte;
++    inst.lt = _sharedBigIntLt;
++    inst.lte = _sharedBigIntLte;
++    inst.max = _sharedBigIntLte;
++    inst.positive = _sharedBigIntPositive;
++    inst.negative = _sharedBigIntNegative;
++    inst.nonpositive = _sharedBigIntNonpositive;
++    inst.nonnegative = _sharedBigIntNonnegative;
++    inst.multipleOf = _sharedBigIntMultipleOf;
+     const bag = inst._zod.bag;
+     inst.minValue = bag.minimum ?? null;
+     inst.maxValue = bag.maximum ?? null;
+@@ -519,8 +693,8 @@ export const ZodDate = /*@__PURE__*/ core.$constructor("ZodDate", (inst, def) =>
+     core.$ZodDate.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.dateProcessor(inst, ctx, json, params);
+-    inst.min = (value, params) => inst.check(checks.gte(value, params));
+-    inst.max = (value, params) => inst.check(checks.lte(value, params));
++    inst.min = _sharedDateMin;
++    inst.max = _sharedDateMax;
+     const c = inst._zod.bag;
+     inst.minDate = c.minimum ? new Date(c.minimum) : null;
+     inst.maxDate = c.maximum ? new Date(c.maximum) : null;
+@@ -533,11 +707,11 @@ export const ZodArray = /*@__PURE__*/ core.$constructor("ZodArray", (inst, def)
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.arrayProcessor(inst, ctx, json, params);
+     inst.element = def.element;
+-    inst.min = (minLength, params) => inst.check(checks.minLength(minLength, params));
+-    inst.nonempty = (params) => inst.check(checks.minLength(1, params));
+-    inst.max = (maxLength, params) => inst.check(checks.maxLength(maxLength, params));
+-    inst.length = (len, params) => inst.check(checks.length(len, params));
+-    inst.unwrap = () => inst.element;
++    inst.min = _sharedArrMin;
++    inst.nonempty = _sharedArrNonempty;
++    inst.max = _sharedArrMax;
++    inst.length = _sharedArrLength;
++    inst.unwrap = _sharedArrUnwrap;
+ });
+ export function array(element, params) {
+     return core._array(ZodArray, element, params);
+@@ -554,23 +728,19 @@ export const ZodObject = /*@__PURE__*/ core.$constructor("ZodObject", (inst, def
+     util.defineLazy(inst, "shape", () => {
+         return def.shape;
+     });
+-    inst.keyof = () => _enum(Object.keys(inst._zod.def.shape));
+-    inst.catchall = (catchall) => inst.clone({ ...inst._zod.def, catchall: catchall });
+-    inst.passthrough = () => inst.clone({ ...inst._zod.def, catchall: unknown() });
+-    inst.loose = () => inst.clone({ ...inst._zod.def, catchall: unknown() });
+-    inst.strict = () => inst.clone({ ...inst._zod.def, catchall: never() });
+-    inst.strip = () => inst.clone({ ...inst._zod.def, catchall: undefined });
+-    inst.extend = (incoming) => {
+-        return util.extend(inst, incoming);
+-    };
+-    inst.safeExtend = (incoming) => {
+-        return util.safeExtend(inst, incoming);
+-    };
+-    inst.merge = (other) => util.merge(inst, other);
+-    inst.pick = (mask) => util.pick(inst, mask);
+-    inst.omit = (mask) => util.omit(inst, mask);
+-    inst.partial = (...args) => util.partial(ZodOptional, inst, args[0]);
+-    inst.required = (...args) => util.required(ZodNonOptional, inst, args[0]);
++    inst.keyof = _sharedObjKeyof;
++    inst.catchall = _sharedObjCatchall;
++    inst.passthrough = _sharedObjPassthrough;
++    inst.loose = _sharedObjLoose;
++    inst.strict = _sharedObjStrict;
++    inst.strip = _sharedObjStrip;
++    inst.extend = _sharedObjExtend;
++    inst.safeExtend = _sharedObjSafeExtend;
++    inst.merge = _sharedObjMerge;
++    inst.pick = _sharedObjPick;
++    inst.omit = _sharedObjOmit;
++    inst.partial = _sharedObjPartial;
++    inst.required = _sharedObjRequired;
+ });
+ export function object(shape, params) {
+     const def = {
+@@ -657,10 +827,7 @@ export const ZodTuple = /*@__PURE__*/ core.$constructor("ZodTuple", (inst, def)
+     core.$ZodTuple.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.tupleProcessor(inst, ctx, json, params);
+-    inst.rest = (rest) => inst.clone({
+-        ...inst._zod.def,
+-        rest: rest,
+-    });
++    inst.rest = _sharedTupleRest;
+ });
+ export function tuple(items, _paramsOrRest, _params) {
+     const hasRest = _paramsOrRest instanceof core.$ZodType;
+@@ -714,10 +881,10 @@ export const ZodMap = /*@__PURE__*/ core.$constructor("ZodMap", (inst, def) => {
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.mapProcessor(inst, ctx, json, params);
+     inst.keyType = def.keyType;
+     inst.valueType = def.valueType;
+-    inst.min = (...args) => inst.check(core._minSize(...args));
+-    inst.nonempty = (params) => inst.check(core._minSize(1, params));
+-    inst.max = (...args) => inst.check(core._maxSize(...args));
+-    inst.size = (...args) => inst.check(core._size(...args));
++    inst.min = _sharedSizeMin;
++    inst.nonempty = _sharedSizeNonempty;
++    inst.max = _sharedSizeMax;
++    inst.size = _sharedSize;
+ });
+ export function map(keyType, valueType, params) {
+     return new ZodMap({
+@@ -731,10 +898,10 @@ export const ZodSet = /*@__PURE__*/ core.$constructor("ZodSet", (inst, def) => {
+     core.$ZodSet.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.setProcessor(inst, ctx, json, params);
+-    inst.min = (...args) => inst.check(core._minSize(...args));
+-    inst.nonempty = (params) => inst.check(core._minSize(1, params));
+-    inst.max = (...args) => inst.check(core._maxSize(...args));
+-    inst.size = (...args) => inst.check(core._size(...args));
++    inst.min = _sharedSizeMin;
++    inst.nonempty = _sharedSizeNonempty;
++    inst.max = _sharedSizeMax;
++    inst.size = _sharedSize;
+ });
+ export function set(valueType, params) {
+     return new ZodSet({
+@@ -749,39 +916,8 @@ export const ZodEnum = /*@__PURE__*/ core.$constructor("ZodEnum", (inst, def) =>
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.enumProcessor(inst, ctx, json, params);
+     inst.enum = def.entries;
+     inst.options = Object.values(def.entries);
+-    const keys = new Set(Object.keys(def.entries));
+-    inst.extract = (values, params) => {
+-        const newEntries = {};
+-        for (const value of values) {
+-            if (keys.has(value)) {
+-                newEntries[value] = def.entries[value];
+-            }
+-            else
+-                throw new Error(`Key ${value} not found in enum`);
+-        }
+-        return new ZodEnum({
+-            ...def,
+-            checks: [],
+-            ...util.normalizeParams(params),
+-            entries: newEntries,
+-        });
+-    };
+-    inst.exclude = (values, params) => {
+-        const newEntries = { ...def.entries };
+-        for (const value of values) {
+-            if (keys.has(value)) {
+-                delete newEntries[value];
+-            }
+-            else
+-                throw new Error(`Key ${value} not found in enum`);
+-        }
+-        return new ZodEnum({
+-            ...def,
+-            checks: [],
+-            ...util.normalizeParams(params),
+-            entries: newEntries,
+-        });
+-    };
++    inst.extract = _sharedEnumExtract;
++    inst.exclude = _sharedEnumExclude;
+ });
+ function _enum(values, params) {
+     const entries = Array.isArray(values) ? Object.fromEntries(values.map((v) => [v, v])) : values;
+@@ -831,9 +967,9 @@ export const ZodFile = /*@__PURE__*/ core.$constructor("ZodFile", (inst, def) =>
+     core.$ZodFile.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.fileProcessor(inst, ctx, json, params);
+-    inst.min = (size, params) => inst.check(core._minSize(size, params));
+-    inst.max = (size, params) => inst.check(core._maxSize(size, params));
+-    inst.mime = (types, params) => inst.check(core._mime(Array.isArray(types) ? types : [types], params));
++    inst.min = _sharedFileMin;
++    inst.max = _sharedFileMax;
++    inst.mime = _sharedFileMime;
+ });
+ export function file(params) {
+     return core._file(ZodFile, params);
+@@ -883,7 +1019,7 @@ export const ZodOptional = /*@__PURE__*/ core.$constructor("ZodOptional", (inst,
+     core.$ZodOptional.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.optionalProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ export function optional(innerType) {
+     return new ZodOptional({
+@@ -895,7 +1031,7 @@ export const ZodExactOptional = /*@__PURE__*/ core.$constructor("ZodExactOptiona
+     core.$ZodExactOptional.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.optionalProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ export function exactOptional(innerType) {
+     return new ZodExactOptional({
+@@ -907,7 +1043,7 @@ export const ZodNullable = /*@__PURE__*/ core.$constructor("ZodNullable", (inst,
+     core.$ZodNullable.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.nullableProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ export function nullable(innerType) {
+     return new ZodNullable({
+@@ -923,8 +1059,8 @@ export const ZodDefault = /*@__PURE__*/ core.$constructor("ZodDefault", (inst, d
+     core.$ZodDefault.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.defaultProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
+-    inst.removeDefault = inst.unwrap;
++    inst.unwrap = _sharedUnwrap;
++    inst.removeDefault = _sharedUnwrap;
+ });
+ export function _default(innerType, defaultValue) {
+     return new ZodDefault({
+@@ -939,7 +1075,7 @@ export const ZodPrefault = /*@__PURE__*/ core.$constructor("ZodPrefault", (inst,
+     core.$ZodPrefault.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.prefaultProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ export function prefault(innerType, defaultValue) {
+     return new ZodPrefault({
+@@ -954,7 +1090,7 @@ export const ZodNonOptional = /*@__PURE__*/ core.$constructor("ZodNonOptional",
+     core.$ZodNonOptional.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.nonoptionalProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ export function nonoptional(innerType, params) {
+     return new ZodNonOptional({
+@@ -967,7 +1103,7 @@ export const ZodSuccess = /*@__PURE__*/ core.$constructor("ZodSuccess", (inst, d
+     core.$ZodSuccess.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.successProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ export function success(innerType) {
+     return new ZodSuccess({
+@@ -979,8 +1115,8 @@ export const ZodCatch = /*@__PURE__*/ core.$constructor("ZodCatch", (inst, def)
+     core.$ZodCatch.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.catchProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
+-    inst.removeCatch = inst.unwrap;
++    inst.unwrap = _sharedUnwrap;
++    inst.removeCatch = _sharedUnwrap;
+ });
+ function _catch(innerType, catchValue) {
+     return new ZodCatch({
+@@ -1030,7 +1166,7 @@ export const ZodReadonly = /*@__PURE__*/ core.$constructor("ZodReadonly", (inst,
+     core.$ZodReadonly.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.readonlyProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ export function readonly(innerType) {
+     return new ZodReadonly({
+@@ -1054,7 +1190,7 @@ export const ZodLazy = /*@__PURE__*/ core.$constructor("ZodLazy", (inst, def) =>
+     core.$ZodLazy.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.lazyProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.getter();
++    inst.unwrap = _sharedLazyUnwrap;
+ });
+ export function lazy(getter) {
+     return new ZodLazy({
+@@ -1066,7 +1202,7 @@ export const ZodPromise = /*@__PURE__*/ core.$constructor("ZodPromise", (inst, d
+     core.$ZodPromise.init(inst, def);
+     ZodType.init(inst, def);
+     inst._zod.processJSONSchema = (ctx, json, params) => processors.promiseProcessor(inst, ctx, json, params);
+-    inst.unwrap = () => inst._zod.def.innerType;
++    inst.unwrap = _sharedUnwrap;
+ });
+ export function promise(innerType) {
+     return new ZodPromise({
+diff --git a/node_modules/zod/v4/core/core.cjs b/node_modules/zod/v4/core/core.cjs
+index 937f35e..c4e4fd5 100644
+--- a/node_modules/zod/v4/core/core.cjs
++++ b/node_modules/zod/v4/core/core.cjs
+@@ -24,15 +24,10 @@ function $constructor(name, initializer, params) {
+         }
+         inst._zod.traits.add(name);
+         initializer(inst, def);
+-        // support prototype modifications
+-        const proto = _.prototype;
+-        const keys = Object.keys(proto);
+-        for (let i = 0; i < keys.length; i++) {
+-            const k = keys[i];
+-            if (!(k in inst)) {
+-                inst[k] = proto[k].bind(inst);
+-            }
+-        }
++        // NOTE: The "support prototype modifications" loop has been removed as part of
++        // the memory optimization patch. All schema methods are assigned as shared
++        // function references (not per-instance closures) inside each initializer in
++        // schemas.cjs, so this loop is both unnecessary and wasteful.
+     }
+     // doesn't work if Parent has a constructor with arguments
+     const Parent = params?.Parent ?? Object;
+diff --git a/node_modules/zod/v4/core/core.js b/node_modules/zod/v4/core/core.js
+index 2a32024..050fcec 100644
+--- a/node_modules/zod/v4/core/core.js
++++ b/node_modules/zod/v4/core/core.js
+@@ -19,15 +19,10 @@ export /*@__NO_SIDE_EFFECTS__*/ function $constructor(name, initializer, params)
+         }
+         inst._zod.traits.add(name);
+         initializer(inst, def);
+-        // support prototype modifications
+-        const proto = _.prototype;
+-        const keys = Object.keys(proto);
+-        for (let i = 0; i < keys.length; i++) {
+-            const k = keys[i];
+-            if (!(k in inst)) {
+-                inst[k] = proto[k].bind(inst);
+-            }
+-        }
++        // NOTE: The "support prototype modifications" loop has been removed as part of
++        // the memory optimization patch. All schema methods are assigned as shared
++        // function references (not per-instance closures) inside each initializer in
++        // schemas.js, so this loop is both unnecessary and wasteful.
+     }
+     // doesn't work if Parent has a constructor with arguments
+     const Parent = params?.Parent ?? Object;
