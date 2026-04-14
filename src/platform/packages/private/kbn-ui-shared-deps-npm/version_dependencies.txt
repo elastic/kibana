@@ -8,6 +8,7 @@
 @babel/parser@7.24.7
 @babel/plugin-syntax-jsx@7.28.6
 @babel/runtime@7.27.6
+@babel/runtime@7.28.4
 @babel/template@7.26.8
 @babel/traverse@7.26.8
 @babel/types@7.24.7

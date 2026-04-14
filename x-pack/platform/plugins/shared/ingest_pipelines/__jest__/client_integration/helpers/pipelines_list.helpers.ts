@@ -49,11 +49,19 @@ const createActions = (testBed: TestBed) => {
   };
 
   const clickActionMenu = (pipelineName: string) => {
-    const { component } = testBed;
+    const { component, table } = testBed;
 
     act(() => {
-      // When a table has > 2 actions, EUI displays an overflow menu with an id "<pipeline_name>-actions"
-      component.find(`div[id="${pipelineName}-actions"] button`).simulate('click');
+      // EUI uses row index for the popover id ("0-actions", …) instead of "<name>-actions".
+      const { rows } = table.getMetaData('pipelinesTable');
+      const row = rows.find((r) => {
+        const pipelineLink = findTestSubject(r.reactWrapper, 'pipelineDetailsLink');
+        return pipelineLink.length > 0 && pipelineLink.text() === pipelineName;
+      });
+      if (!row) {
+        throw new Error(`Could not find table row for pipeline "${pipelineName}"`);
+      }
+      findTestSubject(row.reactWrapper, 'euiCollapsedItemActionsButton').simulate('click');
     });
 
     component.update();

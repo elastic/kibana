@@ -135,7 +135,10 @@ export class ContentStream extends Duplex {
         },
         {
           asStream: true, // This tells the ES client to not process the response body in any way.
-          headers: { accept: 'application/cbor' },
+          headers: {
+            accept: 'application/cbor',
+            'accept-encoding': 'identity', // Disable response compression: asStream bypasses decompression, so gzipped bytes would break CBOR decoding
+          },
         }
       );
 
@@ -173,6 +176,9 @@ export class ContentStream extends Duplex {
           this.logger.error(`File not found (id: ${this.getHeadChunkId()}).`);
         }
       }
+      this.logger.error(
+        `Error reading chunk #${this.chunksRead} with id [${id}] from index [${chunkIndex}]: ${e.message}`
+      );
       throw e;
     }
   }
