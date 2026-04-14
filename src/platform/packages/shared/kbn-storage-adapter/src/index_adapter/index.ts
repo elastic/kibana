@@ -122,7 +122,7 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
  */
 export class StorageIndexAdapter<
   TStorageSettings extends IndexStorageSettings,
-  TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>,
+  TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>
 > {
   private readonly logger: Logger;
   constructor(
