@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { get, has } from 'lodash';
+import { map, type Observable } from 'rxjs';
+
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
+import type { Job } from '../../../../common/types/anomaly_detection_jobs';
+import type { CriteriaField } from '../../services/results_service';
+import type { MlApi } from '../../services/ml_api_service';
+import { normalizeSeverityThresholdForApi } from './normalize_table_severity';
+
+export interface AnomaliesTableEnrichmentJobService {
+  source: 'jobService';
+  detectorsByJob: Record<string, Record<number, { detector_description?: string; custom_rules?: unknown[] }>>;
+  customUrlsByJob: Record<string, unknown>;
+}
+
+export interface AnomaliesTableEnrichmentSingleJob {
+  source: 'singleJob';
+  selectedJob: Pick<Job, 'job_id' | 'analysis_config' | 'custom_settings'>;
+}
+
+export type AnomaliesTableEnrichment = AnomaliesTableEnrichmentJobService | AnomaliesTableEnrichmentSingleJob;
+
+export interface FetchAnomaliesTableDataParams {
+  mlApi: MlApi;
+  jobId: string;
+  criteriaFields: CriteriaField[];
+  tableInterval: string;
+  /** Raw severity from props; normalized before calling the API. */
+  tableSeverity: unknown;
+  earliestMs: number;
+  latestMs: number;
+  dateFormatTz: string;
+  functionDescription?: string;
+  enrichment: AnomaliesTableEnrichment;
+}
+
+function enrichAnomalies(
+  anomalies: Array<Record<string, unknown> & { jobId: string; detectorIndex: number; source: { function_description?: string } }>,
+  enrichment: AnomaliesTableEnrichment
+) {
+  anomalies.forEach((anomaly) => {
+    const jobId = anomaly.jobId;
+    let detector: { detector_description?: string; custom_rules?: unknown[] } | undefined;
+
+    if (enrichment.source === 'jobService') {
+      detector = get(enrichment.detectorsByJob, [jobId, anomaly.detectorIndex]);
+    } else {
+      const jobDetectors = enrichment.selectedJob.analysis_config.detectors;
+      detector = jobDetectors[anomaly.detectorIndex];
+    }
+
+    anomaly.detector = get(
+      detector,
+      ['detector_description'],
+      anomaly.source.function_description
+    );
+
+    const customRules = detector && 'custom_rules' in detector ? detector.custom_rules : undefined;
+    if (Array.isArray(customRules)) {
+      anomaly.rulesLength = customRules.length;
+    }
+
+    if (enrichment.source === 'jobService') {
+      if (has(enrichment.customUrlsByJob, jobId)) {
+        anomaly.customUrls = enrichment.customUrlsByJob[jobId];
+      }
+    } else if (
+      enrichment.selectedJob.custom_settings &&
+      enrichment.selectedJob.custom_settings.custom_urls
+    ) {
+      anomaly.customUrls = enrichment.selectedJob.custom_settings.custom_urls;
+    }
+  });
+}
+
+/**
+ * Shared anomalies table pipeline for SMV page and embeddable chart.
+ */
+export function fetchAnomaliesTableData$(params: FetchAnomaliesTableDataParams): Observable<{
+  tableData: {
+    anomalies: unknown[];
+    interval: unknown;
+    examplesByJobId: unknown;
+    showViewSeriesLink: boolean;
+  };
+}> {
+  const threshold = normalizeSeverityThresholdForApi(params.tableSeverity);
+
+  return params.mlApi.results
+    .getAnomaliesTableData(
+      [params.jobId],
+      params.criteriaFields as unknown as string[],
+      [],
+      params.tableInterval,
+      threshold,
+      params.earliestMs,
+      params.latestMs,
+      params.dateFormatTz,
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+      undefined,
+      undefined,
+      params.functionDescription
+    )
+    .pipe(
+      map((resp) => {
+        const anomalies = resp.anomalies as Parameters<typeof enrichAnomalies>[0];
+        enrichAnomalies(anomalies, params.enrichment);
+        return {
+          tableData: {
+            anomalies,
+            interval: resp.interval,
+            examplesByJobId: resp.examplesByJobId,
+            showViewSeriesLink: false,
+          },
+        };
+      })
+    );
+}

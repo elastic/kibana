@@ -1063,6 +1063,9 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate('xpack.ml.anomaliesTable.linksMenu.popoverAriaLabel', {
+          defaultMessage: 'Anomaly actions',
+        })}
       >
         <LinksMenuUI {...props} onItemClick={closePopover} />
       </EuiPopover>
