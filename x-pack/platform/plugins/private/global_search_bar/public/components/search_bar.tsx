@@ -38,7 +38,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { apm } from '@elastic/apm-rum';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
@@ -55,6 +55,9 @@ import { getSuggestions } from '../suggestions';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import type { SearchBarProps } from './types';
+
+/** Matches inline `width` on the project command palette modal. */
+const PROJECT_SEARCH_PALETTE_WIDTH_PX = 800;
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (
@@ -105,7 +108,27 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   // These hooks are used when on chromeStyle set to 'project'
   const [isVisible, setIsVisible] = useState(false);
+  const [projectSearchPaletteRightPx, setProjectSearchPaletteRightPx] = useState(0);
   const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const syncProjectSearchPaletteToRevealButton = useCallback(() => {
+    const el = visibilityButtonRef.current;
+    if (!el) {
+      return;
+    }
+    setProjectSearchPaletteRightPx(
+      Math.max(0, window.innerWidth - el.getBoundingClientRect().right)
+    );
+  }, []);
+
+  useLayoutEffect(() => {
+    if (chromeStyle !== 'project' || !isVisible) {
+      return;
+    }
+    syncProjectSearchPaletteToRevealButton();
+    window.addEventListener('resize', syncProjectSearchPaletteToRevealButton);
+    return () => window.removeEventListener('resize', syncProjectSearchPaletteToRevealButton);
+  }, [chromeStyle, isVisible, syncProjectSearchPaletteToRevealButton]);
 
   // General hooks
   const [initialLoad, setInitialLoad] = useState(false);
@@ -545,6 +568,26 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const projectSearchCommandPaletteGlobalCss = useMemo(
     () => css`
+      /*
+       * Flush to the viewport top; horizontal placement is fixed + right on the modal
+       * (aligned to the reveal button in JS). Flex alignment only affects non-fixed children.
+       */
+      .euiOverlayMask:has(.kbnGlobalSearchBarProjectModal) {
+        align-items: flex-start !important;
+        padding-block-start: 0 !important;
+        animation: none !important;
+        background: color-mix(
+          in srgb,
+          ${euiTheme.components.overlayMaskBackground} 42%,
+          transparent
+        ) !important;
+      }
+
+      /* EuiModal slide-in + bounce feels jumpy next to fixed header alignment */
+      .kbnGlobalSearchBarProjectModal.euiModal {
+        animation: none !important;
+      }
+
       /* EuiModal always renders a close icon; hide it for the command palette (Escape / overlay still close). */
       .kbnGlobalSearchBarProjectModal .euiModal__closeIcon {
         display: none !important;
@@ -554,7 +597,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         padding: 0 !important;
       }
       .kbnGlobalSearchBarProjectModal .euiModalBody__overflow {
-        padding: ${euiTheme.size.base} !important;
+        padding: ${euiTheme.size.s} !important;
       }
       /* Footer: pinned to modal bottom with top rule; full-width help row + pill shortcuts */
       .kbnGlobalSearchBarProjectModal .euiModalFooter {
@@ -609,7 +652,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
               className="kbnGlobalSearchBarProjectModal"
               data-test-subj="nav-search-command-palette"
               initialFocus='[data-test-subj="nav-search-input"]'
-              style={{ width: 800, height: '50vh' }}
+              style={{
+                width: PROJECT_SEARCH_PALETTE_WIDTH_PX,
+                height: '50vh',
+                position: 'fixed',
+                top: 0,
+                right: projectSearchPaletteRightPx,
+                margin: 0,
+              }}
               onClose={closePalette}
               outsideClickCloses
             >
@@ -700,6 +750,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
             if (isVisible) {
               closePalette();
             } else {
+              syncProjectSearchPaletteToRevealButton();
               setIsVisible(true);
             }
           }}

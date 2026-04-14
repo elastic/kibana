@@ -409,8 +409,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const tabsBarContainerCss = css`
     background-color: ${euiTheme.colors.lightestShade};
-    margin: ${euiTheme.size.s};
-    margin-bottom: 0;
+    margin-block-start: 0;
+    margin-inline: ${euiTheme.size.s};
+    margin-block-end: 0;
     border-radius: ${euiTheme.border.radius.small};
     overflow: clip;
   `;

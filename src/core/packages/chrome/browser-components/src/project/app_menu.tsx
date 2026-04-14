@@ -67,13 +67,17 @@ const canNavigateToParent = (crumb: ChromeBreadcrumb | undefined): boolean => {
   return Boolean(crumb.onClick || crumb.href);
 };
 
+const DISCOVER_APP_ID = 'discover';
+
 const useAppMenuBarStyles = (
   euiTheme: UseEuiTheme['euiTheme'],
   hasSecondaryRow: boolean,
   showBackToParent: boolean,
-  hasHeaderTabs: boolean
+  hasHeaderTabs: boolean,
+  currentAppId: string | undefined
 ) =>
   useMemo(() => {
+    const hideBottomBorder = currentAppId === DISCOVER_APP_ID;
     const root = {
       display: 'flex',
       flexDirection: 'column' as const,
@@ -84,8 +88,8 @@ const useAppMenuBarStyles = (
       paddingInline: euiTheme.size.m,
       paddingBottom: hasHeaderTabs ? 0 : euiTheme.size.m,
       background: euiTheme.colors.backgroundBasePlain,
-      borderBottom: euiTheme.border.thin,
-      marginBottom: `-${euiTheme.border.width.thin}`,
+      borderBottom: hideBottomBorder ? 'none' : euiTheme.border.thin,
+      marginBottom: hideBottomBorder ? 0 : `-${euiTheme.border.width.thin}`,
       minHeight: 0,
       boxSizing: 'border-box' as const,
       '&:hover .appMenuBar__globalActions': {
@@ -208,7 +212,7 @@ const useAppMenuBarStyles = (
       titleEuiTitleReact,
       menuSection,
     };
-  }, [euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs]);
+  }, [euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs, currentAppId]);
 
 const AppMenuBarHeaderTabs = ({ tabs }: { tabs: AppMenuHeaderTab[] }) => (
   <EuiTabs
@@ -265,7 +269,14 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
   const hideBackFromAppMenu = appMenuConfig?.hideProjectHeaderBackButton === true;
   const showBackToParent =
     !hideBackFromAppMenu && Boolean(parentBreadcrumb) && canNavigateToParent(parentBreadcrumb);
-  const styles = useAppMenuBarStyles(euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs);
+  const currentAppId = useCurrentAppId();
+  const styles = useAppMenuBarStyles(
+    euiTheme,
+    hasSecondaryRow,
+    showBackToParent,
+    hasHeaderTabs,
+    currentAppId
+  );
   const hasLegacyActionMenu = useHasLegacyActionMenu();
 
   useLayoutEffect(() => {
@@ -320,7 +331,6 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
     [navigateToUrl, basePath, docLinks]
   );
   const navLinks = useNavLinks();
-  const currentAppId = useCurrentAppId();
   const currentAppTitleFromNav = useMemo(() => {
     if (!currentAppId) {
       return undefined;
