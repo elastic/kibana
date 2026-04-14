@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   run:
-    uses: uses: elastic/docs-actions/.github/workflows/gh-aw-alerting-v2-digest.lock.yml@test-alerting-digest
+    uses: elastic/docs-actions/.github/workflows/gh-aw-alerting-v2-digest.lock.yml@test-alerting-digest
     with:
       target-repo: elastic/kibana
       hours-back: "24"
