@@ -77,7 +77,7 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
           data-test-subj="languageModalSaveButton"
           onClick={async () => {
             if (locale !== initialLocaleValue) {
-              onChange(locale, true);
+              await onChange(locale, true);
             }
             closeModal();
           }}
