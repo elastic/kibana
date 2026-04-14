@@ -78,7 +78,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Wait for the risk score data stream to be fully created before indexing into it.
-      await retry.waitForWithTimeout('risk score data stream to exist', 30_000, async () => {
+      // Task Manager scheduling is non-deterministic under CI load; 120 s gives enough headroom.
+      await retry.waitForWithTimeout('risk score data stream to exist', 120_000, async () => {
         try {
           const response = await es.indices.getDataStream({ name: RISK_SCORE_DATA_STREAM });
           return response.data_streams.length > 0;
