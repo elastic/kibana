@@ -243,11 +243,18 @@ const inferRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { featureClient, inferenceClient, soClient, tuningConfig, licensing, uiSettingsClient } =
-      await getScopedClients({ request });
+    const {
+      getFeatureClient,
+      inferenceClient,
+      soClient,
+      tuningConfig,
+      licensing,
+      uiSettingsClient,
+    } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const featureClient = await getFeatureClient();
     const { name: streamName } = params.path;
     const {
       connectorId,
@@ -369,14 +376,16 @@ const reconcileRoute = createServerRoute({
       totalTokensUsed: tokensSchema.optional(),
       successCount: z.number().optional(),
       featureTtlDays: z.number().optional(),
+      iterationResults: z.array(z.record(z.string(), z.unknown())).optional().default([]),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
-    const { featureClient, streamsClient, tuningConfig, licensing, uiSettingsClient } =
+    const { getFeatureClient, streamsClient, tuningConfig, licensing, uiSettingsClient } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const featureClient = await getFeatureClient();
     const { name: streamName } = params.path;
     const {
       runId,
@@ -393,6 +402,7 @@ const reconcileRoute = createServerRoute({
       totalTokensUsed: prevTokens = { ...EMPTY_TOKENS },
       successCount: prevSuccessCount = 0,
       featureTtlDays = tuningConfig.feature_ttl_days,
+      iterationResults: prevIterationResults = [],
     } = params.body;
 
     const taskLogger = logger.get('features_identification_workflow', streamName);
@@ -445,6 +455,7 @@ const reconcileRoute = createServerRoute({
         totalTokensUsed: prevTokens,
         successCount: prevSuccessCount,
         iterationResult: failedResult,
+        iterationResults: [...prevIterationResults, failedResult],
       };
     }
 
@@ -514,6 +525,7 @@ const reconcileRoute = createServerRoute({
       totalTokensUsed: updatedTotalTokens,
       successCount: prevSuccessCount + 1,
       iterationResult,
+      iterationResults: [...prevIterationResults, iterationResult],
     };
   },
 });
@@ -546,7 +558,7 @@ const finalizeRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const {
       scopedClusterClient,
-      featureClient,
+      getFeatureClient,
       streamsClient,
       tuningConfig,
       licensing,
@@ -555,6 +567,7 @@ const finalizeRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const featureClient = await getFeatureClient();
     const { name: streamName } = params.path;
     const {
       start,

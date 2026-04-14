@@ -96,6 +96,7 @@ steps:
       iteration: 0
       successCount: 0
       discoveredFeatures: []
+      iterationResults: []
       totalTokensUsed:
         prompt: 0
         completion: 0
@@ -176,6 +177,7 @@ steps:
             totalTokensUsed: "${{ variables.totalTokensUsed }}"
             successCount: "${{ variables.successCount }}"
             featureTtlDays: "${{ inputs.featureTtlDays }}"
+            iterationResults: "${{ variables.iterationResults }}"
 
       # 3e: Update loop variables with reconcile output.
       - name: update_state
@@ -185,6 +187,7 @@ steps:
           successCount: "${{ steps.reconcile_features.output.successCount }}"
           discoveredFeatures: "${{ steps.reconcile_features.output.discoveredFeatures }}"
           totalTokensUsed: "${{ steps.reconcile_features.output.totalTokensUsed }}"
+          iterationResults: "${{ steps.reconcile_features.output.iterationResults }}"
 
   # -----------------------------------------------------------------------
   # Step 4: Finalize — generate computed KI features.
@@ -213,4 +216,5 @@ steps:
       discoveredFeatures: "${{ variables.discoveredFeatures }}"
       computedFeaturesCount: "${{ steps.finalize.output.computedFeaturesCount }}"
       tokensUsed: "${{ variables.totalTokensUsed }}"
-      iterations: "${{ variables.iteration }}"
+      iterations: "${{ variables.iterationResults }}"
+      iterationCount: "${{ variables.iteration }}"

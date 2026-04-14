@@ -21,11 +21,7 @@ import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
-import {
-  ExecutionStatus,
-  isTerminalStatus,
-  type WorkflowExecutionListItemDto,
-} from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { StreamsTaskType, TaskContext } from '.';
 import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';
@@ -40,7 +36,11 @@ import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
 } from '../../sig_events/tasks/significant_events_queries_generation';
-import type { WorkflowClient, WorkflowExecutionResult } from '../../workflows/workflow_client';
+import {
+  type WorkflowClient,
+  type WorkflowExecutionResult,
+  streamNamePredicate,
+} from '../../workflows/workflow_client';
 import type { FeaturesIdentificationWorkflowInputs } from '../../../../common/constants';
 
 export interface OnboardingTaskParams {
@@ -63,10 +63,6 @@ export function getOnboardingTaskId(streamName: string, saveQueries: boolean = t
 }
 
 const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
-
-const streamNamePredicate = (name: string) => {
-  return (exec: WorkflowExecutionListItemDto) => exec.context?.streamName === name;
-};
 
 function toIdentifyFeaturesResult(
   execution: WorkflowExecutionResult

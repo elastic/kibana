@@ -67,6 +67,7 @@ export const useKnowledgeIndicatorsColumns = ({
       {
         name: TITLE_COLUMN_LABEL,
         truncateText: true,
+        width: '35%',
         render: (ki: KnowledgeIndicator) => {
           const title = getKnowledgeIndicatorTitle(ki);
           const isExpanded = selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(ki);
@@ -115,7 +116,7 @@ export const useKnowledgeIndicatorsColumns = ({
       },
       {
         name: TYPE_COLUMN_LABEL,
-        width: '90px',
+        width: '120px',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind === 'feature') {
             return (
@@ -129,7 +130,7 @@ export const useKnowledgeIndicatorsColumns = ({
       },
       {
         name: CONFIDENCE_COLUMN_LABEL,
-        width: '70px',
+        width: '100px',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind !== 'feature') return null;
           return (
@@ -141,14 +142,14 @@ export const useKnowledgeIndicatorsColumns = ({
       },
       {
         name: STREAM_COLUMN_LABEL,
-        width: '110px',
+        width: '150px',
         render: (ki: KnowledgeIndicator) => {
           return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
         },
       },
       {
         name: BACKED_STATUS_COLUMN,
-        width: '100px',
+        width: '120px',
         render: (ki: KnowledgeIndicator) => {
           if (ki.kind !== 'query') return null;
           return (

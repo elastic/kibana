@@ -18,11 +18,9 @@ import {
   STREAMS_API_PRIVILEGES,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MAX_SCHEDULED_STREAMS,
+  type FeaturesIdentificationWorkflowInputs,
 } from '../../../../../common/constants';
-import {
-  type FeaturesIdentificationTaskParams,
-  FEATURES_IDENTIFICATION_TASK_TYPE,
-} from '../../../../lib/tasks/task_definitions/features_identification';
+import type { WorkflowClient } from '../../../../lib/workflows/workflow_client';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import {
   classifyStreams,
@@ -61,13 +59,19 @@ const NumberFromString = z.string().transform((value) => {
   return Number(trimmed);
 });
 
+const COMPLETED_EXECUTIONS_MAX_AGE_MS = 48 * 3_600_000;
+
+const fetchCompletedExecutions = (
+  workflowClient: WorkflowClient<FeaturesIdentificationWorkflowInputs>
+) => workflowClient.getCompletedExecutions({ maxAgeMs: COMPLETED_EXECUTIONS_MAX_AGE_MS });
+
 const eligibleStreamsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_extraction/_eligible',
   options: {
     access: 'internal',
     summary: 'List streams eligible for KI extraction',
     description:
-      'Classifies streams into eligible candidates, already-running, up-to-date, and excluded buckets based on extraction settings and task state.',
+      'Classifies streams into eligible candidates, already-running, up-to-date, and excluded buckets based on extraction settings and workflow execution state.',
   },
   security: {
     authz: {
@@ -89,11 +93,16 @@ const eligibleStreamsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    featuresIdentificationWorkflowClient: workflowClient,
   }): Promise<EligibleStreamsResponse> => {
-    const { streamsClient, taskClient, globalUiSettingsClient, uiSettingsClient, licensing } =
+    const { streamsClient, globalUiSettingsClient, uiSettingsClient, licensing } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    if (!workflowClient) {
+      throw new StatusError('KI features identification workflow client is not available', 500);
+    }
 
     const query = params?.query ?? {};
 
@@ -117,26 +126,18 @@ const eligibleStreamsRoute = createServerRoute({
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
 
-    const [connectorId, sortedTasks, allStreams] = await Promise.all([
-      resolveConnectorForFeature({
-        searchInferenceEndpoints: server.searchInferenceEndpoints,
-        featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-        featureName: 'knowledge indicator extraction',
-        request,
-      }),
-      taskClient.findByType<FeaturesIdentificationTaskParams>(FEATURES_IDENTIFICATION_TASK_TYPE, {
-        sort: [
-          {
-            last_completed_at: {
-              order: 'asc',
-              missing: '_first',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      }),
-      streamsClient.listStreams(),
-    ]);
+    const [connectorId, { results: runningExecutions }, completedExecutions, allStreams] =
+      await Promise.all([
+        resolveConnectorForFeature({
+          searchInferenceEndpoints: server.searchInferenceEndpoints,
+          featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+          featureName: 'knowledge indicator extraction',
+          request,
+        }),
+        workflowClient.getNonTerminalExecutions(),
+        fetchCompletedExecutions(workflowClient),
+        streamsClient.listStreams(),
+      ]);
 
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
@@ -145,7 +146,8 @@ const eligibleStreamsRoute = createServerRoute({
 
     const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
       allStreams,
-      sortedTasks,
+      runningExecutions,
+      completedExecutions,
       excludedStreamPatterns: resolvedExcludedPatterns,
       intervalHours,
     });

@@ -9,10 +9,11 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { TaskStatus } from '@kbn/streams-schema';
-import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
-import type { TaskClient } from '../tasks/task_client';
-import { FEATURES_IDENTIFICATION_TASK_TYPE } from '../tasks/task_definitions/features_identification';
+import {
+  CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+  type FeaturesIdentificationWorkflowInputs,
+} from '../../../common/constants';
+import type { WorkflowClient } from './workflow_client';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 import { pollUntil } from './poll_until';
 
@@ -20,7 +21,7 @@ export interface ContinuousKiExtractionWorkflowService {
   ensureWorkflow(params: {
     enabled: boolean;
     request: KibanaRequest;
-    taskClient: TaskClient<string>;
+    featuresWorkflowClient?: WorkflowClient<FeaturesIdentificationWorkflowInputs>;
   }): Promise<void>;
 }
 
@@ -59,20 +60,23 @@ export const createContinuousKiExtractionWorkflowService = (
     );
   };
 
-  const cancelRunningTasks = async (taskClient: TaskClient<string>) => {
-    const canceledIds = await taskClient.cancelByType(FEATURES_IDENTIFICATION_TASK_TYPE);
-    if (canceledIds.length === 0) {
-      return;
-    }
+  const cancelRunningFeaturesWorkflows = async (
+    featuresWorkflowClient?: WorkflowClient<FeaturesIdentificationWorkflowInputs>
+  ) => {
+    if (!featuresWorkflowClient) return;
 
-    log.debug(() => `Requested cancellation for ${canceledIds.length} running task(s)`);
+    const { results } = await featuresWorkflowClient.getNonTerminalExecutions();
+    if (results.length === 0) return;
+
+    await Promise.all(results.map((exec) => featuresWorkflowClient.cancel(exec.id)));
+
+    log.debug(
+      () => `Requested cancellation for ${results.length} running features workflow execution(s)`
+    );
 
     await pollUntil(
-      () => Promise.all(canceledIds.map((id) => taskClient.get(id))),
-      (tasks) =>
-        tasks.every(
-          ({ status }) => status !== TaskStatus.InProgress && status !== TaskStatus.BeingCanceled
-        )
+      () => featuresWorkflowClient.getNonTerminalExecutions(),
+      ({ total }) => total === 0
     );
   };
 
@@ -99,7 +103,7 @@ export const createContinuousKiExtractionWorkflowService = (
   };
 
   return {
-    async ensureWorkflow({ enabled, request, taskClient }) {
+    async ensureWorkflow({ enabled, request, featuresWorkflowClient }) {
       const existing = await managementApi.getWorkflow(
         CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
         DEFAULT_SPACE_ID
@@ -112,8 +116,8 @@ export const createContinuousKiExtractionWorkflowService = (
       }
 
       if (existing) {
-        await cancelRunningTasks(taskClient).catch((err) =>
-          log.warn(`Failed to cancel running tasks: ${err}`)
+        await cancelRunningFeaturesWorkflows(featuresWorkflowClient).catch((err) =>
+          log.warn(`Failed to cancel running features workflow executions: ${err}`)
         );
         await hardDelete(request);
       }

@@ -49,6 +49,7 @@ export interface WorkflowClient<TInputs extends Record<string, unknown>> {
     predicate: (execution: WorkflowExecutionListItemDto) => boolean,
     options?: { maxAgeMs?: number }
   ): Promise<WorkflowExecutionListItemDto | null>;
+  getCompletedExecutions(options?: { maxAgeMs?: number }): Promise<WorkflowExecutionListItemDto[]>;
 }
 
 interface WorkflowClientParams {
@@ -57,6 +58,17 @@ interface WorkflowClientParams {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
 }
+
+export const getStreamNameFromExecution = (
+  exec: WorkflowExecutionListItemDto
+): string | undefined => {
+  const inputs = (exec.context as Record<string, Record<string, unknown>> | undefined)?.inputs;
+  return (inputs as Record<string, unknown> | undefined)?.streamName as string | undefined;
+};
+
+export const streamNamePredicate = (name: string) => {
+  return (exec: WorkflowExecutionListItemDto) => getStreamNameFromExecution(exec) === name;
+};
 
 export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
   workflowId,
@@ -157,6 +169,54 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
     return created;
   };
 
+  // TODO: The workflow plugin's getWorkflowExecutions strips `context` from list items,
+  // so predicates that inspect context.inputs (e.g. streamName) require a follow-up
+  // getWorkflowExecution call per item. This N+1 overhead should be eliminated once
+  // the workflow team adds support for including context in list responses or
+  // server-side filtering by context fields.
+  const enrichWithContext = async (
+    item: WorkflowExecutionListItemDto
+  ): Promise<WorkflowExecutionListItemDto> => {
+    const full = await managementApi.getWorkflowExecution(item.id, DEFAULT_SPACE_ID);
+    return full ? { ...item, context: full.context } : item;
+  };
+
+  const paginateCompletedExecutions = async (
+    maxAgeMs: number | undefined,
+    visitor: (exec: WorkflowExecutionListItemDto) => 'match' | 'continue'
+  ): Promise<WorkflowExecutionListItemDto | null> => {
+    const cutoff = maxAgeMs ? Date.now() - maxAgeMs : undefined;
+    const pageSize = 100;
+    let page = 1;
+
+    while (true) {
+      const { results, total } = await managementApi.getWorkflowExecutions(
+        {
+          workflowId,
+          statuses: [ExecutionStatus.COMPLETED],
+          size: pageSize,
+          page,
+        },
+        DEFAULT_SPACE_ID
+      );
+
+      for (const exec of results) {
+        if (cutoff && new Date(exec.finishedAt).getTime() < cutoff) {
+          return null;
+        }
+        const enriched = await enrichWithContext(exec);
+        if (visitor(enriched) === 'match') {
+          return enriched;
+        }
+      }
+
+      if (page * pageSize >= total) {
+        return null;
+      }
+      page++;
+    }
+  };
+
   return {
     async ensureExists(request) {
       await ensureWorkflow(request);
@@ -205,12 +265,13 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
         throw new StatusError(`Workflow execution ${executionId} not found`, 404);
       }
 
+      const ctx = (execution.context ?? {}) as Record<string, unknown>;
       return {
         executionId: execution.id,
         status: execution.status,
         error: execution.error?.message,
         duration: execution.duration,
-        output: execution.context,
+        output: (ctx.output as Record<string, unknown>) ?? {},
       };
     },
 
@@ -219,50 +280,37 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
     // TODO: Replace with server-side filtering once the workflow plugin supports
     // concurrencyGroupKey and finishedAfter/finishedBefore filters in getWorkflowExecutions.
     async getLastCompletedExecution(predicate, options) {
-      const maxAgeMs = options?.maxAgeMs;
-      const cutoff = maxAgeMs ? Date.now() - maxAgeMs : undefined;
-      const pageSize = 100;
-      let page = 1;
+      return paginateCompletedExecutions(options?.maxAgeMs, (exec) =>
+        predicate(exec) ? 'match' : 'continue'
+      );
+    },
 
-      while (true) {
-        const { results, total } = await managementApi.getWorkflowExecutions(
-          {
-            workflowId,
-            statuses: [ExecutionStatus.COMPLETED],
-            size: pageSize,
-            page,
-          },
-          DEFAULT_SPACE_ID
-        );
-
-        for (const exec of results) {
-          if (cutoff && new Date(exec.finishedAt).getTime() < cutoff) {
-            return null;
-          }
-          if (predicate(exec)) {
-            return exec;
-          }
-        }
-
-        if (page * pageSize >= total) {
-          return null;
-        }
-        page++;
-      }
+    async getCompletedExecutions(options) {
+      const collected: WorkflowExecutionListItemDto[] = [];
+      await paginateCompletedExecutions(options?.maxAgeMs, (exec) => {
+        // Items are already enriched with context by paginateCompletedExecutions
+        collected.push(exec);
+        return 'continue';
+      });
+      return collected;
     },
 
     async getActiveExecution(predicate) {
       const { results } = await getNonTerminalExecutions();
-      const match = results.find(predicate);
 
-      if (!match) return null;
+      for (const item of results) {
+        const enriched = await enrichWithContext(item);
+        if (predicate(enriched)) {
+          return {
+            executionId: item.id,
+            status: item.status,
+            error: item.error?.message,
+            duration: item.duration,
+          };
+        }
+      }
 
-      return {
-        executionId: match.id,
-        status: match.status,
-        error: match.error?.message,
-        duration: match.duration,
-      };
+      return null;
     },
   };
 };

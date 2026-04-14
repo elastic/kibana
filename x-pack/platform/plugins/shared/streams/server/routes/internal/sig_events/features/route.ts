@@ -7,24 +7,59 @@
 
 import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
-import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
-import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
+import type {
+  BaseFeature,
+  IdentifyFeaturesResult,
+  IterationResult,
+  TaskResult,
+} from '@kbn/streams-schema';
+import { TaskStatus, baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import { ExecutionStatus } from '@kbn/workflows';
 import { v4 as uuid } from 'uuid';
+import {
+  type WorkflowExecutionResult,
+  streamNamePredicate,
+} from '../../../../lib/workflows/workflow_client';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import {
-  type FeaturesIdentificationTaskParams,
-  getFeaturesIdentificationTaskId,
-  FEATURES_IDENTIFICATION_TASK_TYPE,
-} from '../../../../lib/tasks/task_definitions/features_identification';
-import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
-import { handleTaskAction } from '../../../utils/task_helpers';
 
 export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
 
 const dateFromString = z.string().transform((input) => new Date(input));
+
+function workflowExecutionToTaskResult(
+  execution: WorkflowExecutionResult
+): FeaturesIdentificationTaskResult {
+  if (execution.status === ExecutionStatus.COMPLETED) {
+    const output = execution.output ?? {};
+    const rawFeatures = output.discoveredFeatures;
+    const features = Array.isArray(rawFeatures) ? (rawFeatures as BaseFeature[]) : [];
+    const tokensUsed = output.tokensUsed as ChatCompletionTokenCount | undefined;
+    const iterations = output.iterations as IterationResult[] | undefined;
+    return {
+      status: TaskStatus.Completed,
+      features,
+      durationMs: execution.duration ?? 0,
+      totalTokensUsed: tokensUsed,
+      iterations,
+    };
+  }
+
+  if (
+    execution.status === ExecutionStatus.FAILED ||
+    execution.status === ExecutionStatus.CANCELLED
+  ) {
+    return {
+      status: TaskStatus.Failed,
+      error: execution.error ?? `Workflow execution ${execution.executionId} ${execution.status}`,
+    };
+  }
+
+  return { status: TaskStatus.InProgress };
+}
 
 export const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features',
@@ -290,7 +325,7 @@ export const featuresStatusRoute = createServerRoute({
     access: 'internal',
     summary: 'Check the status of feature identification',
     description:
-      'Feature identification happens as a background task, this endpoints allows the user to check the status of this task. This endpoints combine with POST /internal/streams/{name}/features/_task which manages the task lifecycle.',
+      'Feature identification happens as a background workflow execution. This endpoint returns the current status or last completed result.',
   },
   security: {
     authz: {
@@ -305,29 +340,53 @@ export const featuresStatusRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    featuresIdentificationWorkflowClient: workflowClient,
   }): Promise<FeaturesIdentificationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    if (!workflowClient) {
+      return { status: TaskStatus.NotStarted };
+    }
+
     const { name } = params.path;
     await streamsClient.ensureStream(name);
 
-    return taskClient.getStatus<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
-      getFeaturesIdentificationTaskId(name)
-    );
+    const activeExecution = await workflowClient.getActiveExecution(streamNamePredicate(name));
+    if (activeExecution) {
+      return { status: TaskStatus.InProgress };
+    }
+
+    const lastCompleted = await workflowClient.getLastCompletedExecution(streamNamePredicate(name));
+    if (lastCompleted) {
+      const execution = await workflowClient.getStatus(lastCompleted.id);
+      return workflowExecutionToTaskResult(execution);
+    }
+
+    return { status: TaskStatus.NotStarted };
   },
 });
+
+const workflowTaskActionSchema = z.discriminatedUnion('action', [
+  z.object({
+    action: z.literal('schedule').describe('Schedule a new KI features identification run'),
+    from: dateFromString,
+    to: dateFromString,
+  }),
+  z.object({
+    action: z.literal('cancel').describe('Cancel an in-progress KI features identification run'),
+  }),
+]);
 
 export const featuresTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features/_task',
   options: {
     access: 'internal',
     summary: 'Identify features in a stream',
-    description:
-      'Identify features in a stream with an LLM, this happens as a background task and this endpoint manages the task lifecycle.',
+    description: 'Identify features in a stream with an LLM via a background workflow execution.',
   },
   security: {
     authz: {
@@ -336,22 +395,24 @@ export const featuresTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: taskActionSchema({
-      from: dateFromString,
-      to: dateFromString,
-    }),
+    body: workflowTaskActionSchema,
   }),
   handler: async ({
     params,
     request,
     getScopedClients,
     server,
+    featuresIdentificationWorkflowClient: workflowClient,
   }): Promise<FeaturesIdentificationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    if (!workflowClient) {
+      throw new Error('KI features identification workflow client is not available');
+    }
 
     const {
       path: { name },
@@ -359,30 +420,25 @@ export const featuresTaskRoute = createServerRoute({
     } = params;
     await streamsClient.ensureStream(name);
 
-    const taskId = getFeaturesIdentificationTaskId(name);
+    if (body.action === 'schedule') {
+      await workflowClient.run(
+        {
+          streamName: name,
+          start: body.from.getTime(),
+          end: body.to.getTime(),
+        },
+        request
+      );
+      return { status: TaskStatus.InProgress };
+    }
 
-    const actionParams =
-      body.action === 'schedule'
-        ? ({
-            action: body.action,
-            scheduleConfig: {
-              taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
-              taskId,
-              params: {
-                start: body.from.getTime(),
-                end: body.to.getTime(),
-                streamName: name,
-              },
-              request,
-            },
-          } as const)
-        : ({ action: body.action } as const);
+    const activeExecution = await workflowClient.getActiveExecution(streamNamePredicate(name));
+    if (activeExecution) {
+      await workflowClient.cancel(activeExecution.executionId);
+      return { status: TaskStatus.BeingCanceled };
+    }
 
-    return handleTaskAction<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>({
-      taskClient,
-      taskId,
-      ...actionParams,
-    });
+    return { status: TaskStatus.NotStarted };
   },
 });
 

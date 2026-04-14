@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Streams, TaskStatus } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { minimatch } from 'minimatch';
-import type { PersistedTask } from '../../../../lib/tasks/types';
-import type { FeaturesIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/features_identification';
+import { getStreamNameFromExecution } from '../../../../lib/workflows/workflow_client';
 
 export interface StreamCandidate {
   streamName: string;
@@ -35,17 +35,22 @@ const matchesExcludePatterns = (name: string, patterns: string[]): boolean =>
 
 /**
  * Classifies streams into buckets (excluded, already-running, candidates, up-to-date)
- * by walking the ES-sorted task list and comparing each stream's last activity
- * against the configured extraction interval.
+ * by checking workflow execution state for each stream.
+ *
+ * `runningExecutions`: non-terminal workflow executions (used for "alreadyRunning")
+ * `completedExecutions`: completed workflow executions sorted by finishedAt desc
+ *   (used to determine freshness: "upToDate" vs "candidate")
  */
 export const classifyStreams = ({
   allStreams,
-  sortedTasks,
+  runningExecutions,
+  completedExecutions,
   excludedStreamPatterns,
   intervalHours,
 }: {
   allStreams: Streams.all.Definition[];
-  sortedTasks: Array<PersistedTask<FeaturesIdentificationTaskParams>>;
+  runningExecutions: WorkflowExecutionListItemDto[];
+  completedExecutions: WorkflowExecutionListItemDto[];
   excludedStreamPatterns: string;
   intervalHours: number;
 }): StreamClassificationResult => {
@@ -69,35 +74,45 @@ export const classifyStreams = ({
     }
   }
 
+  const runningStreamNames = new Set<string>();
+  const alreadyRunning: Array<{ streamName: string; scheduledAt: string | null }> = [];
+  for (const exec of runningExecutions) {
+    const streamName = getStreamNameFromExecution(exec);
+    if (!streamName || !eligibleNames.has(streamName)) continue;
+    runningStreamNames.add(streamName);
+    alreadyRunning.push({ streamName, scheduledAt: exec.startedAt ?? null });
+  }
+
   const intervalMs = intervalHours * 3_600_000;
   const now = Date.now();
-  const alreadyRunning: Array<{ streamName: string; scheduledAt: string | null }> = [];
   const candidates: StreamCandidate[] = [];
   const upToDate: StreamCandidate[] = [];
-  const streamsWithTask = new Set<string>();
+  const streamsWithCompletion = new Set<string>();
 
-  for (const task of sortedTasks) {
-    const streamName = task.task.params.streamName;
-    if (!eligibleNames.has(streamName)) continue;
-    streamsWithTask.add(streamName);
+  const lastCompletedByStream = new Map<string, string>();
+  for (const exec of completedExecutions) {
+    const streamName = getStreamNameFromExecution(exec);
+    if (!streamName || !eligibleNames.has(streamName)) continue;
+    if (runningStreamNames.has(streamName)) continue;
+    if (lastCompletedByStream.has(streamName)) continue;
+    lastCompletedByStream.set(streamName, exec.finishedAt);
+  }
 
-    if (task.status === TaskStatus.InProgress || task.status === TaskStatus.BeingCanceled) {
-      alreadyRunning.push({ streamName, scheduledAt: task.created_at || null });
+  for (const [streamName, finishedAt] of lastCompletedByStream) {
+    streamsWithCompletion.add(streamName);
+    const lastActivityMs = new Date(finishedAt).getTime();
+    if (now - lastActivityMs >= intervalMs) {
+      candidates.push({ streamName, lastCompletedAt: finishedAt });
     } else {
-      const lastActivityAt =
-        task.status === TaskStatus.Failed ? task.last_failed_at : task.last_completed_at;
-      const lastActivityMs = lastActivityAt ? new Date(lastActivityAt).getTime() : 0;
-      if (now - lastActivityMs >= intervalMs) {
-        candidates.push({ streamName, lastCompletedAt: task.last_completed_at ?? null });
-      } else {
-        upToDate.push({ streamName, lastCompletedAt: task.last_completed_at ?? null });
-      }
+      upToDate.push({ streamName, lastCompletedAt: finishedAt });
     }
   }
 
-  const noTaskStreams = [...eligibleNames].filter((name) => !streamsWithTask.has(name));
+  const noHistoryStreams = [...eligibleNames].filter(
+    (name) => !runningStreamNames.has(name) && !streamsWithCompletion.has(name)
+  );
   const allCandidates = [
-    ...noTaskStreams.map((name) => ({ streamName: name, lastCompletedAt: null })),
+    ...noHistoryStreams.map((name) => ({ streamName: name, lastCompletedAt: null })),
     ...candidates,
   ];
 
