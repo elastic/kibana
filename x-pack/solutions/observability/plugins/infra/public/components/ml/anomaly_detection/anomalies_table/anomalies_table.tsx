@@ -279,7 +279,7 @@ export interface Props {
   dateRange?: TimeRange;
   // In case the date picker is managed outside this component
   hideDatePicker?: boolean;
-  // subject to watch the completition of the request
+  // subject to watch the completion of the request
   fetcherOpts?: Pick<FetcherOptions, 'autoFetch' | 'requestObservable$'>;
   hideSelectGroup?: boolean;
   onJobTypeChange?: (jobType: 'host' | 'pod') => void;
@@ -313,7 +313,6 @@ export const AnomaliesTable = ({
   dateRange = DEFAULT_DATE_RANGE,
   hideDatePicker = false,
   fetcherOpts,
-  onJobTypeChange,
   hideSelectGroup,
 }: Props) => {
   const [search, setSearch] = useState('');
@@ -438,14 +437,10 @@ export const AnomaliesTable = ({
     setSearch(e.target.value);
   }, []);
 
-  const changeJobType = useCallback(
-    (selectedOptions: any) => {
-      setSelectedJobType(selectedOptions);
-      setJobType(selectedOptions[0].id);
-      onJobTypeChange?.(selectedOptions[0].id === 'hosts' ? 'host' : 'pod');
-    },
-    [onJobTypeChange]
-  );
+  const changeJobType = useCallback((selectedOptions: any) => {
+    setSelectedJobType(selectedOptions);
+    setJobType(selectedOptions[0].id);
+  }, []);
 
   const changeSortOptions = useCallback(
     (nextSortOptions: Sort) => {
