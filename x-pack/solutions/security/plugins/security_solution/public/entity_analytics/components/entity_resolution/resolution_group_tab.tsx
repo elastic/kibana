@@ -39,9 +39,14 @@ import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
 interface ResolutionGroupTabProps {
   entityId: string;
   entityType: EntityType;
+  scopeId: string;
 }
 
-export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId, entityType }) => {
+export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
+  entityId,
+  entityType,
+  scopeId,
+}) => {
   const { http } = useKibana().services;
   const { addError } = useAppToasts();
   const { openFlyout } = useExpandableFlyoutApi();
@@ -90,13 +95,13 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
           params: {
             [panelParam]: clickedEntityName,
             entityId: clickedEntityId,
-            contextID: 'entity-resolution',
-            scopeId: 'entity-resolution',
+            contextID: scopeId,
+            scopeId,
           },
         },
       });
     },
-    [openFlyout, entityType]
+    [openFlyout, entityType, scopeId]
   );
 
   const handleRemoveEntity = useCallback(
