@@ -99,6 +99,7 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/event-log-plugin'
 tags:
   - plugin
   - prod
