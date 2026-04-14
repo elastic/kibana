@@ -15,9 +15,6 @@ import {
 import type { SavedViews } from './saved_views';
 
 export class InventoryPage {
-  public readonly feedbackLink: Locator;
-  public readonly k8sFeedbackLink: Locator;
-
   public readonly datePickerInput: Locator;
 
   public readonly inventorySwitcherButton: Locator;
@@ -67,9 +64,6 @@ export class InventoryPage {
     private readonly kbnUrl: KibanaUrl,
     private readonly savedViews: SavedViews
   ) {
-    this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
-    this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
-
     this.datePickerInput = this.page.getByTestId('waffleDatePicker').getByRole('textbox');
 
     this.inventorySwitcherButton = this.page.getByTestId('openInventorySwitcher');
