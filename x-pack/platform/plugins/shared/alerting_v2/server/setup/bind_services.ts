@@ -67,6 +67,12 @@ import {
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+import {
+  ExecutionEventLogger,
+  ExecutionEventLoggerToken,
+  EVENT_LOG_PROVIDER,
+  EVENT_LOG_ACTIONS,
+} from '../lib/services/execution_event_logger';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -249,4 +255,18 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   // Order matters: specialized strategies first, fallback (BasicTransitionStrategy) last.
   bind(TransitionStrategyToken).to(CountTimeframeStrategy).inSingletonScope();
   bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
+
+  // Execution event logger — writes enriched execution metrics to the event log
+  bind(ExecutionEventLoggerToken)
+    .toDynamicValue(({ get }) => {
+      const eventLogService = get(
+        PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
+      );
+      eventLogService.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+      const eventLogger = eventLogService.getLogger({
+        event: { provider: EVENT_LOG_PROVIDER },
+      });
+      return new ExecutionEventLogger(eventLogger);
+    })
+    .inSingletonScope();
 }

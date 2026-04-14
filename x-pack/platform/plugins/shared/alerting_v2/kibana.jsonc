@@ -11,6 +11,7 @@
     "configPath": ["xpack", "alerting_v2"],
     "requiredPlugins": [
       "taskManager",
+      "eventLog",
       "features",
       "spaces",
       "data",

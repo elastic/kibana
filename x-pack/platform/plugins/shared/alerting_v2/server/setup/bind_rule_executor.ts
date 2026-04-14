@@ -26,6 +26,7 @@ import {
 } from '../lib/rule_executor/middleware';
 import { DirectorStep } from '../lib/rule_executor/steps/director_step';
 import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events';
+import { CountActiveEpisodesStep } from '../lib/rule_executor/steps/count_active_episodes_step';
 
 export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) => {
   /**
@@ -55,6 +56,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(CountActiveEpisodesStep).inSingletonScope();
 
   bind(RuleExecutionPipeline).toSelf().inRequestScope();
 };

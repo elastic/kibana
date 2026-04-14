@@ -8,28 +8,80 @@
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
 
-import type { HaltReason, RuleExecutorTaskParams } from './types';
+import type { HaltReason, RuleExecutorTaskParams, RuleExecutionInput } from './types';
 import type {
   RuleExecutionPipelineContract,
   RuleExecutionPipelineInput,
   RuleExecutionPipelineResult,
 } from './execution_pipeline';
 import { RuleExecutionPipeline } from './execution_pipeline';
+import {
+  ExecutionEventLoggerToken,
+  type ExecutionEventLoggerContract,
+} from '../services/execution_event_logger';
+import { createExecutionContext } from '../execution_context';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
   constructor(
-    @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract
+    @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract,
+    @inject(ExecutionEventLoggerToken)
+    private readonly executionEventLogger: ExecutionEventLoggerContract
   ) {}
 
   public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
-    const input = this.createRuleExecutionInput(taskInstance, abortController);
+    const pipelineInput = this.createRuleExecutionInput(taskInstance, abortController);
+    const executionInput: RuleExecutionInput = {
+      ...pipelineInput,
+      executionContext: createExecutionContext(pipelineInput.abortSignal),
+    };
+    const startTime = Date.now();
 
-    const result = await this.pipeline.execute(input);
+    let result: RuleExecutionPipelineResult;
+    let executionError: Error | undefined;
+
+    try {
+      result = await this.pipeline.execute(pipelineInput);
+    } catch (error) {
+      executionError = error;
+      result = {
+        completed: false,
+        finalState: { input: executionInput },
+      };
+    }
+
+    const durationMs = Date.now() - startTime;
+
+    this.logExecutionEvent(pipelineInput, result, durationMs, executionError);
+
+    if (executionError) {
+      throw executionError;
+    }
 
     return this.buildRunResult(result, taskInstance);
+  }
+
+  private logExecutionEvent(
+    input: RuleExecutionPipelineInput,
+    result: RuleExecutionPipelineResult,
+    durationMs: number,
+    error?: Error
+  ): void {
+    const { activeEpisodeCount } = result.finalState;
+    const outcome = result.completed ? 'success' : 'failure';
+
+    this.executionEventLogger.logExecution({
+      ruleId: input.ruleId,
+      spaceId: input.spaceId,
+      scheduledAt: input.scheduledAt,
+      outcome,
+      durationMs,
+      message: error ? `rule execution failed: ${error.message}` : `rule executed: ${input.ruleId}`,
+      errorMessage: error?.message,
+      metrics: result.completed && activeEpisodeCount != null ? { activeEpisodeCount } : null,
+    });
   }
 
   /**

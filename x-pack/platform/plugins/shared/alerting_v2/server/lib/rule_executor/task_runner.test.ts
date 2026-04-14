@@ -9,11 +9,13 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task'
 
 import { RuleExecutorTaskRunner } from './task_runner';
 import type { RuleExecutionPipelineContract } from './execution_pipeline';
+import type { ExecutionEventLoggerContract } from '../services/execution_event_logger';
 import { createRulePipelineState } from './test_utils';
 
 describe('RuleExecutorTaskRunner', () => {
   let runner: RuleExecutorTaskRunner;
   let pipeline: jest.Mocked<RuleExecutionPipelineContract>;
+  let executionEventLogger: jest.Mocked<ExecutionEventLoggerContract>;
   let abortController: AbortController;
 
   // @ts-expect-error: not all fields are required
@@ -27,7 +29,8 @@ describe('RuleExecutorTaskRunner', () => {
 
   beforeEach(() => {
     pipeline = { execute: jest.fn() };
-    runner = new RuleExecutorTaskRunner(pipeline);
+    executionEventLogger = { logExecution: jest.fn() };
+    runner = new RuleExecutorTaskRunner(pipeline, executionEventLogger);
     abortController = new AbortController();
   });
 

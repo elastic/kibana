@@ -20,12 +20,14 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { IEventLogService } from '@kbn/event-log-plugin/server';
 
 export type AlertingServerSetup = void;
 export type AlertingServerStart = void;
 
 export interface AlertingServerSetupDependencies {
   taskManager: TaskManagerSetupContract;
+  eventLog: IEventLogService;
   features: FeaturesPluginSetup;
   spaces: SpacesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
