@@ -183,82 +183,78 @@ apiTest.describe(
   }
 );
 
-apiTest.describe(
-  'Fleet Outputs Management',
-  { tag: [...tags.serverless.security.complete, ...tags.stateful.classic] },
-  () => {
-    let outputId: string;
+apiTest.describe('Fleet Outputs Management', { tag: [...tags.stateful.classic] }, () => {
+  let outputId: string;
 
-    apiTest.afterEach(async ({ apiServices }) => {
-      // Clean up output
-      if (outputId) {
-        await apiServices.fleet.outputs.delete(outputId);
+  apiTest.afterEach(async ({ apiServices }) => {
+    // Clean up output
+    if (outputId) {
+      await apiServices.fleet.outputs.delete(outputId);
+    }
+    outputId = '';
+  });
+
+  apiTest('should get all outputs', async ({ apiServices }) => {
+    const response = await apiServices.fleet.outputs.getOutputs();
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.data).toBeDefined();
+    expect(response.data.items).toBeDefined();
+  });
+
+  apiTest('should get a specific output by ID', async ({ apiServices }) => {
+    // First get all outputs to find an existing one
+    const allOutputsResponse = await apiServices.fleet.outputs.getOutputs();
+    const existingOutput = allOutputsResponse.data.items[0];
+
+    // Only proceed if we have an existing output
+    expect(existingOutput).toBeDefined();
+
+    const response = await apiServices.fleet.outputs.getOutput(existingOutput.id);
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.data.item.id).toBe(existingOutput.id);
+  });
+
+  apiTest('should create an output with additional parameters', async ({ apiServices }) => {
+    const outputName = `test-output-params-${Date.now()}`;
+    const outputHosts = ['https://localhost:9200'];
+
+    const response = await apiServices.fleet.outputs.create(
+      outputName,
+      outputHosts,
+      'elasticsearch',
+      {
+        is_default: false,
+        ca_trusted_fingerprint: 'test-fingerprint',
       }
-      outputId = '';
-    });
+    );
 
-    apiTest('should get all outputs', async ({ apiServices }) => {
-      const response = await apiServices.fleet.outputs.getOutputs();
+    expect(response).toHaveStatusCode(200);
+    expect(response.data.item.name).toBe(outputName);
+    expect(response.data.item.is_default).toBe(false);
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.data).toBeDefined();
-      expect(response.data.items).toBeDefined();
-    });
+    outputId = response.data.item.id;
+  });
 
-    apiTest('should get a specific output by ID', async ({ apiServices }) => {
-      // First get all outputs to find an existing one
-      const allOutputsResponse = await apiServices.fleet.outputs.getOutputs();
-      const existingOutput = allOutputsResponse.data.items[0];
+  apiTest('should delete an output', async ({ apiServices }) => {
+    const outputName = `test-output-delete-${Date.now()}`;
 
-      // Only proceed if we have an existing output
-      expect(existingOutput).toBeDefined();
+    // First create an output
+    const createResponse = await apiServices.fleet.outputs.create(
+      outputName,
+      ['https://localhost:9200'],
+      'elasticsearch'
+    );
+    const deleteOutputId = createResponse.data.item.id;
 
-      const response = await apiServices.fleet.outputs.getOutput(existingOutput.id);
+    // Then delete it
+    const response = await apiServices.fleet.outputs.delete(deleteOutputId);
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.data.item.id).toBe(existingOutput.id);
-    });
-
-    apiTest('should create an output with additional parameters', async ({ apiServices }) => {
-      const outputName = `test-output-params-${Date.now()}`;
-      const outputHosts = ['https://localhost:9200'];
-
-      const response = await apiServices.fleet.outputs.create(
-        outputName,
-        outputHosts,
-        'elasticsearch',
-        {
-          is_default: false,
-          ca_trusted_fingerprint: 'test-fingerprint',
-        }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.data.item.name).toBe(outputName);
-      expect(response.data.item.is_default).toBe(false);
-
-      outputId = response.data.item.id;
-    });
-
-    apiTest('should delete an output', async ({ apiServices }) => {
-      const outputName = `test-output-delete-${Date.now()}`;
-
-      // First create an output
-      const createResponse = await apiServices.fleet.outputs.create(
-        outputName,
-        ['https://localhost:9200'],
-        'elasticsearch'
-      );
-      const deleteOutputId = createResponse.data.item.id;
-
-      // Then delete it
-      const response = await apiServices.fleet.outputs.delete(deleteOutputId);
-
-      expect(response).toHaveStatusCode(200);
-      // Don't set outputId since we already deleted it
-    });
-  }
-);
+    expect(response).toHaveStatusCode(200);
+    // Don't set outputId since we already deleted it
+  });
+});
 
 apiTest.describe(
   'Fleet Server Hosts Management',
