@@ -116,12 +116,24 @@ export const createNavigationTree = ({
                 title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
                   defaultMessage: 'Service inventory',
                 }),
+                getIsActive: ({ pathNameSerialized }) => {
+                  const regex = /app\/apm\/.*service.*/;
+
+                  return regex.test(pathNameSerialized);
+                },
               },
               {
                 link: 'apm:service-map',
                 title: i18n.translate('xpack.serverlessObservability.nav.apm.serviceMap', {
                   defaultMessage: 'Service map',
                 }),
+                sideNavStatus: 'hidden',
+              },
+              {
+                link: 'apm:service-groups-list',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/apm/service-groups'));
+                },
                 sideNavStatus: 'hidden',
               },
               { link: 'apm:traces' },
