@@ -22,25 +22,32 @@ export const getExternalStepDefinition = (deps: { externalService: IExampleExter
       config: {
         'proxy.id': {
           selection: {
-            search: async (input, _context) => {
+            search: async (input, context) => {
               const proxies = await deps.externalService.getProxies();
               const inputTrimmed = input.trim();
+              const sslOnly = context.values.config.proxy?.ssl === true;
               return proxies
-                .filter(
-                  (proxy) =>
+                .filter((proxy) => {
+                  if (sslOnly && !proxy.url.startsWith('https://')) return false;
+                  return (
                     inputTrimmed.length === 0 ||
                     proxy.id.includes(inputTrimmed) ||
                     proxy.name.toLowerCase().includes(inputTrimmed.toLowerCase())
-                )
+                  );
+                })
                 .map((proxy) => ({
                   value: proxy.id,
                   label: proxy.name,
                   description: 'URL: ' + proxy.url,
                 }));
             },
-            resolve: async (value, _context) => {
+            resolve: async (value, context) => {
               const proxy = await deps.externalService.getProxy(value);
               if (!proxy) {
+                return null;
+              }
+              const sslOnly = context.values.config.proxy?.ssl === true;
+              if (sslOnly && !proxy.url.startsWith('https://')) {
                 return null;
               }
               return {
@@ -49,10 +56,18 @@ export const getExternalStepDefinition = (deps: { externalService: IExampleExter
                 description: 'URL: ' + proxy.url,
               };
             },
-            getDetails: async (value, _context, option) => {
+            getDetails: async (value, context, option) => {
               if (option) {
                 return {
                   message: `Proxy "${option.label}" is connected`,
+                  links: [{ text: 'Manage proxies', path: 'https://example.com/proxies' }],
+                };
+              }
+              const sslOnly = context.values.config.proxy?.ssl === true;
+              const proxy = await deps.externalService.getProxy(value);
+              if (proxy && sslOnly && !proxy.url.startsWith('https://')) {
+                return {
+                  message: `Proxy "${proxy.name}" uses HTTP but proxy.ssl is enabled. Select an HTTPS proxy or set proxy.ssl to false.`,
                   links: [{ text: 'Manage proxies', path: 'https://example.com/proxies' }],
                 };
               }
