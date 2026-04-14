@@ -16,8 +16,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiInMemoryTable,
   EuiLink,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
@@ -58,8 +60,9 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
   const { queries, refetch, isLoading } = usePromotableQueries(streamName);
   const queryIds = queries.map(({ query }) => query.id);
   const [selectedQueryRow, setSelectedQueryRow] = useState<SignificantEventQueryRow | null>(null);
+  const [selectedQueries, setSelectedQueries] = useState<SignificantEventQueryRow[]>([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
-  const { promote, removeQuery } = useQueriesApi();
+  const { promote, removeQuery, deleteQueriesInBulk } = useQueriesApi();
 
   const toggleDetailsFlyout = (item: SignificantEventQueryRow) => {
     setSelectedQueryRow((previous) => (previous?.query.id === item.query.id ? null : item));
@@ -117,6 +120,28 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
       });
     },
   });
+
+  const bulkDeleteQueriesMutation = useMutation<void, Error, string[]>({
+    mutationFn: (ids) => deleteQueriesInBulk({ queryIds: ids, streamName }),
+    onSuccess: async (_, deletedIds) => {
+      setSelectedQueries([]);
+
+      if (selectedQueryRow && deletedIds.includes(selectedQueryRow.query.id)) {
+        setSelectedQueryRow(null);
+      }
+
+      toasts.addSuccess(DELETE_SELECTED_SUCCESS_MESSAGE(deletedIds.length));
+      await invalidateQueriesData();
+      refetch();
+    },
+    onError: (error) => {
+      toasts.addError(getFormattedError(error), {
+        title: DELETE_SELECTED_ERROR_TITLE,
+      });
+    },
+  });
+
+  const isSelectionActionsDisabled = selectedQueries.length === 0;
 
   const columns: Array<EuiBasicTableColumn<SignificantEventQueryRow>> = [
     {
@@ -212,13 +237,53 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="cross"
+                    size="xs"
+                    aria-label={CLEAR_SELECTION_LABEL}
+                    isDisabled={isSelectionActionsDisabled}
+                    onClick={() => setSelectedQueries([])}
+                    data-test-subj="suggestedRulesFlyoutClearSelectionButton"
+                  >
+                    {CLEAR_SELECTION_LABEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="trash"
+                    color="danger"
+                    size="xs"
+                    aria-label={DELETE_SELECTED_ACTION_LABEL}
+                    isLoading={bulkDeleteQueriesMutation.isLoading}
+                    isDisabled={isSelectionActionsDisabled || bulkDeleteQueriesMutation.isLoading}
+                    onClick={() => {
+                      bulkDeleteQueriesMutation.mutate(
+                        selectedQueries.map((selectedItem) => selectedItem.query.id)
+                      );
+                    }}
+                    data-test-subj="suggestedRulesFlyoutDeleteSelectedButton"
+                  >
+                    {DELETE_SELECTED_ACTION_LABEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              <EuiHorizontalRule margin="none" style={{ height: 2 }} />
               <EuiInMemoryTable<SignificantEventQueryRow>
                 tableCaption={TABLE_CAPTION}
                 columns={columns}
                 itemId={(item) => item.query.id}
                 items={queries}
-                loading={isLoading || deleteQueryMutation.isLoading}
+                loading={
+                  isLoading || deleteQueryMutation.isLoading || bulkDeleteQueriesMutation.isLoading
+                }
                 noItemsMessage={!isLoading ? NO_ITEMS_MESSAGE : ''}
+                selection={{
+                  selected: selectedQueries,
+                  onSelectionChange: setSelectedQueries,
+                }}
                 pagination={{
                   pageIndex: pagination.pageIndex,
                   pageSize: pagination.pageSize,
@@ -312,6 +377,20 @@ const DELETE_QUERY_ERROR_TITLE = i18n.translate(
   }
 );
 
+const DELETE_SELECTED_ERROR_TITLE = i18n.translate(
+  'xpack.streams.suggestedRulesFlyout.deleteSelectedError',
+  {
+    defaultMessage: 'Failed to delete selected rules',
+  }
+);
+
+const DELETE_SELECTED_SUCCESS_MESSAGE = (count: number) =>
+  i18n.translate('xpack.streams.suggestedRulesFlyout.deleteSelectedSuccess', {
+    defaultMessage:
+      '{count, plural, one {# selected rule deleted successfully.} other {# selected rules deleted successfully.}}',
+    values: { count },
+  });
+
 const MINIMIZE_ARIA_LABEL = i18n.translate('xpack.streams.suggestedRulesFlyout.minimizeAriaLabel', {
   defaultMessage: 'Collapse row details',
 });
@@ -370,5 +449,19 @@ const CREATE_RULES_BUTTON_LABEL = i18n.translate(
   'xpack.streams.suggestedRulesFlyout.createRulesButton',
   {
     defaultMessage: 'Create rules',
+  }
+);
+
+const CLEAR_SELECTION_LABEL = i18n.translate(
+  'xpack.streams.suggestedRulesFlyout.clearSelectionLabel',
+  {
+    defaultMessage: 'Clear selection',
+  }
+);
+
+const DELETE_SELECTED_ACTION_LABEL = i18n.translate(
+  'xpack.streams.suggestedRulesFlyout.deleteSelectedActionLabel',
+  {
+    defaultMessage: 'Delete selected',
   }
 );
