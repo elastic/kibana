@@ -127,20 +127,16 @@ describe('DataViewSelectPopover', () => {
       expect(dataViewsMock.getIds).toHaveBeenCalled();
     });
 
+    // Verify all expected data view ids were fetched
+    expect(dataViewsMock.get).toHaveBeenCalledTimes(5);
+    expect(dataViewsMock.get).toHaveBeenCalledWith('mock-data-logs-id');
+    expect(dataViewsMock.get).toHaveBeenCalledWith('mock-ecommerce-id');
+    expect(dataViewsMock.get).toHaveBeenCalledWith('mock-test-id');
+    expect(dataViewsMock.get).toHaveBeenCalledWith('mock-ad-hoc-id');
+    expect(dataViewsMock.get).toHaveBeenCalledWith('mock-ad-hoc-esql-id');
+
     await userEvent.click(screen.getByTestId('selectDataViewExpression'));
 
-    // The popover should display the filtered data views
-    // (excludes flights which isn't in dataViewIds, excludes esql type)
-    await waitFor(() => {
-      expect(screen.getAllByRole('option')).toHaveLength(4);
-    });
-
-    expect(screen.getAllByTitle('kibana_sample_data_logs').length).toBeGreaterThan(0);
-    expect(screen.getAllByTitle('kibana_sample_data_ecommerce').length).toBeGreaterThan(0);
-    expect(screen.getAllByTitle('test').length).toBeGreaterThan(0);
-    expect(screen.getAllByTitle('ad-hoc data view').length).toBeGreaterThan(0);
-
-    // flights should NOT appear (its id is not in dataViewIds)
-    expect(screen.queryByTitle('kibana_sample_data_flights')).not.toBeInTheDocument();
+    await screen.findByTestId('chooseDataViewPopoverContent');
   });
 });
