@@ -446,12 +446,15 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
 
   const handleAnalyzeLogs = useCallback(async () => {
     if (!formData) return;
-    if (!meetsMinLength(formData.title) || !meetsMinLength(formData.dataStreamTitle)) {
+
+    const trimmedIntegrationTitle = formData.title?.trim() ?? '';
+    const trimmedDataStreamTitle = formData.dataStreamTitle?.trim() ?? '';
+    if (!isValidTitle(trimmedIntegrationTitle) || !isValidTitle(trimmedDataStreamTitle)) {
       return;
     }
 
-    const integrationId = currentIntegrationId ?? normalizeTitleName(formData.title);
-    const dataStreamId = normalizeTitleName(formData.dataStreamTitle);
+    const integrationId = currentIntegrationId ?? normalizeTitleName(trimmedIntegrationTitle);
+    const dataStreamId = normalizeTitleName(trimmedDataStreamTitle);
     const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
       name: method as InputType['name'],
     }));
