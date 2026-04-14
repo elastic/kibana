@@ -197,6 +197,10 @@ export const allowedExperimentalValues = Object.freeze({
    */
   qradarRulesMigration: true,
   /**
+   *  Enables the Microsoft Sentinel rules import feature
+   */
+  sentinelRulesMigration: false,
+  /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
   kubernetesEnabled: true,

@@ -15,22 +15,25 @@ import {
 import type { ItemDocument, OriginalItem } from '../types';
 import type { SplunkResourceType } from '../model/vendor/common/splunk.gen';
 import type { QradarResourceType } from '../model/vendor/common/qradar.gen';
+import type { SentinelResourceType } from '../model/vendor/common/sentinel.gen';
 import { qradarResourceIdentifier } from './qradar';
+import { sentinelResourceIdentifier } from './sentinel';
 import type { ExperimentalFeatures } from '../../experimental_features';
 
 export interface SiemMigrationResourceTypeByVendor {
   splunk: SplunkResourceType;
   qradar: QradarResourceType;
+  'microsoft-sentinel': SentinelResourceType;
 }
 
 export interface ResourceIdentifierDeps {
   experimentalFeatures: ExperimentalFeatures;
 }
 
-/** Currently resource identification is only needed for Splunk since this for Qradar we identify resources by LLM */
 const identifiers: Record<ResourceSupportedVendor, VendorResourceIdentifier> = {
   splunk: splResourceIdentifier,
   qradar: qradarResourceIdentifier,
+  'microsoft-sentinel': sentinelResourceIdentifier,
 };
 
 // Type for a class that extends the ResourceIdentifier abstract class
@@ -66,6 +69,7 @@ export abstract class ResourceIdentifier<I> {
   ): Promise<SiemMigrationResourceBase[]> {
     const lookups = new Set<string>();
     const macros = new Set<string>();
+    const watchlists = new Set<string>();
     for (const item of originalItem) {
       const resources = await this.fromOriginal(item);
       resources.forEach((resource) => {
@@ -73,12 +77,18 @@ export abstract class ResourceIdentifier<I> {
           macros.add(resource.name);
         } else if (resource.type === 'lookup') {
           lookups.add(resource.name);
+        } else if (resource.type === 'watchlist') {
+          watchlists.add(resource.name);
         }
       });
     }
     return [
       ...Array.from(macros).map<SiemMigrationResourceBase>((name) => ({ type: 'macro', name })),
       ...Array.from(lookups).map<SiemMigrationResourceBase>((name) => ({ type: 'lookup', name })),
+      ...Array.from(watchlists).map<SiemMigrationResourceBase>((name) => ({
+        type: 'watchlist',
+        name,
+      })),
     ];
   }
 

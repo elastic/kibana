@@ -31,7 +31,7 @@ import {
  * The original rule vendor identifier.
  */
 export type OriginalRuleVendor = z.infer<typeof OriginalRuleVendor>;
-export const OriginalRuleVendor = z.enum(['splunk', 'qradar']);
+export const OriginalRuleVendor = z.enum(['splunk', 'qradar', 'microsoft-sentinel']);
 export type OriginalRuleVendorEnum = typeof OriginalRuleVendor.enum;
 export const OriginalRuleVendorEnum = OriginalRuleVendor.enum;
 

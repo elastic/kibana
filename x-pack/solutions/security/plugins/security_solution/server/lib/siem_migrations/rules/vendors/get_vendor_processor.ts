@@ -7,11 +7,19 @@
 
 import type { OriginalRuleVendor } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { QRadarProcessor } from './qradar/processor';
+import { SentinelProcessor } from './sentinel/processor';
 
+export function getVendorProcessor(vendor: 'qradar'): typeof QRadarProcessor;
+export function getVendorProcessor(vendor: 'microsoft-sentinel'): typeof SentinelProcessor;
+export function getVendorProcessor(
+  vendor: OriginalRuleVendor
+): typeof QRadarProcessor | typeof SentinelProcessor;
 export function getVendorProcessor(vendor: OriginalRuleVendor) {
   switch (vendor) {
     case 'qradar':
       return QRadarProcessor;
+    case 'microsoft-sentinel':
+      return SentinelProcessor;
     default:
       throw new Error(`Unsupported vendor processor: ${vendor}`);
   }

@@ -63,6 +63,29 @@ export type CreateQRadarRuleMigrationRulesRequestBodyInput = z.input<
   typeof CreateQRadarRuleMigrationRulesRequestBody
 >;
 
+export type CreateSentinelRuleMigrationRulesRequestParams = z.infer<
+  typeof CreateSentinelRuleMigrationRulesRequestParams
+>;
+export const CreateSentinelRuleMigrationRulesRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type CreateSentinelRuleMigrationRulesRequestParamsInput = z.input<
+  typeof CreateSentinelRuleMigrationRulesRequestParams
+>;
+
+export type CreateSentinelRuleMigrationRulesRequestBody = z.infer<
+  typeof CreateSentinelRuleMigrationRulesRequestBody
+>;
+export const CreateSentinelRuleMigrationRulesRequestBody = z.object({
+  /**
+   * The Sentinel rules ARM template JSON export content
+   */
+  json: z.string().min(1),
+});
+export type CreateSentinelRuleMigrationRulesRequestBodyInput = z.input<
+  typeof CreateSentinelRuleMigrationRulesRequestBody
+>;
+
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
 export const CreateRuleMigrationRequestBody = z.object({
   /**
