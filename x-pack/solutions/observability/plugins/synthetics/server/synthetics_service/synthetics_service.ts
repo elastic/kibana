@@ -33,6 +33,7 @@ import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/in
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
 import type { ServiceConfig } from '../config';
+import type { ServiceData } from './service_api_client';
 import { ServiceAPIClient } from './service_api_client';
 
 import type {
@@ -450,84 +451,26 @@ export class SyntheticsService {
     const license = await this.getLicense();
     const service = this;
 
-    const SYNC_BATCH_SIZE = 250;
+    const PER_PAGE = 250;
     service.syncErrors = [];
+
+    let output: ServiceData['output'] | null = null;
 
     const paramsBySpace = await this.getSyntheticsParams();
     const maintenanceWindows = await this.getMaintenanceWindows(spaceId);
-    const finder = await this.getSOClientFinder({ pageSize: SYNC_BATCH_SIZE });
+    const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
 
     const bucketsByLocation: Record<string, MonitorFields[]> = {};
     this.locations.forEach((location) => {
       bucketsByLocation[location.id] = [];
     });
 
-    try {
-      for await (const result of finder.find()) {
-        if (result.saved_objects.length === 0) {
-          continue;
-        }
-
-        try {
-          const monitors = result.saved_objects.filter(({ error }) => !error);
-          const formattedConfigs = this.normalizeConfigs(
-            monitors,
-            paramsBySpace,
-            maintenanceWindows
-          );
-
-          this.logger.debug(
-            `${formattedConfigs.length} monitors will be queued for synthetics service sync.`
-          );
-
-          formattedConfigs.forEach((monitor) => {
-            monitor.locations.forEach((location) => {
-              if (location.isServiceManaged) {
-                bucketsByLocation[location.id]?.push(monitor);
-              }
-            });
-          });
-        } catch (error) {
-          this.logger.error(`Failed to run Synthetics sync task, Error: ${error.message}`, {
-            error,
-          });
-
-          sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-            reason: 'Failed to push configs to service',
-            message: error?.message,
-            type: 'pushConfigsError',
-            code: error?.code,
-            status: error.status,
-            stackVersion: service.server.stackVersion,
-          });
-        }
-      }
-    } finally {
-      finder
-        .close()
-        .catch((err) => this.logger.debug('Failed to close PIT finder', { error: err }));
-    }
-
-    if (this.locations.every((loc) => bucketsByLocation[loc.id].length === 0)) return;
-    const output = await this.getOutput();
-    if (!output) {
-      sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-        reason: 'API key is not valid.',
-        message: 'Failed to push configs. API key is not valid.',
-        type: 'invalidApiKey',
-        stackVersion: service.server.stackVersion,
-      });
-      return;
-    }
-
-    const syncAllLocations = async () => {
+    const syncAllLocations = async (perBucket = 0) => {
       await pMap(
         this.locations,
         async (location) => {
-          const locationMonitors = bucketsByLocation[location.id] ?? [];
-
-          for (let start = 0; start < locationMonitors.length; start += SYNC_BATCH_SIZE) {
-            const locMonitors = locationMonitors.slice(start, start + SYNC_BATCH_SIZE);
+          if (bucketsByLocation[location.id].length > perBucket && output) {
+            const locMonitors = bucketsByLocation[location.id].splice(0, PER_PAGE);
 
             this.logger.debug(
               `${locMonitors.length} monitors will be pushed to synthetics service for location ${location.id}.`
@@ -548,7 +491,64 @@ export class SyntheticsService {
         }
       );
     };
+
+    for await (const result of finder.find()) {
+      if (result.saved_objects.length > 0) {
+        try {
+          if (!output) {
+            output = await this.getOutput();
+            if (!output) {
+              sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+                reason: 'API key is not valid.',
+                message: 'Failed to push configs. API key is not valid.',
+                type: 'invalidApiKey',
+                stackVersion: service.server.stackVersion,
+              });
+              return;
+            }
+          }
+
+          const monitors = result.saved_objects.filter(({ error }) => !error);
+          const formattedConfigs = this.normalizeConfigs(
+            monitors,
+            paramsBySpace,
+            maintenanceWindows
+          );
+
+          this.logger.debug(
+            `${formattedConfigs.length} monitors will be pushed to synthetics service.`
+          );
+
+          formattedConfigs.forEach((monitor) => {
+            monitor.locations.forEach((location) => {
+              if (location.isServiceManaged) {
+                bucketsByLocation[location.id]?.push(monitor);
+              }
+            });
+          });
+
+          await syncAllLocations(PER_PAGE);
+        } catch (error) {
+          this.logger.error(`Failed to run Synthetics sync task, Error: ${error.message}`, {
+            error,
+          });
+
+          sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+            reason: 'Failed to push configs to service',
+            message: error?.message,
+            type: 'pushConfigsError',
+            code: error?.code,
+            status: error.status,
+            stackVersion: service.server.stackVersion,
+          });
+        }
+      }
+    }
+
+    // execute the remaining monitors
     await syncAllLocations();
+
+    finder.close().catch(() => {});
   }
 
   async runOnceConfigs(configs?: ConfigData) {
