@@ -49,11 +49,11 @@ import {
   useCreateUpdateIntegration,
   useGetIntegrationById,
   useUploadSamples,
-  normalizeTitleName,
   isValidNameFormat,
   startsWithLetter,
   useKibana,
 } from '../../../../common';
+import { meetsMinLength, normalizeTitleName } from '../../../../common/lib/helper_functions';
 import { useTelemetry } from '../../../telemetry_context';
 
 interface CreateDataStreamFlyoutProps {
@@ -154,6 +154,9 @@ const getAnalyzeLogsValidationReasons = (params: AnalyzeLogsValidationParams): s
   if (!params.integrationTitle) {
     reasons.push(formI18n.TITLE_REQUIRED);
   } else {
+    if (!meetsMinLength(params.integrationTitle)) {
+      reasons.push(formI18n.NAME_TOO_SHORT);
+    }
     if (!isValidNameFormat(params.integrationTitle)) {
       reasons.push(formI18n.NAME_INVALID_FORMAT);
     }
@@ -170,6 +173,9 @@ const getAnalyzeLogsValidationReasons = (params: AnalyzeLogsValidationParams): s
   if (!params.dataStreamTitle) {
     reasons.push(formI18n.DATA_STREAM_TITLE_REQUIRED);
   } else {
+    if (!meetsMinLength(params.dataStreamTitle)) {
+      reasons.push(formI18n.NAME_TOO_SHORT);
+    }
     if (params.hasDuplicateDataStreamName) {
       reasons.push(formI18n.DATA_STREAM_TITLE_ALREADY_EXISTS);
     }
@@ -218,7 +224,10 @@ interface AnalyzeFormValidityParams {
 }
 
 const isValidTitle = (title: string): boolean =>
-  !!title && isValidNameFormat(title) && startsWithLetter(title);
+  !!title &&
+  meetsMinLength(title) &&
+  isValidNameFormat(title) &&
+  startsWithLetter(title);
 
 const checkIntegrationFieldsValid = (params: AnalyzeFormValidityParams): boolean =>
   isValidTitle(params.integrationTitle) &&
@@ -440,6 +449,9 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
 
   const handleAnalyzeLogs = useCallback(async () => {
     if (!formData) return;
+    if (!meetsMinLength(formData.title) || !meetsMinLength(formData.dataStreamTitle)) {
+      return;
+    }
 
     const integrationId = currentIntegrationId ?? normalizeTitleName(formData.title);
     const dataStreamId = normalizeTitleName(formData.dataStreamTitle);
