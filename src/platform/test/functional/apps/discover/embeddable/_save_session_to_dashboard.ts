@@ -88,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
         await dashboard.verifyNoRenderErrors();
         expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
+        await dashboard.saveDashboard('New Dashboard With Session');
       });
 
       it('can save a new session to an existing dashboard', async () => {
@@ -135,6 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
         await dashboard.verifyNoRenderErrors();
         expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
+        await dashboard.saveDashboard('New Dashboard With Copied Session');
       });
 
       it('can save as a copy to a new dashboard via "Save as new Discover session" toggle', async () => {
@@ -209,7 +211,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.waitForRenderComplete();
         await dashboard.verifyNoRenderErrors();
-        expect(await discover.getSavedSearchDocumentCount()).to.be('35 documents');
+        expect(await discover.getSavedSearchDocumentCount()).to.be('13 documents');
       });
 
       it('can save as a copy from the embedded editor to a new dashboard', async () => {
