@@ -349,7 +349,8 @@ export const Slack: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://slack.com/oauth/v2/authorize',
           tokenUrl: 'https://slack.com/api/oauth.v2.access',
-          scope: 'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+          scope:
+            'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
           scopeParamName: 'user_scope',
           accessTokenPath: 'authed_user.access_token',
           tokenType: 'Bearer',
