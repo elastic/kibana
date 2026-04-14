@@ -617,6 +617,8 @@ export class DashboardPageObject extends FtrService {
       await this.clickCancelOutOfEditMode();
     }
     await this.header.waitUntilLoadingHasFinished();
+    // make sure the dashboard page is shown
+    await this.waitForRenderComplete();
 
     return message;
   }

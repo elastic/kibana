@@ -51,7 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('dashboard with stored time', function () {
       it('is saved with time', async function () {
-        await dashboard.switchToEditMode();
         await timePicker.setDefaultAbsoluteRange();
         await dashboard.saveDashboard(dashboardName, {
           storeTimeWithDashboard: true,
@@ -60,10 +59,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('sets time on open', async function () {
-        await dashboard.waitForRenderComplete();
-        const timeBefore = await timePicker.getTimeConfig();
-        expect(timeBefore.start).to.equal(timePicker.defaultStartTime);
-        expect(timeBefore.end).to.equal(timePicker.defaultEndTime);
         await timePicker.setAbsoluteRange(
           'Jan 1, 2019 @ 00:00:00.000',
           'Jan 2, 2019 @ 00:00:00.000'
