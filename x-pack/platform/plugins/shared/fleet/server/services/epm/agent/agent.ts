@@ -6,7 +6,7 @@
  */
 
 import Handlebars from '@kbn/handlebars';
-import { load, dump } from 'js-yaml';
+import { parse, stringify } from 'yaml';
 import type { Logger } from '@kbn/core/server';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';
@@ -28,7 +28,7 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   }
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-  const yamlFromCompiledTemplate = load(compiledTemplate, {});
+  const yamlFromCompiledTemplate = parse(compiledTemplate, {});
 
   // Hack to keep empty string ('') values around in the end yaml because
   // `load` replaces empty strings with null
@@ -98,7 +98,9 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
     if (recordEntry.type && recordEntry.type === 'yaml') {
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
-      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? load(recordEntry.value) : null;
+      // Coerce to string before parsing to match the behavior of js-yaml.load,
+      // which internally calls String(input). The yaml package requires a string.
+      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? parse(String(recordEntry.value)) : null;
     } else if (recordEntry.value && recordEntry.value.isSecretRef) {
       varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
     } else {
@@ -122,24 +124,31 @@ function containsHelper(this: any, item: string, check: string | string[], optio
 handlebars.registerHelper('contains', containsHelper);
 
 // escapeStringHelper will wrap the provided string with single quotes.
-// Single quoted strings in yaml need to escape single quotes by doubling them
-// and to respect any incoming newline we also need to double them, otherwise
-// they will be replaced with a space.
+// Single quoted strings in yaml need to escape single quotes by doubling them.
+// If the string contains newlines, use double quotes with escaped newlines since the yaml package
+// doesn't allow literal newlines in single-quoted strings.
 function escapeStringHelper(str: string) {
   if (!str) return undefined;
-  return "'" + str.replace(/\'/g, "''").replace(/\n/g, '\n\n') + "'";
+  if (str.includes('\n')) {
+    // Use double quotes with escaped newlines for strings with newlines
+    return '"' + str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
+  }
+  return "'" + str.replace(/\'/g, "''") + "'";
 }
 handlebars.registerHelper('escape_string', escapeStringHelper);
 
 /**
- * escapeMultilineStringHelper will escape a multiline string by doubling the newlines
- * and escaping single quotes.
+ * escapeMultilineStringHelper will escape a multiline string by escaping single quotes
+ * and escaping newlines as \n for use inside double quotes.
  * This is useful when the string is multiline and needs to be escaped in a yaml file
  * without wrapping it in single quotes.
+ * Note: Removes spaces immediately following newlines to match js-yaml behavior.
  */
 function escapeMultilineStringHelper(str: string) {
   if (!str) return undefined;
-  return str.replace(/\'/g, "''").replace(/\n/g, '\n\n');
+  // Remove spaces immediately after newlines to match js-yaml behavior
+  // then escape single quotes and newlines for use inside double quotes
+  return str.replace(/\n /g, '\n').replace(/\'/g, "''").replace(/\n/g, '\\n');
 }
 handlebars.registerHelper('escape_multiline_string', escapeMultilineStringHelper);
 
@@ -177,9 +186,15 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
     patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), () =>
-      val ? dump(val) : ''
+      val ? stringify(val) : ''
     );
   });
+
+  // Fix flow-style values (e.g. [] or {}) at column 1 that immediately follow a
+  // mapping key on the preceding line. The yaml package (unlike js-yaml) rejects
+  // this pattern because the value is not indented under its key. Placing the
+  // value on the same line as the key resolves the ambiguity.
+  patchedTemplate = patchedTemplate.replace(/^(\S[^\n]*:)\s*\n(\[.*\]|\{.*\})\s*$/gm, '$1 $2');
 
   return patchedTemplate;
 }

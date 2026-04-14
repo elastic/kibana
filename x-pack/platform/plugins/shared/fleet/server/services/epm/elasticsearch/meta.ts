@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load, dump } from 'js-yaml';
+import { parse, stringify } from 'yaml';
 
 import type { ESAssetMetadata } from '../../../../common/types';
 
@@ -44,12 +44,12 @@ export function appendMetadataToIngestPipeline({
   if (pipeline.extension === 'yml') {
     // Convert the YML content to JSON, append the `_meta` value, then convert it back to
     // YML and return the resulting YML
-    const parsedPipelineContent = load(pipeline.contentForInstallation);
+    const parsedPipelineContent = parse(pipeline.contentForInstallation);
     parsedPipelineContent._meta = meta;
 
     return {
       ...pipeline,
-      contentForInstallation: `---\n${dump(parsedPipelineContent)}`,
+      contentForInstallation: `---\n${stringify(parsedPipelineContent)}`,
     };
   }
 

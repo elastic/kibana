@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
+
 import {
   validateESHosts,
   validateLogstashHosts,
-  validateYamlConfig,
+  createValidateYamlConfig,
   validateCATrustedFingerPrint,
   validateKafkaHeaders,
   validateKafkaHosts,
 } from './output_form_validators';
+
+const validateYamlConfig = createValidateYamlConfig(parse);
 
 describe('Output form validation', () => {
   describe('validateKafkaHosts', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo, useCallback } from 'react';
+import React, { useState, Fragment, memo, useMemo, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +32,8 @@ import type {
 import type { PackagePolicyInputValidationResults } from '../../../services';
 import { hasInvalidButRequiredVar, countValidationErrors } from '../../../services';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
+import type { YamlParseFn } from '../../../services';
+import { useYaml } from '../../../../../../../../services';
 
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
@@ -45,6 +47,7 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 `;
 
 export const shouldShowStreamsByDefault = (
+  parse: YamlParseFn,
   packageInput: RegistryInput,
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>,
   packagePolicyInput: NewPackagePolicyInput,
@@ -55,11 +58,12 @@ export const shouldShowStreamsByDefault = (
   }
 
   return (
-    hasInvalidButRequiredVar(packageInput.vars, packagePolicyInput.vars) ||
+    hasInvalidButRequiredVar(parse, packageInput.vars, packagePolicyInput.vars) ||
     packageInputStreams.some(
       (stream) =>
         stream.enabled &&
         hasInvalidButRequiredVar(
+          parse,
           stream.vars,
           packagePolicyInput.streams.find(
             (pkgStream) => stream.data_stream.dataset === pkgStream.data_stream.dataset
@@ -95,15 +99,34 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
 
-    // Showing streams toggle state
-    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
-      shouldShowStreamsByDefault(
-        packageInput,
-        packageInputStreams,
-        packagePolicyInput,
-        defaultDataStreamId
-      )
-    );
+    const yaml = useYaml();
+    // Showing streams toggle state (initialized once when yaml loads so we can validate)
+    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(false);
+    const isShowingStreamsInitialized = useRef(false);
+    useEffect(() => {
+      // Only initialize once — we must not re-evaluate after the user fills in required
+      // fields, or the streams section would collapse as each field becomes valid.
+      if (yaml && !isShowingStreamsInitialized.current) {
+        isShowingStreamsInitialized.current = true;
+        setIsShowingStreams(
+          (packageInfo.type !== 'input') ||
+            shouldShowStreamsByDefault(
+              yaml.parse,
+              packageInput,
+              packageInputStreams,
+              packagePolicyInput,
+              defaultDataStreamId
+            )
+        );
+      }
+    }, [
+      yaml,
+      packageInput,
+      packageInputStreams,
+      packagePolicyInput,
+      defaultDataStreamId,
+      packageInfo.type,
+    ]);
 
     // Hide registry variables based on `hide_in_deployment_modes` value
     const hideRegistryVars = useCallback(

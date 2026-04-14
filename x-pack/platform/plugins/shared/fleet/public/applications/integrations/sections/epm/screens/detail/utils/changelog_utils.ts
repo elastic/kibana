@@ -4,12 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { load } from 'js-yaml';
-
 import semverGte from 'semver/functions/gte';
 import semverLte from 'semver/functions/lte';
 
 import type { ChangeLogParams } from '../settings/changelog_modal';
+export type YamlParseFn = (value: string) => unknown;
+
+export enum ChangeType {
+  Enhancement = 'enhancement',
+  BreakingChange = 'breaking-change',
+  BugFix = 'bugfix',
+}
 
 export const formatChangelog = (parsedChangelog: ChangeLogParams[]) => {
   if (!parsedChangelog) return '';
@@ -22,11 +27,14 @@ export const formatChangelog = (parsedChangelog: ChangeLogParams[]) => {
 
 // Exported for testing
 export const filterYamlChangelog = (
+  parse: YamlParseFn,
   changelogText: string | null | undefined,
   latestVersion: string,
   currentVersion?: string
 ) => {
-  const parsedChangelog: ChangeLogParams[] = changelogText ? load(changelogText) : [];
+  const parsedChangelog: ChangeLogParams[] = changelogText
+    ? (parse(changelogText) as ChangeLogParams[])
+    : [];
 
   if (!currentVersion) return parsedChangelog.filter((e) => semverLte(e.version, latestVersion));
 
@@ -36,10 +44,11 @@ export const filterYamlChangelog = (
 };
 
 export const getFormattedChangelog = (
+  parse: YamlParseFn,
   changelogText: string | null | undefined,
   latestVersion: string,
   currentVersion?: string
 ) => {
-  const parsed = filterYamlChangelog(changelogText, latestVersion, currentVersion);
+  const parsed = filterYamlChangelog(parse, changelogText, latestVersion, currentVersion);
   return formatChangelog(parsed);
 };
