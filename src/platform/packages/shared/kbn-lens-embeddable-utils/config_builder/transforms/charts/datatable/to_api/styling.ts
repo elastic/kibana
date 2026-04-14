@@ -14,7 +14,8 @@ import type { DatatableState } from '../../../../schema';
 import type { ColumnIdMapping } from './columns';
 import { stripUndefined } from '../../utils';
 
-type HeightAPI = NonNullable<NonNullable<DatatableState['density']>['height']>;
+type DatatableStyling = NonNullable<DatatableState['styling']>;
+type HeightAPI = NonNullable<NonNullable<DatatableStyling['density']>['height']>;
 type ValueHeightAPI = HeightAPI['value'];
 type HeaderHeightAPI = HeightAPI['header'];
 
@@ -52,7 +53,7 @@ function parseDensityToAPI(
     DatatableVisualizationState,
     'density' | 'rowHeight' | 'rowHeightLines' | 'headerRowHeight' | 'headerRowHeightLines'
   >
-): DatatableState['density'] | undefined {
+): DatatableStyling['density'] | undefined {
   const { rowHeight, headerRowHeight, density, rowHeightLines, headerRowHeightLines } =
     visualization;
 
@@ -62,7 +63,7 @@ function parseDensityToAPI(
 
   const valueHeight = buildHeightAPI('value', rowHeight, rowHeightLines);
   const headerHeight = buildHeightAPI('header', headerRowHeight, headerRowHeightLines);
-  const height = stripUndefined<NonNullable<NonNullable<DatatableState['density']>['height']>>({
+  const height = stripUndefined<HeightAPI>({
     value: valueHeight,
     header: headerHeight,
   });
@@ -105,7 +106,7 @@ function parsePivotedSorting(
 function parseSortingToAPI(
   sorting: DatatableVisualizationState['sorting'],
   columnIdMapping: ColumnIdMapping
-): DatatableState['sort_by'] | undefined {
+): DatatableStyling['sort_by'] | undefined {
   if (!sorting?.columnId || sorting.direction === 'none') {
     return;
   }
@@ -137,10 +138,10 @@ function parseSortingToAPI(
   };
 }
 
-export function convertAppearanceToAPIFormat(
+export function convertStylingToAPIFormat(
   visualization: DatatableVisualizationState,
   columnIdMapping: ColumnIdMapping
-): Pick<DatatableState, 'density' | 'paging' | 'sort_by' | 'row_numbers'> {
+): Pick<DatatableState, 'styling'> {
   const { paging, sorting } = visualization;
 
   const densityAPI = parseDensityToAPI(visualization);
@@ -150,7 +151,7 @@ export function convertAppearanceToAPIFormat(
     return [10, 20, 30, 50, 100].includes(size);
   };
 
-  return {
+  const styling = {
     ...(densityAPI ? { density: densityAPI } : {}),
     ...(paging && paging.enabled
       ? { paging: isValidPagingSize(paging.size) ? paging.size : 10 }
@@ -160,4 +161,6 @@ export function convertAppearanceToAPIFormat(
       ? { row_numbers: { visible: visualization.showRowNumbers } }
       : {}),
   };
+
+  return Object.keys(styling).length > 0 ? { styling } : {};
 }
