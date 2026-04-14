@@ -20,7 +20,10 @@ import type { Condition } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import {
   Streams,
+  convertUpsertRequestIntoDefinition,
   deriveQueryType,
+  getAncestors,
+  getParentId,
   LOGS_ROOT_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
   LOGS_ECS_STREAM_NAME,
