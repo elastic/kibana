@@ -39,6 +39,7 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'disable:entityAnalyticsEntityStoreV2',
           ])}`,
