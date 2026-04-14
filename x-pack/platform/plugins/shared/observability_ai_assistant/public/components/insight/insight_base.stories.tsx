@@ -62,6 +62,7 @@ const defaultProps: InsightBaseProps = {
         reloadConnectors: () => {},
         getConnector: () => undefined,
         isConnectorSelectionRestricted: false,
+        defaultConnector: undefined,
       }}
       onEditPrompt={() => {}}
     />

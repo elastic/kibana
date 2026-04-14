@@ -14,3 +14,5 @@ export interface TimeBounds {
   from: Date;
   to: Date;
 }
+
+export type SloEventType = 'Good' | 'Bad' | 'All';

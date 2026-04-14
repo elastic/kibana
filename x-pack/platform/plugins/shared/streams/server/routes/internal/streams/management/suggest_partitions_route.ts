@@ -74,7 +74,7 @@ export const suggestPartitionsRoute = createServerRoute({
       throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { inferenceClient, scopedClusterClient, streamsClient, featureClient } =
+    const { inferenceClient, scopedClusterClient, streamsClient, getFeatureClient } =
       await getScopedClients({
         request,
       });
@@ -99,6 +99,7 @@ export const suggestPartitionsRoute = createServerRoute({
       existingPartitions: params.body.existing_partitions,
       refinementHistory: params.body.refinement_history,
       getFeatures: async (filters) => {
+        const featureClient = await getFeatureClient();
         const { hits } = await featureClient.getFeatures(params.path.name, filters);
         return hits;
       },
