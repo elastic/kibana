@@ -118,6 +118,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/fs'
   - '@kbn/doc-links'
+  - '@kbn/yaml-loader'
 tags:
   - plugin
   - prod
