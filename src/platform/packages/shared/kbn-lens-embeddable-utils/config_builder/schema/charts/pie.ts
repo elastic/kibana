@@ -34,9 +34,6 @@ import {
 import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
-/**
- * Shared visualization options for pie charts including legend, value display, and label positioning
- */
 const pieStateSharedSchema = {
   legend: schema.maybe(
     schema.object(
@@ -55,33 +52,48 @@ const pieStateSharedSchema = {
       }
     )
   ),
-  values: valueDisplaySchema,
-  labels: schema.maybe(
-    schema.object(
-      {
-        visible: schema.maybe(schema.boolean({ meta: { description: 'Show slice labels' } })),
-        position: schema.maybe(
-          schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
-            meta: {
-              description: 'Renders pie chart slice labels inside or outside the pie',
-            },
-          })
-        ),
-      },
-      {
-        meta: {
-          description: 'Label configuration for pie chart slice labels inside or outside the pie',
-        },
-      }
-    )
-  ),
-  donut_hole: schema.maybe(
-    schema.oneOf(
-      [schema.literal('none'), schema.literal('s'), schema.literal('m'), schema.literal('l')],
-      { meta: { description: 'Donut hole size: none (pie), or s/m/l' } }
-    )
-  ),
 };
+
+/**
+ * Pie chart styling: value display, slice labels, and donut hole
+ */
+const pieStylingSchema = schema.object(
+  {
+    values: valueDisplaySchema,
+    labels: schema.maybe(
+      schema.object(
+        {
+          visible: schema.maybe(schema.boolean({ meta: { description: 'Show slice labels' } })),
+          position: schema.maybe(
+            schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
+              meta: {
+                description: 'Renders pie chart slice labels inside or outside the pie',
+              },
+            })
+          ),
+        },
+        {
+          meta: {
+            description: 'Label configuration for pie chart slice labels inside or outside the pie',
+          },
+        }
+      )
+    ),
+    donut_hole: schema.maybe(
+      schema.oneOf(
+        [schema.literal('none'), schema.literal('s'), schema.literal('m'), schema.literal('l')],
+        { meta: { description: 'Donut hole size: none (pie), or s/m/l' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'pieStyling',
+      title: 'Pie chart styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 /**
  * Color configuration for primary metric in pie chart
@@ -135,7 +147,7 @@ export const pieStateSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...pieStateSharedSchema,
-    ...dslOnlyPanelInfoSchema,
+    styling: schema.maybe(pieStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         partitionStatePrimaryMetricOptionsSchema
@@ -177,6 +189,7 @@ export const pieStateSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
     ...pieStateSharedSchema,
+    styling: schema.maybe(pieStylingSchema),
     metrics: schema.arrayOf(
       esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
         meta: { description: 'ES|QL column reference for primary metric' },

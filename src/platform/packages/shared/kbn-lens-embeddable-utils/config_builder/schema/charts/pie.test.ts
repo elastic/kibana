@@ -81,11 +81,13 @@ describe('Pie Schema', () => {
               fields: ['category'],
             },
           ],
-          donut_hole: 'm',
+          styling: {
+            donut_hole: 'm',
+          },
         };
 
         const validated = pieStateSchema.validate(input);
-        expect(validated.donut_hole).toBe('m');
+        expect(validated.styling?.donut_hole).toBe('m');
       });
 
       it('validates full configuration with specific options', () => {
@@ -117,20 +119,22 @@ describe('Pie Schema', () => {
             visibility: 'visible',
             size: 'xl',
           },
-          labels: { position: 'inside' },
-          donut_hole: 's',
-          values: {
-            mode: 'percentage',
-            percent_decimals: 0,
+          styling: {
+            labels: { position: 'inside' },
+            donut_hole: 's',
+            values: {
+              mode: 'percentage',
+              percent_decimals: 0,
+            },
           },
         };
 
         const validated = pieStateSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
         expect(validated.legend?.nested).toBe(false);
-        expect(validated.donut_hole).toBe('s');
-        expect(validated.labels?.position).toBe('inside');
-        expect(validated.values?.mode).toBe('percentage');
+        expect(validated.styling?.donut_hole).toBe('s');
+        expect(validated.styling?.labels?.position).toBe('inside');
+        expect(validated.styling?.values?.mode).toBe('percentage');
       });
 
       it('validates configuration with multiple group_by dimensions', () => {
@@ -294,8 +298,10 @@ describe('Pie Schema', () => {
               fields: ['category'],
             },
           ],
-          // @ts-expect-error - invalid donut hole size
-          donut_hole: 'invalid',
+          styling: {
+            // @ts-expect-error - invalid donut hole size
+            donut_hole: 'invalid',
+          },
         };
 
         expect(() => pieStateSchema.validate(input)).toThrow();
@@ -317,9 +323,11 @@ describe('Pie Schema', () => {
               fields: ['category'],
             },
           ],
-          labels: {
-            // @ts-expect-error - invalid labels position
-            position: 'invalid',
+          styling: {
+            labels: {
+              // @ts-expect-error - invalid labels position
+              position: 'invalid',
+            },
           },
         };
 
@@ -821,14 +829,16 @@ describe('Pie Schema', () => {
             nested: false,
             visibility: 'visible',
           },
-          labels: { position: 'outside' },
-          donut_hole: 'l',
+          styling: {
+            labels: { position: 'outside' },
+            donut_hole: 'l',
+          },
         };
 
         const validated = pieStateSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
-        expect(validated.donut_hole).toBe('l');
-        expect(validated.labels?.position).toBe('outside');
+        expect(validated.styling?.donut_hole).toBe('l');
+        expect(validated.styling?.labels?.position).toBe('outside');
       });
     });
   });
