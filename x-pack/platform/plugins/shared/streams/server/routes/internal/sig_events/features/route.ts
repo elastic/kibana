@@ -48,13 +48,16 @@ export const upsertFeatureRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
+    const featureClient = await getFeatureClient();
     await featureClient.bulk(params.path.name, [
       {
         index: {
@@ -93,13 +96,16 @@ export const deleteFeatureRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
+    const featureClient = await getFeatureClient();
     await featureClient.deleteFeature(params.path.name, params.path.uuid);
 
     return { acknowledged: true };
@@ -134,20 +140,23 @@ export const listFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ features: Feature[] }> => {
-    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
+    const featureClient = await getFeatureClient();
     const {
       query,
       search_mode: searchMode,
       include_excluded: includeExcluded,
     } = params.query ?? {};
     const { hits: features } = query
-      ? await featureClient.findFeatures(params.path.name, query, { searchMode })
+      ? await featureClient.findFeatures(params.path.name, query, { searchMode, includeExcluded })
       : await featureClient.getFeatures(params.path.name, { includeExcluded });
 
     return { features };
@@ -171,6 +180,7 @@ export const listAllFeaturesRoute = createServerRoute({
       .object({
         query: z.string().optional().describe('Free-text query for semantic/keyword search'),
         search_mode: searchModeSchema.optional(),
+        include_excluded: BooleanFromString.optional(),
       })
       .optional(),
   }),
@@ -180,19 +190,26 @@ export const listAllFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ features: Feature[] }> => {
-    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const streams = await streamsClient.listStreams();
     const streamNames = streams.map((stream) => stream.name);
 
-    const { query, search_mode: searchMode } = params?.query ?? {};
+    const featureClient = await getFeatureClient();
+    const {
+      query,
+      search_mode: searchMode,
+      include_excluded: includeExcluded,
+    } = params?.query ?? {};
     const { hits: features } = query
-      ? await featureClient.findFeatures(streamNames, query, { searchMode })
-      : await featureClient.getFeatures(streamNames);
+      ? await featureClient.findFeatures(streamNames, query, { searchMode, includeExcluded })
+      : await featureClient.getFeatures(streamNames, { includeExcluded });
 
     return { features };
   },
@@ -245,9 +262,11 @@ export const bulkFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ acknowledged: boolean }> => {
-    const { featureClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
+    const { getFeatureClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -258,6 +277,7 @@ export const bulkFeaturesRoute = createServerRoute({
 
     await streamsClient.ensureStream(name);
 
+    const featureClient = await getFeatureClient();
     await featureClient.bulk(name, operations);
 
     return { acknowledged: true };
