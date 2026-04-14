@@ -15,6 +15,9 @@ xpack.ux.enabled: false
 xpack.uptime.enabled: false
 xpack.exploratoryView.enabled: false
 
+### Workflows Management plugin is not available in this tier
+workflowsManagement.available: false
+
 xpack.features.overrides:
   ### Machine Learning feature privilege should be hidden
   ml.hidden: true

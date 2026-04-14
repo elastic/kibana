@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReqOptions } from '@kbn/kbn-client';
 import { type KbnClient } from '@kbn/scout';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
@@ -68,11 +69,15 @@ export class WorkflowsApiService {
   }
 
   /** GET /api/workflows/workflow/{id} — fetch a workflow by ID, with response status. */
-  async rawGetWorkflow(workflowId: string): Promise<{
+  async rawGetWorkflow(
+    workflowId: string,
+    options?: Partial<ReqOptions>
+  ): Promise<{
     data: WorkflowDetailDto;
     status: number;
   }> {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
+      ...options,
       method: 'GET',
       path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}`,
     });
