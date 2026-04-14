@@ -302,7 +302,7 @@
           "(query: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/sources.ts",
-        "lineNumber": 292,
+        "lineNumber": 318,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -318,7 +318,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/sources.ts",
-            "lineNumber": 292,
+            "lineNumber": 318,
             "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
@@ -909,7 +909,7 @@
           "(type: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-        "lineNumber": 520,
+        "lineNumber": 530,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -925,7 +925,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-            "lineNumber": 520,
+            "lineNumber": 530,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
@@ -1067,7 +1067,7 @@
           "[]>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/autocomplete.ts",
-        "lineNumber": 55,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1083,7 +1083,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/autocomplete.ts",
-            "lineNumber": 56,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1100,7 +1100,7 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/autocomplete.ts",
-            "lineNumber": 57,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1124,7 +1124,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/autocomplete/autocomplete.ts",
-            "lineNumber": 58,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1145,7 +1145,7 @@
           "(type: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-        "lineNumber": 524,
+        "lineNumber": 534,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1161,7 +1161,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-            "lineNumber": 524,
+            "lineNumber": 534,
             "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
@@ -1202,7 +1202,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/language/validation/validation.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1220,7 +1220,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/validation/validation.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1246,7 +1246,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/validation/validation.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1270,7 +1270,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/validation/validation.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1611,6 +1611,128 @@
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
             "lineNumber": 166,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.ESQLMessage",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLMessage",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+        "lineNumber": 496,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ESQLMessage.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"error\" | \"warning\""
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "lineNumber": 497,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ESQLMessage.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "lineNumber": 498,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ESQLMessage.location",
+            "type": "Object",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "signature": [
+              "ESQLLocation"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "lineNumber": 499,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ESQLMessage.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "lineNumber": 500,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ESQLMessage.errorType",
+            "type": "string",
+            "tags": [],
+            "label": "errorType",
+            "description": [],
+            "signature": [
+              "\"semantic\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "lineNumber": 501,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ESQLMessage.requiresCallback",
+            "type": "string",
+            "tags": [],
+            "label": "requiresCallback",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "lineNumber": 502,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ESQLMessage.underlinedWarning",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "underlinedWarning",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "lineNumber": 503,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3652,7 +3774,7 @@
         "label": "ValidationOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/language/validation/types.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3672,7 +3794,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/validation/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3704,7 +3826,7 @@
         "label": "EsqlFunctionNames",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated/function_names.ts",
-        "lineNumber": 264,
+        "lineNumber": 266,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3900,6 +4022,23 @@
       },
       {
         "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.ESQL_APPLY_TEXT_REPLACEMENT_COMMAND",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_APPLY_TEXT_REPLACEMENT_COMMAND",
+        "description": [],
+        "signature": [
+          "\"esql.applyTextReplacement\""
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
         "id": "def-common.ESQL_NAMED_PARAMS_TYPE",
         "type": "string",
         "tags": [],
@@ -3909,7 +4048,7 @@
           "\"function_named_parameters\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-        "lineNumber": 530,
+        "lineNumber": 540,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3998,7 +4137,7 @@
           "\"string\" | \"boolean\" | \"bool\" | \"geo_shape\" | \"geotile\" | \"geohash\" | \"geohex\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"date_range\" | \"aggregate_metric_double\" | \"dense_vector\" | \"exponential_histogram\" | \"unsigned_long\" | \"int\" | \"datetime\" | \"tdigest\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-        "lineNumber": 532,
+        "lineNumber": 542,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4333,7 +4472,7 @@
           "readonly string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-        "lineNumber": 515,
+        "lineNumber": 525,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4352,7 +4491,7 @@
           "readonly [\"double\", \"long\", \"integer\"]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-        "lineNumber": 499,
+        "lineNumber": 509,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4369,7 +4508,7 @@
           "readonly string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-        "lineNumber": 509,
+        "lineNumber": 519,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4386,7 +4525,7 @@
           "readonly [\"double\", \"unsigned_long\", \"long\", \"counter_long\", \"counter_double\"]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-        "lineNumber": 501,
+        "lineNumber": 511,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4403,7 +4542,7 @@
           "readonly [\"keyword\", \"text\"]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
-        "lineNumber": 528,
+        "lineNumber": 538,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

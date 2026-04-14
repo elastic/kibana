@@ -43,3 +43,9 @@ export const SUCCESS_TITLE = i18n.translate(
     defaultMessage: 'Integration installed successfully',
   }
 );
+
+export const DUPLICATE_PACKAGE_NAME_ERROR = (packageName: string) =>
+  i18n.translate('xpack.automaticImport.createIntegrationUpload.duplicatePackageNameError', {
+    defaultMessage: 'A package named "{packageName}" already exists.',
+    values: { packageName },
+  });
