@@ -615,6 +615,7 @@ describe('generateOtelcolConfig', () => {
               context: 'span',
               statements: [
                 'set(attributes["data_stream.type"], "traces")',
+                'set(attributes["data_stream.dataset"], "zipkinreceiver")',
                 'set(attributes["data_stream.namespace"], "apmtest")',
               ],
             },
@@ -622,6 +623,7 @@ describe('generateOtelcolConfig', () => {
               context: 'spanevent',
               statements: [
                 'set(attributes["data_stream.type"], "logs")',
+                'set(attributes["data_stream.dataset"], "zipkinreceiver")',
                 'set(attributes["data_stream.namespace"], "apmtest")',
               ],
             },
@@ -669,6 +671,39 @@ describe('generateOtelcolConfig', () => {
         },
       },
     });
+  });
+
+  it('should include dataset in span routing transform for traces input without use_apm', () => {
+    const otelTracesInputNoAPM: FullAgentPolicyInput = {
+      ...otelTracesInputWithAPM,
+      streams: otelTracesInputWithAPM.streams?.map((stream) => {
+        const { use_apm: _useApm, ...rest } = stream as any;
+        return rest;
+      }),
+    };
+    const inputs: FullAgentPolicyInput[] = [otelTracesInputNoAPM];
+    const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput });
+
+    expect(
+      result.processors?.['transform/test-traces-stream-id-1-routing']?.trace_statements
+    ).toEqual([
+      {
+        context: 'span',
+        statements: [
+          'set(attributes["data_stream.type"], "traces")',
+          'set(attributes["data_stream.dataset"], "zipkinreceiver")',
+          'set(attributes["data_stream.namespace"], "apmtest")',
+        ],
+      },
+      {
+        context: 'spanevent',
+        statements: [
+          'set(attributes["data_stream.type"], "logs")',
+          'set(attributes["data_stream.dataset"], "zipkinreceiver")',
+          'set(attributes["data_stream.namespace"], "apmtest")',
+        ],
+      },
+    ]);
   });
 
   it('should produce separate aggregated-apm-metrics pipelines for two APM package policies with different namespaces', () => {
@@ -967,13 +1002,13 @@ describe('generateOtelcolConfig', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes];
       const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
-      // dynamic_signal_types: data_stream.dataset is NOT set — deferred to ES exporter routing
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
         log_statements: [
           {
             context: 'log',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -983,6 +1018,7 @@ describe('generateOtelcolConfig', () => {
             context: 'datapoint',
             statements: [
               'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -992,6 +1028,7 @@ describe('generateOtelcolConfig', () => {
             context: 'span',
             statements: [
               'set(attributes["data_stream.type"], "traces")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -999,6 +1036,7 @@ describe('generateOtelcolConfig', () => {
             context: 'spanevent',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1008,6 +1046,7 @@ describe('generateOtelcolConfig', () => {
             context: 'profile',
             statements: [
               'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1019,13 +1058,13 @@ describe('generateOtelcolConfig', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes2];
       const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
-      // dynamic_signal_types: data_stream.dataset is NOT set — deferred to ES exporter routing
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
         log_statements: [
           {
             context: 'log',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1035,6 +1074,7 @@ describe('generateOtelcolConfig', () => {
             context: 'datapoint',
             statements: [
               'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1044,6 +1084,7 @@ describe('generateOtelcolConfig', () => {
             context: 'span',
             statements: [
               'set(attributes["data_stream.type"], "traces")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1051,6 +1092,7 @@ describe('generateOtelcolConfig', () => {
             context: 'spanevent',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1060,6 +1102,7 @@ describe('generateOtelcolConfig', () => {
             context: 'profile',
             statements: [
               'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1095,13 +1138,13 @@ describe('generateOtelcolConfig', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithSubsetSignalTypes];
       const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
-      // dynamic_signal_types: data_stream.dataset is NOT set — deferred to ES exporter routing
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
         log_statements: [
           {
             context: 'log',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1111,6 +1154,7 @@ describe('generateOtelcolConfig', () => {
             context: 'datapoint',
             statements: [
               'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },

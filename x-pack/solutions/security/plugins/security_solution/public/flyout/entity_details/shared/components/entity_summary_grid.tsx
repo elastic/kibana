@@ -32,7 +32,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 
 interface EntitySummaryGridProps {
   entityRecord: Entity;
-  criticalityLevel?: CriticalityLevelWithUnassigned;
+  criticalityLevel?: CriticalityLevelWithUnassigned | null;
   onCriticalitySave?: (value: CriticalityLevelWithUnassigned) => void;
 }
 
@@ -159,7 +159,7 @@ const AssetCriticalityCell = memo(
     canEdit,
     onOpenModal,
   }: {
-    criticalityLevel?: CriticalityLevelWithUnassigned;
+    criticalityLevel?: CriticalityLevelWithUnassigned | null;
     canEdit: boolean;
     onOpenModal: () => void;
   }) => (
