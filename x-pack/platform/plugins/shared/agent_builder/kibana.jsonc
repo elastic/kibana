@@ -33,7 +33,6 @@
       "triggersActionsUi",
       "esUiShared",
       "workflowsExtensions",
-      "embeddable",
     ],
     "requiredBundles": [
       "kibanaReact",

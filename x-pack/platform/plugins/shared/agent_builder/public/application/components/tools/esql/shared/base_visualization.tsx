@@ -6,13 +6,10 @@
  */
 
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { InlineEditLensEmbeddableContext, LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useCallback, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { visualizationWrapper } from './styles';
 import { VisualizationActions } from './visualization_actions';
 
@@ -24,7 +21,6 @@ interface BaseVisualizationProps {
   lensInput: TypedLensByValueInput | undefined;
   setLensInput: (input: TypedLensByValueInput) => void;
   isLoading: boolean;
-  embeddable: EmbeddableStart;
 }
 
 export function BaseVisualization({
@@ -33,7 +29,6 @@ export function BaseVisualization({
   lensInput,
   setLensInput,
   isLoading,
-  embeddable,
 }: BaseVisualizationProps) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [lensLoadEvent, setLensLoadEvent] = useState<
@@ -41,7 +36,6 @@ export function BaseVisualization({
   >(null);
 
   const { euiTheme } = useEuiTheme();
-  const { activeDashboardApi$ } = useAgentBuilderServices();
 
   const onLoad = useCallback(
     (
@@ -58,46 +52,6 @@ export function BaseVisualization({
 
   const onOpenSave = useCallback(() => setIsSaveModalOpen(true), []);
   const onCloseSave = useCallback(() => setIsSaveModalOpen(false), []);
-
-  const runSave = useCallback(
-    async (saveProps: { dashboardId?: string | null; newTitle?: string }) => {
-      if (!lensInput) return;
-
-      const { dashboardId } = saveProps;
-      if (!dashboardId) {
-        onCloseSave();
-        return;
-      }
-
-      const embeddablePackage = {
-        type: LENS_EMBEDDABLE_TYPE,
-        serializedState: {
-          ...lensInput,
-          title: saveProps.newTitle ?? lensInput.title,
-        },
-      };
-
-      const dashboardApi = activeDashboardApi$.value;
-      const currentDashboardId = dashboardApi?.savedObjectId$.value;
-
-      if (dashboardApi && dashboardId === currentDashboardId) {
-        dashboardApi.addNewPanel(
-          { panelType: embeddablePackage.type, ...embeddablePackage },
-          { scrollToPanel: true }
-        );
-        dashboardApi.setViewMode('edit');
-      } else {
-        const stateTransfer = embeddable.getStateTransfer();
-        stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
-          state: [embeddablePackage],
-          path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
-        });
-      }
-
-      onCloseSave();
-    },
-    [lensInput, activeDashboardApi$, embeddable, onCloseSave]
-  );
 
   return (
     <>
@@ -127,7 +81,6 @@ export function BaseVisualization({
           initialInput={lensInput}
           onClose={onCloseSave}
           isSaveable={false}
-          runSave={runSave}
         />
       )}
     </>

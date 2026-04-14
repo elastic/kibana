@@ -16,7 +16,7 @@ import type { DashboardRendererProps } from '../dashboard_renderer/dashboard_ren
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import { buildMockDashboardApi } from '../mocks';
-import { dataService } from '../services/kibana_services';
+import { dataService, embeddableService } from '../services/kibana_services';
 import { DashboardApp } from './dashboard_app';
 
 jest.mock('../dashboard_renderer/dashboard_renderer');
@@ -109,6 +109,150 @@ describe('Dashboard App', () => {
       expect(dashboardApi.expandedPanelId$.getValue()).toBe(undefined);
       expect(historySpy).toHaveBeenCalledTimes(1);
       expect(mockHistory.location.pathname).toBe('/create');
+    });
+  });
+
+  describe('same-dashboard incoming embeddables', () => {
+    const addIncomingEmbeddablesSpy = jest.spyOn(dashboardApi, 'addIncomingEmbeddables');
+    const setViewModeSpy = jest.spyOn(dashboardApi, 'setViewMode');
+    const stateTransferMock = embeddableService.getStateTransfer();
+    const mockGetIncomingEmbeddablePackage =
+      stateTransferMock.getIncomingEmbeddablePackage as jest.Mock;
+
+    beforeAll(() => {
+      (embeddableService.getStateTransfer as jest.Mock).mockReturnValue(stateTransferMock);
+    });
+
+    beforeEach(() => {
+      addIncomingEmbeddablesSpy.mockClear();
+      setViewModeSpy.mockClear();
+      mockGetIncomingEmbeddablePackage.mockReset();
+    });
+
+    it('adds incoming embeddables directly when navigating to the same dashboard', async () => {
+      const savedDashboardId = 'test-dashboard-123';
+      mockHistory = createMemoryHistory({ initialEntries: [`/view/${savedDashboardId}`] });
+
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={mockHistory}
+          savedDashboardId={savedDashboardId}
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+      });
+
+      const incomingEmbeddables = [
+        {
+          type: 'lens',
+          serializedState: { title: 'Chart from the AI sidebar' },
+        },
+      ];
+      mockGetIncomingEmbeddablePackage.mockReturnValueOnce(incomingEmbeddables);
+
+      mockHistory.push(`/view/${savedDashboardId}`);
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledTimes(1);
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledWith(incomingEmbeddables);
+        expect(setViewModeSpy).toHaveBeenCalledWith('edit');
+      });
+    });
+
+    it('adds incoming embeddables directly when navigating to the same dashboard with a maximized panel', async () => {
+      const savedDashboardId = 'test-dashboard-123';
+      mockHistory = createMemoryHistory({ initialEntries: [`/view/${savedDashboardId}/panel`] });
+
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={mockHistory}
+          savedDashboardId={savedDashboardId}
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+      });
+
+      const incomingEmbeddables = [
+        {
+          type: 'lens',
+          serializedState: { title: 'Chart from the AI sidebar' },
+        },
+      ];
+      mockGetIncomingEmbeddablePackage.mockReturnValueOnce(incomingEmbeddables);
+
+      mockHistory.push(`/view/${savedDashboardId}/panel`);
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledTimes(1);
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledWith(incomingEmbeddables);
+        expect(setViewModeSpy).toHaveBeenCalledWith('edit');
+      });
+    });
+
+    it('does not consume embeddables when navigating to a different dashboard', async () => {
+      const savedDashboardId = 'dashboard-a';
+      mockHistory = createMemoryHistory({ initialEntries: [`/view/${savedDashboardId}`] });
+
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={mockHistory}
+          savedDashboardId={savedDashboardId}
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+      });
+
+      mockGetIncomingEmbeddablePackage.mockReturnValueOnce([
+        {
+          type: 'lens',
+          serializedState: { title: 'Some panel' },
+        },
+      ]);
+
+      mockHistory.push('/view/dashboard-b');
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    it('does nothing when there are no incoming embeddables in session storage', async () => {
+      const savedDashboardId = 'test-dashboard-456';
+      mockHistory = createMemoryHistory({ initialEntries: [`/view/${savedDashboardId}`] });
+
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={mockHistory}
+          savedDashboardId={savedDashboardId}
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+      });
+
+      mockGetIncomingEmbeddablePackage.mockReturnValueOnce(undefined);
+
+      mockHistory.push(`/view/${savedDashboardId}`);
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+        expect(setViewModeSpy).not.toHaveBeenCalled();
+      });
     });
   });
 });

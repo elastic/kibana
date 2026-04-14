@@ -24,7 +24,6 @@ export class DashboardAgentPlugin
     >
 {
   private cleanupAttachmentUi?: () => void;
-  private cleanupDashboardApiForwarding?: () => void;
 
   constructor(_initContext: PluginInitializerContext) {}
 
@@ -39,11 +38,6 @@ export class DashboardAgentPlugin
     _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    const dashboardApiForwarding = plugins.dashboard.dashboardAppClientApi$.subscribe((api) => {
-      plugins.agentBuilder.setActiveDashboardApi(api ?? undefined);
-    });
-    this.cleanupDashboardApiForwarding = () => dashboardApiForwarding.unsubscribe();
-
     // TODO this causes async imports when plugin starts
     // Please avoid this practice as it hides plugin size but impacts kibana load performance
     // Please remove async import.
@@ -62,6 +56,5 @@ export class DashboardAgentPlugin
 
   public stop() {
     this.cleanupAttachmentUi?.();
-    this.cleanupDashboardApiForwarding?.();
   }
 }

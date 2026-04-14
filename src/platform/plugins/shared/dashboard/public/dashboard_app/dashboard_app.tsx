@@ -29,7 +29,11 @@ import {
   screenshotModeService,
   shareService,
 } from '../services/kibana_services';
-import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
+import {
+  DASHBOARD_STATE_STORAGE_KEY,
+  VIEW_DASHBOARD_URL,
+  createDashboardEditUrl,
+} from '../utils/urls';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
@@ -134,6 +138,37 @@ export function DashboardApp({
       dataService.search.session.clear();
     };
   }, []);
+
+  /**
+   * Handle incoming embeddables from the state transfer service received after the dashboard has already loaded
+   * This can happen if a modal or popup makes use of state transfers and redirects to add panels to a dashboard,
+   * but it tries to add them to the dashboard the user is already looking at. e.g. the AI agent chat sidebar works this way
+   */
+  useEffect(() => {
+    if (!dashboardApi) return;
+    const unlisten = history.listen((location) => {
+      const dashboardPath = `${VIEW_DASHBOARD_URL}/${savedDashboardId}`;
+      const isNavigatingToSameDashboard =
+        savedDashboardId && location.pathname.match(`^${dashboardPath}/?$`);
+      // Bail out if the history update is navigating to a different dashboard. Otherwise the following code
+      // will eat the state transfer intended for the next dashboard
+      if (!isNavigatingToSameDashboard) return;
+
+      const lateEmbeddables = embeddableService
+        .getStateTransfer()
+        .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
+
+      if (lateEmbeddables?.length) {
+        // If a panel is expanded, minimize it so that the user can see the newly added embeddables
+        if (dashboardApi.expandedPanelId$.value) {
+          dashboardApi.expandPanel(dashboardApi.expandedPanelId$.value);
+        }
+        dashboardApi.addIncomingEmbeddables(lateEmbeddables);
+        dashboardApi.setViewMode('edit');
+      }
+    });
+    return unlisten;
+  }, [dashboardApi, history, savedDashboardId]);
 
   /**
    * Validate saved object load outcome

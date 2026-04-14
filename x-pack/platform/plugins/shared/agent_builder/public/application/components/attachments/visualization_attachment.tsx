@@ -43,7 +43,6 @@ export const createVisualizationAttachmentDefinition = ({
             lens={startDependencies.lens}
             uiActions={startDependencies.uiActions}
             timeRange={timeRange}
-            embeddable={startDependencies.embeddable}
           />
         </Suspense>
       );

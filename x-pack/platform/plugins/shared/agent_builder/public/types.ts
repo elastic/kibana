@@ -31,13 +31,7 @@ import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-as
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
-import type {
-  CanAddNewPanel,
-  PublishesSavedObjectId,
-  PublishesWritableViewMode,
-} from '@kbn/presentation-publishing';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
 export interface ConversationSidebarRef {
@@ -65,7 +59,6 @@ export interface AgentBuilderSetupDependencies {
 
 export interface AgentBuilderStartDependencies {
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
-  embeddable: EmbeddableStart;
   evals?: EvalsPublicStart;
   inference: InferencePublicStart;
   lens: LensPublicStart;
@@ -78,10 +71,6 @@ export interface AgentBuilderStartDependencies {
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
-
-export type ActiveDashboardApi = CanAddNewPanel &
-  PublishesSavedObjectId &
-  PublishesWritableViewMode;
 
 export interface AgentBuilderPluginSetup {}
 
@@ -162,10 +151,4 @@ export interface AgentBuilderPluginStart {
     attachmentId: string,
     origin: string
   ) => Promise<UpdateOriginResponse>;
-  /**
-   * Sets the active dashboard API, enabling visualizations to be saved directly
-   * to the current dashboard without a page redirect.
-   * Call with `undefined` when no dashboard is active.
-   */
-  setActiveDashboardApi: (api: ActiveDashboardApi | undefined) => void;
 }

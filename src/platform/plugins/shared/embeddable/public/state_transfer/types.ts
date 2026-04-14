@@ -81,3 +81,10 @@ function ensureFieldOfTypeExists(key: string, obj: unknown, type?: string): bool
     (!type || typeof (obj as { [key: string]: unknown })[key] === type)
   );
 }
+
+export interface CanAddIncomingEmbeddables {
+  addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => void;
+}
+export const apiCanAddIncomingEmbeddables = (api: unknown): api is CanAddIncomingEmbeddables => {
+  return typeof (api as CanAddIncomingEmbeddables)?.addIncomingEmbeddables === 'function';
+};

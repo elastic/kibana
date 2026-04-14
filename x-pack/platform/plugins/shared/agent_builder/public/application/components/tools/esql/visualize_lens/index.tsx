@@ -12,7 +12,6 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { useLensInput } from './use_lens_input';
 import { BaseVisualization } from '../shared/base_visualization';
 
@@ -22,14 +21,12 @@ export function VisualizeLens({
   uiActions,
   lensConfig,
   timeRange,
-  embeddable,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
   uiActions: UiActionsStart;
   lensConfig: any;
   timeRange?: TimeRange;
-  embeddable: EmbeddableStart;
 }) {
   const { lensInput, setLensInput, isLoading, error } = useLensInput({
     lens,
@@ -60,7 +57,6 @@ export function VisualizeLens({
       lensInput={lensInput}
       setLensInput={setLensInput}
       isLoading={isLoading}
-      embeddable={embeddable}
     />
   );
 }

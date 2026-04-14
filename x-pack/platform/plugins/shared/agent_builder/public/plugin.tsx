@@ -50,7 +50,6 @@ import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
 import { registerWorkflowSteps } from './step_types';
 import type {
-  ActiveDashboardApi,
   ConfigSchema,
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -158,7 +157,6 @@ export class AgentBuilderPlugin
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
-    const activeDashboardApi$ = new BehaviorSubject<ActiveDashboardApi | undefined>(undefined);
 
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');
@@ -207,7 +205,6 @@ export class AgentBuilderPlugin
     };
 
     const internalServices: AgentBuilderInternalService = {
-      activeDashboardApi$,
       agentService,
       attachmentsService,
       chatService,
@@ -284,9 +281,6 @@ export class AgentBuilderPlugin
       },
       updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
-      },
-      setActiveDashboardApi: (api: ActiveDashboardApi | undefined) => {
-        activeDashboardApi$.next(api);
       },
     };
 

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import type { BehaviorSubject } from 'rxjs';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AgentBuilderAccessChecker } from './access/access';
-import type {
-  ActiveDashboardApi,
-  AgentBuilderStartDependencies,
-  OpenConversationSidebarReturn,
-} from '../types';
+import type { AgentBuilderStartDependencies, OpenConversationSidebarReturn } from '../types';
 import type { OpenConversationSidebarOptions } from '../sidebar/types';
 import type { AgentService } from './agents';
 import type { AttachmentsService } from './attachments';
@@ -27,7 +22,6 @@ import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
 
 export interface AgentBuilderInternalService {
-  activeDashboardApi$: BehaviorSubject<ActiveDashboardApi | undefined>;
   agentService: AgentService;
   attachmentsService: AttachmentsService;
   chatService: ChatService;
