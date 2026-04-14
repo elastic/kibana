@@ -14,6 +14,7 @@ import {
   type FindItemsResult,
   type FindItemsParams,
 } from '@kbn/content-list-provider';
+import type { ContentListItemConfig } from '@kbn/content-list-provider';
 import { useColumns } from './use_columns';
 import { Column, NameColumn } from '../column';
 
@@ -25,7 +26,11 @@ const mockFindItems = jest.fn(
 );
 
 const createWrapper =
-  (options?: { isReadOnly?: boolean; getHref?: (item: { id: string }) => string }) =>
+  (options?: {
+    isReadOnly?: boolean;
+    getHref?: (item: { id: string }) => string;
+    item?: ContentListItemConfig;
+  }) =>
   ({ children }: { children: React.ReactNode }) =>
     (
       <ContentListProvider
@@ -33,7 +38,7 @@ const createWrapper =
         labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
         dataSource={{ findItems: mockFindItems }}
         isReadOnly={options?.isReadOnly}
-        item={options?.getHref ? { getHref: options.getHref } : undefined}
+        item={options?.item ?? (options?.getHref ? { getHref: options.getHref } : undefined)}
       >
         {children}
       </ContentListProvider>
@@ -45,31 +50,80 @@ describe('useColumns', () => {
   });
 
   describe('default columns', () => {
-    it('returns the default Name column when `children` is `undefined`', () => {
+    it('returns Name and UpdatedAt columns when `children` is `undefined` (no item config)', () => {
       const { result } = renderHook(() => useColumns(undefined), {
         wrapper: createWrapper(),
       });
 
-      expect(result.current).toHaveLength(1);
+      // Actions column is omitted because no onEdit/onDelete is configured.
+      expect(result.current).toHaveLength(2);
       expect(result.current[0]).toMatchObject({
         field: 'title',
         name: 'Name',
         sortable: true,
       });
+      expect(result.current[1]).toMatchObject({
+        field: 'updatedAt',
+        name: 'Last updated',
+        sortable: true,
+      });
     });
 
-    it('returns the default Name column when children contain no valid column parts', () => {
+    it('includes Actions column when item config has edit/delete handlers', () => {
+      const onEdit = jest.fn();
+      const onDelete = jest.fn();
+      const wrapper = createWrapper({ item: { onEdit, onDelete } });
+
+      const { result } = renderHook(() => useColumns(undefined, onDelete), {
+        wrapper,
+      });
+
+      expect(result.current).toHaveLength(3);
+      expect(result.current[0]).toMatchObject({ field: 'title', name: 'Name' });
+      expect(result.current[1]).toMatchObject({ field: 'updatedAt', name: 'Last updated' });
+      expect(result.current[2]).toMatchObject({ name: 'Actions' });
+    });
+
+    it('includes only Edit action when only onEdit is configured', () => {
+      const onEdit = jest.fn();
+      const wrapper = createWrapper({ item: { onEdit } });
+
+      const { result } = renderHook(() => useColumns(undefined), {
+        wrapper,
+      });
+
+      expect(result.current).toHaveLength(3);
+      const actionsColumn = result.current[2];
+      expect(actionsColumn).toMatchObject({ name: 'Actions' });
+      expect((actionsColumn as { actions: unknown[] }).actions).toHaveLength(1);
+    });
+
+    it('omits Actions column in read-only mode even with handlers', () => {
+      const onEdit = jest.fn();
+      const onDelete = jest.fn();
+      const wrapper = createWrapper({ isReadOnly: true, item: { onEdit, onDelete } });
+
+      const { result } = renderHook(() => useColumns(undefined, onDelete), {
+        wrapper,
+      });
+
+      // Actions column is omitted in read-only mode.
+      expect(result.current).toHaveLength(2);
+      expect(result.current[0]).toMatchObject({ field: 'title' });
+      expect(result.current[1]).toMatchObject({ field: 'updatedAt' });
+    });
+
+    it('returns Name and UpdatedAt when children contain no valid column parts', () => {
       const children = <div>Not a column</div>;
 
       const { result } = renderHook(() => useColumns(children), {
         wrapper: createWrapper(),
       });
 
-      expect(result.current).toHaveLength(1);
-      expect(result.current[0]).toMatchObject({
-        field: 'title',
-        name: 'Name',
-      });
+      // Falls back to defaults; Actions omitted (no item config).
+      expect(result.current).toHaveLength(2);
+      expect(result.current[0]).toMatchObject({ field: 'title', name: 'Name' });
+      expect(result.current[1]).toMatchObject({ field: 'updatedAt', name: 'Last updated' });
     });
   });
 
