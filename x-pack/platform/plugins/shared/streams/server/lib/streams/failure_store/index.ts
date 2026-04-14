@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const FAILURE_STORE_SELECTOR = '::failures';
+export { getClusterDefaultFailureStoreRetentionValue, getFailureStoreStats } from './route_helpers';

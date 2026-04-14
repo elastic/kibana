@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import {
   getClusterDefaultFailureStoreRetentionValue,
   getFailureStoreStats,
-} from '../../../../lib/streams/stream_crud';
+} from '../../../../lib/streams/failure_store';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 
