@@ -11,6 +11,7 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 import { defineConfig, devices } from '@playwright/test';
 import {
   scoutFailedTestsReporter,
+  scoutFailureSummaryReporter,
   scoutPlaywrightReporter,
   generateTestRunId,
 } from '@kbn/scout-reporting';
@@ -91,6 +92,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       ['json', { outputFile: './.scout/reports/test-results.json' }], // JSON report
       scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
       scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
+      scoutFailureSummaryReporter({ name: 'scout-failure-summary', runId }), // Scout failure summary (local only)
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
