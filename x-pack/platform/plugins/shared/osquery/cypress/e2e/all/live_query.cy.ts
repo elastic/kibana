@@ -37,12 +37,12 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('Query is a required field').should('not.exist');
     checkResults();
     getAdvancedButton().click();
-    fillInQueryTimeout('901');
+    fillInQueryTimeout('86401');
     submitQuery();
-    cy.contains('The timeout value must be 900 seconds or lower.');
-    fillInQueryTimeout('890');
+    cy.contains('The timeout value must be 86400 seconds or lower.');
+    fillInQueryTimeout('120');
     submitQuery();
-    cy.contains('The timeout value must be 900 seconds or lower.').should('not.exist');
+    cy.contains('The timeout value must be 86400 seconds or lower.').should('not.exist');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
     submitQuery();
     cy.contains('ECS field is required.');
@@ -53,9 +53,9 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('ECS field is required.').should('not.exist');
     cy.wait('@postQuery').then((interception) => {
       expect(interception.request.body).to.have.property('query', 'select * from uptime;');
-      expect(interception.request.body).to.have.property('timeout', 890);
+      expect(interception.request.body).to.have.property('timeout', 120);
       expect(interception.response?.statusCode).to.eq(200);
-      expect(interception.response?.body.data.queries[0]).to.have.property('timeout', 890);
+      expect(interception.response?.body.data.queries[0]).to.have.property('timeout', 120);
     });
     checkResults();
   });
