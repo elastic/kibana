@@ -95,6 +95,20 @@ globalSetupHookWithSynthtrace(
       })),
     });
 
+    // Add remove processor to partitioning streams BEFORE indexing so that
+    // attributes.filepath is stripped at ingest time, forcing the LLM to
+    // analyze body.text content rather than relying on filepath as a discriminator.
+    const partitioningStreams = [
+      'logs.otel.partition-eval',
+      'logs.otel.partition-homog',
+      'logs.otel.partition-hard',
+    ];
+    for (const stream of partitioningStreams) {
+      await apiServices.streams.updateStreamProcessors(stream, {
+        steps: [{ action: 'remove', from: 'attributes.filepath' }],
+      });
+    }
+
     // Collect all systems needed across pipeline + partitioning tests
     const pipelineSystems = indexModeExamples.map((e) => e.input.system);
     const partitioningSystems = [
@@ -160,20 +174,6 @@ globalSetupHookWithSynthtrace(
       log.info(
         `[streams eval setup] ${example.input.stream_name}: ${count} documents (>= ${needed})`
       );
-    }
-
-    // Remove attributes.filepath from partitioning streams so the LLM must analyze
-    // log content rather than relying on the filepath as a discriminator.
-    const partitioningStreams = [
-      'logs.otel.partition-eval',
-      'logs.otel.partition-homog',
-      'logs.otel.partition-hard',
-    ];
-    for (const stream of partitioningStreams) {
-      await apiServices.streams.updateStreamProcessors(stream, (prev) => ({
-        ...prev,
-        steps: [...(prev.steps ?? []), { action: 'remove', from: 'attributes.filepath' }],
-      }));
     }
 
     log.info('[streams eval setup] done');
