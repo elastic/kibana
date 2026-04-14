@@ -94,7 +94,8 @@
     "@kbn/utility-types",
     "@kbn/usage-collection-plugin",
     "@kbn/share-plugin",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/event-log-plugin"
   ],
   "exclude": ["target/**/*"]
 }
