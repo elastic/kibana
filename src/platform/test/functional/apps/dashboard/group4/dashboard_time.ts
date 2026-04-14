@@ -88,7 +88,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(time:(from:now-1h,to:now))`;
         await browser.get(urlWithGlobalTime, false);
         const time = await timePicker.getTimeConfig();
-        expect(time.start).to.equal('~ an hour ago');
+        // Legacy picker shows "~ an hour ago", new DateRangePicker returns
+        // dateMath (with /h rounding when roundRelativeTime setting is enabled)
+        expect(
+          time.start === '~ an hour ago' || time.start === 'now-1h' || time.start === 'now-1h/h'
+        ).to.equal(true);
         expect(time.end).to.equal('now');
 
         /**
@@ -109,7 +113,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.get(urlWithGlobalTime, false);
 
         const time = await timePicker.getTimeConfig();
-        expect(time.start).to.equal('~ an hour ago');
+        // Legacy picker shows "~ an hour ago", new DateRangePicker returns
+        // dateMath (with /h rounding when roundRelativeTime setting is enabled)
+        expect(
+          time.start === '~ an hour ago' || time.start === 'now-1h' || time.start === 'now-1h/h'
+        ).to.equal(true);
         expect(time.end).to.equal('now');
       });
 

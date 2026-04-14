@@ -10998,7 +10998,7 @@
           "BaseMetadata"
         ],
         "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-        "lineNumber": 79,
+        "lineNumber": 80,
         "columnNumber": 3,
         "deprecated": false,
         "trackAdoption": false,
@@ -11014,7 +11014,7 @@
               "[key: string]:  unknown"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -30726,6 +30726,10 @@
           },
           {
             "plugin": "entityStore",
+            "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/utils/validator.ts"
+          },
+          {
+            "plugin": "entityStore",
             "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/utils/log_extraction_validator.ts"
           },
           {
@@ -30743,10 +30747,6 @@
           {
             "plugin": "entityStore",
             "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/install/validator.ts"
-          },
-          {
-            "plugin": "entityStore",
-            "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/utils/validator.ts"
           },
           {
             "plugin": "cases",

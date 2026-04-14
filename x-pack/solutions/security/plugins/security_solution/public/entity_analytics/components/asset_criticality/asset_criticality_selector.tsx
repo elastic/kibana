@@ -52,7 +52,7 @@ interface Props {
   entity: Entity;
   onChange?: () => void;
   /** When using Entity Store v2: criticality from the store record. */
-  criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
+  criticalityFromEntityStore?: CriticalityLevelWithUnassigned | null;
   /** When using Entity Store v2: the full entity record for upsert on save. */
   entityRecord?: ApiEntity;
   /** When using Entity Store v2: called after updating criticality via entity store API. */
@@ -273,7 +273,7 @@ export const AssetCriticalityTitle = () => (
 );
 
 export interface AssetCriticalityModalProps {
-  initialCriticalityLevel: CriticalityLevel | undefined;
+  initialCriticalityLevel: CriticalityLevel | undefined | null;
   toggle: (nextValue: boolean) => void;
   onSave: (value: CriticalityLevelWithUnassigned) => void;
 }
