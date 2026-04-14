@@ -134,6 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.saveDashboard('test');
       await browser.refresh();
       await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       const initialWidth = (await (await dataGrid.getHeaderElement('_source')).getSize()).width;
       expect(initialWidth).to.be(newWidth);
     });
