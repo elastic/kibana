@@ -26,7 +26,6 @@ import {
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
 } from './synthetics_monitor/legacy_synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';
-import { syntheticsCCSSettings } from './synthetics_ccs_settings';
 
 export const registerSyntheticsSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
@@ -36,7 +35,6 @@ export const registerSyntheticsSavedObjects = (
   savedObjectsService.registerType(PRIVATE_LOCATION_SAVED_OBJECT_TYPE);
 
   savedObjectsService.registerType(syntheticsSettings);
-  savedObjectsService.registerType(syntheticsCCSSettings);
 
   // legacy synthetics monitor saved object type which is single namespace
   savedObjectsService.registerType(

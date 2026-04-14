@@ -10,9 +10,15 @@ import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { SyntheticsCCSSettings } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
-  DefaultSyntheticsCCSSettingsRepository,
-  DEFAULT_CCS_SETTINGS,
-} from '../../services/synthetics_ccs_settings_repository';
+  getSyntheticsDynamicSettings,
+  setSyntheticsDynamicSettings,
+} from '../../saved_objects/synthetics_settings';
+
+const DEFAULT_CCS_SETTINGS: SyntheticsCCSSettings = {
+  useAllRemoteClusters: false,
+  selectedRemoteClusters: [],
+  remoteKibanaUrls: {},
+};
 
 export const createGetCCSSettingsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsCCSSettings
@@ -25,8 +31,12 @@ export const createGetCCSSettingsRoute: SyntheticsRestApiRouteFactory<
       return DEFAULT_CCS_SETTINGS;
     }
 
-    const repository = new DefaultSyntheticsCCSSettingsRepository(savedObjectsClient);
-    return await repository.get();
+    const dynamicSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
+    return {
+      useAllRemoteClusters: dynamicSettings.useAllRemoteClusters ?? false,
+      selectedRemoteClusters: dynamicSettings.selectedRemoteClusters ?? [],
+      remoteKibanaUrls: dynamicSettings.remoteKibanaUrls ?? {},
+    };
   },
 });
 
@@ -52,7 +62,20 @@ export const createPutCCSSettingsRoute: SyntheticsRestApiRouteFactory<
       }) as never;
     }
 
-    const repository = new DefaultSyntheticsCCSSettingsRepository(savedObjectsClient);
-    return await repository.save(request.body as SyntheticsCCSSettings);
+    const prevSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
+    const body = request.body as SyntheticsCCSSettings;
+
+    const updated = await setSyntheticsDynamicSettings(savedObjectsClient, {
+      ...prevSettings,
+      useAllRemoteClusters: body.useAllRemoteClusters,
+      selectedRemoteClusters: body.selectedRemoteClusters,
+      remoteKibanaUrls: body.remoteKibanaUrls,
+    });
+
+    return {
+      useAllRemoteClusters: updated.useAllRemoteClusters ?? false,
+      selectedRemoteClusters: updated.selectedRemoteClusters ?? [],
+      remoteKibanaUrls: updated.remoteKibanaUrls ?? {},
+    };
   },
 });

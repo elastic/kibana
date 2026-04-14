@@ -14,7 +14,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
-import { DefaultSyntheticsCCSSettingsRepository } from './services/synthetics_ccs_settings_repository';
+import { getSyntheticsDynamicSettings } from './saved_objects/synthetics_settings';
 import { getSyntheticsIndices } from './services/get_synthetics_indices';
 import type { SyntheticsRouteWrapper } from './routes/types';
 
@@ -52,10 +52,12 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       let remoteKibanaUrls: Record<string, string> = {};
       if (!server.isElasticsearchServerless && server.config.experimental?.ccs?.enabled) {
         try {
-          const ccsSettingsRepository = new DefaultSyntheticsCCSSettingsRepository(
-            savedObjectsClient
-          );
-          const ccsSettings = await ccsSettingsRepository.get();
+          const dynamicSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
+          const ccsSettings = {
+            useAllRemoteClusters: dynamicSettings.useAllRemoteClusters ?? false,
+            selectedRemoteClusters: dynamicSettings.selectedRemoteClusters ?? [],
+            remoteKibanaUrls: dynamicSettings.remoteKibanaUrls ?? {},
+          };
           const { indices } = await getSyntheticsIndices(esClient.asCurrentUser, ccsSettings);
           heartbeatIndices = indices;
           remoteKibanaUrls = ccsSettings.remoteKibanaUrls;
