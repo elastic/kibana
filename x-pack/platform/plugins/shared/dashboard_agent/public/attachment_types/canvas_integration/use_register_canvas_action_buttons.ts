@@ -27,7 +27,6 @@ interface UseRegisterCanvasActionButtonsParams {
   getExistingDashboardId: () => string | undefined;
   closeCanvas: () => void;
   openSidebarConversation?: () => void;
-  savedObjectStatus: SavedObjectStatus;
   canWriteDashboards: boolean;
 }
 
@@ -37,7 +36,6 @@ export const useRegisterCanvasActionButtons = ({
   updateOrigin,
   closeCanvas,
   openSidebarConversation,
-  savedObjectStatus,
   canWriteDashboards,
   dashboardLocatorParams,
   getExistingDashboardId,
@@ -71,8 +69,7 @@ export const useRegisterCanvasActionButtons = ({
       return;
     }
 
-    const isLinkedSavedDashboard =
-      savedObjectStatus.status === 'resolved' && savedObjectStatus.exists === true;
+    const isLinkedSavedDashboard = getExistingDashboardIdRef.current?.() !== undefined;
     const isManagedLinkedDashboard = isLinkedSavedDashboard && dashboardApi.isManaged;
     const isReadOnlyLinkedDashboard = isLinkedSavedDashboard && !dashboardApi.isEditableByUser;
 
@@ -146,7 +143,6 @@ export const useRegisterCanvasActionButtons = ({
     dashboardLocatorParamsRef,
     getExistingDashboardIdRef,
     canWriteDashboards,
-    savedObjectStatus,
     missingDashboardWriteControlsReason,
     managedDashboardDisabledReason,
     readOnlyDashboardDisabledReason,

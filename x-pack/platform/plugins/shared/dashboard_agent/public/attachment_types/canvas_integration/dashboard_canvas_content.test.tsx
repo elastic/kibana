@@ -274,7 +274,7 @@ describe('DashboardCanvasContent', () => {
     );
   });
 
-  describe('Edit in Dashboards button', () => {
+  describe('Edit in Dashboards disabled states', () => {
     it('should not navigate for managed dashboards', async () => {
       const attachmentWithOrigin: DashboardAttachment = {
         ...mockAttachment,

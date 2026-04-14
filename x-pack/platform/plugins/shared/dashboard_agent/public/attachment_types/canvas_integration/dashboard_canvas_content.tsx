@@ -158,7 +158,6 @@ export const DashboardCanvasContent = ({
     registerActionButtons,
     updateOrigin,
     openSidebarConversation,
-    savedObjectStatus,
     canWriteDashboards,
     dashboardLocatorParams,
     getExistingDashboardId,
