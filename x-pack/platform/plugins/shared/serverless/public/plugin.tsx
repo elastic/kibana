@@ -50,7 +50,11 @@ export class ServerlessPlugin
     }
 
     project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
+
+    let privilegedUsersAndRolesUrl: string | undefined;
     cloud.getPrivilegedUrls().then((privilegedUrls) => {
+      privilegedUsersAndRolesUrl = privilegedUrls.usersAndRolesUrl;
+
       if (Object.keys(privilegedUrls).length === 0) return;
 
       project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
@@ -64,7 +68,9 @@ export class ServerlessPlugin
       getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
         if (!roleManagementEnabled) return extendCardNavDefinitions;
 
-        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.usersAndRolesUrl);
+        if (!privilegedUsersAndRolesUrl) return extendCardNavDefinitions;
+
+        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(privilegedUsersAndRolesUrl);
         if (extendCardNavDefinitions) {
           extendCardNavDefinitions[manageOrgMembersNavCardName] = manageOrgMembersNavCard;
           return extendCardNavDefinitions;
