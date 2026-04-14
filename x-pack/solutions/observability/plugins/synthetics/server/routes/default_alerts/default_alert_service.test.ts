@@ -41,6 +41,9 @@ describe('DefaultAlertService', () => {
         defaultEmail: undefined,
         defaultStatusRuleEnabled: true,
         defaultTLSRuleEnabled: true,
+        useAllRemoteClusters: false,
+        selectedRemoteClusters: [],
+        remoteKibanaUrls: {},
       });
       expect(soClient.get).toHaveBeenCalledTimes(1);
     });
