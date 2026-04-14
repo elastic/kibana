@@ -9,8 +9,9 @@ Docs should be written during development and accompany PRs when relevant. There
 
 ## End-user documentation
 
-User-facing features should be documented in [asciidoc](http://asciidoc.org/) at [https://github.com/elastic/kibana/tree/main/docs](https://github.com/elastic/kibana/tree/main/docs)
+User-facing features should be documented in Markdown at [https://github.com/elastic/kibana/tree/main/docs](https://github.com/elastic/kibana/tree/main/docs)
 
+###LG TODO update this to reflect reality of docsv3
 To build the docs, you must clone the [elastic/docs](https://github.com/elastic/docs) repo as a sibling of your Kibana repo. Follow the instructions in that project’s [README](https://github.com/elastic/docs#readme) for getting the docs tooling set up.
 
 To build the docs:
@@ -20,6 +21,7 @@ node scripts/docs.js --open
 ```
 
 ## REST APIs
+###LG TODO we use OAS now.
 REST APIs should be documented using the following formats:
 
 - [API doc template](https://raw.githubusercontent.com/elastic/docs/master/shared/api-ref-ex.asciidoc)
@@ -27,20 +29,16 @@ REST APIs should be documented using the following formats:
 
 ## Developer documentation
 
-Developer documentation can be segmented into two types: internal plugin details, and information on extending Kibana. Our [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/getting-started/welcome) is meant to serve the latter. The guide can only be accessed internally at the moment, though the raw content is public in our [public repository](https://docs.elastic.dev/kibana-dev-docs/contributing/(https:/github.com/elastic/kibana/tree/main/dev_docs)).
+Developer documentation can be segmented into two types: internal plugin details, and information on extending Kibana. This guide is meant to serve the latter.
 
-Internal plugin details can be kept alongside the code it describes. Information about extending Kibana may go in the root of your plugin folder, or inside the top-level [dev_docs](https://github.com/elastic/kibana/tree/main/dev_docs) folder. 
-
-:::{note} Internal only
-Only `mdx` files with the appropriate frontmatter are rendered inside the Developer Guide. Read about the syntax here. Edit [kibana/nav-kibana-dev.docnav.json](https://github.com/elastic/kibana/blob/main/dev_docs/nav-kibana-dev.docnav.json) to have a link to your document appear in the navigation menu. Read these instructions for more details on how to add new content and test locally.
-:::
+Internal plugin details can be kept alongside the code it describes. Information about extending Kibana may go in the root of your plugin or package folder.
 
 ### Structure
 
-The high-level developer documentation located in the [dev_docs](https://github.com/elastic/kibana/tree/main/dev_docs) folder attempts to follow [divio documentation](https://documentation.divio.com/) guidance. [Getting started](../getting-started/welcome.md) and [Key concepts](../key-concepts/plugins-packages-and-the-platform.md) sections are _explanation_ oriented, while
+The high-level developer documentation located in the [docs/extend](https://github.com/elastic/kibana/tree/main/docs/extend) folder attempts to follow [divio documentation](https://documentation.divio.com/) guidance. [Getting started](../getting-started/welcome.md) and [Key concepts](../key-concepts/plugins-packages-and-the-platform.md) sections are _explanation_ oriented, while
 [Tutorials](../tutorials/debugging-in-development.md) falls under both _tutorials_ and _how to_. The [API documentation](../api-documentation/welcome.md) section is _reference_ material.
 
-Developers may choose to keep information that is specific to a particular plugin along side the code.
+Developers may choose to keep information that is specific to a particular plugin or package alongside the code.
 
 ### Best practices
 
@@ -62,23 +60,7 @@ It's easy to forget what it felt like to first write code in Kibana, but do your
 
 ## API documentation
 
-We automatically generate [API documentation](../api-documentation/welcome.md). The following guidelines will help ensure your [public APIs](../key-concepts/plugins-packages-and-the-platform.md#public-plugin-api) are useful.
-
-If you encounter an error of the form:
-
-:::{important} JavaScript heap out of memory
-
-:::
-
-You can increase [max memory](https://nodejs.org/api/cli.html#--max-old-space-sizesize-in-megabytes) for node as follows:
-
-```bash
-# As a runtime argument
-node --max-old-space-size=8192 foo/bar
-
-# As an env variable, in order to apply it systematically
-export NODE_OPTIONS=--max-old-space-size=8192
-```
+Coming soon. ###LG TODO need to figure out API Documentation
 
 ### Code comments
 

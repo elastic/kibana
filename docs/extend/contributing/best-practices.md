@@ -29,12 +29,11 @@ Build with scalability in mind.
 
 Did you know Kibana makes a public statement about our commitment to creating an accessible product for people
 with disabilities? [We do](https://www.elastic.co/guide/en/kibana/master/accessibility.html)! It's very important
-all of our apps are accessible.
+all of our apps are accessible. ### LG TODO this link is broken, where does it live?
 
 - Learn how [EUI tackles accessibility](https://elastic.github.io/eui/#/guidelines/accessibility)
 - If you don't use EUI, follow the same EUI accessibility standards
 
-:::{note} Internal only
 ## Accessibility automation in Kibana
 
   Kibana maintains accessibility quality using a layered, hybrid approach:
@@ -82,16 +81,9 @@ it('has no detectable a11y violations on load', () => {
   - No new axe violations in updated components — keep it clean
   - VoiceOver sanity check: new or modified interactive areas should clearly announce their purpose
 
-  For help: join `#accessibility` slack channel.
-:::
-
 ## Localization
 
 Kibana is translated into other languages. Use our i18n utilities to ensure your public facing strings will be translated to ensure all Kibana apps are localized. Read and adhere to our [i18n guidelines](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-i18n/GUIDELINE.md)
-
-:::{note} Internal only
-Elasticians, check out the #kibana-localization channel to ask questions and receive guidance.
-:::
 
 ## Styleguide
 
@@ -115,7 +107,7 @@ const dataView = savedObjectsClient.get(dataViewId) as DataView;
 
 ## Resusable react components
 
-Use [EUI](https://elastic.github.io/eui) for all your basic UI components to create a consistent UI experience. We also have generic UI components offered from the kibana_react plugin.
+Use [EUI](https://elastic.github.io/eui) for all your basic UI components to create a consistent UI experience. ###LG TODO we have kibana ui components too. document these.
 
 ## Don't export code that doesn't need to be public
 
@@ -129,6 +121,7 @@ Over-refactoring can be a problem in it's own right, but it's still important to
 
 ### Timing
 
+### LG TODO extract this to a kibana-team document
 :::{note} Internal only
 Try not to put your PR in review mode, or merge large changes, right before Feature Freeze. It's inevitably one of the most volatile times for the
 Kibana code base, try not to contribute to this volatility. Doing this can:
@@ -208,6 +201,8 @@ auto-fixing to migration all existing and new uses of this export to the proper 
 
 ## Licensing
 
+### LG TODO move this section to kibana-team
+
 :::{note} Internal only
 Has there been a discussion about which license this feature should be available under? Open up a license issue in [https://github.com/elastic/dev](https://github.com/elastic/dev) if you are unsure.
 :::
@@ -221,27 +216,26 @@ Every PR submitted should be accompanied by tests. Read through the [testing plu
 Refer to the list of browsers and OS Kibana supports https://www.elastic.co/support/matrix
 
 Does the feature work efficiently on the below listed browsers
-  - chrome
+  - Chrome
   - Firefox
   - Safari
-  - IE11
 
 ### Upgrade Scenarios
   - Migration scenarios- Does the feature affect old indices, saved objects ?
-  - Has the feature been tested with Kibana aliases
+  - Has the feature been tested with Kibana aliases?
   - Read/Write privileges of the indices before and after the upgrade?
 
 ### Test coverage
-  - Does the feature have sufficient unit test coverage? (does it handle storeinSessions?)
-  - Does the feature have sufficient Functional UI  test coverage?
-  - Does the feature have sufficient Rest API coverage test coverage?
+  - Does the feature have sufficient unit test coverage?
+  - Does the feature have sufficient Functional UI test coverage?
+  - Does the feature have sufficient Rest API test coverage?
   - Does the feature have sufficient Integration test coverage?
 
 ### Environment configurations
 
 - Kibana should be fully [cross cluster search](https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-cross-cluster-search.html) compatible (aside from admin UIs which only work on the local cluster).
 - How does your plugin behave when optional dependencies are disabled?
-- How does your app behave under anonymous access, or with security disabled?
+- How does your app behave under anonymous access, with security disabled, or with users having restricted privileges?
 - Make sure to test your PR in a cloud environment. Read about the [ci:deploy cloud](../tutorials/ci.md#labels) label which makes this very easy.
 
 ## Backward compatibility
@@ -258,19 +252,15 @@ Saved objects exported from past Kibana versions should always continue to work.
 
 ### Treating Kibana's filesystem as durable storage
 
-Plugins should rarely, if ever, access Kibana's filesystem directly. Kibana instances are commonly ephemeral and anything written to the filesystem will potentially
-not be there on restart.
+Plugins should rarely, if ever, access Kibana's filesystem directly. Kibana instances are commonly ephemeral and anything written to the filesystem will potentially not be there on restart.
 
 ### Storing state in server memory
 
-There are generally multiple instances of Kibana all hosted behind a round-robin load-balancer. As a result, storing state in server memory is risky as there is no
-guarantee that a single end-user's HTTP requests will be served by the same Kibana instance.
+There are generally multiple instances of Kibana all hosted behind a round-robin load-balancer. As a result, storing state in server memory is risky as there is no guarantee that a single end-user's HTTP requests will be served by the same Kibana instance.
 
 ### Using WebSockets
 
-Kibana has a number of platform services that don't work with WebSockets, for example authentication and authorization. If your use-case would benefit substantially
-from websockets, talk to the Kibana Core team about adding support. Do not hack around this limitation, everytime that someone has, it's created so many problems
-it's been eventually removed.
+Kibana has a number of platform services that don't work with WebSockets, for example authentication and authorization. If your use-case would benefit substantially from websockets, talk to the Kibana Core team about adding support. Do not hack around this limitation.
 
 ## Security best practices
 

@@ -5,12 +5,7 @@ description: "Learn how to setup a development environment for contributing to t
 
 # Set up a Development Environment
 
-Setting up a development environment is pretty easy.
-
-:::{note} A note about Windows
-We do not support Windows native development anymore and in order to develop Kibana on Windows you must use **WSL** which will give you a much better experience.
-  Please check our [tutorial](../tutorials/wsl-on-windows-development.md) to know how to setup the environment and then follow the rest of this guide inside **WSL**.
-:::
+Kibana development is supported on Linux and macOS. We also support Windows development [using WSL](../tutorials/wsl-on-windows-development.md), but native Windows development is not supported.
 
 ## Get the code
 
@@ -18,7 +13,7 @@ Start by forking [the Kibana repository](https://github.com/elastic/kibana) on G
 
 Then clone the repository to your machine:
 
-```sh
+```bash
 git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
 cd kibana
 ```
@@ -37,28 +32,18 @@ Then, install the latest version of yarn using:
 npm install -g yarn
 ```
 
-If you have Yarn installed, make sure you are using 1.22.22.
-
-. If you are using an unsupported Yarn version, run:
-+
-```sh
-yarn set version 1.22.22
-```
-
 Finally, bootstrap Kibana and install all of the remaining dependencies:
 
 ```sh
 yarn kbn bootstrap
 ```
 
-Node.js native modules could be in use and node-gyp is the tool used to build them. There are tools you need to install per platform and python versions you need to be using. Please follow the [node-gyp installation steps](https://github.com/nodejs/node-gyp#installation) for your platform.
-
 ## Run Elasticsearch
 
 In order to start Kibana you need to run a local version of Elasticsearch. You can startup and initialize the latest Elasticsearch snapshot of the correct version for Kibana by running the following in a new terminal tab/window:
 
 ```sh
-yarn es snapshot
+yarn es snapshot [--license trial]
 ```
 
 You can pass `--license trial` to start Elasticsearch with a trial license, or use the Kibana UI to switch the local version to a trial version which includes all features.
@@ -73,10 +58,11 @@ In another terminal tab/window you can start Kibana.
 yarn start
 ```
 
-Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. Read more about the advanced options for [Running Kibana](https://www.elastic.co/guide/en/kibana/current/running-kibana-advanced.html).
+Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. Read more about the advanced options for [Running Kibana](https://www.elastic.co/guide/en/kibana/current/running-kibana-advanced.html). ###LG TODO: this should be a relative link to the docs, not an absolute link to the website
 You will find the development server running on (http://localhost:5601) - and you can log in with the `elastic:changeme` credential pair.
 
 ## Run in serverless mode
+### LG TODO: Can non-employees even do this??
 
 To develop against serverless projects, you need to start both Elasticsearch and Kibana in serverless mode with matching project types.
 
@@ -120,7 +106,7 @@ After the script completes the pre-commit hook will be created within the file `
 
 ## Using the Kibana Dev Container (optional)
 
-Kibana also supports using a [dev container](https://containers.dev/) which can integrate with various editors and tools [(supported tools)](https://containers.dev/supporting). The dev container provides a consistent development environment across different machines and setups which is based on Ubuntu Jammy (22.04). The only prerequisite is having [Docker](https://www.docker.com/) installed locally. VS Code is the recommended editor and will be used for these instructions because it is the most mature, but it is not required.
+Kibana also supports using a [dev container](https://containers.dev/) which can integrate with various editors and tools [(supported tools)](https://containers.dev/supporting). The dev container provides a consistent development environment across different machines and setups. The only prerequisite is having [Docker](https://www.docker.com/) installed locally. VS Code is the recommended editor and will be used for these instructions because it is the most mature, but it is not required.
 
 ### Setting up the Dev Container
 

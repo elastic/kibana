@@ -5,12 +5,15 @@ mapped_pages:
 
 # Contribute to Kibana [development]
 
-Contributing to {{kib}} can be daunting at first, but it doesn’t have to be. The following sections should get you up and running in no time. If you have any problems, file an issue in the [Kibana repo](https://github.com/elastic/kibana/issues).
+[{{kib}}](https://www.elastic.co/what-is/kibana) is a pluggable platform that allows users to search, visualize and analyze data in Elasticsearch.
 
-* [Getting started](./development-getting-started.md)
-* [Best practices](./development-best-practices.md)
-* [Architecture](./kibana-architecture.md)
-* [Contributing](./contributing.md)
+{{kib}} ships with many out-of-the-box capabilities that can be extended and enhanced by custom javascript plugins. Developers can also write their own custom applications.
+
+
+* [Getting started](./getting-started/welcome.md)
+* [Best practices](./contributing/best-practices.md)
+* [Architecture](./contributing/repository-structure.md)
+* [Contributing](./contributing/how-we-use-github.md)
 * [External plugin development](./external-plugin-development.md)
 * [Advanced](./advanced.md)
 * [List of {{kib}} plugins](./plugin-list.md)

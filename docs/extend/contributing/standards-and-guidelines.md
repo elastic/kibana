@@ -10,7 +10,7 @@ description: "Standards and guidelines we expect every Kibana developer to abide
 We expect all developers to read and abide by our overarching [Developer principles](./developer-principles.md).
 
 ## Style guide
-
+###LG TODO is there a style guide that we can link to here? Otherwise this doesn't feel useful.
 Please read and abide by our Style guide. The majority of these items are linted against but some are not.
 
 ## Adding dependencies
@@ -25,7 +25,7 @@ Please read and abide by our [third-party dependencies guide](./managing-third-p
 Technically, REST does not specify a protocol, but for readability, we’ll be calling RESTful HTTP APIs as REST APIs for short for the remainder of the section. HTTP APIs that serve HTML, CSS and images are not REST APIs.
 
 **End user**
-Anywhere we refer to “end user” in this section, we are referring to someone who is using the REST APIs. The distinction between Product breaking changes and plugin breaking changes can also be found in this [Make it Minor strawman proposal doc](https://docs.google.com/document/d/12R0w75dSNR-VDQLGl2vxFyEHhzxNT38iamYhven9uvw/edit). This can be a tricky distinction, as some folks may consider end user to only be folks that use the Kibana UI.
+Anywhere we refer to “end user” in this section, we are referring to someone who is using the REST APIs.
 
 ### Privacy
 
@@ -45,6 +45,7 @@ All internal APIs should start with `/internal/{pluginname}/{...}`.
 
 ### Backward compatibility and breaking changes
 
+###LG TODO link to OAS?
 Every public API should have a release tag specified at the top of it’s documentation page. Release tags are not applicable to internal APIs, as we make no guarantees on those.
 
 #### Release tags
@@ -67,7 +68,7 @@ Every public API should have a release tag specified at the top of it’s docume
 - Status code changes
 
 ### Telemetry
-
+###LG TODO check in on https://github.com/elastic/kibana/issues/112291#issuecomment-4238886978
 Every team should be collecting telemetry metrics on it’s public API usage. This will be important for knowing when it’s safe to make breaking changes. The Core team will be looking into ways to make this easier and an automatic part of registration (see [#112291](https://github.com/elastic/kibana/issues/112291)).
 
 ### APM
@@ -79,6 +80,8 @@ You may introduce custom transactions. Please refer to the [APM documentation](h
 - [Refrain from adding too many custom labels](https://www.elastic.co/guide/en/apm/get-started/current/metadata.html)
 
 ### Documentation
+
+###LG TODO update this section to use OAS
 
 Every public API should be documented inside the [docs/api](https://github.com/elastic/kibana/tree/main/docs/api) folder in asciidoc (this content will eventually be migrated to mdx to support the new docs system). If a public REST API is undocumented, you should either document it, or make it internal.
 

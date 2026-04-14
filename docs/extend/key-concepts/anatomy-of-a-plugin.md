@@ -15,14 +15,14 @@ Plugins are defined as classes and present themselves to Kibana through a simple
 or both. There is no architectural difference between a plugin in the browser and a plugin on the server. In both places, you describe your plugin similarly,
 and you interact with Core and other plugins in the same way.
 
-This anatomy of a plugin documentation applies to internal/built-in plugins. 3rd-party plugins should refer to the external plugin development guide [LINK](https://www.elastic.co/docs/extend/kibana/external-plugin-development).
+This anatomy of a plugin documentation applies to internal/built-in plugins. 3rd-party plugins should refer to the [external plugin development guide](../getting-started/external-plugin-development.md).
 
 The basic file structure of a Kibana plugin named demo that has both client-side and server-side code would be:
 
 ```
 plugins/
   demo
-    kibana.json
+    kibana.jsonc
     tsconfig.json
     public
       index.ts
@@ -35,9 +35,9 @@ plugins/
     jest.config.js
 ```
 
-### kibana.json
+### kibana.jsonc
 
-`kibana.json` is a static manifest file that is used to identify the plugin and to specify if this plugin has server-side code, browser-side code, or both:
+`kibana.jsonc` is a static manifest file that is used to identify the plugin and to specify if this plugin has server-side code, browser-side code, or both:
 
 ```jsonc
 {
@@ -115,14 +115,6 @@ If you are developing in TypeScript (which we recommend), you will need to add a
   "kbn_references": [
       "@kbn/core",
       "@kbn/developer-examples-plugin"
-      // NOTE:
-      // Previously, references were specified using explicit paths to other plugins' tsconfig.json files, like:
-      // "references": [{ "path": "../../src/core/tsconfig.json" }]
-      //
-      // Now, Kibana uses simplified package aliases under "kbn_references" to refer to these dependencies,
-      // e.g., "@kbn/core" or "@kbn/developer-examples-plugin".
-      //
-      // This new approach makes references clearer, reduces path errors, and aligns with Kibana's package structure.
     ]
 }
 ```
@@ -251,11 +243,10 @@ module.exports = {
 };
 ```
 
-## How plugin's interact with each other, and Core
+## How plugins interact with each other, and Core
 
 The lifecycle-specific contracts exposed by core services are always passed as the first argument to the equivalent lifecycle function in a plugin.
-For example, the core http service exposes a function createRouter to all plugin setup functions. To use this function to register an HTTP route handler,
-a plugin just accesses it off of the first argument:
+For example, the core http service exposes a function createRouter to all plugin setup functions. To use this function to register an HTTP route handler, a plugin just accesses it off of the first argument:
 
 ```ts
 import type { CoreSetup } from '@kbn/core/server';

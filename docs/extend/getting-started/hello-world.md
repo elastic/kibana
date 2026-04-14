@@ -2,7 +2,7 @@
 navigation_title: "Hello World"
 description: "Build a very basic plugin that registers an application that says \"Hello World!\"."
 ---
-
+###LG TODO let's flip the order, and check to see if the automated plugin generator works OOTB now.
 # Hello World
 
 This tutorial walks you through two ways to create a plugin that registers an application that says "Hello World!".

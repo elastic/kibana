@@ -7,7 +7,7 @@ description: "Expectations for working with third-party dependencies"
 
 ## Third-party dependencies
 
-Third-party dependencies allow us to leverage the broader web development community to effeciently bring ideas to life, without having to re-invent the wheel.
+Third-party dependencies allow us to leverage the broader web development community to efficiently bring ideas to life, without having to re-invent the wheel.
 This is an attractive proposition, but using someone else's code does not absolve us of responsibility.
 
 The Kibana project is not just the code we commit to the repo but rather the combined total of all of the source code from our own repo and all of the external dependencies we rely on. When a user encounters a deficiency in Kibana, it matters not whether the root cause is in code we've written or external code we depend on. Additionally, relying on a dependency is a considerable expense in terms of cognitive burden, maintenance overhead, and risk.
@@ -58,10 +58,6 @@ on Github:
 - **@elastic/kibana-operations**
 - **@elastic/kibana-security**
 
-:::{note} Internal only
-If you are unsure of which licenses are okay to use, refer to the
-  [Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
-:::
 
 ### Dependency evaluation
 

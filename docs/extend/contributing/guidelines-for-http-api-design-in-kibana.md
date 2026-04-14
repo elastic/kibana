@@ -87,7 +87,7 @@ First release new HTTP APIs internally or as `Technical Preview` behind a featur
  - Set an existing **optional** property as required
  - Add or delete a security requirement
  - In some cases, changing a default
- - In some cases, _behavioural_ changes might form part of your contract
+ - In some cases, _behavioral_ changes might form part of your contract
 
 #### Non-breaking changes to HTTP APIs include
  - Adding a new **optional** request parameter
@@ -100,7 +100,7 @@ A public HTTP API should never cause a client to break. Not without a long depre
 
   Even `Technical Preview` HTTP APIs should consider graceful paths for changes when possible.
 
-  Linus Torvalds famously said of Kernel development: "WE DO NOT BREAK USERSPACE!" (along with some other expletives). We should adopt this kind of rigor and empathy when working with our _public_ HTTP APIs and always prioritize finding ways to avoid breaking our APIs.
+  Linus Torvalds famously said of Kernel development: "WE DO NOT BREAK USERSPACE!". We should adopt this kind of rigor and empathy when working with our _public_ HTTP APIs and always prioritize finding ways to avoid breaking our APIs.
 :::
 
 ## Internal vs Public APIs

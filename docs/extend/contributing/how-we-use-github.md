@@ -43,7 +43,7 @@ A good rule of thumb is that most package upgrades should be backported to the `
 - Resolve merge conflicts by rebasing the target branch over your feature branch, and force-pushing (see below for instructions).
 - When merging, we’ll squash your commits into a single commit.
 
-### Commit using your `@elastic.co` email address
+### Elasticians: Commit using your `@elastic.co` email address
 
 In order to assist with developer tooling we ask that all Elastic engineers use their `@elastic.co` email address when committing to the Kibana repo. We have implemented a CI check that validates any PR opened by a member of the `@elastic` organization has at least one commit that is attributed to an `@elastic.co` email address. If you have a PR that is failing because of this check you can fix your PR by following these steps:
 
@@ -123,30 +123,15 @@ The following information notes how we use GitHub labels in Kibana. Note that on
 
 Many of our labels follow the pattern of `{key}:{value}`.
 
-:::{note} Internal only
-Use PascalCase when creating new labels.
-
-Teams can create labels at their own discretion, but we have over 600 labels at the time of this writing.
-Consider using an existing convention before creating a new one. If you think a new label or convention
-would be useful to all teams, talk to your team or tech lead about getting it added here.
-:::
-
 ### Team labels
 
 Examples: `Team:Security`, `Team:Operations`, `Team:Docs`.
 
-These labels map the issue to the team that owns the particular area. Part of the responsibilities of
-(todo) is to ensure every issue has at least a team or a project
-label.
-
-:::{note} Internal only
-View our org chart [here](https://wiki.elastic.co/display/DEV/Kibana+Team+Organization) to view
-  all our teams and appropriate contacts.
-:::
+These labels map the issue to the team that owns the particular area. Every issue should have at least one team label applied.
 
 ### Feature labels
 
-Examples: `Feature:Lens`, `Feature:TSVB`, `Feature:Vega`.
+Examples: `Feature:Lens`, `Feature:Cases`, `Feature:Vega`.
 
 Feature labels break down architectural domains that are owned by a given team.
 
