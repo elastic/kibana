@@ -169,7 +169,7 @@ components:
           $ref: '#/components/schemas/ECSMappingItem'
 
     ECSMappingArray:
-      description: 'ECS mapping in saved-object storage format (array of key-value pairs). The find and copy pack endpoints return this format. The read endpoint returns object format (ECSMapping). Phase 2 will normalize all endpoints to object format.'
+      description: 'ECS mapping in saved-object storage format (array of key-value pairs). The find and copy pack endpoints return this format. The read endpoint returns object format (ECSMapping). Phase 1.9 will normalize all endpoints to object format.'
       type: array
       items:
         $ref: '#/components/schemas/ECSMappingArrayItem'
