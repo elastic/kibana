@@ -22,7 +22,6 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './canvas_integration/dashboard_canvas_content';
-import { DashboardCapabilitiesProvider } from './canvas_integration/dashboard_capabilities_context';
 import { createDashboardAppIntegration$ } from './dashboard_integration/dashboard_app_integration';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
 import { selectDashboardAttachmentForSync } from './dashboard_integration/select_dashboard_attachment_for_sync';
@@ -101,16 +100,15 @@ export const registerDashboardAttachmentUiDefinition = ({
       };
     },
     renderCanvasContent: (props, callbacks) => (
-      <DashboardCapabilitiesProvider value={{ canWriteDashboards }}>
-        <DashboardCanvasContent
-          {...props}
-          {...callbacks}
-          dashboardLocator={dashboardLocator}
-          searchBarComponent={unifiedSearch.ui.SearchBar}
-          filterManager={filterManager}
-          checkSavedDashboardExist={checkSavedDashboardExist}
-        />
-      </DashboardCapabilitiesProvider>
+      <DashboardCanvasContent
+        {...props}
+        {...callbacks}
+        dashboardLocator={dashboardLocator}
+        searchBarComponent={unifiedSearch.ui.SearchBar}
+        filterManager={filterManager}
+        checkSavedDashboardExist={checkSavedDashboardExist}
+        canWriteDashboards={canWriteDashboards}
+      />
     ),
     getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
       if (isCanvas) {
@@ -125,7 +123,7 @@ export const registerDashboardAttachmentUiDefinition = ({
           type: ActionButtonType.SECONDARY,
           handler: () => {
             // sidebar in dashboard experience - synchronize dashboard app to attachment
-            if (dashboardApi) {
+            if (dashboardApi && canWriteDashboards) {
               return previewAttachmentInDashboard({
                 attachment,
                 dashboardApi,
@@ -134,7 +132,7 @@ export const registerDashboardAttachmentUiDefinition = ({
               });
             }
             // sidebar preview - open dashboard in sidebar if possible, otherwise open canvas preview
-            if (isSidebar && dashboardLocator) {
+            if (isSidebar && dashboardLocator && canWriteDashboards) {
               const dashboardState = attachmentDataToDashboardState(attachment.data);
               return handleEditInDashboard({
                 locator: dashboardLocator,

@@ -15,7 +15,6 @@ import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { Filter, Query } from '@kbn/es-query';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
-import { DashboardCapabilitiesProvider } from './dashboard_capabilities_context';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
@@ -149,14 +148,11 @@ describe('DashboardCanvasContent', () => {
       closeCanvas,
       checkSavedDashboardExist,
       openSidebarConversation,
+      canWriteDashboards,
       ...propsOverride,
     };
 
-    const renderResult = render(
-      <DashboardCapabilitiesProvider value={{ canWriteDashboards }}>
-        <DashboardCanvasContent {...props} />
-      </DashboardCapabilitiesProvider>
-    );
+    const renderResult = render(<DashboardCanvasContent {...props} />);
 
     // Wait for savedObjectStatus to resolve before DashboardRenderer is rendered
     await waitFor(() => {
