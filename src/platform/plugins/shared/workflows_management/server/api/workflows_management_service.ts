@@ -1884,7 +1884,6 @@ export class WorkflowsService {
         },
       },
       size: candidates.length,
-      _source: false,
       track_total_hits: false,
     });
     const existingIds = new Set(response.hits.hits.map((hit) => hit._id));
@@ -2053,7 +2052,6 @@ export class WorkflowsService {
           },
         },
         size: chunk.length,
-        _source: false,
         track_total_hits: false,
       });
       for (const hit of response.hits.hits) {
@@ -2094,7 +2092,6 @@ export class WorkflowsService {
         },
       },
       size: ids.length,
-      _source: false,
       track_total_hits: false,
     });
 
