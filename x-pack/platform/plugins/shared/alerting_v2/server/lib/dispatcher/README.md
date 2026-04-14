@@ -1,5 +1,7 @@
 # Dispatcher
 
+> **Prerequisites:** Read the [server-level README](../../README.md) first for an overview of system concepts (rule events, series, episodes, rules) and how the components fit together.
+
 The Dispatcher is the notification pipeline for alerting v2. It reads data from `.rule-events` and `.alert-actions`, decides what should or should not notify, sends eligible groups to destinations (for example workflows), and records final outcomes in `.alert-actions`.
 
 It runs as its own Task Manager task, separate from per-rule execution. This separation keeps rule evaluation focused on producing events, while notification gating is handled asynchronously with its own cadence and state.

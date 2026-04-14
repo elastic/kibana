@@ -1,5 +1,7 @@
 # Rule Executor
 
+> **Prerequisites:** Read the [server-level README](../../README.md) first for an overview of system concepts (rule events, series, episodes, rules) and how the components fit together.
+
 The Rule Executor runs v2 rules on a Task Manager schedule: load the rule saved object, execute ES|QL, materialize rule events, and persist rule events to `.rule-events`. For alert-type rules it coordinates recovery/no-data handling and alert episode fields.
 
 When a rule is scheduled to run, the Task Manager triggers the Rule Executor. The executor follows a pipeline pattern where execution flows through a series of discrete steps, each handling a specific responsibility.

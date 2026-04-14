@@ -1,5 +1,7 @@
 # Director Service
 
+> **Prerequisites:** Read the [server-level README](../../README.md) first for an overview of system concepts (rule events, series, episodes, rules) and how the components fit together.
+
 The Director is a state engine that derives episode transitions (for example `pending` → `active`) from the stream of alert events produced by the rule executor. It runs inside the rule pipeline as [`DirectorStep`](../rule_executor/steps/director_step.ts), not as a separate Task Manager job.
 
 Configurable transition strategies encapsulate how rules move between episode statuses (including count/timeframe thresholds) without changing `DirectorService` core logic.
