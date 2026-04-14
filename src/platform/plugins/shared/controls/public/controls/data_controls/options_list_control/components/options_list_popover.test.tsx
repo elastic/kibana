@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, filter, first, skip, tap } from 'rxjs';
 
 import { EuiThemeProvider } from '@elastic/eui';
 import type { OptionsListDisplaySettings, OptionsListDSLControlState } from '@kbn/controls-schemas';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { RenderResult } from '@testing-library/react';
 import { act, prettyDOM, render as rtlRender, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,20 +20,62 @@ import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 import type { OptionsListComponentApi } from '../../../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
-import { OptionsListControlContext } from '../options_list_context_provider';
+import {
+  OptionsListControlContext,
+  type OptionsListControlContextType,
+} from '../options_list_context_provider';
 import * as ControlContextModule from '../options_list_context_provider';
 import { OptionsListPopover } from './options_list_popover';
 import { getOptionsListControlFactory } from '../get_options_list_control_factory';
 import { getMockedFinalizeApi } from '../../../mocks/control_mocks';
 import { coreServices, dataViewsService } from '../../../../services/kibana_services';
 import { createStubDataView } from '../../../../../../data_views/common/data_view.stub';
+import { capitalize } from 'lodash';
+import type { DSLOptionsListComponentApi } from '../types';
 
 const render = (ui: React.ReactElement) => {
   return rtlRender(ui, { wrapper: EuiThemeProvider });
 };
 
+const factory = getOptionsListControlFactory();
+const mockFetch = jest.fn();
+
 describe('Options list popover', () => {
   const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+
+  const getRealControlContext = async ({
+    uuid,
+    overwriteState,
+  }: {
+    uuid: string;
+    overwriteState?: Partial<OptionsListDSLControlState>;
+  }): Promise<{
+    componentApi: DSLOptionsListComponentApi;
+    displaySettings: OptionsListDisplaySettings;
+  }> => {
+    const contextSpy = jest.spyOn(ControlContextModule, 'useOptionsListContext');
+
+    const finalizeApi = getMockedFinalizeApi(uuid, factory);
+    const { Component } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+        data_view_id: 'myDataViewId',
+        field_name: 'myFieldName',
+        ...overwriteState,
+      },
+      finalizeApi,
+      uuid,
+      parentApi: {},
+    });
+    await waitFor(() => {
+      expect(mockFetch).toBeCalled();
+    });
+    render(<Component />); // makes component context available via spy; we will not actually use this component
+    const context = contextSpy.mock.results[0].value;
+    contextSpy.mockClear(); // allows for context to be refetched regardless of call number
+    return context;
+  };
 
   const mountComponent = ({
     componentApi,
@@ -58,6 +100,48 @@ describe('Options list popover', () => {
     const showOnlySelectedButton = popover.getByTestId('optionsList-control-show-only-selected');
     await userEvent.click(showOnlySelectedButton);
   };
+
+  beforeAll(async () => {
+    const getDataView = async (id: string): Promise<DataView> => {
+      if (id !== 'myDataViewId') {
+        throw new Error(`Simulated error: no data view found for id ${id}`);
+      }
+      const stubDataView = createStubDataView({
+        spec: {
+          id: 'myDataViewId',
+          fields: {
+            myFieldName: {
+              name: 'myFieldName',
+              customLabel: 'My field name',
+              type: 'string',
+              esTypes: ['keyword'],
+              aggregatable: true,
+              searchable: true,
+            },
+          },
+          title: 'logstash-*',
+          timeFieldName: '@timestamp',
+        },
+      });
+      stubDataView.getFormatterForField = jest.fn().mockImplementation(() => {
+        return {
+          getConverterFor: () => {
+            return (value: string) => `${value}:formatted`;
+          },
+          toJSON: (value: any) => JSON.stringify(value),
+        };
+      });
+      return stubDataView;
+    };
+    dataViewsService.get = jest.fn().mockImplementation(getDataView);
+    coreServices.http.fetch = mockFetch.mockResolvedValue({
+      suggestions: [
+        { value: 'woof', docCount: 10 },
+        { value: 'bark', docCount: 15 },
+        { value: 'meow', docCount: 12 },
+      ],
+    });
+  });
 
   test('no available options', async () => {
     const contextMock = getOptionsListContextMock();
@@ -98,8 +182,28 @@ describe('Options list popover', () => {
     expect(contextMock.componentApi.makeSelection).toBeCalledWith('woof', true);
   });
 
+  test('renders a selectable "(blank)" option', async () => {
+    mockFetch.mockResolvedValueOnce({
+      suggestions: [
+        { value: 'woof', docCount: 10 },
+        { value: 'bark', docCount: 15 },
+        { value: 'meow', docCount: 12 },
+        { value: '', docCount: 20 },
+      ],
+    });
+    const context = await getRealControlContext({ uuid: 'test-control' });
+    const popover = mountComponent(context);
+
+    const option = popover.getByTestId('optionsList-control-selection-');
+    await userEvent.click(option);
+    expect(option).toBeChecked();
+
+    await userEvent.click(option);
+    expect(option).not.toBeChecked();
+  });
+
   describe('show only selected', () => {
-    test('show only selected options', async () => {
+    test('show only se1lected options', async () => {
       const contextMock = getOptionsListContextMock();
       const selections = ['woof', 'bark'];
       contextMock.componentApi.setAvailableOptions([
@@ -158,6 +262,35 @@ describe('Options list popover', () => {
       sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
       expect(searchBox).toBeDisabled();
       expect(sortButton).toBeDisabled();
+    });
+
+    test.only('deselects when showOnlySelected is true', async () => {
+      const context = await getRealControlContext({ uuid: 'test-control' });
+      context.componentApi.setSelectedOptions(['woof', 'bark']);
+      const popover = mountComponent(context);
+
+      await userEvent.click(popover.getByTestId('optionsList-control-show-only-selected'));
+      expect(popover.getByTestId('optionsList-control-selection-woof')).toBeChecked();
+      expect(popover.getByTestId('optionsList-control-selection-bark')).toBeChecked();
+      expect(popover.queryByTestId('optionsList-control-selection-meow')).toBeNull();
+
+      await userEvent.click(popover.getByTestId('optionsList-control-selection-bark'));
+
+      expect(popover.getByTestId('optionsList-control-selection-woof')).toBeChecked();
+      expect(popover.queryByTestId('optionsList-control-selection-bark')).toBeNull();
+      expect(popover.queryByTestId('optionsList-control-selection-meow')).toBeNull();
+
+      // TODO: move this I think
+      expect(context.componentApi.appliedFilters$.value).toEqual([
+        {
+          meta: { controlledBy: 'test-control', index: 'myDataViewId', key: 'myFieldName' },
+          query: {
+            match_phrase: {
+              myFieldName: 'woof',
+            },
+          },
+        },
+      ]);
     });
   });
 
@@ -253,6 +386,53 @@ describe('Options list popover', () => {
       const availableOptions = within(availableOptionsList).getAllByRole('option');
       expect(availableOptions[0]).toHaveTextContent('Exists. Checked option.');
     });
+
+    test('clicking another option unselects "Exists"', async () => {
+      const context = await getRealControlContext({ uuid: 'test-control' });
+      const popover = mountComponent(context);
+
+      const existsOption = popover.getByTestId('optionsList-control-selection-exists');
+      expect(existsOption).not.toBeChecked();
+      await userEvent.click(existsOption);
+      expect(existsOption).toBeChecked();
+
+      const option = popover.getByTestId('optionsList-control-selection-woof');
+      await userEvent.click(option);
+      await waitFor(() => {
+        expect(option).toBeChecked();
+      });
+    });
+
+    test('clicking "Exists" unselects all other selections', async () => {
+      const context = await getRealControlContext({ uuid: 'test-control' });
+      const popover = mountComponent(context);
+
+      const woofOption = popover.getByTestId('optionsList-control-selection-woof');
+      const barkOption = popover.getByTestId('optionsList-control-selection-bark');
+      const meowOption = popover.getByTestId('optionsList-control-selection-meow');
+      const existsOption = popover.getByTestId('optionsList-control-selection-exists');
+
+      context.componentApi.setSelectedOptions(['woof', 'bark']);
+      await waitFor(() => {
+        expect(woofOption).toBeChecked();
+        expect(barkOption).toBeChecked();
+      });
+      expect(meowOption).not.toBeChecked();
+      expect(existsOption).not.toBeChecked();
+
+      await userEvent.click(existsOption);
+      await waitFor(() => {
+        expect(existsOption).toBeChecked();
+      });
+      expect(woofOption).not.toBeChecked();
+      expect(barkOption).not.toBeChecked();
+      expect(meowOption).not.toBeChecked();
+
+      await userEvent.click(existsOption);
+      await waitFor(() => {
+        expect(existsOption).not.toBeChecked();
+      });
+    });
   });
 
   describe('field formatter', () => {
@@ -344,214 +524,45 @@ describe('Options list popover', () => {
     });
   });
 
-  describe.only('test', () => {
-    const uuid = 'myControl1';
-    const factory = getOptionsListControlFactory();
-    const finalizeApi = getMockedFinalizeApi(uuid, factory);
-    const mockFetch = jest.fn();
-    const contextSpy = jest.spyOn(ControlContextModule, 'useOptionsListContext');
+  // describe.skip('test', () => {
 
-    const getDataView = async (id: string): Promise<DataView> => {
-      if (id !== 'myDataViewId') {
-        throw new Error(`Simulated error: no data view found for id ${id}`);
-      }
-      const stubDataView = createStubDataView({
-        spec: {
-          id: 'myDataViewId',
-          fields: {
-            myFieldName: {
-              name: 'myFieldName',
-              customLabel: 'My field name',
-              type: 'string',
-              esTypes: ['keyword'],
-              aggregatable: true,
-              searchable: true,
-            },
-          },
-          title: 'logstash-*',
-          timeFieldName: '@timestamp',
-        },
-      });
-      stubDataView.getFormatterForField = jest.fn().mockImplementation(() => {
-        return {
-          getConverterFor: () => {
-            return (value: string) => `${value}:formatted`;
-          },
-          toJSON: (value: any) => JSON.stringify(value),
-        };
-      });
-      return stubDataView;
-    };
+  //   test('replace selection when singleSelect is true', async () => {
+  //     const context = await getRealControlContext();
+  //     const popover = mountComponent(context);
 
-    const getContext = async (overwriteState?: Partial<OptionsListDSLControlState>) => {
-      const { Component } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
-        initialState: {
-          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
-          data_view_id: 'myDataViewId',
-          field_name: 'myFieldName',
-          ...overwriteState,
-        },
-        finalizeApi,
-        uuid,
-        parentApi: {},
-      });
-      await waitFor(() => {
-        expect(mockFetch).toBeCalled();
-      });
-      render(<Component />); // makes component context available via spy; we will not actually use this component
-      const context = contextSpy.mock.results[0].value;
-      contextSpy.mockClear(); // allows for context to be refetched regardless of call number
-      return context;
-    };
+  //     expect(context.componentApi.appliedFilters$.value).toEqual([
+  //       {
+  //         meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
+  //         query: {
+  //           match_phrase: {
+  //             myFieldName: 'woof',
+  //           },
+  //         },
+  //       },
+  //     ]);
 
-    beforeAll(async () => {
-      dataViewsService.get = jest.fn().mockImplementation(getDataView);
-      coreServices.http.fetch = mockFetch.mockResolvedValue({
-        suggestions: [
-          { value: 'woof', docCount: 10 },
-          { value: 'bark', docCount: 15 },
-          { value: 'meow', docCount: 12 },
-          { value: '', docCount: 20 },
-        ],
-      });
-    });
+  //     expect(popover.getByTestId('optionsList-control-selection-woof')).toBeChecked();
+  //     expect(popover.queryByTestId('optionsList-control-selection-bark')).not.toBeChecked();
+  //     expect(popover.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
 
-    test('renders a "(blank)" option', async () => {
-      const context = await getContext();
-      const popover = mountComponent(context);
+  //     await userEvent.click(popover.getByTestId('optionsList-control-selection-bark'));
+  //     await waitFor(async () => {
+  //       expect(popover.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
+  //     });
 
-      const option = popover.getByTestId('optionsList-control-selection-');
-      await userEvent.click(option);
-      expect(option).toBeChecked();
+  //     expect(popover.queryByTestId('optionsList-control-selection-bark')).toBeChecked();
+  //     expect(popover.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
 
-      await userEvent.click(option);
-      expect(option).not.toBeChecked();
-    });
-
-    test('clicking another option unselects "Exists"', async () => {
-      const context = await getContext();
-      const popover = mountComponent(context);
-
-      const existsOption = popover.getByTestId('optionsList-control-selection-exists');
-      expect(existsOption).not.toBeChecked();
-      await userEvent.click(existsOption);
-      expect(existsOption).toBeChecked();
-
-      const option = popover.getByTestId('optionsList-control-selection-woof');
-      await userEvent.click(option);
-      await waitFor(() => {
-        expect(option).toBeChecked();
-      });
-    });
-
-    test('clicking "Exists" unselects all other selections', async () => {
-      const context = await getContext();
-      const popover = mountComponent(context);
-
-      const woofOption = popover.getByTestId('optionsList-control-selection-woof');
-      const barkOption = popover.getByTestId('optionsList-control-selection-bark');
-      const meowOption = popover.getByTestId('optionsList-control-selection-meow');
-      const existsOption = popover.getByTestId('optionsList-control-selection-exists');
-
-      context.componentApi.setSelectedOptions(['woof', 'bark']);
-      await waitFor(() => {
-        expect(woofOption).toBeChecked();
-        expect(barkOption).toBeChecked();
-      });
-      expect(meowOption).not.toBeChecked();
-      expect(existsOption).not.toBeChecked();
-
-      await userEvent.click(existsOption);
-      await waitFor(() => {
-        expect(existsOption).toBeChecked();
-      });
-      expect(woofOption).not.toBeChecked();
-      expect(barkOption).not.toBeChecked();
-      expect(meowOption).not.toBeChecked();
-
-      await userEvent.click(existsOption);
-      await waitFor(() => {
-        expect(existsOption).not.toBeChecked();
-      });
-    });
-
-    test('deselects when showOnlySelected is true', async () => {
-      const context = await getContext();
-      const popover = mountComponent(context);
-
-      const woofOption = popover.getByTestId('optionsList-control-selection-woof');
-      const barkOption = popover.getByTestId('optionsList-control-selection-bark');
-      const meowOption = popover.getByTestId('optionsList-control-selection-meow');
-
-      context.componentApi.setSelectedOptions(['woof', 'bark']);
-      await waitFor(() => {
-        expect(woofOption).toBeChecked();
-        expect(barkOption).toBeChecked();
-      });
-      expect(meowOption).not.toBeChecked();
-
-      await userEvent.click(popover.getByTestId('optionsList-control-show-only-selected'));
-      expect(woofOption).toBeChecked();
-      expect(barkOption).toBeChecked();
-      expect(meowOption).not.toBeInTheDocument();
-
-      await userEvent.click(barkOption);
-      expect(woofOption).toBeChecked();
-      expect(barkOption).not.toBeInTheDocument();
-      expect(meowOption).not.toBeInTheDocument();
-
-      // await waitFor(() => {
-      //   expect(context.componentApi.appliedFilters$.value).toEqual([
-      //     {
-      //       meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
-      //       query: {
-      //         match_phrase: {
-      //           myFieldName: 'woof',
-      //         },
-      //       },
-      //     },
-      //   ]);
-      // });
-    });
-
-    test('replace selection when singleSelect is true', async () => {
-      const context = await getContext();
-      const popover = mountComponent(context);
-
-      expect(context.componentApi.appliedFilters$.value).toEqual([
-        {
-          meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
-          query: {
-            match_phrase: {
-              myFieldName: 'woof',
-            },
-          },
-        },
-      ]);
-
-      expect(popover.getByTestId('optionsList-control-selection-woof')).toBeChecked();
-      expect(popover.queryByTestId('optionsList-control-selection-bark')).not.toBeChecked();
-      expect(popover.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
-
-      await userEvent.click(popover.getByTestId('optionsList-control-selection-bark'));
-      await waitFor(async () => {
-        expect(popover.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
-      });
-
-      expect(popover.queryByTestId('optionsList-control-selection-bark')).toBeChecked();
-      expect(popover.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
-
-      expect(context.componentApi.appliedFilters$.value).toEqual([
-        {
-          meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
-          query: {
-            match_phrase: {
-              myFieldName: 'bark',
-            },
-          },
-        },
-      ]);
-    });
-  });
+  //     expect(context.componentApi.appliedFilters$.value).toEqual([
+  //       {
+  //         meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
+  //         query: {
+  //           match_phrase: {
+  //             myFieldName: 'bark',
+  //           },
+  //         },
+  //       },
+  //     ]);
+  //   });
+  // });
 });
