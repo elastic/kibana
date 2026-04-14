@@ -10,12 +10,14 @@
 import {
   filterDataErrors,
   filterOutWarningsOverlappingWithErrors,
+  filterQuickFixes,
   getToggleCommentLines,
   parseErrors,
   parseWarning,
   filterDuplicatedWarnings,
   shouldAutoTriggerSuggestions,
 } from './helpers';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
 describe('helpers', function () {
@@ -396,6 +398,61 @@ describe('helpers', function () {
       ['comma', 'field1,', false],
     ])('should return %s for %s', (_label, input, expected) => {
       expect(shouldAutoTriggerSuggestions(input as string)).toBe(expected);
+    });
+  });
+
+  describe('filterQuickFixes', function () {
+    const emptyCallbacks = {} as ESQLCallbacks;
+
+    const monacoMessage = (overrides: Partial<MonacoMessage> = {}): MonacoMessage => ({
+      message: 'Test error',
+      severity: 8,
+      startLineNumber: 1,
+      endLineNumber: 1,
+      startColumn: 1,
+      endColumn: 10,
+      code: 'TEST',
+      ...overrides,
+    });
+    it('returns messages unchanged when there is no quickFix in them', async () => {
+      const messages = [monacoMessage(), monacoMessage({ message: 'Second' })];
+      await expect(filterQuickFixes(messages, 'FROM a', emptyCallbacks)).resolves.toEqual(messages);
+    });
+
+    it('keeps quickFix when displayCondition is not defined', async () => {
+      const quickFix = {
+        title: 'Apply fix',
+        fixQuery: (q: string) => q,
+      };
+      const messages = [monacoMessage({ quickFix })];
+      const out = await filterQuickFixes(messages, 'FROM idx', emptyCallbacks);
+      expect(out).toHaveLength(1);
+      expect(out[0].quickFix).toEqual(quickFix);
+    });
+
+    it('keeps quickFix when displayCondition resolves true', async () => {
+      const quickFix = {
+        title: 'Fix',
+        fixQuery: (q: string) => q,
+        displayCondition: jest.fn().mockResolvedValue(true),
+      };
+      const messages = [monacoMessage({ quickFix })];
+      const out = await filterQuickFixes(messages, 'FROM logs-*', emptyCallbacks);
+      expect(out[0].quickFix).toEqual(quickFix);
+      expect(quickFix.displayCondition).toHaveBeenCalledWith('FROM logs-*', emptyCallbacks);
+    });
+
+    it('removes quickFix when displayCondition resolves false', async () => {
+      const quickFix = {
+        title: 'Fix',
+        fixQuery: (q: string) => q,
+        displayCondition: jest.fn().mockResolvedValue(false),
+      };
+      const messages = [monacoMessage({ message: 'Unknown column', quickFix })];
+      const out = await filterQuickFixes(messages, 'FROM x', emptyCallbacks);
+      expect(out[0].message).toBe('Unknown column');
+      expect(out[0].quickFix).toBeUndefined();
+      expect(quickFix.displayCondition).toHaveBeenCalledWith('FROM x', emptyCallbacks);
     });
   });
 });
