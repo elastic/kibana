@@ -38,7 +38,7 @@ export const spaceTest = spaceBaseTest.extend<
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
-      tracesExperience: createLazyPageObject(TracesExperiencePage, page),
+      tracesExperience: createLazyPageObject(TracesExperiencePage, page, pageObjects.discover),
     };
 
     await use(extendedPageObjects);
@@ -57,6 +57,7 @@ export async function expectTracesExperienceEnabled(
 
 export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE, DEEP_TRACE } from './constants';
 export { setupTracesExperience, teardownTracesExperience } from './setup';
+export { expectTracesExperienceEnabled } from './helpers';
 export {
   richTrace,
   traceCorrelatedLogs,

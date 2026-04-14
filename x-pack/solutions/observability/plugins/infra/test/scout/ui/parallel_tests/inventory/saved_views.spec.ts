@@ -62,8 +62,9 @@ test.describe(
       preloadedViewId = response.id;
     });
 
-    test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage }, kbnClient }) => {
       await browserAuth.loginAsPrivilegedUser();
+      await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: true });
       await inventoryPage.addDismissK8sTourInitScript();
       await inventoryPage.addDismissK8sToastInitScript();
     });

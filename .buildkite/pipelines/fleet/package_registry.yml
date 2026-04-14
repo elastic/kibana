@@ -58,10 +58,9 @@ steps:
       machineType: n2-standard-4
     key: build_scout_tests
     timeout_in_minutes: 15
-    depends_on:
-      - build
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:

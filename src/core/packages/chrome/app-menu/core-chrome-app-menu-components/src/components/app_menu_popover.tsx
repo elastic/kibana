@@ -16,6 +16,7 @@ interface AppMenuContextMenuProps {
   tooltipContent?: string | (() => string | undefined);
   tooltipTitle?: string | (() => string | undefined);
   anchorElement: ReactElement;
+  anchorDomElement?: HTMLElement;
   items: AppMenuPopoverItem[];
   isOpen: boolean;
   popoverWidth?: number;
@@ -28,6 +29,7 @@ interface AppMenuContextMenuProps {
 export const AppMenuPopover = ({
   items,
   anchorElement,
+  anchorDomElement,
   tooltipContent,
   tooltipTitle,
   isOpen,
@@ -46,8 +48,17 @@ export const AppMenuPopover = ({
         rootPopoverTestId: popoverTestId,
         onClose,
         onCloseOverflowButton,
+        anchorDomElement,
       }),
-    [items, primaryActionItem, popoverWidth, popoverTestId, onClose, onCloseOverflowButton]
+    [
+      items,
+      primaryActionItem,
+      popoverWidth,
+      popoverTestId,
+      onClose,
+      onCloseOverflowButton,
+      anchorDomElement,
+    ]
   );
 
   if (panels.length === 0) {

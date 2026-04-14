@@ -14,7 +14,6 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -43,9 +42,9 @@ import { ActiveItemRow } from '../common/active_item_row';
 import { ToolLibraryPanel } from './tool_library_panel';
 import { ToolDetailPanel } from './tool_detail_panel';
 import { PageWrapper } from '../common/page_wrapper';
-import { ICON_DIMENSIONS } from '../common/constants';
 import { useListDetailPageStyles } from '../common/styles';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { ToolsCustomizeEmptyState } from './tools_customize_empty_state';
 
 const ActiveToolsList: React.FC<{
   filteredActiveTools: ToolDefinition[];
@@ -244,6 +243,8 @@ export const AgentTools: React.FC = () => {
     }
   }, [selectedToolId, activeTools, handleRemoveTool, enableElasticCapabilities, defaultToolIdSet]);
 
+  const showCustomizeEmptyState = activeTools.length === 0 && !searchQuery.trim();
+
   const isLoading = agentLoading || toolsLoading;
 
   if (isLoading) {
@@ -254,21 +255,35 @@ export const AgentTools: React.FC = () => {
     );
   }
 
+  const toolModals = isLibraryOpen ? (
+    <ToolLibraryPanel
+      onClose={closeLibrary}
+      allTools={allTools}
+      activeToolIdSet={libraryActiveToolIdSet}
+      onToggleTool={handleToggleTool}
+      mutatingToolId={mutatingToolId}
+      enableElasticCapabilities={enableElasticCapabilities}
+      builtinToolIdSet={defaultToolIdSet}
+    />
+  ) : null;
+
+  if (showCustomizeEmptyState) {
+    return (
+      <PageWrapper>
+        <ToolsCustomizeEmptyState canEditAgent={canEditAgent} onOpenLibrary={openLibrary} />
+        {toolModals}
+      </PageWrapper>
+    );
+  }
+
   return (
     <PageWrapper>
       <div css={styles.header}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="wrench" aria-hidden={true} css={ICON_DIMENSIONS} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.tools.title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiTitle size="l">
+              <h1>{labels.tools.title}</h1>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -288,8 +303,8 @@ export const AgentTools: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
+        <EuiSpacer size="m" />
+        <EuiText size="m" color="default">
           {labels.agentTools.pageDescription}
         </EuiText>
       </div>
@@ -343,17 +358,7 @@ export const AgentTools: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isLibraryOpen && (
-        <ToolLibraryPanel
-          onClose={closeLibrary}
-          allTools={allTools}
-          activeToolIdSet={libraryActiveToolIdSet}
-          onToggleTool={handleToggleTool}
-          mutatingToolId={mutatingToolId}
-          enableElasticCapabilities={enableElasticCapabilities}
-          builtinToolIdSet={defaultToolIdSet}
-        />
-      )}
+      {toolModals}
     </PageWrapper>
   );
 };
