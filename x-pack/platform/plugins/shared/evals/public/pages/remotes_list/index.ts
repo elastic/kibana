@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export interface TraceSearchQuery {
-  query: string;
-  type: TraceSearchType;
-}
-
-export enum TraceSearchType {
-  kql = 'kql',
-  eql = 'eql',
-}
+export { RemotesListPage } from './remotes_list_page';

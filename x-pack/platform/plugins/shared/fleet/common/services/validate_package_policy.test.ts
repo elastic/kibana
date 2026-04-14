@@ -656,6 +656,115 @@ describe('Fleet - validatePackagePolicy()', () => {
       ).toBe(false);
     });
   });
+
+  describe('works for inputs with same type but different ids', () => {
+    const packageWithDuplicateTypeInputs: PackageInfo = {
+      name: 'nginx',
+      title: 'Nginx',
+      version: '1.0.0',
+      latestVersion: '1.0.0',
+      description: 'Nginx integration',
+      type: 'integration',
+      categories: [],
+      conditions: { kibana: { version: '' } },
+      format_version: '',
+      download: '',
+      path: '',
+      assets: { kibana: {} as any, elasticsearch: {} as any },
+      status: 'not_installed',
+      release: 'ga',
+      owner: { github: 'elastic/fleet' },
+      policy_templates: [
+        {
+          name: 'nginx',
+          title: 'Nginx',
+          description: 'Nginx logs and metrics',
+          data_streams: ['access', 'stubstatus'],
+          inputs: [
+            {
+              name: 'filelog_otel',
+              type: 'otelcol',
+              title: 'Logs via filelog',
+              description: 'Collect logs',
+              vars: [{ name: 'log_path', type: 'text', required: true }],
+            },
+            {
+              name: 'nginx_otel',
+              type: 'otelcol',
+              title: 'Metrics via nginx receiver',
+              description: 'Collect metrics',
+              vars: [{ name: 'endpoint', type: 'text', required: true }],
+            },
+          ],
+        },
+      ] as unknown as RegistryPolicyTemplate[],
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'nginx.access',
+          title: 'Access logs',
+          path: 'access',
+          release: 'ga',
+          package: 'nginx',
+          streams: [{ input: 'filelog_otel', title: 'Access logs', vars: [] }],
+        },
+        {
+          type: 'metrics',
+          dataset: 'nginx.stubstatus',
+          title: 'Stub status',
+          path: 'stubstatus',
+          release: 'ga',
+          package: 'nginx',
+          streams: [{ input: 'nginx_otel', title: 'Stub status', vars: [] }],
+        },
+      ] as any,
+    };
+
+    it('validates each input independently using name as key', () => {
+      const packagePolicy: NewPackagePolicy = {
+        name: 'nginx-1',
+        namespace: 'default',
+        policy_ids: ['policy1'],
+        enabled: true,
+        inputs: [
+          {
+            type: 'otelcol',
+            name: 'filelog_otel',
+            policy_template: 'nginx',
+            enabled: true,
+            vars: { log_path: { value: '/var/log/nginx/access.log' } },
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'nginx.access' },
+              },
+            ],
+          },
+          {
+            type: 'otelcol',
+            name: 'nginx_otel',
+            policy_template: 'nginx',
+            enabled: true,
+            vars: { endpoint: { value: undefined } },
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'metrics', dataset: 'nginx.stubstatus' },
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = validatePackagePolicy(packagePolicy, packageWithDuplicateTypeInputs, load);
+
+      // The first input (filelog_otel) has a valid var, so no error
+      // Single policy template packages use just the effectiveName as key (no template prefix)
+      expect(result.inputs?.filelog_otel?.vars?.log_path).toBeNull();
+      // The second input (nginx_otel) has an empty required var, so it should error
+      expect(result.inputs?.nginx_otel?.vars?.endpoint).not.toBeNull();
+    });
+  });
 });
 
 describe('Fleet - validateConditionalRequiredVars()', () => {
