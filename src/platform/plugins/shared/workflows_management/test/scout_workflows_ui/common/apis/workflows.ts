@@ -116,6 +116,14 @@ export class WorkflowsApiService {
     }
   }
 
+  /** DELETE /api/workflows/workflow/{id}?force=true — permanently delete a single workflow. */
+  async hardDelete(workflowId: string): Promise<void> {
+    await this.kbnClient.request({
+      method: 'DELETE',
+      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}?force=true`,
+    });
+  }
+
   /** GET /api/workflows + DELETE — delete all workflows in a space. */
   async deleteAll(): Promise<void> {
     const response = await this.kbnClient.request<{ results?: Array<{ id: string }> }>({
@@ -133,11 +141,16 @@ export class WorkflowsApiService {
     }
   }
 
-  async run(id: string, inputs: Record<string, unknown>): Promise<{ workflowExecutionId: string }> {
+  async run(
+    id: string,
+    inputs: Record<string, unknown>,
+    headers?: Record<string, string>
+  ): Promise<{ workflowExecutionId: string }> {
     const response = await this.kbnClient.request<{ workflowExecutionId: string }>({
       method: 'POST',
       path: `/s/${this.spaceId}/api/workflows/workflow/${id}/run`,
       body: { inputs },
+      headers,
     });
     return response.data;
   }

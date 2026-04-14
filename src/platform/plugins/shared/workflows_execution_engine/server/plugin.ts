@@ -625,6 +625,17 @@ export class WorkflowsExecutionEnginePlugin
         throw new Error('Workflows cannot be executed without the user context');
       }
 
+      // Test-only hook: simulate slow execution creation so Scout API tests
+      // can deterministically reproduce the TOCTOU race in hardDeleteWorkflows.
+      // Only honoured for internal API requests (KbnClient sets x-elastic-internal-origin).
+      if (request?.isInternalApiRequest) {
+        const raw = request.headers['x-kbn-test-run-delay-ms'];
+        const delayMs = parseInt(String(Array.isArray(raw) ? raw[0] : raw ?? '0'), 10);
+        if (delayMs > 0) {
+          await new Promise((r) => setTimeout(r, delayMs));
+        }
+      }
+
       const { workflowExecution } = await createAndPersistWorkflowExecution(
         workflow,
         context,
