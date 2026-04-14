@@ -9,7 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
-  type ExecutionStatus,
+  ExecutionStatus,
   type WorkflowDetailDto,
   type WorkflowExecutionEngineModel,
   type WorkflowExecutionListItemDto,
@@ -45,6 +45,10 @@ export interface WorkflowClient<TInputs extends Record<string, unknown>> {
   getActiveExecution(
     predicate: (execution: WorkflowExecutionListItemDto) => boolean
   ): Promise<WorkflowExecutionResult | null>;
+  getLastCompletedExecution(
+    predicate: (execution: WorkflowExecutionListItemDto) => boolean,
+    options?: { maxAgeMs?: number }
+  ): Promise<WorkflowExecutionListItemDto | null>;
 }
 
 interface WorkflowClientParams {
@@ -211,6 +215,41 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
     },
 
     getNonTerminalExecutions,
+
+    // TODO: Replace with server-side filtering once the workflow plugin supports
+    // concurrencyGroupKey and finishedAfter/finishedBefore filters in getWorkflowExecutions.
+    async getLastCompletedExecution(predicate, options) {
+      const maxAgeMs = options?.maxAgeMs;
+      const cutoff = maxAgeMs ? Date.now() - maxAgeMs : undefined;
+      const pageSize = 100;
+      let page = 1;
+
+      while (true) {
+        const { results, total } = await managementApi.getWorkflowExecutions(
+          {
+            workflowId,
+            statuses: [ExecutionStatus.COMPLETED],
+            size: pageSize,
+            page,
+          },
+          DEFAULT_SPACE_ID
+        );
+
+        for (const exec of results) {
+          if (cutoff && new Date(exec.finishedAt).getTime() < cutoff) {
+            return null;
+          }
+          if (predicate(exec)) {
+            return exec;
+          }
+        }
+
+        if (page * pageSize >= total) {
+          return null;
+        }
+        page++;
+      }
+    },
 
     async getActiveExecution(predicate) {
       const { results } = await getNonTerminalExecutions();

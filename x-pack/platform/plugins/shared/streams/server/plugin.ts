@@ -22,11 +22,9 @@ import {
 } from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
-import type { FakeRawRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { StreamsConfig } from '../common/config';
 import { configSchema, exposeToBrowserConfig } from '../common/config';
@@ -110,7 +108,6 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
-  private featuresIdentificationWorkflowClient?: WorkflowClient<FeaturesIdentificationWorkflowInputs>;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -300,7 +297,6 @@ export class StreamsPlugin
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
       });
-      this.featuresIdentificationWorkflowClient = featuresIdentificationWorkflowClient;
     }
 
     const telemetryClient = this.ebtTelemetryService.getClient();
@@ -318,6 +314,7 @@ export class StreamsPlugin
         return startPlugins.agentBuilder.conversations.getScopedClient({ request });
       },
       server: this.server,
+      featuresIdentificationWorkflowClient,
     });
 
     plugins.features.registerKibanaFeature({
@@ -569,23 +566,6 @@ export class StreamsPlugin
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
-
-    if (this.featuresIdentificationWorkflowClient) {
-      const path = addSpaceIdToPath('/', DEFAULT_SPACE_ID);
-      const fakeRawRequest: FakeRawRequest = {
-        headers: {},
-        path,
-        url: new URL(`https://fake-request${path}`),
-      };
-      const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-      core.http.basePath.set(fakeRequest, path);
-
-      this.featuresIdentificationWorkflowClient.ensureExists(fakeRequest).catch((err) => {
-        this.logger.warn(
-          `Failed to register KI features identification workflow on startup: ${err}`
-        );
-      });
-    }
 
     return {};
   }

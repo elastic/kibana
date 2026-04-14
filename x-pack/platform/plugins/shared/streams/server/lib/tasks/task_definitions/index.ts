@@ -20,6 +20,8 @@ import { createStreamsMemoryGenerationTask } from './memory_generation';
 import { createStreamsMemoryUpdateTask } from './memory_update';
 import { createStreamsConversationScraperTask } from './conversation_scraper';
 import { createStreamsMemoryConsolidationTask } from './memory_consolidation';
+import type { WorkflowClient } from '../../workflows/workflow_client';
+import type { FeaturesIdentificationWorkflowInputs } from '../../../../common/constants';
 
 export interface TaskContext {
   logger: Logger;
@@ -30,6 +32,7 @@ export interface TaskContext {
     request: KibanaRequest
   ) => Promise<ReadOnlyConversationClient | undefined>;
   server: StreamsServer;
+  featuresIdentificationWorkflowClient?: WorkflowClient<FeaturesIdentificationWorkflowInputs>;
 }
 
 export function createTaskDefinitions(taskContext: TaskContext) {

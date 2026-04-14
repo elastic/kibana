@@ -7,18 +7,25 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
+  BaseFeature,
   GeneratedSignificantEventQuery,
   IdentifyFeaturesResult,
   OnboardingResult,
   SignificantEventsQueriesGenerationResult,
   TaskResult,
 } from '@kbn/streams-schema';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
+import {
+  ExecutionStatus,
+  isTerminalStatus,
+  type WorkflowExecutionListItemDto,
+} from '@kbn/workflows';
 import type { StreamsTaskType, TaskContext } from '.';
 import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';
@@ -26,11 +33,6 @@ import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
 import type { TaskParams } from '../types';
-import type { FeaturesIdentificationTaskParams } from './features_identification';
-import {
-  FEATURES_IDENTIFICATION_TASK_TYPE,
-  getFeaturesIdentificationTaskId,
-} from './features_identification';
 import type { MemoryGenerationTaskParams } from './memory_generation';
 import { MEMORY_GENERATION_TASK_TYPE } from './memory_generation';
 import type { SignificantEventsQueriesGenerationTaskParams } from '../../sig_events/tasks/significant_events_queries_generation';
@@ -38,6 +40,8 @@ import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
 } from '../../sig_events/tasks/significant_events_queries_generation';
+import type { WorkflowClient, WorkflowExecutionResult } from '../../workflows/workflow_client';
+import type { FeaturesIdentificationWorkflowInputs } from '../../../../common/constants';
 
 export interface OnboardingTaskParams {
   streamName: string;
@@ -60,27 +64,24 @@ export function getOnboardingTaskId(streamName: string, saveQueries: boolean = t
 
 const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
 
-async function areFeaturesUpToDate({
-  taskClient,
-  featuresTaskId,
-}: {
-  taskClient: TaskClient<StreamsTaskType>;
-  featuresTaskId: string;
-}) {
-  const featuresTask = await taskClient.get<
-    FeaturesIdentificationTaskParams,
-    IdentifyFeaturesResult
-  >(featuresTaskId);
+const streamNamePredicate = (name: string) => {
+  return (exec: WorkflowExecutionListItemDto) => exec.context?.streamName === name;
+};
 
-  if (featuresTask.status !== TaskStatus.Completed) {
-    return false;
-  }
+function toIdentifyFeaturesResult(
+  execution: WorkflowExecutionResult
+): TaskResult<IdentifyFeaturesResult> {
+  const output = execution.output ?? {};
+  const rawFeatures = output.discoveredFeatures;
+  const features = Array.isArray(rawFeatures) ? (rawFeatures as BaseFeature[]) : [];
+  const tokensUsed = output.tokensUsed as ChatCompletionTokenCount | undefined;
 
-  return Boolean(
-    featuresTask.last_completed_at &&
-      Date.now() - new Date(featuresTask.last_completed_at).getTime() <
-        FEATURES_IDENTIFICATION_RECENCY_MS
-  );
+  return {
+    status: TaskStatus.Completed,
+    features,
+    durationMs: execution.duration ?? 0,
+    totalTokensUsed: tokensUsed,
+  };
 }
 
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
@@ -104,6 +105,8 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   request: fakeRequest,
                 });
 
+              const { featuresIdentificationWorkflowClient: workflowClient } = taskContext;
+
               try {
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
                 let queriesTaskResult:
@@ -113,34 +116,43 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 for (const step of steps) {
                   switch (step) {
                     case OnboardingStep.FeaturesIdentification: {
-                      const featuresTaskId = getFeaturesIdentificationTaskId(streamName);
+                      if (!workflowClient) {
+                        throw new Error(
+                          'KI features identification workflow client is not available'
+                        );
+                      }
+
                       const isFeaturesOnlyStep =
                         steps.length === 1 && steps[0] === OnboardingStep.FeaturesIdentification;
 
-                      if (
-                        !isFeaturesOnlyStep &&
-                        (await areFeaturesUpToDate({ taskClient, featuresTaskId }))
-                      ) {
-                        featuresTaskResult = await taskClient.getStatus<
-                          FeaturesIdentificationTaskParams,
-                          IdentifyFeaturesResult
-                        >(featuresTaskId);
-                      } else {
-                        await scheduleFeaturesIdentificationTask(
+                      if (!isFeaturesOnlyStep) {
+                        const lastExec = await workflowClient.getLastCompletedExecution(
+                          streamNamePredicate(streamName),
+                          { maxAgeMs: FEATURES_IDENTIFICATION_RECENCY_MS }
+                        );
+
+                        if (lastExec) {
+                          const status = await workflowClient.getStatus(lastExec.id);
+                          featuresTaskResult = toIdentifyFeaturesResult(status);
+                        }
+                      }
+
+                      if (!featuresTaskResult) {
+                        const { executionId } = await workflowClient.run(
                           {
+                            streamName,
                             start: from,
                             end: to,
-                            streamName,
                             connectorId: connectors?.features,
                           },
-                          taskClient,
                           fakeRequest
                         );
 
-                        featuresTaskResult = await waitForSubtask<
-                          FeaturesIdentificationTaskParams,
-                          IdentifyFeaturesResult
-                        >(featuresTaskId, runContext.taskInstance.id, taskClient);
+                        featuresTaskResult = await waitForWorkflowExecution(
+                          executionId,
+                          runContext.taskInstance.id,
+                          { workflowClient, taskClient }
+                        );
                       }
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
@@ -243,8 +255,9 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   }
                 }
               } catch (error) {
-                // Errors here originate from waitForSubtask (plain Error), not from inference calls.
-                // isInferenceProviderError is always false, so no connector enrichment is needed.
+                // Errors here originate from waitForSubtask / waitForWorkflowExecution (plain Error),
+                // not from inference calls. isInferenceProviderError is always false, so no connector
+                // enrichment is needed.
                 const errorMessage = parseError(error).message;
 
                 if (
@@ -313,24 +326,36 @@ async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>
   }
 }
 
-async function scheduleFeaturesIdentificationTask(
-  params: FeaturesIdentificationTaskParams,
-  taskClient: TaskClient<StreamsTaskType>,
-  request: KibanaRequest
-): Promise<string> {
-  const id = getFeaturesIdentificationTaskId(params.streamName);
+async function waitForWorkflowExecution(
+  executionId: string,
+  parentTaskId: string,
+  deps: {
+    workflowClient: WorkflowClient<FeaturesIdentificationWorkflowInputs>;
+    taskClient: TaskClient<StreamsTaskType>;
+  }
+): Promise<TaskResult<IdentifyFeaturesResult>> {
+  const { workflowClient, taskClient } = deps;
 
-  await taskClient.schedule<FeaturesIdentificationTaskParams>({
-    task: {
-      type: FEATURES_IDENTIFICATION_TASK_TYPE,
-      id,
-      space: '*',
-    },
-    params,
-    request,
-  });
+  while (true) {
+    const parentTask = await taskClient.get(parentTaskId);
 
-  return id;
+    if (parentTask.status === TaskStatus.BeingCanceled) {
+      await workflowClient.cancel(executionId);
+    }
+
+    const execution = await workflowClient.getStatus(executionId);
+
+    if (isTerminalStatus(execution.status)) {
+      if (execution.status === ExecutionStatus.COMPLETED) {
+        return toIdentifyFeaturesResult(execution);
+      }
+
+      const errorMsg = execution.error ?? `Workflow execution ${executionId} ${execution.status}`;
+      throw new Error(errorMsg);
+    }
+
+    await sleep(SUBTASK_POLL_INTERVAL_MS);
+  }
 }
 
 async function scheduleQueriesGenerationTask(
