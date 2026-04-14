@@ -408,7 +408,7 @@ describe('UiamService', () => {
         token: 'essu_ephemeral_token_value',
         credentials: {
           oauth: {
-            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243/',
           },
         },
       };
@@ -424,7 +424,7 @@ describe('UiamService', () => {
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243',
+        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243%2F',
         {
           method: 'POST',
           headers: {

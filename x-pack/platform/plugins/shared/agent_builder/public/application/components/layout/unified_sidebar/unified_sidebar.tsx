@@ -12,10 +12,10 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiFlexGroup, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { storageKeys } from '../../../storage_keys';
 import { getSidebarViewForRoute, getAgentIdFromPath } from '../../../route_config';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { getLastAgentId } from '../../../hooks/use_last_agent_id';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationSidebarView } from './views/conversation_view';
 import { ManageSidebarView } from './views/manage_view';
@@ -36,18 +36,18 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
 }) => {
   const location = useLocation();
   const sidebarView = getSidebarViewForRoute(location.pathname);
-  const agentIdFromPath = getAgentIdFromPath(location.pathname) ?? agentBuilderDefaultAgentId;
+  const agentIdFromUrl = getAgentIdFromPath(location.pathname);
   const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.agentId);
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const validateAgentId = useValidateAgentId();
   const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
-    // Wait for agents to load before validating — prevents falsely skipping valid IDs during initial load
-    if (isAgentsFetched && agentIdFromPath && validateAgentId(agentIdFromPath)) {
-      setStoredAgentId(agentIdFromPath);
+    // Only persist agent ID when it's explicitly in the URL path
+    if (isAgentsFetched && agentIdFromUrl && validateAgentId(agentIdFromUrl)) {
+      setStoredAgentId(agentIdFromUrl);
     }
-  }, [isAgentsFetched, agentIdFromPath, validateAgentId, setStoredAgentId]);
+  }, [isAgentsFetched, agentIdFromUrl, validateAgentId, setStoredAgentId]);
 
   const getNavigationPath = useCallback(
     (newAgentId: string) => appPaths.agent.root({ agentId: newAgentId }),
@@ -80,7 +80,7 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
     >
       <SidebarHeader
         sidebarView={sidebarView}
-        agentId={agentIdFromPath}
+        agentId={agentIdFromUrl ?? getLastAgentId()}
         getNavigationPath={getNavigationPath}
         isCondensed={isCondensed}
         onToggleCondensed={onToggleCondensed}

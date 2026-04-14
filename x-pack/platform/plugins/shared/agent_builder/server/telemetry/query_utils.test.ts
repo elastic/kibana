@@ -594,6 +594,353 @@ describe('query_utils', () => {
       });
     });
 
+    describe('getAllRoundMetrics', () => {
+      const mockRoundMetricsResponse = ({
+        ttft = { p50: 100, p75: 200, p90: 400, p95: 600, p99: 800, mean: 150.0, total_samples: 5 },
+        ttlt = {
+          p50: 1000,
+          p75: 2000,
+          p90: 4000,
+          p95: 6000,
+          p99: 8000,
+          mean: 1500.0,
+          total_samples: 10,
+        },
+        byModel = [
+          {
+            model: 'gpt-4',
+            ttlt_p50: 900,
+            ttlt_p75: 1200,
+            ttlt_p90: 1500,
+            ttlt_p95: 2000,
+            ttlt_p99: 2500,
+            ttlt_mean: 1100.0,
+            ttlt_samples: 6,
+            input_tokens: 10000,
+            output_tokens: 8000,
+            total_tokens: 18000,
+            rounds: 6,
+            avg_tokens_per_round: 3000.0,
+            tool_calls: 4,
+          },
+        ],
+        byAgent = [
+          {
+            agent_id: 'default',
+            p50: 1000,
+            p75: 2000,
+            p90: 4000,
+            p95: 6000,
+            p99: 8000,
+            mean: 1500.0,
+            total_samples: 10,
+          },
+        ],
+      } = {}) => ({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 0, relation: 'eq' as const }, hits: [] },
+        aggregations: {
+          round_metrics: {
+            value: { ttft, ttlt, byModel, byAgent },
+          },
+        },
+      });
+
+      it('returns populated round metrics from scripted_metric aggregation', async () => {
+        esClient.search.mockResolvedValue(mockRoundMetricsResponse());
+
+        const result = await queryUtils.getAllRoundMetrics();
+
+        expect(result.ttft).toEqual({
+          p50: 100,
+          p75: 200,
+          p90: 400,
+          p95: 600,
+          p99: 800,
+          mean: 150,
+          total_samples: 5,
+        });
+        expect(result.ttlt).toEqual({
+          p50: 1000,
+          p75: 2000,
+          p90: 4000,
+          p95: 6000,
+          p99: 8000,
+          mean: 1500,
+          total_samples: 10,
+        });
+        expect(result.byModel).toEqual([
+          {
+            model: 'gpt-4',
+            ttlt_p50: 900,
+            ttlt_p75: 1200,
+            ttlt_p90: 1500,
+            ttlt_p95: 2000,
+            ttlt_p99: 2500,
+            ttlt_mean: 1100,
+            ttlt_samples: 6,
+            input_tokens: 10000,
+            output_tokens: 8000,
+            total_tokens: 18000,
+            rounds: 6,
+            avg_tokens_per_round: 3000,
+            tool_calls: 4,
+          },
+        ]);
+        expect(result.byAgent).toEqual([
+          {
+            agent_id: 'default',
+            p50: 1000,
+            p75: 2000,
+            p90: 4000,
+            p95: 6000,
+            p99: 8000,
+            mean: 1500,
+            total_samples: 10,
+          },
+        ]);
+      });
+
+      it('returns empty defaults when aggregation value is null', async () => {
+        esClient.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 0, relation: 'eq' as const }, hits: [] },
+          aggregations: {
+            round_metrics: { value: null },
+          },
+        });
+
+        const result = await queryUtils.getAllRoundMetrics();
+
+        expect(result.ttft).toEqual({
+          p50: 0,
+          p75: 0,
+          p90: 0,
+          p95: 0,
+          p99: 0,
+          mean: 0,
+          total_samples: 0,
+        });
+        expect(result.ttlt).toEqual({
+          p50: 0,
+          p75: 0,
+          p90: 0,
+          p95: 0,
+          p99: 0,
+          mean: 0,
+          total_samples: 0,
+        });
+        expect(result.byModel).toEqual([]);
+        expect(result.byAgent).toEqual([]);
+      });
+
+      it('returns empty defaults when aggregation is missing entirely', async () => {
+        esClient.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 0, relation: 'eq' as const }, hits: [] },
+          aggregations: {},
+        });
+
+        const result = await queryUtils.getAllRoundMetrics();
+
+        expect(result.byModel).toEqual([]);
+        expect(result.byAgent).toEqual([]);
+      });
+
+      it('returns empty defaults for index_not_found_exception without logging', async () => {
+        const error = {
+          message: 'index_not_found_exception: no such index [.chat-conversations]',
+        };
+        esClient.search.mockRejectedValue(error);
+
+        const result = await queryUtils.getAllRoundMetrics();
+
+        expect(result.ttft).toEqual({
+          p50: 0,
+          p75: 0,
+          p90: 0,
+          p95: 0,
+          p99: 0,
+          mean: 0,
+          total_samples: 0,
+        });
+        expect(result.byModel).toEqual([]);
+        expect(result.byAgent).toEqual([]);
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('returns empty defaults and logs warning for other errors', async () => {
+        esClient.search.mockRejectedValue(new Error('ES error'));
+
+        const result = await queryUtils.getAllRoundMetrics();
+
+        expect(result.ttft.total_samples).toBe(0);
+        expect(result.byModel).toEqual([]);
+        expect(logger.warn).toHaveBeenCalledWith('Failed to fetch round metrics: ES error');
+      });
+
+      it('passes dateFilter to the ES query', async () => {
+        esClient.search.mockResolvedValue(mockRoundMetricsResponse());
+
+        await queryUtils.getAllRoundMetrics({ gte: '2024-01-01T00:00:00.000Z' });
+
+        expect(esClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                filter: [{ range: { created_at: { gte: '2024-01-01T00:00:00.000Z' } } }],
+              },
+            },
+          })
+        );
+      });
+
+      it('uses match_all when no dateFilter is provided', async () => {
+        esClient.search.mockResolvedValue(mockRoundMetricsResponse());
+
+        await queryUtils.getAllRoundMetrics();
+
+        expect(esClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: { match_all: {} },
+          })
+        );
+      });
+
+      it('handles multiple models and agents', async () => {
+        esClient.search.mockResolvedValue(
+          mockRoundMetricsResponse({
+            byModel: [
+              {
+                model: 'gpt-4',
+                ttlt_p50: 900,
+                ttlt_p75: 1200,
+                ttlt_p90: 1500,
+                ttlt_p95: 2000,
+                ttlt_p99: 2500,
+                ttlt_mean: 1100.0,
+                ttlt_samples: 6,
+                input_tokens: 10000,
+                output_tokens: 8000,
+                total_tokens: 18000,
+                rounds: 6,
+                avg_tokens_per_round: 3000.0,
+                tool_calls: 4,
+              },
+              {
+                model: 'claude-3',
+                ttlt_p50: 800,
+                ttlt_p75: 1100,
+                ttlt_p90: 1400,
+                ttlt_p95: 1800,
+                ttlt_p99: 2200,
+                ttlt_mean: 1000.0,
+                ttlt_samples: 4,
+                input_tokens: 5000,
+                output_tokens: 4000,
+                total_tokens: 9000,
+                rounds: 4,
+                avg_tokens_per_round: 2250.0,
+                tool_calls: 0,
+              },
+            ],
+            byAgent: [
+              {
+                agent_id: 'default',
+                p50: 1000,
+                p75: 2000,
+                p90: 4000,
+                p95: 6000,
+                p99: 8000,
+                mean: 1500.0,
+                total_samples: 6,
+              },
+              {
+                agent_id: 'custom_agent_1',
+                p50: 800,
+                p75: 1500,
+                p90: 3000,
+                p95: 5000,
+                p99: 7000,
+                mean: 1200.0,
+                total_samples: 4,
+              },
+            ],
+          })
+        );
+
+        const result = await queryUtils.getAllRoundMetrics();
+
+        expect(result.byModel).toHaveLength(2);
+        expect(result.byModel[0].model).toBe('gpt-4');
+        expect(result.byModel[1].model).toBe('claude-3');
+        expect(result.byAgent).toHaveLength(2);
+        expect(result.byAgent[0].agent_id).toBe('default');
+        expect(result.byAgent[1].agent_id).toBe('custom_agent_1');
+      });
+
+      it('rounds fractional percentile values', async () => {
+        esClient.search.mockResolvedValue(
+          mockRoundMetricsResponse({
+            ttft: {
+              p50: 100.7,
+              p75: 200.3,
+              p90: 400.9,
+              p95: 600.1,
+              p99: 800.5,
+              mean: 150.456,
+              total_samples: 5,
+            },
+          })
+        );
+
+        const result = await queryUtils.getAllRoundMetrics();
+
+        expect(result.ttft).toEqual({
+          p50: 101,
+          p75: 200,
+          p90: 401,
+          p95: 600,
+          p99: 801,
+          mean: 150,
+          total_samples: 5,
+        });
+      });
+
+      it('defaults missing model fields to zero', async () => {
+        esClient.search.mockResolvedValue(
+          mockRoundMetricsResponse({
+            byModel: [{ model: 'unknown-model' } as any],
+          })
+        );
+
+        const result = await queryUtils.getAllRoundMetrics();
+
+        expect(result.byModel[0]).toEqual({
+          model: 'unknown-model',
+          ttlt_p50: 0,
+          ttlt_p75: 0,
+          ttlt_p90: 0,
+          ttlt_p95: 0,
+          ttlt_p99: 0,
+          ttlt_mean: 0,
+          ttlt_samples: 0,
+          input_tokens: 0,
+          output_tokens: 0,
+          total_tokens: 0,
+          rounds: 0,
+          avg_tokens_per_round: 0,
+          tool_calls: 0,
+        });
+      });
+    });
+
     describe('calculatePercentilesFromBuckets', () => {
       it('returns all zeros for empty buckets', () => {
         const buckets = new Map<string, number>();
