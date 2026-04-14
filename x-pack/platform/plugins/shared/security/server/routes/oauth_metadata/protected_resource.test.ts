@@ -25,6 +25,7 @@ describe('GET /.well-known/oauth-protected-resource', () => {
         oauth2: {
           metadata: {
             authorization_servers: ['https://auth.example.com'],
+            resource: 'https://kibana.example.com',
           },
         },
       },
@@ -73,10 +74,11 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         authorization_servers: ['https://auth.example.com'],
+        resource: 'https://kibana.example.com',
       });
     });
 
-    it('returns only authorization_servers when no optional fields are set', async () => {
+    it('returns required fields when no optional fields are set', async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create(mcpConfig, {
         serverless: true,
       });
@@ -90,6 +92,7 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         authorization_servers: ['https://auth.example.com'],
+        resource: 'https://kibana.example.com',
       });
     });
 

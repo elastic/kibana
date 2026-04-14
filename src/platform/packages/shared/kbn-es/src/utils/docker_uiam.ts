@@ -22,7 +22,6 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL,
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
-  MOCK_IDP_UIAM_SERVICE_INTERNAL_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from '@kbn/mock-idp-utils';
@@ -52,7 +51,10 @@ export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`
 const MAX_HEALTHCHECK_RETRIES = 30;
 
 const ENV_DEFAULTS = {
+  UIAM_COSMOS_DB_PORT: '8081',
   UIAM_COSMOS_DB_UI_PORT: '8082',
+  UIAM_SERVICE_PORT: '8443',
+  UIAM_OAUTH_SERVICE_PORT: '8444',
   UIAM_APP_LOGGING_LEVEL: 'DEBUG',
   UIAM_LOGGING_LEVEL: 'INFO',
 };
@@ -95,7 +97,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
 
       '-p',
-      `127.0.0.1:${new URL(MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL)?.port}:8081`, // Cosmos DB gateway
+      `127.0.0.1:${env.UIAM_COSMOS_DB_PORT}:8081`, // Cosmos DB gateway
       '-p',
       `127.0.0.1:${env.UIAM_COSMOS_DB_UI_PORT}:1234`, // Cosmos DB emulator UI
 
@@ -112,8 +114,6 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
 
       '--health-cmd',
       'curl -sk http://127.0.0.1:8080/ready | grep -q "\\"overall\\": true"',
-      '--env',
-      'UIAM_SERVICE_BOUNDARY=external',
     ],
     cmdParams: ['--protocol', 'https', '--port', '8081'],
   },
@@ -137,7 +137,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       `${KBN_CERT_PATH}:/tmp/server.crt:z`,
 
       '-p',
-      `127.0.0.1:${new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port}:8443`, // UIAM API port
+      `127.0.0.1:${env.UIAM_SERVICE_PORT}:8443`, // UIAM API port
 
       '--entrypoint',
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
@@ -236,7 +236,7 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     `${KBN_CERT_PATH}:/tmp/server.crt:z`,
 
     '-p',
-    `127.0.0.1:${+new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1}:8443`, // UIAM OAuth HTTPS port
+    `127.0.0.1:${env.UIAM_OAUTH_SERVICE_PORT}:8443`, // UIAM OAuth HTTPS port
 
     '--entrypoint',
     '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
@@ -309,16 +309,19 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     'UIAM_SERVICE_BOUNDARY=external',
 
     '--env',
-    `uiam.oauth.base_url=https://localhost:${
-      +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1
-    }`,
+    `uiam.oauth.base_url=https://localhost:${env.UIAM_OAUTH_SERVICE_PORT}`,
     '--env',
-    `UIAM_OAUTH_BASE_URL=https://localhost:${
-      +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1
-    }`,
+    `UIAM_OAUTH_BASE_URL=https://localhost:${env.UIAM_OAUTH_SERVICE_PORT}`,
 
     '--env',
     'uiam.tokens.refresh.grace_period=PT3S',
+
+    '--volume',
+    `${SERVERLESS_IDP_METADATA_PATH}:/tmp/mock-idp-metadata.xml:z`,
+    '--env',
+    'uiam.saml.idp.metadata=/tmp/mock-idp-metadata.xml',
+    '--env',
+    `uiam.saml.acs.url=https://localhost:${env.UIAM_OAUTH_SERVICE_PORT}/saml/consume`,
 
     '--health-cmd',
     'timeout 1 bash -c "</dev/tcp/localhost/8443"',
@@ -328,41 +331,22 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
 
 /**
  * Returns the list of UIAM containers to run.
- * When `uiamOAuth` is true, includes the UIAM OAuth container.
+ * When `includeOAuth` is true, includes the UIAM OAuth container.
  */
-export function getUiamContainers(uiamOAuth?: boolean): UiamContainer[] {
-  return uiamOAuth ? [...UIAM_BASE_CONTAINERS, UIAM_OAUTH_CONTAINER] : [...UIAM_BASE_CONTAINERS];
+export function getUiamContainers({
+  includeOAuth = false,
+}: { includeOAuth?: boolean } = {}): UiamContainer[] {
+  return includeOAuth ? [...UIAM_BASE_CONTAINERS, UIAM_OAUTH_CONTAINER] : [...UIAM_BASE_CONTAINERS];
 }
 
 /** @deprecated Use {@link getUiamContainers} instead */
 export const UIAM_CONTAINERS = UIAM_BASE_CONTAINERS;
 
 /**
- * UIAM external (OAuth) container needs a filesystem path to IdP metadata XML.
- * Override with `MOCK_IDP_KIBANA_URL`.
- */
-async function extraDockerParamsForUiamOauthContainer(): Promise<string[]> {
-  const oauthPort = +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1;
-
-  return [
-    '--volume',
-    `${SERVERLESS_IDP_METADATA_PATH}:/tmp/mock-idp-metadata.xml:z`,
-    '--env',
-    'uiam.saml.idp.metadata=/tmp/mock-idp-metadata.xml',
-    '--env',
-    `uiam.saml.acs.url=https://localhost:${oauthPort}/saml/consume`,
-  ];
-}
-
-/**
  * Run a single UIAM-related container.
  */
 export async function runUiamContainer(log: ToolingLog, container: UiamContainer) {
-  const extraParams =
-    container.name === 'uiam-oauth' ? await extraDockerParamsForUiamOauthContainer() : [];
-
   const dockerCommand = SHARED_DOCKER_PARAMS.concat(
-    extraParams,
     container.params,
     ['--name', container.name],
     container.image,

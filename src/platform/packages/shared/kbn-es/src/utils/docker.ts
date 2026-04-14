@@ -562,7 +562,7 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
     const linkedNodes = getServerlessNodes('-linked', 10);
     const serverlessContainerNames = SERVERLESS_NODES.concat(
       linkedNodes,
-      getUiamContainers(true)
+      getUiamContainers({ includeOAuth: true })
     ).map(({ name }) => name);
 
     for (const name of serverlessContainerNames) {
@@ -579,9 +579,10 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
 
 export async function detectRunningNodes(log: ToolingLog, options: BaseOptions) {
   const linkedNodes = getServerlessNodes('-linked', 10);
-  const namesCmd = SERVERLESS_NODES.concat(linkedNodes, getUiamContainers(true)).flatMap(
-    ({ name }) => ['--filter', `name=${name}`]
-  );
+  const namesCmd = SERVERLESS_NODES.concat(
+    linkedNodes,
+    getUiamContainers({ includeOAuth: true })
+  ).flatMap(({ name }) => ['--filter', `name=${name}`]);
 
   const { stdout } = await execa('docker', ['ps', '--quiet'].concat(namesCmd));
   const runningNodeIds = stdout.split(/\r?\n/).filter((s) => s);
@@ -1000,7 +1001,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await Promise.all([
     setupDockerImage({ log, image: esServerlessImage }),
     ...(options.uiam
-      ? getUiamContainers(options.uiamOAuth).map(({ image }) => setupDockerImage({ log, image }))
+      ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map(({ image }) =>
+          setupDockerImage({ log, image })
+        )
       : []),
   ]);
   log.info(`[runServerlessCluster] Docker image(s) ready (${elapsed()})`);
@@ -1027,7 +1030,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       return node.name;
     }).concat(
       options.uiam
-        ? getUiamContainers(options.uiamOAuth).map((container) => runUiamContainer(log, container))
+        ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map((container) =>
+            runUiamContainer(log, container)
+          )
         : []
     )
   );
@@ -1296,7 +1301,9 @@ export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
 export function teardownServerlessClusterSync(log: ToolingLog, options: ServerlessOptions) {
   const imagesToKillContainersFor = [
     getServerlessImage(options),
-    ...(options.uiam ? getUiamContainers(options.uiamOAuth).map(({ image }) => image) : []),
+    ...(options.uiam
+      ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map(({ image }) => image)
+      : []),
   ];
   const { stdout } = execa.commandSync(
     `docker ps --filter status=running ${imagesToKillContainersFor

@@ -21,9 +21,11 @@ export function defineOAuthProtectedResourceRoute({ router, config }: RouteDefin
     authz: { enabled: false as const, reason: authcReason },
   };
 
+  // https://datatracker.ietf.org/doc/html/rfc9728#section-2
+  // Only resource is required by the specification and authorization_servers must be present for our UIAM OAuth implementation.
   const metadataBody: Record<string, unknown> = {
     authorization_servers: metadata.authorization_servers,
-    ...(metadata.resource ? { resource: metadata.resource } : {}),
+    resource: metadata.resource,
     ...(metadata.bearer_methods_supported
       ? { bearer_methods_supported: metadata.bearer_methods_supported }
       : {}),
@@ -48,11 +50,12 @@ export function defineOAuthProtectedResourceRoute({ router, config }: RouteDefin
     }
   );
 
-  // MCP SDK (RFC 9728) tries path-aware discovery first (e.g.,
+  // MCP Client tries path-aware discovery first (e.g.,
   // /.well-known/oauth-protected-resource/api/agent_builder/mcp) before falling
   // back to the root URL. Without this catch-all, the path-aware URL hits Kibana's
   // auth middleware and redirects to the login page (302 → 200 HTML), which the SDK
   // treats as a successful response and tries to parse as JSON, causing a failure.
+  // https://datatracker.ietf.org/doc/html/rfc8414#section-3.1
   router.get(
     {
       path: '/.well-known/oauth-protected-resource/{path*}',

@@ -6,6 +6,7 @@
  */
 
 import type { errors } from '@elastic/elasticsearch';
+import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 import type { BuildFlavor } from '@kbn/config';
 import type {
@@ -216,8 +217,8 @@ export class AuthenticationService {
         : this.authenticator.getRequestOriginalURL(request);
 
       // For routes that accept UIAM OAuth tokens, return a 401 with a WWW-Authenticate header
-      // containing the resource_metadata URL (RFC 9728) instead of redirecting to the login page.
-      // The body uses JSON-RPC 2.0 error format so MCP clients can parse it correctly.
+      // containing the resource_metadata URL instead of redirecting to the login page.
+      // https://datatracker.ietf.org/doc/html/rfc9728#name-www-authenticate-response
       if (
         preResponse.statusCode === 401 &&
         config.mcp?.oauth2 &&
@@ -232,7 +233,10 @@ export class AuthenticationService {
           body: JSON.stringify({
             jsonrpc: '2.0',
             id: null,
-            error: { code: -32001, message: 'Unauthorized' },
+            // TODO: In MCP SDK v2, ErrorCode is renamed to ProtocolErrorCode, and ConnectionClosed moves to
+            // SdkErrorCode (local-only, string-valued). Update this import when upgrading to SDK v2.
+            // https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/migration.md#error-hierarchy-refactoring
+            error: { code: ErrorCode.ConnectionClosed, message: 'Unauthorized' },
           }),
           headers: {
             'WWW-Authenticate': `Bearer resource_metadata="${resourceMetadataUrl}"`,

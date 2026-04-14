@@ -822,7 +822,10 @@ describe('AuthenticationService', () => {
             {
               mcp: {
                 oauth2: {
-                  metadata: { authorization_servers: ['https://localhost:9200'] },
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
                 },
               },
             },
@@ -848,7 +851,7 @@ describe('AuthenticationService', () => {
           body: JSON.stringify({
             jsonrpc: '2.0',
             id: null,
-            error: { code: -32001, message: 'Unauthorized' },
+            error: { code: -32000, message: 'Unauthorized' },
           }),
           headers: {
             'WWW-Authenticate': expect.stringContaining('Bearer resource_metadata="'),
@@ -884,7 +887,10 @@ describe('AuthenticationService', () => {
             {
               mcp: {
                 oauth2: {
-                  metadata: { authorization_servers: ['https://localhost:9200'] },
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
                 },
               },
             },
@@ -916,7 +922,10 @@ describe('AuthenticationService', () => {
             {
               mcp: {
                 oauth2: {
-                  metadata: { authorization_servers: ['https://localhost:9200'] },
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
                 },
               },
             },
