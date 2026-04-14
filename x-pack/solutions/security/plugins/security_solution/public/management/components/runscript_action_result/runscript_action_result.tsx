@@ -16,6 +16,7 @@ import type {
   ResponseActionRunScriptOutputContent,
 } from '../../../../common/endpoint/types';
 import { RunscriptOutput } from './runscript_action_output';
+import { CrowdstrikeRunscriptOutput } from './crowdstrike_runscript_output';
 
 export interface RunscriptActionResultProps {
   action: MaybeImmutable<ActionDetails<ResponseActionRunScriptOutputContent>>;
@@ -41,13 +42,49 @@ export interface RunscriptActionResultProps {
 export const RunscriptActionResult = memo<RunscriptActionResultProps>(
   ({ action, 'data-test-subj': dataTestSubj, textSize = 's' }) => {
     const { canWriteExecuteOperations } = useUserPrivileges().endpointPrivileges;
-
     const agentId = action.agents[0];
-    const showFile = useMemo(() => action.agentType !== 'crowdstrike', [action.agentType]);
+    const showFile = action.agentType !== 'crowdstrike';
     const shouldShowOutput = useMemo(
       () => action.agentType === 'microsoft_defender_endpoint',
       [action.agentType]
     );
+    const executionOutput = useMemo(() => {
+      if (action.agentType === 'microsoft_defender_endpoint') {
+        return (
+          <RunscriptOutput
+            action={action}
+            agentId={agentId}
+            data-test-subj={`${dataTestSubj}-output`}
+            textSize={textSize}
+          />
+        );
+      }
+
+      if (action.agentType === 'crowdstrike') {
+        return (
+          <CrowdstrikeRunscriptOutput
+            action={action}
+            agentId={agentId}
+            data-test-subj={`${dataTestSubj}-output`}
+            textSize={textSize}
+          />
+        );
+      }
+
+      if (action.agentType === 'endpoint' && action.outputs?.[agentId]?.content) {
+        return (
+          <EndpointHostExecutionResponseOutput
+            outputContent={
+              action.outputs[agentId].content as ResponseActionEndpointRunScriptOutputContent
+            }
+            textSize="s"
+            data-test-subj={`${dataTestSubj}-output`}
+          />
+        );
+      }
+
+      return null;
+    }, [action, agentId, dataTestSubj, textSize]);
 
     return (
       <>
