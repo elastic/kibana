@@ -110,8 +110,8 @@ export interface PackageManifestBaseFields {
    */
   visibility?: ModuleVisibility;
   /**
-   * When true, api-extractor will generate bundled .d.ts output for this package
-   * during the type_check pipeline.
+   * When true, the type_check pipeline will run a noCheck pre-pass to emit .d.ts
+   * for this package before the main composite build.
    */
   bundledTypes?: boolean;
 }

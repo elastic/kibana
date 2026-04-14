@@ -248,7 +248,7 @@ export class TsProject {
   }
 
   /**
-   * Returns true if this project has opted into bundled .d.ts generation via api-extractor
+   * Returns true if this project has opted into bundled .d.ts generation via noCheck pre-pass during type_check
    */
   public hasBundledTypes() {
     return this.pkg?.manifest.bundledTypes === true;
@@ -374,8 +374,14 @@ export class TsProject {
    */
   public getTypeCheckOnlyRefs(tsProjects: TsProject[]): TsProject[] {
     const refs = this.config.typecheck_only_references;
-    if (!refs || !Array.isArray(refs)) {
+    if (!refs) {
       return [];
+    }
+
+    if (!Array.isArray(refs) || !refs.every((r) => typeof r === 'string')) {
+      throw new Error(
+        `invalid typecheck_only_references in ${this.name}: expected an array of strings`
+      );
     }
 
     const importMap = this.getImportMap(tsProjects);

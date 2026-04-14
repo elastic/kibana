@@ -317,8 +317,8 @@ export const bootstrapBundledTypes = async (
         noCheck: true,
         types: ['jest', 'node'],
       },
-      include: ['**/*.ts'],
-      exclude: ['target/**/*'],
+      include: ['**/*.ts', '**/*.tsx'],
+      exclude: ['target/**/*', '**/*.test.*', '**/*.mock.*', '**/*.stories.*'],
     };
 
     await Fsp.writeFile(bootstrapConfigPath, JSON.stringify(bootstrapConfig, null, 2));
@@ -396,8 +396,8 @@ export const bootstrapCircularConsumers = async (
         noCheck: true,
         types: ['jest', 'node'],
       },
-      include: ['**/*.ts'],
-      exclude: ['target/**/*'],
+      include: ['**/*.ts', '**/*.tsx'],
+      exclude: ['target/**/*', '**/*.test.*', '**/*.mock.*', '**/*.stories.*'],
     };
 
     await Fsp.writeFile(bootstrapConfigPath, JSON.stringify(bootstrapConfig, null, 2));
