@@ -24,6 +24,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space',
       access: 'public',
       summary: `Create a space`,
+      description: 'Create a new Kibana space.',
       options: {
         tags: ['oas-tag:spaces'],
       },
