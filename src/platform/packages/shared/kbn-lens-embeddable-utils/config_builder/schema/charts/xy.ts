@@ -28,7 +28,7 @@ import {
   xScaleSchema,
 } from './shared';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { colorMappingSchema, staticColorSchema } from '../color';
+import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { filterSchema } from '../filter';
 import { builderEnums } from '../enums';
 import { cornerPositionSchema } from '../alignments';
@@ -278,17 +278,6 @@ const sharedLegendSchema = {
 /**
  * Layout Schemas
  */
-const legendTruncateMaxPixelsSchema = schema.maybe(
-  schema.number({
-    defaultValue: 250,
-    min: 10,
-    max: 1000,
-    meta: {
-      description: 'Maximum pixels before truncating legend items in list layout',
-      id: 'legendTruncateMaxPixels',
-    },
-  })
-);
 const legendTruncateEnabledSchema = schema.maybe(
   schema.boolean({
     meta: {
@@ -307,12 +296,6 @@ const gridLayout = schema.object({
 });
 const listLayout = schema.object({
   type: schema.literal('list'),
-  truncate: schema.maybe(
-    schema.object({
-      max_pixels: legendTruncateMaxPixelsSchema,
-      enabled: legendTruncateEnabledSchema,
-    })
-  ),
 });
 
 const XY_API_LINE_INTERPOLATION = {
@@ -623,7 +606,11 @@ const xyDataLayerSchemaNoESQL = schema.object(
     y: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
         axis_id: schema.maybe(yAxisIdReferenceSchema),
-        color: schema.maybe(staticColorSchema),
+        color: schema.maybe(
+          schema.oneOf([staticColorSchema, autoColorSchema], {
+            defaultValue: AUTO_COLOR,
+          })
+        ),
       }),
       { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
     ),
@@ -659,7 +646,11 @@ const xyDataLayerSchemaESQL = schema.object(
       esqlColumnWithFormatSchema.extends(
         {
           axis_id: schema.maybe(yAxisIdReferenceSchema),
-          color: schema.maybe(staticColorSchema),
+          color: schema.maybe(
+            schema.oneOf([staticColorSchema, autoColorSchema], {
+              defaultValue: AUTO_COLOR,
+            })
+          ),
         },
         { meta: { description: 'ES|QL column for Y-axis metric' } }
       ),
@@ -731,7 +722,11 @@ const referenceLineLayerShared = {
       meta: { description: 'Line style' },
     })
   ),
-  color: schema.maybe(staticColorSchema),
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   position: schema.maybe(
     schema.oneOf([schema.literal('auto'), schema.literal('left'), schema.literal('right')], {
       meta: { description: 'Position of the icon and label relative to the reference line' },
@@ -797,7 +792,11 @@ const referenceLineLayerSchemaESQL = schema.object(
  * Common properties for all annotation types
  */
 const annotationEventShared = {
-  color: schema.maybe(staticColorSchema),
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   visible: schema.maybe(schema.boolean({ meta: { description: 'Show the annotation' } })),
 };
 

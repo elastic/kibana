@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 import globby from 'globby';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import { getField, processFields, processFieldsWithWildcard } from './field';
 import type { Field, Fields } from './field';
@@ -30,7 +30,7 @@ test('tests loading fields.yml', () => {
   const files = globby.sync(path.join(__dirname, '/tests/*.yml'));
   for (const file of files) {
     const fieldsYML = readFileSync(file, 'utf-8');
-    const fields: Field[] = load(fieldsYML);
+    const fields: Field[] = parse(fieldsYML);
     const processedFields = processFields(fields);
 
     // Check that content file and generated file are equal
@@ -778,8 +778,8 @@ describe('processFields', () => {
         Total swap memory.
 `;
 
-    const noWildcardFields: Field[] = load(noWildcardYml);
-    const wildcardWithObjectTypeFields: Field[] = load(wildcardWithObjectTypeYml);
+    const noWildcardFields: Field[] = parse(noWildcardYml);
+    const wildcardWithObjectTypeFields: Field[] = parse(wildcardWithObjectTypeYml);
 
     test('Does not add object type when object_type field when is already defined and name has wildcard', () => {
       expect(processFieldsWithWildcard(wildcardWithObjectTypeFields)).toMatchInlineSnapshot(`

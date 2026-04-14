@@ -15,6 +15,7 @@ import type {
   PromQLLabel,
   PromQLSelector,
 } from '@elastic/esql';
+import { TRAILING_COMMA_REGEX } from '../../shared';
 import type { PromQLFunctionParamType } from '../../../types';
 import type { CursorMatch, PromqlDetailedPosition } from './types';
 import {
@@ -41,7 +42,6 @@ import {
 } from '../../promql';
 import { promqlOperatorDefinitions } from '../../../generated/promql_operators';
 
-const TRAILING_COMMA_WITH_SPACES_REGEX = /,\s*$/;
 const SELECTOR_DURATION_START_REGEX = /^\s*\[$/;
 
 // Builds a regex pattern like `\+|\-|\*|==|and|or|...` from all binary operator definitions.
@@ -132,7 +132,7 @@ export function getQueryPosition(
       node.type === 'identifier' &&
       parent?.type === 'label-map' &&
       innermostFunc &&
-      TRAILING_COMMA_WITH_SPACES_REGEX.test(textBeforeCursor);
+      TRAILING_COMMA_REGEX.test(textBeforeCursor);
 
     if (!skipLabel) {
       const labelPos = resolveLabelPosition(match, cursor, textBeforeCursor, getSignatureTypes());

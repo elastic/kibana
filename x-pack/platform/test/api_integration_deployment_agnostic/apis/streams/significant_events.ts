@@ -83,6 +83,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'aaa',
+              type: 'match' as const,
               title: 'OOM Error',
               description: '',
               esql: { query: esqlQuery },
@@ -95,6 +96,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamDefinition.queries.length).to.eql(1);
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
+          type: 'match',
           title: 'OOM Error',
           description: '',
           esql: { query: esqlQuery },
@@ -125,6 +127,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'logs.otel.queries-test.query1',
+              type: 'match' as const,
               title: 'should not be deleted',
               description: '',
               esql: {
@@ -168,6 +171,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'logs.otel.queries-test.child.query1',
+              type: 'match' as const,
               title: 'must be deleted',
               description: '',
               esql: {
@@ -185,6 +189,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'logs.otel.queries-test.child.first.query1',
+              type: 'match' as const,
               title: 'must be deleted',
               description: '',
               esql: {
@@ -194,6 +199,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             {
               id: 'logs.otel.queries-test.child.first.query2',
+              type: 'match' as const,
               title: 'must be deleted',
               description: '',
               esql: {
@@ -274,6 +280,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'aaa',
+              type: 'match' as const,
               title: 'OOM Error',
               description: '',
               esql: { query: esqlQuery },
@@ -286,6 +293,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamDefinition.queries.length).to.eql(1);
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
+          type: 'match',
           title: 'OOM Error',
           description: '',
           esql: { query: esqlQuery },

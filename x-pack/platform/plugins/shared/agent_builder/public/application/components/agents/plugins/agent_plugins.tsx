@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
@@ -24,7 +21,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
-import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
@@ -32,26 +28,22 @@ import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useToasts } from '../../../hooks/use_toasts';
-import { queryKeys } from '../../../query_keys';
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
 import { ActiveItemRow } from '../common/active_item_row';
 import { PluginLibraryPanel } from './plugin_library_panel';
 import { PluginDetailPanel } from './plugin_detail_panel';
 import { InstallPluginFlyout } from './install_plugin_flyout';
+import { PluginAddMenuPanel } from './plugin_add_menu_panel';
 import { PageWrapper } from '../common/page_wrapper';
-import { ICON_DIMENSIONS } from '../common/constants';
+import { PluginsCustomizeEmptyState } from './plugins_customize_empty_state';
 import { useListDetailPageStyles } from '../common/styles';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { usePluginsMutation } from './use_plugins_mutation';
 
 export const AgentPlugins: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const styles = useListDetailPageStyles();
   const { createAgentBuilderUrl } = useNavigation();
-  const { agentService } = useAgentBuilderServices();
-  const { addSuccessToast, addErrorToast } = useToasts();
-  const queryClient = useQueryClient();
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { plugins: allPlugins, isLoading: pluginsLoading } = usePluginsService();
@@ -60,8 +52,8 @@ export const AgentPlugins: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPluginId, setSelectedPluginId] = useQueryState<string>(searchParamNames.pluginId);
   const pendingSelectPluginIdRef = useRef<string | null>(null);
-  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
-  const [mutatingPluginId, setMutatingPluginId] = useState<string | null>(null);
+  const [isHeaderInstallMenuOpen, setIsHeaderInstallMenuOpen] = useState(false);
+  const { handleAddPlugin, handleRemovePlugin } = usePluginsMutation({ agent });
   const {
     isOpen: isLibraryOpen,
     openFlyout: openLibrary,
@@ -74,12 +66,12 @@ export const AgentPlugins: React.FC = () => {
   } = useFlyoutState();
 
   const handleOpenLibrary = useCallback(() => {
-    setIsAddMenuOpen(false);
+    setIsHeaderInstallMenuOpen(false);
     openLibrary();
   }, [openLibrary]);
 
   const handleOpenInstallFlyout = useCallback(() => {
-    setIsAddMenuOpen(false);
+    setIsHeaderInstallMenuOpen(false);
     openInstallFlyout();
   }, [openInstallFlyout]);
 
@@ -115,6 +107,7 @@ export const AgentPlugins: React.FC = () => {
   useEffect(() => {
     if (agentLoading || pluginsLoading) return;
 
+    // When a newly added plugin is pending to be selected. Once it is active, select it.
     if (pendingSelectPluginIdRef.current) {
       const pendingInActive = activePlugins.some((p) => p.id === pendingSelectPluginIdRef.current);
       if (pendingInActive) {
@@ -124,15 +117,18 @@ export const AgentPlugins: React.FC = () => {
       }
     }
 
+    // Select first plugin when no plugin is currently selected, like on first render
     if (!selectedPluginId) {
       if (activePlugins.length > 0) {
         setSelectedPluginId(activePlugins[0].id);
       }
-    } else {
-      const stillActive = activePlugins.some((p) => p.id === selectedPluginId);
-      if (!stillActive) {
-        setSelectedPluginId(activePlugins[0]?.id ?? null);
-      }
+      return;
+    }
+
+    // Selected plugin is no longer active, for example after deleting a skill
+    const selectedPluginNotActive = activePlugins.every((p) => p.id !== selectedPluginId);
+    if (selectedPluginNotActive) {
+      setSelectedPluginId(activePlugins[0]?.id ?? null);
     }
   }, [activePlugins, selectedPluginId, setSelectedPluginId, agentLoading, pluginsLoading]);
 
@@ -143,56 +139,6 @@ export const AgentPlugins: React.FC = () => {
       (p) => p.name.toLowerCase().includes(lower) || p.description.toLowerCase().includes(lower)
     );
   }, [activePlugins, searchQuery]);
-
-  const updatePluginsMutation = useMutation({
-    mutationFn: (newPluginIds: string[]) => {
-      return agentService.update(agentId!, { configuration: { plugin_ids: newPluginIds } });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId) });
-    },
-    onError: () => {
-      addErrorToast({ title: labels.agentPlugins.updatePluginsErrorToast });
-    },
-  });
-
-  const handleAddPlugin = useCallback(
-    async (
-      plugin: PluginDefinition,
-      { selectOnSuccess = false }: { selectOnSuccess?: boolean } = {}
-    ) => {
-      const currentIds = agentPluginIds ?? [];
-      if (currentIds.includes(plugin.id)) return;
-      const newIds = [...currentIds, plugin.id];
-      setMutatingPluginId(plugin.id);
-      try {
-        await updatePluginsMutation.mutateAsync(newIds);
-        if (selectOnSuccess) {
-          pendingSelectPluginIdRef.current = plugin.id;
-        }
-        addSuccessToast({ title: labels.agentPlugins.addPluginSuccessToast(plugin.name) });
-      } finally {
-        setMutatingPluginId(null);
-      }
-    },
-    [agentPluginIds, updatePluginsMutation, addSuccessToast]
-  );
-
-  const handleRemovePlugin = useCallback(
-    (plugin: PluginDefinition) => {
-      const currentIds = agentPluginIds ?? [];
-      const newIds = currentIds.filter((id) => id !== plugin.id);
-      setMutatingPluginId(plugin.id);
-      updatePluginsMutation.mutate(newIds, {
-        onSuccess: () => {
-          setSelectedPluginId(null);
-          addSuccessToast({ title: labels.agentPlugins.removePluginSuccessToast(plugin.name) });
-        },
-        onSettled: () => setMutatingPluginId(null),
-      });
-    },
-    [agentPluginIds, updatePluginsMutation, addSuccessToast, setSelectedPluginId]
-  );
 
   const handleTogglePlugin = useCallback(
     (plugin: PluginDefinition, isActive: boolean) => {
@@ -221,6 +167,8 @@ export const AgentPlugins: React.FC = () => {
     return agentPluginIdSet;
   }, [agentPluginIdSet, enableElasticCapabilities, builtinPluginIdSet]);
 
+  const showCustomizeEmptyState = activePlugins.length === 0 && !searchQuery.trim();
+
   const isLoading = agentLoading || pluginsLoading;
 
   if (isLoading) {
@@ -231,21 +179,52 @@ export const AgentPlugins: React.FC = () => {
     );
   }
 
+  const pluginModals = (
+    <>
+      {isLibraryOpen ? (
+        <PluginLibraryPanel
+          onClose={closeLibrary}
+          allPlugins={allPlugins}
+          activePluginIdSet={libraryActivePluginIdSet}
+          onTogglePlugin={handleTogglePlugin}
+        />
+      ) : null}
+      {isInstallFlyoutOpen ? (
+        <InstallPluginFlyout
+          onClose={closeInstallFlyout}
+          onPluginInstalled={(plugin) =>
+            handleAddPlugin(plugin, {
+              onSuccess: () => {
+                pendingSelectPluginIdRef.current = plugin.id;
+              },
+            })
+          }
+        />
+      ) : null}
+    </>
+  );
+
+  if (showCustomizeEmptyState) {
+    return (
+      <PageWrapper>
+        <PluginsCustomizeEmptyState
+          canEditAgent={canEditAgent}
+          onAddFromLibrary={handleOpenLibrary}
+          onInstallFromUrlOrZip={handleOpenInstallFlyout}
+        />
+        {pluginModals}
+      </PageWrapper>
+    );
+  }
+
   return (
     <PageWrapper>
       <div css={styles.header}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="package" aria-hidden={true} css={ICON_DIMENSIONS} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.plugins.title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiTitle size="l">
+              <h1>{labels.plugins.title}</h1>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -254,50 +233,38 @@ export const AgentPlugins: React.FC = () => {
                   {labels.agentPlugins.manageAllPlugins}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  aria-label={labels.agentPlugins.installPluginButton}
-                  button={
-                    <EuiButton
-                      fill
-                      iconType="plusInCircle"
-                      iconSide="left"
-                      onClick={() => setIsAddMenuOpen((prev) => !prev)}
-                    >
-                      {labels.agentPlugins.installPluginButton}
-                    </EuiButton>
-                  }
-                  isOpen={isAddMenuOpen}
-                  closePopover={() => setIsAddMenuOpen(false)}
-                  anchorPosition="downLeft"
-                  panelPaddingSize="none"
-                >
-                  <EuiContextMenuPanel
-                    items={[
-                      <EuiContextMenuItem
-                        key="fromUrlOrZip"
-                        icon="link"
-                        onClick={handleOpenInstallFlyout}
+              {canEditAgent ? (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    aria-label={labels.agentPlugins.installPluginButton}
+                    button={
+                      <EuiButton
+                        fill
+                        iconType="plusInCircle"
+                        iconSide="left"
+                        onClick={() => setIsHeaderInstallMenuOpen((prev) => !prev)}
                       >
-                        {labels.agentPlugins.fromUrlOrZipMenuItem}
-                      </EuiContextMenuItem>,
-                      <EuiContextMenuItem
-                        key="fromLibrary"
-                        icon="importAction"
-                        onClick={handleOpenLibrary}
-                      >
-                        {labels.agentPlugins.fromLibraryMenuItem}
-                      </EuiContextMenuItem>,
-                    ]}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
+                        {labels.agentPlugins.installPluginButton}
+                      </EuiButton>
+                    }
+                    isOpen={isHeaderInstallMenuOpen}
+                    closePopover={() => setIsHeaderInstallMenuOpen(false)}
+                    anchorPosition="downLeft"
+                    panelPaddingSize="none"
+                  >
+                    <PluginAddMenuPanel
+                      onInstallFromUrlOrZip={handleOpenInstallFlyout}
+                      onAddFromLibrary={handleOpenLibrary}
+                    />
+                  </EuiPopover>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
+        <EuiSpacer size="m" />
+        <EuiText size="m" color="default">
           {labels.agentPlugins.pageDescription}
         </EuiText>
       </div>
@@ -332,7 +299,6 @@ export const AgentPlugins: React.FC = () => {
                   isSelected={selectedPluginId === plugin.id}
                   onSelect={() => setSelectedPluginId(plugin.id)}
                   onRemove={() => handleRemovePlugin(plugin)}
-                  isRemoving={updatePluginsMutation.isLoading}
                   removeAriaLabel={labels.agentPlugins.removePluginAriaLabel}
                   readOnlyContent={
                     enableElasticCapabilities && plugin.readonly ? (
@@ -363,19 +329,7 @@ export const AgentPlugins: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isLibraryOpen && (
-        <PluginLibraryPanel
-          onClose={closeLibrary}
-          allPlugins={allPlugins}
-          activePluginIdSet={libraryActivePluginIdSet}
-          onTogglePlugin={handleTogglePlugin}
-          mutatingPluginId={mutatingPluginId}
-        />
-      )}
-
-      {isInstallFlyoutOpen && (
-        <InstallPluginFlyout onClose={closeInstallFlyout} onPluginInstalled={handleAddPlugin} />
-      )}
+      {pluginModals}
     </PageWrapper>
   );
 };
