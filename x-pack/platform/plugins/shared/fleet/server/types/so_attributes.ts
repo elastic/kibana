@@ -183,6 +183,7 @@ export interface OutputSoBaseAttributes {
   is_internal?: boolean;
   is_preconfigured?: boolean;
   config_yaml?: string | null;
+  otel_exporter_config_yaml?: string | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];

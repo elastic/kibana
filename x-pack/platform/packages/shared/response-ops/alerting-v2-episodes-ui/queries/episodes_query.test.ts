@@ -6,45 +6,60 @@
  */
 
 import { buildEpisodesBaseQuery, buildEpisodesQuery } from './episodes_query';
-import { PAGE_SIZE_ESQL_VARIABLE, ALERT_EVENTS_DATA_STREAM } from '../constants';
+import {
+  PAGE_SIZE_ESQL_VARIABLE,
+  ALERT_EVENTS_DATA_STREAM,
+  ALERT_ACTIONS_DATA_STREAM,
+} from '../constants';
 
 describe('buildEpisodesBaseQuery', () => {
   it('should build query with correct structure', () => {
     const query = buildEpisodesBaseQuery();
     const queryString = query.print('basic');
 
-    // Selects FROM the correct data stream
     expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
-
-    // Filters for alert type events
     expect(queryString).toContain('type == "alert"');
-
-    // Contains the correct INLINE STATS and grouping
     expect(queryString).toContain('INLINE STATS');
     expect(queryString).toContain('first_timestamp = MIN(@timestamp)');
     expect(queryString).toContain('last_timestamp = MAX(@timestamp)');
     expect(queryString).toContain('BY episode.id');
-
-    // Calculates the duration
     expect(queryString).toContain('EVAL duration = DATE_DIFF');
     expect(queryString).toContain('"ms"');
     expect(queryString).toContain('first_timestamp');
     expect(queryString).toContain('last_timestamp');
-
-    // Selects the last timestamp in the series of events
     expect(queryString).toContain('WHERE @timestamp == last_timestamp');
   });
 });
 
 describe('buildEpisodesQuery', () => {
+  it('should join both data streams', () => {
+    const query = buildEpisodesQuery();
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
+    expect(queryString).toContain(ALERT_ACTIONS_DATA_STREAM);
+  });
+
+  it('should compute effective_status from deactivation actions', () => {
+    const query = buildEpisodesQuery();
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain(
+      'last_deactivate_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
+    );
+    expect(queryString).toContain(
+      'last_tags = LAST(tags, @timestamp) WHERE (action_type IN ("tag"))'
+    );
+    expect(queryString).toContain('BY group_hash');
+    expect(queryString).toContain('EVAL effective_status = CASE');
+    expect(queryString).toContain('last_deactivate_action == "deactivate"');
+  });
+
   it('should build query with default sort', () => {
     const query = buildEpisodesQuery();
     const queryString = query.print('basic');
 
-    // Default sort is @timestamp DESC
     expect(queryString).toContain('SORT @timestamp DESC');
-
-    // Adds the page size variable correctly to the LIMIT clause
     expect(queryString).toContain(`LIMIT ?${PAGE_SIZE_ESQL_VARIABLE}`);
   });
 
@@ -55,10 +70,7 @@ describe('buildEpisodesQuery', () => {
     });
     const queryString = query.print('basic');
 
-    // Correctly sanitizes the sort field (episode.id is allowlisted)
     expect(queryString).toContain('episode.id');
-
-    // Outputs the correct sort direction keyword
     expect(queryString).toContain('SORT `episode.id` ASC');
   });
 
@@ -69,7 +81,6 @@ describe('buildEpisodesQuery', () => {
     });
     const queryString = query.print('basic');
 
-    // Falls back to @timestamp
     expect(queryString).toContain('SORT @timestamp DESC');
     expect(queryString).not.toContain('invalid.field');
   });
@@ -88,14 +99,21 @@ describe('buildEpisodesQuery', () => {
     });
   });
 
-  it('should apply status filter', () => {
+  it('should filter on effective_status when status filter is set', () => {
     const query = buildEpisodesQuery(
       { sortField: '@timestamp', sortDirection: 'desc' },
       { status: 'active' }
     );
     const queryString = query.print('basic');
 
-    expect(queryString).toContain('WHERE episode.status == "active"');
+    expect(queryString).toContain('WHERE effective_status == "active"');
+  });
+
+  it('should not filter on effective_status when no status filter is set', () => {
+    const query = buildEpisodesQuery({ sortField: '@timestamp', sortDirection: 'desc' }, {});
+    const queryString = query.print('basic');
+
+    expect(queryString).not.toContain('WHERE effective_status ==');
   });
 
   it('should apply ruleId filter', () => {
@@ -130,8 +148,40 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
-    expect(queryString).toContain('WHERE episode.status == "active"');
+    expect(queryString).toContain('WHERE effective_status == "active"');
     expect(queryString).toContain('WHERE rule.id == "rule-123"');
+  });
+
+  it('should apply single tag filter with MV_CONTAINS', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { tags: ['prod'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('MV_CONTAINS(last_tags, "prod")');
+  });
+
+  it('should apply multiple tags as OR of MV_CONTAINS', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { tags: ['a', 'b'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('MV_CONTAINS(last_tags, "a")');
+    expect(queryString).toContain('OR');
+    expect(queryString).toContain('MV_CONTAINS(last_tags, "b")');
+  });
+
+  it('should ignore empty tag strings when filtering', () => {
+    const query = buildEpisodesQuery(
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { tags: ['  ', ''] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).not.toContain('MV_CONTAINS(last_tags');
   });
 
   it('should trim queryString before applying', () => {
@@ -147,13 +197,14 @@ describe('buildEpisodesQuery', () => {
   it('should not apply filters when they are null or undefined', () => {
     const query = buildEpisodesQuery(
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { queryString: null, status: null, ruleId: undefined }
+      { queryString: null, status: null, ruleId: undefined, tags: null }
     );
     const queryString = query.print('basic');
 
-    // Should only have the base WHERE clauses from buildEpisodesBaseQuery
-    const whereCount = (queryString.match(/WHERE/g) || []).length;
-    expect(whereCount).toBe(2); // "type == alert" and "@timestamp == last_timestamp"
+    expect(queryString).not.toContain('QSTR');
+    expect(queryString).not.toContain('WHERE effective_status ==');
+    expect(queryString).not.toContain('WHERE rule.id ==');
+    expect(queryString).not.toContain('MV_CONTAINS(last_tags');
   });
 
   it('should not apply queryString filter when it is empty or whitespace', () => {

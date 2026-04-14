@@ -25,7 +25,9 @@ import type { IPatternExtractionService } from '../lib/pattern_extraction/patter
 import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { InsightClient } from '../lib/sig_events/insights/client/insight_client';
+import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
+import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
 
 export type GetScopedClients = ({
   request,
@@ -38,17 +40,19 @@ export interface RouteHandlerScopedClients {
   soClient: SavedObjectsClientContract;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
-  featureClient: FeatureClient;
+  getFeatureClient: () => Promise<FeatureClient>;
   insightClient: InsightClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
-  queryClient: QueryClient;
+  getQueryClient: () => Promise<QueryClient>;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
   globalUiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   taskClient: TaskClient<StreamsTaskType>;
+  streamsSettingsStorageClient: StreamsSettingsStorageClient;
   isSecurityEnabled: boolean;
+  tuningConfig: SigEventsTuningConfig;
 }
 
 export interface RouteDependencies {

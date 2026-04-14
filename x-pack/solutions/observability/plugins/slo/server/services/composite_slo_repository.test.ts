@@ -289,7 +289,7 @@ describe('DefaultCompositeSLORepository', () => {
         pagination: { page: 1, perPage: 25 },
       });
 
-      expect(result.total).toEqual(2);
+      expect(result.total).toEqual(1);
       expect(result.results).toHaveLength(1);
       expect(result.results[0].id).toEqual(compositeSlo.id);
     });
