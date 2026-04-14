@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { createAction } from 'redux-actions';
 import { startBasic } from '../../lib/es';
+import type { StartBasicStatusState, AppThunkAction } from '../types';
 
-export const startBasicLicenseStatus = createAction(
+export const startBasicLicenseStatus = createAction<StartBasicStatusState>(
   'LICENSE_MANAGEMENT_START_BASIC_LICENSE_STATUS'
 );
 
@@ -18,26 +19,23 @@ export const cancelStartBasicLicense = createAction(
 );
 
 export const startBasicLicense =
-  (currentLicenseType, ack) =>
+  (currentLicenseType: string, ack?: boolean): AppThunkAction<Promise<void>> =>
   async (dispatch, getState, { licensing, toasts, http }) => {
-    /*eslint camelcase: 0*/
     const { acknowledged, basic_was_started, error_message, acknowledge } = await startBasic(
       http,
-      ack
+      ack ?? false
     );
     if (acknowledged) {
       if (basic_was_started) {
         await licensing.refresh();
-        // reload necessary to get left nav to refresh with proper links
         window.location.reload();
       } else {
-        return toasts.addDanger(error_message);
+        toasts.addDanger(error_message);
       }
     } else {
-      //messages coming back in arrays
       const messages = Object.values(acknowledge)
         .slice(1)
-        .reduce((acc, item) => {
+        .reduce<string[]>((acc, item) => {
           item.forEach((message) => {
             acc.push(message);
           });

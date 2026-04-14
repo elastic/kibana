@@ -7,21 +7,22 @@
 
 import { createAction } from 'redux-actions';
 import { getPermissions } from '../../lib/es';
+import type { AppThunkAction } from '../types';
 
-export const permissionsLoading = createAction('LICENSE_MANAGEMENT_PERMISSIONS_LOADING');
+export const permissionsLoading = createAction<boolean>('LICENSE_MANAGEMENT_PERMISSIONS_LOADING');
 
-export const permissionsSuccess = createAction('LICENSE_MANAGEMENT_PERMISSIONS_SUCCESS');
+export const permissionsSuccess = createAction<boolean>('LICENSE_MANAGEMENT_PERMISSIONS_SUCCESS');
 
-export const permissionsError = createAction('LICENSE_MANAGEMENT_PERMISSIONS_ERROR');
+export const permissionsError = createAction<unknown>('LICENSE_MANAGEMENT_PERMISSIONS_ERROR');
 
 export const loadPermissions =
-  () =>
+  (): AppThunkAction<Promise<void>> =>
   async (dispatch, getState, { http }) => {
     dispatch(permissionsLoading(true));
     try {
-      const permissions = await getPermissions(http);
+      const { hasPermission } = await getPermissions(http);
       dispatch(permissionsLoading(false));
-      dispatch(permissionsSuccess(permissions.hasPermission));
+      dispatch(permissionsSuccess(hasPermission));
     } catch (e) {
       dispatch(permissionsLoading(false));
       dispatch(permissionsError(e));

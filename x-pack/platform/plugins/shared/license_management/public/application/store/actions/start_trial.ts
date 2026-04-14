@@ -7,26 +7,25 @@
 
 import { createAction } from 'redux-actions';
 import { canStartTrial, startTrial } from '../../lib/es';
+import type { AppThunkAction } from '../types';
 
-export const trialStatusLoaded = createAction('LICENSE_MANAGEMENT_TRIAL_STATUS_LOADED');
+export const trialStatusLoaded = createAction<boolean>('LICENSE_MANAGEMENT_TRIAL_STATUS_LOADED');
 
 export const loadTrialStatus =
-  () =>
+  (): AppThunkAction<Promise<void>> =>
   async (dispatch, getState, { http }) => {
     const trialOK = await canStartTrial(http);
     dispatch(trialStatusLoaded(trialOK));
   };
 
 export const startLicenseTrial =
-  () =>
+  (): AppThunkAction<Promise<void>> =>
   async (dispatch, getState, { licensing, toasts, http }) => {
-    /*eslint camelcase: 0*/
     const { trial_was_started, error_message } = await startTrial(http);
     if (trial_was_started) {
       await licensing.refresh();
-      // reload necessary to get left nav to refresh with proper links
       window.location.reload();
     } else {
-      return toasts.addDanger(error_message);
+      toasts.addDanger(error_message);
     }
   };

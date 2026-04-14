@@ -6,5 +6,6 @@
  */
 
 import { createAction } from 'redux-actions';
+import type { ILicense } from '@kbn/licensing-types';
 
-export const addLicense = createAction('LICENSE_MANAGEMENT_ADD_LICENSE');
+export const addLicense = createAction<ILicense>('LICENSE_MANAGEMENT_ADD_LICENSE');

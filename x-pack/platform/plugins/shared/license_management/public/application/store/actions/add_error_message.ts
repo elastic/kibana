@@ -7,4 +7,6 @@
 
 import { createAction } from 'redux-actions';
 
-export const addUploadErrorMessage = createAction('LICENSE_MANAGEMENT_ADD_UPLOAD_ERROR_MESSAGE');
+export const addUploadErrorMessage = createAction<string | React.ReactNode>(
+  'LICENSE_MANAGEMENT_ADD_UPLOAD_ERROR_MESSAGE'
+);

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { Action } from 'redux-actions';
 import { handleActions } from 'redux-actions';
 
 import { trialStatusLoaded } from '../actions/start_trial';
+import type { TrialStatusState } from '../types';
 
-export const trialStatus = handleActions(
+export const trialStatus = handleActions<TrialStatusState, boolean>(
   {
-    [trialStatusLoaded](state, { payload }) {
+    [String(trialStatusLoaded)](state: TrialStatusState, { payload }: Action<boolean>) {
       return {
         canStartTrial: payload,
       };

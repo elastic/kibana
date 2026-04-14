@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import type { Action } from 'redux-actions';
 import { handleActions } from 'redux-actions';
+import type { ILicense } from '@kbn/licensing-types';
 
 import { addLicense } from '../actions/add_license';
 
-export const license = handleActions(
+export const license = handleActions<ILicense | null, ILicense>(
   {
-    [addLicense](state, { payload }) {
+    [String(addLicense)](_state: ILicense | null, { payload }: Action<ILicense>) {
       return payload;
     },
   },
-  {}
+  null
 );
