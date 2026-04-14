@@ -24,6 +24,8 @@ const ERROR_MSG =
 const isDescribeCall = (node) => {
   return (
     node.callee.type === 'MemberExpression' &&
+    node.callee.object.type === 'Identifier' &&
+    SCOUT_CALLERS.includes(node.callee.object.name) &&
     node.callee.property.type === 'Identifier' &&
     node.callee.property.name === 'describe'
   );
