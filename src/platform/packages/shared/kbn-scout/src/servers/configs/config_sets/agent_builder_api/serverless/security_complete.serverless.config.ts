@@ -11,10 +11,8 @@ import { servers as defaultConfig } from '../../default/serverless/security_comp
 import type { ScoutServerConfig } from '../../../../../types';
 
 /**
- * Agent Builder Scout API tests on serverless Security: enable experimental Agent Builder features.
- *
- * Usage:
- *   node scripts/scout.js start-server --arch serverless --domain security_complete --serverConfigSet agent_builder_api
+ * Serverless Security defaults with experimental Agent Builder UI settings enabled
+ * for Agent Builder API tests.
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,

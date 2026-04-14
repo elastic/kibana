@@ -11,8 +11,8 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Scout server configuration for Agent Builder UI functional tests (stateful).
- * Mirrors FTR `x-pack/platform/test/agent_builder_functional/config.ts` kbnServerArgs.
+ * Stateful defaults with Agent Builder UI test settings: Agent Builder debug logging,
+ * AI agents feature flag, and AI Assistant chat experience set to agent mode.
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,

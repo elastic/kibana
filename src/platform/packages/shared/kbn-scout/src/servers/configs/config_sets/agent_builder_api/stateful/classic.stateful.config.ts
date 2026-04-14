@@ -11,18 +11,15 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Port for the in-repo GitHub-style plugin mock (PluginsTestServer). Must match
- * `SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT` in Agent Builder Scout API fixtures.
+ * Fixed port for the in-repo GitHub-style plugin mock used by Agent Builder plugin install tests.
+ * Kept in sync with `SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT` in Agent Builder Scout API fixtures.
  */
 const AGENT_BUILDER_GITHUB_MOCK_PORT = 18387;
 
 /**
- * Scout server configuration for Agent Builder API integration tests (stateful).
- * Mirrors FTR `x-pack/platform/test/agent_builder_api_integration/configs/config.stateful.ts`:
- * experimental Agent Builder UI settings, logging, and a fixed GitHub base URL for plugin install tests.
- *
- * Usage:
- *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet agent_builder_api
+ * Stateful Kibana + Elasticsearch defaults with Agent Builder API test settings:
+ * experimental Agent Builder UI flags, verbose Agent Builder plugin logging, and
+ * `xpack.agentBuilder.githubBaseUrl` pointing at the local plugin registry mock.
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,

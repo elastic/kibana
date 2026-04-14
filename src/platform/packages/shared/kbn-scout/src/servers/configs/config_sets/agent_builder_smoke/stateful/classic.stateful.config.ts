@@ -17,11 +17,10 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
-// EIS QA environment URL for Cloud Connected Mode — parity with FTR
-// `x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts`
+// Elastic Inference Service QA base URL (Elasticsearch Cloud Connected Mode).
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 
-/** Same env name as `@kbn/gen-ai-functional-testing` / FTR smoke. */
+/** Env name shared with `@kbn/gen-ai-functional-testing` for base64-encoded preconfigured connectors. */
 const AI_CONNECTORS_ENV = 'KIBANA_TESTING_AI_CONNECTORS';
 
 interface AvailableConnector {
@@ -137,13 +136,9 @@ const preconfiguredConnectors = {
 };
 
 /**
- * Stateful Scout servers for Agent Builder live EIS smoke API tests.
- * Mirrors FTR `x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts`.
- *
- * Run:
- *   node scripts/scout.js run-tests --arch stateful --domain classic \\
- *     --serverConfigSet agent_builder_smoke \\
- *     --testFiles x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts
+ * Stateful defaults wired for Agent Builder smoke tests against live EIS: Elasticsearch
+ * uses the QA inference endpoint, and Kibana merges static preconfigured connectors
+ * (from env or `config/kibana.dev.yml`) with connectors derived from `target/eis_models.json`.
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,

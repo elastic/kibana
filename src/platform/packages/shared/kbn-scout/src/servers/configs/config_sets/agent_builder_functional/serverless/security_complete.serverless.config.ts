@@ -11,7 +11,8 @@ import { servers as defaultConfig } from '../../default/serverless/security_comp
 import type { ScoutServerConfig } from '../../../../../types';
 
 /**
- * Agent Builder UI tests on serverless Security: enable AI agents feature flags (FTR parity).
+ * Serverless Security defaults with Agent Builder UI test settings: Agent Builder debug logging,
+ * AI agents feature flag, and AI Assistant chat experience set to agent mode.
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
