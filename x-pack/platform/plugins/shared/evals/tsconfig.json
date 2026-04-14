@@ -10,6 +10,7 @@
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/features-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
     "@kbn/management-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/storage-adapter",
@@ -29,6 +30,9 @@
     "@kbn/workflows-management-plugin",
     "@kbn/workflows-extensions",
     "@kbn/inference-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-saved-objects-api-server-mocks"
   ]
 }

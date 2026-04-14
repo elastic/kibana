@@ -45,8 +45,14 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
-  handler: async ({ request, getScopedClients, server }): Promise<{ count: number }> => {
+  params: z.object({
+    query: z
+      .object({
+        minSeverityScore: z.coerce.number().int().min(0).max(100).optional(),
+      })
+      .optional(),
+  }),
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ count: number }> => {
     const { getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
@@ -54,7 +60,8 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const queryClient = await getQueryClient();
-    const count = await queryClient.getUnbackedQueriesCount();
+    const minSeverityScore = params?.query?.minSeverityScore;
+    const count = await queryClient.getUnbackedQueriesCount({ minSeverityScore });
     return { count };
   },
 });
@@ -86,6 +93,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     body: z
       .object({
         queryIds: z.array(z.string()).optional(),
+        minSeverityScore: z.number().int().min(0).max(100).optional(),
       })
       .nullish(),
   }),
@@ -103,7 +111,8 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const queryClient = await getQueryClient();
-    const all = await queryClient.getAllUnbackedQueries();
+    const minSeverityScore = params?.body?.minSeverityScore;
+    const all = await queryClient.getAllUnbackedQueries({ minSeverityScore });
     const requestedQueryIds = params?.body?.queryIds ?? [];
 
     let toPromote = all;

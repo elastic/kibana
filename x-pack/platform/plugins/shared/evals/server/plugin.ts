@@ -6,10 +6,19 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import {
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  type PluginInitializerContext,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import type { EvalsConfig } from './config';
+import {
+  EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
+  evalsRemoteKibanaConfigSavedObjectType,
+} from './saved_objects/remote_kibana_config';
 import type {
   EvalsRequestHandlerContext,
   EvalsPluginSetup,
@@ -39,7 +48,12 @@ export class EvalsPlugin
 
   setup(
     coreSetup: CoreSetup<EvalsStartDependencies, EvalsPluginStart>,
-    { features, workflowsManagement, workflowsExtensions }: EvalsSetupDependencies
+    {
+      features,
+      encryptedSavedObjects,
+      workflowsManagement,
+      workflowsExtensions,
+    }: EvalsSetupDependencies
   ): EvalsPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('Evals plugin is disabled');
@@ -61,6 +75,13 @@ export class EvalsPlugin
         })
       );
     }
+
+    coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
+    encryptedSavedObjects.registerType({
+      type: EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
+      attributesToEncrypt: new Set(['apiKey']),
+      attributesToIncludeInAAD: new Set(['createdAt', 'url']),
+    });
 
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
       'evals',
@@ -107,11 +128,21 @@ export class EvalsPlugin
     });
 
     const router = coreSetup.http.createRouter<EvalsRequestHandlerContext>();
+    const internalRemoteConfigsSoClientPromise = coreSetup.getStartServices().then(([coreStart]) =>
+      coreStart.savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE],
+      })
+    );
+
     registerRoutes({
       router,
       logger: this.logger,
       onlineSuiteRegistry: this.onlineSuiteRegistry,
       workflowsManagement,
+      canEncrypt: encryptedSavedObjects.canEncrypt,
+      getEncryptedSavedObjectsStart: () =>
+        coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
+      getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
     });
 
     return {

@@ -18,7 +18,7 @@ export interface PromoteResult {
 interface QueriesApi {
   promote: ({ queryIds }: { queryIds: string[] }) => Promise<PromoteResult>;
   demote: ({ queryIds }: { queryIds: string[] }) => Promise<{ demoted: number }>;
-  promoteAll: () => Promise<PromoteResult>;
+  promoteAll: (opts?: { minSeverityScore?: number }) => Promise<PromoteResult>;
   upsertQuery: ({ query, streamName }: { query: StreamQuery; streamName: string }) => Promise<void>;
   removeQuery: ({ queryId, streamName }: { queryId: string; streamName: string }) => Promise<void>;
   deleteQueriesInBulk: ({
@@ -28,7 +28,10 @@ interface QueriesApi {
     queryIds: string[];
     streamName: string;
   }) => Promise<void>;
-  getUnbackedQueriesCount: (signal?: AbortSignal | null) => Promise<{ count: number }>;
+  getUnbackedQueriesCount: (
+    signal?: AbortSignal | null,
+    opts?: { minSeverityScore?: number }
+  ) => Promise<{ count: number }>;
   abort: () => void;
 }
 
@@ -108,14 +111,18 @@ export function useQueriesApi(): QueriesApi {
           },
         });
       },
-      promoteAll: async () => {
+      promoteAll: async ({ minSeverityScore }: { minSeverityScore?: number } = {}) => {
         return streamsRepositoryClient.fetch('POST /internal/streams/queries/_promote', {
-          params: { body: {} },
+          params: { body: { minSeverityScore } },
           signal: null,
         });
       },
-      getUnbackedQueriesCount: async (requestSignal?: AbortSignal | null) => {
+      getUnbackedQueriesCount: async (
+        requestSignal?: AbortSignal | null,
+        opts?: { minSeverityScore?: number }
+      ) => {
         return streamsRepositoryClient.fetch('GET /internal/streams/queries/_unbacked_count', {
+          params: { query: { minSeverityScore: opts?.minSeverityScore } },
           signal: requestSignal ?? signal,
         });
       },

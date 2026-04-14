@@ -7,6 +7,8 @@
 
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EvalsRouter } from '../types';
 import type { OnlineSuiteRegistry } from '../online_suites/registry';
 import { registerGetRunsRoute } from './runs/get_runs';
@@ -24,6 +26,7 @@ import { registerAddExamplesRoute } from './datasets/add_examples';
 import { registerUpdateExampleRoute } from './datasets/update_example';
 import { registerDeleteExampleRoute } from './datasets/delete_example';
 import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
+import { registerRemoteConfigsRoutes } from './remotes/register_routes';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
 import { registerGetOnlineSuitesRoute } from './online/get_suites';
@@ -38,6 +41,9 @@ export interface RouteDependencies {
   logger: Logger;
   onlineSuiteRegistry?: OnlineSuiteRegistry;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  canEncrypt: boolean;
+  getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
+  getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
@@ -58,6 +64,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpdateExampleRoute(dependencies);
   registerDeleteExampleRoute(dependencies);
   registerUpsertDatasetRoute(dependencies);
+  registerRemoteConfigsRoutes(dependencies);
 
   registerGetOnlineSuitesRoute(dependencies);
   registerRunOnlineSuiteRoute(dependencies);
