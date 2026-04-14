@@ -42,26 +42,14 @@ import {
 import type { QueryStorageSettings } from '../storage_settings';
 import { parseError } from '../../errors/parse_error';
 import { computeRuleId } from './helpers/query';
+import {
+  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+  type SigEventsTuningConfig,
+} from '../../../../../common/sig_events_tuning_config';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
 export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';
-
-/**
- * Minimum raw ELSER score threshold for semantic search results.
- *
- * We apply min_score directly on the raw ELSER scores rather than using
- * `minmax` normalization because minmax is relative to the current result set:
- * the top result always normalizes to 1.0, so irrelevant queries (e.g.,
- * "test-keyword" against security documents) still return hits. A raw score
- * threshold avoids this — ELSER produces very low scores (typically < 1.0)
- * for nonsensical or completely unrelated queries, while genuinely relevant
- * matches score much higher (5–30+).
- *
- * This threshold may need tuning as the dataset evolves. If legitimate
- * matches are being excluded, lower it; if noise creeps back in, raise it.
- */
-const SEMANTIC_MIN_SCORE = 10;
 
 const SEARCH_SIZE_LIMIT = 10_000;
 
@@ -72,6 +60,7 @@ const LEGACY_RUNTIME_MAPPINGS = {
 
 export interface QueryLinkFilters {
   ruleUnbacked?: RuleUnbackedFilter;
+  queryIds?: string[];
 }
 
 interface TermQueryOpts {
@@ -309,7 +298,11 @@ export class QueryClient {
       logger: Logger;
     },
     private readonly isSignificantEventsEnabled: boolean = false,
-    private readonly inferenceAvailable: boolean = false
+    private readonly inferenceAvailable: boolean = false,
+    private readonly config: Pick<
+      SigEventsTuningConfig,
+      'semantic_min_score' | 'rrf_rank_constant'
+    > = DEFAULT_SIG_EVENTS_TUNING_CONFIG
   ) {}
 
   // ==================== Storage Operations ====================
@@ -401,6 +394,7 @@ export class QueryClient {
     const filter = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...termQuery(ASSET_TYPE, 'query'),
+      ...termsQuery(ASSET_ID, filters?.queryIds),
       ...ruleUnbackedFilter(filters?.ruleUnbacked),
     ];
 
@@ -561,7 +555,7 @@ export class QueryClient {
             match: { [QUERY_SEARCH_EMBEDDING]: query },
           },
           filter: { bool: { filter } },
-          min_score: SEMANTIC_MIN_SCORE,
+          min_score: this.config.semantic_min_score,
         },
       },
     });
@@ -592,8 +586,8 @@ export class QueryClient {
                 query: {
                   match: { [QUERY_SEARCH_EMBEDDING]: query },
                 },
-                // See SEMANTIC_MIN_SCORE for rationale.
-                min_score: SEMANTIC_MIN_SCORE,
+                // See config.semantic_min_score for rationale.
+                min_score: this.config.semantic_min_score,
               },
             },
           ],
@@ -605,7 +599,7 @@ export class QueryClient {
           rank_window_size: SEARCH_SIZE_LIMIT,
           // Lower than the ES default (60) to give more weight to top-ranked
           // results from each retriever, improving precision for small catalogs.
-          rank_constant: 20,
+          rank_constant: this.config.rrf_rank_constant,
         },
       },
     });
@@ -881,6 +875,52 @@ export class QueryClient {
     );
 
     return { promoted: toPromote.length };
+  }
+
+  /**
+   * Removes backing Kibana rules for stored rule-backed queries, then marks them as unbacked.
+   */
+  public async demoteQueries(
+    definition: Streams.all.Definition,
+    queryIds: string[]
+  ): Promise<{ demoted: number }> {
+    const streamName = definition.name;
+
+    if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping demoteQueries because significant events feature is disabled.`
+      );
+      return { demoted: 0 };
+    }
+
+    const { [streamName]: currentQueryLinks } = await this.getStreamToQueryLinksMap([streamName]);
+    const idSet = new Set(queryIds);
+    const toDemote = currentQueryLinks.filter(
+      (link) => link.rule_backed && idSet.has(link.query.id)
+    );
+
+    if (toDemote.length === 0) {
+      return { demoted: 0 };
+    }
+
+    await this.bulkStorage(
+      definition,
+      toDemote.map((link) => ({
+        index: {
+          asset: {
+            [ASSET_ID]: link[ASSET_ID],
+            [ASSET_TYPE]: link[ASSET_TYPE],
+            query: link.query,
+            rule_backed: false,
+            rule_id: link.rule_id,
+          },
+        },
+      }))
+    );
+
+    await this.uninstallQueries(toDemote);
+
+    return { demoted: toDemote.length };
   }
 
   private async installQueries(

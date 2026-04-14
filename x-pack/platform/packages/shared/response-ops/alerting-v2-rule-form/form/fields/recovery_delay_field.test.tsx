@@ -12,7 +12,7 @@ import { RecoveryDelayField } from './recovery_delay_field';
 import { AlertDelayField } from './alert_delay_field';
 import type { FormValues } from '../types';
 import { mapFormValuesToUpdateRequest } from '../utils/rule_request_mappers';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 
 let getFormValues: (() => FormValues) | undefined;
 
@@ -47,11 +47,11 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByText('No delay - Recovers on first non-breach')).toBeInTheDocument();
   });
 
-  it('shows breaches controls when recovery delay mode is breaches', () => {
+  it('shows recoveries controls when recovery delay mode is recoveries', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
-        stateTransitionRecoveryDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: { recoveringCount: 4 },
       }),
     });
@@ -71,12 +71,12 @@ describe('RecoveryDelayField', () => {
     expect(screen.getByTestId('recoveryTransitionTimeframeNumberInput')).toBeInTheDocument();
   });
 
-  it('switches to breaches mode when Breaches button is clicked', () => {
+  it('switches to recoveries mode when Recoveries button is clicked', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
 
-    fireEvent.click(screen.getByText('Breaches'));
+    fireEvent.click(screen.getByText('Recoveries'));
 
     expect(screen.getByTestId('recoveryTransitionCountInput')).toBeInTheDocument();
     expect(screen.queryByTestId('recoveryDelayImmediateDescription')).not.toBeInTheDocument();
@@ -97,12 +97,12 @@ describe('RecoveryDelayField', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({
         kind: 'alert',
-        stateTransitionRecoveryDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: { recoveringCount: 4 },
       }),
     });
 
-    // Start in breaches mode, switch to immediate
+    // Start in recoveries mode, switch to immediate
     fireEvent.click(screen.getByText('Immediate'));
 
     expect(screen.getByTestId('recoveryDelayImmediateDescription')).toBeInTheDocument();
@@ -112,6 +112,14 @@ describe('RecoveryDelayField', () => {
   it('renders the mode toggle button group', () => {
     render(<RecoveryDelayField />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
+    });
+
+    expect(screen.getByTestId('recoveryDelayMode')).toBeInTheDocument();
+  });
+
+  it('renders correctly in flyout layout', () => {
+    render(<RecoveryDelayField />, {
+      wrapper: createFormWrapper({ kind: 'alert' }, createMockServices(), { layout: 'flyout' }),
     });
 
     expect(screen.getByTestId('recoveryDelayMode')).toBeInTheDocument();
@@ -129,7 +137,7 @@ describe('RecoveryDelayField', () => {
         wrapper: createFormWrapper({
           kind: 'alert',
           stateTransitionAlertDelayMode: 'breaches',
-          stateTransitionRecoveryDelayMode: 'breaches',
+          stateTransitionRecoveryDelayMode: 'recoveries',
           stateTransition: {
             pendingCount: 2,
             pendingTimeframe: null,

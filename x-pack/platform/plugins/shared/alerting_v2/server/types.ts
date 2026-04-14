@@ -19,6 +19,7 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export type AlertingServerSetup = void;
 export type AlertingServerStart = void;
@@ -29,6 +30,7 @@ export interface AlertingServerSetupDependencies {
   spaces: SpacesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface AlertingServerStartDependencies {

@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./field_value_pairs.spec.ts'));
     loadTestFile(require.resolve('./latency.spec.ts'));
     loadTestFile(require.resolve('./p_values.spec.ts'));
+    loadTestFile(require.resolve('./correlations.spec.ts'));
   });
 }

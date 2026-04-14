@@ -41,7 +41,8 @@ import { InspectButton, InspectButtonContainer } from '../../../../common/compon
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
-import { CellActions } from '../../shared/components/cell_actions';
+import { CellActions as DocumentDetailsCellActions } from '../../shared/components/cell_actions';
+import { CellActions as AttackDetailsCellActions } from '../../../attack_details/components/cell_actions';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
@@ -116,6 +117,11 @@ export interface UserDetailsProps {
    * Set to false for attack flyout so multiple entity panels start collapsed.
    */
   expandedOnFirstRender?: boolean;
+  /**
+   * When true, related-entity cell actions use the attack flyout implementation.
+   * Set for attack flyout entity panels; omit in document details flyout.
+   */
+  isAttackDetails?: boolean;
 }
 
 /**
@@ -127,7 +133,10 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   timestamp,
   scopeId,
   expandedOnFirstRender = true,
+  isAttackDetails = false,
 }) => {
+  const EntityCellActions = isAttackDetails ? AttackDetailsCellActions : DocumentDetailsCellActions;
+
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -320,7 +329,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
         ),
         render: (host: string) => (
           <EuiText grow={false} size="xs">
-            <CellActions field={HOST_NAME_FIELD_NAME} value={host}>
+            <EntityCellActions field={HOST_NAME_FIELD_NAME} value={host}>
               <PreviewLink
                 field={HOST_NAME_FIELD_NAME}
                 value={host}
@@ -328,7 +337,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
                 scopeId={scopeId}
                 data-test-subj={USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID}
               />
-            </CellActions>
+            </EntityCellActions>
           </EuiText>
         ),
       },
@@ -381,7 +390,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId, entityId]
+    [EntityCellActions, isEntityAnalyticsAuthorized, scopeId, entityId]
   );
 
   const relatedHostsCount = useMemo(
