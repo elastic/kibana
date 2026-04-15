@@ -41,7 +41,6 @@ dependsOn:
   - '@kbn/doc-links'
   - '@kbn/cloud'
   - '@kbn/agent-builder-plugin'
-  - '@kbn/deeplinks-search'
   - '@kbn/scout-search'
   - '@kbn/search-agent'
   - '@kbn/shared-ux-ai-components'

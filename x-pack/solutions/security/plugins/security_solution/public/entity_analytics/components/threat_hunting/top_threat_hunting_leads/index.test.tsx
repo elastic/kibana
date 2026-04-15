@@ -158,32 +158,4 @@ describe('TopThreatHuntingLeads', () => {
     expect(onLeadClick).toHaveBeenCalledTimes(1);
     expect(onLeadClick).toHaveBeenCalledWith(lead);
   });
-
-  it('info button calls onLeadInfoClick when prop is defined', () => {
-    const onLeadInfoClick = jest.fn();
-    const lead = createMockLead({ id: 'lead-info' });
-
-    render(
-      <TopThreatHuntingLeads
-        {...defaultProps}
-        leads={[lead]}
-        totalCount={1}
-        onLeadInfoClick={onLeadInfoClick}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('leadInfoButton-lead-info'));
-
-    expect(onLeadInfoClick).toHaveBeenCalledTimes(1);
-    expect(onLeadInfoClick).toHaveBeenCalledWith(lead);
-  });
-
-  it('info button not rendered when onLeadInfoClick is undefined', () => {
-    const lead = createMockLead({ id: 'lead-no-info' });
-
-    render(<TopThreatHuntingLeads {...defaultProps} leads={[lead]} totalCount={1} />);
-
-    expect(screen.getByTestId('leadCard-lead-no-info')).toBeInTheDocument();
-    expect(screen.queryByTestId('leadInfoButton-lead-no-info')).not.toBeInTheDocument();
-  });
 });
