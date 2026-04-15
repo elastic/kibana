@@ -7,27 +7,9 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { i18n } from '@kbn/i18n';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { Header } from './header';
 import { Content } from './content';
-
-export interface NetworkExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'network-details' | 'network-preview';
-  params: NetworkProps;
-}
-
-export const NetworkPanelKey: NetworkExpandableFlyoutProps['key'] = 'network-details';
-export const NetworkPreviewPanelKey: NetworkExpandableFlyoutProps['key'] = 'network-preview';
-
-export const NETWORK_PREVIEW_BANNER = {
-  title: i18n.translate('xpack.securitySolution.flyout.right.network.networkPreviewTitle', {
-    defaultMessage: 'Preview network details',
-  }),
-  backgroundColor: 'warning',
-  textColor: 'warning',
-};
 
 export interface NetworkProps extends Record<string, unknown> {
   /**
