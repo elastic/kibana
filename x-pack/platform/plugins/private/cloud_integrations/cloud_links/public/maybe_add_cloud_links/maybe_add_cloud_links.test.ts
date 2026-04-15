@@ -82,6 +82,7 @@ describe('maybeAddCloudLinks', () => {
         order: 300,
       },
       expect.any(Object),
+      expect.any(Object),
     ]);
 
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
@@ -157,6 +158,7 @@ describe('maybeAddCloudLinks', () => {
         label: 'Organization',
         order: 300,
       },
+      expect.any(Object),
       expect.any(Object),
     ]);
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
