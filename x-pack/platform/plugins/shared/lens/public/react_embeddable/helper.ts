@@ -39,12 +39,12 @@ import { BehaviorSubject } from 'rxjs';
 
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
-
 import type { StrippedLensState } from '../../common/transforms/helpers';
 import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../common/transforms/utils';
 import { getLensBuilder } from '../lazy_builder';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
+import { hydrateESQLTimeFields } from './hydrate_esql_time_fields';
 import type { LensEmbeddableStartServices } from './types';
 import type { FlattenedLensByValuePanelSchema } from '../../server/types';
 
@@ -93,10 +93,12 @@ export async function deserializeState(
     try {
       const { attributes, managed, sharingSavedObjectProps } =
         await attributeService.loadFromLibrary(refId);
+      // hydrate by ref API/ESQL  attributes with the time field and date column types
+      const hydratedAttributes = await hydrateESQLTimeFields(attributes, services.coreStart.http);
       return {
         ...state,
         ref_id: refId,
-        attributes,
+        attributes: hydratedAttributes,
         managed,
         sharingSavedObjectProps,
       } satisfies LensRuntimeState;
@@ -121,8 +123,16 @@ export async function deserializeState(
       return { ...newState, attributes: fallbackAttributes };
     }
   }
+  // hydrate by value API/ESQL  attributes with the time field and date column types
+  const hydratedAttributes = await hydrateESQLTimeFields(
+    newState.attributes ?? fallbackAttributes,
+    services.coreStart.http
+  );
 
-  return newState;
+  return {
+    ...newState,
+    attributes: hydratedAttributes,
+  };
 }
 
 export function isTextBasedLanguage(state: LensRuntimeState) {
