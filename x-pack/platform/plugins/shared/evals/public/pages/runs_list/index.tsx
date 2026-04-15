@@ -78,7 +78,9 @@ export const RunsListPage: React.FC = () => {
         truncateText: true,
         width: '200px',
         render: (runId: string) => (
-          <EuiLink onClick={() => history.push(`/runs/${runId}`)}>{runId.slice(0, 12)}...</EuiLink>
+          <EuiLink onClick={() => history.push(`/runs/${encodeURIComponent(runId)}`)}>
+            {runId.slice(0, 12)}...
+          </EuiLink>
         ),
       },
       {
@@ -272,7 +274,7 @@ export const RunsListPage: React.FC = () => {
             onClick: (e: React.MouseEvent) => {
               const target = e.target as HTMLElement;
               if (target.closest('.euiTableRowCellCheckbox, .euiLink, a')) return;
-              history.push(`/runs/${item.run_id}`);
+              history.push(`/runs/${encodeURIComponent(item.run_id)}`);
             },
             style: { cursor: 'pointer' },
           })}
