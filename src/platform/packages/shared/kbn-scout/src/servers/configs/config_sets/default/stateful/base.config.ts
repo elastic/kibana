@@ -226,6 +226,10 @@ export const defaultConfig: ScoutServerConfig = {
       `--server.publicBaseUrl=${kbnUrl}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      // Disable entity store V2 until Scout tests cover it
+      `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        'disable:entityAnalyticsEntityStoreV2',
+      ])}`,
     ],
   },
 };
