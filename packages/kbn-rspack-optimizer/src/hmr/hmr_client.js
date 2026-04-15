@@ -21,16 +21,80 @@ function upToDate(hash) {
   return lastHash === __webpack_hash__;
 }
 
+// --- Shadow DOM isolation --------------------------------------------------
+// All HMR UI lives inside a shadow tree so that mouse/pointer events never
+// leak to document listeners (e.g. EuiOutsideClickDetector) and DOM
+// mutations inside the shadow tree are invisible to external observers.
+
+var SHADOW_HOST_ID = '__kbn_hmr_root__';
+var shadowHost = null;
+var shadowRootRef = null;
+var fenceElement = null;
+var hostObserver = null;
+
+function ensureShadowRoot() {
+  if (shadowRootRef) return shadowRootRef;
+
+  shadowHost = document.createElement('div');
+  shadowHost.id = SHADOW_HOST_ID;
+  shadowHost.setAttribute(
+    'style',
+    [
+      'position:fixed',
+      'top:0',
+      'left:0',
+      'width:0',
+      'height:0',
+      'overflow:visible',
+      'z-index:2147483647',
+      'pointer-events:none',
+    ].join(';')
+  );
+
+  shadowRootRef = shadowHost.attachShadow({ mode: 'open' });
+
+  // Bubble-phase event fence: stops mouse/pointer events after internal
+  // handlers (onclick, etc.) have executed but before they retarget to
+  // the shadow host and reach document (EuiOutsideClickDetector).
+  fenceElement = document.createElement('div');
+  fenceElement.setAttribute('style', 'display:contents');
+  ['mousedown', 'mouseup', 'click', 'touchstart', 'touchend'].forEach(function (evt) {
+    fenceElement.addEventListener(evt, function (e) {
+      e.stopPropagation();
+    });
+  });
+  shadowRootRef.appendChild(fenceElement);
+
+  document.body.appendChild(shadowHost);
+  observeShadowHost();
+  return shadowRootRef;
+}
+
+function getShadowContainer() {
+  ensureShadowRoot();
+  return fenceElement;
+}
+
+function observeShadowHost() {
+  if (hostObserver) return;
+  hostObserver = new MutationObserver(function () {
+    if (shadowHost && !shadowHost.isConnected && document.body) {
+      hostObserver.disconnect();
+      document.body.appendChild(shadowHost);
+      hostObserver.observe(document.body, { childList: true });
+    }
+  });
+  hostObserver.observe(document.body, { childList: true });
+}
+
 // --- Status indicator ------------------------------------------------------
 
 var INDICATOR_ID = '__kbn_hmr_indicator__';
-var INDICATOR_STYLE_ID = '__kbn_hmr_indicator_styles__';
 var indicatorElement = null;
 var indicatorDot = null;
 var indicatorLabel = null;
 var indicatorState = 'idle';
 var updateFlashTimeout = null;
-var indicatorObserver = null;
 
 var STATE_CONFIG = {
   idle: { color: '#4caf50', text: 'HMR: Connected', animation: 'none' },
@@ -45,9 +109,13 @@ var STATE_CONFIG = {
 };
 
 function injectIndicatorStyles() {
-  if (document.getElementById(INDICATOR_STYLE_ID)) return;
+  var root = ensureShadowRoot();
+  if (root.getElementById && root.getElementById(INDICATOR_ID + '_styles')) return;
+  // Shadow roots may not have getElementById; check by querying
+  if (root.querySelector && root.querySelector('#' + INDICATOR_ID + '_styles')) return;
+
   var style = document.createElement('style');
-  style.id = INDICATOR_STYLE_ID;
+  style.id = INDICATOR_ID + '_styles';
   style.textContent = [
     '@keyframes kbnHmrPulse {',
     '  0%, 100% { opacity: 1; }',
@@ -82,7 +150,8 @@ function injectIndicatorStyles() {
     '  max-width: 120px;',
     '}',
   ].join('\n');
-  document.head.appendChild(style);
+  // Append style directly to shadow root (not fence) for correct scoping
+  root.appendChild(style);
 }
 
 function createIndicator() {
@@ -148,27 +217,13 @@ function createIndicator() {
 
   container.appendChild(dot);
   container.appendChild(label);
-  document.body.appendChild(container);
+  getShadowContainer().appendChild(container);
 
   indicatorElement = container;
   indicatorDot = dot;
   indicatorLabel = label;
 
   applyIndicatorState();
-  observeIndicator();
-}
-
-function observeIndicator() {
-  if (indicatorObserver) return;
-  indicatorObserver = new MutationObserver(function () {
-    if (indicatorElement && !indicatorElement.isConnected) {
-      indicatorElement = null;
-      indicatorDot = null;
-      indicatorLabel = null;
-      createIndicator();
-    }
-  });
-  indicatorObserver.observe(document.body, { childList: true });
 }
 
 function ensureIndicatorAttached() {
@@ -240,6 +295,7 @@ function showOverlay(errors) {
       'line-height:1.5',
       'display:flex',
       'flex-direction:column',
+      'pointer-events:auto',
     ].join(';')
   );
 
@@ -300,7 +356,12 @@ function showOverlay(errors) {
 
   backdrop.appendChild(header);
   backdrop.appendChild(body);
-  document.body.appendChild(backdrop);
+  getShadowContainer().appendChild(backdrop);
+
+  // Enable pointer-events on the host so the full-screen overlay receives clicks
+  if (shadowHost) {
+    shadowHost.style.pointerEvents = 'auto';
+  }
 
   overlayElement = backdrop;
 }
@@ -311,6 +372,10 @@ function hideOverlay() {
       overlayElement.parentNode.removeChild(overlayElement);
     }
     overlayElement = null;
+  }
+  // Revert pointer-events so the host doesn't intercept app clicks
+  if (shadowHost) {
+    shadowHost.style.pointerEvents = 'none';
   }
 }
 

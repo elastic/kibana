@@ -56,6 +56,16 @@ function loadHmrClient(overrides = {}) {
   return { module: m, hot };
 }
 
+function getShadowRoot() {
+  const host = document.getElementById('__kbn_hmr_root__');
+  return host ? host.shadowRoot : null;
+}
+
+function queryInShadow(selector) {
+  const root = getShadowRoot();
+  return root ? root.querySelector(selector) : null;
+}
+
 describe('hmr_client', () => {
   let eventSourceInstances;
   let OriginalEventSource;
@@ -101,9 +111,8 @@ describe('hmr_client', () => {
 
     jest.restoreAllMocks();
 
-    document.getElementById('__kbn_hmr_indicator__')?.remove();
-    document.getElementById('__kbn_hmr_indicator_styles__')?.remove();
-    document.getElementById('__kbn_hmr_error_overlay__')?.remove();
+    // Clean up the shadow host (contains all HMR UI inside its shadow tree)
+    document.getElementById('__kbn_hmr_root__')?.remove();
     document.body.replaceChildren();
     document.head.querySelectorAll('style').forEach((n) => n.remove());
   });
@@ -111,6 +120,14 @@ describe('hmr_client', () => {
   it('constructs EventSource against localhost and HMR port', () => {
     loadHmrClient();
     expect(EventSource).toHaveBeenCalledWith('http://localhost:12345/');
+  });
+
+  it('creates shadow host with shadow root containing indicator', () => {
+    loadHmrClient();
+    const host = document.getElementById('__kbn_hmr_root__');
+    expect(host).not.toBeNull();
+    expect(host.shadowRoot).not.toBeNull();
+    expect(queryInShadow('#__kbn_hmr_indicator__')).not.toBeNull();
   });
 
   it('skips module.hot.check when hash matches __webpack_hash__ (upToDate)', async () => {
@@ -164,7 +181,21 @@ describe('hmr_client', () => {
     await Promise.resolve();
 
     expect(console.error).toHaveBeenCalled();
-    expect(document.getElementById('__kbn_hmr_error_overlay__')).not.toBeNull();
+    expect(queryInShadow('#__kbn_hmr_error_overlay__')).not.toBeNull();
+  });
+
+  it('sets pointer-events auto on host when overlay is shown', async () => {
+    loadHmrClient();
+    const source = eventSourceInstances[0];
+
+    source.onmessage({
+      data: JSON.stringify({ errors: ['line 1'], replay: false }),
+    });
+
+    await Promise.resolve();
+
+    const host = document.getElementById('__kbn_hmr_root__');
+    expect(host.style.pointerEvents).toBe('auto');
   });
 
   it('handles errors SSE with replay: stores errors without overlay', async () => {
@@ -177,7 +208,7 @@ describe('hmr_client', () => {
 
     await Promise.resolve();
 
-    expect(document.getElementById('__kbn_hmr_error_overlay__')).toBeNull();
+    expect(queryInShadow('#__kbn_hmr_error_overlay__')).toBeNull();
   });
 
   it('handles basePath when wasDisconnected: triggers reload path when base path matches', async () => {
@@ -206,7 +237,7 @@ describe('hmr_client', () => {
       data: JSON.stringify({ errors: ['x'], replay: false }),
     });
     await Promise.resolve();
-    expect(document.getElementById('__kbn_hmr_error_overlay__')).not.toBeNull();
+    expect(queryInShadow('#__kbn_hmr_error_overlay__')).not.toBeNull();
 
     source.onmessage({
       data: JSON.stringify({ hash: 'hash-b', time: 0.1, files: ['a.js'] }),
@@ -215,7 +246,28 @@ describe('hmr_client', () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(document.getElementById('__kbn_hmr_error_overlay__')).toBeNull();
+    expect(queryInShadow('#__kbn_hmr_error_overlay__')).toBeNull();
     expect(hot.check).toHaveBeenCalledWith({ ignoreDeclined: true, ignoreUnaccepted: true });
+  });
+
+  it('reverts pointer-events to none on host when overlay is dismissed', async () => {
+    loadHmrClient();
+    const source = eventSourceInstances[0];
+
+    source.onmessage({
+      data: JSON.stringify({ errors: ['x'], replay: false }),
+    });
+    await Promise.resolve();
+
+    const host = document.getElementById('__kbn_hmr_root__');
+    expect(host.style.pointerEvents).toBe('auto');
+
+    // Clear overlay via a hash update
+    source.onmessage({
+      data: JSON.stringify({ hash: 'hash-b', time: 0.1, files: ['a.js'] }),
+    });
+    await Promise.resolve();
+
+    expect(host.style.pointerEvents).toBe('none');
   });
 });
