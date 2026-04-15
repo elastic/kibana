@@ -33,7 +33,7 @@ export const ELASTICSEARCH_ESQL_KIBANA_ROOT = 'docs/reference/query-languages/es
 export const ELASTICSEARCH_PROMQL_KIBANA_ROOT = 'docs/reference/query-languages/promql/kibana';
 
 /** Shape of JSON definition objects from Elasticsearch; `name` is required for merge/sort. */
-export type ElasticsearchJsonDefinition = Record<string, unknown> & { name: string };
+export type ElasticsearchJsonDefinition = Record<string, any> & { name: string };
 
 export function readElasticsearchDefinitions<T extends ElasticsearchJsonDefinition>(
   options: ReadDefinitionsOptions
