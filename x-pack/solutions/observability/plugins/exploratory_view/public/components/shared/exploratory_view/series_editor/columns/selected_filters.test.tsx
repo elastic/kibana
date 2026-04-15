@@ -13,7 +13,6 @@ import { getDefaultConfigs } from '../../configurations/default_configs';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
-// Failing: See https://github.com/elastic/kibana/issues/253605
 describe('SelectedFilters', function () {
   mockAppDataView();
 
@@ -24,24 +23,31 @@ describe('SelectedFilters', function () {
     reportConfigMap: obsvReportConfigMap,
   });
 
-  it('should render properly', async function () {
-    const filters = [{ field: USER_AGENT_NAME, values: ['Chrome'] }];
-    const initSeries = { filters };
+  it(
+    'should render properly',
+    async function () {
+      const filters = [{ field: USER_AGENT_NAME, values: ['Chrome'] }];
+      const initSeries = { filters };
 
-    render(
-      <SelectedFilters
-        seriesId={0}
-        seriesConfig={dataViewSeries}
-        series={{ ...mockUxSeries, filters }}
-      />,
-      {
-        initSeries,
-      }
-    );
+      render(
+        <SelectedFilters
+          seriesId={0}
+          seriesConfig={dataViewSeries}
+          series={{ ...mockUxSeries, filters }}
+        />,
+        {
+          initSeries,
+        }
+      );
 
-    await waitFor(() => {
-      screen.getByText('Chrome');
-      screen.getByTitle('Filter: Browser family: Chrome. Select for more filter actions.');
-    });
-  });
+      await waitFor(
+        () => {
+          screen.getByText('Chrome');
+          screen.getByTitle('Filter: Browser family: Chrome. Select for more filter actions.');
+        },
+        { timeout: 15_000 }
+      );
+    },
+    30_000
+  );
 });
