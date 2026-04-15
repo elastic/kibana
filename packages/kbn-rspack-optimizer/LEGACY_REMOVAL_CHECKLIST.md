@@ -65,9 +65,26 @@ delete the legacy branch/assertions and keep only the rspack assertions.
 - [ ] `packages/kbn-plugin-helpers/src/integration_tests/build.test.ts`: Delete the original "builds a generated plugin into a viable archive" test (legacy webpack path). The "[rspack-transition]" rspack build test becomes the sole build test. Remove `KBN_USE_RSPACK` env override (it will be the default).
 - [ ] `x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts`: Delete the legacy `else` branch (`toStrictEqual` for webpack-only labels) and `RSPACK_ONLY_BUNDLE_LABELS`; keep a single assertion set for unified RSPack bundles only.
 
+## Shared deps build
+
+These files were added to build `@kbn/ui-shared-deps-npm` and `@kbn/ui-shared-deps-src` with
+rspack when `KBN_USE_RSPACK=true`. Once the legacy webpack optimizer is removed, the webpack
+configs and the `KBN_USE_RSPACK` conditional in `build_package.ts` can be cleaned up.
+
+- [ ] `src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js`: Delete (rspack.config.js becomes the only config).
+- [ ] `src/platform/packages/private/kbn-ui-shared-deps-src/webpack.config.js`: Delete (rspack.config.js becomes the only config).
+- [ ] `src/platform/packages/private/kbn-ui-shared-deps-npm/rspack.config.js`: Rename to `webpack.config.js` (reclaiming the canonical name).
+- [ ] `src/platform/packages/private/kbn-ui-shared-deps-src/rspack.config.js`: Rename to `webpack.config.js` (reclaiming the canonical name).
+- [ ] `src/dev/build_package/build_package.ts`: Remove the `[rspack-transition]` conditional and the `buildWithWebpack` function. Keep only the rspack programmatic API path. Rename `rspack.config.js` references to `webpack.config.js`.
+- [ ] `packages/kbn-rspack-optimizer/src/config/dll_manifest.ts`: Delete the `[rspack-transition]` conditional and the webpack buildMeta sanitisation loop. The `loadDllManifest()` function becomes a simple `JSON.parse` of the raw manifest.
+- [ ] `src/platform/packages/private/kbn-ui-shared-deps-npm/moon.extend.yml`: Remove `webpack` from `extract-version-dependencies --collect` list (no longer a build dependency).
+- [ ] `src/platform/packages/private/kbn-ui-shared-deps-src/moon.extend.yml`: Remove `webpack` from `extract-version-dependencies --collect` list (no longer a build dependency).
+- [ ] `src/platform/packages/private/kbn-ui-shared-deps-npm/src/public_path_loader.js`: Delete (replaced by `src/set_public_path.js`).
+- [ ] `src/platform/packages/private/kbn-ui-shared-deps-npm/src/public_path_module_creator.js`: Delete (replaced by `src/set_public_path.js`).
+
 ## Package rename
 
 - [ ] `packages/kbn-rspack-optimizer/`: Rename to `packages/kbn-optimizer/` (reclaiming the name from the deleted legacy package). Update all imports and `kibana.jsonc` references.
 - [ ] Delete this `LEGACY_REMOVAL_CHECKLIST.md` file (no longer needed).
 
-## Total: ~26 files with deletions/simplifications, 0 files with structural changes.
+## Total: ~36 files with deletions/simplifications, 0 files with structural changes.
