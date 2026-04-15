@@ -214,7 +214,11 @@ export const EditPipelineFlyout = ({
   );
 
   return (
-    <EuiFlyout onClose={handleFlyoutClose} aria-labelledby="editPipelineFlyoutTitle">
+    <EuiFlyout
+      onClose={handleFlyoutClose}
+      aria-labelledby="editPipelineFlyoutTitle"
+      data-test-subj="editPipelineFlyout"
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="editPipelineFlyoutTitle">{dataStream.title}</h2>
@@ -247,7 +251,9 @@ export const EditPipelineFlyout = ({
               iconType="save"
               onClick={handleSave}
               isLoading={updateDataStreamPipelineMutation.isLoading}
-              isDisabled={selectedPipelineTab !== 'pipeline' || !pipelineText.trim()}
+              isDisabled={
+                selectedPipelineTab !== 'pipeline' || !pipelineText.trim() || !hasUnsavedChanges
+              }
               data-test-subj="editPipelineFlyoutSaveButton"
             >
               {i18n.EDIT_PIPELINE_FLYOUT.saveButton}

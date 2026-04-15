@@ -7,8 +7,14 @@
 
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
+import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '@kbn/observability-agent-builder-plugin/common/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { createLlmProxyActionConnector, deleteActionConnector } from './action_connectors';
+import {
+  createLlmProxyActionConnector,
+  deleteActionConnector,
+  configureInferenceSettings,
+  clearInferenceSettings,
+} from './action_connectors';
 
 export interface LlmTestContext {
   llmProxy: LlmProxy;
@@ -16,7 +22,8 @@ export interface LlmTestContext {
 }
 
 /**
- * Sets up an LLM proxy and action connector for testing AI insights.
+ * Sets up an LLM proxy, action connector, and configures inference settings
+ * so that the connector is resolved via getForFeature for AI insights.
  */
 export async function setupLlmProxy(
   getService: DeploymentAgnosticFtrProviderContext['getService']
@@ -26,16 +33,21 @@ export async function setupLlmProxy(
   const connectorId = await createLlmProxyActionConnector(getService, {
     port: llmProxy.getPort(),
   });
+  await configureInferenceSettings(getService, {
+    featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+    connectorId,
+  });
   return { llmProxy, connectorId };
 }
 
 /**
- * Tears down the LLM proxy and action connector after tests.
+ * Tears down the LLM proxy, action connector, and clears inference settings.
  */
 export async function teardownLlmProxy(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
   context: Partial<LlmTestContext>
 ): Promise<void> {
+  await clearInferenceSettings(getService);
   if (context.connectorId) {
     await deleteActionConnector(getService, { actionId: context.connectorId });
   }

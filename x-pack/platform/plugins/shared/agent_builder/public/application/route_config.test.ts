@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { getSidebarViewForRoute, getAgentIdFromPath } from './route_config';
+import { agentBuilderViewIds } from './agent_builder_view_ids';
+import {
+  allRoutes,
+  getAgentIdFromPath,
+  getEnabledRoutes,
+  getSidebarViewForRoute,
+  getViewIdForPathname,
+} from './route_config';
+
+const enabledRoutesWithExperimental = getEnabledRoutes({ experimental: true });
 
 describe('route_config', () => {
   describe('getSidebarViewForRoute', () => {
@@ -94,6 +103,49 @@ describe('route_config', () => {
       expect(getAgentIdFromPath('/manage/tools')).toBeUndefined();
       expect(getAgentIdFromPath('/')).toBeUndefined();
       expect(getAgentIdFromPath('/unknown')).toBeUndefined();
+    });
+  });
+
+  describe('getViewIdForPathname', () => {
+    it('returns the TrackApplicationView viewId for agent tools', () => {
+      expect(
+        getViewIdForPathname('/agents/elastic-ai-agent/tools', enabledRoutesWithExperimental)
+      ).toBe(agentBuilderViewIds.agentTools);
+    });
+
+    it('returns the viewId for conversation route', () => {
+      expect(
+        getViewIdForPathname(
+          '/agents/elastic-ai-agent/conversations/conv-1',
+          enabledRoutesWithExperimental
+        )
+      ).toBe(agentBuilderViewIds.agentConversation);
+    });
+
+    it('returns the viewId for manage tools list', () => {
+      expect(getViewIdForPathname('/manage/tools', enabledRoutesWithExperimental)).toBe(
+        agentBuilderViewIds.manageTools
+      );
+    });
+
+    it('returns undefined when no enabled route matches', () => {
+      expect(getViewIdForPathname('/unknown', enabledRoutesWithExperimental)).toBeUndefined();
+    });
+  });
+
+  describe('route view ids', () => {
+    it('uses a stable prefixed viewId for every route', () => {
+      allRoutes.forEach((route) => {
+        expect(route.viewId).toBeTruthy();
+        expect(route.viewId.startsWith('agent_builder_')).toBe(true);
+      });
+    });
+
+    it('uses unique viewId values across all routes', () => {
+      const viewIds = allRoutes.map((route) => route.viewId);
+      const uniqueViewIds = new Set(viewIds);
+
+      expect(uniqueViewIds.size).toBe(viewIds.length);
     });
   });
 });

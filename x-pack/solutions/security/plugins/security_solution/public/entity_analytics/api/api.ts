@@ -59,6 +59,10 @@ import type {
   UpdateWatchlistEntitySourceRequestBodyInput,
   UpdateWatchlistEntitySourceResponse,
 } from '../../../common/api/entity_analytics/watchlists/data_source/update.gen';
+import type {
+  CreateWatchlistEntitySourceRequestBodyInput,
+  CreateWatchlistEntitySourceResponse,
+} from '../../../common/api/entity_analytics/watchlists/data_source/create.gen';
 import {
   API_VERSIONS,
   ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
@@ -91,11 +95,12 @@ import {
 import {
   WATCHLISTS_URL,
   WATCHLISTS_INDICES_URL,
+  WATCHLISTS_CSV_UPLOAD_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
+import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
   GENERATE_LEADS_URL,
   GET_LEADS_URL,
-  GET_LEAD_BY_ID_URL,
   LEAD_GENERATION_STATUS_URL,
   DISMISS_LEAD_URL,
   BULK_UPDATE_LEADS_URL,
@@ -105,7 +110,6 @@ import {
 import type {
   FindLeadsResponse,
   GenerateLeadsResponse,
-  Lead,
   LeadGenerationStatus,
   BulkUpdateLeadsResponse,
 } from '../../../common/entity_analytics/lead_generation/types';
@@ -776,6 +780,19 @@ export const useEntityAnalyticsRoutes = () => {
         }
       );
 
+    const createWatchlistEntitySource = async (params: {
+      watchlistId: string;
+      body: CreateWatchlistEntitySourceRequestBodyInput;
+    }) =>
+      http.fetch<CreateWatchlistEntitySourceResponse>(
+        `${WATCHLISTS_URL}/${params.watchlistId}/entity_source`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+          body: JSON.stringify(params.body),
+        }
+      );
+
     const searchWatchlistIndices = async (params: {
       query: string | undefined;
       signal?: AbortSignal;
@@ -788,6 +805,25 @@ export const useEntityAnalyticsRoutes = () => {
         },
         signal: params.signal,
       });
+
+    const uploadWatchlistCsv = async (
+      watchlistId: string,
+      file: File
+    ): Promise<UploadWatchlistCsvResponse> => {
+      const body = new FormData();
+      body.append('file', file);
+      return http.fetch<UploadWatchlistCsvResponse>(
+        WATCHLISTS_CSV_UPLOAD_URL.replace('{watchlist_id}', encodeURIComponent(watchlistId)),
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+          headers: {
+            'Content-Type': undefined, // Lets the browser set the appropriate content type
+          },
+          body,
+        }
+      );
+    };
 
     const fetchLeads = ({
       signal,
@@ -806,13 +842,6 @@ export const useEntityAnalyticsRoutes = () => {
         version: API_VERSIONS.internal.v1,
         method: 'GET',
         query: params,
-        signal,
-      });
-
-    const fetchLeadById = ({ signal, id }: { signal?: AbortSignal; id: string }) =>
-      http.fetch<Lead>(GET_LEAD_BY_ID_URL.replace('{id}', id), {
-        version: API_VERSIONS.internal.v1,
-        method: 'GET',
         signal,
       });
 
@@ -901,7 +930,9 @@ export const useEntityAnalyticsRoutes = () => {
       deleteWatchlist,
       listWatchlistEntitySources,
       updateWatchlistEntitySource,
+      createWatchlistEntitySource,
       searchWatchlistIndices,
+      uploadWatchlistCsv,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,
@@ -912,7 +943,6 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntityDetailsHighlights,
       fetchWatchlists,
       fetchLeads,
-      fetchLeadById,
       fetchLeadGenerationStatus,
       generateLeads,
       dismissLead,

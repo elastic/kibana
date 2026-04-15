@@ -8,8 +8,9 @@
  */
 
 import { deepExactRt, mergeRt } from '@kbn/io-ts-utils';
-import { isLeft } from 'fp-ts/Either';
+import { isLeft, isRight } from 'fp-ts/Either';
 import type { Location } from 'history';
+import type { Errors } from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { compact, findLastIndex, mapValues, merge, orderBy } from 'lodash';
 import qs from 'query-string';
@@ -17,15 +18,33 @@ import type { MatchedRoute, RouteConfig as ReactRouterConfig } from 'react-route
 import { matchRoutes as matchRoutesConfig } from 'react-router-config';
 import type { FlattenRoutesOf, Route, RouteMap, Router, RouteWithPath } from './types';
 import { encodePath } from './encode_path';
+import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
+import { NotFoundRouteException } from './errors';
 
 function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');
 }
 
-export class NotFoundRouteException extends Error {
-  constructor(message: string) {
-    super(message);
+function extractFailingQueryKeys(errors: Errors): Set<string> {
+  const keys = new Set<string>();
+  for (const error of errors) {
+    const { context } = error;
+    let foundQuery = false;
+    for (let i = 0; i < context.length; i++) {
+      if (!foundQuery) {
+        if (context[i].key === 'query') {
+          foundQuery = true;
+        }
+      } else {
+        // Skip numeric keys from intersection/union wrappers
+        if (context[i].key && !Number.isInteger(Number(context[i].key))) {
+          keys.add(context[i].key);
+          break;
+        }
+      }
+    }
   }
+  return keys;
 }
 
 export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<TRoutes> {
@@ -131,43 +150,96 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
       throw new NotFoundRouteException('No route was matched');
     }
 
-    return matches.slice(0, matchIndex + 1).map((matchedRoute) => {
+    const parsedQuery = qs.parse(location.search, { decode: true });
+    const results: Array<{ match: any; route: Route | undefined }> = [];
+    const allPatchedKeys = new Map<string, any>();
+    const errorMessages: string[] = [];
+    let hasUnrecoverableError = false;
+
+    for (const matchedRoute of matches.slice(0, matchIndex + 1)) {
       const route = routesByReactRouterConfig.get(matchedRoute.route);
 
-      if (route?.params) {
-        const decoded = deepExactRt(route.params).decode(
-          merge({}, route.defaults ?? {}, {
-            path: mapValues(matchedRoute.match.params, (value) => {
-              return decodeURIComponent(value);
-            }),
-            query: qs.parse(location.search, { decode: true }),
-          })
-        );
-
-        if (isLeft(decoded)) {
-          throw new Error(PathReporter.report(decoded).join('\n'));
-        }
-
-        return {
-          match: {
-            ...matchedRoute.match,
-            params: decoded.right,
-          },
+      if (!route?.params) {
+        results.push({
+          match: { ...matchedRoute.match, params: { path: {}, query: {} } },
           route,
-        };
+        });
+        continue;
       }
 
-      return {
-        match: {
-          ...matchedRoute.match,
-          params: {
-            path: {},
-            query: {},
-          },
-        },
-        route,
-      };
-    });
+      const pathParams = mapValues(matchedRoute.match.params, (value) => {
+        return decodeURIComponent(value);
+      });
+
+      const decoded = deepExactRt(route.params).decode(
+        merge({}, route.defaults ?? {}, {
+          path: pathParams,
+          query: parsedQuery,
+        })
+      );
+
+      if (isRight(decoded)) {
+        results.push({
+          match: { ...matchedRoute.match, params: decoded.right },
+          route,
+        });
+        continue;
+      }
+
+      const failingKeys = extractFailingQueryKeys(decoded.left);
+      const defaultQuery = (route.defaults?.query as Record<string, string>) ?? {};
+      const patchedQuery: Record<string, any> = { ...parsedQuery };
+
+      for (const key of failingKeys) {
+        if (key in defaultQuery) {
+          patchedQuery[key] = defaultQuery[key];
+        } else {
+          delete patchedQuery[key];
+        }
+      }
+
+      const retryDecoded = deepExactRt(route.params).decode(
+        merge({}, route.defaults ?? {}, {
+          path: pathParams,
+          query: patchedQuery,
+        })
+      );
+
+      if (isRight(retryDecoded)) {
+        errorMessages.push(PathReporter.report(decoded).join('\n'));
+        for (const key of failingKeys) {
+          allPatchedKeys.set(key, patchedQuery[key]);
+        }
+        results.push({
+          match: { ...matchedRoute.match, params: retryDecoded.right },
+          route,
+        });
+      } else {
+        hasUnrecoverableError = true;
+        errorMessages.push(PathReporter.report(decoded).join('\n'));
+      }
+    }
+
+    if (hasUnrecoverableError) {
+      throw new Error(errorMessages.join('\n'));
+    }
+
+    if (allPatchedKeys.size > 0) {
+      const mergedQuery: Record<string, any> = { ...parsedQuery };
+      for (const [key, value] of allPatchedKeys) {
+        if (value === undefined) {
+          delete mergedQuery[key];
+        } else {
+          mergedQuery[key] = value;
+        }
+      }
+      throw new InvalidRouteParamsException(errorMessages.join('\n'), {
+        path: results[results.length - 1]?.match.params.path ?? {},
+        query: mergedQuery,
+      });
+    }
+
+    return results;
   };
 
   const link = (path: string, ...args: any[]) => {

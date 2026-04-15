@@ -7,8 +7,18 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import type { LensByRefSerializedState, LensSerializedState } from '@kbn/lens-common';
-import type { LensSerializedAPIConfig, LensByRefSerializedAPIConfig } from '@kbn/lens-common-2';
+import type {
+  LensByRefSerializedState,
+  LensByValueSerializedState,
+  LensSerializedState,
+} from '@kbn/lens-common';
+import type {
+  LensByRefSerializedAPIConfig,
+  LensByValueSerializedAPIConfig,
+  LensSerializedAPIConfig,
+} from '@kbn/lens-common-2';
+
+import type { FlattenedLensByValuePanelSchema } from '../../server/types';
 import { DOC_TYPE } from '../constants';
 
 export const LENS_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
@@ -20,11 +30,34 @@ export function findLensReference(references?: Reference[]) {
 }
 
 export function isByRefLensState(state: LensSerializedState): state is LensByRefSerializedState {
-  return !state.attributes;
+  return 'ref_id' in state && !!state.ref_id;
 }
 
 export function isByRefLensConfig(
-  config: LensSerializedAPIConfig
+  config: LensByRefSerializedAPIConfig | LensSerializedAPIConfig | FlattenedLensByValuePanelSchema
 ): config is LensByRefSerializedAPIConfig {
-  return !config.attributes;
+  return 'ref_id' in config && !!config.ref_id;
+}
+
+export function isFlattenedAPIConfig(
+  config: LensSerializedAPIConfig | FlattenedLensByValuePanelSchema | LensByValueSerializedState
+): config is FlattenedLensByValuePanelSchema {
+  return !('attributes' in config);
+}
+
+export function unflattenAPIConfig(
+  config: FlattenedLensByValuePanelSchema
+): LensByValueSerializedAPIConfig {
+  const { title, description, hide_title, hide_border, time_range, drilldowns, ...attributes } =
+    config;
+
+  return {
+    title,
+    description,
+    hide_title,
+    hide_border,
+    time_range,
+    drilldowns,
+    attributes,
+  };
 }

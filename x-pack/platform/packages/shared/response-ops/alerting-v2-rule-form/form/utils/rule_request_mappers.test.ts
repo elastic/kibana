@@ -165,7 +165,7 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         kind: 'alert',
         stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: {
           pendingCount: 2,
           pendingTimeframe: null,
@@ -201,7 +201,7 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         kind: 'alert',
         stateTransitionAlertDelayMode: 'immediate',
-        stateTransitionRecoveryDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
         stateTransition: { recoveringCount: 3 },
       };
 

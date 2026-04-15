@@ -7,12 +7,16 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
+import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
+import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { ENTITY_RESOLVED_TOAST, RESOLUTION_ERROR_TITLE } from '../translations';
+import {
+  ENTITY_RESOLVED_TOAST,
+  ENTITY_RESOLVED_TOAST_TEXT,
+  RESOLUTION_ERROR_TITLE,
+} from '../translations';
 import { RESOLUTION_GROUP_QUERY_KEY } from './use_resolution_group';
-
-const RESOLUTION_LINK_ROUTE = '/internal/security/entity_store/resolution/link';
 
 interface LinkEntitiesParams {
   target_id: string;
@@ -25,21 +29,27 @@ interface LinkEntitiesResponse {
   target_id: string;
 }
 
-export const useLinkEntities = () => {
+interface UseLinkEntitiesOptions {
+  successToast?: string | { title: string; text: string };
+}
+
+export const useLinkEntities = (options?: UseLinkEntitiesOptions) => {
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
   const { addSuccess, addError } = useAppToasts();
 
   return useMutation<LinkEntitiesResponse, IHttpFetchError, LinkEntitiesParams>({
     mutationFn: (params) =>
-      http.fetch<LinkEntitiesResponse>(RESOLUTION_LINK_ROUTE, {
-        version: '2',
+      http.fetch<LinkEntitiesResponse>(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
+        version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify(params),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });
-      addSuccess(ENTITY_RESOLVED_TOAST);
+      addSuccess(
+        options?.successToast ?? { title: ENTITY_RESOLVED_TOAST, text: ENTITY_RESOLVED_TOAST_TEXT }
+      );
     },
     onError: (error) => {
       addError(error, { title: RESOLUTION_ERROR_TITLE });

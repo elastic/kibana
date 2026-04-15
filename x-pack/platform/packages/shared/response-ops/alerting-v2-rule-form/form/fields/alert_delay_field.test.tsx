@@ -137,7 +137,7 @@ describe('AlertDelayField', () => {
         wrapper: createFormWrapper({
           kind: 'alert',
           stateTransitionAlertDelayMode: 'breaches',
-          stateTransitionRecoveryDelayMode: 'breaches',
+          stateTransitionRecoveryDelayMode: 'recoveries',
           stateTransition: {
             pendingCount: 2,
             pendingTimeframe: null,

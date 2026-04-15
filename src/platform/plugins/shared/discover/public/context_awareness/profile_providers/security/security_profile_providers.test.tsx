@@ -132,6 +132,26 @@ describe('createSecurityDocumentProfileProviders', () => {
       expect(registry.add).not.toHaveBeenCalled();
     });
 
+    it('does not override renderHeader when event.kind is absent', () => {
+      const { result, prevRenderHeader } = getDocViewerResult(createRecord({}));
+
+      expect(result.renderHeader).toBe(prevRenderHeader);
+    });
+
+    it('does not override renderFooter when event.kind is absent', () => {
+      const { result, prevRenderFooter } = getDocViewerResult(createRecord({}));
+
+      expect(result.renderFooter).toBe(prevRenderFooter);
+    });
+
+    it('does not add the overview tab to the registry when event.kind is absent', () => {
+      const { result } = getDocViewerResult(createRecord({}));
+      const registry = { add: jest.fn() };
+      result.docViewsRegistry(registry as never);
+
+      expect(registry.add).not.toHaveBeenCalled();
+    });
+
     it('does not override renderHeader for remote (CCS) alert documents', () => {
       const { result, prevRenderHeader } = getDocViewerResult(
         createRecord({

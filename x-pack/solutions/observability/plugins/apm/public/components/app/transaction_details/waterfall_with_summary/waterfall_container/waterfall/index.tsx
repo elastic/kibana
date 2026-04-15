@@ -95,7 +95,6 @@ export function Waterfall({
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
   const traceId = waterfall.entryTransaction?.trace.id;

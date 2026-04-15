@@ -133,23 +133,6 @@ describe('AppMenuRegistry', () => {
     });
   });
 
-  describe('setSecondaryActionItem', () => {
-    it('should set the secondary action item', () => {
-      const secondaryItem = {
-        id: 'secondary',
-        label: 'Secondary',
-        iconType: 'cross',
-        run: jest.fn(),
-        testId: 'secondaryButton',
-      };
-
-      registry.setSecondaryActionItem(secondaryItem);
-
-      const config = registry.getAppMenuConfig();
-      expect(config.secondaryActionItem).toEqual(secondaryItem);
-    });
-  });
-
   describe('registerPopoverItem', () => {
     it('should register a popover item under a parent menu item', () => {
       const parentItem: DiscoverAppMenuItemType = {
@@ -411,23 +394,14 @@ describe('AppMenuRegistry', () => {
         run: jest.fn(),
       };
 
-      const secondaryItem = {
-        id: 'secondary',
-        label: 'Cancel',
-        iconType: 'cross',
-        run: jest.fn(),
-      };
-
       registry.registerItems([item1, item2]);
       registry.registerPopoverItem('item-2', popoverItem);
       registry.setPrimaryActionItem(primaryItem);
-      registry.setSecondaryActionItem(secondaryItem);
 
       const config = registry.getAppMenuConfig();
 
       expect(config.items).toHaveLength(2);
       expect(config.primaryActionItem).toEqual(primaryItem);
-      expect(config.secondaryActionItem).toEqual(secondaryItem);
 
       const item2Config = config.items?.find((item) => item.id === 'item-2');
       expect(item2Config?.items).toHaveLength(1);
@@ -438,7 +412,6 @@ describe('AppMenuRegistry', () => {
 
       expect(config.items).toEqual([]);
       expect(config.primaryActionItem).toBeUndefined();
-      expect(config.secondaryActionItem).toBeUndefined();
     });
 
     it('should include both regular and custom items', () => {

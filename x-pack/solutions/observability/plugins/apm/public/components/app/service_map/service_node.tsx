@@ -7,7 +7,7 @@
 
 import React, { useMemo, memo } from 'react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -23,12 +23,19 @@ import {
   SERVICE_NODE_CIRCLE_SIZE,
 } from '../../../../common/service_map/constants';
 import { NodeLabel } from './node_label';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { SloStatusBadge } from '../../shared/slo_status_badge';
+import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
 
 export const ServiceNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<ServiceNodeType>) => {
     const { euiTheme, colorMode } = useEuiTheme();
+    const { core } = useApmPluginContext();
+    const { capabilities } = core.application;
+    const canReadSlos = !!capabilities.slo?.read;
+    const { onSloBadgeClick } = useServiceMapSloFlyout();
     const isDarkMode = colorMode === 'DARK';
 
     const borderColor = useMemo(() => {
@@ -136,17 +143,41 @@ export const ServiceNode = memo(
       pointer-events: none;
     `;
 
+    const badgesRowStyles = css`
+      pointer-events: none;
+      max-width: 220px;
+      justify-content: center;
+    `;
+
+    const badgePointerEventsStyles = css`
+      pointer-events: auto;
+    `;
+
+    // Match service inventory cells: show count when API merged data (no extra capability check;
+    // `alerting:show` is enforced when opening linked views; badge is display-only here).
+    const showAlertsBadge = data.alertsCount !== undefined && data.alertsCount > 0;
+
+    // Map: only violated/degrading (inventory & header show all SLO statuses).
+    const showSloBadge =
+      canReadSlos && (data.sloStatus === 'violated' || data.sloStatus === 'degrading');
+
+    const alertsTooltip = i18n.translate('xpack.apm.serviceMap.serviceNode.alertsBadgeTooltip', {
+      defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}',
+      values: { count: data.alertsCount ?? 0 },
+    });
+
     return (
       <EuiFlexGroup
         direction="column"
         alignItems="center"
-        gutterSize="s"
+        gutterSize="xs"
         responsive={false}
         data-test-subj={`serviceMapNode-service-${data.id}`}
       >
         <EuiFlexItem grow={false} css={containerStyles}>
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
           <div
+            data-test-subj="serviceMapNodeServiceCircle"
             css={circleStyles}
             role="button"
             tabIndex={0}
@@ -159,6 +190,52 @@ export const ServiceNode = memo(
           </div>
           <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
         </EuiFlexItem>
+        {(showAlertsBadge || showSloBadge) && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              gutterSize="xs"
+              alignItems="center"
+              justifyContent="center"
+              responsive={false}
+              wrap
+              css={badgesRowStyles}
+            >
+              {showAlertsBadge && (
+                <span css={badgePointerEventsStyles}>
+                  <EuiBadge
+                    data-test-subj="serviceMapNodeAlertsBadge"
+                    color="danger"
+                    iconType="warning"
+                    title={alertsTooltip}
+                  >
+                    {data.alertsCount}
+                  </EuiBadge>
+                </span>
+              )}
+              {showSloBadge && data.sloStatus && (
+                <span
+                  css={badgePointerEventsStyles}
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                >
+                  <SloStatusBadge
+                    sloStatus={data.sloStatus}
+                    sloCount={data.sloCount}
+                    serviceName={data.label}
+                    {...(onSloBadgeClick
+                      ? {
+                          onClick: (e) => {
+                            e.stopPropagation();
+                            onSloBadgeClick(data.label, data.agentName);
+                          },
+                        }
+                      : { hideTooltip: true })}
+                  />
+                </span>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         <NodeLabel label={data.label} selected={selected} />
       </EuiFlexGroup>
     );

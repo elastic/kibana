@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import pMap from 'p-map';
 import type { MMRegExp } from 'minimatch';
 import { minimatch } from 'minimatch';
@@ -439,7 +439,7 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, load(asset.attributes.data_utf8));
+      acc.set(asset.attributes.asset_path, parse(asset.attributes.data_utf8));
       return acc;
     },
     new Map()
@@ -685,6 +685,29 @@ export const getPackageUsageStats = async ({
     agent_policy_count: agentPolicyCount.size,
   };
 };
+
+export async function getPackageDependencies(
+  pkgName: string,
+  pkgVersion: string
+): Promise<Array<{ name: string; version: string; title: string }>> {
+  const pkg = await Registry.fetchInfo(pkgName, pkgVersion).catch(() => undefined);
+  if (!pkg) {
+    throw new PackageNotFoundError(`[${pkgName}-${pkgVersion}] package not found in registry`);
+  }
+
+  const deps = pkg.requires?.content ?? [];
+
+  return Promise.all(
+    deps.map(async (dep) => {
+      const depPkg = await Registry.fetchFindLatestPackageOrUndefined(dep.package);
+      return {
+        name: dep.package,
+        version: dep.version,
+        title: depPkg && 'title' in depPkg ? depPkg.title : dep.package,
+      };
+    })
+  );
+}
 
 interface PackageResponse {
   paths: string[];
