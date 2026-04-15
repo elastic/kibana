@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/deeplinks-observability'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/logging'
 tags:
   - plugin
   - prod
