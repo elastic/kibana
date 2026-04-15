@@ -73,7 +73,7 @@ const SignificanceBadge: React.FC<{
   diff: number;
   evaluatorName: string;
 }> = ({ pValue, diff, evaluatorName }) => {
-  if (pValue === null) {
+  if (pValue === null || !Number.isFinite(pValue)) {
     return <EuiBadge color="hollow">{i18n.BADGE_INSUFFICIENT_DATA}</EuiBadge>;
   }
   if (pValue >= SIGNIFICANCE_THRESHOLD) {
@@ -301,25 +301,26 @@ const ExampleDrilldownFlyout: React.FC<{
             loading={isLoading}
             tableLayout="auto"
             rowProps={(item) => {
-              if (
-                item.scoreA !== null &&
-                item.scoreA !== undefined &&
-                item.scoreB !== null &&
-                item.scoreB !== undefined
-              ) {
-                const diff = item.scoreA - item.scoreB;
-                if (diff < 0) {
-                  return {
-                    style: { backgroundColor: `${euiTheme.colors.backgroundFilledDanger}15` },
-                  };
-                }
-                if (diff > 0) {
-                  return {
-                    style: { backgroundColor: `${euiTheme.colors.backgroundFilledSuccess}15` },
-                  };
-                }
+              const isPaired =
+                item.scoreA != null &&
+                item.scoreB != null &&
+                Number.isFinite(item.scoreA) &&
+                Number.isFinite(item.scoreB);
+
+              if (!isPaired) {
+                return { style: { opacity: 0.55 } };
               }
-              return {};
+
+              const diff = item.scoreA! - item.scoreB!;
+              if (diff === 0) return {};
+              if (isImproved(diff, item.evaluatorName)) {
+                return {
+                  style: { backgroundColor: `${euiTheme.colors.backgroundFilledSuccess}15` },
+                };
+              }
+              return {
+                style: { backgroundColor: `${euiTheme.colors.backgroundFilledDanger}15` },
+              };
             }}
           />
         )}

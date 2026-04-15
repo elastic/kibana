@@ -215,6 +215,7 @@ export const RunsListPage: React.FC = () => {
             onChange={(e) => {
               setSearchText(e.target.value);
               setPageIndex(0);
+              setSelectedRuns([]);
             }}
             isClearable
           />
@@ -227,6 +228,7 @@ export const RunsListPage: React.FC = () => {
             onChange={(event) => {
               setSuiteIdFilter(event.target.value);
               setPageIndex(0);
+              setSelectedRuns([]);
             }}
           />
         </EuiFlexItem>

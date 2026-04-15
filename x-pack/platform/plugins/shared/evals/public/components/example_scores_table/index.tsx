@@ -315,6 +315,9 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       name: i18n.COLUMN_EXAMPLE_ID,
       width: '120px',
       render: (exampleId: string, row: ExampleScoreRow) => {
+        // Numeric-only IDs (auto-generated) get a 1-based "#N" label for readability.
+        // Descriptive string IDs (e.g. "healthy-baseline") are shown as-is;
+        // the index prefix is omitted because the ID is self-explanatory.
         const isNumericFallback = /^\d+$/.test(exampleId);
         const label = isNumericFallback
           ? `#${(row.exampleIndex ?? Number(exampleId)) + 1}`
