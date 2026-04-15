@@ -76,7 +76,7 @@ export const buildScreenContext = (
   hidden: true,
   type: AttachmentType.screenContext,
   data: {
-    app: 'discover',
+    app: SESSION_TAG,
     url: window.location.href,
     description: i18n.translate('discover.agentBuilder.screenContextDescription', {
       defaultMessage:

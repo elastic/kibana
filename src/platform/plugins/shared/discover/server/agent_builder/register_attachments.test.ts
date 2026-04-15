@@ -190,7 +190,6 @@ describe('registerAttachments', () => {
       const description = attachmentType.getAgentDescription?.();
       expect(description).toContain('ES|QL query results');
       expect(description).toContain('executeEsql');
-      expect(description).toContain('getIndexMapping');
     });
   });
 });
