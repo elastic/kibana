@@ -94,8 +94,7 @@ export async function computeAndPersistCompositeSummaries({
           const summaryParams = activeMembers.map((member) => ({
             slo: memberDefinitionMap.get(member.sloId)!,
             instanceId: member.instanceId ?? ALL_VALUE,
-            timeWindowOverride: compositeSlo.timeWindow,
-            budgetingMethodOverride: compositeSlo.budgetingMethod, // ToDo: remove budgetingMethodOverride (?)
+            timeWindowOverride: compositeSlo.timeWindow,            
           }));
 
           const summaryResults = await summaryClient.computeSummaries(summaryParams);
