@@ -23,8 +23,8 @@ Decide whether this PR needs a Flaky Test Runner nudge. If not, post nothing.
 ## Step 1: Are any in-scope files changed?
 
 - **Scout**
-  - **`**/test/scout*/**`:** specs, fixtures, and plugin-local Scout test code (each tree usually has a Playwright config next to it).
-  - **`**/kbn-scout*/**`:** shared Scout packages (for example `@kbn/scout`, `@kbn/scout-oblt`, `@kbn/scout-search`, `@kbn/scout-security`): page objects, framework code, and helpers that tests import. This layout is **not** covered by `**/test/scout*/**` alone; changes here can still affect many suites even when there is no `playwright.config.ts` beside the file.
+  - **`**/test/scout\*/**`:** specs, fixtures, and plugin-local Scout test code (each tree usually has a Playwright config next to it).
+  - **`**/kbn-scout*/**`:** shared Scout packages (for example `@kbn/scout`, `@kbn/scout-oblt`, `@kbn/scout-search`, `@kbn/scout-security`): page objects, framework code, and helpers that tests import. This layout is **not** covered by `\*\*/test/scout*/\*\*`alone; changes here can still affect many suites even when there is no`playwright.config.ts` beside the file.
 - **FTR:** `src/platform/test/**`, `x-pack/platform/test/**`, `x-pack/solutions/*/test/**`
 
 If nothing matches, stop.
@@ -49,11 +49,17 @@ Sample FTR config path: `x-pack/platform/test/serverless/functional/configs/sear
 
    Sample: `x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts`
 
-2. **Change is under `**/kbn-scout*/**` (or other shared Scout package code) with no Playwright config in an ancestor directory:** Do **not** invent a `scoutConfig` path from the file location. Treat this as **no resolved config next to the change**. In the PR comment, use the **Output: shared Scout package** template below. Tell the author to either use the Flaky Test Runner UI to pick a suite that exercises the change, or to find a plugin `test/scout/**/playwright.config.ts` (or `parallel.playwright.config.ts`) whose tests import or cover this code, then post `/flaky scoutConfig:<that-config>:30` for that file. Use `browse_code` or import search if needed to suggest a plausible config.
+2. **Change is under `**/kbn-scout*/**` (or other shared Scout package code) with no Playwright config in an ancestor directory:** Do **not** guess a path from the package file path alone. **First, derive a config from the changed code:**
+   - Search the repo for **imports of the changed module(s)** (the file you edited, its barrel `index.ts`, or the package subpath that changed). Prioritize hits under `**/test/scout*/**` (specs, fixtures, page objects in plugin trees that re-export or wrap the package).
+   - From each relevant hit, **walk up** to the nearest `playwright.config.ts` or `parallel.playwright.config.ts` (same rules as case 1). That is the `scoutConfig` for suites that actually exercise this change.
+   - If **one** clear config covers the change, use **Output B** with that path. If **several** configs are justified (widely shared symbol), pick the **most representative** config from the search, or emit **B** for the narrowest scope first; mention in a short line that other suites may also import this code if needed.
+   - Use **`browse_code`** and **`grep`** freely to follow imports and fixture wiring.
+
+   **Only if** no `playwright.config.ts` can be tied to the change after that search, use **Output C** (author picks a suite in the UI or manually).
 
 ## Output
 
-Pick **A**, **B**, or **C** depending on Step 3. Use **C** when shared Scout package files change and no `playwright.config.ts` exists in an ancestor path (Step 3 case 2).
+Pick **A**, **B**, or **C** depending on Step 3. Prefer **B** for Scout whenever you can resolve a Playwright config (including case 2 after import tracing). Use **C** only when shared package code changes and **no** config can be linked to the change after searching imports from that code into `**/test/scout*/**`.
 
 **A. FTR only (resolved `ftrConfig`)**
 
@@ -83,19 +89,19 @@ Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigge
 ```
 ````
 
-**C. Scout shared package (no Playwright config beside the changed files)**
+**C. Scout shared package (import tracing did not resolve a config)**
 
-Use when Step 3 case **2** applies. Do not paste a fake `scoutConfig` path.
+Use only when Step 3 case **2** still has **no** Playwright config after searching imports from the changed code into `**/test/scout*/**`. Do not paste a guessed `scoutConfig` path.
 
 ````markdown
 ## Catch flakiness early (recommended)
 
 **Recommended before merge**: run the flaky test runner for suites that **cover this change**.
 
-This PR touches **shared Scout package** code (for example under `kbn-scout*`). There is no single Playwright config next to those files, so pick the right run yourself:
+This PR touches **shared Scout package** code (for example under `kbn-scout*`). No Playwright config could be tied to this diff by following imports from the changed files into plugin `test/scout/` trees, so pick the right run yourself:
 
 1. Use the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigger_flaky_test_runner) and select a suite whose tests exercise the code you changed, **or**
-2. Find a plugin `test/scout/**/playwright.config.ts` or `parallel.playwright.config.ts` for a suite that imports or uses this package, then post a PR comment:
+2. Manually find a plugin `test/scout/**/playwright.config.ts` or `parallel.playwright.config.ts` for a suite that uses this package, then post:
 
 ```
 /flaky scoutConfig:<path-to-that-playwright-config>:30
