@@ -1,0 +1,46 @@
+version: '1'
+name: Threat Coverage Initialization
+description: >-
+  Automatically initializes threat detection coverage when the Security Solution
+  setup completes or a new Fleet integration is installed. Invokes the AI agent
+  with the threat-coverage-initialization skill to assess available security data,
+  map it to MITRE ATT&CK tactics, find matching prebuilt detection rules, and
+  install them.
+enabled: true
+tags:
+  - Security
+  - Detection Coverage
+  - MITRE ATT&CK
+  - Automation
+
+triggers:
+  - type: security.setupComplete
+  - type: fleet.integrationInstalled
+
+steps:
+  - name: initialize_threat_coverage
+    type: ai.agent
+    with:
+      message: >-
+        {%- if event.trigger_id == "fleet.integrationInstalled" -%}
+        A new Fleet integration "{{ event.package_name }}" (version {{ event.package_version }}) has
+        just been installed. Use the threat-coverage-initialization skill to assess
+        the available security data including this newly installed integration, map
+        data sources to MITRE ATT&CK tactics, find matching prebuilt detection rules
+        that leverage the new integration data, and install the recommended rules.
+        Focus especially on detection rules related to the "{{ event.package_name }}" integration.
+        {%- else -%}
+        The Security Solution setup has just been completed. Use the
+        threat-coverage-initialization skill to perform a full assessment of the
+        available security data and installed integrations, map all data sources to
+        MITRE ATT&CK tactics, identify coverage gaps, find matching prebuilt
+        detection rules, and install the recommended rules to bootstrap detection
+        coverage for this deployment.
+        {%- endif -%}
+
+  - name: log_completion
+    type: console
+    with:
+      message: >-
+        Threat coverage initialization completed.
+        Agent response: {{ steps.initialize_threat_coverage.output.message }}

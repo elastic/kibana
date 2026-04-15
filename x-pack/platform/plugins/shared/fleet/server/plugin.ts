@@ -48,6 +48,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -70,6 +71,8 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../common/constants';
+
+import { integrationInstalledTriggerDefinition } from '../common/triggers/integration_installed_trigger';
 
 import { runWithCache } from './services/epm/packages/cache';
 
@@ -190,6 +193,7 @@ export interface FleetSetupDeps {
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
   fieldsMetadata: FieldsMetadataServerSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -705,6 +709,10 @@ export class FleetPlugin
 
     if (deps.agentBuilder) {
       registerAgentBuilderTools({ agentBuilder: deps.agentBuilder, core });
+    }
+
+    if (deps.workflowsExtensions) {
+      deps.workflowsExtensions.registerTriggerDefinition(integrationInstalledTriggerDefinition);
     }
 
     // Register tasks

@@ -6,3 +6,4 @@
  */
 
 export { initializeRoute } from './initialize_route';
+export { setupCompleteRoute } from './setup_complete_route';
