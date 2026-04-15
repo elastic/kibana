@@ -165,6 +165,22 @@ export const CLICK_ROW_HINT = i18n.translate('xpack.evals.compareRuns.clickRowHi
   defaultMessage: 'Click a row to view per-example score details.',
 });
 
+export const DIFF_IMPROVED = i18n.translate('xpack.evals.compareRuns.diffImproved', {
+  defaultMessage: 'Improvement (Run A is better)',
+});
+
+export const DIFF_REGRESSED = i18n.translate('xpack.evals.compareRuns.diffRegressed', {
+  defaultMessage: 'Regression (Run A is worse)',
+});
+
+export const DIFF_LOWER_IS_BETTER = i18n.translate('xpack.evals.compareRuns.diffLowerIsBetter', {
+  defaultMessage: 'Lower is better for this metric',
+});
+
+export const DIFF_HIGHER_IS_BETTER = i18n.translate('xpack.evals.compareRuns.diffHigherIsBetter', {
+  defaultMessage: 'Higher is better for this metric',
+});
+
 export const FLYOUT_NO_EXAMPLES_TITLE = i18n.translate(
   'xpack.evals.compareRuns.flyoutNoExamplesTitle',
   { defaultMessage: 'No paired examples' }

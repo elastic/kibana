@@ -60,27 +60,50 @@ const formatDiff = (value: number): string => {
   return `${prefix}${value.toFixed(3)}`;
 };
 
-const SignificanceBadge: React.FC<{ pValue: number | null; diff: number }> = ({ pValue, diff }) => {
+const LOWER_IS_BETTER_PATTERN = /\b(tokens?|latency|costs?|duration|time|errors?)\b/i;
+
+const isLowerBetter = (evaluatorName: string): boolean =>
+  LOWER_IS_BETTER_PATTERN.test(evaluatorName);
+
+const isImproved = (diff: number, evaluatorName: string): boolean =>
+  isLowerBetter(evaluatorName) ? diff < 0 : diff > 0;
+
+const SignificanceBadge: React.FC<{
+  pValue: number | null;
+  diff: number;
+  evaluatorName: string;
+}> = ({ pValue, diff, evaluatorName }) => {
   if (pValue === null) {
     return <EuiBadge color="hollow">{i18n.BADGE_INSUFFICIENT_DATA}</EuiBadge>;
   }
   if (pValue >= SIGNIFICANCE_THRESHOLD) {
     return <EuiBadge color="hollow">{i18n.BADGE_NOT_SIGNIFICANT}</EuiBadge>;
   }
-  const color = diff > 0 ? 'success' : 'danger';
+  const color = isImproved(diff, evaluatorName) ? 'success' : 'danger';
   return <EuiBadge color={color}>{i18n.BADGE_SIGNIFICANT}</EuiBadge>;
 };
 
-const DiffValue: React.FC<{ diff: number }> = ({ diff }) => {
+const DiffValue: React.FC<{ diff: number; evaluatorName: string }> = ({ diff, evaluatorName }) => {
   const { euiTheme } = useEuiTheme();
   if (!Number.isFinite(diff)) return <span>-</span>;
 
+  const lowerBetter = isLowerBetter(evaluatorName);
+  const improved = isImproved(diff, evaluatorName);
   let color: string | undefined;
-  if (diff > 0) color = euiTheme.colors.textSuccess;
-  else if (diff < 0) color = euiTheme.colors.textDanger;
+  if (diff !== 0) {
+    color = improved ? euiTheme.colors.textSuccess : euiTheme.colors.textDanger;
+  }
+
+  const directionHint = lowerBetter ? i18n.DIFF_LOWER_IS_BETTER : i18n.DIFF_HIGHER_IS_BETTER;
+  const verdictHint = diff === 0 ? null : improved ? i18n.DIFF_IMPROVED : i18n.DIFF_REGRESSED;
+  const tooltip = verdictHint ? `${verdictHint} · ${directionHint}` : directionHint;
 
   return (
-    <span style={{ color, fontWeight: diff !== 0 ? 600 : undefined }}>{formatDiff(diff)}</span>
+    <EuiToolTip content={tooltip}>
+      <span tabIndex={0} style={{ color, fontWeight: diff !== 0 ? 600 : undefined }}>
+        {formatDiff(diff)}
+      </span>
+    </EuiToolTip>
   );
 };
 
@@ -240,7 +263,7 @@ const ExampleDrilldownFlyout: React.FC<{
             return '-';
           }
           const diff = item.scoreA - item.scoreB;
-          return <DiffValue diff={diff} />;
+          return <DiffValue diff={diff} evaluatorName={item.evaluatorName} />;
         },
       },
     ],
@@ -404,7 +427,9 @@ export const CompareRunsPage: React.FC = () => {
       {
         name: i18n.COLUMN_DIFF,
         sortable: (item: PairedTTestResult) => item.meanA - item.meanB,
-        render: (item: PairedTTestResult) => <DiffValue diff={item.meanA - item.meanB} />,
+        render: (item: PairedTTestResult) => (
+          <DiffValue diff={item.meanA - item.meanB} evaluatorName={item.evaluatorName} />
+        ),
         align: 'right' as const,
       },
       {
@@ -417,7 +442,11 @@ export const CompareRunsPage: React.FC = () => {
       {
         name: i18n.COLUMN_SIGNIFICANCE,
         render: (item: PairedTTestResult) => (
-          <SignificanceBadge pValue={item.pValue} diff={item.meanA - item.meanB} />
+          <SignificanceBadge
+            pValue={item.pValue}
+            diff={item.meanA - item.meanB}
+            evaluatorName={item.evaluatorName}
+          />
         ),
       },
     ],

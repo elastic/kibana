@@ -270,6 +270,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         paddingSize="none"
         transparentBackground
         fontSize="s"
+        isCopyable
       >
         {serializedValue}
       </EuiCodeBlock>
