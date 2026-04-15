@@ -34,22 +34,40 @@ export function resolveConnectorId(connectorId: string): string {
 /**
  * Inference connectors may return 400 (not 409) when the backing inference endpoint
  * was created by another parallel worker — treat as success and reuse.
+ * Also handles non-Axios errors (e.g., from HttpHandler) that have status/message properties.
  */
 function isAlreadyExistsConnectorError(error: unknown): boolean {
-  if (!isAxiosError(error)) {
+  // Handle Axios errors
+  if (isAxiosError(error)) {
+    if (error.status === 409) {
+      return true;
+    }
+    if (error.status !== 400) {
+      return false;
+    }
+    const data = error.response?.data;
+    const message =
+      typeof data === 'object' && data !== null && 'message' in data
+        ? String((data as { message: unknown }).message)
+        : '';
+    return /already exists/i.test(message);
+  }
+
+  // Handle non-Axios errors with status and message properties (e.g., HttpHandler errors)
+  const errorObj = error as Record<string, unknown> | null;
+  if (!errorObj) {
     return false;
   }
-  if (error.status === 409) {
+
+  if (errorObj.status === 409) {
     return true;
   }
-  if (error.status !== 400) {
+
+  if (errorObj.status !== 400) {
     return false;
   }
-  const data = error.response?.data;
-  const message =
-    typeof data === 'object' && data !== null && 'message' in data
-      ? String((data as { message: unknown }).message)
-      : '';
+
+  const message = typeof errorObj.message === 'string' ? errorObj.message : '';
   return /already exists/i.test(message);
 }
 

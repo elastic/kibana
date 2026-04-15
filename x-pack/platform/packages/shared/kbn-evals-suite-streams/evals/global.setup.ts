@@ -116,7 +116,9 @@ globalSetupHookWithSynthtrace(
       ...PARTITIONING_HOMOG_SYSTEMS,
       ...PARTITIONING_HARD_SYSTEMS,
     ];
-    const allSystems = [...pipelineSystems, ...partitioningSystems].join(',');
+    // Deduplicate systems: Hadoop appears in both EVAL and HARD; Linux appears in both HOMOG and HARD
+    const uniqueSystems = [...new Set([...pipelineSystems, ...partitioningSystems])];
+    const allSystems = uniqueSystems.join(',');
 
     const from = kbnDatemath.parse('now-5m')!;
     const to = kbnDatemath.parse('now')!;
@@ -130,7 +132,7 @@ globalSetupHookWithSynthtrace(
     }
 
     const maxSampleCount = Math.max(...sampleCounts);
-    const systemCount = pipelineSystems.length + partitioningSystems.length;
+    const systemCount = uniqueSystems.length;
     const rpm = computeTotalRpmForSampleCount({
       maxSampleCount,
       systemCount,
@@ -147,7 +149,8 @@ globalSetupHookWithSynthtrace(
     // Hard: overlapping service.name (data-platform, infra-monitoring) requiring secondary field analysis
     const loghubMetadataOverrides = {
       // Easy dataset: distinct identifiers
-      Hadoop: { 'service.name': 'hadoop-yarn', 'host.name': 'yarn-node-1' },
+      // Note: Hadoop is in both easy and hard datasets; hard dataset uses data-platform
+      Hadoop: { 'service.name': 'data-platform', 'host.name': 'yarn-node-1', data_layer: 'batch' },
       Proxifier: { 'service.name': 'proxifier-proxy', 'host.name': 'proxy-1' },
       Android: {
         'service.name': 'android-system',

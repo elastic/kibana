@@ -304,13 +304,18 @@ export const suggestProcessingPipelineRoute = createServerRoute({
             }),
         });
 
-        const pipeline =
-          suggestion.pipeline && effectiveParsingProcessor
+        // If LLM suggests a pipeline and we have a parsing processor, merge them.
+        // If LLM doesn't suggest a pipeline but we have a valid parsing processor, use it.
+        const pipeline = suggestion.pipeline
+          ? effectiveParsingProcessor
             ? mergeSeedParsingProcessorIntoSuggestedPipeline(
                 effectiveParsingProcessor,
                 suggestion.pipeline
               )
-            : suggestion.pipeline;
+            : suggestion.pipeline
+          : effectiveParsingProcessor
+            ? { steps: [effectiveParsingProcessor] }
+            : null;
 
         const result: SuggestProcessingPipelineResult = {
           ...suggestion,

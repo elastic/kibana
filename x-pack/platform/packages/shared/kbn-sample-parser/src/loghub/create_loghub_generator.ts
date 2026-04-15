@@ -26,6 +26,7 @@ export function createLoghubGenerator({
   targetRpm,
   streamType,
   timestampLayout = 'source',
+  metadataOverride,
 }: {
   system: LoghubSystem;
   parser: LoghubParser;
@@ -33,6 +34,7 @@ export function createLoghubGenerator({
   targetRpm?: number;
   streamType: 'classic' | 'wired';
   timestampLayout?: LoghubTimestampLayout;
+  metadataOverride?: Record<string, unknown>;
 }): StreamLogGenerator {
   let index = 0;
   let start = 0;
@@ -45,7 +47,11 @@ export function createLoghubGenerator({
 
   const filepath = `${system.name}.log`;
 
-  const effectiveRpm = Math.max(1, Math.round(targetRpm ?? systemRpm));
+  // Guard against Infinity when systemRpm is Infinity (all logs have identical timestamps)
+  const effectiveRpm = Math.max(
+    1,
+    Math.round(targetRpm ?? (systemRpm === Infinity ? 1 : systemRpm))
+  );
   const msBetween = 60000 / effectiveRpm;
 
   if (timestampLayout === 'uniform_interval') {
@@ -82,6 +88,7 @@ export function createLoghubGenerator({
             '@timestamp': simulatedTimestamp,
             message: parser.replaceTimestamp(line.message, simulatedTimestamp),
             ...parser.getFakeMetadata(line.message),
+            ...metadataOverride,
             filepath,
             _index:
               streamType === 'classic' ? `logs-${system.name.toLowerCase()}-default` : undefined,
@@ -116,6 +123,7 @@ export function createLoghubGenerator({
           '@timestamp': simulatedTimestamp,
           message: parser.replaceTimestamp(line.message, simulatedTimestamp),
           ...parser.getFakeMetadata(line.message),
+          ...metadataOverride,
           filepath,
           _index:
             streamType === 'classic' ? `logs-${system.name.toLowerCase()}-default` : undefined,

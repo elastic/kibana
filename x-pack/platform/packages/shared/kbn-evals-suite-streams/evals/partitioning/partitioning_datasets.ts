@@ -57,25 +57,25 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
             {
               name: 'hadoop',
               description:
-                'Hadoop MapReduce job logs with service.name=hadoop-yarn and host.name=yarn-node-1',
-              key_fields: ['service.name', 'body.text'],
+                'Hadoop MapReduce job logs with Java stack traces, org.apache.hadoop class names, and YARN references',
+              key_fields: ['body.text'],
             },
             {
               name: 'proxifier',
               description:
-                'Proxifier proxy software logs with service.name=proxifier-proxy and host.name=proxy-1',
+                'Proxifier proxy software logs with service.name=proxifier-proxy, host.name=proxy-1, and proxy connection details',
               key_fields: ['service.name', 'body.text'],
             },
             {
               name: 'android',
               description:
-                'Android framework logs with service.name=android-system and os.platform=android',
+                'Android framework logs with service.name=android-system, os.platform=android, and com.android.* class names',
               key_fields: ['service.name', 'os.platform'],
             },
             {
               name: 'openstack',
               description:
-                'OpenStack infrastructure logs with service.name=openstack-nova and cloud.provider=openstack',
+                'OpenStack infrastructure logs with service.name=openstack-nova, cloud.provider=openstack, and nova.* class names',
               key_fields: ['service.name', 'cloud.provider'],
             },
           ],
@@ -87,7 +87,7 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
         metadata: {
           difficulty: 'easy',
           notes:
-            'Four distinct LogHub systems with correlated metadata fields (service.name, host.name, os.platform, cloud.provider). The LLM can partition by service.name as the primary key or by body.text patterns.',
+            'Four distinct LogHub systems with correlated metadata fields (service.name, os.platform, cloud.provider). The LLM must analyze body.text patterns to distinguish systems; Hadoop patterns (Java/MapReduce) differ from Proxifier (proxy), Android (framework), and OpenStack (cloud infrastructure).',
         },
       },
     ],
