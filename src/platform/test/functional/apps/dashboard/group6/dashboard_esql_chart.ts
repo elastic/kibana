@@ -21,7 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
 
-  describe.only('dashboard add ES|QL chart', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/258164
+  describe.skip('dashboard add ES|QL chart', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -33,7 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      // debugger;
       await dashboard.navigateToApp();
       await testSubjects.click('discard-unsaved-New-Dashboard');
     });
@@ -66,7 +66,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset to the previous state on edit inline', async () => {
-      // debugger;
       await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
@@ -105,7 +104,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('cancelFlyoutButton');
       const panels = await dashboard.getDashboardPanels();
       await dashboardPanelActions.removePanel(panels[0]);
-      // expect((await dashboard.getDashboardPanels()).length).to.eql(0);
     });
 
     it('should be able to edit the query and render another chart', async () => {
