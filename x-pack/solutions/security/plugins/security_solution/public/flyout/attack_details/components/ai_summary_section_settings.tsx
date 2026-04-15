@@ -23,15 +23,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 export interface AISummarySectionSettingsProps {
+  /** Whether the AI summary should render anonymized field values when available. */
   showAnonymized: boolean;
+  /** Invoked when the user toggles the "Show anonymized values" switch. */
   onChangeShowAnonymized: (event: EuiSwitchEvent) => void;
+  /** Closes the settings popover (for example when the user dismisses it or clicks outside). */
   closePopover: () => void;
+  /** Opens the settings popover when the user activates the menu button. */
   openPopover: () => void;
+  /** Whether the attack summary settings popover is currently open. */
   isPopoverOpen: boolean;
-  /** When false, the anonymized markdown toggle has no effect */
+  /** When false, the "Show anonymized values" switch is disabled because there is no anonymized content to show. */
   hasAnonymizedContent: boolean;
 }
 
+/**
+ * Attack-details flyout menu for AI summary display options (for example showing anonymized values).
+ */
 export const AISummarySectionSettings: React.FC<AISummarySectionSettingsProps> = ({
   showAnonymized,
   onChangeShowAnonymized,
