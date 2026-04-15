@@ -118,7 +118,7 @@ export function RedMetricsChartActions({
           disabled={!apmLink}
           data-test-subj="apmAlertDetailsOpenInApmAction"
           data-action="openInApm"
-          data-source={ruleTypeId ? `apmAlertDetails-${ruleTypeId}` : 'apmAlertDetails'}
+          data-source={`apmAlertDetails-${ruleTypeId}`}
         >
           {inApmLabel}
         </EuiContextMenuItem>
@@ -127,7 +127,7 @@ export function RedMetricsChartActions({
           disabled={!discoverLink}
           data-test-subj="apmAlertDetailsTracesOpenInDiscoverAction"
           data-action="openTracesInDiscover"
-          data-source={ruleTypeId ? `apmAlertDetails-${ruleTypeId}` : 'apmAlertDetails'}
+          data-source={`apmAlertDetails-${ruleTypeId}`}
         >
           {tracesInDiscoverLabel}
         </EuiContextMenuItem>

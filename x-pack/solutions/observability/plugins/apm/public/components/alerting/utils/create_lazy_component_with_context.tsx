@@ -29,12 +29,13 @@ export const createLazyApmComponentWithContext = <T extends React.ComponentType<
 ) =>
   React.lazy(() =>
     Promise.all([lazyComponentFactory(), coreSetup.getStartServices()]).then(
-      ([{ default: LazilyLoadedComponent }, [core, plugins]]) => ({
+      ([{ default: LazilyLoadedComponent }, [core, plugins, pluginStart]]) => ({
         default: (props: PropsOf<T>) => (
           <KibanaContextProvider
             services={{
               ...core,
               ...plugins,
+              ...(pluginStart ?? {}),
             }}
           >
             <LazilyLoadedComponent {...props} />
