@@ -27,8 +27,6 @@ import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
 import { PrevalenceDetails } from '../../prevalence/prevalence';
-import { NetworkPanel } from '../../network_details';
-import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
@@ -159,25 +157,6 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
     );
   }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
 
-  const onShowNetworkDetails = useCallback(
-    (ip: string) => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <NetworkPanel ip={ip} flowTarget={FlowTargetSourceDest.source} scopeId={''} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    },
-    [history, historyKey, overlays, services, store]
-  );
-
   const onShowPrevalenceDetails = useCallback(() => {
     overlays.openSystemFlyout(
       flyoutProviders({
@@ -189,7 +168,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
             hit={hit}
             investigationFields={investigationFields}
             scopeId={''}
-            columns={getColumns(cellActionRenderer, isInSecurityApp, '', onShowNetworkDetails)}
+            columns={getColumns(cellActionRenderer, isInSecurityApp, '')}
           />
         ),
       }),
@@ -199,17 +178,7 @@ export const InsightsSection = memo(({ hit, onAlertUpdated }: InsightsSectionPro
         session: 'start',
       }
     );
-  }, [
-    history,
-    historyKey,
-    hit,
-    investigationFields,
-    isInSecurityApp,
-    onShowNetworkDetails,
-    overlays,
-    services,
-    store,
-  ]);
+  }, [history, historyKey, hit, investigationFields, isInSecurityApp, overlays, services, store]);
 
   return (
     <ExpandableSection
