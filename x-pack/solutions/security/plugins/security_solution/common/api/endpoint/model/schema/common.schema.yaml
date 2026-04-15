@@ -194,7 +194,7 @@ components:
 
     Parameters:
       type: object
-      description: Optional parameters object
+      description: Parameters object
 
     AgentTypes:
       type: string

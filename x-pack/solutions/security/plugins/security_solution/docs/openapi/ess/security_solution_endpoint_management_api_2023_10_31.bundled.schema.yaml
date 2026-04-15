@@ -81,15 +81,12 @@ paths:
       description: Get the status of response actions for the specified agent IDs.
       operationId: EndpointGetActionsStatus
       parameters:
-        - description: The query parameters for filtering action status.
+        - description: A list of agent IDs to get the action status for.
           in: query
-          name: query
+          name: agent_ids
           required: true
           schema:
-            type: object
-            properties:
-              agent_ids:
-                $ref: '#/components/schemas/AgentIds'
+            $ref: '#/components/schemas/AgentIds'
       responses:
         '200':
           content:
@@ -1127,15 +1124,12 @@ paths:
       description: Get the most recent policy response for an endpoint.
       operationId: GetPolicyResponse
       parameters:
-        - description: The query parameters for retrieving the policy response.
+        - description: The agent ID to retrieve the policy response for.
           in: query
-          name: query
+          name: agentId
           required: true
           schema:
-            type: object
-            properties:
-              agentId:
-                $ref: '#/components/schemas/AgentId'
+            $ref: '#/components/schemas/AgentId'
       responses:
         '200':
           content:
@@ -2413,9 +2407,10 @@ components:
       minimum: 1
       type: integer
     Parameters:
-      description: Optional parameters object
+      description: Parameters object
       type: object
     PendingActionDataType:
+      description: Number of pending actions of this type.
       type: integer
     PendingActionsSchema:
       oneOf:
@@ -2423,22 +2418,31 @@ components:
           properties:
             execute:
               $ref: '#/components/schemas/PendingActionDataType'
+              description: Number of pending execute actions.
             get-file:
               $ref: '#/components/schemas/PendingActionDataType'
+              description: Number of pending get-file actions.
             isolate:
               $ref: '#/components/schemas/PendingActionDataType'
+              description: Number of pending isolate actions.
             kill-process:
               $ref: '#/components/schemas/PendingActionDataType'
+              description: Number of pending kill-process actions.
             running-processes:
               $ref: '#/components/schemas/PendingActionDataType'
+              description: Number of pending running-processes (get processes) actions.
             scan:
               $ref: '#/components/schemas/PendingActionDataType'
+              description: Number of pending scan actions.
             suspend-process:
               $ref: '#/components/schemas/PendingActionDataType'
+              description: Number of pending suspend-process actions.
             unisolate:
               $ref: '#/components/schemas/PendingActionDataType'
+              description: Number of pending unisolate (release) actions.
             upload:
               $ref: '#/components/schemas/PendingActionDataType'
+              description: Number of pending upload actions.
         - additionalProperties: true
           type: object
     ProtectionUpdatesNoteResponse:

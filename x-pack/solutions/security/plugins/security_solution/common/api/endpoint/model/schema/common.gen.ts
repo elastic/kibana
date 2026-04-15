@@ -187,7 +187,7 @@ export type Comment = z.infer<typeof Comment>;
 export const Comment = z.string();
 
 /**
- * Optional parameters object
+ * Parameters object
  */
 export type Parameters = z.infer<typeof Parameters>;
 export const Parameters = z.object({});

@@ -15,23 +15,59 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 import { AgentIds, AgentId } from '../../model/schema/common.gen';
 
+/**
+ * Number of pending actions of this type.
+ */
 export type PendingActionDataType = z.infer<typeof PendingActionDataType>;
 export const PendingActionDataType = z.number().int();
 
 export type PendingActionsSchema = z.infer<typeof PendingActionsSchema>;
 export const PendingActionsSchema = z.union([
   z.object({
+    /**
+     * Number of pending isolate actions.
+     */
     isolate: PendingActionDataType.optional(),
+    /**
+     * Number of pending unisolate (release) actions.
+     */
     unisolate: PendingActionDataType.optional(),
+    /**
+     * Number of pending kill-process actions.
+     */
     'kill-process': PendingActionDataType.optional(),
+    /**
+     * Number of pending suspend-process actions.
+     */
     'suspend-process': PendingActionDataType.optional(),
+    /**
+     * Number of pending running-processes (get processes) actions.
+     */
     'running-processes': PendingActionDataType.optional(),
+    /**
+     * Number of pending get-file actions.
+     */
     'get-file': PendingActionDataType.optional(),
+    /**
+     * Number of pending execute actions.
+     */
     execute: PendingActionDataType.optional(),
+    /**
+     * Number of pending upload actions.
+     */
     upload: PendingActionDataType.optional(),
+    /**
+     * Number of pending scan actions.
+     */
     scan: PendingActionDataType.optional(),
   }),
   z.object({}).catchall(z.unknown()),
@@ -52,11 +88,9 @@ export type EndpointGetActionsStatusRequestQuery = z.infer<
 >;
 export const EndpointGetActionsStatusRequestQuery = z.object({
   /**
-   * The query parameters for filtering action status.
+   * A list of agent IDs to get the action status for.
    */
-  query: z.object({
-    agent_ids: AgentIds.optional(),
-  }),
+  agent_ids: AgentIds,
 });
 export type EndpointGetActionsStatusRequestQueryInput = z.input<
   typeof EndpointGetActionsStatusRequestQuery

@@ -15,17 +15,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 import { AgentId, SuccessResponse } from '../model/schema/common.gen';
 
 export type GetPolicyResponseRequestQuery = z.infer<typeof GetPolicyResponseRequestQuery>;
 export const GetPolicyResponseRequestQuery = z.object({
   /**
-   * The query parameters for retrieving the policy response.
+   * The agent ID to retrieve the policy response for.
    */
-  query: z.object({
-    agentId: AgentId.optional(),
-  }),
+  agentId: AgentId,
 });
 export type GetPolicyResponseRequestQueryInput = z.input<typeof GetPolicyResponseRequestQuery>;
 
