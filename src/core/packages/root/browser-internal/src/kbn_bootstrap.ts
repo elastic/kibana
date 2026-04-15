@@ -33,7 +33,8 @@ export async function __kbnBootstrap__() {
   const isDefaultConfig = injectedMetadata.i18n.configLocale === 'en';
   // Only use browserLocale as fallback when kibana.yml hasn't set an explicit locale
   const resolvedLocale =
-    injectedMetadata.i18n.userLocale ?? (isDefaultConfig ? injectedMetadata.i18n.browserLocale : undefined);
+    injectedMetadata.i18n.userLocale ??
+    (isDefaultConfig ? injectedMetadata.i18n.browserLocale : undefined);
   const resolvedHash = resolvedLocale
     ? injectedMetadata.i18n.translationHashes?.[resolvedLocale]
     : undefined;
