@@ -24,13 +24,13 @@ import {
 import { NonEmptyString } from '../../../../common_attributes.gen';
 
 /**
- * Object containing Attack Discovery schedule.
+ * Response body shape for Attack discovery schedule create, read, update, enable, and disable operations. Fields vary by endpoint; refer to each operation’s schema and examples.
  */
 export type AttackDiscoveryGenericResponse = z.infer<typeof AttackDiscoveryGenericResponse>;
 export const AttackDiscoveryGenericResponse = z.object({}).catchall(z.unknown());
 
 /**
- * Generic error response for Attack discovery schedule operations
+ * Error response for Attack discovery schedule operations when the request is rejected. Uses `status_code` (snake_case), `error`, and `message` to match the implementation.
  */
 export type AttackDiscoveryGenericError = z.infer<typeof AttackDiscoveryGenericError>;
 export const AttackDiscoveryGenericError = z.object({

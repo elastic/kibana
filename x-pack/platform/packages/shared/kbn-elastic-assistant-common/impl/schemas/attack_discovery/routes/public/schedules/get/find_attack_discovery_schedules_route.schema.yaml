@@ -78,7 +78,7 @@ paths:
                     items:
                       $ref: '../schedules_api.schema.yaml#/components/schemas/AttackDiscoveryApiSchedule'
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:

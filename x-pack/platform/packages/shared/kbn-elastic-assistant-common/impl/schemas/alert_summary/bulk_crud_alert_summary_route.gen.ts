@@ -25,42 +25,102 @@ import {
 } from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
 
+/**
+ * The reason an alert summary was skipped during a bulk action.
+ */
 export type AlertSummaryBulkActionSkipReason = z.infer<typeof AlertSummaryBulkActionSkipReason>;
 export const AlertSummaryBulkActionSkipReason = z.literal('ALERT_SUMMARY_NOT_MODIFIED');
 
+/**
+ * Details about an alert summary that was skipped during a bulk action.
+ */
 export type AlertSummaryBulkActionSkipResult = z.infer<typeof AlertSummaryBulkActionSkipResult>;
 export const AlertSummaryBulkActionSkipResult = z.object({
+  /**
+   * The ID of the skipped alert summary.
+   */
   id: z.string(),
+  /**
+   * The ID of the alert associated with the skipped summary.
+   */
   alertId: z.string().optional(),
   skip_reason: AlertSummaryBulkActionSkipReason,
 });
 
+/**
+ * Details about an alert summary that encountered an error during a bulk action.
+ */
 export type AlertSummaryDetailsInError = z.infer<typeof AlertSummaryDetailsInError>;
 export const AlertSummaryDetailsInError = z.object({
+  /**
+   * The ID of the alert associated with the errored summary.
+   */
   alertId: z.string().optional(),
+  /**
+   * The ID of the alert summary that encountered an error.
+   */
   id: z.string(),
 });
 
+/**
+ * A normalized error object returned when one or more alert summaries fail during a bulk action.
+ */
 export type NormalizedAlertSummaryError = z.infer<typeof NormalizedAlertSummaryError>;
 export const NormalizedAlertSummaryError = z.object({
+  /**
+   * A human-readable description of the error.
+   */
   message: z.string(),
+  /**
+   * The HTTP status code associated with the error.
+   */
   status_code: z.number().int(),
+  /**
+   * A machine-readable error code.
+   */
   err_code: z.string().optional(),
+  /**
+   * The alert summaries that encountered this error.
+   */
   alert_summaries: z.array(AlertSummaryDetailsInError),
 });
 
+/**
+ * An alert summary created by the Elastic Assistant for a specific security alert.
+ */
 export type AlertSummaryResponse = z.infer<typeof AlertSummaryResponse>;
 export const AlertSummaryResponse = z.object({
   id: NonEmptyString,
   alertId: NonEmptyString,
   timestamp: NonEmptyTimestamp.optional(),
+  /**
+   * The AI-generated summary of the alert.
+   */
   summary: z.string(),
+  /**
+   * AI-generated recommended actions for responding to the alert.
+   */
   recommendedActions: z.string().optional(),
   replacements: Replacements,
+  /**
+   * The timestamp when the alert summary was last updated.
+   */
   updatedAt: z.string().optional(),
+  /**
+   * The user who last updated the alert summary.
+   */
   updatedBy: z.string().optional(),
+  /**
+   * The timestamp when the alert summary was created.
+   */
   createdAt: z.string().optional(),
+  /**
+   * The user who created the alert summary.
+   */
   createdBy: z.string().optional(),
+  /**
+   * The users associated with this alert summary.
+   */
   users: z.array(User).optional(),
   /**
    * Kibana space
@@ -68,11 +128,26 @@ export const AlertSummaryResponse = z.object({
   namespace: z.string().optional(),
 });
 
+/**
+ * The results of a bulk action on alert summaries.
+ */
 export type AlertSummaryBulkCrudActionResults = z.infer<typeof AlertSummaryBulkCrudActionResults>;
 export const AlertSummaryBulkCrudActionResults = z.object({
+  /**
+   * Alert summaries that were successfully updated.
+   */
   updated: z.array(AlertSummaryResponse),
+  /**
+   * Alert summaries that were successfully created.
+   */
   created: z.array(AlertSummaryResponse),
+  /**
+   * IDs of alert summaries that were successfully deleted.
+   */
   deleted: z.array(z.string()),
+  /**
+   * Alert summaries that were skipped because no changes were needed.
+   */
   skipped: z.array(AlertSummaryBulkActionSkipResult),
 });
 

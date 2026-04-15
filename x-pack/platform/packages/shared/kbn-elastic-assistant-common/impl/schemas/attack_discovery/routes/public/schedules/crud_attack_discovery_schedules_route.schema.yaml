@@ -8,10 +8,10 @@ components:
     AttackDiscoveryGenericResponse:
       type: object
       additionalProperties: true
-      description: Object containing Attack Discovery schedule.
+      description: Response body shape for Attack discovery schedule create, read, update, enable, and disable operations. Fields vary by endpoint; refer to each operation’s schema and examples.
     AttackDiscoveryGenericError:
       type: object
-      description: Generic error response for Attack discovery schedule operations
+      description: Error response for Attack discovery schedule operations when the request is rejected. Uses `status_code` (snake_case), `error`, and `message` to match the implementation.
       properties:
         status_code:
           type: number
@@ -126,7 +126,7 @@ paths:
                   interval: "24h"
                 actions: []
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -191,7 +191,7 @@ paths:
                   status: "ok"
                   last_duration: 45.2
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -289,7 +289,7 @@ paths:
                   interval: "12h"
                 actions: []
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -336,7 +336,7 @@ paths:
               example:
                 id: "12345678-1234-1234-1234-123456789012"
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -385,7 +385,7 @@ paths:
               example:
                 id: "12345678-1234-1234-1234-123456789012"
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -434,7 +434,7 @@ paths:
               example:
                 id: "12345678-1234-1234-1234-123456789012"
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:

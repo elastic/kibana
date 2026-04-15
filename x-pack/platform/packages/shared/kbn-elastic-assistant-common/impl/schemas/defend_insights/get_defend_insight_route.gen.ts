@@ -22,7 +22,7 @@ import { DefendInsightsResponse } from './common_attributes.gen';
 export type DefendInsightGetRequestParams = z.infer<typeof DefendInsightGetRequestParams>;
 export const DefendInsightGetRequestParams = z.object({
   /**
-   * The Defend insight id
+   * The Defend insight id.
    */
   id: NonEmptyString,
 });

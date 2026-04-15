@@ -61,7 +61,7 @@ paths:
                 required:
                   - data
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:

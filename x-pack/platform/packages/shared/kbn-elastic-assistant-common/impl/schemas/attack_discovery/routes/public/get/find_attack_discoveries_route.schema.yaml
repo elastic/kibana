@@ -189,7 +189,7 @@ paths:
                   - total
                   - unique_alert_ids_count
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
