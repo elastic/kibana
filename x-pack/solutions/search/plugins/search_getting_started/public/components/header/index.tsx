@@ -94,10 +94,10 @@ export const SearchGettingStartedHeader: React.FC = () => {
               <KibanaVersionBadge
                 docLink={
                   cloud?.isServerlessEnabled
-                      ? docLinks.serverlessReleaseNotes
-                      : cloud?.isCloudEnabled
-                      ? docLinks.hostedCloudReleaseNotes
-                      : docLinks.releaseNotes
+                    ? docLinks.serverlessReleaseNotes
+                    : cloud?.isCloudEnabled
+                    ? docLinks.hostedCloudReleaseNotes
+                    : docLinks.releaseNotes
                 }
                 kibanaVersion={
                   !cloud?.isServerlessEnabled
