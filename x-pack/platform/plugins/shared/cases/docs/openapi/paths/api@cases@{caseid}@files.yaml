@@ -38,3 +38,13 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+  x-codeSamples:
+    - label: curl
+      lang: curl
+      source: |
+        curl \
+          --request POST 'https://localhost:5601/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/files' \
+          --header "Authorization: $API_KEY" \
+          --header "kbn-xsrf: true" \
+          --form "file=@/path/to/my_attachment.txt" \
+          --form "filename=my_attachment"

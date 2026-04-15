@@ -332,6 +332,20 @@ paths:
                           target:
                             type: string
                             example: summary
+                    observableTypes:
+                      type: array
+                      description: Custom observable type configuration details.
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: The observable type key.
+                            example: d312efda-ec2b-42ec-9e2c-84981795c581
+                          label:
+                            type: string
+                            description: The observable type label.
+                            example: My observable type
                     owner:
                       $ref: '#/components/schemas/owner'
                     templates:
@@ -500,6 +514,20 @@ paths:
                         target:
                           type: string
                           example: summary
+                  observableTypes:
+                    type: array
+                    description: Custom observable type configuration details.
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                          description: The observable type key.
+                          example: d312efda-ec2b-42ec-9e2c-84981795c581
+                        label:
+                          type: string
+                          description: The observable type label.
+                          example: My observable type
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -670,6 +698,20 @@ paths:
                         target:
                           type: string
                           example: summary
+                  observableTypes:
+                    type: array
+                    description: Custom observable type configuration details.
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                          description: The observable type key.
+                          example: d312efda-ec2b-42ec-9e2c-84981795c581
+                        label:
+                          type: string
+                          description: The observable type label.
+                          example: My observable type
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -904,6 +946,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+      x-codeSamples:
+        - label: curl
+          lang: curl
+          source: |
+            curl \
+              --request DELETE 'https://localhost:5601/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/comments' \
+              --header "Authorization: $API_KEY" \
+              --header "kbn-xsrf: true"
+        - label: Console
+          lang: console
+          source: |
+            DELETE kbn:/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/comments
     patch:
       summary: Update a case comment or alert
       operationId: updateCaseCommentDefaultSpace
@@ -989,6 +1043,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+      x-codeSamples:
+        - label: curl
+          lang: curl
+          source: |
+            curl \
+              --request DELETE 'https://localhost:5601/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/comments/71ec1870-725b-11ea-a0b2-c51ea50a58e2' \
+              --header "Authorization: $API_KEY" \
+              --header "kbn-xsrf: true"
+        - label: Console
+          lang: console
+          source: |
+            DELETE kbn:/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/comments/71ec1870-725b-11ea-a0b2-c51ea50a58e2
     get:
       summary: Get a case comment or alert
       operationId: getCaseCommentDefaultSpace
@@ -1035,6 +1101,10 @@ paths:
             schema:
               type: object
               nullable: true
+            examples:
+              pushCaseRequest:
+                summary: Push a case to an external service. No request body is required.
+                value: null
       responses:
         '200':
           description: Indicates a successful call.
@@ -1178,6 +1248,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+      x-codeSamples:
+        - label: curl
+          lang: curl
+          source: |
+            curl \
+              --request POST 'https://localhost:5601/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/files' \
+              --header "Authorization: $API_KEY" \
+              --header "kbn-xsrf: true" \
+              --form "file=@/path/to/my_attachment.txt" \
+              --form "filename=my_attachment"
 components:
   parameters:
     kbn_xsrf:
@@ -1251,6 +1331,7 @@ components:
       schema:
         type: integer
         default: 1
+      example: 1
     page_size:
       in: query
       name: perPage
@@ -1260,6 +1341,7 @@ components:
         type: integer
         default: 20
         maximum: 100
+      example: 20
     reporters:
       in: query
       name: reporters
@@ -1275,6 +1357,7 @@ components:
       description: An Elasticsearch simple_query_string query that filters the objects in the response.
       schema:
         type: string
+      example: Case title 1
     searchFields:
       in: query
       name: searchFields
@@ -1294,6 +1377,7 @@ components:
           - high
           - low
           - medium
+      example: low
     sortField:
       in: query
       name: sortField
@@ -1321,6 +1405,7 @@ components:
           - asc
           - desc
         default: desc
+      example: desc
     status:
       in: query
       name: status
@@ -1857,6 +1942,77 @@ components:
         - email
         - full_name
         - username
+    case_response_created_by_properties:
+      title: Case response properties for created_by
+      type: object
+      properties:
+        email:
+          type: string
+          example: null
+          nullable: true
+        full_name:
+          type: string
+          example: null
+          nullable: true
+        username:
+          type: string
+          example: elastic
+          nullable: true
+        profile_uid:
+          type: string
+          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+      required:
+        - email
+        - full_name
+        - username
+    case_response_pushed_by_properties:
+      title: Case response properties for pushed_by
+      type: object
+      nullable: true
+      properties:
+        email:
+          type: string
+          example: null
+          nullable: true
+        full_name:
+          type: string
+          example: null
+          nullable: true
+        username:
+          type: string
+          example: elastic
+          nullable: true
+        profile_uid:
+          type: string
+          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+      required:
+        - email
+        - full_name
+        - username
+    case_response_updated_by_properties:
+      title: Case response properties for updated_by
+      type: object
+      nullable: true
+      properties:
+        email:
+          type: string
+          example: null
+          nullable: true
+        full_name:
+          type: string
+          example: null
+          nullable: true
+        username:
+          type: string
+          example: elastic
+          nullable: true
+        profile_uid:
+          type: string
+          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+      required:
+        - email
+        - full_name
+        - username
     actions_comment_response_properties:
       title: Case response properties for actions comments
       type: object
@@ -2130,77 +2286,6 @@ components:
         version:
           type: string
           example: WzIwNDMxLDFd
-    case_response_created_by_properties:
-      title: Case response properties for created_by
-      type: object
-      properties:
-        email:
-          type: string
-          example: null
-          nullable: true
-        full_name:
-          type: string
-          example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
-        profile_uid:
-          type: string
-          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-      required:
-        - email
-        - full_name
-        - username
-    case_response_pushed_by_properties:
-      title: Case response properties for pushed_by
-      type: object
-      nullable: true
-      properties:
-        email:
-          type: string
-          example: null
-          nullable: true
-        full_name:
-          type: string
-          example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
-        profile_uid:
-          type: string
-          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-      required:
-        - email
-        - full_name
-        - username
-    case_response_updated_by_properties:
-      title: Case response properties for updated_by
-      type: object
-      nullable: true
-      properties:
-        email:
-          type: string
-          example: null
-          nullable: true
-        full_name:
-          type: string
-          example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
-        profile_uid:
-          type: string
-          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-      required:
-        - email
-        - full_name
-        - username
     external_service:
       type: object
       nullable: true
@@ -2338,10 +2423,10 @@ components:
             discriminator:
               propertyName: type
               mapping:
-                actions: '#/components/schemas/actions_comment_response_properties'
-                alert: '#/components/schemas/alert_comment_response_properties'
-                event: '#/components/schemas/event_comment_response_properties'
-                user: '#/components/schemas/user_comment_response_properties'
+                actions: actions_comment_response_properties.yaml
+                alert: alert_comment_response_properties.yaml
+                event: event_comment_response_properties.yaml
+                user: user_comment_response_properties.yaml
         connector:
           title: Case response properties for connectors
           oneOf:
@@ -2355,13 +2440,13 @@ components:
           discriminator:
             propertyName: type
             mapping:
-              .none: '#/components/schemas/connector_properties_none'
-              .cases-webhook: '#/components/schemas/connector_properties_cases_webhook'
-              .jira: '#/components/schemas/connector_properties_jira'
-              .resilient: '#/components/schemas/connector_properties_resilient'
-              .servicenow: '#/components/schemas/connector_properties_servicenow'
-              .servicenow-sir: '#/components/schemas/connector_properties_servicenow_sir'
-              .swimlane: '#/components/schemas/connector_properties_swimlane'
+              .none: connector_properties_none.yaml
+              .cases-webhook: connector_properties_cases_webhook.yaml
+              .jira: connector_properties_jira.yaml
+              .resilient: connector_properties_resilient.yaml
+              .servicenow: connector_properties_servicenow.yaml
+              .servicenow-sir: connector_properties_servicenow_sir.yaml
+              .swimlane: connector_properties_swimlane.yaml
         created_at:
           type: string
           format: date-time
@@ -2408,6 +2493,12 @@ components:
         id:
           type: string
           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+        incremental_id:
+          type: integer
+          description: |
+            A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
+          nullable: true
+          example: 1
         observables:
           type: array
           description: Observables attached to the case.
@@ -2950,13 +3041,13 @@ components:
           discriminator:
             propertyName: type
             mapping:
-              .none: '#/components/schemas/connector_properties_none'
-              .cases-webhook: '#/components/schemas/connector_properties_cases_webhook'
-              .jira: '#/components/schemas/connector_properties_jira'
-              .resilient: '#/components/schemas/connector_properties_resilient'
-              .servicenow: '#/components/schemas/connector_properties_servicenow'
-              .servicenow-sir: '#/components/schemas/connector_properties_servicenow_sir'
-              .swimlane: '#/components/schemas/connector_properties_swimlane'
+              .none: connector_properties_none.yaml
+              .cases-webhook: connector_properties_cases_webhook.yaml
+              .jira: connector_properties_jira.yaml
+              .resilient: connector_properties_resilient.yaml
+              .servicenow: connector_properties_servicenow.yaml
+              .servicenow-sir: connector_properties_servicenow_sir.yaml
+              .swimlane: connector_properties_swimlane.yaml
         created_at:
           type: string
           format: date-time
@@ -3003,6 +3094,12 @@ components:
         id:
           type: string
           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+        incremental_id:
+          type: integer
+          description: |
+            A monotonically increasing number assigned to each case, unique per space. This value is generated asynchronously after the case is created and may not be present immediately in the response.
+          nullable: true
+          example: 1
         observables:
           type: array
           description: Observables attached to the case.
@@ -3062,6 +3159,44 @@ components:
         index:
           description: The alert index.
           type: string
+    alert_identifiers:
+      title: Alert identifiers
+      description: |
+        The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
+          maxItems: 1000
+      x-state: Technical preview
+      example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+    alert_indices:
+      title: Alert indices
+      description: |
+        The alert indices. It is required only when `type` is `alert`. If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array.  This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
+          maxItems: 1000
+      x-state: Technical preview
+    rule:
+      title: Alerting rule
+      description: |
+        The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      type: object
+      x-state: Technical preview
+      properties:
+        id:
+          description: The rule identifier.
+          type: string
+          example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+        name:
+          description: The rule name.
+          type: string
+          example: security_rule
     add_alert_comment_request_properties:
       title: Add case comment request properties for alerts
       required:
@@ -3109,44 +3244,6 @@ components:
         - comment
         - owner
         - type
-    alert_identifiers:
-      title: Alert identifiers
-      description: |
-        The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      oneOf:
-        - type: string
-        - type: array
-          items:
-            type: string
-          maxItems: 1000
-      x-state: Technical preview
-      example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
-    alert_indices:
-      title: Alert indices
-      description: |
-        The alert indices. It is required only when `type` is `alert`. If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array.  This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      oneOf:
-        - type: string
-        - type: array
-          items:
-            type: string
-          maxItems: 1000
-      x-state: Technical preview
-    rule:
-      title: Alerting rule
-      description: |
-        The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      type: object
-      x-state: Technical preview
-      properties:
-        id:
-          description: The rule identifier.
-          type: string
-          example: 94d80550-aaf4-11ec-985f-97e55adae8b9
-        name:
-          description: The rule name.
-          type: string
-          example: security_rule
     add_case_comment_request:
       title: Add case comment request
       description: The add comment to case API request body varies depending on whether you are adding an alert or a comment.
@@ -3156,8 +3253,8 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          alert: '#/components/schemas/add_alert_comment_request_properties'
-          user: '#/components/schemas/add_user_comment_request_properties'
+          alert: add_alert_comment_request_properties.yaml
+          user: add_user_comment_request_properties.yaml
     update_alert_comment_request_properties:
       title: Update case comment request properties for alerts
       description: Defines properties for case comment requests when type is alert.
@@ -3238,8 +3335,8 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          alert: '#/components/schemas/update_alert_comment_request_properties'
-          user: '#/components/schemas/update_user_comment_request_properties'
+          alert: update_alert_comment_request_properties.yaml
+          user: update_user_comment_request_properties.yaml
     find_comments_response:
       title: Find case comments response
       type: object
@@ -3612,16 +3709,21 @@ components:
           description: The type of action.
           enum:
             - assignees
-            - create_case
+            - category
             - comment
             - connector
+            - create_case
+            - customFields
+            - delete_case
             - description
+            - extended_fields
+            - observables
             - pushed
-            - tags
-            - title
-            - status
             - settings
             - severity
+            - status
+            - tags
+            - title
           example: create_case
     add_case_file_request:
       title: Add case file request properties
@@ -3809,6 +3911,7 @@ components:
         total: 1
         cases:
           - id: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
+            incremental_id: 1
             version: WzExMCwxXQ==
             comments: []
             observables: []
@@ -3870,6 +3973,7 @@ components:
               label: my-text-field
               required: false
               type: text
+          observableTypes: []
           owner: cases
           created_at: '2024-07-01T17:07:17.767Z'
           created_by:
@@ -4094,6 +4198,7 @@ components:
       summary: Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.
       value:
         id: 31cdada0-02c1-11ed-85f2-4f7c222ca2fa
+        incremental_id: 1
         version: WzM2LDFd
         totalComment: 1
         totalAlerts: 1
@@ -4212,6 +4317,11 @@ components:
               username: elastic
               email: null
               full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            pushed_at: null
+            pushed_by: null
+            updated_at: null
+            updated_by: null
         observables: []
         totalAlerts: 0
         totalEvents: 0
@@ -4397,16 +4507,21 @@ components:
         closed_at: null
         closed_by: null
         created_at: '2022-07-29T00:59:39.444Z'
+        assignees: []
+        category: null
+        customFields: []
         created_by:
           username: elastic
           email: null
           full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         status: open
         updated_at: '2022-07-29T01:20:58.436Z'
         updated_by:
           username: elastic
           full_name: null
           email: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         connector:
           id: 09f8c0b0-0eda-11ed-bd18-65557fe66949
           name: My connector
