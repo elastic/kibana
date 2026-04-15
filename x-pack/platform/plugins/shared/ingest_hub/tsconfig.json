@@ -18,6 +18,7 @@
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
     "@kbn/deeplinks-observability",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/logging"
   ]
 }
