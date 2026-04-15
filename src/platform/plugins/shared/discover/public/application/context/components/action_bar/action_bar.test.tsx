@@ -18,54 +18,54 @@ import { SurrDocType } from '../../services/context';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 describe('Test Discover Context ActionBar', () => {
+  const submitForm = (input: HTMLElement) => {
+    const form = input.closest('form');
+    if (!form) {
+      throw new Error('Expected count picker to be rendered inside a form');
+    }
+    // jsdom doesn't support implicit form submission via Enter key,
+    // so we call requestSubmit() directly to simulate it
+    form.requestSubmit();
+  };
+
+  const renderComponent = (type: SurrDocType, propsOverride: Partial<ActionBarProps> = {}) => {
+    const user = userEvent.setup();
+    const onChangeCount = jest.fn();
+    const props: ActionBarProps = {
+      defaultStepSize: 5,
+      docCount: 20,
+      docCountAvailable: 0,
+      isDisabled: false,
+      isLoading: false,
+      onChangeCount,
+      type,
+      ...propsOverride,
+    };
+
+    renderWithKibanaRenderContext(
+      <DiscoverTestProvider>
+        <ActionBar {...props} />
+      </DiscoverTestProvider>
+    );
+
+    return {
+      user,
+      onChangeCount,
+      input: screen.getByTestId(`${type}CountPicker`),
+      button: screen.getByTestId(`${type}LoadMoreButton`),
+    };
+  };
+
   describe.each([SurrDocType.SUCCESSORS, SurrDocType.PREDECESSORS])('for %s', (type) => {
-    const submitForm = (input: HTMLElement) => {
-      const form = input.closest('form');
-      if (!form) {
-        throw new Error('Expected count picker to be rendered inside a form');
-      }
-      // jsdom doesn't support implicit form submission via Enter key,
-      // so we call requestSubmit() directly to simulate it
-      form.requestSubmit();
-    };
-
-    const renderComponent = (propsOverride: Partial<ActionBarProps> = {}) => {
-      const user = userEvent.setup();
-      const onChangeCount = jest.fn();
-      const props: ActionBarProps = {
-        defaultStepSize: 5,
-        docCount: 20,
-        docCountAvailable: 0,
-        isDisabled: false,
-        isLoading: false,
-        onChangeCount,
-        type,
-        ...propsOverride,
-      };
-
-      renderWithKibanaRenderContext(
-        <DiscoverTestProvider>
-          <ActionBar {...props} />
-        </DiscoverTestProvider>
-      );
-
-      return {
-        user,
-        onChangeCount,
-        input: screen.getByTestId(`${type}CountPicker`),
-        button: screen.getByTestId(`${type}LoadMoreButton`),
-      };
-    };
-
     test('Load button click', async () => {
-      const { button, onChangeCount, user } = renderComponent();
+      const { button, onChangeCount, user } = renderComponent(type);
 
       await user.click(button);
       expect(onChangeCount).toHaveBeenCalledWith(type, 25);
     });
 
     test('Load button click doesnt submit when MAX_CONTEXT_SIZE was reached', async () => {
-      const { button, input, onChangeCount, user } = renderComponent();
+      const { button, input, onChangeCount, user } = renderComponent(type);
 
       await user.clear(input);
       await user.type(input, String(MAX_CONTEXT_SIZE));
@@ -79,7 +79,7 @@ describe('Test Discover Context ActionBar', () => {
     });
 
     test('Count input change submits on blur', async () => {
-      const { input, onChangeCount, user } = renderComponent();
+      const { input, onChangeCount, user } = renderComponent(type);
 
       await user.clear(input);
       await user.type(input, '123');
@@ -88,7 +88,7 @@ describe('Test Discover Context ActionBar', () => {
     });
 
     test('Count input change submits on return', async () => {
-      const { input, onChangeCount, user } = renderComponent();
+      const { input, onChangeCount, user } = renderComponent(type);
 
       await user.clear(input);
       await user.type(input, '124');
@@ -98,7 +98,7 @@ describe('Test Discover Context ActionBar', () => {
     });
 
     test('Count input doesnt submits values higher than MAX_CONTEXT_SIZE ', async () => {
-      const { input, onChangeCount, user } = renderComponent();
+      const { input, onChangeCount, user } = renderComponent(type);
 
       await user.clear(input);
       await user.type(input, String(MAX_CONTEXT_SIZE + 1));
@@ -108,7 +108,7 @@ describe('Test Discover Context ActionBar', () => {
     });
 
     test('Count input doesnt submits values lower than MIN_CONTEXT_SIZE ', async () => {
-      const { input, onChangeCount, user } = renderComponent();
+      const { input, onChangeCount, user } = renderComponent(type);
 
       await user.clear(input);
       await user.type(input, String(MIN_CONTEXT_SIZE - 1));
@@ -117,22 +117,8 @@ describe('Test Discover Context ActionBar', () => {
       expect(onChangeCount).toHaveBeenCalledTimes(0);
     });
 
-    test('Warning about limitation of additional records', () => {
-      renderComponent();
-
-      if (type === SurrDocType.PREDECESSORS) {
-        expect(screen.getByTestId('predecessorsWarningMsg')).toHaveTextContent(
-          'No documents newer than the anchor could be found.'
-        );
-      } else {
-        expect(screen.getByTestId('successorsWarningMsg')).toHaveTextContent(
-          'No documents older than the anchor could be found.'
-        );
-      }
-    });
-
     test('Load button disabled when defaultStepSize is 0', async () => {
-      const { input, button, onChangeCount, user } = renderComponent({ defaultStepSize: 0 });
+      const { input, button, onChangeCount, user } = renderComponent(type, { defaultStepSize: 0 });
 
       expect(button).toBeDisabled();
       await user.click(button);
@@ -147,5 +133,21 @@ describe('Test Discover Context ActionBar', () => {
       await user.click(button);
       expect(onChangeCount).toHaveBeenCalledTimes(1);
     });
+  });
+
+  test('shows the predecessors warning message', () => {
+    renderComponent(SurrDocType.PREDECESSORS);
+
+    expect(screen.getByTestId('predecessorsWarningMsg')).toHaveTextContent(
+      'No documents newer than the anchor could be found.'
+    );
+  });
+
+  test('shows the successors warning message', () => {
+    renderComponent(SurrDocType.SUCCESSORS);
+
+    expect(screen.getByTestId('successorsWarningMsg')).toHaveTextContent(
+      'No documents older than the anchor could be found.'
+    );
   });
 });
