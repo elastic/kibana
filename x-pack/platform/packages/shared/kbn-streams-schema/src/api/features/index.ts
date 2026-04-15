@@ -23,6 +23,7 @@ const featureSummarySchema = z.object({
 });
 
 export const iterationResultSchema = z.object({
+  runId: z.string(),
   iteration: z.number(),
   durationMs: z.number(),
   state: z.enum(['success', 'failure']),
@@ -32,6 +33,7 @@ export const iterationResultSchema = z.object({
 });
 
 export interface IterationResult {
+  runId: string;
   iteration: number;
   durationMs: number;
   state: 'success' | 'failure';

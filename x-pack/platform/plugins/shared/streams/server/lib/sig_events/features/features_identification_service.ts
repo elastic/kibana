@@ -608,6 +608,7 @@ export async function identifyInferredFeatures({
   if (outcome.state === 'failure') {
     const durationMs = elapsedMs();
     const failedResult: IterationResult = {
+      runId,
       iteration,
       durationMs,
       state: 'failure',
@@ -648,6 +649,7 @@ export async function identifyInferredFeatures({
 
   const durationMs = elapsedMs();
   const successResult: IterationResult = {
+    runId,
     iteration,
     durationMs,
     state: 'success',
