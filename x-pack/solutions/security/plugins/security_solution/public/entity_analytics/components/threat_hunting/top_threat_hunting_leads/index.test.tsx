@@ -207,5 +207,4 @@ describe('TopThreatHuntingLeads', () => {
     expect(onLeadClick).toHaveBeenCalledTimes(1);
     expect(onLeadClick).toHaveBeenCalledWith(lead);
   });
-
 });
