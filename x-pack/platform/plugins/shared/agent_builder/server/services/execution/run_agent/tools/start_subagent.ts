@@ -90,16 +90,17 @@ export const createSubagentTool = ({
 
         if (run_in_background) {
           backgroundExecutionService?.registerExecution(executionId);
+
           return {
             results: [createOtherResult({ execution_id: executionId, mode: 'background' })],
           };
+        } else {
+          const response = await extractFinalResponse(events$);
+
+          return {
+            results: [createOtherResult({ response })],
+          };
         }
-
-        const response = await extractFinalResponse(events$);
-
-        return {
-          results: [createOtherResult({ response })],
-        };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         return {

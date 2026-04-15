@@ -90,8 +90,19 @@ export const createAgentGraph = ({
       return {};
     }
 
+    // Find the last tool call group ID for positioning the completion notice
+    let lastToolCallGroupId: string | undefined;
+    for (let i = state.mainActions.length - 1; i >= 0; i--) {
+      const action = state.mainActions[i];
+      if (isToolCallAction(action)) {
+        lastToolCallGroupId = action.tool_call_group_id;
+        break;
+      }
+    }
+
     const completions = await backgroundExecutionService.checkForCompletions({
       roundId,
+      toolCallGroupId: lastToolCallGroupId,
     });
 
     if (completions.length === 0) return {};
