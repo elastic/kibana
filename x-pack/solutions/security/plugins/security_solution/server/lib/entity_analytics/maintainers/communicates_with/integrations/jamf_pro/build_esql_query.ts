@@ -15,16 +15,16 @@ export function buildEsqlQuery(namespace: string): string {
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
   const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
   const userEuidEval = euid.esql.getEuidEvaluation('user', { withTypeId: true });
+  const hostIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('host');
+  const hostEuidEval = euid.esql.getEuidEvaluation('host', { withTypeId: true });
 
   return `SET unmapped_fields="nullify";
 FROM ${getIndexPattern(namespace)}
 | WHERE (${userIdFilter})
-    AND (host.name IS NOT NULL OR host.id IS NOT NULL)
+    AND (${hostIdFilter})
 ${userFieldEvalsLine}| EVAL actorUserId = ${userEuidEval}
 | WHERE actorUserId IS NOT NULL AND actorUserId != ""
-| EVAL targetEntityId = CASE(
-    (host.id IS NOT NULL AND host.id != ""), CONCAT("host:", host.id),
-    CONCAT("host:", host.name))
+| EVAL targetEntityId = ${hostEuidEval}
 | MV_EXPAND targetEntityId
 | WHERE targetEntityId IS NOT NULL AND targetEntityId != "host:"
 | STATS communicates_with = VALUES(targetEntityId) BY actorUserId

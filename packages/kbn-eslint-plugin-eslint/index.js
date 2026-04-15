@@ -33,6 +33,7 @@ module.exports = {
     scout_expect_import: require('./rules/scout_expect_import'),
     scout_no_deprecated_tags: require('./rules/scout_no_deprecated_tags'),
     scout_no_cross_boundary_imports: require('./rules/scout_no_cross_boundary_imports'),
+    scout_no_at_in_test_titles: require('./rules/scout_no_at_in_test_titles'),
     scout_no_locators: require('./rules/scout_no_locators'),
     require_kbn_fs: require('./rules/require_kbn_fs'),
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),

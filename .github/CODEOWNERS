@@ -693,6 +693,7 @@ src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
 src/platform/packages/shared/kbn-workspaces @elastic/observability-ui
 src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-yaml-loader @elastic/fleet
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
@@ -1200,6 +1201,7 @@ x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/r
 x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture @elastic/response-ops
 x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
+x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture @elastic/search-kibana
 x-pack/platform/test/security_api_integration/packages/helpers @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/features_provider @elastic/kibana-security
@@ -2426,6 +2428,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @el
 src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cloud_functions/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/github/** @elastic/workchat-eng
@@ -3234,7 +3237,7 @@ oas_docs/linters                              @elastic/experience-docs
 oas_docs/overlays                             @elastic/experience-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/experience-docs
 oas_docs/kibana.info.yaml                     @elastic/experience-docs
-oas_docs/output                               @elastic/experience-docs
+oas_docs/output                               @elastic/ski-docs
 
 # Documentation settings files
 docs/settings-gen                             @elastic/experience-docs
@@ -3271,6 +3274,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # Appex QA to own auto-generated scout metadata
 /**/scout/.meta/**
 /**/scout_*/.meta/**
+
+# Macroscope Check Run Agents
+/.macroscope/scout-review.md @elastic/appex-qa
+/.macroscope/flaky-test-runner-nudge.md @elastic/appex-qa
 
 # These files influence agent behavior and are loaded into every new agent session.
 # Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
