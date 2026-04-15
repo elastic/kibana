@@ -9,7 +9,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
-import { calculateResolutionEntityScores, fetchResolutionGroupMemberIds } from './score_resolution_entities';
+import {
+  calculateResolutionEntityScores,
+  fetchResolutionGroupMemberIds,
+} from './score_resolution_entities';
 import type { ScopedLogger } from '../utils/with_log_context';
 
 const buildLogger = (): ScopedLogger =>
@@ -69,15 +72,7 @@ describe('score_resolution_entities', () => {
         },
       });
     const esqlQuery = jest.fn().mockResolvedValue({
-      values: [
-        [
-          1,
-          50,
-          JSON.stringify({ id: 'alert-1', risk_score: 50 }),
-          [],
-          'user:target-1',
-        ],
-      ],
+      values: [[1, 50, JSON.stringify({ id: 'alert-1', risk_score: 50 }), [], 'user:target-1']],
     });
 
     const esClient = {
@@ -185,6 +180,8 @@ describe('score_resolution_entities', () => {
       ([args]) => args.filter?.terms?.['entity.id'] !== undefined
     )?.[0];
     const requestedEntityIds = fetchByIdsCall?.filter?.terms?.['entity.id'] ?? [];
-    expect(requestedEntityIds).toEqual(expect.arrayContaining(['user:target-1', 'user:alias-silent']));
+    expect(requestedEntityIds).toEqual(
+      expect.arrayContaining(['user:target-1', 'user:alias-silent'])
+    );
   });
 });

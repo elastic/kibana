@@ -625,7 +625,9 @@ export default ({ getService }: FtrProviderContext): void => {
           const resolutionScore = allScores.find(
             (s) => s.id_value === targetUser.expectedEuid && s.score_type === 'resolution'
           )!;
-          const watchlistMods = resolutionScore.modifiers!.filter((modifier) => modifier.type === 'watchlist');
+          const watchlistMods = resolutionScore.modifiers!.filter(
+            (modifier) => modifier.type === 'watchlist'
+          );
           expect(watchlistMods.length).to.be.greaterThan(0);
           expect(watchlistMods.some((modifier) => modifier.subtype === 'departing')).to.be(true);
 

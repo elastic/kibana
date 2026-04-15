@@ -95,7 +95,9 @@ export const calculateResolutionEntityScores = async function* ({
     if (parsedScores.length > 0) {
       const allMemberIds = collectMemberEntityIds(parsedScores);
       const alertDerivedMemberCount = allMemberIds.size;
-      const resolutionTargetIds = [...new Set(parsedScores.map((score) => score.resolution_target_id))];
+      const resolutionTargetIds = [
+        ...new Set(parsedScores.map((score) => score.resolution_target_id)),
+      ];
       const fullGroupMemberIds = await fetchResolutionGroupMemberIds({
         crudClient,
         resolutionTargetIds,
@@ -246,8 +248,7 @@ export const fetchResolutionGroupMemberIds = async ({
     } while (searchAfter !== undefined);
   } catch (error) {
     logger.warn(
-      'Error fetching full resolution group members. Resolution scoring will proceed with alert-derived members only: ' +
-        error
+      `Error fetching full resolution group members. Resolution scoring will proceed with alert-derived members only: ${error}`
     );
   }
 
