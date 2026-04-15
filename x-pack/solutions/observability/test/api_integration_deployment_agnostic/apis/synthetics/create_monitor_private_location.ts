@@ -473,16 +473,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('handles auto upgrading policies', async function () {
-      // force a lower version
       const lowerVersion = '1.1.1';
-
-      // Check if the lower version is available in the package registry.
-      // The package-registry-verify-and-promote pipeline may use a registry
-      // that doesn't include old versions — skip gracefully instead of timing out.
-      const pkgCheck = await supertestWithAuth
-        .get(`/api/fleet/epm/packages/synthetics/${lowerVersion}`)
-        .set('kbn-xsrf', 'true');
-      if (pkgCheck.status === 404) {
+      if (!(await testPrivateLocations.isSyntheticsPackageVersionAvailable(lowerVersion))) {
         this.skip();
       }
 
@@ -492,6 +484,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const monitor = {
         ...httpMonitorJson,
+        locations: [],
         name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
         private_locations: [privateLocation.id],
@@ -516,29 +509,48 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
         );
 
-        expect(packagePolicy.package.version).eql(lowerVersion);
-        await supertestWithAuth.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-        await retry.tryForTime(120 * 1000, async () => {
-          const policyResponseAfterUpgrade = await supertestWithAuth.get(
-            '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
-          );
-          const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
-            (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
-          );
-          expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(true);
-        });
+        expect(packagePolicy).not.to.equal(
+          undefined,
+          `Missing synthetics package policy for monitor ${monitorId} and location ${privateLocation.id}`
+        );
+
+        const policyVersion = packagePolicy!.package.version;
+        expect(semver.gte(policyVersion, lowerVersion)).equal(
+          true,
+          `Expected policy version ${policyVersion} to be >= ${lowerVersion}`
+        );
+
+        if (!semver.gt(policyVersion, lowerVersion)) {
+          await supertestWithAuth
+            .post('/api/fleet/setup')
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect(200);
+          await retry.tryForTime(120 * 1000, async () => {
+            const policyResponseAfterUpgrade = await supertestWithAuth.get(
+              '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+            );
+            const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
+              (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
+            );
+            expect(packagePolicyAfterUpgrade).not.to.equal(
+              undefined,
+              `Missing synthetics package policy after upgrade wait for monitor ${monitorId}`
+            );
+            const afterVersion = packagePolicyAfterUpgrade!.package.version;
+            expect(semver.gt(afterVersion, lowerVersion)).equal(
+              true,
+              `Expected ${afterVersion} to be greater than ${lowerVersion}`
+            );
+          });
+        }
       } finally {
         try {
           await deleteMonitor(monitorId);
-        } catch (e) {
-          // ignore cleanup errors
+        } catch {
+          // ignore cleanup failures
         }
-        // Restore the package to the latest version so subsequent tests aren't affected
-        try {
-          await testPrivateLocations.installSyntheticsPackage();
-        } catch (e) {
-          // ignore cleanup errors
-        }
+        await testPrivateLocations.reinstallLatestSyntheticsPackage();
       }
     });
 

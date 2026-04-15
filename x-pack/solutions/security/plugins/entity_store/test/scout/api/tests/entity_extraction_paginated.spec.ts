@@ -19,7 +19,8 @@ import { assertEntitiesEqual, expectedHostEntities } from '../fixtures/entity_ex
 import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 // Failing: See https://github.com/elastic/kibana/issues/263067
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/263067
+apiTest.describe.skip(
   'Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage)',
   { tag: ENTITY_STORE_TAGS },
   () => {
