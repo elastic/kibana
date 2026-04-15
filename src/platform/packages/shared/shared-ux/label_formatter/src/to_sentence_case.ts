@@ -48,6 +48,7 @@ const TITLE_CASE_GLOSSARY = [
   'TLS certificates',
   'Cloud Connect',
   'SIEM Readiness',
+  'V2 Alerting Preview',
   'Ingest Hub',
 ] as const;
 

@@ -24,7 +24,7 @@ describe('FetchRulesStep', () => {
       {
         id: 'r1',
         attributes: createRuleSoAttributes({
-          metadata: { name: 'Rule 1', labels: ['production'] },
+          metadata: { name: 'Rule 1', tags: ['production'] },
         }),
         namespaces: ['default'],
       },

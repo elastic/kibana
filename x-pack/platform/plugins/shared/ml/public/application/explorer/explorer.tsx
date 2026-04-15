@@ -665,6 +665,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                 influencerFilter={applyFilter}
                 sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
                 selectedJobs={selectedJobs}
+                telemetrySource="explorer_anomalies_table"
               />
             ) : null}
           </EuiSkeletonText>

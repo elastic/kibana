@@ -12,12 +12,12 @@ import type { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { OAuthStateClient } from '../lib/oauth_state_client';
-import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
+import { OAuthAuthorizationService, type OAuthConfig } from '../lib/oauth_authorization_service';
 import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import type { ActionsConfigurationUtilities } from '../actions_config';
+import { OAUTH_API_TAG } from '../feature';
 
 const paramsSchema = schema.object({
   connectorId: schema.string(),
@@ -26,6 +26,23 @@ const paramsSchema = schema.object({
 const bodySchema = schema.object({
   returnUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
 });
+
+const validateOAuthUrlsAreAllowed = (
+  oauthConfig: OAuthConfig,
+  actionsConfigUtils: ActionsConfigurationUtilities
+): { earsAuthorizationUrl?: string } => {
+  if (oauthConfig.authTypeId === 'oauth_authorization_code') {
+    actionsConfigUtils.ensureUriAllowed(oauthConfig.authorizationUrl);
+    actionsConfigUtils.ensureUriAllowed(oauthConfig.tokenUrl);
+    return {};
+  }
+
+  const { authorizeEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
+  const earsAuthorizationUrl = resolveEarsUrl(authorizeEndpoint, actionsConfigUtils.getEarsUrl());
+  actionsConfigUtils.ensureUriAllowed(earsAuthorizationUrl);
+
+  return { earsAuthorizationUrl };
+};
 
 /**
  * Initiates OAuth2 Authorization Code flow
@@ -42,7 +59,11 @@ export const oauthAuthorizeRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_start_oauth_flow`,
-      security: DEFAULT_ACTION_ROUTE_SECURITY,
+      security: {
+        authz: {
+          requiredPrivileges: [OAUTH_API_TAG],
+        },
+      },
       validate: {
         params: paramsSchema,
         body: bodySchema,
@@ -58,6 +79,10 @@ export const oauthAuthorizeRoute = (
         try {
           const core = await context.core;
           const routeLogger = logger.get('oauth_authorize');
+
+          // Verify the connector exists and the user has access via the actions client
+          const actionsClient = (await context.actions).getActionsClient();
+          await actionsClient.get({ id: connectorId });
 
           // Check rate limit
           const currentUser = core.security.authc.getCurrentUser();
@@ -117,6 +142,23 @@ export const oauthAuthorizeRoute = (
             namespace = spaces.spacesService.spaceIdToNamespace(spaceId);
           }
           const oauthConfig = await oauthService.getOAuthConfig(connectorId, namespace);
+
+          let earsAuthorizationUrl: string | undefined;
+          try {
+            ({ earsAuthorizationUrl } = validateOAuthUrlsAreAllowed(
+              oauthConfig,
+              actionsConfigUtils
+            ));
+          } catch (allowedHostsErr) {
+            const message =
+              allowedHostsErr instanceof Error ? allowedHostsErr.message : String(allowedHostsErr);
+            return res.badRequest({
+              body: {
+                message: message || 'OAuth URL is not allowed by xpack.actions.allowedHosts',
+              },
+            });
+          }
+
           const redirectUri = OAuthAuthorizationService.getRedirectUri(kibanaUrl);
 
           // Validate return URL for post-OAuth redirect.
@@ -158,12 +200,11 @@ export const oauthAuthorizeRoute = (
 
           let authorizationUrl: string;
           if (oauthConfig.authTypeId === 'ears') {
-            const { authorizeEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
+            if (!earsAuthorizationUrl) {
+              throw new Error('EARS authorization URL was not resolved');
+            }
             authorizationUrl = oauthService.buildEarsAuthorizationUrl({
-              baseAuthorizationUrl: resolveEarsUrl(
-                authorizeEndpoint,
-                actionsConfigUtils.getEarsUrl()
-              ),
+              baseAuthorizationUrl: earsAuthorizationUrl,
               scope: oauthConfig.scope,
               callbackUri: redirectUri,
               state: state.state,

@@ -70,8 +70,6 @@ const extractOutcome = (event: IValidatedEvent): UnifiedExecutionResult['outcome
 
 const extractMetrics = (event: IValidatedEvent): UnifiedExecutionResult['metrics'] => {
   const metrics = event?.kibana?.alert?.rule?.execution?.metrics;
-  // `matched_indices_count` is not yet in the Alerting Framework event log schema
-  const additionalMetrics = metrics as Record<string, unknown> | undefined;
 
   return {
     total_search_duration_ms: toOptionalInt(metrics?.total_search_duration_ms),
@@ -83,7 +81,7 @@ const extractMetrics = (event: IValidatedEvent): UnifiedExecutionResult['metrics
           new: toOptionalInt(metrics.alert_counts.new),
         }
       : null,
-    matched_indices_count: toOptionalInt(additionalMetrics?.matched_indices_count),
+    matched_indices_count: toOptionalInt(metrics?.matched_indices_count),
     frozen_indices_queried_count: toOptionalInt(metrics?.frozen_indices_queried_count),
   };
 };

@@ -7,12 +7,16 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { Condition, StreamlangDSL } from '@kbn/streamlang';
-import type { InsightImpactLevel, RoutingStatus, Streams } from '@kbn/streams-schema';
-import { getImpactLevel, type Insight } from '@kbn/streams-schema';
+import type { RoutingStatus, Streams } from '@kbn/streams-schema';
+import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
+import {
+  getImpactLevel,
+  type Insight,
+  type InsightImpactLevel,
+} from '@kbn/streams-schema/src/insights';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
 
 export type { Insight };
 
@@ -36,6 +40,7 @@ export interface StreamsTestApiService {
   createQueryStream: (streamName: string, esql: string) => Promise<void>;
   updateStream: (streamName: string, body: { ingest: IngestUpsertRequest }) => Promise<void>;
   deleteStream: (streamName: string) => Promise<void>;
+  restoreDataStream: (streamName: string) => Promise<void>;
   forkStream: (
     parentStream: string,
     childStream: string,
@@ -171,6 +176,15 @@ export function getStreamsTestApiService({
         await kbnClient.request({
           method: 'DELETE',
           path: `/api/streams/${streamName}`,
+        });
+      });
+    },
+
+    async restoreDataStream(streamName: string) {
+      await measurePerformanceAsync(log, 'streamsTestApi.restoreDataStream', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `/internal/streams/${streamName}/_restore_data_stream`,
         });
       });
     },

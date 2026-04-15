@@ -10,6 +10,7 @@ import { createTestConfig } from '../../../../../config/serverless/config.base';
 
 const securitySolutionEnableExperimental: Array<keyof ExperimentalFeatures> = [
   'entityAnalyticsEntityStoreV2',
+  'entityAnalyticsWatchlistEnabled',
 ];
 
 export default createTestConfig({

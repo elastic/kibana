@@ -7,10 +7,12 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import type { DispatcherServiceContract } from './dispatcher';
+import type { DispatcherEnabledProvider } from './tokens';
 import { DispatcherTaskRunner } from './task_runner';
 
 describe('DispatcherTaskRunner', () => {
   let dispatcherService: jest.Mocked<DispatcherServiceContract>;
+  let dispatcherEnabledProvider: jest.MockedFunction<DispatcherEnabledProvider>;
   let runner: DispatcherTaskRunner;
   let abortController: AbortController;
 
@@ -27,7 +29,8 @@ describe('DispatcherTaskRunner', () => {
 
   beforeEach(() => {
     dispatcherService = { run: jest.fn() };
-    runner = new DispatcherTaskRunner(dispatcherService);
+    dispatcherEnabledProvider = jest.fn().mockResolvedValue(true);
+    runner = new DispatcherTaskRunner(dispatcherService, dispatcherEnabledProvider);
     abortController = new AbortController();
   });
 
@@ -60,6 +63,34 @@ describe('DispatcherTaskRunner', () => {
           previousStartedAt: '2026-01-22T07:45:00.000Z',
         },
       });
+    });
+
+    it('skips dispatcher when setting is disabled', async () => {
+      dispatcherEnabledProvider.mockResolvedValue(false);
+
+      const result = await runner.run({ taskInstance, abortController });
+
+      expect(dispatcherService.run).not.toHaveBeenCalled();
+      expect(result).toEqual({ state: taskInstance.state });
+    });
+
+    it('preserves previousStartedAt when disabled', async () => {
+      dispatcherEnabledProvider.mockResolvedValue(false);
+
+      const result = await runner.run({ taskInstance, abortController });
+
+      expect(result.state).toEqual({ previousStartedAt: '2026-01-22T07:30:00.000Z' });
+    });
+
+    it('defaults to enabled when uiSettings read fails', async () => {
+      dispatcherEnabledProvider.mockRejectedValue(new Error('SO unavailable'));
+      dispatcherService.run.mockResolvedValue({
+        startedAt: new Date('2026-01-22T07:45:00.000Z'),
+      });
+
+      await runner.run({ taskInstance, abortController });
+
+      expect(dispatcherService.run).toHaveBeenCalled();
     });
   });
 });

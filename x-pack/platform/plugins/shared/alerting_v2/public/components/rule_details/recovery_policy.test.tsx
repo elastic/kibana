@@ -37,28 +37,11 @@ describe('RecoveryPolicy', () => {
     );
   });
 
-  it('renders combined base and condition in code block', () => {
-    const policy: RuleApiResponse['recovery_policy'] = {
-      type: 'query',
-      query: { base: 'FROM metrics-*', condition: 'WHERE cpu < 0.5' },
-    };
-    wrap(<RecoveryPolicy recoveryPolicy={policy} />);
-    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryQueryBase')).toHaveTextContent(
-      'FROM metrics-*'
-    );
-    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryQueryCondition')).toHaveTextContent(
-      'WHERE cpu < 0.5'
-    );
-  });
-
   it('renders only type label for query policy without actual queries', () => {
     const policy: RuleApiResponse['recovery_policy'] = { type: 'query' };
     const { container } = wrap(<RecoveryPolicy recoveryPolicy={policy} />);
     expect(container).toHaveTextContent('ESQL recovery query');
     expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryQueryBase')).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('alertingV2RuleDetailsRecoveryQueryCondition')
-    ).not.toBeInTheDocument();
   });
 
   it('falls back to raw type value for unknown types', () => {

@@ -27,3 +27,10 @@ export const txtUrlTemplateVariablesFilterPlaceholderText = i18n.translate(
     defaultMessage: 'Filter variables',
   }
 );
+
+export const txtVariablePopoverAriaLabel = i18n.translate(
+  'xpack.urlDrilldown.editor.variablePopoverAriaLabel',
+  {
+    defaultMessage: 'URL template variables',
+  }
+);

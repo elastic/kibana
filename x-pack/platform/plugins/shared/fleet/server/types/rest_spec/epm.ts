@@ -648,6 +648,24 @@ export const GetStatsRequestSchema = {
   }),
 };
 
+export const GetDependenciesRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+  }),
+};
+
+export const GetDependenciesResponseSchema = schema.object({
+  items: schema.arrayOf(
+    schema.object({
+      name: schema.string(),
+      version: schema.string(),
+      title: schema.string(),
+    }),
+    { maxSize: 1000 }
+  ),
+});
+
 export const InstallPackageFromRegistryRequestSchema = {
   params: PackageVersionRequestParamsSchema,
   query: schema.object({

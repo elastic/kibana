@@ -24,6 +24,7 @@ export const useCreateNotificationPolicy = () => {
     mutationFn: (data) => notificationPoliciesApi.createNotificationPolicy(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.lists(), exact: false });
+      queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.allTags(), exact: false });
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.notificationPolicy.createSuccess', {
           defaultMessage: 'Notification policy created successfully',

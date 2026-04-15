@@ -37,7 +37,6 @@ const lensPersistableState = {
     title: '',
     description: '',
     visualizationType: 'lnsXY',
-    type: 'lens',
     references: [
       {
         type: 'index-pattern',

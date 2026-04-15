@@ -9,6 +9,7 @@
 
 export {
   DocViewer,
+  DOC_VIEWER_FLYOUT_HISTORY_KEY,
   type DocViewerProps,
   type DocViewerApi,
   type DocViewerRestorableState,

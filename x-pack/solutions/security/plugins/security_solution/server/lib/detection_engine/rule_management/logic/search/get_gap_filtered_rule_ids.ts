@@ -9,6 +9,7 @@ import { chunk } from 'lodash';
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
 
 import type { FindRulesSortField } from '../../../../../../common/api/detection_engine/rule_management';
 import type { SortOrder } from '../../../../../../common/api/detection_engine';
@@ -81,6 +82,7 @@ export interface GapFilteredRuleIdsOptions {
   filter?: string;
   sortField?: FindRulesSortField;
   sortOrder?: SortOrder;
+  excludedReasons?: GapReasonType[];
   schedulerId?: string;
 }
 
@@ -103,6 +105,7 @@ export const getGapFilteredRuleIds = async ({
   filter,
   sortField,
   sortOrder,
+  excludedReasons,
   schedulerId,
 }: GapFilteredRuleIdsOptions): Promise<GapFilteredRuleIdsResult> => {
   // Step 1: get ALL rule IDs with gaps for the selected range and gap fill statuses
@@ -110,6 +113,7 @@ export const getGapFilteredRuleIds = async ({
     highestPriorityGapFillStatuses: gapFillStatuses,
     start: gapRange.start,
     end: gapRange.end,
+    excludedReasons,
     schedulerId,
   });
 

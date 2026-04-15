@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
@@ -15,6 +15,7 @@ import { collectAllCustomPropertyItems } from './collect_all_custom_property_ite
 import { collectAllVariables } from './collect_all_variables';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateCustomProperties } from './validate_custom_properties';
+import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
@@ -35,13 +36,24 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
-import { CUSTOM_YAML_VALIDATION_MARKER_OWNERS, type YamlValidationResult } from '../model/types';
+import {
+  BATCHED_CUSTOM_MARKER_OWNER,
+  validationResultFingerprint,
+  type YamlValidationResult,
+} from '../model/types';
 
 const SEVERITY_MAP = {
   error: MarkerSeverity.Error,
   warning: MarkerSeverity.Warning,
   info: MarkerSeverity.Info,
 };
+
+function buildResultsFingerprint(results: YamlValidationResult[]): string {
+  if (results.length === 0) {
+    return '';
+  }
+  return results.map(validationResultFingerprint).join('\n');
+}
 
 export interface UseYamlValidationResult {
   error: Error | null;
@@ -56,6 +68,14 @@ export function useYamlValidation(
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [validationResults, setValidationResults] = useState<YamlValidationResult[]>([]);
+  const lastFingerprintRef = useRef<string>('');
+  const setStableValidationResults = useCallback((results: YamlValidationResult[]) => {
+    const fingerprint = buildResultsFingerprint(results);
+    if (fingerprint !== lastFingerprintRef.current) {
+      lastFingerprintRef.current = fingerprint;
+      setValidationResults(results);
+    }
+  }, []);
   const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const yamlDocument = useSelector(selectYamlDocument);
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
@@ -82,17 +102,15 @@ export function useYamlValidation(
         if (decorationsCollection.current) {
           decorationsCollection.current.clear();
         }
-        CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
-          monaco.editor.setModelMarkers(model, owner, []);
-        });
-        setValidationResults([]);
+        monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, []);
+        setStableValidationResults([]);
         setIsLoading(false);
         setError(null);
         return;
       }
 
       if (!yamlDocument) {
-        setValidationResults([]);
+        setStableValidationResults([]);
         setIsLoading(false);
         setError(new Error('Error validating: Yaml document is not loaded'));
         return;
@@ -122,13 +140,14 @@ export function useYamlValidation(
       // so that connector-id, step-name, liquid-template, custom-property, and
       // workflow-inputs validation still provide feedback.
       const results: YamlValidationResult[] = [
-        ...validateStepNameUniqueness(yamlDocument),
+        ...(lineCounter ? validateStepNameUniqueness(yamlDocument, lineCounter) : []),
         ...validateLiquidTemplate(model.getValue(), yamlDocument),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
         ...(workflowLookup && lineCounter
           ? [
+              ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
               ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
               ...validateIfConditions(workflowLookup, lineCounter),
             ]
@@ -162,15 +181,9 @@ export function useYamlValidation(
       }
       decorationsCollection.current = editor.createDecorationsCollection(decorations);
 
-      setValidationResults(results);
+      setStableValidationResults(results);
       setIsLoading(false);
-      CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
-        monaco.editor.setModelMarkers(
-          model,
-          owner,
-          markers.filter((m) => m.source === owner)
-        );
-      });
+      monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, markers);
       setError(null);
     }
 
@@ -186,6 +199,7 @@ export function useYamlValidation(
     connectors?.connectorTypes,
     workflowLookup,
     workflows,
+    setStableValidationResults,
   ]);
 
   return {

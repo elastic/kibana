@@ -318,7 +318,7 @@
         "label": "CasesSearchResponse",
         "description": [],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-        "lineNumber": 100,
+        "lineNumber": 102,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -331,7 +331,7 @@
             "label": "total",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 101,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -344,7 +344,7 @@
             "label": "countOpenCases",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 102,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -357,7 +357,7 @@
             "label": "countClosedCases",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 103,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -370,7 +370,7 @@
             "label": "countInProgressCases",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 104,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -965,6 +965,21 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.PipelineStats.statsAvailable",
+            "type": "boolean",
+            "tags": [],
+            "label": "statsAvailable",
+            "description": [
+              "False when the server cannot provide ingestion stats (e.g. serverless mode)."
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1090,7 +1105,7 @@
         "label": "RetentionInfo",
         "description": [],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-        "lineNumber": 111,
+        "lineNumber": 113,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1103,7 +1118,7 @@
             "label": "indexName",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 112,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1116,7 +1131,7 @@
             "label": "isDataStream",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 113,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1132,7 +1147,7 @@
               "\"ilm\" | \"dsl\" | null"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 114,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1148,7 +1163,7 @@
               "string | null"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 115,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1164,7 +1179,7 @@
               "number | null"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 116,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1180,7 +1195,7 @@
               "string | null"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 117,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1196,7 +1211,7 @@
               "\"healthy\" | \"non-compliant\""
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 118,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1212,7 +1227,7 @@
         "label": "RetentionResponse",
         "description": [],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-        "lineNumber": 121,
+        "lineNumber": 123,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1235,7 +1250,7 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 122,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1613,7 +1628,7 @@
           "\"healthy\" | \"non-compliant\""
         ],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-        "lineNumber": 109,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1630,7 +1645,7 @@
           "\"ilm\" | \"dsl\" | null"
         ],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-        "lineNumber": 108,
+        "lineNumber": 110,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -8,23 +8,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
+import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
-
-export const createRequestParamsSchema = schema.maybe(
-  schema.object(
-    {
-      id: asCodeIdSchema,
-    },
-    { unknowns: 'forbid' }
-  )
-);
 
 export const createRequestBodySchema = markdownAttributesSchema;
 
 export const createResponseBodySchema = schema.object({
   id: schema.string(),
   data: markdownAttributesSchema,
-  meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
+  meta: asCodeMetaSchema,
 });

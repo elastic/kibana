@@ -55,7 +55,7 @@
       "label": "WorkflowsServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 43,
+      "lineNumber": 44,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -71,7 +71,7 @@
             "WorkflowsManagementApi"
           ],
           "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-          "lineNumber": 44,
+          "lineNumber": 45,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -91,7 +91,7 @@
         "{ [x: string]: never; }"
       ],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 47,
+      "lineNumber": 48,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -150,7 +150,7 @@
           "\"https://ela.st/workflows-docs\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
-        "lineNumber": 16,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -165,6 +165,23 @@
         "description": [],
         "signature": [
           "\".workflows-executions\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsManagement",
+        "id": "def-common.WORKFLOWS_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_INDEX",
+        "description": [],
+        "signature": [
+          "\".workflows-workflows\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
         "lineNumber": 13,
@@ -184,7 +201,7 @@
           "\".workflows-step-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
