@@ -211,13 +211,13 @@ const ExampleDrilldownFlyout: React.FC<{
     }
 
     const result: ExampleScorePair[] = [];
-    const seenBExamples = new Set<string>();
+    const coveredBExamples = new Set<string>();
 
     for (const ex of examplesA.examples) {
       const bScores = mapB.get(ex.example_id);
-      if (bScores) seenBExamples.add(ex.example_id);
       for (const score of ex.scores) {
         if (score.evaluator.name !== evaluatorName) continue;
+        coveredBExamples.add(ex.example_id);
         const key = `${score.evaluator.name}|${score.task.repetition_index}`;
         result.push({
           exampleId: ex.example_id,
@@ -231,7 +231,7 @@ const ExampleDrilldownFlyout: React.FC<{
     }
 
     for (const ex of examplesB.examples) {
-      if (seenBExamples.has(ex.example_id)) continue;
+      if (coveredBExamples.has(ex.example_id)) continue;
       for (const score of ex.scores) {
         if (score.evaluator.name !== evaluatorName) continue;
         result.push({
