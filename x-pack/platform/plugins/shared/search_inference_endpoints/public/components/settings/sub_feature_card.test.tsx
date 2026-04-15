@@ -116,7 +116,11 @@ describe('SubFeatureCard', () => {
     mockUseRegisteredFeatures.mockReturnValue({ features: [], isLoading: false });
   });
 
-  const renderCard = (endpointIds: string[], overrides?: Partial<InferenceFeatureConfig>) =>
+  const renderCard = (
+    endpointIds: string[],
+    overrides?: Partial<InferenceFeatureConfig>,
+    invalidEndpointIds: Set<string> = new Set()
+  ) =>
     render(
       <Wrapper>
         <SubFeatureCard
@@ -124,6 +128,7 @@ describe('SubFeatureCard', () => {
           feature={{ ...feature, ...overrides }}
           endpointIds={endpointIds}
           onEndpointsChange={onEndpointsChange}
+          invalidEndpointIds={invalidEndpointIds}
         />
       </Wrapper>
     );

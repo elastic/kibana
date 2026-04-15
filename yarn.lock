@@ -8623,6 +8623,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-inference-endpoints-fixture-plugin@link:x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-inference-endpoints@link:x-pack/platform/plugins/shared/search_inference_endpoints":
   version "0.0.0"
   uid ""
@@ -9820,6 +9824,10 @@
   uid ""
 
 "@kbn/xstate-utils@link:src/platform/packages/shared/kbn-xstate-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/yaml-loader@link:src/platform/packages/shared/kbn-yaml-loader":
   version "0.0.0"
   uid ""
 

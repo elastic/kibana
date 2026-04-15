@@ -8,6 +8,7 @@
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useMemo, useState } from 'react';
 import {
@@ -17,6 +18,7 @@ import {
   RESTORE_LABEL,
   PROMOTE_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
+import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../significant_events_discovery/components/queries_table/translations';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -80,41 +82,38 @@ export function KnowledgeIndicatorActionsCell({
     [excludeFeature, isMutating, knowledgeIndicator, onDeleteRequest, restoreFeature]
   );
 
-  const queryActionItems = useMemo(
-    () =>
-      knowledgeIndicator.kind === 'query'
-        ? [
-            ...(!knowledgeIndicator.rule.backed
-              ? [
-                  <EuiContextMenuItem
-                    key="query-promote"
-                    icon="plusCircle"
-                    disabled={isMutating}
-                    onClick={() => {
-                      setIsActionsMenuOpen(false);
-                      promoteQuery(knowledgeIndicator.query.id);
-                    }}
-                  >
-                    {PROMOTE_LABEL}
-                  </EuiContextMenuItem>,
-                ]
-              : []),
-            <EuiContextMenuItem
-              key="query-delete"
-              icon="trash"
-              color="danger"
-              disabled={isMutating}
-              onClick={() => {
-                setIsActionsMenuOpen(false);
-                onDeleteRequest(knowledgeIndicator);
-              }}
-            >
-              {DELETE_LABEL}
-            </EuiContextMenuItem>,
-          ]
-        : [],
-    [isMutating, knowledgeIndicator, onDeleteRequest, promoteQuery]
-  );
+  const queryActionItems = useMemo(() => {
+    if (knowledgeIndicator.kind !== 'query') return [];
+
+    const isStats = knowledgeIndicator.query.type === QUERY_TYPE_STATS;
+    const isPromoteDisabled = isMutating || knowledgeIndicator.rule.backed || isStats;
+
+    return [
+      <EuiContextMenuItem
+        key="query-promote"
+        icon="plusInCircle"
+        disabled={isPromoteDisabled}
+        toolTipContent={isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined}
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          promoteQuery(knowledgeIndicator.query.id);
+        }}
+      >
+        {PROMOTE_LABEL}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="query-delete"
+        icon="trash"
+        disabled={isMutating}
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          onDeleteRequest(knowledgeIndicator);
+        }}
+      >
+        {DELETE_LABEL}
+      </EuiContextMenuItem>,
+    ];
+  }, [isMutating, knowledgeIndicator, onDeleteRequest, promoteQuery]);
 
   return (
     <EuiPopover

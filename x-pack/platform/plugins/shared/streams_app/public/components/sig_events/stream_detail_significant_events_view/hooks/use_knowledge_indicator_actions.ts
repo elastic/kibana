@@ -10,9 +10,15 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { Streams } from '@kbn/streams-schema';
 import { useCallback } from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
+import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
+import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../hooks/sig_events/use_unbacked_queries_count';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
+import { useQueriesApi, type PromoteResult } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
+import {
+  PROMOTE_QUERY_ALREADY_PROMOTED,
+  STATS_PROMOTE_DISABLED_TOOLTIP,
+} from '../../significant_events_discovery/components/queries_table/translations';
 
 interface UseKnowledgeIndicatorActionsParams {
   definition: Streams.all.Definition;
@@ -35,6 +41,8 @@ export function useKnowledgeIndicatorActions({
   const invalidateData = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: ['features', definition.name] }),
     ]);
   }, [definition.name, queryClient]);
@@ -67,13 +75,19 @@ export function useKnowledgeIndicatorActions({
     },
   });
 
-  const promoteAction = useMutation<void, Error, string>({
+  const promoteAction = useMutation<PromoteResult, Error, string>({
     mutationFn: async (queryId) => {
-      await promote({ queryIds: [queryId] });
+      return promote({ queryIds: [queryId] });
     },
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       await invalidateData();
-      toasts.addSuccess({ title: PROMOTE_SUCCESS_TOAST });
+      if (result.promoted > 0) {
+        toasts.addSuccess({ title: PROMOTE_SUCCESS_TOAST });
+      } else if (result.skipped_stats > 0) {
+        toasts.addInfo({ title: STATS_PROMOTE_DISABLED_TOOLTIP });
+      } else {
+        toasts.addInfo({ title: PROMOTE_QUERY_ALREADY_PROMOTED });
+      }
       onSuccess?.();
     },
     onError: (error) => {

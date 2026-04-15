@@ -8,10 +8,11 @@
 import { useEffect } from 'react';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
-import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useLatest from 'react-use/lib/useLatest';
+import { handleEditInDashboard } from '../handle_edit_in_dashboard';
 
 export type SavedObjectStatus =
   | { status: 'idle' }
@@ -22,13 +23,10 @@ interface UseRegisterCanvasActionButtonsParams {
   dashboardApi: DashboardApi | undefined;
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
-  timeRange: { from: string; to: string };
-  dashboardState: Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'>;
-  attachmentOrigin: string | undefined;
-  isSidebar: boolean;
+  dashboardLocatorParams: DashboardLocatorParams;
+  getExistingDashboardId: () => string | undefined;
   closeCanvas: () => void;
   openSidebarConversation?: () => void;
-  savedObjectStatus: SavedObjectStatus;
 }
 
 export const useRegisterCanvasActionButtons = ({
@@ -37,17 +35,12 @@ export const useRegisterCanvasActionButtons = ({
   updateOrigin,
   closeCanvas,
   openSidebarConversation,
-  timeRange,
-  dashboardState,
-  attachmentOrigin,
-  isSidebar,
-  savedObjectStatus,
+  dashboardLocatorParams,
+  getExistingDashboardId,
 }: UseRegisterCanvasActionButtonsParams) => {
-  const timeRangeRef = useLatest(timeRange);
-  const attachmentOriginRef = useLatest(attachmentOrigin);
-  const dashboardStateRef = useLatest(dashboardState);
+  const dashboardLocatorParamsRef = useLatest(dashboardLocatorParams);
+  const getExistingDashboardIdRef = useLatest(getExistingDashboardId);
   const openSidebarConversationRef = useLatest(openSidebarConversation);
-  const savedObjectStatusRef = useLatest(savedObjectStatus);
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -65,21 +58,13 @@ export const useRegisterCanvasActionButtons = ({
         }),
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          const existingAttachmentOrigin =
-            savedObjectStatusRef.current.status === 'resolved' &&
-            savedObjectStatusRef.current.exists
-              ? attachmentOriginRef.current
-              : undefined;
-          await locator.navigate({
-            ...dashboardStateRef.current,
-            dashboardId: existingAttachmentOrigin,
-            time_range: timeRangeRef.current,
-            viewMode: 'edit',
+          await handleEditInDashboard({
+            locator,
+            getExistingDashboardId: async () => getExistingDashboardIdRef.current(),
+            dashboardLocatorParams: dashboardLocatorParamsRef.current,
           });
           closeCanvas();
-          if (!isSidebar) {
-            openSidebarConversationRef.current?.();
-          }
+          openSidebarConversationRef.current?.();
         },
       });
     }
@@ -90,10 +75,7 @@ export const useRegisterCanvasActionButtons = ({
       icon: 'save',
       type: ActionButtonType.PRIMARY,
       handler: async () => {
-        const existingAttachmentOrigin =
-          savedObjectStatusRef.current.status === 'resolved' && savedObjectStatusRef.current.exists
-            ? attachmentOriginRef.current
-            : undefined;
+        const existingAttachmentOrigin = getExistingDashboardIdRef.current();
         if (existingAttachmentOrigin) {
           await dashboardApi.runQuickSave();
           await updateOrigin(existingAttachmentOrigin);
@@ -112,10 +94,7 @@ export const useRegisterCanvasActionButtons = ({
     updateOrigin,
     closeCanvas,
     openSidebarConversationRef,
-    timeRangeRef,
-    attachmentOriginRef,
-    dashboardStateRef,
-    savedObjectStatusRef,
-    isSidebar,
+    dashboardLocatorParamsRef,
+    getExistingDashboardIdRef,
   ]);
 };

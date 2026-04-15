@@ -25,7 +25,7 @@ export const useToolTypes = () => {
   });
 
   const workflowsEnabled = useMemo(
-    () => settings.client.get(WORKFLOWS_UI_SETTING_ID, false),
+    () => settings.client.get<boolean>(WORKFLOWS_UI_SETTING_ID),
     [settings]
   );
 

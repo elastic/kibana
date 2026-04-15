@@ -42,6 +42,24 @@ const filterToggleEvents$ = new Subject<FilterToggleEvent>();
 // Global event bus for entity relationship toggle actions
 const entityRelationshipEvents$ = new Subject<EntityRelationshipEvent>();
 
+// =============================================================================
+// Pinned EUID Event Bus
+// =============================================================================
+
+/**
+ * Event emitted when a pinned EUID toggle action is requested.
+ * When an entity filter is toggled, the entity's EUID is also pinned/unpinned
+ * so the server can prioritize it in ES|QL query results.
+ */
+export interface PinnedEuidEvent {
+  scopeId: string;
+  entityId: string;
+  action: 'show' | 'hide';
+}
+
+// Global event bus for pinned EUID toggle actions
+const pinnedEuidEvents$ = new Subject<PinnedEuidEvent>();
+
 /**
  * Emit a filter toggle event. Any FilterStore listening for this scopeId
  * will receive the event and update its filter state.
@@ -89,6 +107,23 @@ export const emitEntityRelationshipToggle = (
 };
 
 /**
+ * Emit a pinned EUID toggle event. Any FilterStore listening for this scopeId
+ * will receive the event and update its pinned EUIDs state.
+ *
+ * @param scopeId - Unique identifier for the graph instance
+ * @param entityId - The entity EUID to pin/unpin
+ * @param action - 'show' to pin, 'hide' to unpin
+ */
+export const emitPinnedEuidToggle = (
+  scopeId: string,
+  entityId: string,
+  action: 'show' | 'hide'
+): void => {
+  const event: PinnedEuidEvent = { scopeId, entityId, action };
+  pinnedEuidEvents$.next(event);
+};
+
+/**
  * Check if an entity's relationships are expanded for the given scope.
  * Returns false gracefully if no store exists.
  *
@@ -107,6 +142,15 @@ export const isEntityRelationshipExpandedForScope = (
 export const isInitialEntityForScope = (scopeId: string, entityId: string): boolean => {
   const store = stores.get(scopeId);
   return store?.isInitialEntity(entityId) ?? false;
+};
+
+/**
+ * Check if an entity EUID is pinned for the given scope.
+ * Returns false gracefully if no store exists.
+ */
+export const isPinnedForScope = (scopeId: string, entityId: string): boolean => {
+  const store = stores.get(scopeId);
+  return store?.isPinned(entityId) ?? false;
 };
 
 /**
@@ -150,8 +194,10 @@ export class FilterStore {
   private initialEntityIds: Array<{ id: string; isOrigin: boolean }> = [];
   private readonly filters$ = new BehaviorSubject<Filter[]>([]);
   private readonly expandedEntityIds$ = new BehaviorSubject<Set<string>>(new Set());
+  private readonly pinnedEuids$ = new BehaviorSubject<Set<string>>(new Set());
   private readonly filterEventSubscription: Subscription;
   private readonly entityRelationshipEventSubscription: Subscription;
+  private readonly pinnedEuidEventSubscription: Subscription;
 
   constructor(scopeId: string) {
     this.scopeId = scopeId;
@@ -168,6 +214,13 @@ export class FilterStore {
       .pipe(rxFilter((event) => event.scopeId === this.scopeId))
       .subscribe((event) => {
         this.toggleEntityRelationship(event.entityId, event.action);
+      });
+
+    // Subscribe to pinned EUID toggle events for this scopeId
+    this.pinnedEuidEventSubscription = pinnedEuidEvents$
+      .pipe(rxFilter((event) => event.scopeId === this.scopeId))
+      .subscribe((event) => {
+        this.togglePinnedEuid(event.entityId, event.action);
       });
   }
 
@@ -280,12 +333,56 @@ export class FilterStore {
     return this.expandedEntityIds$.subscribe(callback);
   }
 
+  // ===========================================================================
+  // Pinned EUID State
+  // ===========================================================================
+
+  /**
+   * Toggle an entity EUID's pinned state.
+   * Pinned EUIDs are sent to the server to prioritize matching events in query results.
+   * @param entityId - The entity EUID to pin/unpin
+   * @param action - 'show' to pin, 'hide' to unpin
+   */
+  togglePinnedEuid(entityId: string, action: 'show' | 'hide'): void {
+    const next = new Set(this.pinnedEuids$.value);
+    if (action === 'show') {
+      next.add(entityId);
+    } else {
+      next.delete(entityId);
+    }
+    this.pinnedEuids$.next(next);
+  }
+
+  /**
+   * Check if an entity EUID is currently pinned.
+   */
+  isPinned(entityId: string): boolean {
+    return this.pinnedEuids$.value.has(entityId);
+  }
+
+  /**
+   * Get the current set of pinned EUIDs.
+   */
+  getPinnedEuids(): Set<string> {
+    return this.pinnedEuids$.value;
+  }
+
+  /**
+   * Subscribe to pinned EUID changes.
+   * @param callback - Function called when pinned EUIDs change
+   * @returns Subscription that should be unsubscribed on cleanup
+   */
+  subscribeToPinnedEuids(callback: (pinnedEuids: Set<string>) => void): Subscription {
+    return this.pinnedEuids$.subscribe(callback);
+  }
+
   /**
    * Reset the filter store to empty state.
    */
   reset(): void {
     this.filters$.next([]);
     this.expandedEntityIds$.next(new Set());
+    this.pinnedEuids$.next(new Set());
   }
 
   /**
@@ -295,8 +392,10 @@ export class FilterStore {
   destroy(): void {
     this.filterEventSubscription.unsubscribe();
     this.entityRelationshipEventSubscription.unsubscribe();
+    this.pinnedEuidEventSubscription.unsubscribe();
     this.filters$.complete();
     this.expandedEntityIds$.complete();
+    this.pinnedEuids$.complete();
   }
 }
 
