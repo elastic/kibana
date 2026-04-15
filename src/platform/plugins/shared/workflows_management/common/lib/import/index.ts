@@ -100,7 +100,20 @@ export function detectFileFormat(bytes: Uint8Array): 'zip' | 'yaml' {
   return 'yaml';
 }
 
-const MAX_COLLISION_RETRIES = 100;
+export const MAX_COLLISION_RETRIES = 100;
+
+/**
+ * Builds a single suffixed candidate ID from a base ID and a numeric index.
+ * Truncates the base when appending the suffix would exceed WORKFLOW_ID_MAX_LENGTH
+ * and strips trailing hyphens to prevent invalid double-hyphen sequences.
+ *
+ * Shared between client-side collision resolution and server-side batch candidate
+ * generation so truncation semantics can never diverge.
+ */
+export const buildSuffixedCandidate = (baseId: string, index: number): string => {
+  const suffix = `-${index}`;
+  return `${baseId.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length).replace(/-+$/, '')}${suffix}`;
+};
 
 /**
  * Resolves a non-colliding ID by appending a numeric suffix (-1, -2, ...).
@@ -118,10 +131,7 @@ export const resolveCollisionId = (
     return baseId;
   }
   for (let i = 1; i <= MAX_COLLISION_RETRIES; i++) {
-    const suffix = `-${i}`;
-    const candidate = `${baseId
-      .slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)
-      .replace(/-+$/, '')}${suffix}`;
+    const candidate = buildSuffixedCandidate(baseId, i);
     if (!conflictIds.has(candidate)) {
       return candidate;
     }
