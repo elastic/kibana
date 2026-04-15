@@ -358,7 +358,7 @@ function collectDocuments({
     let registerFetchLatency: () => void = () => {};
 
     const subscription = data.search
-      .search({ params }, { abortSignal: abortController.signal, retrieveResults: true })
+      .search({ params }, { abortSignal: abortController.signal, returnIntermediateResults: true })
       .pipe(
         tap({
           subscribe: () => {

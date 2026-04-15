@@ -59,7 +59,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   } = useKibana();
   const queryClient = useQueryClient();
   const [tableSearchValue, setTableSearchValue] = useState('');
-  const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS);
+  const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
+    .trim()
+    .toLowerCase();
   const [knowledgeIndicatorStatusFilter, setKnowledgeIndicatorStatusFilter] = useState<
     'active' | 'excluded'
   >('active');
@@ -161,6 +163,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
     : undefined;
+
+  const closeFlyout = useCallback(() => {
+    setSelectedKnowledgeIndicator(null);
+  }, []);
 
   const toggleSelectedKnowledgeIndicator = useCallback((knowledgeIndicator: KnowledgeIndicator) => {
     setSelectedKnowledgeIndicator((currentKnowledgeIndicator) => {
@@ -281,7 +287,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             <EuiSpacer size="m" />
             {isRulesSelected ? (
               <RulesTable
-                definition={definition.stream}
                 rules={ruleKnowledgeIndicators}
                 occurrencesByQueryId={occurrencesByQueryId}
                 searchTerm={debouncedTableSearchValue}
@@ -307,7 +312,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         <KnowledgeIndicatorDetailsFlyout
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
-          onClose={() => setSelectedKnowledgeIndicator(null)}
+          onClose={closeFlyout}
         />
       ) : null}
 

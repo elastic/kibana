@@ -16,10 +16,9 @@ export interface LocationState {
   initialMessage?: string;
 }
 
-export const MANAGEMENT_APP_ID = 'management';
+export const INFERENCE_MANAGEMENT_APP_ID = 'management';
 
-export const MANAGEMENT_LLM_CONNECTORS_PATH =
-  '/insightsAndAlerting/triggersActionsConnectors/connectors';
+export const INFERENCE_MANAGEMENT_PATH = '/modelManagement/model_settings';
 
 export const useIsOnManagementLlmConnectorsPage = (): boolean => {
   const {
@@ -31,7 +30,7 @@ export const useIsOnManagementLlmConnectorsPage = (): boolean => {
       combineLatest([application.currentAppId$, application.currentLocation$]).pipe(
         map(
           ([appId, location]) =>
-            appId === MANAGEMENT_APP_ID && location.includes(MANAGEMENT_LLM_CONNECTORS_PATH)
+            appId === INFERENCE_MANAGEMENT_APP_ID && location.includes(INFERENCE_MANAGEMENT_PATH)
         )
       ),
     [application]
@@ -67,14 +66,15 @@ export const useNavigation = () => {
   );
 
   const navigateToManageConnectors = useCallback(
-    () => application.navigateToApp(MANAGEMENT_APP_ID, { path: MANAGEMENT_LLM_CONNECTORS_PATH }),
+    () =>
+      application.navigateToApp(INFERENCE_MANAGEMENT_APP_ID, { path: INFERENCE_MANAGEMENT_PATH }),
     [application]
   );
 
   const manageConnectorsUrl = useMemo(
     () =>
-      application.getUrlForApp(MANAGEMENT_APP_ID, {
-        path: MANAGEMENT_LLM_CONNECTORS_PATH,
+      application.getUrlForApp(INFERENCE_MANAGEMENT_APP_ID, {
+        path: INFERENCE_MANAGEMENT_PATH,
       }),
     [application]
   );

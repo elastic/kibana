@@ -72,13 +72,6 @@ export const STREAMS_TABLE_CAPTION_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.runBulkStreamOnboardingButtonEmptyLabel',
-  {
-    defaultMessage: 'Onboard Streams',
-  }
-);
-
 export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.runStreamOnboardingButtonEmptyLabel',
   {
@@ -167,58 +160,66 @@ export const GENERATE_QUERIES_BUTTON_LABEL = i18n.translate(
   }
 );
 
-export const ONBOARDING_CONFIG_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.onboardingConfigPopoverAriaLabel',
-  {
-    defaultMessage: 'Configure onboarding steps and connectors',
-  }
-);
-
-export const ONBOARDING_CONFIG_POPOVER_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.onboardingConfigPopoverTitle',
-  {
-    defaultMessage: 'Onboarding configuration',
-  }
-);
-
-export const FEATURES_STEP_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.featuresStepLabel',
-  {
-    defaultMessage: 'KI Features',
-  }
-);
-
-export const QUERIES_STEP_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.queriesStepLabel',
-  {
-    defaultMessage: 'KI Queries',
-  }
-);
-
-export const RUN_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.runButtonLabel',
-  {
-    defaultMessage: 'Run',
-  }
-);
-
-export const INSIGHTS_CONNECTOR_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.insightsConnectorPopoverAriaLabel',
-  {
-    defaultMessage: 'Configure discovery connector',
-  }
-);
-
-export const INSIGHTS_CONNECTOR_POPOVER_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.insightsConnectorPopoverTitle',
-  {
-    defaultMessage: 'Discovery connector',
-  }
-);
-
 export const CONNECTOR_LOAD_ERROR = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.connectorLoadError',
   {
     defaultMessage: 'Failed to load connectors',
+  }
+);
+
+export const GENERATE_CONFIG_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.generateConfigAriaLabel',
+  {
+    defaultMessage: 'Configure generation steps and models',
+  }
+);
+
+export const GENERATE_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.generateButtonLabel',
+  {
+    defaultMessage: 'Generate',
+  }
+);
+
+export const MODEL_SELECTION_PANEL_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.modelSelectionPanelTitle',
+  {
+    defaultMessage: 'Model selection',
+  }
+);
+
+export const MODEL_SETTINGS_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.modelSettingsLabel',
+  {
+    defaultMessage: 'Model settings',
+  }
+);
+
+export const DEFAULT_MODEL_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.defaultModelBadgeLabel',
+  {
+    defaultMessage: 'Default',
+  }
+);
+
+export const GENERATE_FEATURES_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesTooltip',
+  {
+    defaultMessage:
+      'Runs only feature identification on selected streams using the configured model.',
+  }
+);
+
+export const GENERATE_QUERIES_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.generateQueriesTooltip',
+  {
+    defaultMessage: 'Runs only query generation on selected streams using the configured model.',
+  }
+);
+
+export const DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsConfigAriaLabel',
+  {
+    defaultMessage: 'Configure discovery model',
   }
 );

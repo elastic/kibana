@@ -150,6 +150,7 @@ components:
         environment:
           type: string
         criticality:
+          nullable: true
           $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
         business_unit:
           type: string

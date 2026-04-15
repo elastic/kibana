@@ -33,6 +33,7 @@ export interface DetailPanelLayoutProps {
   isReadOnly?: boolean;
   headerActions: (openConfirmRemove: () => void) => React.ReactNode;
   headerContent?: React.ReactNode;
+  footer?: React.ReactNode;
   children: React.ReactNode;
   confirmRemove?: ConfirmRemoveConfig;
 }
@@ -44,6 +45,7 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
   isReadOnly = false,
   headerActions,
   headerContent,
+  footer,
   children,
   confirmRemove,
 }) => {
@@ -121,10 +123,24 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
             flex: 1;
             min-height: 0;
             overflow-y: auto;
+            padding: ${euiTheme.size.l};
           `}
         >
           {children}
         </div>
+
+        {/* Footer: pinned at bottom */}
+        {footer && (
+          <div
+            css={css`
+              flex-shrink: 0;
+              border-top: ${euiTheme.border.thin};
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            `}
+          >
+            {footer}
+          </div>
+        )}
       </div>
 
       {confirmRemove && isConfirmOpen && (

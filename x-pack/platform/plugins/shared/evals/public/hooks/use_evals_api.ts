@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EVALS_RUNS_URL,
@@ -43,6 +44,20 @@ import {
   type GetProjectTracesResponse,
 } from '@kbn/evals-common';
 import { queryKeys } from '../query_keys';
+
+const EVALS_REMOTES_URL = '/internal/evals/remotes' as const;
+const getRemoteUrl = (remoteId: string) =>
+  `/internal/evals/remotes/${encodeURIComponent(remoteId)}` as const;
+
+export interface EvalsRemoteSummary {
+  id: string;
+  displayName: string;
+  url: string;
+}
+
+export interface GetEvalsRemotesResponse {
+  remotes: EvalsRemoteSummary[];
+}
 
 interface RunsListFilters {
   suiteId?: string;
@@ -102,6 +117,12 @@ export const useDatasets = (filters: DatasetsListFilters = {}) => {
       });
     },
     keepPreviousData: true,
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
   });
 };
 
@@ -115,6 +136,13 @@ export const useDataset = (datasetId: string) => {
         version: API_VERSIONS.internal.v1,
       });
     },
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -257,6 +285,89 @@ export const useDeleteExample = () => {
   });
 };
 
+export const useRemotes = () => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.remotes.list(),
+    queryFn: async (): Promise<GetEvalsRemotesResponse> => {
+      return services.http!.get<GetEvalsRemotesResponse>(EVALS_REMOTES_URL, {
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+  });
+};
+
+export const useCreateRemote = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: { displayName: string; url: string; apiKey: string }) => {
+      return services.http!.post<EvalsRemoteSummary>(EVALS_REMOTES_URL, {
+        body: JSON.stringify(body),
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.remotes.all });
+    },
+  });
+};
+
+export const useUpdateRemote = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (args: {
+      remoteId: string;
+      updates: { displayName?: string; url?: string; apiKey?: string };
+    }) => {
+      return services.http!.put<EvalsRemoteSummary>(getRemoteUrl(args.remoteId), {
+        body: JSON.stringify(args.updates),
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.remotes.all });
+    },
+  });
+};
+
+export const useTestRemoteConnection = () => {
+  const { services } = useKibana();
+
+  return useMutation({
+    mutationFn: async (body: {
+      url?: string;
+      apiKey?: string;
+      remoteId?: string;
+    }): Promise<{ success: boolean; statusCode: number; message?: string }> => {
+      return services.http!.post('/internal/evals/remotes/_test', {
+        body: JSON.stringify(body),
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+  });
+};
+
+export const useDeleteRemote = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (remoteId: string) => {
+      return services.http!.delete<{ deleted: boolean }>(getRemoteUrl(remoteId), {
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.remotes.all });
+    },
+  });
+};
+
 export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
   const { services } = useKibana();
 
@@ -277,6 +388,12 @@ export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
       });
     },
     keepPreviousData: true,
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
   });
 };
 
@@ -291,6 +408,13 @@ export const useEvaluationRun = (runId: string) => {
         version: API_VERSIONS.internal.v1,
       });
     },
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -347,7 +471,8 @@ export const useTrace = (traceId: string | null) => {
   return useQuery({
     queryKey: queryKeys.traces.detail(traceId ?? ''),
     queryFn: async (): Promise<GetTraceResponse> => {
-      const url = EVALS_TRACE_URL.replace('{traceId}', traceId!);
+      if (!traceId) throw new Error('traceId is required');
+      const url = EVALS_TRACE_URL.replace('{traceId}', traceId);
       return services.http!.get<GetTraceResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
@@ -359,6 +484,7 @@ export const useTrace = (traceId: string | null) => {
 interface TracingProjectsFilters {
   from?: string;
   to?: string;
+  name?: string;
   page?: number;
   perPage?: number;
 }
@@ -379,6 +505,7 @@ export const useTracingProjects = (
       const query: Record<string, string | number> = {};
       if (filters.from) query.from = filters.from;
       if (filters.to) query.to = filters.to;
+      if (filters.name) query.name = filters.name;
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
 
