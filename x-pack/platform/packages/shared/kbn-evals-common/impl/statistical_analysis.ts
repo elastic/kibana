@@ -9,7 +9,7 @@ import { gammaln, mean, tTest } from 'simple-statistics';
 import type { EvaluationScoreDocument } from './schemas/common_attributes.gen';
 import type { PairedTTestResult } from './schemas/runs/compare_runs_route.gen';
 
-interface PairedScore {
+export interface PairedScore {
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
@@ -60,30 +60,32 @@ export function pairScores(
   let skippedMissingPairs = 0;
 
   for (const scoreA of scoresA) {
+    const key = buildPairKey(scoreA);
+
     if (!isFiniteNumber(scoreA.evaluator.score)) {
       skippedNullScores += 1;
+      referenceMap.delete(key);
       continue;
     }
 
-    const match = referenceMap.get(buildPairKey(scoreA));
+    const match = referenceMap.get(key);
     if (!match) {
       skippedMissingPairs += 1;
       continue;
     }
 
-    if (!isFiniteNumber(match.evaluator.score)) {
-      skippedNullScores += 1;
-      continue;
-    }
+    referenceMap.delete(key);
 
     pairs.push({
       datasetId: scoreA.example.dataset.id,
       datasetName: scoreA.example.dataset.name,
       evaluatorName: scoreA.evaluator.name,
-      scoreA: scoreA.evaluator.score,
-      scoreB: match.evaluator.score,
+      scoreA: scoreA.evaluator.score!,
+      scoreB: match.evaluator.score!,
     });
   }
+
+  skippedMissingPairs += referenceMap.size;
 
   return {
     pairs,
@@ -107,12 +109,22 @@ function tStatisticToPValue(tStatistic: number, degreesOfFreedom: number): numbe
 
 /**
  * Compute paired t-test results grouped by dataset and evaluator.
+ * Accepts either raw score documents (which are paired internally)
+ * or pre-computed pairs to avoid duplicate pairing work.
  */
+export function computePairedTTestResults(pairs: PairedScore[]): PairedTTestResult[];
 export function computePairedTTestResults(
   scoresA: EvaluationScoreDocument[],
   scoresB: EvaluationScoreDocument[]
+): PairedTTestResult[];
+export function computePairedTTestResults(
+  scoresAOrPairs: EvaluationScoreDocument[] | PairedScore[],
+  scoresB?: EvaluationScoreDocument[]
 ): PairedTTestResult[] {
-  const { pairs } = pairScores(scoresA, scoresB);
+  const pairs: PairedScore[] =
+    scoresB !== undefined
+      ? pairScores(scoresAOrPairs as EvaluationScoreDocument[], scoresB).pairs
+      : (scoresAOrPairs as PairedScore[]);
 
   const groups = new Map<string, PairedScore[]>();
   for (const pair of pairs) {

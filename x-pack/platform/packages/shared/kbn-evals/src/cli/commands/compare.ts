@@ -99,7 +99,7 @@ export const compareCmd: Command<void> = {
       `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
 
-    const results = computePairedTTestResults(scoresA, scoresB);
+    const results = computePairedTTestResults(pairs);
     if (results.length === 0) {
       log.warning('No t-test results returned.');
       return;

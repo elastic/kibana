@@ -99,7 +99,7 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
             filteredA,
             filteredB
           );
-          const results = computePairedTTestResults(filteredA, filteredB);
+          const results = computePairedTTestResults(pairs);
 
           return response.ok({
             body: {

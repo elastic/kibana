@@ -39,6 +39,7 @@ interface ExampleScorePair {
   exampleId: string;
   exampleIndex: number | null;
   evaluatorName: string;
+  repetitionIndex: number;
   scoreA: number | null | undefined;
   scoreB: number | null | undefined;
 }
@@ -201,11 +202,12 @@ const ExampleDrilldownFlyout: React.FC<{
 
     const mapB = new Map<string, Map<string, number | null | undefined>>();
     for (const ex of examplesB.examples) {
-      const evaluatorScores = new Map<string, number | null | undefined>();
+      const scoresByKey = new Map<string, number | null | undefined>();
       for (const score of ex.scores) {
-        evaluatorScores.set(score.evaluator.name, score.evaluator.score);
+        const key = `${score.evaluator.name}|${score.task.repetition_index}`;
+        scoresByKey.set(key, score.evaluator.score);
       }
-      mapB.set(ex.example_id, evaluatorScores);
+      mapB.set(ex.example_id, scoresByKey);
     }
 
     const result: ExampleScorePair[] = [];
@@ -213,20 +215,27 @@ const ExampleDrilldownFlyout: React.FC<{
       const bScores = mapB.get(ex.example_id);
       for (const score of ex.scores) {
         if (score.evaluator.name !== evaluatorName) continue;
+        const key = `${score.evaluator.name}|${score.task.repetition_index}`;
         result.push({
           exampleId: ex.example_id,
           exampleIndex: ex.example_index,
           evaluatorName: score.evaluator.name,
+          repetitionIndex: score.task.repetition_index,
           scoreA: score.evaluator.score,
-          scoreB: bScores?.get(score.evaluator.name) ?? null,
+          scoreB: bScores?.get(key) ?? null,
         });
       }
     }
 
-    return result.sort((a, b) => (a.exampleIndex ?? 0) - (b.exampleIndex ?? 0));
+    return result.sort((a, b) => {
+      const indexDiff = (a.exampleIndex ?? 0) - (b.exampleIndex ?? 0);
+      if (indexDiff !== 0) return indexDiff;
+      return a.repetitionIndex - b.repetitionIndex;
+    });
   }, [examplesA, examplesB, evaluatorName]);
 
   const isLoading = loadingA || loadingB;
+  const hasRepetitions = useMemo(() => pairs.some((p) => p.repetitionIndex > 0), [pairs]);
 
   const flyoutColumns: Array<EuiBasicTableColumn<ExampleScorePair>> = useMemo(
     () => [
@@ -235,7 +244,10 @@ const ExampleDrilldownFlyout: React.FC<{
         name: i18n.FLYOUT_COLUMN_EXAMPLE,
         render: (_id: string, item: ExampleScorePair) => {
           const isNumericFallback = /^\d+$/.test(item.exampleId);
-          const label = isNumericFallback ? `#${item.exampleId}` : item.exampleId;
+          const baseLabel = isNumericFallback ? `#${item.exampleId}` : item.exampleId;
+          const label = hasRepetitions
+            ? `${baseLabel} (rep ${item.repetitionIndex + 1})`
+            : baseLabel;
           const isPaired =
             item.scoreA != null &&
             item.scoreB != null &&
@@ -280,7 +292,7 @@ const ExampleDrilldownFlyout: React.FC<{
         },
       },
     ],
-    []
+    [hasRepetitions]
   );
 
   return (
@@ -394,12 +406,14 @@ export const CompareRunsPage: React.FC = () => {
 
   const firstRowByDataset = useMemo(() => {
     const seen = new Set<string>();
-    const map = new Map<number, boolean>();
-    sortedResults.forEach((item, idx) => {
-      map.set(idx, !seen.has(item.datasetId));
-      seen.add(item.datasetId);
-    });
-    return map;
+    const firstRows = new Set<PairedTTestResult>();
+    for (const item of sortedResults) {
+      if (!seen.has(item.datasetId)) {
+        firstRows.add(item);
+        seen.add(item.datasetId);
+      }
+    }
+    return firstRows;
   }, [sortedResults]);
 
   const columns: Array<EuiBasicTableColumn<PairedTTestResult>> = useMemo(
@@ -408,8 +422,7 @@ export const CompareRunsPage: React.FC = () => {
         field: 'datasetName',
         name: i18n.COLUMN_DATASET,
         render: (_val: string, item: PairedTTestResult) => {
-          const idx = sortedResults.indexOf(item);
-          if (!firstRowByDataset.get(idx)) return null;
+          if (!firstRowByDataset.has(item)) return null;
           return <strong>{item.datasetName}</strong>;
         },
       },
@@ -464,7 +477,7 @@ export const CompareRunsPage: React.FC = () => {
         ),
       },
     ],
-    [sortedResults, firstRowByDataset]
+    [firstRowByDataset]
   );
 
   if (!runIdA || !runIdB) {
