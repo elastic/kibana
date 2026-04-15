@@ -18,7 +18,7 @@ exclude:
 conclusion: neutral
 ---
 
-Decide whether this PR should nudge the author to run the **Flaky Test Runner**. That takes two steps: (1) paths in scope, (2) changes that could realistically affect flakiness (see **When to nudge**). When a nudge applies, output **only** the markdown block in **Output format** below. When it does not apply, leave no comment on the PR.
+Decide whether this PR should nudge the author to run the **Flaky Test Runner**. That takes two steps: (1) paths in scope, (2) changes that could realistically affect flakiness (see **When to nudge**). When a nudge applies, follow **Output format** (verbatim PR markdown plus resolved `/flaky` lines per **Rules**). When it does not apply, leave no comment on the PR.
 
 ## When this applies (paths)
 
@@ -57,10 +57,10 @@ If a PR touches **both** Scout and FTR paths, judge **each runner separately**. 
 
 Each PR comment body must start with **`/flaky `** followed by **exactly one** clause: `<kind>:<path>:<count>` (for example `/flaky scoutConfig:path/to/playwright.config.ts:30`). The workflow runs **per comment**, so **do not** put Scout and FTR in the same comment. If you need **both** runners, post **two** comments on the PR: first `/flaky` line in one comment, second `/flaky` line in another.
 
-**Why not a generic `type`?** The GitHub workflow (`.github/workflows/trigger-flaky.yml`) only recognizes the **exact** tokens **`scoutConfig`** and **`ftrConfig`**. They select which CI job runs (Scout/Playwright vs FTR). Replace placeholders with those literals, not the word `type`.
+**Why not a generic `type`?** The `/flaky` handler only accepts the **exact** tokens **`scoutConfig`** and **`ftrConfig`**. They select which CI job runs (Scout/Playwright vs FTR). Replace placeholders with those literals, not the word `type`.
 
 - **`scoutConfig`:** path to the **Playwright** config `.ts` file.
-- **`ftrConfig`:** path to the **FTR** leaf config `.ts` file passed to `node scripts/functional_tests --config`.
+- **`ftrConfig`:** path to the **FTR** leaf config `.ts` file.
 
 **Examples:**
 
@@ -110,15 +110,17 @@ Both Scout and FTR (two separate comments on the PR):
 - `x-pack/platform/test/serverless/**`
 - `x-pack/solutions/<solution>/test/serverless/**`
 
-**Recognize FTR:** mocha suites with **`FtrProviderContext`** (`getService`, `loadTestFile`, …), **`@kbn/expect`**, or leaf **`config*.ts`** used by `node scripts/functional_tests --config`.
+**Recognize FTR:** mocha suites with **`FtrProviderContext`** (`getService`, `loadTestFile`, …), **`@kbn/expect`**, or leaf **`config*.ts`** for an FTR suite.
 
 **Not FTR:** Scout (`**/test/scout/**`), Cypress (`*.cy.ts` and `*cypress*` driver trees), plain Jest units without FTR.
 
 ## Output format (follow verbatim)
 
-When a nudge is warranted per **When to nudge (substance)**, output **only** the following markdown block (wording is fixed; you resolve paths). Include **`scoutConfig`** lines only for qualifying Scout changes; **`ftrConfig`** lines only for qualifying FTR changes. Replace `<KIND>` / `<CONFIG_PATH>` with literals and real paths (see **GitHub comment format**).
+When a nudge is warranted per **When to nudge (substance)**, output two parts:
 
-If **one** runner qualifies, use **one** `text` block with a **single** `/flaky` line. If **both** qualify, use **two** `text` blocks in a row (Scout first, then FTR), each block containing **one** `/flaky` line. The author must post each block as a **separate** PR comment.
+1. **PR markdown (verbatim block below):** fixed wording only. Do **not** put placeholder `/flaky` lines, copy-paste fences, or explanations about kinds, paths, or multiple blocks in this block. Developers get the exact `/flaky` command(s) from automation; this section is just the nudge and the two ways to run.
+
+2. **Resolved commands (Rules):** you still resolve paths per **Scout** / **FTR** / **GitHub comment format** so automation (or follow-up tooling) can post the right `/flaky` line(s).
 
 ````markdown
 ## Run the Flaky Test Runner (recommended)
@@ -127,21 +129,13 @@ If **one** runner qualifies, use **one** `text` block with a **single** `/flaky`
 
 **Two ways to run it:**
 
-1. Open the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigger_flaky_test_runner) or
-2. Post each `/flaky` line below as its **own** comment on this PR (one trigger per comment):
-
-```text
-/flaky <KIND>:<CONFIG_PATH>:30
-```
-
-`<KIND>` must be the literal token `scoutConfig` or `ftrConfig`. `<CONFIG_PATH>` is the repo-relative config for that runner. If both runners qualify, add a **second** `text` block with the other kind (two comments total).
+1. Open the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigger_flaky_test_runner)
+2. Use the `/flaky` PR comment(s) prepared automatically for this change (exact `scoutConfig` / `ftrConfig` lines are injected for you; post one comment per runner when both apply).
 ````
 
 **Rules**
 
-- Each `text` fence must contain **exactly one** `/flaky` line (one `scoutConfig:` **or** one `ftrConfig:` clause, never both in the same fence).
-- If both runners qualify, output **two** `text` blocks (two separate paste targets for two PR comments).
+- After the verbatim block, output the **resolved** `/flaky` line(s) automation needs: one line if one runner qualifies, **two** lines (Scout first, then FTR) if both qualify. Each line must be a full `/flaky scoutConfig:…:30` or `/flaky ftrConfig:…:30` with repo-relative paths and **`:30`**. Never use `<KIND>` or `<CONFIG_PATH>` placeholders there.
 - Always append **`:30`** after **each** path (never omit the count).
-- Do not rephrase the heading, recommendation, or two-way instructions; do not add severity labels or extra sections.
-- The `/flaky` lines you show must be **fully resolved** (no literal `<KIND>` or `<CONFIG_PATH>` left in what you publish).
-- Never invent a second command for a runner that did not qualify.
+- Do not rephrase the heading, recommendation, or two-way instructions inside the verbatim block; do not add severity labels or extra sections there.
+- Never invent a command for a runner that did not qualify.
