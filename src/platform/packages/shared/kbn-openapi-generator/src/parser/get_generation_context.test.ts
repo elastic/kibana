@@ -270,4 +270,27 @@ describe('getGenerationContext zodHelpersImports', () => {
     const ctx = getGenerationContext(doc, {});
     expect(ctx.zodHelpersImports).toEqual(['isNonEmptyString']);
   });
+
+  it('zodHelpersImportMode full imports all four helpers when minimal analysis needs any', () => {
+    const ctx = getGenerationContext(
+      minimalGetOperation({
+        operationId: 'FullMode',
+        parameters: [
+          {
+            name: 'flag',
+            in: 'query',
+            required: false,
+            schema: { type: 'boolean' },
+          },
+        ],
+      }),
+      { zodHelpersImportMode: 'full' }
+    );
+    expect(ctx.zodHelpersImports).toEqual([
+      'isValidDateMath',
+      'isNonEmptyString',
+      'ArrayFromString',
+      'BooleanFromString',
+    ]);
+  });
 });

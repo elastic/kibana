@@ -26,7 +26,7 @@ export interface GenerationContext {
   info: OpenAPIV3.InfoObject;
   imports: ImportsMap;
   circularRefs: Set<string>;
-  config: Pick<GeneratorConfig, 'schemaNameTransform'>;
+  config: Pick<GeneratorConfig, 'schemaNameTransform' | 'zodHelpersImportMode'>;
   /**
    * Helpers from @kbn/zod-helpers/v4 that are actually used in generated Zod
    * (query/path coercions and string formats). Omitted names are not imported.
@@ -45,7 +45,7 @@ export interface BundleGenerationContext {
   operations: NormalizedOperation[];
   sources: ParsedSource[];
   info: OpenAPIV3.InfoObject;
-  config: Pick<GeneratorConfig, 'schemaNameTransform'>;
+  config: Pick<GeneratorConfig, 'schemaNameTransform' | 'zodHelpersImportMode'>;
 }
 
 const ZOD_HELPERS_ORDER = [
@@ -230,7 +230,11 @@ export function getGenerationContext(
   const info = getInfo(normalizedDocument);
   const imports = getImportsMap(normalizedDocument);
   const circularRefs = getCircularRefs(normalizedDocument);
-  const zodHelpersImports = computeZodHelpersImports(operations, document);
+  const minimalZodHelpers = computeZodHelpersImports(operations, document);
+  const zodHelpersImports: readonly string[] =
+    config.zodHelpersImportMode === 'full' && minimalZodHelpers.length > 0
+      ? [...ZOD_HELPERS_ORDER]
+      : minimalZodHelpers;
   const hasZodHelpersImports = zodHelpersImports.length > 0;
 
   return {

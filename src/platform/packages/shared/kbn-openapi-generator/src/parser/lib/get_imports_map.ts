@@ -16,9 +16,13 @@ import { isLocalRef } from './helpers/is_local_ref';
 const HTTP_METHODS = Object.values(OpenAPIV3.HttpMethods);
 
 /**
- * Codegen only emits Zod for success responses (typically 200). `findRefs` for import
- * discovery should ignore `$ref`s that exist only under error responses so consumers
- * do not need to edit OpenAPI YAML; this does not change runtime route behavior.
+ * Returns a copy of the document where each operation keeps only the `200` response entry
+ * under `paths.*.*.responses`. This must stay aligned with `getApiOperationsList`
+ * (`get_api_operations_list.ts`): emitted Zod for an operation uses `responses['200']` only,
+ * so external `$ref`s that appear solely under `4xx`/`5xx` (or other non-200 codes) are not
+ * materialized in generated code and must not force cross-file imports for those symbols.
+ *
+ * `components` is not modified—schemas there are always candidates for codegen imports.
  */
 function cloneDocumentOmittingNonSuccessResponses(parsedSchema: OpenApiDocument): OpenApiDocument {
   const clone = structuredClone(parsedSchema) as OpenApiDocument;
@@ -48,8 +52,12 @@ export interface ImportsMap {
 }
 
 /**
- * Traverse the OpenAPI document, find all external references, and return a map
- * of import paths and imported symbols
+ * Traverse the OpenAPI document, find all external `$ref`s, and return a map of import paths
+ * to symbols to import from adjacent `*.gen.ts` files.
+ *
+ * Discovery runs on `cloneDocumentOmittingNonSuccessResponses`: path-level `$ref`s under
+ * non-200 responses are ignored so import lists match what `zod_operation_schema` can emit
+ * for success responses (same `responses['200']` slice as `getApiOperationsList`).
  *
  * @param parsedSchema Parsed OpenAPI document
  * @returns A map of import paths to symbols to import

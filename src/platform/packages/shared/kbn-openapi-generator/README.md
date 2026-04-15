@@ -68,8 +68,9 @@ By default it uses the `zod_operation_schema` template which produces runtime ty
 
 Codegen picks `@kbn/zod-helpers/v4` imports to match what the emitted Zod actually uses (for example `BooleanFromString` for boolean query parameters, `ArrayFromString` for array query parameters). For import analysis, local `#/components/...` `$ref`s in query and path parameters are resolved; external file `$ref`s are not, because the corresponding Zod lives in the generated file for that schema. String `format` helpers (`date-math`, `nonempty`) are inferred from operation bodies/responses and from `components.schemas`, not from a blanket string scan of the whole document.
 
-- **Cross-file schema imports:** Discovery ignores `$ref`s that appear only under **non-200** responses, because this template only emits Zod for success responses. That avoids unused imports without changing runtime behavior.
-- **`GenerationContext`:** Prefer `hasZodHelpersImports` and `zodHelpersImports`. The field `useZodHelpers` is a deprecated alias equal to `hasZodHelpersImports`.
+- **Cross-file schema imports:** [`getImportsMap`](src/parser/lib/get_imports_map.ts) walks `$ref`s on the same slice of the document as codegen: **only `responses['200']`** on each operation (see [`get_api_operations_list.ts`](src/parser/lib/get_api_operations_list.ts)). `$ref`s that appear only under error responses (or any non-200 code) on `paths` are ignored for import discovery, which avoids unused imports and matches emitted Zod. `components.schemas` is still scanned in full.
+- **Optional parity check:** `assertZodHelperImportsCoverUsage` in [`src/parser/lib/assert_zod_helper_imports_cover_usage.ts`](src/parser/lib/assert_zod_helper_imports_cover_usage.ts) can be used in tests or scripts to assert every used `@kbn/zod-helpers/v4` symbol is imported (see unit tests in the same directory).
+- **`GenerationContext`:** Prefer `hasZodHelpersImports` and `zodHelpersImports`. The field `useZodHelpers` is a deprecated alias equal to `hasZodHelpersImports`. Pass `zodHelpersImportMode: 'full'` to [`generate`](src/openapi_generator.ts) (or `--zodHelpersImportMode full` on the CLI) to import all four zod helpers whenever minimal analysis would import any—use sparingly for edge-case OpenAPI shapes.
 - **Regenerated `*.gen.ts` files:** After changing a `.schema.yaml` or the generator, run codegen and commit the updated `*.gen.ts` output (including import-line churn). That is expected; it does not by itself mean the OpenAPI source was incorrect.
 
 Example of generated code:
@@ -126,6 +127,8 @@ generate({
 ```
 
 ## CI integration
+
+Elastic’s Buildkite pipeline runs repo-wide type checking (for example `node scripts/type_check --with-archive` from `.buildkite/scripts/steps/typecheck/check_types.sh`) and codegen checks referenced from `.buildkite/scripts/steps/checks.sh`. For example, `.buildkite/scripts/steps/code_generation/elastic_assistant_codegen.sh` runs `yarn openapi:generate` in `kbn-elastic-assistant-common` and fails if generated `*.gen.ts` files are out of sync. Generator changes should pass `node scripts/type_check --project src/platform/packages/shared/kbn-openapi-generator/tsconfig.json` and regenerate consumers as needed.
 
 To make sure that generated code is always in sync with its OpenAPI specification it is recommended to add a command to your CI pipeline that will run code generation on every pull request and commit the changes if there are any.
 
