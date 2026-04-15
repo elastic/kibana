@@ -162,7 +162,7 @@ export class UpgradeAgentlessDeploymentsTask {
   ) => {
     const SAVED_OBJECT_TYPE = 'fleet-agent-policies';
 
-    const policiesKuery = `${SAVED_OBJECT_TYPE}.supports_agentless: true`;
+    const policiesKuery = `${SAVED_OBJECT_TYPE}.supports_agentless: true AND NOT ${SAVED_OBJECT_TYPE}.is_verifier: true`;
 
     try {
       const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {

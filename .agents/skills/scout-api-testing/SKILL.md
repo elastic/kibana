@@ -14,7 +14,7 @@ description: Use when creating, updating, debugging, or reviewing Scout API test
 - `x-pack/solutions/search/**` -> `@kbn/scout-search`
 - `x-pack/solutions/security/**` -> `@kbn/scout-security`
 - Prefer a single top-level `apiTest.describe(...)` per file and avoid nested `describe` blocks; multiple top-level `describe`s are supported, but files get hard to read quickly.
-- Tags: add `{ tag: ... }` on the suite (or individual tests) so CI/discovery can select the right test target (for example `tags.deploymentAgnostic` or `[...tags.stateful.classic]`). Unlike UI tests, API tests don’t currently validate tags at runtime.
+- Tags: add `{ tag: ... }` on the suite (or individual tests) so CI/discovery can select the right test target. For **solution** modules, prefer explicit targets (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]` in Observability); reserve `tags.deploymentAgnostic` mainly for **platform** specs that truly need every deployment-agnostic target (see `scout-migrate-from-ftr`). Unlike UI tests, API tests don’t currently validate tags at runtime.
 - If the module provides Scout fixtures, import `apiTest` from `<module-root>/test/scout*/api/fixtures` to get module-specific extensions. Importing directly from the module’s Scout package is also fine when you don’t need extensions.
 - Browser fixtures are disabled for `apiTest` (no `page`, `browserAuth`, `pageObjects`).
 

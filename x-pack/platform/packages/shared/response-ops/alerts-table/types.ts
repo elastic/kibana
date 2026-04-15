@@ -676,6 +676,7 @@ interface PanelConfig {
   id: EuiContextMenuPanelId;
   title?: JSX.Element | string;
   'data-test-subj'?: string;
+  width?: number;
 }
 
 export interface RenderContentPanelProps {

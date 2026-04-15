@@ -9,7 +9,8 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, header, timePicker, svlCommonPage } = getPageObjects([
+  const { appMenu, common, discover, header, timePicker, svlCommonPage } = getPageObjects([
+    'appMenu',
     'common',
     'timePicker',
     'discover',
@@ -46,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setDefaultAbsoluteRange();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      await testSubjects.existOrFail('discoverNewButton');
+      await appMenu.existOrFail('discoverNewButton');
       await testSubjects.click('app-menu-overflow-button');
       await testSubjects.existOrFail('discoverAlertsButton');
     });
@@ -63,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setDefaultAbsoluteRange();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      await testSubjects.existOrFail('discoverNewButton');
+      await appMenu.existOrFail('discoverNewButton');
       await testSubjects.click('app-menu-overflow-button');
       await testSubjects.existOrFail('discoverAlertsButton');
       await testSubjects.existOrFail('example-custom-action');

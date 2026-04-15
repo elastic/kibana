@@ -22,19 +22,18 @@ export const WorkflowSelectorEmptyState: React.FC<WorkflowSelectorEmptyStateProp
     <EuiSelectableMessage>
       <EuiEmptyPrompt
         title={
-          <EuiText textAlign="center" color="textParagraph">
-            {i18n.EMPTY_STATE_TITLE}
+          <EuiText textAlign="center" color="textParagraph" size="s">
+            <strong>{i18n.EMPTY_STATE_TITLE}</strong>
           </EuiText>
         }
-        titleSize="s"
-        body={i18n.EMPTY_STATE_DESCRIPTION}
+        titleSize="xxs"
         actions={
           <EuiButton
             color="primary"
             fill={false}
             href={createWorkflowHref}
             target="_blank"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             size="s"
           >
             {i18n.EMPTY_STATE_BUTTON_TEXT}

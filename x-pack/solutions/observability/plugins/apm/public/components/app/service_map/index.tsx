@@ -8,7 +8,7 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
+import React, { useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
 import {
@@ -18,7 +18,12 @@ import {
 import { SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS, SERVICE_MAP_FULL_SCREEN_CLASS } from './constants';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
+import {
+  invalidLicenseMessage,
+  isServiceNode,
+  SERVICE_MAP_TIMEOUT_ERROR,
+  type ServiceMapNode,
+} from '../../../../common/service_map';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { LicensePrompt } from '../../shared/license_prompt';
@@ -32,6 +37,7 @@ import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
 import { useServiceMap } from './use_service_map';
+import { useServiceMapBadges } from './use_service_map_badges';
 import { ServiceMapGraph } from './graph';
 
 function PromptContainer({ children }: { children: ReactNode }) {
@@ -124,6 +130,54 @@ export function ServiceMap({
     serviceGroupId,
     serviceName,
   });
+
+  const serviceNamesOnMap = useMemo(() => {
+    const names: string[] = [];
+    if (status !== FETCH_STATUS.SUCCESS) {
+      return names;
+    }
+    for (const node of data.nodes) {
+      if (isServiceNode(node)) {
+        names.push(node.data.label);
+      }
+    }
+    return names;
+  }, [data.nodes, status]);
+
+  const { data: badgesData, status: badgesStatus } = useServiceMapBadges({
+    serviceNames: serviceNamesOnMap,
+    environment,
+    start,
+    end,
+    kuery,
+    enabled: status === FETCH_STATUS.SUCCESS && data.nodes.length > 0,
+  });
+
+  const nodesWithBadges: ServiceMapNode[] = useMemo(() => {
+    if (badgesStatus !== FETCH_STATUS.SUCCESS || !badgesData) {
+      return data.nodes;
+    }
+
+    const alertsByName = new Map(badgesData.alerts.map((a) => [a.serviceName, a.alertsCount]));
+    const sloByName = new Map(badgesData.slos.map((s) => [s.serviceName, s]));
+
+    return data.nodes.map((node): ServiceMapNode => {
+      if (!isServiceNode(node)) {
+        return node;
+      }
+      const serviceLabel = node.data.label;
+      const slo = sloByName.get(serviceLabel);
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          alertsCount: alertsByName.get(serviceLabel) ?? 0,
+          sloStatus: slo?.sloStatus ?? 'noSLOs',
+          sloCount: slo?.sloCount,
+        },
+      };
+    });
+  }, [badgesData, badgesStatus, data.nodes]);
 
   const { ref, height } = useRefDimensions();
   const windowHeight = useWindowSize().height;
@@ -246,7 +300,7 @@ export function ServiceMap({
           {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
           <ServiceMapGraph
             height={mapHeight}
-            nodes={data.nodes}
+            nodes={nodesWithBadges}
             edges={data.edges}
             serviceName={serviceName}
             environment={environment}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricStateDefaults, MetricLayoutWithDefault } from './types';
+import type { MetricLayoutWithDefault, MetricStateDefaults, PrimaryMetricPosition } from './types';
 
 export const LENS_METRIC_ID = 'lnsMetric';
 
@@ -36,22 +36,28 @@ export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
   iconAlign: 'right',
   valueFontMode: 'default',
   primaryPosition: 'bottom',
-  titleWeight: 'bold',
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
 };
 
-export const LENS_METRIC_LAYOUT_BY_POSITION: Record<'bottom' | 'top', MetricLayoutWithDefault> = {
+export const LENS_METRIC_LAYOUT_BY_POSITION: Record<
+  PrimaryMetricPosition,
+  MetricLayoutWithDefault
+> = {
   bottom: {
     titlesTextAlign: 'left',
-    titleWeight: 'bold',
     primaryAlign: 'right',
+    iconAlign: 'right',
+    secondaryAlign: 'right',
+  },
+  middle: {
+    titlesTextAlign: 'left',
+    primaryAlign: 'center',
     iconAlign: 'right',
     secondaryAlign: 'right',
   },
   top: {
     titlesTextAlign: 'left',
-    titleWeight: 'normal',
     primaryAlign: 'left',
     iconAlign: 'right',
     secondaryAlign: 'left',

@@ -6,6 +6,7 @@
  */
 
 export const ADD_AGENT_BUTTON = 'addAgentButton';
+export const ADD_AGENT_MENU_BUTTON = 'addAgentMenuButton';
 export const ADD_AGENT_BUTTON_TOP = 'addAgentBtnTop';
 export const LANDING_PAGE_ADD_FLEET_SERVER_BUTTON = 'fleetServerLanding.addFleetServerButton';
 

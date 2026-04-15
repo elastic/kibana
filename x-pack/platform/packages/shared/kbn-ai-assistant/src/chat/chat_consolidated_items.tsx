@@ -111,7 +111,7 @@ export function ChatConsolidatedItems({
             })}
             color="text"
             data-test-subj="observabilityAiAssistantChatCollapsedItemsButton"
-            iconType={expanded ? 'arrowUp' : 'arrowDown'}
+            iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
             onClick={handleToggleExpand}
           />
         }

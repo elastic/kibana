@@ -40,6 +40,21 @@ const DEPRECATED_TYPE_ALIASES = new Set([
 const LOOP_ONLY_STEP_TYPES = new Set(['loop.break', 'loop.continue']);
 
 /**
+ * Match types where the cursor is inside a Liquid/variable expression.
+ * The YAML schema provider cannot contribute suggestions for these contexts
+ * and can block the completion pipeline for seconds on large documents.
+ */
+const TEMPLATE_EXPRESSION_MATCH_TYPES = new Set([
+  'variable-unfinished',
+  'variable-complete',
+  'at',
+  'foreach-variable',
+  'liquid-filter',
+  'liquid-block-filter',
+  'liquid-syntax',
+]);
+
+/**
  * Get the deduplication key for a suggestion.
  * Uses filterText if available (contains the actual connector type),
  * otherwise falls back to the label.
@@ -122,9 +137,14 @@ export function getCompletionItemProvider(
         autocompleteContext.focusedStepInfo
       );
 
+      const matchType = autocompleteContext.lineParseResult?.matchType ?? '';
+      const isInTemplateExpression =
+        TEMPLATE_EXPRESSION_MATCH_TYPES.has(matchType) ||
+        (matchType === 'liquid-block-keyword' && autocompleteContext.isInLiquidBlock);
+
       let isIncomplete = false;
 
-      if (!shouldUseExclusiveSuggestions) {
+      if (!shouldUseExclusiveSuggestions && !isInTemplateExpression) {
         const allYamlProviders = getAllYamlProviders();
 
         for (const yamlProvider of allYamlProviders) {

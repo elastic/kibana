@@ -34,10 +34,13 @@ import {
   FunctionDefinitionTypes,
   ESQL_COMMON_NUMERIC_TYPES,
 } from '../../definitions/types';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 import { setTestFunctions } from '../../definitions/utils/test_functions';
-import { getDateHistogramCompletionItem, PLACEHOLDER_CONFIG } from '../complete_items';
+import {
+  getDateHistogramCompletionItem,
+  getTimeseriesDateHistogramCompletionItem,
+  PLACEHOLDER_CONFIG,
+} from '../complete_items';
 import { attachReplacementRanges } from '../../../language/autocomplete/utils/prefix_range';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
@@ -129,11 +132,8 @@ describe('STATS Autocomplete', () => {
   });
 
   const suggest = async (query: string) => {
-    const correctedQuery = correctQuerySyntax(query);
-    const { root } = Parser.parse(correctedQuery, { withFormatting: true });
     const cursorPosition = query.length;
-    const innerText = query.substring(0, cursorPosition);
-    const { command } = findAstPosition(root, cursorPosition);
+    const { innerText, root, command } = findAutocompleteAstPosition(query, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
@@ -538,6 +538,17 @@ describe('STATS Autocomplete', () => {
           );
         });
 
+        it('suggests opening a list after IN in WHERE', async () => {
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField IN ', ['($0)']);
+        });
+
+        it('suggests LIKE pattern values after LIKE in WHERE', async () => {
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField LIKE ', [
+            '"${0:*}"',
+            '"${0:?}"',
+          ]);
+        });
+
         describe('completed expression suggestions', () => {
           const completedExpressionSuggestions = ['| ', ', ', 'BY '];
 
@@ -858,6 +869,17 @@ describe('STATS Autocomplete', () => {
           const suggestions = await suggest('FROM a | STATS BY ');
 
           expect(suggestions).toContainEqual(expect.objectContaining(expectedCompletionItem));
+        });
+
+        test('suggests TBUCKET for TS source command', async () => {
+          const expectedCompletionItem = getTimeseriesDateHistogramCompletionItem(50);
+
+          const suggestions = await suggest('TS a | STATS BY ');
+
+          expect(suggestions).toContainEqual(expect.objectContaining(expectedCompletionItem));
+          expect(suggestions).not.toContainEqual(
+            expect.objectContaining(getDateHistogramCompletionItem(50))
+          );
         });
 
         test('BUCKET constant arguments should not trigger function suggestions', async () => {

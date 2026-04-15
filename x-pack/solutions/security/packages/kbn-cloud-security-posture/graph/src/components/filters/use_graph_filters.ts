@@ -7,12 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 import type { Filter } from '@kbn/es-query';
-import {
-  getOrCreateFilterStore,
-  destroyFilterStore,
-  emitEntityRelationshipToggle,
-} from './filter_store';
-import type { NodeProps } from '../types';
+import { getOrCreateFilterStore, destroyFilterStore } from './filter_store';
 
 /**
  * Hook that manages graph filter state for a specific scope.
@@ -23,23 +18,32 @@ import type { NodeProps } from '../types';
  * 3. Subscribes to expanded entity IDs from the store using useSyncExternalStore
  * 4. Automatically re-renders when filters or entity relationships change
  * 5. Provides setSearchFilters for SearchBar's onFiltersUpdated callback
- * 6. Provides onToggleEntityRelationships for entity relationship toggle
- * 7. Computes entityIdsForApi from expandedEntityIds for graph data fetching
- * 8. Cleans up and destroys the store on unmount
+ * 6. Computes entityIdsForApi from expandedEntityIds for graph data fetching
+ * 7. Cleans up and destroys the store on unmount
  *
  * @param scopeId - Unique identifier for the graph instance
  * @param dataViewId - The data view ID used when constructing new filters
- * @returns Object containing searchFilters, setSearchFilters, expandedEntityIds, onToggleEntityRelationships, entityIdsForApi
+ * @returns Object containing searchFilters, setSearchFilters, entityIdsForApi
  */
 export const useGraphFilters = (
   scopeId: string,
+  initialEntityIds: Array<{
+    /**
+     * The ID of the entity.
+     */
+    id: string;
+
+    /**
+     * Whether this entity is the origin of the graph (for centering).
+     */
+    isOrigin: boolean;
+  }>,
   dataViewId: string
 ): {
   searchFilters: Filter[];
   setSearchFilters: (filters: Filter[]) => void;
-  expandedEntityIds: Set<string>;
-  onToggleEntityRelationships: (node: NodeProps, action: 'show' | 'hide') => void;
   entityIdsForApi: Array<{ id: string; isOrigin: boolean }> | undefined;
+  pinnedEuids: string[];
 } => {
   // Get or create the FilterStore for this scopeId
   const store = useMemo(() => getOrCreateFilterStore(scopeId), [scopeId]);
@@ -47,7 +51,8 @@ export const useGraphFilters = (
   // Update dataViewId when it changes
   useEffect(() => {
     store.setDataViewId(dataViewId);
-  }, [store, dataViewId]);
+    store.setInitialEntityIds(initialEntityIds);
+  }, [store, dataViewId, initialEntityIds]);
 
   // Clean up store on unmount or when scopeId changes
   useEffect(() => {
@@ -97,29 +102,44 @@ export const useGraphFilters = (
     [store]
   );
 
-  // Toggle handler for entity relationships - emits event to event bus
-  const onToggleEntityRelationships = useCallback(
-    (node: NodeProps, action: 'show' | 'hide') => {
-      emitEntityRelationshipToggle(scopeId, node.id, action);
+  // Subscribe function for useSyncExternalStore (pinned EUIDs)
+  const subscribeToPinnedEuids = useCallback(
+    (onStoreChange: () => void) => {
+      const subscription = store.subscribeToPinnedEuids(onStoreChange);
+      return () => subscription.unsubscribe();
     },
-    [scopeId]
+    [store]
   );
+
+  // Snapshot function for useSyncExternalStore (pinned EUIDs)
+  const getPinnedEuidsSnapshot = useCallback(() => store.getPinnedEuids(), [store]);
+
+  const pinnedEuidsSet = useSyncExternalStore(
+    subscribeToPinnedEuids,
+    getPinnedEuidsSnapshot,
+    getPinnedEuidsSnapshot
+  );
+
+  const pinnedEuids = useMemo(() => Array.from(pinnedEuidsSet), [pinnedEuidsSet]);
 
   // Convert expandedEntityIds Set to API format
   const entityIdsForApi = useMemo(() => {
-    if (expandedEntityIds.size === 0) return undefined;
+    if (expandedEntityIds.size === 0) return initialEntityIds;
 
-    return Array.from(expandedEntityIds).map((id) => ({
-      id,
-      isOrigin: false, // User-expanded entities are not the graph origin
-    }));
-  }, [expandedEntityIds]);
+    return initialEntityIds.concat(
+      Array.from(expandedEntityIds)
+        .filter((id) => !initialEntityIds.some((entity) => entity.id === id))
+        .map((id) => ({
+          id,
+          isOrigin: false, // User-expanded entities are not the graph origin
+        }))
+    );
+  }, [expandedEntityIds, initialEntityIds]);
 
   return {
     searchFilters,
     setSearchFilters,
-    expandedEntityIds,
-    onToggleEntityRelationships,
     entityIdsForApi,
+    pinnedEuids,
   };
 };

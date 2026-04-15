@@ -14,6 +14,8 @@ import { BASE_ACTION_API_PATH } from '../../common';
  * OAuth connector secrets stored in encrypted saved objects
  */
 interface OAuthConnectorSecrets {
+  authType?: string;
+  provider?: string;
   authorizationUrl?: string;
   clientId?: string;
   clientSecret?: string;
@@ -26,9 +28,6 @@ interface OAuthConnectorSecrets {
  */
 interface OAuthConnectorConfig {
   authType?: string;
-  auth?: {
-    type?: string;
-  };
   authorizationUrl?: string;
   clientId?: string;
   tokenUrl?: string;
@@ -36,13 +35,26 @@ interface OAuthConnectorConfig {
 }
 
 /**
- * OAuth configuration required for authorization flow
+ * OAuth configuration for standard OAuth Authorization Code flow
  */
-export interface OAuthConfig {
+export interface OAuthFlowConfig {
+  authTypeId: 'oauth_authorization_code';
   authorizationUrl: string;
+  tokenUrl: string;
   clientId: string;
   scope?: string;
 }
+
+/**
+ * OAuth configuration for EARS (Elastic Authentication Redirect Service) flow
+ */
+export interface EarsFlowConfig {
+  authTypeId: 'ears';
+  provider: string;
+  scope?: string;
+}
+
+export type OAuthConfig = OAuthFlowConfig | EarsFlowConfig;
 
 /**
  * Parameters for building an OAuth authorization URL
@@ -54,6 +66,17 @@ interface BuildAuthorizationUrlParams {
   redirectUri: string;
   state: string;
   codeChallenge: string;
+}
+
+/**
+ * Parameters for building an EARS authorization URL
+ */
+interface BuildEarsAuthorizationUrlParams {
+  baseAuthorizationUrl: string;
+  scope?: string;
+  callbackUri: string;
+  state: string;
+  pkceChallenge: string;
 }
 
 interface ConnectorWithOAuth {
@@ -86,18 +109,25 @@ export class OAuthAuthorizationService {
   }
 
   /**
-   * Validates that a connector uses OAuth Authorization Code flow
-   * @throws Error if connector doesn't use oauth_authorization_code
+   * Validates that a connector uses OAuth Authorization Code or EARS flow
+   * @throws Error if connector doesn't use a supported OAuth flow
    */
-  private validateOAuthConnector(config: OAuthConnectorConfig, authMode?: AuthMode): void {
-    const isOAuthAuthCode =
-      authMode === 'per-user' ||
-      config?.authType === 'oauth_authorization_code' ||
-      config?.auth?.type === 'oauth_authorization_code';
+  private validateOAuthConnector(
+    config: OAuthConnectorConfig,
+    secrets: OAuthConnectorSecrets,
+    authMode?: AuthMode
+  ): 'oauth_authorization_code' | 'ears' {
+    const authType = secrets?.authType || config?.authType;
 
-    if (!isOAuthAuthCode) {
-      throw new Error('Connector does not use OAuth Authorization Code flow');
+    if (authType === 'oauth_authorization_code' || authType === 'ears') {
+      return authType;
     }
+
+    if (authMode === 'per-user') {
+      return 'oauth_authorization_code';
+    }
+
+    throw new Error('Connector does not use OAuth Authorization Code or EARS flow');
   }
 
   /**
@@ -113,9 +143,6 @@ export class OAuthAuthorizationService {
     const connector = await this.actionsClient.get({ id: connectorId });
     const config = connector.config as OAuthConnectorConfig;
 
-    // Validate this is an OAuth connector
-    this.validateOAuthConnector(config, connector.authMode);
-
     // Fetch connector with decrypted secrets
     const rawAction =
       await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<ConnectorWithOAuth>(
@@ -123,23 +150,42 @@ export class OAuthAuthorizationService {
         connectorId,
         { namespace }
       );
-
     const secrets = rawAction.attributes.secrets;
 
+    // Validate this is an OAuth connector and get the resolved auth type
+    const authTypeId = this.validateOAuthConnector(config, secrets, connector.authMode);
+
+    const scope = secrets.scope || config?.scope;
+
+    if (authTypeId === 'ears') {
+      const provider = secrets.provider;
+      if (!provider) {
+        throw new Error('Connector missing required OAuth configuration (EARS provider)');
+      }
+      return {
+        authTypeId: 'ears',
+        provider,
+        scope,
+      };
+    }
+
+    // Standard OAuth Authorization Code flow requires clientId
     // Extract OAuth config - for connector specs, check secrets first, then config
     // For connector specs, OAuth config is always in secrets (encrypted)
     // Fallback to config for backwards compatibility with legacy connectors
     const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
+    const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
     const clientId = secrets.clientId || config?.clientId;
-    const scope = secrets.scope || config?.scope;
-    if (!authorizationUrl || !clientId) {
+    if (!authorizationUrl || !tokenUrl || !clientId) {
       throw new Error(
-        'Connector missing required OAuth configuration (authorizationUrl, clientId)'
+        'Connector missing required OAuth configuration (authorizationUrl, tokenUrl, clientId)'
       );
     }
 
     return {
+      authTypeId: 'oauth_authorization_code',
       authorizationUrl,
+      tokenUrl,
       clientId,
       scope,
     };
@@ -179,6 +225,31 @@ export class OAuthAuthorizationService {
     authUrl.searchParams.set('state', state);
     authUrl.searchParams.set('code_challenge', codeChallenge);
     authUrl.searchParams.set('code_challenge_method', 'S256');
+
+    if (scope) {
+      authUrl.searchParams.set('scope', scope);
+    }
+
+    return authUrl.toString();
+  }
+
+  /**
+   * Builds an EARS authorization URL with PKCE parameters.
+   *
+   * EARS uses different parameter names than standard OAuth:
+   * - `callback_uri` instead of `redirect_uri`
+   * - `pkce_challenge` instead of `code_challenge`
+   * - `pkce_method` instead of `code_challenge_method`
+   * - No `client_id` or `response_type` (EARS manages client credentials)
+   */
+  buildEarsAuthorizationUrl(params: BuildEarsAuthorizationUrlParams): string {
+    const { baseAuthorizationUrl, scope, callbackUri, state, pkceChallenge } = params;
+
+    const authUrl = new URL(baseAuthorizationUrl);
+    authUrl.searchParams.set('callback_uri', callbackUri);
+    authUrl.searchParams.set('state', state);
+    authUrl.searchParams.set('pkce_challenge', pkceChallenge);
+    authUrl.searchParams.set('pkce_method', 'S256');
 
     if (scope) {
       authUrl.searchParams.set('scope', scope);

@@ -33,6 +33,13 @@ interface SLOOverviewFilter {
   lastRefresh?: number;
 }
 
+interface SloTemplateListFilter {
+  search?: string;
+  tags?: string[];
+  page: number;
+  perPage: number;
+}
+
 export const sloKeys = {
   all: ['slo'] as const,
   lists: () => [...sloKeys.all, 'list'] as const,
@@ -42,6 +49,9 @@ export const sloKeys = {
   overview: (filters: SLOOverviewFilter) => ['overview', filters] as const,
   templates: () => [...sloKeys.all, 'templates'] as const,
   template: (templateId: string) => [...sloKeys.templates(), templateId] as const,
+  templatesList: (filters: SloTemplateListFilter) =>
+    [...sloKeys.templates(), 'list', filters] as const,
+  templateTags: () => [...sloKeys.templates(), 'tags'] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId: string, instanceId: string | undefined, remoteName: string | undefined) =>
     [...sloKeys.details(), { sloId, instanceId, remoteName }] as const,
@@ -116,6 +126,21 @@ export const sloKeys = {
       ...sloKeys.allHealthScanResults(),
       { scanId, size, searchAfter, problematic, allSpaces },
     ] as const,
+  compositeLists: () => [...sloKeys.all, 'compositeList'] as const,
+  compositeList: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    tags?: string;
+    sortBy?: string;
+    sortDirection?: string;
+  }) => [...sloKeys.compositeLists(), filters] as const,
+  compositeDetails: () => [...sloKeys.all, 'compositeDetail'] as const,
+  compositeDetail: (id: string) => [...sloKeys.compositeDetails(), id] as const,
+  compositeHistoricalSummaries: () => [...sloKeys.all, 'compositeHistoricalSummary'] as const,
+  compositeHistoricalSummary: (ids: string[]) =>
+    [...sloKeys.compositeHistoricalSummaries(), ids] as const,
+  compositeSuggestions: () => [...sloKeys.all, 'compositeSuggestions'] as const,
 };
 
 export type SloKeys = typeof sloKeys;

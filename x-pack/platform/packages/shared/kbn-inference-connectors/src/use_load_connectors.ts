@@ -11,14 +11,14 @@ import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import type { InferenceConnector } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { i18n } from '@kbn/i18n';
+import { fetchConnectorById } from './fetch_connector_by_id';
 import { fetchConnectorsForFeature } from './fetch_connectors_for_feature';
-import { isOpenAiProviderType } from './openai_provider_type_guard';
+import { toAIConnector } from './load_connectors';
 import type { AIConnector } from './types';
 
 const QUERY_KEY = ['kbn-inference-connectors', 'load-connectors'];
@@ -41,45 +41,6 @@ export interface UseLoadConnectorsProps {
   settings: SettingsStart;
 }
 
-type InferenceConnectorFromApi = InferenceConnector & { isRecommended?: boolean };
-
-const toAIConnector = (connector: InferenceConnectorFromApi): AIConnector => ({
-  id: connector.connectorId,
-  name: connector.name,
-  actionTypeId: connector.type,
-  config: connector.config,
-  secrets: {},
-  isPreconfigured: connector.isPreconfigured,
-  isSystemAction: false,
-  isDeprecated: connector.isDeprecated ?? false,
-  isConnectorTypeDeprecated: connector.isConnectorTypeDeprecated ?? false,
-  isMissingSecrets: connector.isMissingSecrets ?? false,
-  isRecommended: connector.isRecommended,
-  apiProvider:
-    !connector.isPreconfigured &&
-    connector.config?.apiProvider !== undefined &&
-    isOpenAiProviderType(connector.config.apiProvider)
-      ? connector.config.apiProvider
-      : undefined,
-});
-
-const applyConnectorSettings = <T extends { id: string }>(
-  allConnectors: T[],
-  settings: SettingsStart
-): T[] => {
-  const defaultConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-  const defaultConnectorOnly = settings.client.get<boolean>(
-    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-    false
-  );
-
-  if (defaultConnectorOnly && defaultConnectorId) {
-    const connector = allConnectors.find((c) => c.id === defaultConnectorId);
-    return connector ? [connector] : allConnectors;
-  }
-  return allConnectors;
-};
-
 export type UseLoadConnectorsResult = UseQueryResult<AIConnector[], IHttpFetchError> & {
   soEntryFound: boolean;
 };
@@ -94,9 +55,36 @@ export const useLoadConnectors = ({
   const query = useQuery(
     [...QUERY_KEY, featureId],
     async () => {
+      const defaultConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+      const defaultConnectorOnly = settings.client.get<boolean>(
+        GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+        false
+      );
+
+      if (defaultConnectorOnly) {
+        if (!defaultConnectorId) {
+          return [];
+        }
+        const connector = await fetchConnectorById(http, defaultConnectorId);
+        if (connector) {
+          return [connector];
+        } else {
+          return [];
+        }
+      }
+
       const result = await fetchConnectorsForFeature(http, featureId);
       setSoEntryFound(result.soEntryFound);
-      return applyConnectorSettings(result.connectors.map(toAIConnector), settings);
+      const aiConnectors = result.connectors.map(toAIConnector);
+
+      if (!result.soEntryFound && defaultConnectorId) {
+        const defaultConnector = await fetchConnectorById(http, defaultConnectorId);
+        if (defaultConnector) {
+          return [defaultConnector, ...aiConnectors.filter((c) => c.id !== defaultConnectorId)];
+        }
+      }
+
+      return aiConnectors;
     },
     {
       retry: false,
@@ -109,7 +97,7 @@ export const useLoadConnectors = ({
               : error,
             {
               title: i18n.translate('inferenceConnectors.useLoadConnectors.errorMessage', {
-                defaultMessage: 'Error loading connectors',
+                defaultMessage: 'Error loading models',
               }),
             }
           );

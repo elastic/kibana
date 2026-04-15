@@ -26,7 +26,7 @@ import {
 } from './policy_template';
 
 type PackagePolicyStream = RegistryStream & {
-  data_stream: { type: string; dataset: string };
+  data_stream: { type?: string; dataset: string };
 };
 
 export const getStreamsForInputType = (
@@ -89,6 +89,10 @@ export const varsReducer = (
   configObject: PackagePolicyConfigRecord,
   registryVar: RegistryVarsEntry
 ): PackagePolicyConfigRecord => {
+  // section_header vars are decorative only and hold no value
+  if (registryVar.type === 'section_header') {
+    return configObject;
+  }
   const configEntry: PackagePolicyConfigRecordEntry = {
     value: !registryVar.default && registryVar.multi ? [] : registryVar.default,
   };

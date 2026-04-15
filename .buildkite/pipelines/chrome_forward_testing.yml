@@ -58,7 +58,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     env:
       # Unit-tests don't depend on Chrome's versions, integration tests , so we don't need to run those
       LIMIT_CONFIG_TYPE: 'functional'
@@ -76,10 +76,9 @@ steps:
       machineType: n2-standard-4
     key: build_scout_tests
     timeout_in_minutes: 15
-    depends_on:
-      - build
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -118,6 +117,7 @@ steps:
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -385,6 +385,7 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
@@ -398,7 +399,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
     agents:
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
       preemptible: true
     depends_on:
@@ -413,7 +414,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Osquery Cypress Tests on Serverless'
     agents:
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
       preemptible: true
     depends_on:
@@ -429,7 +430,7 @@ steps:
     label: 'Defend Workflows Cypress Tests'
     agents:
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
     depends_on:
       - build
@@ -444,7 +445,7 @@ steps:
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
     depends_on:
       - build

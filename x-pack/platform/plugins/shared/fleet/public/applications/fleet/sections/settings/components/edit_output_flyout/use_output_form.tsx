@@ -8,9 +8,10 @@
 import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { load } from 'js-yaml';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
+import { useYaml } from '../../../../../../services';
 
 import { getDefaultPresetForEsOutput } from '../../../../../../../common/services/output_helpers';
 
@@ -58,7 +59,7 @@ import {
   validateName,
   validateESHosts,
   validateLogstashHosts,
-  validateYamlConfig,
+  createValidateYamlConfig,
   validateCATrustedFingerPrint,
   validateServiceToken,
   validateServiceTokenSecret,
@@ -95,6 +96,7 @@ export interface OutputFormInputsType {
   logstashHostsInput: ReturnType<typeof useComboInput>;
   presetInput: ReturnType<typeof useInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
+  otelExporterConfigInput: ReturnType<typeof useInput>;
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
   defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
   caTrustedFingerprintInput: ReturnType<typeof useInput>;
@@ -197,6 +199,7 @@ export function extractDefaultDynamicKafkaTopics(
 export function useOutputForm(onSucess: () => void, output?: Output, defaultOutput?: Output) {
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
+  const yaml = useYaml();
 
   const { showExperimentalShipperOptions } = ExperimentalFeaturesService.get();
 
@@ -213,7 +216,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const allowEdit = output?.allow_edit ?? [];
 
   function isDisabled(
-    field: keyof Output | keyof KafkaOutput | keyof NewRemoteElasticsearchOutput
+    field:
+      | keyof Output
+      | keyof KafkaOutput
+      | keyof NewRemoteElasticsearchOutput
+      | keyof NewElasticsearchOutput
   ) {
     if (!authz.fleet.allSettings) {
       return true;
@@ -226,14 +233,22 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     return !allowEdit.includes(field);
   }
 
+  const validateYamlConfigFn = yaml ? createValidateYamlConfig(yaml.parse) : () => undefined;
+
   // Define inputs
   // Shared inputs
   const nameInput = useInput(output?.name ?? '', validateName, isDisabled('name'));
   const typeInput = useInput(output?.type ?? 'elasticsearch', undefined, isDisabled('type'));
   const additionalYamlConfigInput = useInput(
     output?.config_yaml ?? '',
-    validateYamlConfig,
+    validateYamlConfigFn,
     isDisabled('config_yaml')
+  );
+
+  const otelExporterConfigInput = useInput(
+    (output as NewElasticsearchOutput)?.otel_exporter_config_yaml ?? '',
+    validateYamlConfigFn,
+    isDisabled('otel_exporter_config_yaml')
   );
 
   const defaultOutputInput = useSwitchInput(
@@ -265,7 +280,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   );
 
   const presetInput = useInput(
-    output?.preset ?? getDefaultPresetForEsOutput(output?.config_yaml ?? '', load),
+    output?.preset ??
+      getDefaultPresetForEsOutput(output?.config_yaml ?? '', yaml?.parse ?? (() => ({}))),
     () => undefined,
     isDisabled('preset')
   );
@@ -322,7 +338,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   shipper:
     enabled: false
   */
-  const configJs = output?.config_yaml ? load(output?.config_yaml) : {};
+  const configJs = output?.config_yaml && yaml ? yaml.parse(output.config_yaml) : {};
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
   const diskQueueEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
@@ -604,6 +620,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     logstashHostsInput,
     presetInput,
     additionalYamlConfigInput,
+    otelExporterConfigInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
@@ -670,6 +687,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     const kafkaHeadersValid = kafkaHeadersInput.validate();
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
+    const otelExporterConfigValid = otelExporterConfigInput.validate();
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
     const serviceTokenValid = serviceTokenInput.validate();
     const serviceTokenSecretValid = serviceTokenSecretInput.validate();
@@ -738,6 +756,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       return (
         elasticsearchUrlsValid &&
         additionalYamlConfigValid &&
+        otelExporterConfigValid &&
         nameInputValid &&
         caTrustedFingerprintValid &&
         diskQueuePathValid
@@ -757,6 +776,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaHeadersInput,
     logstashHostsInput,
     additionalYamlConfigInput,
+    otelExporterConfigInput,
     caTrustedFingerprintInput,
     serviceTokenInput,
     serviceTokenSecretInput,
@@ -1034,6 +1054,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
+              otel_exporter_config_yaml: otelExporterConfigInput.value || null,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               write_to_logs_streams: writeToStreams.value,
@@ -1136,22 +1157,23 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,
     kafkaBrokerAckReliabilityInput.value,
-    logstashEnableSSLInput.value,
     logstashHostsInput.value,
+    logstashEnableSSLInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
     sslCertificateAuthoritiesInput.value,
     sslKeySecretInput.value,
-    elasticsearchUrlInput.value,
-    presetInput.value,
     serviceTokenInput.value,
     serviceTokenSecretInput.value,
+    elasticsearchUrlInput.value,
+    presetInput.value,
     kibanaAPIKeyInput.value,
     syncIntegrationsInput.value,
-    syncUninstalledIntegrationsInput.value,
     kibanaURLInput.value,
-    caTrustedFingerprintInput.value,
+    syncUninstalledIntegrationsInput.value,
     writeToStreams.value,
+    otelExporterConfigInput.value,
+    caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,
   ]);

@@ -27,8 +27,10 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
     const element = node as HTMLElement;
     if (isElementCommandBadge(element)) {
       result += serializeCommandBadge(element);
+    } else if (element.tagName === 'BR') {
+      result += '\n';
     } else {
-      // For any other elements (e.g., <br>), append their text content
+      // For any other elements, append their text content
       result += element.textContent ?? '';
     }
   }

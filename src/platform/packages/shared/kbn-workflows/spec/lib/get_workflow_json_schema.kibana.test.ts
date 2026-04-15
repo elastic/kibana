@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ValidateFunction } from 'ajv';
-import { Ajv } from 'ajv';
 import yaml from 'yaml';
 import type { z } from '@kbn/zod/v4';
 import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_connectors';
@@ -19,15 +17,12 @@ import { getValidateWithYamlLsp } from './test_utils/validate_with_yaml_lsp';
 import { getKibanaConnectors } from '../kibana';
 
 describe('getWorkflowJsonSchema / kibana connectors', () => {
-  let validateAjv: ValidateFunction;
   let jsonSchema: z.core.JSONSchema.JSONSchema;
   let validateWithYamlLsp: ValidateWithYamlLspFunction;
 
   beforeAll(() => {
     const workflowSchema = generateYamlSchemaFromConnectors(getKibanaConnectors());
     jsonSchema = getWorkflowJsonSchema(workflowSchema) as z.core.JSONSchema.JSONSchema;
-    const ajv = new Ajv({ strict: false, validateFormats: false, discriminator: true });
-    validateAjv = ajv.compile(jsonSchema);
     validateWithYamlLsp = getValidateWithYamlLsp(jsonSchema);
   });
 
@@ -126,10 +121,9 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
     // 3. With reused: 'ref', the schema structure may use $ref at root instead of inline properties
     //
     // IMPORTANT: z.toJSONSchema on transform schemas with reused: 'ref' may not generate properties
-    // in definitions as expected. This is a known limitation. The schema is still valid for validation
-    // purposes (AJV can handle it), but the structure differs from previously. We verify that the
-    // schema exists and can be compiled by AJV (which is done in beforeAll), which is the critical
-    // requirement for Monaco YAML validation to work.
+    // in definitions as expected. This is a known limitation. The schema is still usable for Monaco,
+    // but the structure differs from previously. We verify that the schema exists (beforeAll), which is
+    // the critical requirement for Monaco YAML validation to work.
     const schemaWithRef = jsonSchema as { $ref?: string; definitions?: Record<string, unknown> };
     let workflowDef: z.core.JSONSchema.ObjectSchema | null = null;
 
@@ -145,12 +139,11 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
       workflowDef = jsonSchema as z.core.JSONSchema.ObjectSchema;
     }
 
-    // The critical requirement is that the schema can be compiled by AJV for validation
-    // (which is verified in beforeAll with ajv.compile(jsonSchema)). If workflowDef is null,
+    // The critical requirement is that the schema was generated for Monaco. If workflowDef is null,
     // it means z.toJSONSchema on transform schemas with reused: 'ref' generated a different structure,
     // but the schema is still valid for validation purposes.
     // We check for properties if they exist, but don't fail if they don't (the schema structure
-    // may be valid in a different way that AJV can still handle).
+    // may still be consumable by Monaco / the YAML language server).
     if (workflowDef !== null) {
       expect(workflowDef.properties).toBeDefined();
       // type: 'object' is implicit when properties exist in JSON Schema, but we check it if present
@@ -163,7 +156,7 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
       expect(workflowDef?.properties?.settings).toBeDefined();
     } else {
       // If workflowDef is null, the schema structure is different but may still be valid
-      // The critical test is that ajv.compile() succeeded in beforeAll, which means the schema
+      // The critical test is that getWorkflowJsonSchema succeeded in beforeAll, which means the schema
       // is valid for validation purposes even if the structure is different now
       expect(jsonSchema).toBeDefined();
       expect(typeof jsonSchema).toBe('object');
@@ -174,7 +167,7 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
 
     // The schema should be valid JSON Schema that can be used for validation
     // With transform schemas and reused: 'ref', the structure may differ
-    // The critical requirement is that ajv.compile() succeeded in beforeAll
+    // The critical requirement is that JSON Schema generation succeeded in beforeAll
     expect(typeof jsonSchema).toBe('object');
     // definitions may not exist if the schema structure is different, but the schema is still valid
     if ('definitions' in jsonSchema) {
@@ -287,11 +280,20 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
     expect(brokenRefObjectsCount).toEqual(0);
   });
 
-  // This test ensures our generated JSON Schema is structurally valid
-  // This is critical for Monaco autocomplete and validation to work properly
-  it('should generate valid JSON Schema that can be compiled', () => {
-    expect(jsonSchema).toBeTruthy();
-    expect(validateAjv).toBeDefined();
+  // Smoke: schema must load in yaml-language-server (Monaco path), not just JSON-serialize.
+  // Not compared to isValidJsonSchema — Monaco schema includes allOf/discriminator etc.
+  it('should load generated JSON Schema in Monaco / YAML LSP', async () => {
+    expect(jsonSchema).toBeDefined();
+    const diagnostics = await validateWithYamlLsp(
+      'smoke-test-workflow.yaml',
+      yaml.stringify({
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [KIBANA_VALID_SAMPLE_STEPS[0]],
+      })
+    );
+    expect(diagnostics).toEqual([]);
   });
 
   KIBANA_VALID_SAMPLE_STEPS.forEach((step) => {

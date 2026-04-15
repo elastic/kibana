@@ -11,7 +11,13 @@ import type { CommandMatchResult, CommandBadgeData } from './command_menu';
 import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
 import { createCommandBadgeElement, deserializeCommandBadge } from './command_badge';
 import { serializeEditorContent } from './serialize';
-import { createCommandRange, insertSpaceAfter, placeCursorAfter, placeCursorAtEnd } from './utils';
+import {
+  createCommandRange,
+  createTextFragment,
+  insertSpaceAfter,
+  placeCursorAfter,
+  placeCursorAtEnd,
+} from './utils';
 
 export interface MessageEditorInstance {
   ref: React.RefObject<HTMLDivElement>;
@@ -154,7 +160,7 @@ const useMessageEditorController = ({
 
         for (const segment of segments) {
           if (segment.type === 'text') {
-            ref.current.appendChild(document.createTextNode(segment.value));
+            ref.current.appendChild(createTextFragment(segment.value));
           } else if (segment.type === 'badge') {
             ref.current.appendChild(createCommandBadgeElement(segment.data));
           }

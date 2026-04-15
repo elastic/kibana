@@ -20,17 +20,20 @@ import type { AgentsServiceStart } from './types';
 import type { AgentsServiceStartDeps } from './agents_service';
 import { createMockedAgent, createToolsServiceStartMock } from '../../test_utils';
 import { createClient } from './persisted/client';
+import { runSkillRefCleanup } from './persisted/skill_reference_cleanup';
 import { runToolRefCleanup } from './persisted/tool_reference_cleanup';
 
 jest.mock('@kbn/agent-builder-server/allow_lists');
 jest.mock('./persisted/client');
 jest.mock('./persisted/tool_reference_cleanup');
+jest.mock('./persisted/skill_reference_cleanup');
 
 const isAllowedBuiltinAgentMock = isAllowedBuiltinAgent as jest.MockedFunction<
   typeof isAllowedBuiltinAgent
 >;
 const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
 const runToolRefCleanupMock = runToolRefCleanup as jest.MockedFunction<typeof runToolRefCleanup>;
+const runSkillRefCleanupMock = runSkillRefCleanup as jest.MockedFunction<typeof runSkillRefCleanup>;
 
 const createStartDeps = (): AgentsServiceStartDeps => ({
   security: securityServiceMock.createStart(),
@@ -54,6 +57,7 @@ describe('AgentsService', () => {
     isAllowedBuiltinAgentMock.mockReset();
     createClientMock.mockReset();
     runToolRefCleanupMock.mockReset();
+    runSkillRefCleanupMock.mockReset();
   });
 
   describe('#setup', () => {
@@ -98,6 +102,21 @@ describe('AgentsService', () => {
             storage: {} as any,
             spaceId: 'default',
             toolIds: params.toolIds,
+            logger: undefined,
+          }),
+        getAgentsUsingSkills: (params: { skillIds: string[] }) =>
+          runSkillRefCleanupMock({
+            storage: {} as any,
+            spaceId: 'default',
+            skillIds: params.skillIds,
+            logger: undefined,
+            checkOnly: true,
+          }),
+        removeSkillRefsFromAgents: (params: { skillIds: string[] }) =>
+          runSkillRefCleanupMock({
+            storage: {} as any,
+            spaceId: 'default',
+            skillIds: params.skillIds,
             logger: undefined,
           }),
       } as any);
@@ -178,6 +197,83 @@ describe('AgentsService', () => {
 
         await expect(
           started.removeToolRefsFromAgents({ request, toolIds: ['tool-1'] })
+        ).rejects.toThrow('Bulk update failed');
+      });
+    });
+
+    describe('#getAgentsUsingSkills', () => {
+      it('returns agents that use the given skill IDs', async () => {
+        const agents = [
+          { id: 'agent-1', name: 'Agent One' },
+          { id: 'agent-2', name: 'Agent Two' },
+        ];
+        runSkillRefCleanupMock.mockResolvedValue({ agents });
+
+        const result = await started.getAgentsUsingSkills({ request, skillIds: ['skill-1'] });
+
+        expect(result).toEqual({ agents });
+        expect(runSkillRefCleanupMock).toHaveBeenCalledTimes(1);
+        expect(runSkillRefCleanupMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            skillIds: ['skill-1'],
+            checkOnly: true,
+            spaceId: 'default',
+          })
+        );
+      });
+
+      it('returns empty agents list when runSkillRefCleanup returns no agents', async () => {
+        runSkillRefCleanupMock.mockResolvedValue({ agents: [] });
+
+        const result = await started.getAgentsUsingSkills({
+          request,
+          skillIds: ['skill-1', 'skill-2'],
+        });
+
+        expect(result).toEqual({ agents: [] });
+        expect(runSkillRefCleanupMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            skillIds: ['skill-1', 'skill-2'],
+            checkOnly: true,
+          })
+        );
+      });
+
+      it('propagates errors from runSkillRefCleanup', async () => {
+        const error = new Error('Search failed');
+        runSkillRefCleanupMock.mockRejectedValue(error);
+
+        await expect(
+          started.getAgentsUsingSkills({ request, skillIds: ['skill-1'] })
+        ).rejects.toThrow('Search failed');
+      });
+    });
+
+    describe('#removeSkillRefsFromAgents', () => {
+      it('calls runSkillRefCleanup without checkOnly and returns updated agents', async () => {
+        const agents = [{ id: 'agent-1', name: 'Agent 1' }];
+        runSkillRefCleanupMock.mockResolvedValue({ agents });
+
+        await expect(
+          started.removeSkillRefsFromAgents({ request, skillIds: ['skill-1', 'skill-2'] })
+        ).resolves.toEqual({ agents });
+
+        expect(runSkillRefCleanupMock).toHaveBeenCalledTimes(1);
+        expect(runSkillRefCleanupMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            skillIds: ['skill-1', 'skill-2'],
+            spaceId: 'default',
+          })
+        );
+        expect(runSkillRefCleanupMock.mock.calls[0][0]).not.toHaveProperty('checkOnly');
+      });
+
+      it('propagates errors from runSkillRefCleanup', async () => {
+        const error = new Error('Bulk update failed');
+        runSkillRefCleanupMock.mockRejectedValue(error);
+
+        await expect(
+          started.removeSkillRefsFromAgents({ request, skillIds: ['skill-1'] })
         ).rejects.toThrow('Bulk update failed');
       });
     });

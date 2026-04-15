@@ -17,7 +17,11 @@ import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server'
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
-import { scheduleHistorySnapshotTasks } from '../../tasks/history_snapshot_task';
+import {
+  scheduleHistorySnapshotTasks,
+  stopHistorySnapshotTask,
+} from '../../tasks/history_snapshot_task';
+import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
@@ -46,7 +50,7 @@ import type {
   GetStatusResult,
 } from '../types';
 import { getExtractEntityTaskId } from '../../tasks/extract_entity_task';
-import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getUpdatesIndexTemplateId } from './updates_index_template';
 import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
@@ -155,6 +159,13 @@ export class AssetManagerClient {
           frequency: historySnapshot.frequency,
         }),
 
+        scheduleStatusReportTask({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+        }),
+
         installEuidStoredScripts({
           esClient: this.esClient,
           logger: this.logger,
@@ -231,7 +242,19 @@ export class AssetManagerClient {
       const remainingEngines = await this.engineDescriptorClient.getAll();
       if (remainingEngines.length === 0) {
         this.logger.debug(`Deleting global state because last engine was uninstalled`);
-        await this.globalStateClient.delete();
+        await Promise.all([
+          this.globalStateClient.delete(),
+          stopStatusReportTask({
+            taskManager: this.taskManager,
+            logger: this.logger,
+            namespace: this.namespace,
+          }),
+          stopHistorySnapshotTask({
+            taskManager: this.taskManager,
+            logger: this.logger,
+            namespace: this.namespace,
+          }),
+        ]);
       }
 
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
@@ -320,7 +343,7 @@ export class AssetManagerClient {
     );
 
     const targetIndexPrivileges = {
-      [getLatestEntitiesIndexName(this.namespace)]: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+      [getEntitiesAlias(ENTITY_LATEST, this.namespace)]: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
     };
 
     return checkPrivileges({
@@ -416,7 +439,7 @@ export class AssetManagerClient {
 
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
-    const latestIndex = getLatestEntitiesIndexName(this.namespace);
+    const latestIndex = getEntitiesAlias(ENTITY_LATEST, this.namespace);
     const updatesDataStreamName = getUpdatesEntitiesDataStreamName(this.namespace);
     const [latestExists, updatesExists] = await Promise.all([
       this.esClient.indices.exists({ index: latestIndex }),

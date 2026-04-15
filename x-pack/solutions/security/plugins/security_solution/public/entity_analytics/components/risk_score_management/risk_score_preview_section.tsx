@@ -45,9 +45,11 @@ interface IRiskScorePreviewPanel {
   type: EntityType;
 }
 
+const ENTITY_ID_FIELD = 'entity.id';
+
 const getRiskiestScores = (scores: EntityRiskScoreRecord[] = [], field: string) =>
   scores
-    ?.filter((item) => item?.id_field === field)
+    ?.filter((item) => item?.id_field === field || item?.id_field === ENTITY_ID_FIELD)
     ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)
     ?.slice(0, 5) || [];
 

@@ -1,0 +1,175 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
+import { isToolMessage } from '@langchain/core/messages';
+import {
+  extractTextContent,
+  extractToolCalls,
+  extractToolCallsWithReasoning,
+} from '@kbn/agent-builder-genai-utils/langchain';
+import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
+import type { ToolHandlerPromptReturn, ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
+import { isToolHandlerInterruptReturn } from '@kbn/agent-builder-server/tools';
+import type {
+  ToolCallAction,
+  HandoverAction,
+  AgentErrorAction,
+  ExecuteToolAction,
+  ToolPromptAction,
+  AnswerAction,
+  StructuredAnswerAction,
+} from './actions';
+import {
+  toolCallAction,
+  handoverAction,
+  executeToolAction,
+  toolPromptAction,
+  answerAction,
+  errorAction,
+  structuredAnswerAction,
+} from './actions';
+
+export const processResearchResponse = (
+  message: AIMessageChunk
+): ToolCallAction | HandoverAction | AgentErrorAction => {
+  const textContent = extractTextContent(message);
+  if (message.tool_calls?.length) {
+    return toolCallAction(
+      extractToolCallsWithReasoning(message),
+      textContent.trim().length ? textContent : undefined
+    );
+  } else {
+    if (textContent) {
+      return handoverAction(textContent);
+    } else {
+      return errorAction(
+        createAgentExecutionError(
+          'agent returned an empty response',
+          AgentExecutionErrorCode.emptyResponse,
+          {}
+        )
+      );
+    }
+  }
+};
+
+/**
+ * Create execute tool action(s) based on the tool node result.
+ *
+ * When parallel tool calls are used and tools trigger HITL interrupts:
+ * - Completed tools are returned as an `ExecuteToolAction`
+ * - All interrupted tools are returned as a single `ToolPromptAction` containing all prompts
+ */
+export const processToolNodeResponse = (
+  toolNodeResult: BaseMessage[]
+): (ExecuteToolAction | ToolPromptAction)[] => {
+  const toolMessages = toolNodeResult.filter(isToolMessage);
+
+  const completedMessages: ToolMessage[] = [];
+  const interruptMessages: ToolMessage[] = [];
+
+  for (const msg of toolMessages) {
+    const result: ToolHandlerReturn | undefined = msg.artifact;
+    if (result && isToolHandlerInterruptReturn(result)) {
+      interruptMessages.push(msg);
+    } else {
+      completedMessages.push(msg);
+    }
+  }
+
+  const actions: (ExecuteToolAction | ToolPromptAction)[] = [];
+
+  if (completedMessages.length > 0) {
+    actions.push(
+      executeToolAction(
+        completedMessages.map((msg) => ({
+          toolCallId: msg.tool_call_id,
+          content: extractTextContent(msg),
+          artifact: msg.artifact,
+        }))
+      )
+    );
+  }
+
+  if (interruptMessages.length > 0) {
+    actions.push(
+      toolPromptAction(
+        interruptMessages.map((msg) => ({
+          tool_call_id: msg.tool_call_id,
+          prompt: (msg.artifact as ToolHandlerPromptReturn).prompt,
+        }))
+      )
+    );
+  }
+
+  return actions;
+};
+
+export const processAnswerResponse = (message: AIMessageChunk): AnswerAction | AgentErrorAction => {
+  // The answering agent should not call tools. Some models/providers can still emit tool calls
+  // unexpectedly, so we treat that as a recoverable error and retry with an explicit tool-result
+  // error message in the prompt history.
+  if (message.tool_calls?.length) {
+    const [firstToolCall] = extractToolCalls(message);
+    const toolName = firstToolCall?.toolName ?? 'unknown';
+    const toolArgs = firstToolCall?.args ?? {};
+
+    return errorAction(
+      createAgentExecutionError(
+        `Answer agent attempted to call tool "${toolName}"`,
+        AgentExecutionErrorCode.toolNotFound,
+        { toolName, toolArgs }
+      )
+    );
+  }
+
+  const textContent = extractTextContent(message);
+  if (textContent) {
+    return answerAction(extractTextContent(message));
+  } else {
+    return errorAction(
+      createAgentExecutionError(
+        'agent returned an empty response',
+        AgentExecutionErrorCode.emptyResponse,
+        {}
+      )
+    );
+  }
+};
+
+export const processStructuredAnswerResponse = (
+  response: unknown
+): StructuredAnswerAction | AnswerAction | AgentErrorAction => {
+  try {
+    if (response && typeof response === 'object') {
+      const action = structuredAnswerAction(response);
+      return action;
+    } else if (typeof response === 'string') {
+      return answerAction(response);
+    } else {
+      return errorAction(
+        createAgentExecutionError(
+          'agent returned an invalid structured response',
+          AgentExecutionErrorCode.emptyResponse,
+          {}
+        )
+      );
+    }
+  } catch (error) {
+    return errorAction(
+      createAgentExecutionError(
+        `Error processing structured response: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        AgentExecutionErrorCode.emptyResponse,
+        {}
+      )
+    );
+  }
+};

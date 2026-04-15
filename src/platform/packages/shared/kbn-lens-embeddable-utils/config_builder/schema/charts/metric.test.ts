@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { MetricState } from './metric';
 import { metricStateSchema } from './metric';
@@ -14,9 +15,9 @@ import { metricStateSchema } from './metric';
 describe('Metric Schema', () => {
   const baseMetricConfig = {
     type: 'metric',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
   } satisfies Partial<MetricState>;
 
@@ -36,15 +37,16 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'count',
             field: 'test_field',
-            fit: false,
-            sub_label: 'Count of records',
+            subtitle: 'Count of records',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: {
-              labels: 'left',
-              value: 'right',
-            },
           },
         ],
+        styling: {
+          primary: {
+            labels: { alignment: 'left' },
+            value: { sizing: 'auto', alignment: 'right' },
+          },
+        },
       } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
@@ -59,15 +61,19 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'sum',
             field: 'price',
-            fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            icon: {
-              name: 'visMetric',
-              align: 'left',
-            },
-            alignments: { labels: 'left', value: 'left' },
           },
         ],
+        styling: {
+          primary: {
+            icon: {
+              name: 'star_empty',
+              alignment: 'left',
+            },
+            labels: { alignment: 'left' },
+            value: { sizing: 'auto', alignment: 'left' },
+          },
+        },
       } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
@@ -85,8 +91,6 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'average',
             field: 'temperature',
-            fit: false,
-            alignments: { labels: 'left', value: 'left' },
             color: {
               type: 'dynamic',
               range: 'absolute',
@@ -97,6 +101,12 @@ describe('Metric Schema', () => {
             },
           },
         ],
+        styling: {
+          primary: {
+            labels: { alignment: 'left' },
+            value: { sizing: 'auto', alignment: 'left' },
+          },
+        },
       } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
@@ -111,11 +121,9 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'max',
             field: 'cpu_usage',
-            fit: false,
-            alignments: { labels: 'left', value: 'left' },
             background_chart: {
               type: 'bar',
-              direction: 'horizontal',
+              orientation: 'horizontal',
               max_value: {
                 operation: 'static_value',
                 value: 80,
@@ -123,6 +131,12 @@ describe('Metric Schema', () => {
             },
           },
         ],
+        styling: {
+          primary: {
+            labels: { alignment: 'left' },
+            value: { sizing: 'auto', alignment: 'left' },
+          },
+        },
       } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
@@ -146,8 +160,6 @@ describe('Metric Schema', () => {
                   { gte: 0, lte: 100, color: 'red' },
                 ],
               },
-              fit: false,
-              alignments: { labels: 'left', value: 'left' },
             },
           ],
         } satisfies MetricInput;
@@ -173,15 +185,13 @@ describe('Metric Schema', () => {
                   { gte: 0, lte: 100, color: 'red' },
                 ],
               },
-              fit: false,
-              alignments: { labels: 'left', value: 'left' },
             },
           ],
           breakdown_by: {
             operation: 'terms',
             fields: ['category'],
             columns: 3,
-            size: 5,
+            limit: 5,
           },
         };
 
@@ -204,8 +214,6 @@ describe('Metric Schema', () => {
                   { gte: 0, lte: 100, color: 'red' },
                 ],
               },
-              fit: false,
-              alignments: { labels: 'left', value: 'left' },
               background_chart: {
                 type: 'bar',
                 max_value: { operation: 'static_value', value: 100 },
@@ -228,22 +236,24 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'sum',
             field: 'revenue',
-            fit: false,
-            alignments: { labels: 'left', value: 'left' },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
           {
             type: 'secondary',
             operation: 'sum',
             field: 'cost',
-            prefix: '$',
-            label_position: 'before',
+            label: '$',
             compare: {
               to: 'primary',
             },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
         ],
+        styling: {
+          secondary: {
+            label: { visible: true, placement: 'before' },
+          },
+        },
       } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
@@ -258,16 +268,12 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'sum',
             field: 'revenue',
-            fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: { labels: 'left', value: 'left' },
           },
           {
             type: 'secondary',
             operation: 'sum',
             field: 'profit',
-            prefix: '',
-            label_position: 'before',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             color: {
               type: 'static',
@@ -275,6 +281,11 @@ describe('Metric Schema', () => {
             },
           },
         ],
+        styling: {
+          secondary: {
+            label: { visible: false, placement: 'before' },
+          },
+        },
       } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);
@@ -291,9 +302,7 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'sum',
             field: 'sales',
-            fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: { labels: 'left', value: 'left' },
           },
         ],
         breakdown_by: {
@@ -301,7 +310,7 @@ describe('Metric Schema', () => {
           fields: ['category'],
           columns: 3,
           collapse_by: 'sum',
-          size: 5,
+          limit: 5,
         },
       } satisfies MetricInput;
 
@@ -309,7 +318,7 @@ describe('Metric Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        breakdown_by: { ...input.breakdown_by, size: 5 },
+        breakdown_by: { ...input.breakdown_by, limit: 5 },
       });
     });
 
@@ -321,9 +330,7 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'sum',
             field: 'sales',
-            fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: { labels: 'left', value: 'left' },
           },
         ],
         breakdown_by: {
@@ -358,7 +365,7 @@ describe('Metric Schema', () => {
       expect(() => metricStateSchema.validate(input)).toThrow();
     });
 
-    it('throws on invalid alignment value', () => {
+    it('throws on invalid styling alignment value', () => {
       const input = {
         ...baseMetricConfig,
         metrics: [
@@ -366,12 +373,17 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'count',
             field: 'test_field',
-            alignments: {
-              // @ts-expect-error - invalid alignment value
-              labels: 'invalid',
-            },
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
         ],
+        styling: {
+          primary: {
+            labels: {
+              // @ts-expect-error - invalid alignment value
+              alignment: 'invalid',
+            },
+          },
+        },
       } satisfies MetricInput;
 
       expect(() => metricStateSchema.validate(input)).toThrow();
@@ -386,8 +398,6 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: { labels: 'left', value: 'left' },
-            fit: false,
           },
         ],
         breakdown_by: {
@@ -410,8 +420,6 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            fit: false,
-            alignments: { labels: 'left', value: 'left' },
           },
         ],
       } satisfies MetricInput;
@@ -428,16 +436,12 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            fit: false,
-            alignments: { labels: 'left', value: 'left' },
           },
           {
             type: 'primary',
             operation: 'sum',
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            fit: false,
-            alignments: { labels: 'left', value: 'left' },
           },
         ],
       } satisfies MetricInput;
@@ -474,7 +478,32 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            label_position: 'before',
+          },
+        ],
+      } satisfies MetricInput;
+
+      expect(() => metricStateSchema.validate(input)).toThrow();
+    });
+
+    it('throws if the icon name is invalid', () => {
+      const input = {
+        ...baseMetricConfig,
+
+        styling: {
+          primary: {
+            icon: {
+              // @ts-expect-error - camelCase icon name
+              name: 'starEmpty',
+              alignment: 'right',
+            },
+          },
+        },
+        metrics: [
+          {
+            type: 'primary',
+            operation: 'sum',
+            field: 'test_field',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
         ],
       } satisfies MetricInput;
@@ -494,17 +523,8 @@ describe('Metric Schema', () => {
             type: 'primary',
             operation: 'sum',
             field: 'sales',
-            sub_label: 'Total Sales',
-            fit: false,
+            subtitle: 'Total Sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            alignments: {
-              labels: 'left',
-              value: 'right',
-            },
-            icon: {
-              name: 'visMetric',
-              align: 'right',
-            },
             color: {
               type: 'dynamic',
               range: 'absolute',
@@ -521,8 +541,7 @@ describe('Metric Schema', () => {
             type: 'secondary',
             operation: 'sum',
             field: 'profit',
-            prefix: '$',
-            label_position: 'before',
+            label: '$',
             compare: {
               to: 'primary',
             },
@@ -534,7 +553,17 @@ describe('Metric Schema', () => {
           fields: ['category'],
           columns: 4,
           collapse_by: 'sum',
-          size: 5,
+          limit: 5,
+        },
+        styling: {
+          primary: {
+            labels: { alignment: 'left' },
+            value: { sizing: 'auto', alignment: 'right' },
+            icon: { name: 'star_empty', alignment: 'right' },
+          },
+          secondary: {
+            label: { visible: true, placement: 'before' },
+          },
         },
       } satisfies MetricInput;
 
@@ -542,26 +571,29 @@ describe('Metric Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        breakdown_by: { ...input.breakdown_by, size: 5 },
+        breakdown_by: { ...input.breakdown_by, limit: 5 },
       });
     });
 
     it('validates esql configuration', () => {
       const input = {
         type: 'metric',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metrics: [
           {
             type: 'primary',
-            operation: 'value',
             column: 'unique_count',
-            fit: false,
-            alignments: { labels: 'left', value: 'left' },
           },
         ],
+        styling: {
+          primary: {
+            labels: { alignment: 'left' },
+            value: { sizing: 'auto', alignment: 'left' },
+          },
+        },
       } satisfies MetricInput;
 
       const validated = metricStateSchema.validate(input);

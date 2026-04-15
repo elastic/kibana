@@ -60,7 +60,7 @@
           "{ readonly ref_id: string; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
-        "lineNumber": 57,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -74,10 +74,10 @@
         "label": "MarkdownByValueState",
         "description": [],
         "signature": [
-          "{ readonly content: string; }"
+          "{ readonly settings?: Readonly<{} & { open_links_in_new_tab: boolean; }> | undefined; readonly content: string; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
-        "lineNumber": 56,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -91,10 +91,10 @@
         "label": "MarkdownCreateRequestBody",
         "description": [],
         "signature": [
-          "{ readonly description?: string | undefined; readonly title: string; readonly content: string; }"
+          "{ readonly description?: string | undefined; readonly settings?: Readonly<{} & { open_links_in_new_tab: boolean; }> | undefined; readonly title: string; readonly content: string; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/api/create/types.ts",
-        "lineNumber": 18,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -108,10 +108,10 @@
         "label": "MarkdownCreateResponseBody",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly meta: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; created_at?: string | undefined; created_by?: string | undefined; updated_at?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; }>; }"
+          "{ readonly id: string; readonly meta: Readonly<{ version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; managed?: boolean | undefined; created_by?: string | undefined; updated_by?: string | undefined; owner?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; settings?: Readonly<{} & { open_links_in_new_tab: boolean; }> | undefined; } & { title: string; content: string; }>; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/api/create/types.ts",
-        "lineNumber": 19,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -125,10 +125,10 @@
         "label": "MarkdownEmbeddableState",
         "description": [],
         "signature": [
-          "Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { content: string; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { ref_id: string; }>"
+          "Readonly<{ description?: string | undefined; title?: string | undefined; settings?: Readonly<{} & { open_links_in_new_tab: boolean; }> | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { content: string; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { ref_id: string; }>"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
-        "lineNumber": 58,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -142,7 +142,7 @@
         "label": "MarkdownReadResponseBody",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly meta: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; created_at?: string | undefined; created_by?: string | undefined; updated_at?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; }>; }"
+          "{ readonly id: string; readonly meta: Readonly<{ version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; managed?: boolean | undefined; created_by?: string | undefined; updated_by?: string | undefined; owner?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; settings?: Readonly<{} & { open_links_in_new_tab: boolean; }> | undefined; } & { title: string; content: string; }>; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/api/read/types.ts",
         "lineNumber": 13,
@@ -159,7 +159,7 @@
         "label": "MarkdownUpdateResponseBody",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly meta: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; updated_at?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; }>; }"
+          "{ readonly id: string; readonly meta: Readonly<{ version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; managed?: boolean | undefined; created_by?: string | undefined; updated_by?: string | undefined; owner?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; settings?: Readonly<{} & { open_links_in_new_tab: boolean; }> | undefined; } & { title: string; content: string; }>; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/api/update/types.ts",
         "lineNumber": 14,
@@ -185,10 +185,10 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { content: string; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { ref_id: string; }>>"
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; settings?: Readonly<{} & { open_links_in_new_tab: boolean; }> | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { content: string; }> | Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & { ref_id: string; }>>"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
-        "lineNumber": 46,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

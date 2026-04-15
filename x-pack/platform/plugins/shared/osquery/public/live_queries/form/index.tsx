@@ -181,7 +181,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     () => (
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="flexEnd">
-          {formType === 'steps' && queryType !== 'pack' && (
+          {!isHistoryEnabled && formType === 'steps' && queryType !== 'pack' && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 disabled={!permissions.writeSavedQueries || resultsStatus === 'disabled'}
@@ -211,6 +211,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </EuiFlexItem>
     ),
     [
+      isHistoryEnabled,
       formType,
       queryType,
       permissions.writeSavedQueries,
@@ -356,7 +357,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         </EuiFlexGroup>
       </FormProvider>
 
-      {showSavedQueryFlyout ? (
+      {!isHistoryEnabled && showSavedQueryFlyout ? (
         <SavedQueryFlyout onClose={handleCloseSaveQueryFlyout} defaultValue={serializedData} />
       ) : null}
     </>

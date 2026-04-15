@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { SolutionSideNav, type SolutionSideNavProps } from './src';
+export {
+  SolutionSideNav,
+  type SolutionSideNavProps,
+  type SolutionSideNavInteractionVariant,
+} from './src';
 export { SolutionSideNavItemPosition } from './src/types';
 export type { SolutionSideNavItem, Tracker } from './src/types';

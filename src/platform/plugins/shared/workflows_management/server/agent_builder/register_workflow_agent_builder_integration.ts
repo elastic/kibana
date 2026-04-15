@@ -11,12 +11,11 @@ import type { Logger } from '@kbn/core/server';
 import { registerWorkflowYamlAttachment } from './attachments/workflow_yaml_attachment';
 import { registerWorkflowYamlDiffAttachment } from './attachments/workflow_yaml_diff_attachment';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
+import { createWorkflowSmlType } from './sml_types/workflow';
 import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
 import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
-import { registerGetWorkflowTool } from './tools/get_workflow_tool';
-import { registerListWorkflowsTool } from './tools/list_workflows_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
 import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
@@ -43,8 +42,6 @@ export function registerWorkflowAgentBuilderIntegration({
   registerGetStepDefinitionsTool(agentBuilder, api);
   registerGetTriggerDefinitionsTool(agentBuilder);
   registerGetConnectorsTool(agentBuilder, api);
-  registerListWorkflowsTool(agentBuilder, api);
-  registerGetWorkflowTool(agentBuilder, api);
   registerGetExamplesTool(agentBuilder);
 
   registerWorkflowExecuteStepTool(agentBuilder, api);
@@ -54,6 +51,8 @@ export function registerWorkflowAgentBuilderIntegration({
   registerWorkflowYamlDiffAttachment(agentBuilder);
 
   agentBuilder.skills.register(workflowAuthoringSkill);
+
+  agentBuilder.sml.registerType(createWorkflowSmlType(api));
 
   logger.debug('Workflow Agent Builder integration components registered');
 }

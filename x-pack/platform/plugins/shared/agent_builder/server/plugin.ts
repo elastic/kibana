@@ -37,9 +37,10 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/runner/model_provider';
+import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
+import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 
 export class AgentBuilderPlugin
@@ -209,13 +210,21 @@ export class AgentBuilderPlugin
       serviceSetups.tools.register(tool);
     });
 
-    // Register connector lifecycle listener to auto-create workflows/tools
-    // when connectors with workflow definitions are created.
-    // The handler checks the connectors-enabled feature flag and workflows
-    // availability at runtime, so we always register.
+    const connectorTools = createConnectorTools({
+      getActions: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.actions;
+      },
+    });
+    connectorTools.forEach((tool) => {
+      serviceSetups.tools.register(tool);
+    });
+
+    // Register connector lifecycle listener to index connectors into SML
+    // when they are created/deleted. The handler checks the connectors-enabled
+    // feature flag at runtime, so we always register.
     const connectorLifecycleHandler = createConnectorLifecycleHandler({
       serviceManager: this.serviceManager,
-      workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger.get('connector-lifecycle'),
       getStartServices: coreSetup.getStartServices,
     });
@@ -248,6 +257,7 @@ export class AgentBuilderPlugin
       sml: {
         registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
       },
+      topSnippets: this.config.topSnippets,
     };
   }
 
@@ -273,7 +283,8 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    const { tools, agents, skills, runnerFactory, execution, plugins } = startServices;
+    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
+      startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -322,6 +333,15 @@ export class AgentBuilderPlugin
       runtime: {
         createModelProvider: modelProviderFactory,
       },
+      conversations: {
+        getScopedClient: async ({ request }) => {
+          const client = await conversations.getScopedClient({ request });
+          return {
+            get: client.get.bind(client),
+            list: client.list.bind(client),
+          };
+        },
+      },
       sml: {
         indexAttachment: async (params) => {
           const soClient = savedObjects.getScopedClient(params.request);
@@ -335,7 +355,6 @@ export class AgentBuilderPlugin
             esClient: elasticsearch.client.asInternalUser,
             savedObjectsClient: soClient,
             logger: this.logger.get('services.sml'),
-            request: params.request,
           });
         },
       },

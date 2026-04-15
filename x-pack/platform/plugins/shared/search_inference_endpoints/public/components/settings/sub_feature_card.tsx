@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiDragDropContext,
@@ -17,6 +18,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
@@ -44,6 +46,7 @@ interface SubFeatureCardProps {
   feature: InferenceFeatureConfig;
   endpointIds: string[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
+  invalidEndpointIds: Set<string>;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -51,6 +54,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   feature,
   endpointIds,
   onEndpointsChange,
+  invalidEndpointIds,
 }) => {
   const { data: inferenceEndpoints = [] } = useQueryInferenceEndpoints();
   const { features: registeredFeatures } = useRegisteredFeatures();
@@ -58,6 +62,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [listWidth, setListWidth] = useState<number | undefined>(undefined);
   const listRef = useRef<HTMLDivElement>(null);
+  const { isTechPreview, isBeta } = feature;
 
   useEffect(() => {
     const el = listRef.current;
@@ -148,9 +153,33 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             min-inline-size: min(20rem, 50%);
           `}
         >
-          <EuiTitle size="s">
-            <h4>{feature.featureName}</h4>
-          </EuiTitle>
+          <EuiFlexGroup responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h4>{feature.featureName}</h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            {isTechPreview || isBeta ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadgeGroup>
+                  {isTechPreview && (
+                    <EuiBadge>
+                      {i18n.translate('xpack.searchInferenceEndpoints.settings.techPreview', {
+                        defaultMessage: 'Technical Preview',
+                      })}
+                    </EuiBadge>
+                  )}
+                  {isBeta && (
+                    <EuiBadge>
+                      {i18n.translate('xpack.searchInferenceEndpoints.settings.betaBadge', {
+                        defaultMessage: 'Beta',
+                      })}
+                    </EuiBadge>
+                  )}
+                </EuiBadgeGroup>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>{feature.featureDescription}</p>
@@ -191,6 +220,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                         {(provided) => {
                           const { icon = 'compute', label = endpointId } =
                             endpointDisplayMap.get(endpointId) ?? {};
+                          const isInvalid = invalidEndpointIds.has(endpointId);
                           return (
                             <div>
                               <EuiSplitPanel.Inner
@@ -212,7 +242,30 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                     </EuiPanel>
                                   </EuiFlexItem>
                                   <EuiFlexItem grow={false}>
-                                    <EuiIcon type={icon} size="m" aria-hidden />
+                                    {isInvalid ? (
+                                      <EuiIconTip
+                                        type="warning"
+                                        size="m"
+                                        color="warning"
+                                        content={i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.endpointUnavailable',
+                                          {
+                                            defaultMessage:
+                                              'This inference endpoint is no longer available',
+                                          }
+                                        )}
+                                        aria-label={i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.endpointUnavailable.ariaLabel',
+                                          {
+                                            defaultMessage:
+                                              'Inference endpoint {label} is no longer available',
+                                            values: { label },
+                                          }
+                                        )}
+                                      />
+                                    ) : (
+                                      <EuiIcon type={icon} size="m" aria-hidden />
+                                    )}
                                   </EuiFlexItem>
                                   <EuiFlexItem
                                     grow

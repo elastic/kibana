@@ -16,7 +16,7 @@ import { COMMON_UNSAFE_HEADERS, extractAttributeValue } from '../fixtures';
 // These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens and spin up Mock IdP plugin.
 apiTest.describe(
   '[NON-MKI] UIAM API Keys grant and invalidate functions',
-  { tag: [...tags.serverless.security.complete] },
+  { tag: tags.serverless.all },
   () => {
     let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
 

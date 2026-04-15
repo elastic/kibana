@@ -39,19 +39,9 @@ test.describe(
         await expect(viewConnectionDetailsLink).toBeVisible();
       });
 
-      await test.step('expands tutorial cards properly', async () => {
-        // Expect only 3 visible cards initially
-        expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
-        await pageObjects.gettingStarted.expandTutorialCards();
-        // Check for more than 3 cards after expansion (flexible to new tutorials being added)
-        const expandedCards = await pageObjects.gettingStarted.getTutorialCards();
-        expect(expandedCards.length).toBeGreaterThan(3);
-        await pageObjects.gettingStarted.collapseTutorialCards();
-        expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
-      });
-
-      await test.step('renders all tutorial cards and buttons', async () => {
-        await pageObjects.gettingStarted.expandTutorialCards();
+      await test.step('renders all tutorial cards', async () => {
+        const allCards = await pageObjects.gettingStarted.getTutorialCards();
+        expect(allCards.length).toBeGreaterThanOrEqual(6);
 
         const searchBasicsCard = await pageObjects.gettingStarted.getTutorialCard('search_basics');
         await expect(searchBasicsCard).toBeVisible();
@@ -64,23 +54,8 @@ test.describe(
         const esqlCard = await pageObjects.gettingStarted.getTutorialCard('esql');
         await expect(esqlCard).toBeVisible();
 
-        const searchBasicsButton = await pageObjects.gettingStarted.getTutorialCardButton(
-          'search_basics'
-        );
-        await expect(searchBasicsButton).toBeVisible();
-
-        const semanticSearchButton = await pageObjects.gettingStarted.getTutorialCardButton(
-          'semantic_search'
-        );
-        await expect(semanticSearchButton).toBeVisible();
-
-        const esqlButton = await pageObjects.gettingStarted.getTutorialCardButton('esql');
-        await expect(esqlButton).toBeVisible();
-
-        const timeSeriesAnalysisButton = await pageObjects.gettingStarted.getTutorialCardButton(
-          'tsds'
-        );
-        await expect(timeSeriesAnalysisButton).toBeVisible();
+        const tsdsCard = await pageObjects.gettingStarted.getTutorialCard('tsds');
+        await expect(tsdsCard).toBeVisible();
       });
 
       await test.step('renders kibana version badge', async () => {
@@ -115,7 +90,7 @@ test.describe(
       await test.step('navigates to create index page', async () => {
         await pageObjects.gettingStarted.goto();
         await pageObjects.gettingStarted.selectAddDataOption('gettingStartedCreateIndexMenuItem');
-        await expect(page).toHaveURL(/indices\/create/);
+        await expect(page).toHaveURL(/index_management\/indices/);
       });
     });
 
@@ -150,10 +125,8 @@ test.describe(
     });
 
     test('Tutorial cards open embedded console', async ({ pageObjects }) => {
-      await pageObjects.gettingStarted.expandTutorialCards();
-
       await test.step('search basics card opens console', async () => {
-        await pageObjects.gettingStarted.clickTutorialCardButton('search_basics');
+        await pageObjects.gettingStarted.clickTutorialCardAndScrollIntoView('search_basics');
 
         const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
         await expect(embeddedConsole).toBeVisible();
@@ -162,8 +135,8 @@ test.describe(
         await expect(embeddedConsole).toBeHidden();
       });
 
-      await test.step('semantic search button opens console', async () => {
-        await pageObjects.gettingStarted.clickTutorialCardButton('semantic_search');
+      await test.step('semantic search card opens console', async () => {
+        await pageObjects.gettingStarted.clickTutorialCardAndScrollIntoView('semantic_search');
 
         const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
         await expect(embeddedConsole).toBeVisible();

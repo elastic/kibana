@@ -86,6 +86,7 @@ describe('WorkflowsService', () => {
       index: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       update: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       delete: jest.fn().mockResolvedValue({ _id: 'test-id' }),
+      deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
       bulk: jest.fn().mockResolvedValue({ items: [] }),
     } as any;
 
@@ -382,7 +383,6 @@ describe('WorkflowsService', () => {
             valid: true,
             createdAt: '2023-01-01T00:00:00.000Z',
             lastUpdatedAt: '2023-01-01T00:00:00.000Z',
-            history: [],
           },
         ],
       });
@@ -618,6 +618,28 @@ describe('WorkflowsService', () => {
         },
       };
 
+      it('should not include execution history when includeExecutionHistory is false', async () => {
+        const mockSearchResponse = {
+          hits: {
+            hits: [mockWorkflowDocument],
+            total: { value: 1 },
+          },
+        };
+        // First call for workflows, second call for execution history
+        mockEsClient.search
+          .mockResolvedValueOnce(mockSearchResponse as any)
+          .mockResolvedValueOnce(mockExecutionResponse as any);
+
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: false,
+        });
+
+        expect(result.results[0].history).toEqual(undefined);
+
+        // First call for workflows, second call for execution history
+        expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+      });
+
       it('should include execution history when workflows have executions', async () => {
         const mockSearchResponse = {
           hits: {
@@ -631,10 +653,12 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockExecutionResponse as any);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results[0].history).toHaveLength(1);
-        expect(result.results[0].history[0]).toEqual({
+        expect(result.results[0].history?.[0]).toEqual({
           id: 'execution-1',
           workflowId: 'test-workflow-id',
           workflowName: 'Test Workflow',
@@ -704,7 +728,9 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockEmptyExecutionResponse as any);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results[0].history).toEqual([]);
       });
@@ -749,9 +775,11 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockExecutionResponseWithoutFinishedAt as any);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
-        expect(result.results[0].history[0]).toEqual({
+        expect(result.results[0].history?.[0]).toEqual({
           id: 'execution-1',
           workflowId: 'test-workflow-id',
           workflowName: 'Test Workflow',
@@ -811,7 +839,9 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockMixedExecutionResponse as any);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results).toHaveLength(2);
         expect(result.results[0].history).toHaveLength(1);
@@ -830,7 +860,9 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockRejectedValueOnce(new Error('Execution search failed'));
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results[0].history).toEqual([]);
         expect(mockLogger.error).toHaveBeenCalledWith(
@@ -864,7 +896,9 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockRejectedValueOnce(indexNotFoundError);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results[0].history).toEqual([]);
         expect(mockLogger.error).not.toHaveBeenCalled();
@@ -896,7 +930,9 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockRejectedValueOnce(otherError);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results[0].history).toEqual([]);
         expect(mockLogger.error).toHaveBeenCalledWith(
@@ -914,7 +950,9 @@ describe('WorkflowsService', () => {
 
         mockEsClient.search.mockResolvedValueOnce(mockSearchResponse as any);
 
-        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default', {
+          includeExecutionHistory: true,
+        });
 
         expect(result.results).toEqual([]);
         expect(mockEsClient.search).toHaveBeenCalledTimes(1); // Only workflows search, no execution search
@@ -1932,6 +1970,7 @@ steps:
         total: 1,
         deleted: 1,
         failures: [],
+        successfulIds: ['test-workflow-id'],
       });
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
@@ -1970,6 +2009,7 @@ steps:
         total: 1,
         deleted: 1,
         failures: [],
+        successfulIds: [],
       });
     });
 
@@ -2017,12 +2057,243 @@ steps:
         total: 2,
         deleted: 1,
         failures: [{ id: 'workflow-2', error: 'Database error' }],
+        successfulIds: ['workflow-1'],
       });
+    });
+
+    const noRunningExecutions = () => ({ hits: { hits: [], total: { value: 0 } } } as any);
+
+    const mockHardDeleteSearchSequence = (
+      workflowDoc: typeof mockWorkflowDocument = mockWorkflowDocument
+    ) => {
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: { hits: [workflowDoc], total: { value: 1 } },
+        } as any)
+        .mockResolvedValueOnce(noRunningExecutions())
+        .mockResolvedValueOnce({
+          hits: { hits: [workflowDoc], total: { value: 1 } },
+        } as any);
+    };
+
+    it('should hard delete workflows when force=true', async () => {
+      mockHardDeleteSearchSequence();
+      mockEsClient.delete.mockResolvedValue({
+        _id: 'test-workflow-id',
+        result: 'deleted',
+      } as any);
+
+      const result = await service.deleteWorkflows(['test-workflow-id'], 'default', {
+        force: true,
+      });
+
+      expect(result).toEqual({
+        total: 1,
+        deleted: 1,
+        failures: [],
+        successfulIds: ['test-workflow-id'],
+      });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [{ ids: { values: ['test-workflow-id'] } }, { term: { spaceId: 'default' } }],
+            },
+          },
+        })
+      );
+      expect(mockEsClient.delete).toHaveBeenCalled();
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should reject hard delete when workflows have running executions', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: { hits: [mockWorkflowDocument], total: { value: 1 } },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'exec-1',
+                _source: {
+                  spaceId: 'default',
+                  status: 'running',
+                  workflowId: 'test-workflow-id',
+                  triggeredBy: 'manual',
+                },
+              },
+            ],
+            total: { value: 1 },
+          },
+        } as any);
+
+      await expect(
+        service.deleteWorkflows(['test-workflow-id'], 'default', { force: true })
+      ).rejects.toThrow('Cannot force-delete workflows with running executions');
+
+      expect(mockEsClient.delete).not.toHaveBeenCalled();
+      expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+
+    it('should purge executions and step executions scoped to spaceId on hard delete', async () => {
+      mockHardDeleteSearchSequence();
+      mockEsClient.delete.mockResolvedValue({
+        _id: 'test-workflow-id',
+        result: 'deleted',
+      } as any);
+
+      await service.deleteWorkflows(['test-workflow-id'], 'default', { force: true });
+
+      const expectedQuery = {
+        bool: {
+          must: [{ terms: { workflowId: ['test-workflow-id'] } }, { term: { spaceId: 'default' } }],
+        },
+      };
+
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_EXECUTIONS_INDEX,
+          query: expectedQuery,
+        })
+      );
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+          query: expectedQuery,
+        })
+      );
+    });
+
+    it('should only purge data in the specified space when force deleting', async () => {
+      const workflowInSpaceA = {
+        _id: 'workflow-shared-id',
+        _source: { ...mockWorkflowDocument._source, spaceId: 'space-a' },
+      };
+      mockHardDeleteSearchSequence(workflowInSpaceA as typeof mockWorkflowDocument);
+      mockEsClient.delete.mockResolvedValue({
+        _id: 'workflow-shared-id',
+        result: 'deleted',
+      } as any);
+
+      await service.deleteWorkflows(['workflow-shared-id'], 'space-a', { force: true });
+
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_EXECUTIONS_INDEX,
+          query: {
+            bool: {
+              must: [
+                { terms: { workflowId: ['workflow-shared-id'] } },
+                { term: { spaceId: 'space-a' } },
+              ],
+            },
+          },
+        })
+      );
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+          query: {
+            bool: {
+              must: [
+                { terms: { workflowId: ['workflow-shared-id'] } },
+                { term: { spaceId: 'space-a' } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('should not purge related data on soft delete', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [mockWorkflowDocument],
+          total: { value: 1 },
+        },
+      } as any);
+      mockEsClient.bulk.mockResolvedValue({
+        items: [{ index: { _id: 'test-workflow-id', status: 200 } }],
+      } as any);
+
+      await service.deleteWorkflows(['test-workflow-id'], 'default');
+
+      expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+
+    it('should handle failures during hard delete', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              { ...mockWorkflowDocument, _id: 'wf-1' },
+              { ...mockWorkflowDocument, _id: 'wf-2' },
+            ],
+            total: { value: 2 },
+          },
+        } as any)
+        .mockResolvedValueOnce(noRunningExecutions())
+        .mockResolvedValueOnce(noRunningExecutions())
+        .mockResolvedValueOnce({
+          hits: { hits: [{ ...mockWorkflowDocument, _id: 'wf-1' }], total: { value: 1 } },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: { hits: [{ ...mockWorkflowDocument, _id: 'wf-2' }], total: { value: 1 } },
+        } as any);
+      mockEsClient.delete
+        .mockResolvedValueOnce({ _id: 'wf-1', result: 'deleted' } as any)
+        .mockRejectedValueOnce(new Error('ES delete failed'));
+
+      const result = await service.deleteWorkflows(['wf-1', 'wf-2'], 'default', { force: true });
+
+      expect(result).toEqual({
+        total: 2,
+        deleted: 1,
+        failures: [{ id: 'wf-2', error: 'ES delete failed' }],
+        successfulIds: ['wf-1'],
+      });
+    });
+
+    it('should not use bulk index when force=true', async () => {
+      mockHardDeleteSearchSequence();
+      mockEsClient.delete.mockResolvedValue({
+        _id: 'test-workflow-id',
+        result: 'deleted',
+      } as any);
+
+      await service.deleteWorkflows(['test-workflow-id'], 'default', { force: true });
+
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should continue even if purge fails', async () => {
+      mockHardDeleteSearchSequence();
+      mockEsClient.delete.mockResolvedValue({
+        _id: 'test-workflow-id',
+        result: 'deleted',
+      } as any);
+      mockEsClient.deleteByQuery.mockRejectedValue(new Error('Index not found'));
+
+      const result = await service.deleteWorkflows(['test-workflow-id'], 'default', {
+        force: true,
+      });
+
+      expect(result).toEqual({
+        total: 1,
+        deleted: 1,
+        failures: [],
+        successfulIds: ['test-workflow-id'],
+      });
+      expect(mockLogger.warn).toHaveBeenCalled();
     });
   });
 
   describe('getWorkflowStats', () => {
-    it('should return workflow statistics', async () => {
+    beforeEach(() => {
+      mockEsClient.search.mockClear();
       const mockWorkflowStatsResponse = {
         hits: {
           hits: [],
@@ -2048,8 +2319,20 @@ steps:
       mockEsClient.search
         .mockResolvedValueOnce(mockWorkflowStatsResponse as any)
         .mockResolvedValueOnce(mockExecutionStatsResponse as any);
+    });
 
-      const result = await service.getWorkflowStats('default');
+    it('should not include execution stats when includeExecutionStats is false', async () => {
+      const result = await service.getWorkflowStats('default', { includeExecutionStats: false });
+      expect(result.executions).toBeUndefined();
+    });
+
+    it('should include execution stats when includeExecutionStats is true', async () => {
+      const result = await service.getWorkflowStats('default', { includeExecutionStats: true });
+      expect(result.executions).toEqual([]);
+    });
+
+    it('should return workflow statistics', async () => {
+      const result = await service.getWorkflowStats('default', { includeExecutionStats: true });
 
       expect(result).toEqual({
         workflows: {
@@ -2967,6 +3250,219 @@ steps:
       );
       expect(result.valid).toBe(true);
       expect(result.diagnostics).toEqual([]);
+    });
+  });
+
+  describe('disableAllWorkflows', () => {
+    it('should return zero counts when no enabled workflows exist', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      const result = await service.disableAllWorkflows();
+
+      expect(result).toEqual({ total: 0, disabled: 0, failures: [] });
+    });
+
+    it('should bulk-disable all enabled workflows and unschedule tasks', async () => {
+      const enabledWorkflows = [
+        {
+          _id: 'wf-1',
+          _source: {
+            ...mockWorkflowDocument._source,
+            name: 'Workflow 1',
+            enabled: true,
+            yaml: 'name: Workflow 1\nenabled: true',
+          },
+        },
+        {
+          _id: 'wf-2',
+          _source: {
+            ...mockWorkflowDocument._source,
+            name: 'Workflow 2',
+            enabled: true,
+            yaml: 'name: Workflow 2\nenabled: true',
+          },
+        },
+      ];
+
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: enabledWorkflows, total: { value: 2 } },
+      } as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'wf-1', status: 200 } }, { index: { _id: 'wf-2', status: 200 } }],
+      } as any);
+
+      const result = await service.disableAllWorkflows();
+
+      expect(result.total).toBe(2);
+      expect(result.disabled).toBe(2);
+      expect(result.failures).toEqual([]);
+
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0] as any;
+      expect(bulkCall.refresh).toBe(true);
+
+      const docs = bulkCall.operations.filter((op: any) => op.enabled !== undefined);
+      expect(docs).toHaveLength(2);
+      expect(docs[0].enabled).toBe(false);
+      expect(docs[1].enabled).toBe(false);
+    });
+
+    it('should report failures for individual bulk operation errors', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: {
+                ...mockWorkflowDocument._source,
+                enabled: true,
+                yaml: 'name: Test\nenabled: true',
+              },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ index: { _id: 'wf-1', status: 500, error: { reason: 'index_closed' } } }],
+      } as any);
+
+      const result = await service.disableAllWorkflows();
+
+      expect(result.total).toBe(1);
+      expect(result.disabled).toBe(0);
+      expect(result.failures).toEqual([{ id: 'wf-1', error: 'index_closed' }]);
+    });
+
+    it('should handle bulk API errors gracefully', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: {
+                ...mockWorkflowDocument._source,
+                enabled: true,
+                yaml: 'name: Test\nenabled: true',
+              },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+
+      mockEsClient.bulk.mockRejectedValue(new Error('cluster unavailable'));
+
+      const result = await service.disableAllWorkflows();
+
+      expect(result.total).toBe(1);
+      expect(result.disabled).toBe(0);
+      expect(result.failures).toEqual([{ id: 'wf-1', error: 'cluster unavailable' }]);
+    });
+
+    it('should paginate through all enabled workflows using search_after', async () => {
+      const makeHit = (id: string, sortValue: number) => ({
+        _id: id,
+        _source: {
+          ...mockWorkflowDocument._source,
+          name: `Workflow ${id}`,
+          enabled: true,
+          yaml: `name: Workflow ${id}\nenabled: true`,
+        },
+        sort: [sortValue, 0],
+      });
+
+      const page1Hits = Array.from({ length: 1000 }, (_, i) => makeHit(`wf-${i}`, 1000 - i));
+      const page2Hits = [makeHit('wf-1000', 0), makeHit('wf-1001', -1)];
+
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: { hits: page1Hits, total: { value: 1002 } },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: { hits: page2Hits },
+        } as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [],
+      } as any);
+
+      const result = await service.disableAllWorkflows();
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      const secondSearchCall = mockEsClient.search.mock.calls[1][0] as any;
+      expect(secondSearchCall.search_after).toEqual([1, 0]);
+
+      expect(result.total).toBe(1002);
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(2);
+    });
+
+    it("should unschedule tasks per page with only that page's disabled IDs", async () => {
+      const mockTaskScheduler = {
+        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+        scheduleWorkflowTask: jest.fn(),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      const makeHitWithSort = (id: string, sortValue: number) => ({
+        _id: id,
+        _source: {
+          ...mockWorkflowDocument._source,
+          name: `Workflow ${id}`,
+          enabled: true,
+          yaml: `name: Workflow ${id}\nenabled: true`,
+        },
+        sort: [sortValue, 0],
+      });
+
+      const page1Hits = Array.from({ length: 1000 }, (_, i) =>
+        makeHitWithSort(`wf-${i}`, 1000 - i)
+      );
+      const page2Hits = [makeHitWithSort('wf-1000', 0), makeHitWithSort('wf-1001', -1)];
+
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: page1Hits, total: { value: 1002 } } } as any)
+        .mockResolvedValueOnce({ hits: { hits: page2Hits } } as any);
+
+      const page1Items = page1Hits.map((h) => ({ index: { _id: h._id, status: 200 } }));
+      const page2Items = page2Hits.map((h) => ({ index: { _id: h._id, status: 200 } }));
+
+      mockEsClient.bulk
+        .mockResolvedValueOnce({ errors: false, items: page1Items } as any)
+        .mockResolvedValueOnce({ errors: false, items: page2Items } as any);
+
+      await service.disableAllWorkflows();
+
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledTimes(1002);
+
+      const page1Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(0, 1000);
+      const page2Calls = mockTaskScheduler.unscheduleWorkflowTasks.mock.calls.slice(1000);
+
+      expect(page1Calls.map((c: any) => c[0])).toEqual(page1Hits.map((h) => h._id));
+      expect(page2Calls.map((c: any) => c[0])).toEqual(['wf-1000', 'wf-1001']);
+    });
+
+    it('should not call unschedule when no workflows were disabled', async () => {
+      const mockTaskScheduler = {
+        unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+        scheduleWorkflowTask: jest.fn(),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      await service.disableAllWorkflows();
+
+      expect(mockTaskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
     });
   });
 });

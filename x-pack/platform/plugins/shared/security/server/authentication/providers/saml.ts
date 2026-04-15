@@ -308,7 +308,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
     // When the provider is in UIAM mode, the UIAM service is responsible for invalidating the user session tokens.
     // Additionally, when in UIAM mode, SAML Single Logout (SLO) is not supported. Therefore, the code should never
     // reach the `else if` branch below. However, even if it does, it will result in a no-op call to Elasticsearch.
-    if (state && this.isUiamToken(state.accessToken)) {
+    if (state?.accessToken && this.isUiamToken(state.accessToken)) {
       try {
         await this.options.uiam.invalidateSessionTokens(state.accessToken!, state.refreshToken!);
       } catch (err) {
@@ -917,7 +917,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
    * transition period while we support both SAML and UIAM tokens at the same time.
    * @param token ES native or UIAM access or refresh token.
    */
-  private isUiamToken(token?: string): this is { options: { uiam: UiamServicePublic } } {
+  private isUiamToken(token: string): this is { options: { uiam: UiamServicePublic } } {
     const isUiamToken = !!token && isUiamCredential(token);
     if (isUiamToken && !this.useUiam) {
       this.logger.error('Detected UIAM token, but the provider is not configured to use UIAM.');

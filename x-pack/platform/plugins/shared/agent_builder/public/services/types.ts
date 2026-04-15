@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AgentBuilderAccessChecker } from './access/access';
 import type { AgentBuilderStartDependencies, OpenConversationSidebarReturn } from '../types';
 import type { OpenConversationSidebarOptions } from '../sidebar/types';
@@ -15,6 +16,7 @@ import type { ConversationsService } from './conversations';
 import type { DocLinksService } from './doc_links';
 import type { ToolsService } from './tools';
 import type { SkillsService } from './skills/skills_service';
+import type { SmlService } from './sml/sml_service';
 import type { PluginsService } from './plugins/plugins_service';
 import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
@@ -28,8 +30,10 @@ export interface AgentBuilderInternalService {
   navigationService: NavigationService;
   toolsService: ToolsService;
   skillsService: SkillsService;
+  smlService: SmlService;
   pluginsService: PluginsService;
   startDependencies: AgentBuilderStartDependencies;
+  usageCollection?: UsageCollectionSetup;
   accessChecker: AgentBuilderAccessChecker;
   eventsService: EventsService;
   openSidebarConversation: (

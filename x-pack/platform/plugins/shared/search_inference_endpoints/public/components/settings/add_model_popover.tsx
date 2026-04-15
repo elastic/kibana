@@ -104,6 +104,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
         onChange={handleChange}
         singleSelection
         searchable
+        data-test-subj="add-model-selectable"
         searchProps={{
           placeholder: i18n.translate('xpack.searchInferenceEndpoints.settings.addModel.search', {
             defaultMessage: 'Search models...',

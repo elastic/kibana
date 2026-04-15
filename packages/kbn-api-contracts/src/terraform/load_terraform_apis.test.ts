@@ -37,16 +37,19 @@ describe('load_terraform_apis', () => {
         path: '/api/spaces/space',
         methods: ['GET', 'POST'],
         resource: 'elasticstack_kibana_space',
+        owners: ['@elastic/kibana-security'],
       },
       {
         path: '/api/spaces/space/{id}',
         methods: ['GET', 'PUT', 'DELETE'],
         resource: 'elasticstack_kibana_space',
+        owners: ['@elastic/kibana-security'],
       },
       {
         path: '/api/fleet/agent_policies',
         methods: ['GET', 'POST'],
         resource: 'elasticstack_fleet_agent_policy',
+        owners: ['@elastic/fleet'],
       },
     ];
 

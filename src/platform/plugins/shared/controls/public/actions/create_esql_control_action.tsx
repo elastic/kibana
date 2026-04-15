@@ -36,7 +36,7 @@ export const createESQLControlAction = (): ActionDefinition<
   id: ACTION_CREATE_ESQL_CONTROL,
   order: 1,
   grouping: [ADD_PANEL_CONTROL_GROUP],
-  getIconType: () => 'controlsHorizontal',
+  getIconType: () => 'controls',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable, isPinned }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();

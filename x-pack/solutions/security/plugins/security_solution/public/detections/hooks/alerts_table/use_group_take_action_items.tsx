@@ -12,6 +12,7 @@ import type {
 } from '@elastic/eui';
 import { EuiContextMenu, EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 import type { GroupTakeActionItems } from '../../components/alerts_table/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { inputsModel } from '../../../common/store';
@@ -37,7 +38,6 @@ import * as i18n from '../translations';
 import { AlertsEventTypes, METRIC_TYPE, track } from '../../../common/lib/telemetry';
 import type { StartServices } from '../../../types';
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
-import { useBulkAlertClosingReasonItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 const getTelemetryEvent = {
@@ -74,12 +74,12 @@ export const useGroupTakeActionsItems = ({
 }: UseGroupTakeActionsItemsParams): GroupTakeActionItems => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
   const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
   const {
     services: { telemetry },
   } = useKibana<StartServices>();
-  const { hasAlertsUpdate } = useAlertsPrivileges();
 
   const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
 
@@ -202,7 +202,9 @@ export const useGroupTakeActionsItems = ({
     ]
   );
   const { item: alertClosingReasonItem, getPanels: getAlertClosingReasonPanels } =
-    useBulkAlertClosingReasonItems();
+    useBulkClosingReasonItems({
+      isEnabled: hasAlertsUpdate ?? false,
+    });
 
   return useCallback(
     ({ query, tableId, groupNumber, selectedGroup }) => {

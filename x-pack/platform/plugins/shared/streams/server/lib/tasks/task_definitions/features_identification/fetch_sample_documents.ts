@@ -5,20 +5,17 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/streams-schema';
-import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
+import { getDiverseSampleDocuments, getSampleDocuments } from '@kbn/ai-tools';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import type { Condition } from '@kbn/streamlang';
-import { compact } from 'lodash';
-import { getEntityFilters, MAX_FILTERS } from './get_entity_filters';
+import { getEntityFilters } from './get_entity_filters';
+import { parseError } from '../../../streams/errors/parse_error';
 
-const DEFAULT_SAMPLE_SIZE = 20;
-// Defines the proportion of the sample size (e.g., 60%) that should be fetched
-// from a pool that excludes known features (via must_not filters). The remaining
-// portion is backfilled with unfiltered, random documents to ensure a diverse sample.
-const ENTITY_FILTERED_RATIO = 0.6;
+const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits: [] };
 
 export async function fetchSampleDocuments({
   esClient,
@@ -27,7 +24,10 @@ export async function fetchSampleDocuments({
   end,
   features,
   logger,
-  size = DEFAULT_SAMPLE_SIZE,
+  size,
+  entityFilteredRatio,
+  diverseRatio,
+  maxEntityFilters,
 }: {
   esClient: ElasticsearchClient;
   index: string;
@@ -35,52 +35,127 @@ export async function fetchSampleDocuments({
   end: number;
   features: FeatureWithFilter[];
   logger: Logger;
-  size?: number;
+  size: number;
+  entityFilteredRatio: number;
+  diverseRatio: number;
+  maxEntityFilters: number;
 }) {
-  const entityFilters = getEntityFilters(features, MAX_FILTERS);
+  const entityFilters = getEntityFilters(features, maxEntityFilters);
+
   if (entityFilters.length === 0) {
-    const { hits } = await getSampleDocuments({ esClient, index, start, end, size });
-    return { documents: hits, totalFilters: 0, filtersCapped: false, hasFilteredDocuments: false };
+    const diverseSize = Math.round(size * diverseRatio);
+
+    const [{ hits: diverseHits }, { hits: randomHits }] = await Promise.all([
+      getDiverseSampleDocuments({ esClient, index, start, end, size: diverseSize }),
+      getSampleDocuments({ esClient, index, start, end, size }),
+    ]);
+
+    const { documents, bucketCounts } = mergeDocuments(
+      [
+        { hits: diverseHits, cap: diverseSize },
+        { hits: randomHits, cap: size },
+      ],
+      size
+    );
+
+    logger.debug(
+      () =>
+        `Sampled ${documents.length} documents (${bucketCounts[0]} diverse, ${bucketCounts[1]} random). No entities available to filter by.`
+    );
+
+    return {
+      documents,
+      totalFilters: 0,
+      filtersCapped: false,
+      hasFilteredDocuments: false,
+    };
   }
+
+  const runtimeMappings = await getRuntimeMappings(esClient, index, entityFilters);
+  const entityFilteredSize = Math.round(size * entityFilteredRatio);
+  const diverseSize = Math.round(size * diverseRatio);
+
+  const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
+    await Promise.all([
+      getSampleDocuments({
+        esClient,
+        index,
+        start,
+        end,
+        size: entityFilteredSize,
+        filter: { bool: { must_not: entityFilters.map(conditionToQueryDsl) } },
+        runtime_mappings: runtimeMappings,
+      }).catch((err) => {
+        logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
+        return EMPTY_SAMPLE;
+      }),
+      getDiverseSampleDocuments({
+        esClient,
+        index,
+        start,
+        end,
+        size: diverseSize + entityFilteredSize,
+      }),
+      getSampleDocuments({
+        esClient,
+        index,
+        start,
+        end,
+        size,
+      }),
+    ]);
+
+  const { documents, bucketCounts } = mergeDocuments(
+    [
+      { hits: entityFilteredHits, cap: entityFilteredSize },
+      { hits: diverseHits, cap: diverseSize },
+      { hits: randomHits, cap: size },
+    ],
+    size
+  );
 
   logger.debug(
     () =>
-      `Fetching sample documents after excluding ${entityFilters.length} KI features (${
+      `Sampled ${documents.length} documents (${bucketCounts[0]} entity-filtered, ${
+        bucketCounts[1]
+      } diverse, ${bucketCounts[2]} random). ${entityFilters.length} entity filters applied (${
         features.length - entityFilters.length
-      } omitted):\n${JSON.stringify(entityFilters, null, 2)}`
+      } omitted):\n${JSON.stringify(entityFilters)}`
   );
 
-  const runtimeMappings = await getRuntimeMappings(esClient, index, entityFilters);
-  const entityFilteredSize = Math.round(size * ENTITY_FILTERED_RATIO);
-  const [{ hits: entityFilteredDocs }, { hits: unfilteredDocs }] = await Promise.all([
-    getSampleDocuments({
-      esClient,
-      index,
-      start,
-      end,
-      timeout: '10s',
-      size: entityFilteredSize,
-      filter: { bool: { must_not: entityFilters.map(conditionToQueryDsl) } },
-      runtime_mappings: runtimeMappings,
-    }),
-    getSampleDocuments({
-      esClient,
-      index,
-      start,
-      end,
-      size,
-    }),
-  ]);
-
-  const seenIds = new Set<string>(compact(entityFilteredDocs.map(({ _id }) => _id)));
-  const backfill = unfilteredDocs.filter(({ _id }) => _id && !seenIds.has(_id));
-
   return {
-    documents: [...entityFilteredDocs, ...backfill.slice(0, size - entityFilteredDocs.length)],
+    documents,
     totalFilters: features.length,
-    filtersCapped: features.length > MAX_FILTERS,
-    hasFilteredDocuments: entityFilteredDocs.length > 0,
+    filtersCapped: features.length > maxEntityFilters,
+    hasFilteredDocuments: entityFilteredHits.length > 0,
   };
+}
+
+function mergeDocuments(
+  prioritizedHits: Array<{
+    hits: Array<SearchHit<Record<string, unknown>>>;
+    cap: number;
+  }>,
+  totalSize: number
+): { documents: Array<SearchHit<Record<string, unknown>>>; bucketCounts: number[] } {
+  const seen = new Set<string>();
+  const result: Array<SearchHit<Record<string, unknown>>> = [];
+  const bucketCounts = prioritizedHits.map(() => 0);
+
+  for (let i = 0; i < prioritizedHits.length; i++) {
+    const { hits, cap } = prioritizedHits[i];
+    let added = 0;
+    for (const hit of hits) {
+      if (added >= cap || result.length >= totalSize) break;
+      if (hit._id && seen.has(hit._id)) continue;
+      if (hit._id) seen.add(hit._id);
+      result.push(hit);
+      added++;
+    }
+    bucketCounts[i] = added;
+  }
+
+  return { documents: result, bucketCounts };
 }
 
 async function getRuntimeMappings(
