@@ -63,6 +63,14 @@ jest.mock('./gui_rule_form', () => ({
   ),
 }));
 
+jest.mock('./yaml_rule_form', () => ({
+  YamlRuleForm: () => (
+    <form id="ruleV2Form" data-test-subj="mockYamlRuleForm">
+      <div>YAML Form</div>
+    </form>
+  ),
+}));
+
 describe('RuleForm', () => {
   const mockServices = createMockServices();
 
@@ -81,6 +89,24 @@ describe('RuleForm', () => {
 
       expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
       expect(screen.getByText('GUI Form')).toBeInTheDocument();
+    });
+
+    it('renders Form/YAML toggle with GUI form selected by default', () => {
+      render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByTestId('ruleV2FormEditModeToggle')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleV2FormEditModeFormButton')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleV2FormEditModeYamlButton')).toBeInTheDocument();
+    });
+
+    it('shows YAML editor mock when YAML mode is selected', async () => {
+      const user = userEvent.setup();
+      render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+
+      expect(screen.getByTestId('mockYamlRuleForm')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockGuiRuleForm')).not.toBeInTheDocument();
     });
 
     it('renders ErrorCallOut from RuleFormContent', () => {

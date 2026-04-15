@@ -6,28 +6,8 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonGroup,
-  EuiCallOut,
-  EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiSpacer,
-} from '@elastic/eui';
-import type { IconType } from '@elastic/eui';
+import { EuiButtonGroup, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { paths } from '../constants';
-import { RuleBuilderGrid } from '../rule_builders/rule_builder_grid';
-import type { RuleBuilderId } from '../rule_builders/rule_builder_definitions';
 
 /** Remember which builder to return to when toggling ES|QL → builder. */
 export const RULE_EVALUATION_LAST_BUILDER_SESSION_KEY =
@@ -38,35 +18,16 @@ export const RULE_EVALUATION_DEFAULT_BUILDER_ID = 'threshold_alert';
 export interface RuleEvaluationEsqlHeaderActionsProps {
   /** Current mode shown in the rule evaluation header. */
   selectedMode: 'esql' | 'builder';
-  /** Switches to ES|QL after any confirmation handled here. */
+  /** Switches to ES|QL after any confirmation handled here, or to guided builder. */
   onChange: (next: 'esql' | 'builder') => void;
-  /** Switches to guided builder with the chosen builder id (from the picker modal). */
-  onPickBuilder: (builderId: string) => void;
-  /** Icon for the guided builder action (matches the active or last builder). */
-  builderIconType: IconType;
-  basePath: { prepend: (path: string) => string };
-  showAgentBuilderButton?: boolean;
-  onOpenAgentBuilder?: () => void;
 }
 
 export const RuleEvaluationEsqlHeaderActions = ({
   selectedMode,
   onChange,
-  onPickBuilder,
-  builderIconType,
-  basePath,
-  showAgentBuilderButton,
-  onOpenAgentBuilder,
 }: RuleEvaluationEsqlHeaderActionsProps) => {
-  const [isBuilderPickerOpen, setIsBuilderPickerOpen] = useState(false);
   const [isEsqlSwitchConfirmOpen, setIsEsqlSwitchConfirmOpen] = useState(false);
-
-  const useGuidedBuilderLabel = i18n.translate(
-    'xpack.alertingV2.ruleForm.ruleConfigurationMode.useGuidedBuilder',
-    {
-      defaultMessage: 'Use guided builder',
-    }
-  );
+  const [isBuilderSwitchConfirmOpen, setIsBuilderSwitchConfirmOpen] = useState(false);
 
   const toggleLegend = i18n.translate('xpack.alertingV2.ruleForm.ruleConfigurationMode.legend', {
     defaultMessage: 'Rule configuration: guided builder or ES|QL',
@@ -83,22 +44,36 @@ export const RuleEvaluationEsqlHeaderActions = ({
     }
   );
 
+  const builderTooltip = i18n.translate(
+    'xpack.alertingV2.ruleForm.ruleConfigurationMode.builderTooltip',
+    {
+      defaultMessage:
+        'Guided builder: configure the rule with structured fields and controls instead of raw ES|QL.',
+    }
+  );
+
+  const esqlTooltip = i18n.translate('xpack.alertingV2.ruleForm.ruleConfigurationMode.esqlTooltip', {
+    defaultMessage: 'ES|QL: edit the evaluation query directly with the ES|QL editor.',
+  });
+
   const modeToggleButtons = useMemo(
     () => [
       {
         id: 'builder',
         label: builderAria,
-        iconType: builderIconType,
+        iconType: 'dashboardApp' as const,
         'data-test-subj': 'ruleEvaluationModeBuilder',
+        toolTipContent: builderTooltip,
       },
       {
         id: 'esql',
         label: esqlAria,
         iconType: 'editorCodeBlock' as const,
         'data-test-subj': 'ruleEvaluationModeEsql',
+        toolTipContent: esqlTooltip,
       },
     ],
-    [builderAria, builderIconType, esqlAria]
+    [builderAria, builderTooltip, esqlAria, esqlTooltip]
   );
 
   const handleButtonGroupChange = (optionId: string) => {
@@ -110,7 +85,10 @@ export const RuleEvaluationEsqlHeaderActions = ({
       setIsEsqlSwitchConfirmOpen(true);
       return;
     }
-    onChange(next);
+    if (next === 'builder') {
+      setIsBuilderSwitchConfirmOpen(true);
+      return;
+    }
   };
 
   const confirmSwitchToEsql = () => {
@@ -122,19 +100,14 @@ export const RuleEvaluationEsqlHeaderActions = ({
     setIsEsqlSwitchConfirmOpen(false);
   };
 
-  const handlePickBuilderFromModal = (id: RuleBuilderId) => {
-    setIsBuilderPickerOpen(false);
-    onPickBuilder(id);
+  const confirmSwitchToBuilder = () => {
+    setIsBuilderSwitchConfirmOpen(false);
+    onChange('builder');
   };
 
-  const hubHref = basePath.prepend(paths.ruleCreate);
-
-  const builderPickerTitle = i18n.translate(
-    'xpack.alertingV2.ruleForm.ruleConfigurationMode.builderPickerTitle',
-    {
-      defaultMessage: 'Choose a rule builder',
-    }
-  );
+  const cancelSwitchToBuilder = () => {
+    setIsBuilderSwitchConfirmOpen(false);
+  };
 
   const esqlSwitchTitle = i18n.translate(
     'xpack.alertingV2.ruleForm.ruleConfigurationMode.switchToEsqlTitle',
@@ -157,80 +130,43 @@ export const RuleEvaluationEsqlHeaderActions = ({
     }
   );
 
-  if (selectedMode === 'esql') {
-    return (
-      <>
-        <EuiButton
-          size="s"
-          fill={false}
-          color="text"
-          onClick={() => setIsBuilderPickerOpen(true)}
-          data-test-subj="ruleEvaluationUseGuidedBuilder"
-        >
-          {useGuidedBuilderLabel}
-        </EuiButton>
+  const switchModeSharedExplanation = i18n.translate(
+    'xpack.alertingV2.ruleForm.ruleConfigurationMode.switchModeSharedExplanation',
+    {
+      defaultMessage:
+        'We will try to carry over all relevant data when you switch. Some fields you already selected may not transfer and could be reset.',
+    }
+  );
 
-        {isBuilderPickerOpen ? (
-          <EuiModal
-            onClose={() => setIsBuilderPickerOpen(false)}
-            style={{ width: 880, maxWidth: '90vw' }}
-          >
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>{builderPickerTitle}</EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              <RuleBuilderGrid variant="all" onSelectBuilder={handlePickBuilderFromModal} />
-              <EuiSpacer size="m" />
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                wrap
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiLink href={hubHref} data-test-subj="ruleEvaluationBuilderPickerHubLink">
-                    <FormattedMessage
-                      id="xpack.alertingV2.ruleForm.ruleConfigurationMode.viewCreateHub"
-                      defaultMessage="Open create hub (all options)"
-                    />
-                  </EuiLink>
-                </EuiFlexItem>
-                {showAgentBuilderButton && onOpenAgentBuilder ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      color="text"
-                      iconType="productAgent"
-                      data-test-subj="ruleEvaluationBuilderPickerAgentButton"
-                      onClick={() => {
-                        setIsBuilderPickerOpen(false);
-                        onOpenAgentBuilder();
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.alertingV2.ruleForm.ruleConfigurationMode.askAiAgent"
-                        defaultMessage="Ask AI Agent"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            </EuiModalBody>
-            <EuiModalFooter>
-              <EuiButtonEmpty onClick={() => setIsBuilderPickerOpen(false)}>
-                {i18n.translate(
-                  'xpack.alertingV2.ruleForm.ruleConfigurationMode.builderPickerClose',
-                  {
-                    defaultMessage: 'Close',
-                  }
-                )}
-              </EuiButtonEmpty>
-            </EuiModalFooter>
-          </EuiModal>
-        ) : null}
-      </>
-    );
-  }
+  const switchToEsqlSupplement = i18n.translate(
+    'xpack.alertingV2.ruleForm.ruleConfigurationMode.switchToEsqlSupplement',
+    {
+      defaultMessage:
+        'After switching, raw ES|QL can be harder to map back to the guided builder. Continue only if you intend to edit the query directly.',
+    }
+  );
+
+  const builderSwitchTitle = i18n.translate(
+    'xpack.alertingV2.ruleForm.ruleConfigurationMode.switchToBuilderTitle',
+    {
+      defaultMessage: 'Switch to guided builder?',
+    }
+  );
+
+  const switchToBuilderSupplement = i18n.translate(
+    'xpack.alertingV2.ruleForm.ruleConfigurationMode.switchToBuilderSupplement',
+    {
+      defaultMessage:
+        'The guided builder may reorganize or replace parts of your ES|QL query into structured steps.',
+    }
+  );
+
+  const builderSwitchConfirm = i18n.translate(
+    'xpack.alertingV2.ruleForm.ruleConfigurationMode.switchToBuilderConfirm',
+    {
+      defaultMessage: 'Switch to guided builder',
+    }
+  );
 
   return (
     <>
@@ -260,26 +196,26 @@ export const RuleEvaluationEsqlHeaderActions = ({
           buttonColor="warning"
           data-test-subj="ruleEvaluationSwitchToEsqlConfirm"
         >
-          <EuiCallOut
-            color="warning"
-            title={i18n.translate(
-              'xpack.alertingV2.ruleForm.ruleConfigurationMode.switchToEsqlCalloutTitle',
-              {
-                defaultMessage: 'You may not be able to return to the guided builder',
-              }
-            )}
-            iconType="alert"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.alertingV2.ruleForm.ruleConfigurationMode.switchToEsqlCalloutBody',
-                {
-                  defaultMessage:
-                    'Switching to ES|QL replaces the guided builder for this section. Values you entered only in the builder may be lost, and raw ES|QL can be harder to map back to the builder. Continue only if you intend to edit the query directly.',
-                }
-              )}
-            </p>
-          </EuiCallOut>
+          <p>{switchModeSharedExplanation}</p>
+          <EuiSpacer size="s" />
+          <p>{switchToEsqlSupplement}</p>
+        </EuiConfirmModal>
+      ) : null}
+
+      {isBuilderSwitchConfirmOpen ? (
+        <EuiConfirmModal
+          title={builderSwitchTitle}
+          onCancel={cancelSwitchToBuilder}
+          onConfirm={confirmSwitchToBuilder}
+          cancelButtonText={esqlSwitchCancel}
+          confirmButtonText={builderSwitchConfirm}
+          defaultFocusedButton="cancel"
+          buttonColor="warning"
+          data-test-subj="ruleEvaluationSwitchToBuilderConfirm"
+        >
+          <p>{switchModeSharedExplanation}</p>
+          <EuiSpacer size="s" />
+          <p>{switchToBuilderSupplement}</p>
         </EuiConfirmModal>
       ) : null}
     </>

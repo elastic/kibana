@@ -14,6 +14,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ALERTING_V2_SECTION_ID,
@@ -25,6 +26,7 @@ import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
 import { setKibanaServices } from './kibana_services';
+import { getDiscoverHrefForRuleQuery } from './utils/discover_href_for_episode';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
 import type { AlertingV2PublicStart } from './types';
 
@@ -43,15 +45,25 @@ export const module = new ContainerModule(({ bind }) => {
 
     getStartServices().then(([coreStart]) => {
       const diContainer = coreStart.injection.getContainer();
+      const data = diContainer.get(PluginStart('data')) as DataPublicPluginStart;
+      const share = diContainer.get(PluginStart('share')) as SharePluginStart;
       setKibanaServices({
         http: coreStart.http,
         notifications: coreStart.notifications,
         application: coreStart.application,
-        data: diContainer.get(PluginStart('data')) as DataPublicPluginStart,
+        data,
         dataViews: diContainer.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
+        getDiscoverHrefForEsql: (esql: string) =>
+          getDiscoverHrefForRuleQuery({
+            share,
+            capabilities: coreStart.application.capabilities,
+            uiSettings: coreStart.uiSettings,
+            timeRange: data.query.timefilter.timefilter.getTime(),
+            ruleEsql: esql,
+          }),
       });
     });
 

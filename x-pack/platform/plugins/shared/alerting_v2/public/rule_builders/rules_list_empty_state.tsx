@@ -12,9 +12,11 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PluginStart } from '@kbn/core-di';
@@ -90,6 +92,15 @@ export const RulesListEmptyState = () => {
           }
           actions={
             <div css={{ width: '100%' }}>
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.alertingV2.rulesList.emptyStateRuleBuilderSectionTitle"
+                    defaultMessage="Create using a Rule builder"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
               <RuleBuilderGrid variant="featured" />
               <EuiSpacer size="m" />
               <EuiText size="s" textAlign="center">
@@ -100,6 +111,28 @@ export const RulesListEmptyState = () => {
                   />
                 </EuiLink>
               </EuiText>
+              <EuiSpacer size="l" />
+              <EuiFlexGroup
+                alignItems="center"
+                responsive={false}
+                gutterSize="s"
+                data-test-subj="rulesListEmptyStateOrSeparator"
+              >
+                <EuiFlexItem grow css={{ minWidth: 0 }}>
+                  <EuiHorizontalRule margin="none" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.alertingV2.rulesList.emptyStateOrSeparator"
+                      defaultMessage="or"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow css={{ minWidth: 0 }}>
+                  <EuiHorizontalRule margin="none" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s" wrap>
                 <EuiFlexItem grow={false}>
@@ -128,7 +161,7 @@ export const RulesListEmptyState = () => {
                     >
                       <FormattedMessage
                         id="xpack.alertingV2.rulesList.emptyStateAskAiAgentButton"
-                        defaultMessage="Ask AI Agent"
+                        defaultMessage="Create with AI Agent"
                       />
                     </EuiButton>
                   </EuiFlexItem>

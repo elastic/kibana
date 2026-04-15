@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiDataGrid,
   type EuiDataGridCellValueElementProps,
@@ -15,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -70,6 +70,8 @@ export interface QueryResultsGridProps {
   timeField?: string;
   /** The lookback duration string for the chart time range (e.g. '5m', '1h') */
   lookback?: string;
+  /** When set, shows an “Open in Discover” control opening this URL in a new tab */
+  openInDiscoverHref?: string;
 }
 
 /**
@@ -98,6 +100,7 @@ export const QueryResultsGrid = ({
   query,
   timeField,
   lookback,
+  openInDiscoverHref,
 }: QueryResultsGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
 
@@ -163,17 +166,24 @@ export const QueryResultsGrid = ({
 
   const hasQuery = hasValidQuery || columns.length > 0 || rows.length > 0 || isLoading || isError;
 
+  const openInDiscoverLabel = i18n.translate(
+    'xpack.alertingV2.ruleForm.queryResultsGrid.openInDiscover',
+    {
+      defaultMessage: 'Open in Discover',
+    }
+  );
+
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-            {lookback && (
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={true} wrap>
+        <EuiFlexItem grow={true}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={true} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>{title}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            {lookback ? (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   {i18n.translate('xpack.alertingV2.ruleForm.queryResultsGrid.timeRangeLabel', {
@@ -182,14 +192,24 @@ export const QueryResultsGrid = ({
                   })}
                 </EuiText>
               </EuiFlexItem>
-            )}
-            {isLoading && (
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            )}
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
+        {openInDiscoverHref ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="ruleResultsOpenInDiscoverButton"
+              size="xs"
+              color="text"
+              iconType="discoverApp"
+              href={openInDiscoverHref}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {openInDiscoverLabel}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
 
       {rows.length > 0 && query && timeField && lookback && (

@@ -53,6 +53,7 @@ const mockPreviewResult: PreviewResult = {
   hasValidQuery: true,
   query: 'FROM logs-* | STATS count() BY host.name | WHERE count < 5',
   timeField: '@timestamp',
+  refetch: jest.fn(),
   lookback: '1m',
 };
 

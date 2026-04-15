@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useRecoveryPreview } from '../hooks/use_recovery_preview';
+import { useRuleFormServices } from '../contexts';
 import { QueryResultsGrid } from './query_results_grid';
 
 /**
@@ -19,6 +20,7 @@ import { QueryResultsGrid } from './query_results_grid';
  * `QueryResultsGrid`.
  */
 export const RecoveryResultsPreview = () => {
+  const { getDiscoverHrefForEsql } = useRuleFormServices();
   const {
     columns,
     rows,
@@ -33,6 +35,14 @@ export const RecoveryResultsPreview = () => {
     timeField,
     lookback,
   } = useRecoveryPreview();
+
+  const openInDiscoverHref = useMemo(() => {
+    const trimmed = query?.trim();
+    if (!trimmed || !getDiscoverHrefForEsql) {
+      return undefined;
+    }
+    return getDiscoverHrefForEsql(trimmed);
+  }, [getDiscoverHrefForEsql, query]);
 
   return (
     <QueryResultsGrid
@@ -63,6 +73,7 @@ export const RecoveryResultsPreview = () => {
       query={query}
       timeField={timeField}
       lookback={lookback}
+      openInDiscoverHref={openInDiscoverHref}
     />
   );
 };

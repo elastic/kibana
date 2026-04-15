@@ -48,6 +48,7 @@ const mockPreviewResult: RulePreviewResult = {
   query: 'FROM logs-*',
   timeField: '@timestamp',
   lookback: '1m',
+  refetch: jest.fn(),
 };
 
 describe('RuleResultsPreview', () => {

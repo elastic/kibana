@@ -59,7 +59,7 @@ export type {
 } from './types';
 export type { DynamicRuleFormProps } from './dynamic_rule_form';
 export type { StandaloneRuleFormProps } from './standalone_rule_form';
-export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
+export type { RuleFormServices, RuleFormMeta, RuleFormLayout, RuleBuilderCatalogEntry } from './contexts';
 export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';
 export {
   DEFAULT_THRESHOLD_DATA_SOURCE,

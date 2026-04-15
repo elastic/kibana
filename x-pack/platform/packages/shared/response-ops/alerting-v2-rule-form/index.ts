@@ -52,6 +52,7 @@ export type {
   RuleFormServices,
   RuleFormMeta,
   RuleFormLayout,
+  RuleBuilderCatalogEntry,
   RuleRequestCommon,
 } from './form';
 

@@ -17,18 +17,18 @@ describe('EditModeToggle', () => {
     jest.clearAllMocks();
   });
 
-  it('renders Form and YAML buttons', () => {
+  it('renders GUI and YAML buttons', () => {
     render(<EditModeToggle editMode="form" onChange={mockOnChange} />);
 
-    expect(screen.getByText('Form')).toBeInTheDocument();
+    expect(screen.getByText('GUI')).toBeInTheDocument();
     expect(screen.getByText('YAML')).toBeInTheDocument();
   });
 
-  it('shows Form as selected when editMode is form', () => {
+  it('shows GUI as selected when editMode is form', () => {
     render(<EditModeToggle editMode="form" onChange={mockOnChange} />);
 
-    const formButton = screen.getByText('Form').closest('button');
-    expect(formButton).toHaveClass('euiButtonGroupButton-isSelected');
+    const guiButton = screen.getByText('GUI').closest('button');
+    expect(guiButton).toHaveClass('euiButtonGroupButton-isSelected');
   });
 
   it('shows YAML as selected when editMode is yaml', () => {
@@ -46,10 +46,10 @@ describe('EditModeToggle', () => {
     expect(mockOnChange).toHaveBeenCalledWith('yaml');
   });
 
-  it('calls onChange with "form" when Form button is clicked', async () => {
+  it('calls onChange with "form" when GUI button is clicked', async () => {
     render(<EditModeToggle editMode="yaml" onChange={mockOnChange} />);
 
-    await userEvent.click(screen.getByText('Form'));
+    await userEvent.click(screen.getByText('GUI'));
 
     expect(mockOnChange).toHaveBeenCalledWith('form');
   });
@@ -57,7 +57,7 @@ describe('EditModeToggle', () => {
   it('disables buttons when disabled prop is true', () => {
     render(<EditModeToggle editMode="form" onChange={mockOnChange} disabled />);
 
-    const formButton = screen.getByText('Form').closest('button');
+    const formButton = screen.getByText('GUI').closest('button');
     const yamlButton = screen.getByText('YAML').closest('button');
 
     expect(formButton).toBeDisabled();

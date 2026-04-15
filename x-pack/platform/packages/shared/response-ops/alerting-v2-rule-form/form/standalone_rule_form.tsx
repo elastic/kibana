@@ -9,7 +9,7 @@ import React, { useMemo, type ReactNode } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import type { FormValues } from './types';
 import { RuleForm } from './rule_form';
-import type { RuleFormServices, RuleFormLayout } from './contexts';
+import type { RuleFormServices, RuleFormLayout, RuleBuilderCatalogEntry } from './contexts';
 import { useFormDefaults } from './hooks/use_form_defaults';
 
 export interface StandaloneRuleFormProps {
@@ -47,6 +47,10 @@ export interface StandaloneRuleFormProps {
   ruleBuilderId?: string;
   /** Badge text for the Rule evaluation section (builder name or ES|QL). */
   ruleEvaluationModeLabel?: string;
+  /** Guided mode: builders shown in the section-title super select. */
+  ruleBuilderCatalog?: RuleBuilderCatalogEntry[];
+  /** Guided mode: called when the user selects a builder from the super select. */
+  onRuleBuilderIdChange?: (id: string) => void;
 }
 
 /**
@@ -80,6 +84,8 @@ export const StandaloneRuleForm = ({
   includeQueryEditor = true,
   ruleBuilderId,
   ruleEvaluationModeLabel,
+  ruleBuilderCatalog,
+  onRuleBuilderIdChange,
 }: StandaloneRuleFormProps) => {
   const queryDefaults = useFormDefaults({ query });
 
@@ -154,6 +160,8 @@ export const StandaloneRuleForm = ({
         includeQueryEditor={includeQueryEditor}
         ruleBuilderId={ruleBuilderId}
         ruleEvaluationModeLabel={ruleEvaluationModeLabel}
+        ruleBuilderCatalog={ruleBuilderCatalog}
+        onRuleBuilderIdChange={onRuleBuilderIdChange}
       />
     </FormProvider>
   );

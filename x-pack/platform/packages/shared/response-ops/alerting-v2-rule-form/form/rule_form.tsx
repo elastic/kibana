@@ -5,17 +5,26 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useRef, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { useFormContext } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import type { FormValues } from './types';
 import { SubmissionButtons } from './components/submission_buttons';
+import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
+import { YamlRuleForm } from './yaml_rule_form';
+import {
+  parseYamlToFormValuesForGuiSwitch,
+  serializeFormToYaml,
+} from './utils/yaml_form_utils';
 import {
   RuleFormProvider,
   useRuleFormServices,
   useRuleFormMeta,
   type RuleFormServices,
   type RuleFormLayout,
+  type RuleBuilderCatalogEntry,
 } from './contexts';
 import { GuiRuleForm } from './gui_rule_form';
 import { RulePreviewPanel } from './fields/rule_preview_panel';
@@ -24,6 +33,14 @@ import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
 
 export type { RuleFormServices } from './contexts';
+
+const mergeYamlParsedIntoFormValues = (previous: FormValues, parsed: FormValues): FormValues => ({
+  ...previous,
+  ...parsed,
+  metadata: { ...previous.metadata, ...parsed.metadata },
+  schedule: { ...previous.schedule, ...parsed.schedule },
+  evaluation: { ...previous.evaluation, ...parsed.evaluation },
+});
 
 export interface RuleFormProps {
   services: RuleFormServices;
@@ -37,6 +54,10 @@ export interface RuleFormProps {
   ruleBuilderId?: string;
   /** Shown as a badge on the Rule evaluation section (builder name or ES|QL). */
   ruleEvaluationModeLabel?: string;
+  /** Guided mode: builder list for the section-title super select. */
+  ruleBuilderCatalog?: RuleBuilderCatalogEntry[];
+  /** Guided mode: invoked when the user selects a builder from the super select. */
+  onRuleBuilderIdChange?: (id: string) => void;
   /**
    * External submit handler. When provided, form submission delegates to this callback.
    * When omitted and `includeSubmission` is true, the form uses `useCreateRule` internally.
@@ -79,6 +100,10 @@ const RuleFormContent = ({
   const services = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { http, notifications } = services;
+  const { getValues, reset } = useFormContext<FormValues>();
+
+  const [editMode, setEditMode] = useState<EditMode>('form');
+  const [yamlDraft, setYamlDraft] = useState('');
 
   const { createRule, isLoading: isCreating } = useCreateRule({
     http,
@@ -104,10 +129,79 @@ const RuleFormContent = ({
   const onSubmit = externalOnSubmit ?? internalSubmit;
   const isSubmitting = externalIsSubmitting || isCreating || isUpdating;
 
+  const ruleConfigurationHeaderTitle = i18n.translate(
+    'xpack.alertingV2.ruleForm.conditionSectionTitle',
+    {
+      defaultMessage: 'Rule configuration',
+    }
+  );
+
+  const onEditModeChange = useCallback(
+    (next: EditMode) => {
+      if (next === 'yaml') {
+        setYamlDraft(serializeFormToYaml(getValues()));
+        setEditMode('yaml');
+        return;
+      }
+
+      const result = parseYamlToFormValuesForGuiSwitch(getValues(), yamlDraft);
+      if (result.error || !result.values) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.alertingV2.ruleForm.editMode.invalidYamlTitle', {
+            defaultMessage: 'Cannot switch to GUI view',
+          }),
+          text: result.error ?? undefined,
+        });
+        return;
+      }
+
+      reset(mergeYamlParsedIntoFormValues(getValues(), result.values));
+      setEditMode('form');
+    },
+    [getValues, reset, yamlDraft, notifications.toasts]
+  );
+
+  const editModeToggle = (
+    <>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="center"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3>
+              <strong>{ruleConfigurationHeaderTitle}</strong>
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EditModeToggle
+            editMode={editMode}
+            onChange={onEditModeChange}
+            disabled={isSubmitting}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+    </>
+  );
+
   const mainFormFields = (
     <>
+      {editModeToggle}
       <ErrorCallOut />
-      <GuiRuleForm onSubmit={onSubmit} includeQueryEditor={includeQueryEditor} />
+      {editMode === 'form' ? (
+        <GuiRuleForm onSubmit={onSubmit} includeQueryEditor={includeQueryEditor} />
+      ) : (
+        <YamlRuleForm
+          services={services}
+          onSubmit={onSubmit}
+          isSubmitting={isSubmitting}
+          yaml={yamlDraft}
+          onYamlChange={setYamlDraft}
+        />
+      )}
     </>
   );
 
@@ -182,6 +276,8 @@ export const RuleForm = ({
   ruleEvaluationHeaderActions,
   ruleBuilderId,
   ruleEvaluationModeLabel,
+  ruleBuilderCatalog,
+  onRuleBuilderIdChange,
   includeQueryEditor = true,
   ...props
 }: RuleFormProps) => {
@@ -205,8 +301,18 @@ export const RuleForm = ({
       ruleEvaluationHeaderActions,
       ruleBuilderId,
       ruleEvaluationModeLabel,
+      ruleBuilderCatalog,
+      onRuleBuilderIdChange,
     }),
-    [layout, includeQueryEditor, ruleEvaluationHeaderActions, ruleBuilderId, ruleEvaluationModeLabel]
+    [
+      layout,
+      includeQueryEditor,
+      ruleEvaluationHeaderActions,
+      ruleBuilderId,
+      ruleEvaluationModeLabel,
+      ruleBuilderCatalog,
+      onRuleBuilderIdChange,
+    ]
   );
 
   return (

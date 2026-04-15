@@ -36,6 +36,7 @@ const defaultProps: QueryResultsGridProps = {
   isLoading: false,
   isError: false,
   error: null,
+  lookback: '1m',
 };
 
 const renderGrid = (overrides: Partial<QueryResultsGridProps> = {}) =>
@@ -74,9 +75,15 @@ describe('QueryResultsGrid', () => {
     expect(screen.getByText('Showing 2 of 200 rows returned by the query.')).toBeInTheDocument();
   });
 
-  it('renders a loading spinner when isLoading is true', () => {
-    renderGrid({ isLoading: true, columns: [], rows: [], totalRowCount: 0 });
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  it('renders when isLoading is true without a header refresh control', () => {
+    renderGrid({
+      isLoading: true,
+      columns: [],
+      rows: [],
+      totalRowCount: 0,
+    });
+    expect(screen.queryByTestId('ruleResultsPreviewRefreshButton')).not.toBeInTheDocument();
+    expect(screen.getByText('Test preview')).toBeInTheDocument();
   });
 
   it('renders the empty prompt when no query data is present', () => {

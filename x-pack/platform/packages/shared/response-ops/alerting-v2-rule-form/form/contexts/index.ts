@@ -12,4 +12,5 @@ export {
   type RuleFormServices,
   type RuleFormMeta,
   type RuleFormLayout,
+  type RuleBuilderCatalogEntry,
 } from './rule_form_context';

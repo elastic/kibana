@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 import { RulePreviewPanel } from './rule_preview_panel';
 import * as useRulePreviewModule from '../hooks/use_rule_preview';
 import type { RulePreviewResult } from '../hooks/use_rule_preview';
@@ -39,6 +39,7 @@ const mockPreviewResult: RulePreviewResult = {
   query: 'FROM logs-*',
   timeField: '@timestamp',
   lookback: '1m',
+  refetch: jest.fn(),
 };
 
 const defaultFormValues = {
@@ -94,6 +95,43 @@ describe('RulePreviewPanel', () => {
       expect(screen.getByTestId('ruleSummaryBuilderEsqlCodeBlock')).toHaveTextContent(
         'FROM metrics-*'
       );
+    });
+
+    it('renders Open in Discover when getDiscoverHrefForEsql returns a URL', () => {
+      const discoverUrl = 'https://test/discover';
+      render(<RulePreviewPanel />, {
+        wrapper: createFormWrapper(
+          {
+            ...defaultFormValues,
+            evaluation: { query: { base: 'FROM logs-*\n| LIMIT 10' } },
+          },
+          {
+            ...createMockServices(),
+            getDiscoverHrefForEsql: () => discoverUrl,
+          },
+          { layout: 'page', ruleBuilderId: 'threshold_alert', includeQueryEditor: false }
+        ),
+      });
+
+      const link = screen.getByTestId('ruleSummaryOpenInDiscoverButton');
+      expect(link).toHaveAttribute('href', discoverUrl);
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+
+    it('does not render Open in Discover when getDiscoverHrefForEsql is omitted', () => {
+      render(<RulePreviewPanel />, {
+        wrapper: createFormWrapper(
+          {
+            ...defaultFormValues,
+            evaluation: { query: { base: 'FROM logs-*' } },
+          },
+          createMockServices(),
+          { layout: 'page', ruleBuilderId: 'threshold_alert', includeQueryEditor: false }
+        ),
+      });
+
+      expect(screen.queryByTestId('ruleSummaryOpenInDiscoverButton')).not.toBeInTheDocument();
     });
 
     it('does not render recovery preview when recovery type is no_breach', () => {

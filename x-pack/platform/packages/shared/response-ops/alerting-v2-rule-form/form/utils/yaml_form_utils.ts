@@ -192,6 +192,136 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
 };
 
 /**
+ * Parses YAML when switching from the YAML editor back to the GUI. If
+ * `evaluation.query.base` is missing or blank in the YAML, the value from
+ * `fallback` is used. `metadata.name` may be blank; it is not required for
+ * this switch. Content from {@link serializeFormToYaml} (including empty
+ * strings) still round-trips while preserving builder-only fields via the
+ * subsequent merge with current form state.
+ */
+export const parseYamlToFormValuesForGuiSwitch = (
+  fallback: FormValues,
+  yamlString: string
+): YamlParseResult => {
+  let parsed: unknown;
+  try {
+    parsed = load(yamlString);
+  } catch (error) {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.yamlSyntaxError', {
+        defaultMessage: 'Invalid YAML syntax.',
+      }),
+    };
+  }
+
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.yamlObjectError', {
+        defaultMessage: 'YAML must be an object.',
+      }),
+    };
+  }
+
+  const obj = parsed as Record<string, unknown>;
+  const metadata = obj.metadata as Record<string, unknown> | undefined;
+  const schedule = obj.schedule as Record<string, unknown> | undefined;
+  const evaluation = obj.evaluation as Record<string, unknown> | undefined;
+  const evalQuery = evaluation?.query as Record<string, unknown> | undefined;
+  const grouping = obj.grouping as Record<string, unknown> | undefined;
+  const artifacts = parseArtifacts(obj.artifacts);
+  const stateTransitionObj = obj.state_transition as Record<string, unknown> | undefined;
+  const stateTransition: StateTransition | undefined = stateTransitionObj
+    ? {
+        pendingCount:
+          typeof stateTransitionObj.pending_count === 'number'
+            ? stateTransitionObj.pending_count
+            : null,
+        pendingTimeframe:
+          typeof stateTransitionObj.pending_timeframe === 'string'
+            ? stateTransitionObj.pending_timeframe
+            : null,
+        recoveringCount:
+          typeof stateTransitionObj.recovering_count === 'number'
+            ? stateTransitionObj.recovering_count
+            : null,
+        recoveringTimeframe:
+          typeof stateTransitionObj.recovering_timeframe === 'string'
+            ? stateTransitionObj.recovering_timeframe
+            : null,
+      }
+    : undefined;
+
+  const kind = obj.kind;
+  if (kind !== undefined && kind !== 'alert' && kind !== 'signal') {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidKindError', {
+        defaultMessage: 'Kind must be "alert" or "signal".',
+      }),
+    };
+  }
+
+  const nameFromYaml = typeof metadata?.name === 'string' ? metadata.name.trim() : '';
+  const nameFromFallback = typeof fallback.metadata.name === 'string'
+    ? fallback.metadata.name.trim()
+    : '';
+  const resolvedName = nameFromYaml || nameFromFallback;
+
+  const queryFromYaml = typeof evalQuery?.base === 'string' ? evalQuery.base.trim() : '';
+  const queryFromFallback = fallback.evaluation.query.base.trim();
+  const resolvedQueryBase = queryFromYaml || queryFromFallback;
+  if (!resolvedQueryBase) {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.queryRequiredError', {
+        defaultMessage: 'evaluation.query.base is required.',
+      }),
+    };
+  }
+
+  const queryValidationError = validateEsqlQuery(resolvedQueryBase);
+  if (queryValidationError) {
+    return {
+      values: null,
+      error: queryValidationError,
+    };
+  }
+
+  return {
+    values: {
+      kind: (kind as 'alert' | 'signal') ?? 'alert',
+      metadata: {
+        name: resolvedName,
+        enabled: metadata?.enabled !== false,
+        description: typeof metadata?.description === 'string' ? metadata.description : undefined,
+        owner: typeof metadata?.owner === 'string' ? metadata.owner : undefined,
+        tags: Array.isArray(metadata?.tags) ? (metadata.tags as string[]) : undefined,
+      },
+      timeField: typeof obj.time_field === 'string' ? obj.time_field : '@timestamp',
+      schedule: {
+        every: typeof schedule?.every === 'string' ? schedule.every : '5m',
+        lookback: typeof schedule?.lookback === 'string' ? schedule.lookback : '1m',
+      },
+      evaluation: {
+        query: {
+          base: resolvedQueryBase,
+        },
+      },
+      grouping: Array.isArray(grouping?.fields)
+        ? { fields: grouping.fields as string[] }
+        : undefined,
+      artifacts,
+      stateTransition,
+      stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
+      stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
+    },
+    error: null,
+  };
+};
+
+/**
  * Serialize current form values to YAML string
  */
 export const serializeFormToYaml = (values: FormValues): string => {

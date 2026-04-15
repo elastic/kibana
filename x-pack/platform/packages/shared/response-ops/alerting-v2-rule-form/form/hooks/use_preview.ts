@@ -51,6 +51,8 @@ export interface PreviewResult {
   timeField: string;
   /** The lookback duration string (e.g. '5m', '1h') */
   lookback: string;
+  /** Re-runs the preview query (same key as the automatic fetch). */
+  refetch: () => void;
 }
 
 export interface UsePreviewParams {
@@ -160,6 +162,7 @@ export const usePreview = ({
     isLoading,
     isError,
     error,
+    refetch,
   } = useQuery({
     queryKey: ruleFormKeys.preview(debouncedQuery, timeField, lookback),
     queryFn: fetchPreview,
@@ -224,5 +227,8 @@ export const usePreview = ({
     query,
     timeField,
     lookback,
+    refetch: () => {
+      void refetch();
+    },
   };
 };

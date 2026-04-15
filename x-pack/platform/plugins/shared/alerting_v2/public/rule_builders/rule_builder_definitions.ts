@@ -133,7 +133,7 @@ export const RULE_BUILDERS: RuleBuilderDefinition[] = [
     replaces: i18n.translate('xpack.alertingV2.ruleBuilders.counterRate.replaces', {
       defaultMessage: 'Custom threshold (counter metrics)',
     }),
-    iconType: 'metric',
+    iconType: 'metricsApp',
     badge: 'requires_tsdb',
   },
 ];

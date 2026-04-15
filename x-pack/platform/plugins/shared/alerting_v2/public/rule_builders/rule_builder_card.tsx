@@ -41,6 +41,8 @@ export interface RuleBuilderCardProps {
   onPick?: () => void;
   /** `vertical` (default): icon above text. `horizontal`: icon beside text (e.g. create hub). */
   layout?: 'vertical' | 'horizontal';
+  /** When true, card is non-interactive and styled as unavailable. */
+  isDisabled?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -49,6 +51,7 @@ export const RuleBuilderCard = ({
   href,
   onPick,
   layout: cardLayout = 'vertical',
+  isDisabled = false,
   'data-test-subj': dataTestSubj,
 }: RuleBuilderCardProps) => {
   const betaBadgeProps =
@@ -59,35 +62,48 @@ export const RuleBuilderCard = ({
         }
       : undefined;
 
+  const description = (
+    <>
+      <EuiText size="s">
+        <p>{builder.description}</p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiText size="xs" color="subdued">
+        {i18n.translate('xpack.alertingV2.ruleBuilders.replacesLabel', {
+          defaultMessage: 'Replaces: {list}',
+          values: { list: builder.replaces },
+        })}
+      </EuiText>
+    </>
+  );
+
+  const icon = <EuiIcon type={builder.iconType} size="l" color="text" aria-hidden={true} />;
+
+  const sharedCardProps = {
+    'data-test-subj': dataTestSubj ?? `ruleBuilderCard-${builder.id}`,
+    icon,
+    title: builder.title,
+    titleElement: 'h3' as const,
+    titleSize: 'xs' as const,
+    description,
+    betaBadgeProps,
+    href: isDisabled ? undefined : onPick ? undefined : href,
+    onClick: isDisabled ? undefined : onPick,
+    isDisabled,
+    hasBorder: true,
+    display: 'plain' as const,
+  };
+
+  if (cardLayout === 'horizontal') {
+    return <EuiCard {...sharedCardProps} layout="horizontal" />;
+  }
+
   return (
     <EuiCard
-      data-test-subj={dataTestSubj ?? `ruleBuilderCard-${builder.id}`}
-      layout={cardLayout}
-      textAlign={cardLayout === 'vertical' ? 'left' : undefined}
-      css={cardLayout === 'vertical' ? verticalCardTextLeftCss : undefined}
-      icon={<EuiIcon type={builder.iconType} size="l" color="text" aria-hidden={true} />}
-      title={builder.title}
-      titleElement="h3"
-      titleSize="xs"
-      description={
-        <>
-          <EuiText size="s">
-            <p>{builder.description}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.alertingV2.ruleBuilders.replacesLabel', {
-              defaultMessage: 'Replaces: {list}',
-              values: { list: builder.replaces },
-            })}
-          </EuiText>
-        </>
-      }
-      betaBadgeProps={betaBadgeProps}
-      href={onPick ? undefined : href}
-      onClick={onPick}
-      hasBorder
-      display="plain"
+      {...sharedCardProps}
+      layout="vertical"
+      textAlign="left"
+      css={verticalCardTextLeftCss}
     />
   );
 };

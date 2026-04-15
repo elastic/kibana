@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { PluginStart } from '@kbn/core-di';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -14,11 +16,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
@@ -39,6 +39,7 @@ import {
   RULE_EVALUATION_LAST_BUILDER_SESSION_KEY,
 } from '../../components/rule_evaluation_esql_header_actions';
 import { RULE_BUILDERS } from '../../rule_builders/rule_builder_definitions';
+import { getDiscoverHrefForRuleQuery } from '../../utils/discover_href_for_episode';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
 
@@ -166,21 +167,28 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
+  const uiSettings = useService(CoreStart('uiSettings'));
+  const share = useService(PluginStart('share')) as SharePluginStart;
   const { navigateToUrl } = application;
   const { basePath } = http;
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
-  const agentBuilder = useService(PluginStart('agentBuilder'), {
-    optional: true,
-  }) as AgentBuilderPluginStart | undefined;
   const queryClient = useQueryClient();
 
-  const showAskAiAgentButton = Boolean(
-    agentBuilder && application.capabilities.agentBuilder?.show === true
-  );
-
   useBreadcrumbs(isEditing ? 'edit' : 'create');
+
+  const getDiscoverHrefForEsql = useCallback(
+    (esql: string) =>
+      getDiscoverHrefForRuleQuery({
+        share,
+        capabilities: application.capabilities,
+        uiSettings,
+        timeRange: data.query.timefilter.timefilter.getTime(),
+        ruleEsql: esql,
+      }),
+    [share, application.capabilities, uiSettings, data]
+  );
 
   const ruleFormServices = useMemo(
     () => ({
@@ -190,8 +198,9 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
       notifications,
       application,
       lens,
+      getDiscoverHrefForEsql,
     }),
-    [http, data, dataViews, notifications, application, lens]
+    [http, data, dataViews, notifications, application, lens, getDiscoverHrefForEsql]
   );
 
   const onSuccess = useCallback(() => {
@@ -265,15 +274,10 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
     setEvaluationPanel({ mode: 'builder', builderId: id });
   }, []);
 
-  const builderIconType = useMemo(() => {
-    const id =
-      evaluationPanel.builderId ??
-      (typeof window !== 'undefined'
-        ? window.sessionStorage.getItem(RULE_EVALUATION_LAST_BUILDER_SESSION_KEY) ??
-          RULE_EVALUATION_DEFAULT_BUILDER_ID
-        : RULE_EVALUATION_DEFAULT_BUILDER_ID);
-    return RULE_BUILDERS.find((b) => b.id === id)?.iconType ?? 'aggregate';
-  }, [evaluationPanel.builderId]);
+  const ruleBuilderCatalog = useMemo(
+    () => RULE_BUILDERS.map((b) => ({ id: b.id, title: b.title, description: b.description })),
+    []
+  );
 
   const ruleEvaluationHeaderActions = useMemo(() => {
     if (isEditing) {
@@ -289,24 +293,9 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
             selectBuilderMode();
           }
         }}
-        onPickBuilder={onPickBuilder}
-        builderIconType={builderIconType}
-        basePath={basePath}
-        showAgentBuilderButton={showAskAiAgentButton}
-        onOpenAgentBuilder={agentBuilder ? () => agentBuilder.toggleChat() : undefined}
       />
     );
-  }, [
-    isEditing,
-    evaluationPanel.mode,
-    selectEsqlMode,
-    selectBuilderMode,
-    onPickBuilder,
-    builderIconType,
-    basePath,
-    showAskAiAgentButton,
-    agentBuilder,
-  ]);
+  }, [isEditing, evaluationPanel.mode, selectEsqlMode, selectBuilderMode]);
 
   const needsThresholdDefaults =
     !ruleId &&
@@ -363,6 +352,8 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
         includeQueryEditor={includeQueryEditor}
         ruleBuilderId={ruleBuilderIdForForm}
         ruleEvaluationModeLabel={ruleEvaluationModeLabel}
+        ruleBuilderCatalog={ruleBuilderCatalog}
+        onRuleBuilderIdChange={onPickBuilder}
       />
     </>
   );

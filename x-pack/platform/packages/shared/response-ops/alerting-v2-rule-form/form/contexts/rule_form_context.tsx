@@ -19,9 +19,21 @@ export interface RuleFormServices {
   notifications: NotificationsStart;
   application: ApplicationStart;
   lens: LensPublicStart;
+  /**
+   * When set, Rule Summary (Threshold guided builder) can link to Discover with the ES|QL query.
+   * Return undefined when Discover or ES|QL is unavailable.
+   */
+  getDiscoverHrefForEsql?: (esql: string) => string | undefined;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';
+
+/** Entry for the guided-builder picker (title + description shown in the dropdown). */
+export interface RuleBuilderCatalogEntry {
+  id: string;
+  title: string;
+  description: string;
+}
 
 export interface RuleFormMeta {
   /** Whether the form is rendered on a full page or inside a flyout. */
@@ -42,9 +54,16 @@ export interface RuleFormMeta {
   ruleBuilderId?: string;
   /**
    * Short label for the current rule configuration mode (builder name or ES|QL), shown next to the
-   * Rule configuration section title.
+   * Rule configuration section title when {@link ruleBuilderCatalog} is not used.
    */
   ruleEvaluationModeLabel?: string;
+  /**
+   * When set with {@link onRuleBuilderIdChange}, guided mode shows a super select instead of a
+   * mode badge so users can switch rule builders.
+   */
+  ruleBuilderCatalog?: RuleBuilderCatalogEntry[];
+  /** Called when the user picks a different builder from the super select. */
+  onRuleBuilderIdChange?: (id: string) => void;
 }
 
 interface RuleFormContextValue {

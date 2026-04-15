@@ -6,11 +6,21 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiCodeBlock, EuiDescriptionList, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
-import { useRuleFormMeta } from '../contexts';
+import { useRuleFormMeta, useRuleFormServices } from '../contexts';
 
 const EMPTY_VALUE = '—';
 
@@ -84,6 +94,7 @@ const formatSchedulePreview = (every?: string, lookback?: string): string => {
  */
 export const RuleSummaryPreview = () => {
   const { includeQueryEditor, ruleBuilderId } = useRuleFormMeta();
+  const { getDiscoverHrefForEsql } = useRuleFormServices();
   const { control } = useFormContext<FormValues>();
 
   /** `undefined` treated like ES|QL mode (same default as {@link RuleForm}). */
@@ -112,6 +123,10 @@ export const RuleSummaryPreview = () => {
     defaultMessage: 'ES|QL query',
   });
 
+  const openInDiscoverLabel = i18n.translate('xpack.alertingV2.ruleForm.ruleSummary.openInDiscover', {
+    defaultMessage: 'Open in Discover',
+  });
+
   const recoveryEsqlSectionLabel = i18n.translate(
     'xpack.alertingV2.ruleForm.ruleSummary.esqlRecoveryQuerySubtitle',
     {
@@ -119,8 +134,17 @@ export const RuleSummaryPreview = () => {
     }
   );
 
-  const queryText = (evaluationQuery ?? '').trim() || PLACEHOLDER_QUERY;
+  const rawEvaluationQuery = (evaluationQuery ?? '').trim();
+  const queryText = rawEvaluationQuery || PLACEHOLDER_QUERY;
   const recoveryQueryText = (recoveryQueryBase ?? '').trim() || PLACEHOLDER_QUERY;
+
+  const discoverHrefForEvaluation =
+    isThresholdBuilder &&
+    isGuidedBuilderMode &&
+    rawEvaluationQuery &&
+    getDiscoverHrefForEsql
+      ? getDiscoverHrefForEsql(rawEvaluationQuery)
+      : undefined;
 
   const listItems = useMemo(() => {
     const base = evaluationQuery ?? '';
@@ -217,11 +241,35 @@ export const RuleSummaryPreview = () => {
 
       {isGuidedBuilderMode ? (
         <>
-          <EuiText size="s">
-            <p>
-              <strong>{esqlSectionLabel}</strong>
-            </p>
-          </EuiText>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            responsive={true}
+            wrap={true}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <p>
+                  <strong>{esqlSectionLabel}</strong>
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            {discoverHrefForEvaluation ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="ruleSummaryOpenInDiscoverButton"
+                  size="xs"
+                  color="text"
+                  iconType="discoverApp"
+                  href={discoverHrefForEvaluation}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {openInDiscoverLabel}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiPanel
             color="subdued"

@@ -9,6 +9,7 @@ import { dump } from 'js-yaml';
 import {
   formValuesToYamlObject,
   parseYamlToFormValues,
+  parseYamlToFormValuesForGuiSwitch,
   serializeFormToYaml,
 } from './yaml_form_utils';
 import { defaultTestFormValues } from '../../test_utils';
@@ -421,6 +422,49 @@ describe('yaml_form_utils', () => {
       expect(result.values?.stateTransition).toBeUndefined();
       expect(result.values?.stateTransitionAlertDelayMode).toBe('immediate');
       expect(result.values?.stateTransitionRecoveryDelayMode).toBe('immediate');
+    });
+  });
+
+  describe('parseYamlToFormValuesForGuiSwitch', () => {
+    it('uses fallback when name and query are blank in YAML', () => {
+      const fallback: FormValues = {
+        ...defaultTestFormValues,
+        metadata: { ...defaultTestFormValues.metadata, name: 'Kept Name' },
+        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+      };
+      const yaml = dump({
+        kind: 'alert',
+        metadata: { name: '', enabled: true },
+        time_field: '@timestamp',
+        schedule: { every: '5m', lookback: '1m' },
+        evaluation: { query: { base: '' } },
+      });
+
+      const result = parseYamlToFormValuesForGuiSwitch(fallback, yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.metadata.name).toBe('Kept Name');
+      expect(result.values?.evaluation.query.base).toBe('FROM logs-* | LIMIT 10');
+    });
+
+    it('allows switching to GUI when metadata.name is blank in YAML and fallback', () => {
+      const fallback: FormValues = {
+        ...defaultTestFormValues,
+        metadata: { ...defaultTestFormValues.metadata, name: '' },
+        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+      };
+      const yaml = dump({
+        kind: 'alert',
+        metadata: { name: '', enabled: true },
+        time_field: '@timestamp',
+        schedule: { every: '5m', lookback: '1m' },
+        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+      });
+
+      const result = parseYamlToFormValuesForGuiSwitch(fallback, yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.metadata.name).toBe('');
     });
   });
 

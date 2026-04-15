@@ -29,6 +29,11 @@ export interface YamlRuleFormProps {
   onSubmit: (values: FormValues) => void;
   isDisabled?: boolean;
   isSubmitting?: boolean;
+  /**
+   * When both are set, YAML content is controlled by the parent (for example Form/YAML mode toggle).
+   */
+  yaml?: string;
+  onYamlChange?: (yaml: string) => void;
 }
 
 /**
@@ -42,12 +47,18 @@ export const YamlRuleForm = ({
   onSubmit,
   isDisabled = false,
   isSubmitting = false,
+  yaml: controlledYaml,
+  onYamlChange,
 }: YamlRuleFormProps) => {
   const { getValues } = useFormContext<FormValues>();
-  const [yaml, setYaml] = useState<string>(() => {
+  const [internalYaml, setInternalYaml] = useState<string>(() => {
     const values = getValues();
     return serializeFormToYaml(values);
   });
+  const isControlled =
+    typeof controlledYaml === 'string' && typeof onYamlChange === 'function';
+  const yaml = isControlled ? controlledYaml : internalYaml;
+  const setYaml = isControlled ? onYamlChange : setInternalYaml;
   const [error, setError] = useState<string | null>(null);
 
   const esqlCallbacks = useEsqlCallbacks({
@@ -74,11 +85,13 @@ export const YamlRuleForm = ({
     [yaml, onSubmit]
   );
 
-  const handleYamlChange = useCallback((newYaml: string) => {
-    setYaml(newYaml);
-    // Clear error when user starts editing
-    setError(null);
-  }, []);
+  const handleYamlChange = useCallback(
+    (newYaml: string) => {
+      setYaml(newYaml);
+      setError(null);
+    },
+    [setYaml]
+  );
 
   const isReadOnly = isDisabled || isSubmitting;
 

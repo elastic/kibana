@@ -33,14 +33,6 @@ export const RulePreviewPanel = () => {
       <>
         <RuleSummaryPreview />
         <EuiSpacer size="m" />
-        <EuiTitle size="xxs">
-          <h3>
-            {i18n.translate('xpack.alertingV2.ruleForm.ruleEvaluationPreviewRail.resultsHeading', {
-              defaultMessage: 'Results preview',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
         <RuleResultsPreview />
         {showRecoveryPreview && (
           <>
