@@ -529,6 +529,122 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(wlMod.contribution).to.be.a('number');
           }
         });
+
+        it('includes watchlist modifiers from group members that have no alerts', async () => {
+          const shortId = uuidv4().slice(0, 8);
+
+          const { testEntities } = await maintainerScenario.seedEntities([
+            riskScoreMaintainerEntityBuilders.idpUser({ userName: `silent-target-${shortId}` }),
+            riskScoreMaintainerEntityBuilders.idpUser({ userName: `silent-alias-${shortId}` }),
+          ]);
+          const [targetUser, silentAlias] = testEntities;
+
+          await maintainerScenario.createAlertsForDocumentIds({
+            documentIds: [targetUser.documentId],
+            alerts: 1,
+            riskScore: 50,
+          });
+
+          await entityStoreUtils.installEntityStoreV2({
+            entityTypes: ['user', 'host'],
+            dataViewPattern: testLogsIndex,
+          });
+          await waitForEntityStoreEntities({ es, log, count: 2 });
+
+          const watchlistResponse = await watchlistRoutes.create({
+            name: 'departing',
+            riskModifier: 2.0,
+          });
+          if (watchlistResponse.status !== 200) {
+            throw new Error(
+              `Failed to create departing watchlist: ${JSON.stringify(watchlistResponse.body)}`
+            );
+          }
+          const watchlistId = watchlistResponse.body.id!;
+
+          await maintainerScenario.setEntityWatchlists({
+            testEntity: silentAlias,
+            watchlistIds: [watchlistId],
+          });
+
+          await maintainerScenario.setEntityResolutionTarget({
+            testEntity: silentAlias,
+            resolvedToEntityId: targetUser.expectedEuid,
+          });
+
+          await retry.waitForWithTimeout(
+            'entity store reflects watchlist and resolution for silent alias',
+            30_000,
+            async () => {
+              const aliasResp = await es.search({
+                index: entityStoreIndex,
+                size: 1,
+                query: { term: { 'entity.id': silentAlias.expectedEuid } },
+              });
+              const aliasDoc = aliasResp.hits.hits[0]?._source as
+                | {
+                    entity?: {
+                      attributes?: { watchlists?: string[] };
+                      relationships?: { resolution?: { resolved_to?: string } };
+                    };
+                  }
+                | undefined;
+
+              const hasWatchlist = (aliasDoc?.entity?.attributes?.watchlists ?? []).includes(
+                watchlistId
+              );
+              const hasResolution =
+                aliasDoc?.entity?.relationships?.resolution?.resolved_to ===
+                targetUser.expectedEuid;
+              return hasWatchlist && hasResolution;
+            }
+          );
+
+          await maintainerRoutes.runMaintainerSync('risk-score');
+
+          let allScores: ReturnType<typeof normalizeScores> = [];
+          await retry.waitForWithTimeout(
+            `resolution score with silent member watchlist for ${targetUser.expectedEuid}`,
+            60_000,
+            async () => {
+              allScores = normalizeScores(await readRiskScores(es));
+              const resolutionScore = allScores.find(
+                (s) => s.id_value === targetUser.expectedEuid && s.score_type === 'resolution'
+              );
+              if (!resolutionScore) {
+                return false;
+              }
+              return Boolean(
+                resolutionScore.modifiers?.some(
+                  (modifier) => modifier.type === 'watchlist' && modifier.subtype === 'departing'
+                )
+              );
+            }
+          );
+
+          const resolutionScore = allScores.find(
+            (s) => s.id_value === targetUser.expectedEuid && s.score_type === 'resolution'
+          )!;
+          const watchlistMods = resolutionScore.modifiers!.filter((modifier) => modifier.type === 'watchlist');
+          expect(watchlistMods.length).to.be.greaterThan(0);
+          expect(watchlistMods.some((modifier) => modifier.subtype === 'departing')).to.be(true);
+
+          const baseScore = allScores.find(
+            (s) =>
+              s.id_value === targetUser.expectedEuid &&
+              s.score_type === 'base' &&
+              s.calculation_run_id === resolutionScore.calculation_run_id
+          );
+          expect(baseScore).to.not.be(undefined);
+          expect(resolutionScore.calculated_score_norm).to.be.greaterThan(
+            baseScore!.calculated_score_norm!
+          );
+
+          const silentAliasBase = allScores.find(
+            (s) => s.id_value === silentAlias.expectedEuid && s.score_type === 'base'
+          );
+          expect(silentAliasBase).to.be(undefined);
+        });
       });
     });
   });

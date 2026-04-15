@@ -275,6 +275,87 @@ describe('lookup index utilities', () => {
     ]);
   });
 
+  it('adds self-rows for confirmed resolution targets without resolved_to', () => {
+    const page: ScoredEntityPage = {
+      entityIds: ['user:target-silent'],
+      scores: [],
+      entities: new Map([
+        [
+          'user:target-silent',
+          {
+            entity: {
+              id: 'user:target-silent',
+              relationships: {
+                resolution: {},
+              },
+            },
+          },
+        ],
+      ]),
+    };
+
+    const operations = buildLookupSyncOperationsForPage({
+      page,
+      now: '2026-01-01T00:00:00.000Z',
+      notInStoreEntityIds: [],
+      resolutionTargetIds: ['user:target-silent'],
+    });
+
+    expect(operations.upserts).toEqual([
+      {
+        entity_id: 'user:target-silent',
+        resolution_target_id: 'user:target-silent',
+        propagation_target_id: null,
+        relationship_type: 'self',
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+  });
+
+  it('does not overwrite existing alias rows when target ids are injected', () => {
+    const page: ScoredEntityPage = {
+      entityIds: ['user:b'],
+      scores: [],
+      entities: new Map([
+        [
+          'user:b',
+          {
+            entity: {
+              id: 'user:b',
+              relationships: {
+                resolution: { resolved_to: 'user:c' },
+              },
+            },
+          },
+        ],
+      ]),
+    };
+
+    const operations = buildLookupSyncOperationsForPage({
+      page,
+      now: '2026-01-01T00:00:00.000Z',
+      notInStoreEntityIds: [],
+      resolutionTargetIds: ['user:b'],
+    });
+
+    expect(operations.upserts).toEqual([
+      {
+        entity_id: 'user:b',
+        resolution_target_id: 'user:c',
+        propagation_target_id: null,
+        relationship_type: 'entity.relationships.resolution.resolved_to',
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+      },
+      {
+        entity_id: 'user:c',
+        resolution_target_id: 'user:c',
+        propagation_target_id: null,
+        relationship_type: 'self',
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+  });
+
   it('syncs a scored page using one helper call', async () => {
     const page: ScoredEntityPage = {
       entityIds: ['user:alias-4'],

@@ -94,6 +94,19 @@ export const calculateResolutionEntityScores = async function* ({
     let modifiedScores: EntityRiskScoreRecord[] = [];
     if (parsedScores.length > 0) {
       const allMemberIds = collectMemberEntityIds(parsedScores);
+      const alertDerivedMemberCount = allMemberIds.size;
+      const resolutionTargetIds = [...new Set(parsedScores.map((score) => score.resolution_target_id))];
+      const fullGroupMemberIds = await fetchResolutionGroupMemberIds({
+        crudClient,
+        resolutionTargetIds,
+        logger,
+      });
+      for (const memberId of fullGroupMemberIds) {
+        allMemberIds.add(memberId);
+      }
+      logger.debug(
+        `[resolution][page:${pagesProcessed}] alert_derived_members=${alertDerivedMemberCount}, store_derived_members=${fullGroupMemberIds.size}, total_unique=${allMemberIds.size}`
+      );
       const memberEntities = await fetchEntitiesByIds({
         crudClient,
         entityIds: [...allMemberIds],
@@ -198,6 +211,49 @@ const collectMemberEntityIds = (parsedScores: ParsedResolutionScore[]): Set<stri
   return allMemberIds;
 };
 
+export const fetchResolutionGroupMemberIds = async ({
+  crudClient,
+  resolutionTargetIds,
+  logger,
+}: {
+  crudClient: EntityUpdateClient;
+  resolutionTargetIds: string[];
+  logger: ScopedLogger;
+}): Promise<Set<string>> => {
+  const memberIds = new Set<string>();
+  if (resolutionTargetIds.length === 0) {
+    return memberIds;
+  }
+
+  try {
+    let searchAfter: Array<string | number> | undefined;
+    do {
+      const { entities, nextSearchAfter } = await crudClient.listEntities({
+        filter: {
+          terms: { 'entity.relationships.resolution.resolved_to': resolutionTargetIds },
+        },
+        size: resolutionTargetIds.length * 10,
+        searchAfter,
+        source: ['entity.id'],
+      });
+      for (const entity of entities) {
+        const id = entity.entity?.id;
+        if (typeof id === 'string') {
+          memberIds.add(id);
+        }
+      }
+      searchAfter = nextSearchAfter;
+    } while (searchAfter !== undefined);
+  } catch (error) {
+    logger.warn(
+      'Error fetching full resolution group members. Resolution scoring will proceed with alert-derived members only: ' +
+        error
+    );
+  }
+
+  return memberIds;
+};
+
 const applyResolutionModifiers = ({
   parsedScores,
   memberEntities,
@@ -213,11 +269,32 @@ const applyResolutionModifiers = ({
   calculationRunId: string;
   watchlistConfigs: Map<string, WatchlistObject>;
 }): EntityRiskScoreRecord[] => {
+  const allEntities = [...memberEntities.entries()];
   const mergedModifierEntities = new Map(
-    parsedScores.map((score) => [
-      score.resolution_target_id,
-      buildResolutionModifierEntity({ score, memberEntities }),
-    ])
+    parsedScores.map((score) => {
+      const storeOnlyMembers = allEntities
+        .filter(
+          ([entityId, entity]) =>
+            entityId !== score.resolution_target_id &&
+            entity.entity?.relationships?.resolution?.resolved_to === score.resolution_target_id &&
+            !score.related_entities.some((relatedEntity) => relatedEntity.entity_id === entityId)
+        )
+        .map(([entityId]) => ({
+          entity_id: entityId,
+          relationship_type: 'entity.relationships.resolution.resolved_to',
+        }));
+
+      return [
+        score.resolution_target_id,
+        buildResolutionModifierEntity({
+          score: {
+            ...score,
+            related_entities: [...score.related_entities, ...storeOnlyMembers],
+          },
+          memberEntities,
+        }),
+      ];
+    })
   );
   const scoresForModifierPipeline = parsedScores.map((score) => ({
     entity_id: score.resolution_target_id,
