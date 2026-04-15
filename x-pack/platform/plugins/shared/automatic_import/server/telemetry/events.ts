@@ -54,12 +54,9 @@ export const telemetryEventsSchemas: Partial<
         type: 'boolean',
         _meta: { description: 'Whether the creation was successful', optional: false },
       },
-      isFirstDataStream: {
-        type: 'boolean',
-        _meta: {
-          description: 'True if this is the first data stream created for this integration',
-          optional: false,
-        },
+      connectorId: {
+        type: 'keyword',
+        _meta: { description: 'Inference connector ID used for AI generation', optional: false },
       },
       errorMessage: {
         type: 'keyword',

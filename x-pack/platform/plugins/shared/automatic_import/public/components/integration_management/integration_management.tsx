@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -58,13 +58,13 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   const { reportCancelButtonClicked, reportDoneButtonClicked } = useTelemetry();
 
   const performCancelNavigation = useCallback(() => {
-    reportCancelButtonClicked();
+    reportCancelButtonClicked({ integrationId });
     if (window.history.length > 1) {
       window.history.back();
     } else {
       navigateToManage();
     }
-  }, [navigateToManage, reportCancelButtonClicked]);
+  }, [integrationId, navigateToManage, reportCancelButtonClicked]);
 
   const handleCancel = useCallback(() => {
     if (shouldOfferIntegrationDelete) {
@@ -92,9 +92,9 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   }, [deleteIntegrationMutation, integrationId, navigateToManage]);
 
   const handleDone = useCallback(() => {
-    reportDoneButtonClicked();
+    reportDoneButtonClicked({ integrationId });
     submit();
-  }, [reportDoneButtonClicked, submit]);
+  }, [integrationId, reportDoneButtonClicked, submit]);
 
   return (
     <>
@@ -145,16 +145,8 @@ export const IntegrationManagement = React.memo(() => {
 
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
-  const { reportCancelButtonClicked, reportNewIntegrationPageOpened } = useTelemetry();
+  const { reportCancelButtonClicked } = useTelemetry();
   const { createUpdateIntegrationMutation } = useCreateUpdateIntegration();
-
-  const newIntegrationReported = useRef(false);
-  useEffect(() => {
-    if (!integrationId && !newIntegrationReported.current) {
-      newIntegrationReported.current = true;
-      reportNewIntegrationPageOpened();
-    }
-  }, [integrationId, reportNewIntegrationPageOpened]);
 
   const integrationsHomeHref = useMemo(
     () => application.getUrlForApp(INTEGRATIONS_APP_ID),
@@ -166,9 +158,9 @@ export const IntegrationManagement = React.memo(() => {
   }, [application]);
 
   const handlePaywallCancel = useCallback(() => {
-    reportCancelButtonClicked();
+    reportCancelButtonClicked({ integrationId });
     application.navigateToUrl(integrationsHomeHref);
-  }, [application, integrationsHomeHref, reportCancelButtonClicked]);
+  }, [application, integrationId, integrationsHomeHref, reportCancelButtonClicked]);
 
   const initialFormData = useMemo(() => {
     if (!integration) return undefined;

@@ -10,29 +10,47 @@ import { useKibana } from '../common/hooks/use_kibana';
 import { AutomaticImportTelemetryEventType } from '../../common/telemetry/types';
 
 export type LogsSource = 'file' | 'index';
-type ReportNewIntegrationPageOpened = () => void;
-type ReportDataStreamFlyoutOpened = (params: { isFirstDataStream: boolean }) => void;
+type ReportDataStreamFlyoutOpened = (params: { integrationId?: string }) => void;
 
-type ReportEditDataStreamFlyoutOpened = () => void;
+type ReportEditDataStreamFlyoutOpened = (params?: {
+  integrationId?: string;
+  dataStreamId?: string;
+}) => void;
 
 type ReportAnalyzeLogsTriggered = (params: {
+  integrationId?: string;
+  dataStreamId?: string;
   logsSource: LogsSource;
   inputTypes: string[];
 }) => void;
 
-type ReportEditPipelineTabOpened = () => void;
+type ReportEditPipelineTabOpened = (params?: {
+  integrationId?: string;
+  dataStreamId?: string;
+}) => void;
 
-type ReportCodeEditorCopyClicked = () => void;
+type ReportCodeEditorCopyClicked = (params?: {
+  integrationId?: string;
+  dataStreamId?: string;
+}) => void;
 
-type ReportCancelButtonClicked = () => void;
+type ReportCancelButtonClicked = (params?: { integrationId?: string }) => void;
 
-type ReportDoneButtonClicked = () => void;
+type ReportDoneButtonClicked = (params?: { integrationId?: string }) => void;
 
-type ReportDataStreamDeleteConfirmed = () => void;
+type ReportDataStreamDeleteConfirmed = (params?: {
+  integrationId?: string;
+  dataStreamId?: string;
+}) => void;
 
-type ReportDataStreamRefreshConfirmed = () => void;
+type ReportDataStreamRefreshConfirmed = (params?: {
+  integrationId?: string;
+  dataStreamId?: string;
+}) => void;
 
 type ReportPipelineEdited = (params: {
+  integrationId?: string;
+  dataStreamId?: string;
   linesAdded: number;
   linesRemoved: number;
   netLineChange: number;
@@ -40,7 +58,6 @@ type ReportPipelineEdited = (params: {
 
 interface TelemetryContextProps {
   sessionId: string;
-  reportNewIntegrationPageOpened: ReportNewIntegrationPageOpened;
   reportDataStreamFlyoutOpened: ReportDataStreamFlyoutOpened;
   reportEditDataStreamFlyoutOpened: ReportEditDataStreamFlyoutOpened;
   reportAnalyzeLogsTriggered: ReportAnalyzeLogsTriggered;
@@ -55,7 +72,6 @@ interface TelemetryContextProps {
 
 const defaultTelemetryContext: TelemetryContextProps = {
   sessionId: '',
-  reportNewIntegrationPageOpened: () => {},
   reportDataStreamFlyoutOpened: () => {},
   reportEditDataStreamFlyoutOpened: () => {},
   reportAnalyzeLogsTriggered: () => {},
@@ -74,133 +90,167 @@ export const useTelemetry = () => {
   return React.useContext(TelemetryContext);
 };
 
-export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ children }) => {
-  const sessionData = useRef({ sessionId: uuidV4() });
-  const pageLoadReported = useRef(false);
+export const TelemetryContextProvider = React.memo<PropsWithChildren<{ integrationId?: string }>>(
+  ({ children, integrationId }) => {
+    const sessionData = useRef({ sessionId: uuidV4() });
 
-  const { telemetry } = useKibana().services;
+    const { telemetry } = useKibana().services;
 
-  // Report page load event once when provider mounts
-  useEffect(() => {
-    if (!pageLoadReported.current && telemetry) {
-      pageLoadReported.current = true;
-      telemetry.reportEvent(AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded, {
+    // Report page load event once when provider mounts
+    useEffect(() => {
+      if (integrationId) {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditIntegrationPageLoaded, {
+          sessionId: sessionData.current.sessionId,
+          integrationId,
+        });
+      } else {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded, {
+          sessionId: sessionData.current.sessionId,
+        });
+      }
+    }, [telemetry, integrationId]);
+
+    const reportDataStreamFlyoutOpened = useCallback<ReportDataStreamFlyoutOpened>(
+      ({ integrationId: intId }) => {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.DataStreamFlyoutOpened, {
+          sessionId: sessionData.current.sessionId,
+          integrationId: intId,
+        });
+      },
+      [telemetry]
+    );
+
+    const reportEditDataStreamFlyoutOpened = useCallback<ReportEditDataStreamFlyoutOpened>(
+      (params) => {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditDataStreamFlyoutOpened, {
+          sessionId: sessionData.current.sessionId,
+          integrationId: params?.integrationId,
+          dataStreamId: params?.dataStreamId,
+        });
+      },
+      [telemetry]
+    );
+
+    const reportAnalyzeLogsTriggered = useCallback<ReportAnalyzeLogsTriggered>(
+      ({ integrationId: intId, dataStreamId, logsSource, inputTypes }) => {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.AnalyzeLogsTriggered, {
+          sessionId: sessionData.current.sessionId,
+          integrationId: intId,
+          dataStreamId,
+          logsSource,
+          inputTypes,
+        });
+      },
+      [telemetry]
+    );
+
+    const reportEditPipelineTabOpened = useCallback<ReportEditPipelineTabOpened>(
+      (params) => {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditPipelineTabOpened, {
+          sessionId: sessionData.current.sessionId,
+          integrationId: params?.integrationId,
+          dataStreamId: params?.dataStreamId,
+        });
+      },
+      [telemetry]
+    );
+
+    const reportCodeEditorCopyClicked = useCallback<ReportCodeEditorCopyClicked>(
+      (params) => {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.CodeEditorCopyClicked, {
+          sessionId: sessionData.current.sessionId,
+          integrationId: params?.integrationId,
+          dataStreamId: params?.dataStreamId,
+        });
+      },
+      [telemetry]
+    );
+
+    const reportCancelButtonClicked = useCallback<ReportCancelButtonClicked>(
+      (params) => {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.CancelButtonClicked, {
+          sessionId: sessionData.current.sessionId,
+          integrationId: params?.integrationId,
+        });
+      },
+      [telemetry]
+    );
+
+    const reportDoneButtonClicked = useCallback<ReportDoneButtonClicked>(
+      (params) => {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.DoneButtonClicked, {
+          sessionId: sessionData.current.sessionId,
+          integrationId: params?.integrationId,
+        });
+      },
+      [telemetry]
+    );
+
+    const reportDataStreamDeleteConfirmed = useCallback<ReportDataStreamDeleteConfirmed>(
+      (params) => {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.DataStreamDeleteConfirmed, {
+          sessionId: sessionData.current.sessionId,
+          integrationId: params?.integrationId,
+          dataStreamId: params?.dataStreamId,
+        });
+      },
+      [telemetry]
+    );
+
+    const reportDataStreamRefreshConfirmed = useCallback<ReportDataStreamRefreshConfirmed>(
+      (params) => {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.DataStreamRefreshConfirmed, {
+          sessionId: sessionData.current.sessionId,
+          integrationId: params?.integrationId,
+          dataStreamId: params?.dataStreamId,
+        });
+      },
+      [telemetry]
+    );
+
+    const reportPipelineEdited = useCallback<ReportPipelineEdited>(
+      ({ integrationId: intId, dataStreamId, linesAdded, linesRemoved, netLineChange }) => {
+        telemetry?.reportEvent(AutomaticImportTelemetryEventType.PipelineEdited, {
+          sessionId: sessionData.current.sessionId,
+          integrationId: intId,
+          dataStreamId,
+          linesAdded,
+          linesRemoved,
+          netLineChange,
+        });
+      },
+      [telemetry]
+    );
+
+    const value = useMemo<TelemetryContextProps>(
+      () => ({
         sessionId: sessionData.current.sessionId,
-      });
-    }
-  }, [telemetry]);
+        reportDataStreamFlyoutOpened,
+        reportEditDataStreamFlyoutOpened,
+        reportAnalyzeLogsTriggered,
+        reportEditPipelineTabOpened,
+        reportCodeEditorCopyClicked,
+        reportCancelButtonClicked,
+        reportDoneButtonClicked,
+        reportDataStreamDeleteConfirmed,
+        reportDataStreamRefreshConfirmed,
+        reportPipelineEdited,
+      }),
+      [
+        reportDataStreamFlyoutOpened,
+        reportEditDataStreamFlyoutOpened,
+        reportAnalyzeLogsTriggered,
+        reportEditPipelineTabOpened,
+        reportCodeEditorCopyClicked,
+        reportCancelButtonClicked,
+        reportDoneButtonClicked,
+        reportDataStreamDeleteConfirmed,
+        reportDataStreamRefreshConfirmed,
+        reportPipelineEdited,
+      ]
+    );
 
-  const reportNewIntegrationPageOpened = useCallback<ReportNewIntegrationPageOpened>(() => {
-    telemetry?.reportEvent(AutomaticImportTelemetryEventType.NewIntegrationPageOpened, {
-      sessionId: sessionData.current.sessionId,
-    });
-  }, [telemetry]);
-
-  const reportDataStreamFlyoutOpened = useCallback<ReportDataStreamFlyoutOpened>(
-    ({ isFirstDataStream }) => {
-      telemetry?.reportEvent(AutomaticImportTelemetryEventType.DataStreamFlyoutOpened, {
-        sessionId: sessionData.current.sessionId,
-        isFirstDataStream,
-      });
-    },
-    [telemetry]
-  );
-
-  const reportEditDataStreamFlyoutOpened = useCallback<ReportEditDataStreamFlyoutOpened>(() => {
-    telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditDataStreamFlyoutOpened, {
-      sessionId: sessionData.current.sessionId,
-    });
-  }, [telemetry]);
-
-  const reportAnalyzeLogsTriggered = useCallback<ReportAnalyzeLogsTriggered>(
-    ({ logsSource, inputTypes }) => {
-      telemetry?.reportEvent(AutomaticImportTelemetryEventType.AnalyzeLogsTriggered, {
-        sessionId: sessionData.current.sessionId,
-        logsSource,
-        inputTypes,
-      });
-    },
-    [telemetry]
-  );
-
-  const reportEditPipelineTabOpened = useCallback<ReportEditPipelineTabOpened>(() => {
-    telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditPipelineTabOpened, {
-      sessionId: sessionData.current.sessionId,
-    });
-  }, [telemetry]);
-
-  const reportCodeEditorCopyClicked = useCallback<ReportCodeEditorCopyClicked>(() => {
-    telemetry?.reportEvent(AutomaticImportTelemetryEventType.CodeEditorCopyClicked, {
-      sessionId: sessionData.current.sessionId,
-    });
-  }, [telemetry]);
-
-  const reportCancelButtonClicked = useCallback<ReportCancelButtonClicked>(() => {
-    telemetry?.reportEvent(AutomaticImportTelemetryEventType.CancelButtonClicked, {
-      sessionId: sessionData.current.sessionId,
-    });
-  }, [telemetry]);
-
-  const reportDoneButtonClicked = useCallback<ReportDoneButtonClicked>(() => {
-    telemetry?.reportEvent(AutomaticImportTelemetryEventType.DoneButtonClicked, {
-      sessionId: sessionData.current.sessionId,
-    });
-  }, [telemetry]);
-
-  const reportDataStreamDeleteConfirmed = useCallback<ReportDataStreamDeleteConfirmed>(() => {
-    telemetry?.reportEvent(AutomaticImportTelemetryEventType.DataStreamDeleteConfirmed, {
-      sessionId: sessionData.current.sessionId,
-    });
-  }, [telemetry]);
-
-  const reportDataStreamRefreshConfirmed = useCallback<ReportDataStreamRefreshConfirmed>(() => {
-    telemetry?.reportEvent(AutomaticImportTelemetryEventType.DataStreamRefreshConfirmed, {
-      sessionId: sessionData.current.sessionId,
-    });
-  }, [telemetry]);
-
-  const reportPipelineEdited = useCallback<ReportPipelineEdited>(
-    ({ linesAdded, linesRemoved, netLineChange }) => {
-      telemetry?.reportEvent(AutomaticImportTelemetryEventType.PipelineEdited, {
-        sessionId: sessionData.current.sessionId,
-        linesAdded,
-        linesRemoved,
-        netLineChange,
-      });
-    },
-    [telemetry]
-  );
-
-  const value = useMemo<TelemetryContextProps>(
-    () => ({
-      sessionId: sessionData.current.sessionId,
-      reportNewIntegrationPageOpened,
-      reportDataStreamFlyoutOpened,
-      reportEditDataStreamFlyoutOpened,
-      reportAnalyzeLogsTriggered,
-      reportEditPipelineTabOpened,
-      reportCodeEditorCopyClicked,
-      reportCancelButtonClicked,
-      reportDoneButtonClicked,
-      reportDataStreamDeleteConfirmed,
-      reportDataStreamRefreshConfirmed,
-      reportPipelineEdited,
-    }),
-    [
-      reportNewIntegrationPageOpened,
-      reportDataStreamFlyoutOpened,
-      reportEditDataStreamFlyoutOpened,
-      reportAnalyzeLogsTriggered,
-      reportEditPipelineTabOpened,
-      reportCodeEditorCopyClicked,
-      reportCancelButtonClicked,
-      reportDoneButtonClicked,
-      reportDataStreamDeleteConfirmed,
-      reportDataStreamRefreshConfirmed,
-      reportPipelineEdited,
-    ]
-  );
-
-  return <TelemetryContext.Provider value={value}>{children}</TelemetryContext.Provider>;
-});
+    return <TelemetryContext.Provider value={value}>{children}</TelemetryContext.Provider>;
+  }
+);
 TelemetryContextProvider.displayName = 'TelemetryContextProvider';

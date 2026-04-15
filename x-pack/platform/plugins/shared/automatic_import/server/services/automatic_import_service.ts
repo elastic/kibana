@@ -375,12 +375,6 @@ export class AutomaticImportService {
     const { authenticatedUser, dataStreamParams, connectorId, langSmithOptions, integrationName } =
       params;
 
-    // Determine if this is the first data stream for the integration (before inserting)
-    const existingDataStreams = await this.savedObjectService.getAllDataStreams(
-      dataStreamParams.integrationId
-    );
-    const isFirstDataStream = existingDataStreams.length === 0;
-
     // Schedule the data stream creation background task
     const dataStreamTaskParams: DataStreamTaskParams = {
       integrationId: dataStreamParams.integrationId,
@@ -388,7 +382,6 @@ export class AutomaticImportService {
       connectorId,
       integrationName,
       dataStreamName: dataStreamParams.title,
-      isFirstDataStream,
       ...(langSmithOptions ? { langSmithOptions } : {}),
     };
     const { taskId } = await this.taskManagerService.scheduleDataStreamCreationTask(
@@ -511,7 +504,6 @@ export class AutomaticImportService {
         connectorId,
         integrationName,
         dataStreamName,
-        isFirstDataStream: false,
         langSmithOptions,
       },
       request

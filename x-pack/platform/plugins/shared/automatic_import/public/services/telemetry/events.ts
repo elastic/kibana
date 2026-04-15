@@ -27,13 +27,17 @@ export const telemetryEventsSchemas: Partial<
     },
   },
 
-  [AutomaticImportTelemetryEventType.NewIntegrationPageOpened]: {
+  [AutomaticImportTelemetryEventType.EditIntegrationPageLoaded]: {
     sessionId: {
       type: 'keyword',
       _meta: {
         description: 'The ID to identify all the events in the same session',
         optional: false,
       },
+    },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
     },
   },
 
@@ -45,12 +49,9 @@ export const telemetryEventsSchemas: Partial<
         optional: false,
       },
     },
-    isFirstDataStream: {
-      type: 'boolean',
-      _meta: {
-        description: 'True if this is the first data stream being created for a new integration',
-        optional: false,
-      },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
     },
   },
 
@@ -62,6 +63,14 @@ export const telemetryEventsSchemas: Partial<
         optional: false,
       },
     },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
+    },
   },
 
   [AutomaticImportTelemetryEventType.AnalyzeLogsTriggered]: {
@@ -71,6 +80,14 @@ export const telemetryEventsSchemas: Partial<
         description: 'The ID to identify all the events in the same session',
         optional: false,
       },
+    },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
     },
     logsSource: {
       type: 'keyword',
@@ -97,6 +114,14 @@ export const telemetryEventsSchemas: Partial<
         optional: false,
       },
     },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
+    },
   },
 
   // Code editor copy button clicked
@@ -107,6 +132,14 @@ export const telemetryEventsSchemas: Partial<
         description: 'The ID to identify all the events in the same session',
         optional: false,
       },
+    },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
     },
   },
 
@@ -122,6 +155,10 @@ export const telemetryEventsSchemas: Partial<
         optional: false,
       },
     },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
   },
 
   [AutomaticImportTelemetryEventType.DoneButtonClicked]: {
@@ -132,28 +169,49 @@ export const telemetryEventsSchemas: Partial<
         optional: false,
       },
     },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
   },
 
   [AutomaticImportTelemetryEventType.ReviewApproveMenuClicked]: {
     integrationId: {
       type: 'keyword',
-      _meta: { description: 'Integration ID', optional: false },
+      _meta: { description: 'Integration ID', optional: true },
     },
     version: {
       type: 'keyword',
-      _meta: { description: 'Integration version at time of review', optional: false },
+      _meta: { description: 'Integration version at time of review', optional: true },
     },
   },
-  [AutomaticImportTelemetryEventType.IntegrationDownloadZipClicked]: {},
-  [AutomaticImportTelemetryEventType.ApproveModalCancelClicked]: {},
+  [AutomaticImportTelemetryEventType.IntegrationDownloadZipClicked]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+  },
+  [AutomaticImportTelemetryEventType.ApproveModalCancelClicked]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+  },
   [AutomaticImportTelemetryEventType.ApproveModalApproveClicked]: {
     integrationId: {
       type: 'keyword',
-      _meta: { description: 'Integration ID', optional: false },
+      _meta: { description: 'Integration ID', optional: true },
     },
     version: {
       type: 'keyword',
-      _meta: { description: 'Integration version being approved', optional: false },
+      _meta: { description: 'Integration version being approved', optional: true },
+    },
+    dataStreamCount: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of data streams in the integration at the time of approval',
+        optional: false,
+      },
     },
   },
   [AutomaticImportTelemetryEventType.DataStreamDeleteConfirmed]: {
@@ -164,6 +222,14 @@ export const telemetryEventsSchemas: Partial<
         optional: false,
       },
     },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
+    },
   },
   [AutomaticImportTelemetryEventType.DataStreamRefreshConfirmed]: {
     sessionId: {
@@ -173,6 +239,14 @@ export const telemetryEventsSchemas: Partial<
         optional: false,
       },
     },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
+    },
   },
   [AutomaticImportTelemetryEventType.PipelineEdited]: {
     sessionId: {
@@ -181,6 +255,14 @@ export const telemetryEventsSchemas: Partial<
         description: 'The ID to identify all the events in the same session',
         optional: false,
       },
+    },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
     },
     linesAdded: {
       type: 'long',
