@@ -47,6 +47,8 @@ Example: `x-pack/platform/test/serverless/functional/configs/search/config.group
 
 Example: `x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts`
 
+Ensure the new or updated tests actually belong to the config.
+
 ## Output
 
 Post one comment on the PR. Include only the `/flaky` line(s) for the runner(s) that qualify:
@@ -80,3 +82,5 @@ FTR:
 ```
 
 Always use 30: this tells the runner to execute the test config 30 times.
+
+Always ensure the Playwright config exists in the project, otherwise don't post it.
