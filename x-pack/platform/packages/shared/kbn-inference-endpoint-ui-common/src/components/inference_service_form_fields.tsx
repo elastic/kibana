@@ -518,7 +518,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   useEffect(() => {
     if (config?.provider && config?.taskType && isEdit) {
       const newProvider = updatedProviders?.find((p) => p.service === config.provider);
-      // Update connector providerSchema
 
       const overrides = getOverrides(newProvider);
       const newProviderSchema: ConfigEntryView[] = newProvider
@@ -526,6 +525,10 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
+        const availableTaskTypes = allowedTaskTypes
+          ? newProvider.task_types.filter((t) => (allowedTaskTypes as string[]).includes(t))
+          : newProvider.task_types;
+        setTaskTypeOptions(getTaskTypeOptions(availableTaskTypes));
       }
       setSelectedTaskType(config.taskType);
     }
@@ -536,6 +539,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     selectedTaskType,
     updatedProviders,
     getOverrides,
+    allowedTaskTypes,
   ]);
 
   useEffect(() => {

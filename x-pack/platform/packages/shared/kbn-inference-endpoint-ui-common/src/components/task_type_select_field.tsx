@@ -40,15 +40,17 @@ export const TaskTypeSelectField: React.FC<TaskTypeSelectFieldProps> = ({
   onTaskTypeOptionsSelect,
   isEdit,
 }) => {
-  if (!taskType && !taskTypeOptions.length) return null;
+  const isVisible = !!(taskType || taskTypeOptions.length);
 
   return (
-    <>
-      <EuiSpacer size="m" />
-      <UseField path="config.taskType" config={taskTypeConfig}>
-        {(field) => {
-          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-          return (
+    <UseField path="config.taskType" config={taskTypeConfig}>
+      {(field) => {
+        if (!isVisible) return null;
+
+        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+        return (
+          <>
+            <EuiSpacer size="m" />
             <EuiFormRow
               id="taskType"
               fullWidth
@@ -83,9 +85,9 @@ export const TaskTypeSelectField: React.FC<TaskTypeSelectFieldProps> = ({
                 }))}
               />
             </EuiFormRow>
-          );
-        }}
-      </UseField>
-    </>
+          </>
+        );
+      }}
+    </UseField>
   );
 };
