@@ -34,17 +34,6 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
         translation_result: MigrationTranslationResult.FULL,
       };
     }
-    if (!state.index_pattern || state.index_pattern === MISSING_INDEX_PATTERN_PLACEHOLDER) {
-      const message =
-        'No matching Elasticsearch index found. Either provide the index in the prompt or onboard the data before starting the migration.';
-      const panelJSON = createMarkdownPanel(message, state.parsed_panel);
-      return {
-        elastic_panel: panelJSON,
-        translation_result: MigrationTranslationResult.UNTRANSLATABLE,
-        comments: [generateAssistantComment(message)],
-      };
-    }
-
     const query = state.esql_query;
     if (!query) {
       const message = 'SPL query unsupported or missing, cannot translate panel';
@@ -91,6 +80,11 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
     return {
       elastic_panel: panelJSON,
       translation_result: translationResult,
+      comments: [
+        generateAssistantComment(
+          `## Final ES|QL Query\n\n\`\`\`esql\n${query}\n\`\`\``
+        ),
+      ],
     };
   };
 };

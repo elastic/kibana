@@ -69,7 +69,7 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
     ])
     .addConditionalEdges('selectIndexPattern', indexFoundRouter, [
       'sampleIndexRecords',
-      'translationResult',
+      'translateQuery',
     ])
     .addEdge('sampleIndexRecords', 'translateQuery')
     .addEdge('translateQuery', 'validation')
@@ -97,7 +97,7 @@ const translatableRouter = (state: TranslateDashboardPanelState) => {
 
 const indexFoundRouter = (state: TranslateDashboardPanelState) => {
   if (!state.index_pattern || state.index_pattern === MISSING_INDEX_PATTERN_PLACEHOLDER) {
-    return 'translationResult';
+    return 'translateQuery';
   }
   return 'sampleIndexRecords';
 };

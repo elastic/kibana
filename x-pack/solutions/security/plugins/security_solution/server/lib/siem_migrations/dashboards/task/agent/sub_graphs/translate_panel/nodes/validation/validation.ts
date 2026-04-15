@@ -6,17 +6,14 @@
  */
 
 import { generateAssistantComment } from '../../../../../../../common/task/util/comments';
-import {
-  getValidateEsql,
-  type GetValidateEsqlParams,
-} from '../../../../../../../common/task/agent/helpers/validate_esql/validation';
-import type { GraphNode, TranslateDashboardPanelState } from '../../types';
+import { getValidateEsql } from '../../../../../../../common/task/agent/helpers/validate_esql/validation';
+import type {
+  GraphNode,
+  TranslatePanelGraphParams,
+  TranslateDashboardPanelState,
+} from '../../types';
 
-/**
- * This node runs all validation steps, and will redirect to the END of the graph if no errors are found.
- * Any new validation steps should be added here.
- */
-export const getValidationNode = (params: GetValidateEsqlParams): GraphNode => {
+export const getValidationNode = (params: TranslatePanelGraphParams): GraphNode => {
   const validateEsql = getValidateEsql(params);
   return async (state): Promise<Partial<TranslateDashboardPanelState>> => {
     if (!state.esql_query) {
@@ -31,13 +28,11 @@ export const getValidationNode = (params: GetValidateEsqlParams): GraphNode => {
       };
     }
 
-    const { error } = await validateEsql({ query: state.esql_query });
+    const { error: syntaxError } = await validateEsql({ query: state.esql_query });
 
-    if (error && state.esql_query.match(/\[(macro|lookup):.*?\]/)) {
-      // The fix_query_errors tends to remove all the macro and lookup placeholder from the query to make the query valid,
-      // we need to keep them so we skip validation unless the missing resources are provided
+    if (syntaxError && state.esql_query.match(/\[(macro|lookup):.*?\]/)) {
       return {
-        validation_errors: { esql_errors: error, retries_left: 0 },
+        validation_errors: { esql_errors: syntaxError, retries_left: 0 },
         comments: [
           generateAssistantComment(
             '## ESQL Validation Summary\n\nFound missing macro or lookup placeholders in query, can not generate a valid query unless they are provided.\nSkipping self-healing loop'
@@ -46,11 +41,46 @@ export const getValidationNode = (params: GetValidateEsqlParams): GraphNode => {
       };
     }
 
+    if (syntaxError) {
+      return {
+        validation_errors: {
+          esql_errors: syntaxError,
+          retries_left: state.validation_errors.retries_left - 1,
+        },
+      };
+    }
+
+    const executionError = await executeEsqlQuery(state.esql_query, params);
+    const combinedError = executionError || undefined;
+
     return {
       validation_errors: {
-        esql_errors: error,
-        retries_left: state.validation_errors.retries_left - 1,
+        esql_errors: combinedError,
+        retries_left: combinedError
+          ? state.validation_errors.retries_left - 1
+          : state.validation_errors.retries_left,
       },
     };
   };
+};
+
+const executeEsqlQuery = async (
+  query: string,
+  params: TranslatePanelGraphParams
+): Promise<string | undefined> => {
+  try {
+    await params.esScopedClient.asInternalUser.esql.query({
+      query,
+      format: 'json',
+    });
+    return undefined;
+  } catch (error) {
+    const reason =
+      error?.meta?.body?.error?.caused_by?.reason ??
+      error?.meta?.body?.error?.reason ??
+      error?.message ??
+      'Unknown execution error';
+    params.logger.debug(`ES|QL execution error: ${reason}`);
+    return `ES|QL execution error: ${reason}`;
+  }
 };

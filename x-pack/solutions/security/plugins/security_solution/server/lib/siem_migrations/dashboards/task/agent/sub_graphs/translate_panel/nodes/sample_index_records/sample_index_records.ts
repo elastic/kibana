@@ -11,6 +11,15 @@ import type { GraphNode, TranslatePanelGraphParams } from '../../types';
 
 const SAMPLING_SIZE = 10;
 
+const NO_DATA_WARNING = `## ⚠️ No Data Found in Index
+
+The index was identified but contains no data. This impacts the quality of the translation:
+
+- **Field value formats cannot be inferred** from sample records, which may lead to incorrect value comparisons and filters in the generated ES|QL query.
+- **Field mapping accuracy is reduced** since sample values are used to match SPL fields to the correct Elasticsearch fields.
+
+**Recommendation:** Onboard data into this index and re-run the migration for more accurate field mapping and query generation.`;
+
 export const getSampleIndexRecordsNode = (params: TranslatePanelGraphParams): GraphNode => {
   return async (state) => {
     if (!state.index_pattern) {
@@ -30,11 +39,7 @@ export const getSampleIndexRecordsNode = (params: TranslatePanelGraphParams): Gr
       if (!hasData) {
         return {
           resolved_resource: resolvedResource,
-          comments: [
-            generateAssistantComment(
-              `No data found in index \`${state.index_pattern}\`. The generated query may have incorrect field values.`
-            ),
-          ],
+          comments: [generateAssistantComment(NO_DATA_WARNING)],
         };
       }
 
