@@ -117,6 +117,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const preRestartScores = await readRiskScores(es);
         const preRestartCount = preRestartScores.length;
 
+        // Wait for the maintainer to finish its first run before stopping it.
+        // Otherwise, stopMaintainer's document update will cause a 409 version conflict
+        // when the task tries to save its state, wedging the task permanently.
+        await waitForMaintainerRun({
+          retry,
+          routes: maintainerRoutes,
+          minRuns: 1,
+          triggerRun: false,
+        });
+
         await maintainerRoutes.stopMaintainer('risk-score');
         await maintainerRoutes.startMaintainer('risk-score');
         await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
