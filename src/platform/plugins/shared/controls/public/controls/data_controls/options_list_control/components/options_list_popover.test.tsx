@@ -14,6 +14,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { OptionsListDisplaySettings, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { RenderResult } from '@testing-library/react';
 import { act, render as rtlRender, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,7 +24,6 @@ import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import * as ControlContextModule from '../options_list_context_provider';
 import { OptionsListControlContext } from '../options_list_context_provider';
 
-import { createStubDataView } from '../../../../../../data_views/common/data_view.stub';
 import { coreServices, dataViewsService } from '../../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../../mocks/control_mocks';
 import { getOptionsListControlFactory } from '../get_options_list_control_factory';
@@ -279,18 +279,6 @@ describe('Options list popover', () => {
       expect(popover.getByTestId('optionsList-control-selection-woof')).toBeChecked();
       expect(popover.queryByTestId('optionsList-control-selection-bark')).toBeNull();
       expect(popover.queryByTestId('optionsList-control-selection-meow')).toBeNull();
-
-      // TODO: move this I think
-      // expect(context.componentApi.appliedFilters$.value).toEqual([
-      //   {
-      //     meta: { controlledBy: 'test-control', index: 'myDataViewId', key: 'myFieldName' },
-      //     query: {
-      //       match_phrase: {
-      //         myFieldName: 'woof',
-      //       },
-      //     },
-      //   },
-      // ]);
     });
   });
 
@@ -494,16 +482,7 @@ describe('Options list popover', () => {
         overwriteState: { selected_options: ['woof', 'bark'], single_select: true },
       });
       const popover = mountComponent(context);
-      // expect(context.componentApi.appliedFilters$.value).toEqual([
-      //   {
-      //     meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
-      //     query: {
-      //       match_phrase: {
-      //         myFieldName: 'woof',
-      //       },
-      //     },
-      //   },
-      // ]);
+
       expect(popover.getByTestId('optionsList-control-selection-woof')).toBeChecked();
       expect(popover.queryByTestId('optionsList-control-selection-bark')).not.toBeChecked();
       expect(popover.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
@@ -513,16 +492,6 @@ describe('Options list popover', () => {
       expect(popover.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
       expect(popover.queryByTestId('optionsList-control-selection-bark')).toBeChecked();
       expect(popover.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
-      // expect(context.componentApi.appliedFilters$.value).toEqual([
-      //   {
-      //     meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
-      //     query: {
-      //       match_phrase: {
-      //         myFieldName: 'bark',
-      //       },
-      //     },
-      //   },
-      // ]);
     });
   });
 

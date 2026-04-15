@@ -13,6 +13,7 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub
 import { dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
+import { waitFor } from '@testing-library/react';
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
@@ -238,6 +239,33 @@ describe('Options List Control Api', () => {
           },
         },
       ]);
+    });
+
+    test('should set appliedFilters$ when option is selected', async () => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+        },
+        finalizeApi,
+        uuid,
+        parentApi: {},
+      });
+      api.setSelectedOptions(['woof']);
+      await waitFor(() => {
+        expect(api.appliedFilters$.value).toEqual([
+          {
+            meta: { controlledBy: uuid, index: 'myDataViewId', key: 'myFieldName' },
+            query: {
+              match_phrase: {
+                myFieldName: 'woof',
+              },
+            },
+          },
+        ]);
+      });
     });
   });
 });
