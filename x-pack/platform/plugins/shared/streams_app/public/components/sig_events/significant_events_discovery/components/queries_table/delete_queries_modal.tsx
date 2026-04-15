@@ -98,7 +98,11 @@ export function DeleteQueriesModal({
   );
 
   return (
-    <EuiModal onClose={isLoading ? () => {} : onCancel} aria-label={MODAL_ARIA_LABEL} maxWidth={780}>
+    <EuiModal
+      onClose={isLoading ? () => {} : onCancel}
+      aria-label={MODAL_ARIA_LABEL}
+      maxWidth={780}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
