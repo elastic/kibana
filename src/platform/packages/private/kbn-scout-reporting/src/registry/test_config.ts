@@ -78,25 +78,23 @@ const resolveModuleMetadata = (
         root: moduleRoot,
       }
     : g.examplesRoot
-      ? (() => {
-          const manifest = readKibanaModuleManifest(
-            path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc')
-          );
-          return {
-            name: manifest.id,
-            group: manifest.group,
-            type: manifest.type as ScoutTestableModule['type'],
-            visibility: manifest.visibility as ScoutTestableModule['visibility'],
-            root: moduleRoot,
-          };
-        })()
-      : {
-          name: g.moduleName,
-          group: g.platformOrCore ?? g.solution,
-          type: g.moduleKind.slice(0, -1) as ScoutTestableModule['type'],
-          visibility: (g.moduleVisibility || 'private') as ScoutTestableModule['visibility'],
+    ? (() => {
+        const manifest = readKibanaModuleManifest(path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc'));
+        return {
+          name: manifest.id,
+          group: manifest.group,
+          type: manifest.type as ScoutTestableModule['type'],
+          visibility: manifest.visibility as ScoutTestableModule['visibility'],
           root: moduleRoot,
         };
+      })()
+    : {
+        name: g.moduleName,
+        group: g.platformOrCore ?? g.solution,
+        type: g.moduleKind.slice(0, -1) as ScoutTestableModule['type'],
+        visibility: (g.moduleVisibility || 'private') as ScoutTestableModule['visibility'],
+        root: moduleRoot,
+      };
 
   return {
     module,
