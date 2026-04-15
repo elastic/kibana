@@ -10,7 +10,7 @@ import type { AssetCriticalityRecord } from '../../../../../common/api/entity_an
 interface ModifierTypeMap {
   asset_criticality: {
     subtype: void;
-    metadata: { criticality_level: AssetCriticalityRecord['criticality_level'] | undefined };
+    metadata: { criticality_level: AssetCriticalityRecord['criticality_level'] | null | undefined };
   };
   watchlist: {
     subtype: string;

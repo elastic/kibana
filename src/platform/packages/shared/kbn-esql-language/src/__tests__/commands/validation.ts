@@ -8,7 +8,8 @@
  */
 
 import { Parser } from '@elastic/esql';
-import type { ESQLCommand, ESQLMessage } from '@elastic/esql/types';
+import type { ESQLCommand } from '@elastic/esql/types';
+import type { ESQLMessage } from '../../commands/definitions/types';
 import type { ESQLColumnData } from '../../commands/registry/types';
 import { mockContext } from './context_fixtures';
 /**

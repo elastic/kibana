@@ -12,7 +12,7 @@ import { omit } from 'lodash';
 import { schema, type TypeOf } from '@kbn/config-schema';
 
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
-import { colorByValueSchema } from '../color';
+import { colorByValueSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
   sharedPanelInfoSchema,
@@ -144,7 +144,11 @@ const heatmapAxesStateESQLSchemaProps = {
 };
 
 const heatmapStateMetricOptionsSchemaProps = {
-  color: schema.maybe(colorByValueSchema),
+  color: schema.maybe(
+    schema.oneOf([colorByValueSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
 };
 
 export const heatmapStateSchemaNoESQL = schema.object(

@@ -51,6 +51,9 @@ export function validateStepsRecursively(
       }
       // Nested steps are within a where block
       validateStepsRecursively(step.condition.steps, errors, processorCounter, streamType, true);
+      if (step.condition.else) {
+        validateStepsRecursively(step.condition.else, errors, processorCounter, streamType, true);
+      }
     } else if (isActionBlock(step)) {
       processorCounter.count++;
       const processorNumber = processorCounter.count;

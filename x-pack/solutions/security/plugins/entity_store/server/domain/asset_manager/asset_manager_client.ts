@@ -17,7 +17,10 @@ import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server'
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
-import { scheduleHistorySnapshotTasks } from '../../tasks/history_snapshot_task';
+import {
+  scheduleHistorySnapshotTasks,
+  stopHistorySnapshotTask,
+} from '../../tasks/history_snapshot_task';
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import {
   installSharedElasticsearchAssets,
@@ -242,6 +245,11 @@ export class AssetManagerClient {
         await Promise.all([
           this.globalStateClient.delete(),
           stopStatusReportTask({
+            taskManager: this.taskManager,
+            logger: this.logger,
+            namespace: this.namespace,
+          }),
+          stopHistorySnapshotTask({
             taskManager: this.taskManager,
             logger: this.logger,
             namespace: this.namespace,
