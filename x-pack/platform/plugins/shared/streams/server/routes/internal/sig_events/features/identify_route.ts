@@ -148,6 +148,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
+    const startedAt = Date.now();
     const {
       scopedClusterClient,
       getFeatureClient,
@@ -292,13 +293,14 @@ const identifyInferredFeaturesRoute = createServerRoute({
     });
 
     // --- Reconcile ---
+    const elapsedMs = () => Date.now() - startedAt;
+
     const baseTelemetry = {
       run_id: runId,
       iteration,
       stream_name: streamName,
       stream_type: streamType,
       docs_count: docsCount,
-      duration_ms: 0,
       excluded_features_count: excludedFeatures.length,
       total_filters: totalFilters,
       filters_capped: filtersCapped,
@@ -306,9 +308,10 @@ const identifyInferredFeaturesRoute = createServerRoute({
     };
 
     if (!inferResult.success) {
+      const durationMs = elapsedMs();
       const failedResult: IterationResult = {
         iteration,
-        durationMs: 0,
+        durationMs,
         state: 'failure',
         tokensUsed: { ...EMPTY_TOKENS },
         newFeatures: [],
@@ -317,6 +320,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
 
       telemetry.trackFeaturesIdentified({
         ...baseTelemetry,
+        duration_ms: durationMs,
         state: 'failure',
         features_new: 0,
         features_updated: 0,
@@ -370,9 +374,10 @@ const identifyInferredFeaturesRoute = createServerRoute({
 
     const updatedTotalTokens = sumTokens(prevTokens, tokensUsed);
 
+    const durationMs = elapsedMs();
     const iterationResult: IterationResult = {
       iteration,
-      durationMs: 0,
+      durationMs,
       state: 'success',
       tokensUsed,
       newFeatures: newFeatures.map(toFeatureSummary),
@@ -381,6 +386,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
 
     telemetry.trackFeaturesIdentified({
       ...baseTelemetry,
+      duration_ms: durationMs,
       state: 'success',
       features_new: newFeatures.length,
       features_updated: updatedFeatures.length,
