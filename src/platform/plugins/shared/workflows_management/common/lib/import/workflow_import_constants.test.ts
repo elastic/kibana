@@ -8,6 +8,7 @@
  */
 
 import {
+  buildSuffixedCandidate,
   detectFileFormat,
   isDynamicWorkflowReference,
   isUnsafeWorkflowId,
@@ -180,5 +181,37 @@ describe('resolveCollisionId', () => {
     const result = resolveCollisionId(base, new Set([base]), 'fallback');
     expect(result).not.toMatch(/--/);
     expect(result).toMatch(/-1$/);
+  });
+});
+
+describe('buildSuffixedCandidate', () => {
+  it('should append a numeric suffix to the base ID', () => {
+    expect(buildSuffixedCandidate('my-workflow', 1)).toBe('my-workflow-1');
+    expect(buildSuffixedCandidate('my-workflow', 42)).toBe('my-workflow-42');
+    expect(buildSuffixedCandidate('my-workflow', 100)).toBe('my-workflow-100');
+  });
+
+  it('should truncate the base when base + suffix would exceed 255 characters', () => {
+    const base = 'a'.repeat(255);
+    const result = buildSuffixedCandidate(base, 1);
+    expect(result).toBe(`${'a'.repeat(253)}-1`);
+    expect(result.length).toBe(255);
+  });
+
+  it('should strip trailing hyphens after truncation to prevent double hyphens', () => {
+    // 253 "a"s + "-a" = 255 chars. Truncating to 253 yields "aaa...a-",
+    // which must become "aaa...a" + "-1", not "aaa...a-" + "-1" (double hyphen).
+    const base = `${'a'.repeat(253)}-a`;
+    const result = buildSuffixedCandidate(base, 1);
+    expect(result).not.toMatch(/--/);
+    expect(result).toMatch(/-1$/);
+  });
+
+  it('should handle multi-digit suffixes with correct truncation', () => {
+    const base = 'a'.repeat(255);
+    const result = buildSuffixedCandidate(base, 100);
+    // suffix "-100" is 4 chars, so base is truncated to 251
+    expect(result).toBe(`${'a'.repeat(251)}-100`);
+    expect(result.length).toBe(255);
   });
 });
