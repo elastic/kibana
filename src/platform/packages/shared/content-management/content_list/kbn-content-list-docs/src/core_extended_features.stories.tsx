@@ -16,11 +16,21 @@ import { ContentListTable } from '@kbn/content-list-table';
 import { ContentListFooter } from '@kbn/content-list-footer';
 import { ContentListToolbar } from '@kbn/content-list-toolbar';
 import {
+  buildMockItems,
   createMockFavoritesClient,
   createStoryFindItems,
+  createMockTagFacetProvider,
+  createMockUserProfileFacetProvider,
   mockTagsService,
+  mockContentListUserProfilesServices,
   StateDiagnosticPanel,
 } from './stories_helpers';
+import { createPlayContext } from './interactions/play_helpers';
+import { testCreatedByInteractions } from './interactions/created_by_interactions';
+import { testTagsPopoverInteractions } from './interactions/tags_popover_interactions';
+import { testTagBadgeInteractions } from './interactions/tag_badge_interactions';
+import { testStarredSortPaginationInteractions } from './interactions/starred_sort_pagination_interactions';
+import { testCombinedFilterInteractions } from './interactions/combined_filter_interactions';
 
 // =============================================================================
 // Storybook Meta
@@ -40,18 +50,19 @@ const meta: Meta = {
 export default meta;
 
 // =============================================================================
-// Core Features + Extended Story (MS3)
+// Wrapper component
 // =============================================================================
 
 const { Column, Action } = ContentListTable;
 const { Filters } = ContentListToolbar;
 
 /**
- * Wrapper component for the MS3 "Core + Tags + Starred" story.
+ * Wrapper component for the MS3 "Core + Tags + Starred + Created By" story.
  *
- * MS3 (Dashboards migration) requires Core + Tags + Starred. This story
- * demonstrates the full extended feature set: tag filtering, tag badges in the
- * Name column, the starred toggle filter, and the star icon column.
+ * MS3 (Dashboards migration) requires Core + Tags + Starred + Created By. This
+ * story demonstrates the full extended feature set: tag filtering, tag badges in
+ * the Name column, the starred toggle filter, the star icon column, and the
+ * Created By filter popover (include/exclude by user profile).
  *
  * Current state of MS3 features:
  * - [x] Tags filter popover — include/exclude, Cmd/Ctrl+click (PR 9)
@@ -59,6 +70,7 @@ const { Filters } = ContentListToolbar;
  * - [x] Search bar ↔ filter sync — `tag:name` parsed to `filters.tag` (PR 9)
  * - [x] Starred column — star icon toggle per row
  * - [x] Starred filter — toggle to show only starred items
+ * - [x] Created By filter — include/exclude by user (PR 10)
  */
 const CoreTagsStarredFeaturesWrapper = () => {
   const labels = useMemo(
@@ -69,7 +81,8 @@ const CoreTagsStarredFeaturesWrapper = () => {
     []
   );
 
-  const favoritesClient = useMemo(() => createMockFavoritesClient(), []);
+  const favoritesClient = useMemo(() => createMockFavoritesClient([]), []);
+  const mockItems = useMemo(() => buildMockItems(30), []);
 
   const dataSource = useMemo(() => {
     const findItems = createStoryFindItems({ totalItems: 30, favoritesClient });
@@ -91,10 +104,11 @@ const CoreTagsStarredFeaturesWrapper = () => {
         ],
       },
       pagination: { initialPageSize: 20 },
-      tags: true as const,
+      tags: createMockTagFacetProvider(mockItems),
       starred: true as const,
+      userProfiles: createMockUserProfileFacetProvider(mockItems),
     }),
-    []
+    [mockItems]
   );
 
   const itemConfig = useMemo(
@@ -112,6 +126,7 @@ const CoreTagsStarredFeaturesWrapper = () => {
       <>
         <Column.Starred />
         <Column.Name showDescription showTags showStarred />
+        <Column.CreatedBy />
         <Column.UpdatedAt />
         <Column.Actions>
           <Action.Delete />
@@ -129,12 +144,17 @@ const CoreTagsStarredFeaturesWrapper = () => {
         dataSource={dataSource}
         features={features}
         item={itemConfig}
-        services={{ tags: mockTagsService, favorites: favoritesClient }}
+        services={{
+          tags: mockTagsService,
+          favorites: favoritesClient,
+          userProfiles: mockContentListUserProfilesServices,
+        }}
       >
         <ContentListToolbar>
           <Filters>
             <Filters.Starred />
             <Filters.Tags />
+            <Filters.CreatedBy />
             <Filters.Sort />
           </Filters>
         </ContentListToolbar>
@@ -152,7 +172,11 @@ const CoreTagsStarredFeaturesWrapper = () => {
       dataSource={dataSource}
       features={features}
       item={itemConfig}
-      services={{ tags: mockTagsService, favorites: favoritesClient }}
+      services={{
+        tags: mockTagsService,
+        favorites: favoritesClient,
+        userProfiles: mockContentListUserProfilesServices,
+      }}
     >
       <EuiTitle size="s">
         <h2>Core Features + Extended</h2>
@@ -160,9 +184,9 @@ const CoreTagsStarredFeaturesWrapper = () => {
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
         <p>
-          Core + Tags + Starred — the feature set required to migrate Dashboards to Content List.
-          Demonstrates the starred toggle filter and star icon column (backed by{' '}
-          <code>services.favorites</code>), combined with tag filtering and tag badges from MS2.
+          Core + Tags + Starred + Created By — the feature set required to migrate Dashboards to
+          Content List. Demonstrates the starred toggle filter, star icon column, tag filtering, and
+          the Created By filter popover (include/exclude by user profile).
         </p>
       </EuiText>
       <EuiSpacer size="m" />
@@ -172,6 +196,7 @@ const CoreTagsStarredFeaturesWrapper = () => {
             <Filters>
               <Filters.Starred />
               <Filters.Tags />
+              <Filters.CreatedBy />
               <Filters.Sort />
             </Filters>
           </ContentListToolbar>
@@ -191,19 +216,43 @@ const CoreTagsStarredFeaturesWrapper = () => {
 };
 
 /**
- * The "Extended" feature set: Core + Tags + Starred.
+ * The "Extended" feature set: Core + Tags + Starred + Created By.
  *
  * Required by the Dashboards migration (MS3). Builds on MS2 (Tags) and adds:
  * - `services.favorites` on the provider wires the favorites client.
+ * - `services.userProfiles` on the provider wires user profile data.
  * - `features.starred: true` enables starred state and the `Filters.Starred` preset.
+ * - `features.userProfiles: true` enables user-based filtering.
  * - `Column.Starred` renders a star icon toggle in a narrow leading column.
  * - `Filters.Starred` in the toolbar renders a toggle to show only starred items.
+ * - `Filters.CreatedBy` in the toolbar renders a user filter popover.
  *
  * **Try:** Click the star icon in any row to mark it as a favorite. Toggle the
- * "Starred" filter in the toolbar to narrow the list to only starred items.
- * Tag filtering and badge-click-to-filter from MS2 are also active.
+ * "Starred" filter to narrow the list. Use the "Created by" filter to filter by
+ * user, or type `createdBy:email` in the search bar. Hold Cmd/Ctrl to exclude.
+ *
+ * ## Interaction tests
+ *
+ * The play function exercises 31 steps across 5 modules:
+ * - Created By filter (popover, avatars, include/exclude, OR logic, sorted order, bare-clause gate)
+ * - Tags popover (include, exclude, OR logic, clear)
+ * - Tag badges (click to include, Ctrl+click to exclude)
+ * - Starred + Sort + Pagination + Delete
+ * - Combined filters + free-text search + starred flag + tag AND
+ *
+ * Each module resets search to empty before returning so the next module
+ * starts from a clean state, avoiding hidden sequential dependencies.
  */
 export const CoreTagsStarredFeatures: StoryObj = {
   name: 'Core Features + Extended',
   render: () => <CoreTagsStarredFeaturesWrapper />,
+  play: async (args) => {
+    const ctx = createPlayContext(args);
+
+    await testCreatedByInteractions(ctx);
+    await testTagsPopoverInteractions(ctx);
+    await testTagBadgeInteractions(ctx);
+    await testStarredSortPaginationInteractions(ctx);
+    await testCombinedFilterInteractions(ctx);
+  },
 };

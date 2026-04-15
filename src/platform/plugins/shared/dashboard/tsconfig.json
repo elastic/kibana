@@ -81,6 +81,7 @@
     "@kbn/content-management-content-insights-server",
     "@kbn/managed-content-badge",
     "@kbn/content-management-favorites-public",
+    "@kbn/user-profile-components",
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-mount-utils-browser",
     "@kbn/visualization-utils",
@@ -125,5 +126,7 @@
     "@kbn/core-http-browser",
     "@kbn/lens-common"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

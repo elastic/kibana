@@ -13311,6 +13311,17 @@
   dependencies:
     "@storybook/global" "^5.0.0"
 
+"@storybook/addon-interactions@8.6.17":
+  version "8.6.17"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-interactions/-/addon-interactions-8.6.17.tgz#76a33333be43236410217e007237e2c7f0617668"
+  integrity sha512-aj0jC5kMnYYHBofAZrPAfZf2/j9BXMIwMJ9dLdc7Qwxsvig3txWlSx7Wh+szaR2jDz/areh1rZyrwiPHyxxQ4g==
+  dependencies:
+    "@storybook/global" "^5.0.0"
+    "@storybook/instrumenter" "8.6.17"
+    "@storybook/test" "8.6.17"
+    polished "^4.2.2"
+    ts-dedent "^2.2.0"
+
 "@storybook/addon-jest@8.6.17":
   version "8.6.17"
   resolved "https://registry.yarnpkg.com/@storybook/addon-jest/-/addon-jest-8.6.17.tgz#c0b9200799b5b53b76fd833ea462724378814c76"
@@ -34200,7 +34211,7 @@ ts-debounce@^4.0.0:
   resolved "https://registry.yarnpkg.com/ts-debounce/-/ts-debounce-4.0.0.tgz#33440ef64fab53793c3d546a8ca6ae539ec15841"
   integrity sha512-+1iDGY6NmOGidq7i7xZGA4cm8DAa6fqdYcvO5Z6yBevH++Bdo9Qt/mN0TzHUgcCcKv1gmh9+W5dHqz8pMWbCbg==
 
-ts-dedent@^2.0.0:
+ts-dedent@^2.0.0, ts-dedent@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/ts-dedent/-/ts-dedent-2.2.0.tgz#39e4bd297cd036292ae2394eb3412be63f563bb5"
   integrity sha512-q5W7tVM71e2xjHZTlgfTDoPF/SmqKG5hddq9SzR49CH2hayqRKJtQ4mtRlSxKaJlR/+9rEM+mnBHf7I2/BQcpQ==
