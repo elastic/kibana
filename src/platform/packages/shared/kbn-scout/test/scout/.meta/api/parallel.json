@@ -1,5 +1,5 @@
 {
-  "sha1": "9a78185eef8706e8da061a99ea83364a00ed0ff6",
+  "sha1": "54657df8f2c8150bbdce1be96b61fb58a67129ea",
   "tests": [
     {
       "id": "fa4e4cd5fb0f29c-178a4921f7b18d0",
@@ -598,15 +598,13 @@
       "title": "Fleet Outputs Management should get all outputs",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 200,
-        "column": 12
+        "line": 197,
+        "column": 10
       }
     },
     {
@@ -614,15 +612,13 @@
       "title": "Fleet Outputs Management should get a specific output by ID",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 208,
-        "column": 12
+        "line": 205,
+        "column": 10
       }
     },
     {
@@ -630,15 +626,13 @@
       "title": "Fleet Outputs Management should create an output with additional parameters",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 222,
-        "column": 12
+        "line": 219,
+        "column": 10
       }
     },
     {
@@ -646,15 +640,13 @@
       "title": "Fleet Outputs Management should delete an output",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 243,
-        "column": 12
+        "line": 240,
+        "column": 10
       }
     },
     {
@@ -669,7 +661,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 278,
+        "line": 274,
         "column": 12
       }
     },
@@ -685,7 +677,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 285,
+        "line": 281,
         "column": 12
       }
     },
@@ -701,7 +693,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 302,
+        "line": 298,
         "column": 12
       }
     },
@@ -717,7 +709,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 324,
+        "line": 320,
         "column": 12
       }
     },
@@ -733,7 +725,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 330,
+        "line": 326,
         "column": 12
       }
     },
@@ -749,7 +741,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 340,
+        "line": 336,
         "column": 12
       }
     },
@@ -765,7 +757,7 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/api_services/fleet.spec.ts",
-        "line": 355,
+        "line": 351,
         "column": 12
       }
     },
