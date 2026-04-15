@@ -15,6 +15,16 @@ on:
         description: "PR number (for adjust command)"
         required: false
         type: string
+      model:
+        description: "AI model override (provider/model format). Leave empty to use LITELLM_MODEL secret."
+        required: false
+        default: ""
+        type: string
+      max_iterations:
+        description: "Maximum agent loop iterations (default: 5)"
+        required: false
+        default: "5"
+        type: string
 
 permissions:
   contents: write
@@ -61,16 +71,47 @@ jobs:
 
       - name: Install OpenCode
         run: |
-          OPENCODE_VERSION="v0.0.55"
-          curl -fsSL "https://github.com/opencode-ai/opencode/releases/download/${OPENCODE_VERSION}/opencode-linux-x86_64.tar.gz" | sudo tar xz -C /usr/local/bin
+          npm install -g opencode-ai@1.2.15
 
       - name: Configure OpenCode
+        env:
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
         run: |
-          cat > opencode.json <<'EOF'
+          MODEL="${LITELLM_MODEL:-claude-sonnet-4-20250514}"
+          BASE_URL="${LITELLM_BASE_URL:-https://litellm.elastic.co/v1}"
+          cat > opencode.json <<EOF
           {
-            "snapshot": false
+            "\$schema": "https://opencode.ai/config.json",
+            "snapshot": false,
+            "provider": {
+              "litellm": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "LiteLLM",
+                "options": {
+                  "baseURL": "${BASE_URL}",
+                  "apiKey": "{env:LITELLM_API_KEY}"
+                },
+                "models": {
+                  "${MODEL}": {
+                    "name": "${MODEL}"
+                  }
+                }
+              }
+            }
           }
           EOF
+
+      - name: Resolve model
+        id: resolve_model
+        env:
+          LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
+        run: |
+          if [ -n "${{ inputs.model }}" ]; then
+            echo "model=${{ inputs.model }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "model=litellm/${LITELLM_MODEL:-claude-sonnet-4-20250514}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Build Task Prompt
         run: |
@@ -132,13 +173,15 @@ jobs:
         env:
           LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
           GH_TOKEN: ${{ secrets.MY_PAT }}
+          MODEL: ${{ steps.resolve_model.outputs.model }}
         run: |
-          opencode run "$(cat .ralph_task.md)" --model anthropic/claude-sonnet-4-20250514 2>&1 | tee ralph-output.md
+          opencode run "$(cat .ralph_task.md)" --model "$MODEL" 2>&1 | tee ralph-output.md
 
       - name: Self-Fix on Failure
         if: failure()
         env:
           LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          MODEL: ${{ steps.resolve_model.outputs.model }}
         run: |
           echo "Agent step failed. Attempting one self-fix..."
           ERROR_CONTEXT=$(tail -200 ralph-output.md 2>/dev/null || echo "No output captured")
@@ -149,7 +192,7 @@ jobs:
 
           Fix the issue that caused the failure. Focus on the actual error, not on re-implementing the original task.
           FIX_EOF
-          opencode run "$(cat .ralph_fix_task.md)" --model anthropic/claude-sonnet-4-20250514 2>&1 | tee -a ralph-output.md
+          opencode run "$(cat .ralph_fix_task.md)" --model "$MODEL" 2>&1 | tee -a ralph-output.md
 
       - name: Verify Changes
         run: |
@@ -198,6 +241,8 @@ jobs:
             echo "No changes to push"
             exit 0
           fi
+
+          rm -f opencode.json
 
           git config user.name "Ralph-Agent"
           git config user.email "ralph@bot.local"
