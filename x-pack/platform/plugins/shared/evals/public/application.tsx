@@ -5,18 +5,47 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import React, { Suspense, useEffect } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+} from '@elastic/eui';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import type { AppMountParameters, ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
 import { RunsListPage } from './pages/runs_list';
-import { RunDetailPage } from './pages/run_detail';
 import { DatasetsListPage } from './pages/datasets_list';
-import { DatasetDetailPage } from './pages/dataset_detail';
-import { TracingProjectsListPage } from './pages/tracing_projects_list';
-import { TracingProjectDetailPage } from './pages/tracing_project_detail';
+
+const RunDetailPage = React.lazy(async () => {
+  const mod = await import('./pages/run_detail');
+  return { default: mod.RunDetailPage };
+});
+
+const DatasetDetailPage = React.lazy(async () => {
+  const mod = await import('./pages/dataset_detail');
+  return { default: mod.DatasetDetailPage };
+});
+
+const RemotesListPage = React.lazy(async () => {
+  const mod = await import('./pages/remotes_list');
+  return { default: mod.RemotesListPage };
+});
+
+const TracingProjectsListPage = React.lazy(async () => {
+  const mod = await import('./pages/tracing_projects_list');
+  return { default: mod.TracingProjectsListPage };
+});
+
+const TracingProjectDetailPage = React.lazy(async () => {
+  const mod = await import('./pages/tracing_project_detail');
+  return { default: mod.TracingProjectDetailPage };
+});
 
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
@@ -30,6 +59,10 @@ const datasetsTabLabel = i18n.translate('xpack.evals.navigation.datasets', {
   defaultMessage: 'Datasets',
 });
 
+const remotesTabLabel = i18n.translate('xpack.evals.navigation.remotes', {
+  defaultMessage: 'Remotes',
+});
+
 const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
   defaultMessage: 'Tracing',
 });
@@ -37,7 +70,7 @@ const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
 const ROOT_PATH = '/' as const;
 const DATASETS_PATH = '/datasets' as const;
 const TRACING_PATH = '/tracing' as const;
-
+const REMOTES_PATH = '/remotes' as const;
 const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
   defaultMessage: 'Run details',
 });
@@ -97,6 +130,10 @@ const getBreadcrumbs = ({
     return [{ text: datasetsTabLabel }];
   }
 
+  if (pathname === REMOTES_PATH) {
+    return [{ text: remotesTabLabel }];
+  }
+
   if (pathname.startsWith('/runs/')) {
     return [{ text: runsTabLabel, href: runsHref }, { text: runDetailBreadcrumbLabel }];
   }
@@ -109,7 +146,8 @@ const EvalsNavigation: React.FC = () => {
   const { pathname } = useLocation();
   const isTracingSelected = pathname.startsWith(TRACING_PATH);
   const isDatasetsSelected = pathname.startsWith(DATASETS_PATH);
-  const isRunsSelected = !isTracingSelected && !isDatasetsSelected;
+  const isRemotesSelected = pathname.startsWith(REMOTES_PATH);
+  const isRunsSelected = !isTracingSelected && !isDatasetsSelected && !isRemotesSelected;
 
   return (
     <div style={{ flex: '0 0 auto' }}>
@@ -122,6 +160,9 @@ const EvalsNavigation: React.FC = () => {
         </EuiTab>
         <EuiTab isSelected={isTracingSelected} onClick={() => history.push(TRACING_PATH)}>
           {tracingTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isRemotesSelected} onClick={() => history.push(REMOTES_PATH)}>
+          {remotesTabLabel}
         </EuiTab>
       </EuiTabs>
     </div>
@@ -159,14 +200,17 @@ export const EvalsApp: React.FC<{
           breadcrumbPrefix={breadcrumbPrefix}
         />
         <div style={{ flex: 1, minHeight: 0 }}>
-          <Routes>
-            <Route exact path={ROOT_PATH} component={RunsListPage} />
-            <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
-            <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
-            <Route path="/runs/:runId" component={RunDetailPage} />
-            <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
-            <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
-          </Routes>
+          <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+            <Routes>
+              <Route exact path={ROOT_PATH} component={RunsListPage} />
+              <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
+              <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
+              <Route exact path={REMOTES_PATH} component={RemotesListPage} />
+              <Route path="/runs/:runId" component={RunDetailPage} />
+              <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
+              <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
+            </Routes>
+          </Suspense>
         </div>
       </div>
     </Router>

@@ -6,60 +6,120 @@ paths: { }
 components:
   schemas:
     FindSavedQueryResponse:
+        description: 'A paginated list of saved queries.'
         type: object
-        properties: { }
+        properties:
+          page:
+            description: 'The current page number.'
+            type: integer
+          per_page:
+            description: 'The number of results per page.'
+            type: integer
+          total:
+            description: 'The total number of saved queries.'
+            type: integer
+          data:
+            description: 'The list of saved queries.'
+            type: array
+            items:
+              type: object
         example:
           page: 1
           per_page: 100
           total: 11
           data:
-            - type: "osquery-saved-query"
-              id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
-              namespaces:
-                - "default"
-              attributes:
-                id: "saved_query_id"
-                description: "Saved query description"
-                query: "select * from uptime;"
-                platform: "linux,darwin"
-                version: "2.8.0"
-                interval: "60"
-                ecs_mapping:
-                  host.uptime:
-                    field: "total_seconds"
-                created_by: "elastic"
-                created_by_profile_uid: "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
-                created_at: "2022-07-26T09:28:08.597Z"
-                updated_by: "elastic"
-                updated_by_profile_uid: "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
-                updated_at: "2022-07-26T09:28:08.597Z"
-                prebuilt: false
+            - saved_object_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+              id: "saved_query_id"
+              description: "Saved query description"
+              query: "select * from uptime;"
+              platform: "linux,darwin"
+              version: "2.8.0"
+              interval: "60"
+              timeout: 120
+              snapshot: true
+              removed: false
+              ecs_mapping:
+                host.uptime:
+                  field: "total_seconds"
+              created_at: "2022-07-26T09:28:08.597Z"
+              created_by: "elastic"
+              updated_at: "2022-07-26T09:28:08.597Z"
+              updated_by: "elastic"
+              prebuilt: false
 
     FindSavedQueryDetailResponse:
+      description: 'The details of a single saved query.'
       type: object
-      properties: { }
+      properties:
+        data:
+          description: 'The saved query details.'
+          type: object
+          properties:
+            saved_object_id:
+              description: 'The saved object ID.'
+              type: string
+            id:
+              description: 'The saved query ID.'
+              type: string
+            description:
+              description: 'The saved query description.'
+              type: string
+            query:
+              description: 'The SQL query.'
+              type: string
+            interval:
+              description: 'The query interval in seconds.'
+              type: string
+            timeout:
+              description: 'The query timeout in seconds.'
+              type: integer
+            snapshot:
+              description: 'Whether the query is a snapshot query.'
+              type: boolean
+            removed:
+              description: 'Whether to include results for removed processes.'
+              type: boolean
+            platform:
+              description: 'The target platform(s).'
+              type: string
+            version:
+              description: 'The minimum osquery version.'
+              type: string
+            ecs_mapping:
+              description: 'The ECS mapping configuration.'
+              type: object
+            created_at:
+              description: 'The creation timestamp.'
+              type: string
+            created_by:
+              description: 'The user who created the saved query.'
+              type: string
+            updated_at:
+              description: 'The last update timestamp.'
+              type: string
+            updated_by:
+              description: 'The user who last updated the saved query.'
+              type: string
+            prebuilt:
+              description: 'Whether this is a prebuilt saved query.'
+              type: boolean
       example:
         data:
-          id: "3c42c847-eb30-4452-80e0-728584042334"
-          type: "osquery-saved-query"
-          namespaces:
-            - "default"
-          updated_at: "2022-07-26T09:28:08.600Z"
-          version: "WzQzMTcsMV0="
-          attributes:
-            id: "saved_query_id"
-            description: "Saved query description"
-            query: "select * from uptime;"
-            platform: "linux,darwin"
-            version: "2.8.0"
-            interval: "60"
-            ecs_mapping:
-              host.uptime:
-                field: "total_seconds"
-            created_by: "elastic"
-            created_at: "2022-07-26T09:28:08.597Z"
-            updated_by: "elastic"
-            updated_at: "2022-07-26T09:28:08.597Z"
-            prebuilt: false
-          references: [ ]
-          coreMigrationVersion: "8.4.0"
+          saved_object_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+          id: "saved_query_id"
+          description: "Saved query description"
+          query: "select * from uptime;"
+          platform: "linux,darwin"
+          version: "2.8.0"
+          interval: "60"
+          timeout: 120
+          snapshot: true
+          removed: false
+          ecs_mapping:
+            host.uptime:
+              field: "total_seconds"
+          created_at: "2022-07-26T09:28:08.597Z"
+          created_by: "elastic"
+          updated_at: "2022-07-26T09:28:08.597Z"
+          updated_by: "elastic"
+          prebuilt: false
