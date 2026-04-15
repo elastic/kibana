@@ -233,6 +233,18 @@ export const readRiskScores = async (
   return results.hits.hits.map((hit) => hit._source as EcsRiskScore);
 };
 
+const isRetryableRiskScoreReadError = (error: any): boolean => {
+  if (error?.meta?.statusCode === 404) {
+    return true;
+  }
+
+  const message = String(error?.message ?? '').toLowerCase();
+  return (
+    message.includes('no_shard_available_action_exception') ||
+    message.includes('search_phase_execution_exception')
+  );
+};
+
 /**
  * Function to read risk scores from ES and wait for them to be
  * present/readable. By default, it reads from the risk score datastream in the
@@ -269,7 +281,7 @@ export const waitForRiskScoresToBePresent = async ({
         const riskScores = await readRiskScores(es, index, scoreCount + 10);
         return riskScores.length >= scoreCount;
       } catch (e) {
-        if (e?.meta?.statusCode === 404) {
+        if (isRetryableRiskScoreReadError(e)) {
           return false;
         }
         throw e;
@@ -356,7 +368,7 @@ export const waitForRiskScoreForId = async ({
         }
         return true;
       } catch (e) {
-        if (e?.meta?.statusCode === 404) {
+        if (isRetryableRiskScoreReadError(e)) {
           return false;
         }
         throw e;
