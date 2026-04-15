@@ -32,6 +32,7 @@ describe(
       selectAllAgents();
       inputQuery('select * from uptime;');
       submitQuery();
+      cy.url().should('include', '/app/osquery/history/');
       cy.getBySel(RESULTS_TABLE, { timeout: 240000 }).should('exist');
 
       // Results panel and table are rendered
