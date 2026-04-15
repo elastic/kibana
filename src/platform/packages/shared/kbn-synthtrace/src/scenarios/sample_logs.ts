@@ -24,15 +24,32 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { logger } = runOptions;
   const client = new SampleParserClient({ logger });
 
-  const { rpm, streamType, systems, isLogsEnabled, skipFork, loghubTimestampLayout } =
-    (runOptions.scenarioOpts ?? {}) as {
-      rpm?: number;
-      systems?: string | string[];
-      streamType?: 'classic' | 'wired';
-      skipFork?: boolean;
-      isLogsEnabled?: boolean;
-      loghubTimestampLayout?: LoghubTimestampLayout;
-    };
+  const {
+    rpm,
+    streamType,
+    systems,
+    isLogsEnabled,
+    skipFork,
+    loghubTimestampLayout,
+    loghubMetadataOverrides: metadataOverridesStr,
+  } = (runOptions.scenarioOpts ?? {}) as {
+    rpm?: number;
+    systems?: string | string[];
+    streamType?: 'classic' | 'wired';
+    skipFork?: boolean;
+    isLogsEnabled?: boolean;
+    loghubTimestampLayout?: LoghubTimestampLayout;
+    loghubMetadataOverrides?: string;
+  };
+
+  // Parse JSON string metadata overrides if provided
+  let loghubMetadataOverrides: Record<string, Record<string, unknown>> | undefined;
+  if (metadataOverridesStr) {
+    loghubMetadataOverrides =
+      typeof metadataOverridesStr === 'string'
+        ? JSON.parse(metadataOverridesStr)
+        : metadataOverridesStr;
+  }
 
   const generators = await client.getLogGenerators({
     rpm,
@@ -41,6 +58,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       loghub: castArray(systems ?? []).flatMap((item) => item.split(',')),
     },
     loghubTimestampLayout,
+    loghubMetadataOverrides,
   });
 
   return {

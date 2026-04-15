@@ -31,6 +31,7 @@ export async function getLoghubGenerators({
   rpm,
   streamType,
   timestampLayout = 'source',
+  metadataOverrides,
 }: {
   systems?: string[];
   log: ToolingLog;
@@ -38,6 +39,7 @@ export async function getLoghubGenerators({
   rpm: number;
   streamType: 'classic' | 'wired';
   timestampLayout?: LoghubTimestampLayout;
+  metadataOverrides?: Record<string, Record<string, unknown>>;
 }): Promise<StreamLogGenerator[]> {
   let systems = await getSystems({ log });
 
@@ -83,6 +85,7 @@ export async function getLoghubGenerators({
         targetRpm: Math.max(1, targetRpm),
         streamType,
         timestampLayout,
+        metadataOverride: metadataOverrides?.[system.name],
       });
     })
   );

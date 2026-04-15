@@ -142,6 +142,34 @@ globalSetupHookWithSynthtrace(
       `[streams eval setup] synthtrace sample_logs: maxSampleCount=${maxSampleCount}, systems=${systemCount}, rpm=${rpm}, uniform_interval layout`
     );
 
+    // Per-system metadata overrides for partitioning evaluation
+    // Easy: distinct service.name and host.name patterns per system
+    // Hard: overlapping service.name (data-platform, infra-monitoring) requiring secondary field analysis
+    const loghubMetadataOverrides = {
+      // Easy dataset: distinct identifiers
+      Hadoop: { 'service.name': 'hadoop-yarn', 'host.name': 'yarn-node-1' },
+      Proxifier: { 'service.name': 'proxifier-proxy', 'host.name': 'proxy-1' },
+      Android: {
+        'service.name': 'android-system',
+        'host.name': 'pixel-1',
+        'os.platform': 'android',
+      },
+      OpenStack: {
+        'service.name': 'openstack-nova',
+        'host.name': 'compute-1',
+        'cloud.provider': 'openstack',
+      },
+      // Hard dataset: overlapping service.name, distinguished by secondary fields
+      // Note: Hadoop/Mac share service.name 'data-platform'; Linux/HPC share 'infra-monitoring'
+      Mac: { 'service.name': 'data-platform', 'host.name': 'dp-node-2', data_layer: 'streaming' },
+      Linux: { 'service.name': 'infra-monitoring', 'host.name': 'mon-1' },
+      HPC: {
+        'service.name': 'infra-monitoring',
+        'host.name': 'mon-2',
+        'cluster.node_id': 'node-001',
+      },
+    };
+
     await indexSynthtraceScenario({
       scenario: 'sample_logs',
       scenarioOpts: {
@@ -149,6 +177,7 @@ globalSetupHookWithSynthtrace(
         rpm,
         streamType: 'wired',
         loghubTimestampLayout: 'uniform_interval',
+        loghubMetadataOverrides: JSON.stringify(loghubMetadataOverrides),
       },
       config,
       from,

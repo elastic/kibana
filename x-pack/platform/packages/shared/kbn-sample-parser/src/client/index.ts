@@ -37,6 +37,7 @@ export class SampleParserClient {
     systems = {},
     streamType = 'wired',
     loghubTimestampLayout,
+    loghubMetadataOverrides,
   }: {
     rpm?: number;
     distribution?: 'relative' | 'uniform';
@@ -47,6 +48,8 @@ export class SampleParserClient {
     streamType?: 'classic' | 'wired';
     /** LogHub only; default preserves upstream log timestamps. */
     loghubTimestampLayout?: LoghubTimestampLayout;
+    /** LogHub only; per-system metadata overrides. */
+    loghubMetadataOverrides?: Record<string, Record<string, unknown>>;
   }): Promise<StreamLogGenerator[]> {
     const { loghub, serverless } = systems;
 
@@ -65,6 +68,7 @@ export class SampleParserClient {
             rpm,
             streamType,
             timestampLayout: loghubTimestampLayout,
+            metadataOverrides: loghubMetadataOverrides,
           })
         : Promise.resolve([]),
       includeServerless

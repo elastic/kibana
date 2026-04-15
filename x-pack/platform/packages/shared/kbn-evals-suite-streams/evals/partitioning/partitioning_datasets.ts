@@ -57,26 +57,26 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
             {
               name: 'hadoop',
               description:
-                'Hadoop MapReduce job logs with Java stack traces and org.apache.hadoop class names',
-              key_fields: ['body.text', 'resource.attributes.process.name'],
+                'Hadoop MapReduce job logs with service.name=hadoop-yarn and host.name=yarn-node-1',
+              key_fields: ['service.name', 'body.text'],
             },
             {
               name: 'proxifier',
               description:
-                'Proxifier proxy software logs with chrome.exe and proxy connection details',
-              key_fields: ['body.text', 'resource.attributes.host.name'],
+                'Proxifier proxy software logs with service.name=proxifier-proxy and host.name=proxy-1',
+              key_fields: ['service.name', 'body.text'],
             },
             {
               name: 'android',
               description:
-                'Android framework logs with com.android.* class names and PowerManagerService',
-              key_fields: ['body.text', 'resource.attributes.process.name'],
+                'Android framework logs with service.name=android-system and os.platform=android',
+              key_fields: ['service.name', 'os.platform'],
             },
             {
               name: 'openstack',
               description:
-                'OpenStack infrastructure logs with nova.* class names and HTTP API requests',
-              key_fields: ['body.text', 'resource.attributes.kubernetes.namespace'],
+                'OpenStack infrastructure logs with service.name=openstack-nova and cloud.provider=openstack',
+              key_fields: ['service.name', 'cloud.provider'],
             },
           ],
           min_partitions: 2,
@@ -87,7 +87,7 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
         metadata: {
           difficulty: 'easy',
           notes:
-            'Four distinct LogHub systems with different log content and schemas. attributes.filepath is removed so the LLM must rely on body.text patterns and field values.',
+            'Four distinct LogHub systems with correlated metadata fields (service.name, host.name, os.platform, cloud.provider). The LLM can partition by service.name as the primary key or by body.text patterns.',
         },
       },
     ],
@@ -204,26 +204,26 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
             {
               name: 'hadoop',
               description:
-                'Java/MapReduce logs with org.apache.hadoop class names and YARN references',
-              key_fields: ['body.text'],
+                'Hadoop with service.name=data-platform, data_layer=batch. Java/MapReduce patterns in body.text.',
+              key_fields: ['service.name', 'data_layer', 'body.text'],
             },
             {
               name: 'mac',
               description:
-                'macOS kernel logs with com.apple.* framework names and IOThunderbolt/AirPort references',
-              key_fields: ['body.text'],
+                'Mac with service.name=data-platform, data_layer=streaming. macOS kernel/IO patterns in body.text.',
+              key_fields: ['service.name', 'data_layer', 'body.text'],
             },
             {
               name: 'linux',
               description:
-                'Linux syslog with sshd/pam_unix authentication messages and rhost IP addresses',
-              key_fields: ['body.text'],
+                'Linux with service.name=infra-monitoring, host.name=mon-1. syslog auth patterns in body.text.',
+              key_fields: ['service.name', 'host.name', 'body.text'],
             },
             {
               name: 'hpc',
               description:
-                'HPC cluster logs with node IDs, unix.hw state_change, and boot/halt commands',
-              key_fields: ['body.text'],
+                'HPC with service.name=infra-monitoring, host.name=mon-2, cluster.node_id=node-001. Cluster patterns in body.text.',
+              key_fields: ['service.name', 'cluster.node_id', 'body.text'],
             },
           ],
           min_partitions: 2,
@@ -234,10 +234,9 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
         metadata: {
           difficulty: 'hard',
           notes:
-            'Hadoop and Mac share identical metadata schemas (host.name, user.name, process.name, process.pid). ' +
-            'Linux and HPC both use process.id instead of process.pid. ' +
-            'attributes.filepath is removed. The LLM must analyze body.text content to distinguish systems — ' +
-            'Hadoop has Java/MapReduce patterns, Mac has macOS kernel/IO patterns, Linux has syslog auth patterns, HPC has cluster node patterns.',
+            'Hadoop and Mac both have service.name=data-platform; Linux and HPC both have service.name=infra-monitoring. ' +
+            'The LLM must use secondary fields (data_layer for Hadoop/Mac; host.name/cluster.node_id for Linux/HPC) ' +
+            'combined with body.text pattern analysis to distinguish systems correctly.',
         },
       },
     ],
