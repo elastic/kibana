@@ -36,13 +36,14 @@ describe('Slack', () => {
     expect(Slack.metadata.supportedFeatureIds).toContain('workflows');
   });
 
-  it('should use bearer auth type', () => {
+  it('should use oauth_authorization_code auth type', () => {
     expect(Slack.auth).toBeDefined();
     expect(Slack.auth?.types.length).toBeGreaterThanOrEqual(1);
     const types = (Slack.auth?.types as Array<string | { type: string }>).map((t) =>
       typeof t === 'string' ? t : t.type
     );
-    expect(types).toContain('bearer');
+    expect(types).toContain('oauth_authorization_code');
+    expect(types).not.toContain('bearer');
   });
 
   it('supports oauth_authorization_code with correct Slack defaults', () => {
@@ -55,7 +56,8 @@ describe('Slack', () => {
       defaults: {
         authorizationUrl: 'https://slack.com/oauth/v2/authorize',
         tokenUrl: 'https://slack.com/api/oauth.v2.access',
-        scope: 'channels:read chat:write search:read',
+        scope:
+          'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
       },
     });
   });
