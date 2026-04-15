@@ -50,11 +50,16 @@ async function readYamlFile(filePath: string): Promise<Record<string, unknown>> 
   // current block level (a pattern accepted by js-yaml). Fold such spans into a
   // single line by replacing each line-break and its leading whitespace with a
   // single space, matching YAML's flow-scalar line-folding semantics.
-  fileContent = fileContent.replace(/'(?:[^']|'')*'/gs, (match) =>
+  //
+  // The lookbehind (?<=[\s\[{,:]) restricts matching to ' characters that open
+  // a YAML single-quoted scalar (preceded by whitespace or a flow-context
+  // structural character). This prevents matching bare apostrophes inside
+  // unquoted plain scalars (e.g. "alerts'" where ' is preceded by a word char).
+  fileContent = fileContent.replace(/(?<=[\s\[{,:])'(?:[^']|'')*'/gs, (match) =>
     match.includes('\n') ? match.replace(/\n[ \t]*/g, ' ') : match
   );
 
-  const maybeObject = parse(fileContent);
+  const maybeObject = parse(fileContent, { schema: 'yaml-1.1' });
 
   if (!isPlainObjectType(maybeObject)) {
     throw new Error(
