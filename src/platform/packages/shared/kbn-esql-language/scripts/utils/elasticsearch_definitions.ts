@@ -32,7 +32,10 @@ export interface ListDefinitionDirectoriesOptions {
 export const ELASTICSEARCH_ESQL_KIBANA_ROOT = 'docs/reference/query-languages/esql/kibana';
 export const ELASTICSEARCH_PROMQL_KIBANA_ROOT = 'docs/reference/query-languages/promql/kibana';
 
-export function readElasticsearchDefinitions<T extends Record<string, any>>(
+/** Shape of JSON definition objects from Elasticsearch; `name` is required for merge/sort. */
+export type ElasticsearchJsonDefinition = Record<string, unknown> & { name: string };
+
+export function readElasticsearchDefinitions<T extends ElasticsearchJsonDefinition>(
   options: ReadDefinitionsOptions
 ): T[] {
   const { pathToElasticsearch, keywordType: definitionType, language } = options;
@@ -66,7 +69,7 @@ export function readElasticsearchDefinitions<T extends Record<string, any>>(
  * @param definitionFilePaths absolute paths to JSON definition files (non-`.json` paths are ignored)
  * @param definitionType used only for error messages
  */
-export function mergeJsonDefinitionsFromFiles<T extends Record<string, any>>(
+export function mergeJsonDefinitionsFromFiles<T extends ElasticsearchJsonDefinition>(
   definitionFilePaths: string[],
   definitionType: KeywordType
 ): T[] {
