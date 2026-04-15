@@ -10,9 +10,12 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { useRule } from '../../../hooks/use_rule';
 import { RuleMetadata } from './rule_metadata';
 
 jest.mock('@kbn/core-di-browser');
+jest.mock('../../../hooks/use_rule');
+const mockUseRule = useRule as jest.MockedFunction<typeof useRule>;
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
@@ -38,12 +41,14 @@ const baseRule: RuleApiResponse = {
   },
 };
 
-const renderMetadata = (rule: RuleApiResponse) =>
-  render(
+const renderMetadata = (rule: RuleApiResponse) => {
+  mockUseRule.mockReturnValue(rule);
+  return render(
     <I18nProvider>
-      <RuleMetadata rule={rule} />
+      <RuleMetadata />
     </I18nProvider>
   );
+};
 
 describe('RuleMetadata', () => {
   beforeEach(() => {

@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { RuleDetailsActionsMenu } from './rule_details_actions_menu';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { useRule } from '../../hooks/use_rule';
 
 const mockToggleRuleEnabled = jest.fn();
 const mockNavigateToUrl = jest.fn();
@@ -18,9 +19,12 @@ const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
 
 jest.mock('@kbn/core-di-browser');
+jest.mock('../../hooks/use_rule');
 jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled }),
 }));
+
+const mockUseRule = useRule as jest.MockedFunction<typeof useRule>;
 
 const enabledRule = {
   id: 'rule-1',
@@ -31,12 +35,14 @@ const enabledRule = {
 
 const disabledRule = { ...enabledRule, enabled: false } as RuleApiResponse;
 
-const renderMenu = (rule: RuleApiResponse, showDeleteConfirmation = jest.fn()) =>
-  render(
+const renderMenu = (rule: RuleApiResponse, showDeleteConfirmation = jest.fn()) => {
+  mockUseRule.mockReturnValue(rule);
+  return render(
     <I18nProvider>
-      <RuleDetailsActionsMenu rule={rule} showDeleteConfirmation={showDeleteConfirmation} />
+      <RuleDetailsActionsMenu showDeleteConfirmation={showDeleteConfirmation} />
     </I18nProvider>
   );
+};
 
 describe('RuleDetailsActionsMenu', () => {
   beforeEach(() => {

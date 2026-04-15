@@ -9,7 +9,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { useRule } from '../../../hooks/use_rule';
 import { RuleSidebarRunbookTab } from './rule_sidebar_runbook_tab';
+
+jest.mock('../../../hooks/use_rule');
+const mockUseRule = useRule as jest.MockedFunction<typeof useRule>;
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
@@ -25,12 +29,14 @@ const baseRule: RuleApiResponse = {
   updatedAt: '2026-03-04T12:00:00.000Z',
 };
 
-const renderRunbookTab = (rule: RuleApiResponse) =>
-  render(
+const renderRunbookTab = (rule: RuleApiResponse) => {
+  mockUseRule.mockReturnValue(rule);
+  return render(
     <I18nProvider>
-      <RuleSidebarRunbookTab rule={rule} />
+      <RuleSidebarRunbookTab />
     </I18nProvider>
   );
+};
 
 describe('RuleSidebarRunbookTab', () => {
   it('renders empty prompt when rule has no artifacts', () => {

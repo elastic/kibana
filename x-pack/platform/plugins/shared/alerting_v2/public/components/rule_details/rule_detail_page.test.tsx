@@ -11,6 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
 import { RuleDetailPage } from './rule_detail_page';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { useRule } from '../../hooks/use_rule';
+
+jest.mock('../../hooks/use_rule');
+const mockUseRule = useRule as jest.MockedFunction<typeof useRule>;
 
 const mockHistoryPush = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -39,17 +43,15 @@ jest.mock('../../hooks/use_delete_rule', () => ({
 }));
 
 jest.mock('./rule_header_description', () => ({
-  RuleTitleWithBadges: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="ruleTitleWithBadges">{rule.metadata?.name}</div>
-  ),
+  RuleTitleWithBadges: () => <div data-test-subj="ruleTitleWithBadges">Mock Title</div>,
   RuleHeaderDescription: () => <div data-test-subj="ruleHeaderDescription" />,
 }));
 
 jest.mock('./sidebar/rule_sidebar', () => ({
-  RuleSidebar: ({ rule }: { rule: RuleApiResponse }) => (
+  RuleSidebar: () => (
     <div>
-      <div data-test-subj="ruleConditionsSection">conditions-{rule.id}</div>
-      <div data-test-subj="ruleMetadataSection">metadata-{rule.id}</div>
+      <div data-test-subj="ruleConditionsSection">conditions</div>
+      <div data-test-subj="ruleMetadataSection">metadata</div>
     </div>
   ),
 }));
@@ -80,14 +82,16 @@ const baseRule: RuleApiResponse = {
   updatedAt: '2026-03-04T12:00:00.000Z',
 };
 
-const renderPage = (rule: RuleApiResponse) =>
-  render(
+const renderPage = (rule: RuleApiResponse) => {
+  mockUseRule.mockReturnValue(rule);
+  return render(
     <MemoryRouter>
       <I18nProvider>
-        <RuleDetailPage rule={rule} />
+        <RuleDetailPage />
       </I18nProvider>
     </MemoryRouter>
   );
+};
 
 describe('RuleDetailPage', () => {
   beforeEach(() => {
@@ -103,10 +107,10 @@ describe('RuleDetailPage', () => {
 
   it('renders core page sections and actions', () => {
     renderPage(baseRule);
-    expect(screen.getByTestId('ruleTitleWithBadges')).toHaveTextContent('Test Signal Rule');
+    expect(screen.getByTestId('ruleTitleWithBadges')).toHaveTextContent('Mock Title');
     expect(screen.getByTestId('ruleHeaderDescription')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleConditionsSection')).toHaveTextContent('conditions-rule-1');
-    expect(screen.getByTestId('ruleMetadataSection')).toHaveTextContent('metadata-rule-1');
+    expect(screen.getByTestId('ruleConditionsSection')).toHaveTextContent('conditions');
+    expect(screen.getByTestId('ruleMetadataSection')).toHaveTextContent('metadata');
     expect(screen.getByTestId('ruleDetailsActionsButton')).toBeInTheDocument();
     expect(screen.getByTestId('openEditRuleFlyoutButton')).toBeInTheDocument();
   });

@@ -9,19 +9,18 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
-import type { RuleApiResponse } from '../../services/rules_api';
 import { paths } from '../../constants';
+import { useRule } from '../../hooks/use_rule';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 
 export interface RuleDetailsActionsMenuProps {
-  rule: RuleApiResponse;
   showDeleteConfirmation: () => void;
 }
 
 export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsMenuProps> = ({
-  rule,
   showDeleteConfirmation,
 }) => {
+  const rule = useRule();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));

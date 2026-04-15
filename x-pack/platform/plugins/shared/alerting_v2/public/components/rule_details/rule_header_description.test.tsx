@@ -10,6 +10,10 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { useRule } from '../../hooks/use_rule';
+
+jest.mock('../../hooks/use_rule');
+const mockUseRule = useRule as jest.MockedFunction<typeof useRule>;
 
 const baseRule = {
   id: 'rule-1',
@@ -22,7 +26,8 @@ const wrap = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider
 
 describe('RuleHeaderDescription', () => {
   it('renders tags as badges', () => {
-    wrap(<RuleHeaderDescription rule={baseRule} />);
+    mockUseRule.mockReturnValue(baseRule);
+    wrap(<RuleHeaderDescription />);
     expect(screen.getByTestId('ruleTags')).toBeInTheDocument();
     expect(screen.getByText('prod')).toBeInTheDocument();
     expect(screen.getByText('infra')).toBeInTheDocument();
@@ -33,7 +38,8 @@ describe('RuleHeaderDescription', () => {
       ...baseRule,
       metadata: { name: 'My Rule', description: 'Alert when errors exceed threshold.' },
     } as RuleApiResponse;
-    wrap(<RuleHeaderDescription rule={rule} />);
+    mockUseRule.mockReturnValue(rule);
+    wrap(<RuleHeaderDescription />);
     expect(screen.getByTestId('ruleDescription')).toHaveTextContent(
       'Alert when errors exceed threshold.'
     );
@@ -48,49 +54,55 @@ describe('RuleHeaderDescription', () => {
         tags: ['prod', 'infra'],
       },
     } as RuleApiResponse;
-    wrap(<RuleHeaderDescription rule={rule} />);
+    mockUseRule.mockReturnValue(rule);
+    wrap(<RuleHeaderDescription />);
     expect(screen.getByTestId('ruleDescription')).toBeInTheDocument();
     expect(screen.getByTestId('ruleTags')).toBeInTheDocument();
   });
 
   it('returns null when tags are empty and no description', () => {
-    const { container } = wrap(
-      <RuleHeaderDescription rule={{ ...baseRule, metadata: { name: 'No Tags' } }} />
-    );
+    mockUseRule.mockReturnValue({ ...baseRule, metadata: { name: 'No Tags' } });
+    const { container } = wrap(<RuleHeaderDescription />);
     expect(container.innerHTML).toBe('');
   });
 
   it('returns null when tags are undefined and no description', () => {
     const rule = { ...baseRule, metadata: { name: 'No Tags' } } as RuleApiResponse;
-    const { container } = wrap(<RuleHeaderDescription rule={rule} />);
+    mockUseRule.mockReturnValue(rule);
+    const { container } = wrap(<RuleHeaderDescription />);
     expect(container.innerHTML).toBe('');
   });
 });
 
 describe('RuleTitleWithBadges', () => {
   it('renders the rule name', () => {
-    wrap(<RuleTitleWithBadges rule={baseRule} />);
+    mockUseRule.mockReturnValue(baseRule);
+    wrap(<RuleTitleWithBadges />);
     expect(screen.getByTestId('ruleName')).toHaveTextContent('My Rule');
   });
 
   it('renders kind as Detect only for signal rules', () => {
-    wrap(<RuleTitleWithBadges rule={baseRule} />);
+    mockUseRule.mockReturnValue(baseRule);
+    wrap(<RuleTitleWithBadges />);
     expect(screen.getByTestId('kindBadge')).toHaveTextContent('Detect only');
   });
 
   it('renders kind as Alerting for alert rules', () => {
-    wrap(<RuleTitleWithBadges rule={{ ...baseRule, kind: 'alert' }} />);
+    mockUseRule.mockReturnValue({ ...baseRule, kind: 'alert' });
+    wrap(<RuleTitleWithBadges />);
     expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alerting');
   });
 
   it('renders enabled badge when rule is enabled', () => {
-    wrap(<RuleTitleWithBadges rule={baseRule} />);
+    mockUseRule.mockReturnValue(baseRule);
+    wrap(<RuleTitleWithBadges />);
     expect(screen.getByTestId('enabledBadge')).toBeInTheDocument();
     expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
   });
 
   it('renders disabled badge when rule is disabled', () => {
-    wrap(<RuleTitleWithBadges rule={{ ...baseRule, enabled: false }} />);
+    mockUseRule.mockReturnValue({ ...baseRule, enabled: false });
+    wrap(<RuleTitleWithBadges />);
     expect(screen.getByTestId('disabledBadge')).toBeInTheDocument();
     expect(screen.queryByTestId('enabledBadge')).not.toBeInTheDocument();
   });

@@ -9,7 +9,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { useRule } from '../../../hooks/use_rule';
 import { RuleConditions } from './rule_conditions';
+
+jest.mock('../../../hooks/use_rule');
+const mockUseRule = useRule as jest.MockedFunction<typeof useRule>;
 
 jest.mock('@kbn/alerting-plugin/common', () => ({
   formatDuration: (v: string) => v,
@@ -56,12 +60,14 @@ const alertRule: RuleApiResponse = {
   no_data: { behavior: 'no_data', timeframe: '15m' },
 };
 
-const renderConditions = (rule: RuleApiResponse) =>
-  render(
+const renderConditions = (rule: RuleApiResponse) => {
+  mockUseRule.mockReturnValue(rule);
+  return render(
     <I18nProvider>
-      <RuleConditions rule={rule} />
+      <RuleConditions />
     </I18nProvider>
   );
+};
 
 describe('RuleConditions', () => {
   it('renders the base query code block', () => {
