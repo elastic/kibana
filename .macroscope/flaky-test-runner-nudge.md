@@ -2,7 +2,7 @@
 title: Flaky Test Runner nudge
 model: claude-opus-4-6
 reasoning: high
-effort: medium
+effort: high
 input: full_diff
 exclude:
   - 'api_docs/**'
@@ -118,7 +118,7 @@ Both Scout and FTR (two separate comments on the PR):
 
 When a nudge is warranted per **When to nudge (substance)**, output **only** the following markdown block (wording is fixed; you resolve paths). Include **`scoutConfig`** lines only for qualifying Scout changes; **`ftrConfig`** lines only for qualifying FTR changes. Replace `<KIND>` / `<CONFIG_PATH>` with literals and real paths (see **GitHub comment format**).
 
-If **one** runner qualifies, use **one** ```text``` block with a **single** `/flaky` line. If **both** qualify, use **two** ```text``` blocks in a row (Scout first, then FTR), each block containing **one** `/flaky` line. The author must post each block as a **separate** PR comment.
+If **one** runner qualifies, use **one** `text` block with a **single** `/flaky` line. If **both** qualify, use **two** `text` blocks in a row (Scout first, then FTR), each block containing **one** `/flaky` line. The author must post each block as a **separate** PR comment.
 
 ````markdown
 ## Run the Flaky Test Runner (recommended)
@@ -134,13 +134,13 @@ If **one** runner qualifies, use **one** ```text``` block with a **single** `/fl
 /flaky <KIND>:<CONFIG_PATH>:30
 ```
 
-`<KIND>` must be the literal token `scoutConfig` or `ftrConfig`. `<CONFIG_PATH>` is the repo-relative config for that runner. If both runners qualify, add a **second** ```text``` block with the other kind (two comments total).
+`<KIND>` must be the literal token `scoutConfig` or `ftrConfig`. `<CONFIG_PATH>` is the repo-relative config for that runner. If both runners qualify, add a **second** `text` block with the other kind (two comments total).
 ````
 
 **Rules**
 
-- Each ```text``` fence must contain **exactly one** `/flaky` line (one `scoutConfig:` **or** one `ftrConfig:` clause, never both in the same fence).
-- If both runners qualify, output **two** ```text``` blocks (two separate paste targets for two PR comments).
+- Each `text` fence must contain **exactly one** `/flaky` line (one `scoutConfig:` **or** one `ftrConfig:` clause, never both in the same fence).
+- If both runners qualify, output **two** `text` blocks (two separate paste targets for two PR comments).
 - Always append **`:30`** after **each** path (never omit the count).
 - Do not rephrase the heading, recommendation, or two-way instructions; do not add severity labels or extra sections.
 - The `/flaky` lines you show must be **fully resolved** (no literal `<KIND>` or `<CONFIG_PATH>` left in what you publish).
