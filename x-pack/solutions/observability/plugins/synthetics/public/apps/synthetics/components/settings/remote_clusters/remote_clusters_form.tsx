@@ -26,14 +26,10 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
 import type { SyntheticsCCSSettings } from '../../../../../../common/runtime_types';
+import type { RemoteCluster } from '../../../../../../common/get_synthetics_indices';
 import { useGetCCSSettings, DEFAULT_CCS_SETTINGS } from './hooks/use_get_ccs_settings';
 import { usePutCCSSettings } from './hooks/use_put_ccs_settings';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-
-interface RemoteCluster {
-  name: string;
-  isConnected: boolean;
-}
 
 export const RemoteClustersForm = () => {
   const { http } = useKibana().services;
@@ -44,9 +40,7 @@ export const RemoteClustersForm = () => {
   // Fetch available remote clusters
   const { data: remoteClusters, loading: loadingClusters } = useFetcher(async () => {
     try {
-      const response = await http?.get<Array<{ name: string; isConnected: boolean }>>(
-        '/api/remote_clusters'
-      );
+      const response = await http?.get<RemoteCluster[]>('/api/remote_clusters');
       return (response ?? []).map(
         (cluster): RemoteCluster => ({
           name: cluster.name,

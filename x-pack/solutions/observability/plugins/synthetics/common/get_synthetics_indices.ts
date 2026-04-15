@@ -7,10 +7,15 @@
 
 import { SYNTHETICS_INDEX_PATTERN } from './constants';
 
+export interface RemoteCluster {
+  name: string;
+  isConnected: boolean;
+}
+
 interface Props {
   useAllRemoteClusters: boolean;
   selectedRemoteClusters: string[];
-  remoteClusters?: Array<{ name: string; isConnected: boolean }>;
+  remoteClusters?: RemoteCluster[];
 }
 
 /**

@@ -7,15 +7,9 @@
 
 import * as t from 'io-ts';
 
-export const remoteSyntheticsClusterSchema = t.type({
-  name: t.string,
-  isConnected: t.boolean,
-});
-
 export const syntheticsCCSSettingsSchema = t.type({
   useAllRemoteClusters: t.boolean,
   selectedRemoteClusters: t.array(t.string),
 });
 
-export type RemoteSyntheticsCluster = t.TypeOf<typeof remoteSyntheticsClusterSchema>;
 export type SyntheticsCCSSettings = t.TypeOf<typeof syntheticsCCSSettingsSchema>;

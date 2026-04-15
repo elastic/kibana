@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getSyntheticsIndices as buildSyntheticsIndices } from '../../common/get_synthetics_indices';
 import type { SyntheticsCCSSettings } from '../../common/runtime_types';
+import type { RemoteCluster } from '../../common/get_synthetics_indices';
 
 export const getSyntheticsIndices = async (
   esClient: ElasticsearchClient,
@@ -23,7 +24,7 @@ export const getSyntheticsIndices = async (
 
   const clustersByName = await esClient.cluster.remoteInfo();
   const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
-  const remoteClusters = clusterNames.map((clusterName) => ({
+  const remoteClusters: RemoteCluster[] = clusterNames.map((clusterName) => ({
     name: clusterName,
     isConnected: clustersByName[clusterName].connected,
   }));
