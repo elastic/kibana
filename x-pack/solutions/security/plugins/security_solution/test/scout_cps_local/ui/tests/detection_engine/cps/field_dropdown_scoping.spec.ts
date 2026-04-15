@@ -35,11 +35,14 @@ test.describe('CPS field dropdown scoping - threat match mapping fields', { tag:
   }) => {
     const { testIndex, runId, originMarkerField, linkedMarkerField } = cpsTestData;
 
+    // 1. Create space (origin-only CPS routing).
     const spaceId = await cpsSpace.create({
       spaceId: `cps-ui-tm-orig-${runId}`,
       projectRouting: SPACE_PROJECT_ROUTING_ORIGIN_ONLY,
     });
 
+    // 2. Admin is required because the CPS NPRE endpoint (cluster:monitor/project_routing/get)
+    // is not granted to non-admin roles in local serverless environments.
     await browserAuth.loginAsAdmin();
     await pageObjects.threatMatchRuleCreatePage.navigateToThreatMatchForm({
       kbnUrl,
@@ -47,6 +50,7 @@ test.describe('CPS field dropdown scoping - threat match mapping fields', { tag:
       testIndex,
     });
 
+    // 3. Field from origin index should list.
     await test.step('origin_marker field is available', async () => {
       const option = await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
         originMarkerField
@@ -54,6 +58,7 @@ test.describe('CPS field dropdown scoping - threat match mapping fields', { tag:
       await expect(option).toBeVisible({ timeout: 15_000 });
     });
 
+    // 4. Field from linked index should not list.
     await test.step('linked_marker field is NOT available', async () => {
       const option = await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
         linkedMarkerField
@@ -71,11 +76,13 @@ test.describe('CPS field dropdown scoping - threat match mapping fields', { tag:
   }) => {
     const { testIndex, runId, originMarkerField, linkedMarkerField } = cpsTestData;
 
+    // 1. Create space (all-projects routing).
     const spaceId = await cpsSpace.create({
       spaceId: `cps-ui-tm-all-${runId}`,
       projectRouting: SPACE_PROJECT_ROUTING_ALL,
     });
 
+    // 2. Log in and open threat match mapping form.
     await browserAuth.loginAsAdmin();
     await pageObjects.threatMatchRuleCreatePage.navigateToThreatMatchForm({
       kbnUrl,
@@ -83,6 +90,7 @@ test.describe('CPS field dropdown scoping - threat match mapping fields', { tag:
       testIndex,
     });
 
+    // 3. Origin field still lists.
     await test.step('origin_marker field is available', async () => {
       const option = await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
         originMarkerField
@@ -90,6 +98,7 @@ test.describe('CPS field dropdown scoping - threat match mapping fields', { tag:
       await expect(option).toBeVisible({ timeout: 15_000 });
     });
 
+    // 4. Linked field lists too (contrast with origin-only test).
     await test.step('linked_marker field is also available', async () => {
       const option = await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
         linkedMarkerField

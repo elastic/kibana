@@ -17,6 +17,21 @@ export class ThreatMatchRuleCreatePage {
   constructor(private readonly page: ScoutPage) {}
 
   /**
+   * Dismiss the CPS tour dialog ("Got it") if it appears.
+   * Safe to call even when the tour has already been dismissed.
+   */
+  async dismissCpsTourIfPresent(): Promise<void> {
+    const tourCloseBtn = this.page.testSubj.locator('project-picker-tour-close-button');
+    try {
+      await tourCloseBtn.waitFor({ state: 'visible', timeout: 5_000 });
+      await tourCloseBtn.click();
+      await tourCloseBtn.waitFor({ state: 'hidden', timeout: 3_000 });
+    } catch {
+      // Tour didn't appear — nothing to dismiss.
+    }
+  }
+
+  /**
    * Opens rule creation in the given space, selects Indicator match, enters the
    * threat index, and waits for the threat-field autocomplete combobox.
    */
@@ -28,6 +43,7 @@ export class ThreatMatchRuleCreatePage {
     const { kbnUrl, spaceId, testIndex } = params;
 
     await this.page.goto(kbnUrl.app('security/rules/create', { space: spaceId }));
+    await this.dismissCpsTourIfPresent();
 
     await this.page.testSubj.waitForSelector('threatMatchRuleType', {
       state: 'visible',
