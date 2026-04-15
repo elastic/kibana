@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment/moment';
-import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
@@ -27,17 +27,6 @@ import {
   getRangeFilter,
   getTimespanFilter,
 } from '../../../common/constants/client_defaults';
-import { getRemoteMonitorInfo, isCCSEnabled } from '../../lib/remote_result_utils';
-
-interface RemoteMonitorSource {
-  monitor?: {
-    id?: string;
-    name?: string;
-    type?: string;
-    timespan?: { lt?: string };
-  };
-  tags?: string[];
-}
 
 type LocationStatus = Array<{
   status: string;
@@ -46,10 +35,7 @@ type LocationStatus = Array<{
   monitorUrl?: string;
 }>;
 
-import { SUMMARIES_PAGE_SIZE } from './constants';
-
-// Re-export for backwards compatibility
-export { SUMMARIES_PAGE_SIZE };
+export const SUMMARIES_PAGE_SIZE = 5000;
 
 export class OverviewStatusService {
   filterData: {
@@ -69,7 +55,7 @@ export class OverviewStatusService {
     ]);
 
     const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
-      await this.processOverviewStatus(allConfigs, statusResult);
+      this.processOverviewStatus(allConfigs, statusResult);
 
     const {
       enabledMonitorQueryIds,
@@ -99,7 +85,7 @@ export class OverviewStatusService {
   }
 
   getEsDataFilters() {
-    const { spaceId, request, server } = this.routeContext;
+    const { spaceId, request } = this.routeContext;
     const params = request.query || {};
     const {
       scopeStatusByLocation = true,
@@ -109,7 +95,6 @@ export class OverviewStatusService {
       showFromAllSpaces,
     } = params;
     const { locationIds } = this.filterData;
-    const ccsEnabled = isCCSEnabled(server);
     const getTermFilter = (field: string, value: string | string[] | undefined) => {
       if (!value || isEmpty(value)) {
         return [];
@@ -131,12 +116,8 @@ export class OverviewStatusService {
         },
       ];
     };
-    const spaceFilter =
-      showFromAllSpaces || ccsEnabled
-        ? []
-        : [{ terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } }];
     const filters: QueryDslQueryContainer[] = [
-      ...spaceFilter,
+      ...(showFromAllSpaces ? [] : [{ terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } }]),
       ...getTermFilter('monitor.type', monitorTypes),
       ...getTermFilter('tags', tags),
       ...getTermFilter('monitor.project.id', projects),
@@ -251,7 +232,7 @@ export class OverviewStatusService {
     });
   }
 
-  async processOverviewStatus(
+  processOverviewStatus(
     monitors: Array<
       SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
     >,
@@ -329,71 +310,6 @@ export class OverviewStatusService {
       });
     });
 
-    // When CCS is enabled, identify monitor IDs from ES data that don't match any local
-    // saved object — these are remote monitors from federated clusters.
-    // Skip entirely when CCS is disabled to avoid unnecessary iteration over statusData.
-    if (isCCSEnabled(this.routeContext.server)) {
-      const localMonitorIds = new Set<string>();
-      monitors.forEach((monitor) => {
-        localMonitorIds.add(monitor.attributes[ConfigKey.MONITOR_QUERY_ID]);
-      });
-
-      const unmatchedMonitorIds: string[] = [];
-      statusData.forEach((_locationStatuses, monitorId) => {
-        if (!localMonitorIds.has(monitorId)) {
-          unmatchedMonitorIds.push(monitorId);
-        }
-      });
-
-      // If there are unmatched IDs, run a second-pass query to get remote monitor details
-      if (unmatchedMonitorIds.length > 0) {
-        const remoteDetails = await this.getRemoteMonitorDetails(unmatchedMonitorIds);
-        const remoteKibanaUrls = this.routeContext.remoteKibanaUrls ?? {};
-
-        remoteDetails.forEach((hit) => {
-          const monitorId = hit._source?.monitor?.id;
-          const index = hit._index;
-          if (!monitorId || !index) return;
-
-          const remote = getRemoteMonitorInfo(index, remoteKibanaUrls);
-          if (!remote) return;
-
-          const locationStatuses = statusData.get(monitorId);
-          if (!locationStatuses) return;
-
-          locationStatuses.forEach((locStatus) => {
-            const monLocId = `remote-${monitorId}-${locStatus.locationId}`;
-            const meta: OverviewStatusMetaData = {
-              configId: monitorId,
-              monitorQueryId: monitorId,
-              name: hit._source?.monitor?.name ?? monitorId,
-              status: locStatus.status as 'up' | 'down' | 'unknown',
-              locationId: locStatus.locationId,
-              locationLabel: locStatus.locationId,
-              timestamp: locStatus.timestamp,
-              type: hit._source?.monitor?.type ?? 'browser',
-              isEnabled: true,
-              schedule: '',
-              tags: hit._source?.tags ?? [],
-              isStatusAlertEnabled: false,
-              urls: locStatus.monitorUrl,
-              remote,
-            };
-
-            if (locStatus.status === 'down') {
-              down += 1;
-              downConfigs[monLocId] = meta;
-            } else if (locStatus.status === 'up') {
-              up += 1;
-              upConfigs[monLocId] = meta;
-            } else {
-              pendingConfigs[monLocId] = { ...meta, status: 'unknown' };
-            }
-          });
-        });
-      }
-    }
-
     return {
       up,
       down,
@@ -403,48 +319,6 @@ export class OverviewStatusService {
       pendingConfigs,
       disabledConfigs,
     };
-  }
-
-  /**
-   * Second-pass query to get details for remote monitors that have no local saved object.
-   * Uses collapse on monitor.id to get one representative doc per monitor, including _index
-   * for remote cluster detection.
-   */
-  async getRemoteMonitorDetails(monitorIds: string[]) {
-    const range = {
-      from: moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString(),
-      to: 'now',
-    };
-
-    const result = await this.routeContext.syntheticsEsClient.search<
-      RemoteMonitorSource,
-      SearchRequest
-    >(
-      {
-        size: monitorIds.length,
-        query: {
-          bool: {
-            filter: [
-              FINAL_SUMMARY_FILTER,
-              getRangeFilter({ from: range.from, to: range.to }),
-              {
-                terms: {
-                  'monitor.id': monitorIds,
-                },
-              },
-            ] as QueryDslQueryContainer[],
-          },
-        },
-        collapse: {
-          field: 'monitor.id',
-        },
-        sort: [{ '@timestamp': 'desc' as const }],
-        _source: ['monitor.id', 'monitor.name', 'monitor.type', 'monitor.timespan', 'tags'],
-      },
-      'getRemoteMonitorDetails'
-    );
-
-    return result.body.hits.hits;
   }
 
   async getMonitorConfigs() {
