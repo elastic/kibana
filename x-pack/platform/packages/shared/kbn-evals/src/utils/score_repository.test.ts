@@ -617,6 +617,69 @@ describe('EvaluationScoreRepository', () => {
     });
   });
 
+  describe('findLatestBaselineRunId', () => {
+    it('returns the run ID from the aggregation response', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          latest_run: {
+            buckets: [{ key: 'bk-baseline-42', doc_count: 100 }],
+          },
+        },
+      });
+
+      const result = await repository.findLatestBaselineRunId('my-suite', 'main');
+
+      expect(result).toBe('bk-baseline-42');
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 0,
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([
+                { term: { 'suite.id': 'my-suite' } },
+                { term: { 'run_metadata.git_branch': 'main' } },
+              ]),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('returns undefined when no buckets are returned', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: { latest_run: { buckets: [] } },
+      });
+
+      const result = await repository.findLatestBaselineRunId('my-suite', 'main');
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined and logs on ES error', async () => {
+      mockEsClient.search.mockRejectedValue(new Error('connection refused'));
+
+      const result = await repository.findLatestBaselineRunId('my-suite', 'main');
+
+      expect(result).toBeUndefined();
+      expect(mockLog.error).toHaveBeenCalled();
+    });
+
+    it('passes excludeRunId to the query', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: { latest_run: { buckets: [{ key: 'bk-other' }] } },
+      });
+
+      await repository.findLatestBaselineRunId('my-suite', 'main', 'bk-current');
+
+      const searchCall = mockEsClient.search.mock.calls[0][0];
+      expect(searchCall.query.bool.must_not).toEqual(
+        expect.arrayContaining([{ term: { run_id: 'bk-current' } }])
+      );
+    });
+  });
+
   describe('computeScoreDocumentId', () => {
     it('builds a deterministic id from document key fields', () => {
       const doc = createMockScoreDocument();
