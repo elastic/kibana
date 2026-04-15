@@ -14,7 +14,7 @@ import { getDefaultConfigs } from '../../configurations/default_configs';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
-if (getFips()) {
+if (getFips() === 1) {
   jest.setTimeout(30_000);
 }
 
