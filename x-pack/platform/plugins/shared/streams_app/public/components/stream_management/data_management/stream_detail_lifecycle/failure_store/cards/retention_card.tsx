@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { BaseMetricCard } from '../../common/base_metric_card';
-import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
+import { getTimeSizeAndUnitLabel } from '../../../../../../util/format_size_units';
 import type { useFailureStoreConfig } from '../../hooks/use_failure_store_config';
 
 export const RetentionCard = ({
