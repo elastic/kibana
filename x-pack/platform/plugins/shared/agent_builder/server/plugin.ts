@@ -45,6 +45,10 @@ import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_swi
 import { createMemoryTools } from './services/memory/create_memory_tools';
 import { registerMemoryBeforeAgentHook } from './services/memory/hooks/before_agent_hook';
 import { registerMemoryAfterRoundHook } from './services/memory/hooks/after_round_hook';
+import {
+  registerMemoryConsolidationTaskDefinition,
+  scheduleMemoryConsolidationTask,
+} from './services/memory/consolidation';
 
 export class AgentBuilderPlugin
   implements
@@ -213,6 +217,18 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
+    // Register memory consolidation task definition (nightly batch)
+    registerMemoryConsolidationTaskDefinition({
+      taskManager: setupDeps.taskManager,
+      getConsolidationDeps: async () => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return {
+          elasticsearch: coreStart.elasticsearch,
+          logger: this.logger.get('services.memory.consolidation'),
+        };
+      },
+    });
+
     const smlTools = createSmlTools({
       getSmlService: () => {
         const services = this.serviceManager.internalStart;
@@ -334,6 +350,14 @@ export class AgentBuilderPlugin
       logger: this.logger.get('services.sml'),
     }).catch((error) => {
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
+    });
+
+    // Schedule nightly memory consolidation task
+    scheduleMemoryConsolidationTask({
+      taskManager,
+      logger: this.logger.get('services.memory.consolidation'),
+    }).catch((error) => {
+      this.logger.error(`Failed to schedule memory consolidation task: ${error.message}`);
     });
 
     const smlService = startServices.sml;
