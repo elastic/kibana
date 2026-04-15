@@ -88,7 +88,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
 
   return (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
-      {value}
+      {children ?? value}
     </EuiLink>
   );
 };

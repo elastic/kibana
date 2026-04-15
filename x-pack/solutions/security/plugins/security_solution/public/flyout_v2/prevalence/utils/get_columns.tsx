@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IS_OPERATOR } from '@kbn/timelines-plugin/common';
 import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
@@ -31,6 +31,7 @@ import {
 import { FormattedCount } from '../../../common/components/formatted_number';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/investigate_in_timeline_button';
+import type { PreviewLinkRenderer } from '../../document/components/highlighted_fields_cell';
 
 /**
  * Component that renders a grey box to indicate the user doesn't have proper license to view the actual data
@@ -316,9 +317,9 @@ export const getColumns = (
    */
   scopeId: string,
   /**
-   * Callback to open the network details flyout for a given IP
+   * Optional component to render preview links for supported field types (e.g. IP fields)
    */
-  onShowNetworkDetails?: (ip: string) => void
+  RenderPreviewLink?: PreviewLinkRenderer
 ): Array<EuiBasicTableColumn<PrevalenceDetailsRow>> => [
   fieldColumn,
   {
@@ -331,17 +332,15 @@ export const getColumns = (
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => {
       const renderValue = (value: string) => {
-        if (data.field === 'source.ip') {
-          const handleClick = () => {
-            onShowNetworkDetails?.(value);
-          };
+        const text = <EuiText size="xs">{value}</EuiText>;
+        if (RenderPreviewLink) {
           return (
-            <EuiLink onClick={handleClick}>
-              <EuiText size="xs">{value}</EuiText>
-            </EuiLink>
+            <RenderPreviewLink field={data.field} value={value} scopeId={scopeId}>
+              {text}
+            </RenderPreviewLink>
           );
         }
-        return <EuiText size="xs">{value}</EuiText>;
+        return text;
       };
 
       return (
