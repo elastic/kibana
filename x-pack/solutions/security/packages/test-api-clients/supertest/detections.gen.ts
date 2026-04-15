@@ -34,14 +34,6 @@ import type {
 import type { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
 import type { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
 import type { FindRulesWithFacetsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules_with_facets/find_rules_with_facets_route.gen';
-import type {
-  GetRuleExecutionEventsRequestQueryInput,
-  GetRuleExecutionEventsRequestParamsInput,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
-import type {
-  GetRuleExecutionResultsRequestQueryInput,
-  GetRuleExecutionResultsRequestParamsInput,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import type { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import type {
@@ -276,35 +268,6 @@ finalize it.
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
-  },
-  getRuleExecutionEvents(props: GetRuleExecutionEventsProps, kibanaSpace: string = 'default') {
-    return supertest
-      .put(
-        getRouteUrlForSpace(
-          replaceParams('/internal/detection_engine/rules/{ruleId}/execution/events', props.params),
-          kibanaSpace
-        )
-      )
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
-  },
-  getRuleExecutionResults(props: GetRuleExecutionResultsProps, kibanaSpace: string = 'default') {
-    return supertest
-      .put(
-        getRouteUrlForSpace(
-          replaceParams(
-            '/internal/detection_engine/rules/{ruleId}/execution/results',
-            props.params
-          ),
-          kibanaSpace
-        )
-      )
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
   },
   /**
       * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
@@ -676,14 +639,6 @@ export interface FindRulesProps {
 }
 export interface FindRulesWithFacetsProps {
   body: FindRulesWithFacetsRequestBodyInput;
-}
-export interface GetRuleExecutionEventsProps {
-  query: GetRuleExecutionEventsRequestQueryInput;
-  params: GetRuleExecutionEventsRequestParamsInput;
-}
-export interface GetRuleExecutionResultsProps {
-  query: GetRuleExecutionResultsRequestQueryInput;
-  params: GetRuleExecutionResultsRequestParamsInput;
 }
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
