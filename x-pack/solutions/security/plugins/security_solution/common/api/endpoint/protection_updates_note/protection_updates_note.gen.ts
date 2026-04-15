@@ -22,6 +22,9 @@ export type CreateUpdateProtectionUpdatesNoteRequestParams = z.infer<
   typeof CreateUpdateProtectionUpdatesNoteRequestParams
 >;
 export const CreateUpdateProtectionUpdatesNoteRequestParams = z.object({
+  /**
+   * The package policy ID to create or update the protection updates note for.
+   */
   package_policy_id: z.string(),
 });
 export type CreateUpdateProtectionUpdatesNoteRequestParamsInput = z.input<
@@ -32,6 +35,9 @@ export type CreateUpdateProtectionUpdatesNoteRequestBody = z.infer<
   typeof CreateUpdateProtectionUpdatesNoteRequestBody
 >;
 export const CreateUpdateProtectionUpdatesNoteRequestBody = z.object({
+  /**
+   * The note content.
+   */
   note: z.string().optional(),
 });
 export type CreateUpdateProtectionUpdatesNoteRequestBodyInput = z.input<
@@ -47,6 +53,9 @@ export type GetProtectionUpdatesNoteRequestParams = z.infer<
   typeof GetProtectionUpdatesNoteRequestParams
 >;
 export const GetProtectionUpdatesNoteRequestParams = z.object({
+  /**
+   * The package policy ID to retrieve the protection updates note for.
+   */
   package_policy_id: z.string(),
 });
 export type GetProtectionUpdatesNoteRequestParamsInput = z.input<
