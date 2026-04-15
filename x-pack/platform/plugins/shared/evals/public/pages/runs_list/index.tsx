@@ -120,14 +120,15 @@ export const RunsListPage: React.FC = () => {
         name: i18n.COLUMN_CI,
         render: (ci: EvaluationRunSummary['ci']) =>
           ci?.build_url ? (
-            <EuiLink
-              href={ci.build_url}
-              target="_blank"
-              external
+            <span
               onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => event.stopPropagation()}
+              role="presentation"
             >
-              {i18n.CI_BUILD_LINK}
-            </EuiLink>
+              <EuiLink href={ci.build_url} target="_blank" external>
+                {i18n.CI_BUILD_LINK}
+              </EuiLink>
+            </span>
           ) : (
             '-'
           ),
@@ -141,14 +142,15 @@ export const RunsListPage: React.FC = () => {
           const prUrl = resolvePrUrl(prRaw);
           if (!prUrl) return '-';
           return (
-            <EuiLink
-              href={prUrl}
-              target="_blank"
-              external
+            <span
               onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => event.stopPropagation()}
+              role="presentation"
             >
-              {i18n.PR_LINK}
-            </EuiLink>
+              <EuiLink href={prUrl} target="_blank" external>
+                {i18n.PR_LINK}
+              </EuiLink>
+            </span>
           );
         },
       },
