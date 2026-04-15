@@ -102,4 +102,69 @@ describe('AlertActionTypeRegistry', () => {
       expect(mappings.dynamic).toBe(false);
     });
   });
+
+  describe('validation', () => {
+    it('throws on duplicate action type ids', () => {
+      const def = defineAlertActionType({
+        id: 'dup',
+        description: 'Duplicate.',
+        bodySchema: z.object({}),
+      });
+
+      expect(() => new AlertActionTypeRegistry([def, def])).toThrow(
+        "Duplicate alert action type id: 'dup'."
+      );
+    });
+
+    it('throws when an action defines an ES mapping for a reserved base field', () => {
+      const def = defineAlertActionType({
+        id: 'bad_action',
+        description: 'Bad.',
+        bodySchema: z.object({ rule_id: z.string() }),
+        esMappings: { rule_id: { type: 'text' } },
+      });
+
+      expect(() => new AlertActionTypeRegistry([def])).toThrow(
+        "Action 'bad_action' defines ES mapping for 'rule_id' which is a reserved base field."
+      );
+    });
+
+    it('throws when two actions define the same ES mapping field with different types', () => {
+      const defA = defineAlertActionType({
+        id: 'action_a',
+        description: 'A.',
+        bodySchema: z.object({ shared: z.string() }),
+        esMappings: { shared: { type: 'keyword' } },
+      });
+
+      const defB = defineAlertActionType({
+        id: 'action_b',
+        description: 'B.',
+        bodySchema: z.object({ shared: z.string() }),
+        esMappings: { shared: { type: 'text' } },
+      });
+
+      expect(() => new AlertActionTypeRegistry([defA, defB])).toThrow(
+        "Action 'action_b' defines ES mapping for 'shared'"
+      );
+    });
+
+    it('allows two actions to define the same ES mapping field with identical types', () => {
+      const defA = defineAlertActionType({
+        id: 'action_a',
+        description: 'A.',
+        bodySchema: z.object({ shared: z.string() }),
+        esMappings: { shared: { type: 'keyword' } },
+      });
+
+      const defB = defineAlertActionType({
+        id: 'action_b',
+        description: 'B.',
+        bodySchema: z.object({ shared: z.string() }),
+        esMappings: { shared: { type: 'keyword' } },
+      });
+
+      expect(() => new AlertActionTypeRegistry([defA, defB])).not.toThrow();
+    });
+  });
 });

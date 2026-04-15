@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isDeepStrictEqual } from 'util';
 import type { MappingProperty, MappingsDefinition } from '@kbn/es-mappings';
 import type { RouteDefinition } from '@kbn/core-di-server';
 import { injectable, multiInject } from 'inversify';
@@ -30,7 +31,9 @@ export class AlertActionTypeRegistry {
   constructor(
     @multiInject(AlertActionTypeDefinitionToken)
     private readonly definitions: readonly AlertActionDefinition[]
-  ) {}
+  ) {
+    this.validateDefinitions();
+  }
 
   getRouteDefinitions(): RouteDefinition[] {
     return this.definitions.map((def) =>
@@ -55,5 +58,40 @@ export class AlertActionTypeRegistry {
         ...actionSpecificMappings,
       },
     };
+  }
+
+  private validateDefinitions(): void {
+    const seenIds = new Set<string>();
+    const seenMappings = new Map<string, { mapping: MappingProperty; owner: string }>();
+
+    for (const def of this.definitions) {
+      if (seenIds.has(def.id)) {
+        throw new Error(`Duplicate alert action type id: '${def.id}'.`);
+      }
+      seenIds.add(def.id);
+
+      for (const [field, mapping] of Object.entries(def.esMappings)) {
+        if (field in BASE_ALERT_ACTION_MAPPINGS) {
+          throw new Error(
+            `Action '${def.id}' defines ES mapping for '${field}' which is a reserved base field.`
+          );
+        }
+
+        const existing = seenMappings.get(field);
+
+        if (existing && !isDeepStrictEqual(existing.mapping, mapping)) {
+          throw new Error(
+            `Action '${def.id}' defines ES mapping for '${field}' as ${JSON.stringify(mapping)}, ` +
+              `but action '${existing.owner}' already defines it as ${JSON.stringify(
+                existing.mapping
+              )}.`
+          );
+        }
+
+        if (!existing) {
+          seenMappings.set(field, { mapping, owner: def.id });
+        }
+      }
+    }
   }
 }
