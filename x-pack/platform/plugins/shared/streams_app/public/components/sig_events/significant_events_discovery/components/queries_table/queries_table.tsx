@@ -44,6 +44,10 @@ import {
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useQueriesApi, type PromoteResult } from '../../../../../hooks/sig_events/use_queries_api';
 import {
+  useDiscoveryQueriesApi,
+  type BulkDeleteResult,
+} from '../../../../../hooks/sig_events/use_discovery_queries_api';
+import {
   HIGH_SEVERITY_THRESHOLD,
   UNBACKED_QUERIES_COUNT_QUERY_KEY,
   useUnbackedQueriesCount,
@@ -93,7 +97,17 @@ import {
   UNABLE_TO_LOAD_QUERIES_TITLE,
   getEventsCount,
   getPromoteAllSuccessToast,
+  CLEAR_SELECTION_LABEL,
+  DELETE_SELECTED_LABEL,
+  PROMOTE_SELECTED_LABEL,
+  DELETE_QUERIES_MODAL_TITLE,
+  BULK_DELETE_SUCCESS_MESSAGE,
+  BULK_DELETE_ALL_FAILED_MESSAGE,
+  BULK_DELETE_PARTIAL_MESSAGE,
+  BULK_DELETE_ERROR_TITLE,
+  BULK_PROMOTE_ERROR_TITLE,
 } from './translations';
+import { DeleteQueriesModal } from './delete_queries_modal';
 import { PromoteAction } from './promote_action';
 import { QueryDetailsFlyout } from './query_details_flyout';
 import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
@@ -145,11 +159,26 @@ export function QueriesTable() {
     });
   }, [queriesList, setSelectedQuery]);
 
+  useEffect(() => {
+    setSelectedItems([]);
+  }, [timeState.start, timeState.end]);
+
   const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
 
   const { count: unbackedCount } = useUnbackedQueriesCount();
   const queryClient = useQueryClient();
-  const { promoteAll, upsertQuery, removeQuery } = useQueriesApi();
+  const { promoteAll, promote, upsertQuery, removeQuery } = useQueriesApi();
+  const { deleteQueriesInBulk } = useDiscoveryQueriesApi();
+
+  const [selectedItems, setSelectedItems] = useState<SignificantEventQueryRow[]>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<SignificantEventQueryRow[]>([]);
+
+  const isSelectionEmpty = selectedItems.length === 0;
+  const unbackedNonStatsSelected = useMemo(
+    () => selectedItems.filter((item) => !item.rule_backed && item.query.type !== QUERY_TYPE_STATS),
+    [selectedItems]
+  );
+  const hasPromotableSelected = unbackedNonStatsSelected.length > 0;
 
   const invalidateQueriesData = useCallback(
     async () =>
@@ -160,6 +189,47 @@ export function QueriesTable() {
       ]),
     [queryClient]
   );
+
+  const bulkDeleteMutation = useMutation<BulkDeleteResult, Error, SignificantEventQueryRow[]>({
+    mutationFn: (items) => deleteQueriesInBulk(items),
+    onSuccess: async ({ succeededCount, failedCount }) => {
+      setSelectedItems([]);
+      setItemsToDelete([]);
+      await invalidateQueriesData();
+
+      if (failedCount === 0) {
+        toasts.addSuccess(BULK_DELETE_SUCCESS_MESSAGE(succeededCount));
+      } else if (succeededCount === 0) {
+        toasts.addDanger(BULK_DELETE_ALL_FAILED_MESSAGE);
+      } else {
+        toasts.addWarning(BULK_DELETE_PARTIAL_MESSAGE(succeededCount, failedCount));
+      }
+    },
+    onError: (error) => {
+      toasts.addError(getFormattedError(error), { title: BULK_DELETE_ERROR_TITLE });
+    },
+  });
+
+  const bulkPromoteMutation = useMutation<PromoteResult, Error, SignificantEventQueryRow[]>({
+    mutationFn: (items) => {
+      const queryIds = items.map((item) => item.query.id);
+      return promote({ queryIds });
+    },
+    onSuccess: async ({ promoted, skipped_stats: skippedStats }) => {
+      setSelectedItems([]);
+      await invalidateQueriesData();
+
+      const toast = getPromoteAllSuccessToast(promoted, skippedStats);
+      if (toast.severity === 'info') {
+        toasts.add({ title: toast.text, color: 'primary' });
+      } else {
+        toasts.addSuccess(toast.text);
+      }
+    },
+    onError: (error) => {
+      toasts.addError(getFormattedError(error), { title: BULK_PROMOTE_ERROR_TITLE });
+    },
+  });
 
   const promoteAllMutation = useMutation<PromoteResult, Error>({
     mutationFn: () => promoteAll({ minSeverityScore: HIGH_SEVERITY_THRESHOLD }),
@@ -228,6 +298,7 @@ export function QueriesTable() {
       }
 
       setPagination(page);
+      setSelectedItems([]);
     },
     []
   );
@@ -492,6 +563,7 @@ export function QueriesTable() {
           onQuerySubmit={(queryPayload) => {
             setSearchQuery(String(queryPayload.query?.query ?? ''));
             setPagination((currentPagination) => ({ index: 0, size: currentPagination.size }));
+            setSelectedItems([]);
           }}
           placeholder={SEARCH_PLACEHOLDER}
           query={{
@@ -525,7 +597,47 @@ export function QueriesTable() {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">{getEventsCount(queriesData?.total ?? 0)}</EuiText>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{getEventsCount(queriesData?.total ?? 0)}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              size="xs"
+              aria-label={CLEAR_SELECTION_LABEL}
+              isDisabled={isSelectionEmpty}
+              onClick={() => setSelectedItems([])}
+            >
+              {CLEAR_SELECTION_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="trash"
+              color="danger"
+              size="xs"
+              aria-label={DELETE_SELECTED_LABEL}
+              isDisabled={isSelectionEmpty || bulkDeleteMutation.isLoading}
+              isLoading={bulkDeleteMutation.isLoading}
+              onClick={() => setItemsToDelete(selectedItems)}
+            >
+              {DELETE_SELECTED_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="plusInCircle"
+              size="xs"
+              aria-label={PROMOTE_SELECTED_LABEL}
+              isDisabled={!hasPromotableSelected || bulkPromoteMutation.isLoading}
+              isLoading={bulkPromoteMutation.isLoading}
+              onClick={() => bulkPromoteMutation.mutate(unbackedNonStatsSelected)}
+            >
+              {PROMOTE_SELECTED_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
@@ -550,8 +662,21 @@ export function QueriesTable() {
             pageSizeOptions: [...PAGE_SIZE_OPTIONS],
           }}
           onChange={onTableChange}
+          selection={{
+            selected: selectedItems,
+            onSelectionChange: setSelectedItems,
+          }}
         />
       </EuiFlexItem>
+      {itemsToDelete.length > 0 && (
+        <DeleteQueriesModal
+          title={DELETE_QUERIES_MODAL_TITLE(itemsToDelete.length)}
+          items={itemsToDelete}
+          onCancel={() => setItemsToDelete([])}
+          onConfirm={() => bulkDeleteMutation.mutate(itemsToDelete)}
+          isLoading={bulkDeleteMutation.isLoading}
+        />
+      )}
       {selectedQuery && (
         <QueryDetailsFlyout
           item={selectedQuery}
