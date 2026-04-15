@@ -384,8 +384,9 @@ describe('Options list popover', () => {
       const existsOption = popover.getByTestId('optionsList-control-selection-exists');
       expect(existsOption).not.toBeChecked();
       await userEvent.click(existsOption);
-      expect(existsOption).toBeChecked();
-
+      await waitFor(() => {
+        expect(option).toBeChecked();
+      });
       const option = popover.getByTestId('optionsList-control-selection-woof');
       await userEvent.click(option);
       await waitFor(() => {
