@@ -33,12 +33,14 @@ export const registerDashboardAttachmentUiDefinition = ({
   unifiedSearch,
   filterManager,
   dashboardPlugin,
+  canWriteDashboards,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
   filterManager: DataPublicPluginStart['query']['filterManager'];
   dashboardPlugin: DashboardStart;
+  canWriteDashboards: boolean;
 }): (() => void) => {
   const { attachments } = agentBuilder;
   let dashboardApi: DashboardApi | undefined;
@@ -105,6 +107,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         searchBarComponent={unifiedSearch.ui.SearchBar}
         filterManager={filterManager}
         checkSavedDashboardExist={checkSavedDashboardExist}
+        canWriteDashboards={canWriteDashboards}
       />
     ),
     getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
@@ -120,7 +123,7 @@ export const registerDashboardAttachmentUiDefinition = ({
           type: ActionButtonType.SECONDARY,
           handler: () => {
             // sidebar in dashboard experience - synchronize dashboard app to attachment
-            if (dashboardApi) {
+            if (dashboardApi && canWriteDashboards) {
               return previewAttachmentInDashboard({
                 attachment,
                 dashboardApi,
@@ -129,7 +132,7 @@ export const registerDashboardAttachmentUiDefinition = ({
               });
             }
             // sidebar preview - open dashboard in sidebar if possible, otherwise open canvas preview
-            if (isSidebar && dashboardLocator) {
+            if (isSidebar && dashboardLocator && canWriteDashboards) {
               const dashboardState = attachmentDataToDashboardState(attachment.data);
               return handleEditInDashboard({
                 locator: dashboardLocator,
