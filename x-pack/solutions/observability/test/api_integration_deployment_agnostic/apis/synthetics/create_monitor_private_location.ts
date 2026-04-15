@@ -509,7 +509,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
         );
 
-        expect(packagePolicy).not.be(
+        expect(packagePolicy).not.to.equal(
           undefined,
           `Missing synthetics package policy for monitor ${monitorId} and location ${privateLocation.id}`
         );
@@ -533,7 +533,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
               (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
             );
-            expect(packagePolicyAfterUpgrade).not.be(
+            expect(packagePolicyAfterUpgrade).not.to.equal(
               undefined,
               `Missing synthetics package policy after upgrade wait for monitor ${monitorId}`
             );
