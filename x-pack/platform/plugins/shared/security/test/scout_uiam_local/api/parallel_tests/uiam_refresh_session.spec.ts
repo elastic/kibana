@@ -49,9 +49,10 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.serverless.all },
     'should be able to authenticate as UIAM user even if the access token has expired',
     async ({ apiClient, log }) => {
       const userSessionCookie = await userSessionCookieFactory({ lifetime: { accessToken: 2 } });
-      let response = await apiClient.get('internal/security/me', {
+      let response = await apiClient.post('authentication/slow/me', {
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
+        body: { duration: 0, client: 'request-context' },
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
@@ -60,9 +61,10 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.serverless.all },
       await setTimeoutAsync(5000);
       log.info('Session expiration wait time is over, making the request again.');
 
-      response = await apiClient.get('internal/security/me', {
+      response = await apiClient.post('authentication/slow/me', {
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
+        body: { duration: 0, client: 'request-context' },
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
@@ -73,9 +75,10 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.serverless.all },
     'should be able to authenticate as UIAM user when the tokens are refreshed concurrently',
     async ({ apiClient, log }) => {
       const userSessionCookie = await userSessionCookieFactory({ lifetime: { accessToken: 2 } });
-      const response = await apiClient.get('internal/security/me', {
+      const response = await apiClient.post('authentication/slow/me', {
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
+        body: { duration: 0, client: 'request-context' },
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
@@ -86,9 +89,10 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.serverless.all },
 
       const responses = await Promise.all(
         Array.from({ length: 10 }, () =>
-          apiClient.get('internal/security/me', {
+          apiClient.post('authentication/slow/me', {
             headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
             responseType: 'json',
+            body: { duration: 0, client: 'request-context' },
           })
         )
       );
@@ -105,9 +109,10 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.serverless.all },
       const userSessionCookie = await userSessionCookieFactory({
         lifetime: { accessToken: 2, refreshToken: 2 },
       });
-      let response = await apiClient.get('internal/security/me', {
+      let response = await apiClient.post('authentication/slow/me', {
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
+        body: { duration: 0, client: 'request-context' },
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
@@ -116,9 +121,10 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.serverless.all },
       await setTimeoutAsync(5000);
       log.info('Session expiration wait time is over, making the request again.');
 
-      response = await apiClient.get('internal/security/me', {
+      response = await apiClient.post('authentication/slow/me', {
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
+        body: { duration: 0, client: 'request-context' },
       });
       expect(response).toHaveStatusCode(401);
     }
