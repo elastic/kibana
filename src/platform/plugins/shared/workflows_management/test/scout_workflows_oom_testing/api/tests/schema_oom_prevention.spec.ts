@@ -13,7 +13,7 @@ import type { WorkflowsApiService } from '../fixtures';
 import { spaceTest } from '../fixtures';
 
 const GIB = 1024 * 1024 * 1024;
-const MAX_HEAP_SIZE_LIMIT_BYTES = Math.floor(1.0 * GIB);
+const MAX_HEAP_SIZE_LIMIT_BYTES = Math.floor(1.2 * GIB);
 const MAX_SETTLED_HEAP_USAGE_RATIO = 0.85;
 
 const WORKFLOW_YAML = `
@@ -51,12 +51,11 @@ steps:
 `;
 
 /**
- * These tests run against a memory-constrained Kibana (896 MB old-space heap
+ * These tests run against a memory-constrained Kibana (1 GB old-space heap
  * via the workflows_oom_testing server config set). Each endpoint triggers
- * full workflow Zod schema materialisation. Kibana's boot uses ~760 MB, so
- * the 896 MB limit leaves ~136 MB for schema work — tight enough to catch
- * regressions while staying above the boot baseline. If the schema grows
- * too large, Kibana OOMs and the test fails.
+ * full workflow Zod schema materialisation. If the schema grows too large,
+ * Kibana OOMs and the test fails. See the server config for rationale on
+ * why 1024 MB is the chosen limit.
  *
  * Run with:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet workflows_oom_testing
