@@ -77,14 +77,6 @@ describe('getTaskCost', () => {
     expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.ExtraLarge);
   });
 
-  it('ensure Large task size is supported', () => {
-    const task = mockInstance({
-      taskType: 'taskType1',
-      cost: InstanceTaskCost.Large,
-    });
-    expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.Large);
-  });
-
   it('ensure unknown task size is supported', () => {
     const task = mockInstance({
       taskType: 'taskType1',

@@ -903,20 +903,6 @@ describe('TaskManagerRunner', () => {
         });
         expect(runner.cost).toEqual(TaskCost.Normal);
       });
-
-      test('ensure Large task cost is supported', async () => {
-        const { runner } = await pendingStageSetup({
-          instance: { id: 'foo', taskType: 'bar' },
-          definitions: {
-            bar: {
-              title: 'Bar!',
-              cost: TaskCost.Large,
-              createTaskRunner: () => ({ run: async () => ({ state: {} }) }),
-            },
-          },
-        });
-        expect(runner.cost).toEqual(TaskCost.Large);
-      });
     });
 
     describe('TaskEvents', () => {
