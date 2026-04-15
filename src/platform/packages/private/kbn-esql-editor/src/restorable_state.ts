@@ -18,9 +18,5 @@ export interface ESQLEditorRestorableState {
   isVisorOpen: boolean;
 }
 
-export const {
-  withRestorableState,
-  useRestorableState,
-  useRestorableRef,
-  useRestorableLocalStorage,
-} = createRestorableStateProvider<ESQLEditorRestorableState>();
+export const { withRestorableState, useRestorableState, useRestorableRef } =
+  createRestorableStateProvider<ESQLEditorRestorableState>();

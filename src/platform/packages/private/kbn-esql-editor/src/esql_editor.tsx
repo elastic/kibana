@@ -97,11 +97,7 @@ import {
 import { addQueriesToCache } from './history_local_storage';
 import type { getHistoryItems } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
-import {
-  useRestorableState,
-  withRestorableState,
-  useRestorableLocalStorage,
-} from './restorable_state';
+import { useRestorableState, withRestorableState } from './restorable_state';
 import {
   EsqlStarredQueriesService,
   type StarredQueryMetadata,
@@ -222,9 +218,8 @@ const ESQLEditorInternal = function ESQLEditor({
   const [code, setCode] = useState<string>(fixedQuery ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
-  const [editorHeight, setEditorHeight] = useRestorableLocalStorage(
+  const [editorHeight, setEditorHeight] = useRestorableState(
     'editorHeight',
-    'esql:editorHeight',
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
   );
   // the resizable container is the container that holds the history component or the inline docs
