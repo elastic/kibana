@@ -67,6 +67,9 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
       guideline:
         "Choose 'xy' when showing trends over time, comparing multiple data series, or displaying distributions with axes",
     },
+    configPromptRules: [
+      'CRITICAL: For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
+    ],
   },
   [SupportedChartType.Heatmap]: {
     schema: heatmapStateSchemaESQL,

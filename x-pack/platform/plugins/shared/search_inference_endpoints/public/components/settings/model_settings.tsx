@@ -43,7 +43,7 @@ export const ModelSettings: React.FC = () => {
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
-  const { connectors, loading: connectorsLoading } = useConnectors();
+  const { data: connectors, isLoading: connectorsLoading } = useConnectors();
 
   const isDirty = isFeatureDirty || defaultModelSettings.isDirty;
   const isSaving = isFeatureSaving;
