@@ -67,7 +67,7 @@ Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigge
 /flaky <scoutConfig or ftrConfig>:<resolved-scout-or-ftr-config-path>:30
 ```
 
-Provide feedback in the #appex-qa channel.
+This check is experimental. Share your feedback in the #appex-qa channel.
 ````
 
 Replace the example paths with the resolved paths from Step 3. Drop whichever line doesn't apply.
