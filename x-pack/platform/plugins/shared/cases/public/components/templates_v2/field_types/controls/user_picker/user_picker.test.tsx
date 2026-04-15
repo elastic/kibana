@@ -237,7 +237,7 @@ describe('UserPicker', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/The following users does not exist and must be removed/i)
+          screen.getByText(/The following users do not exist and must be removed/i)
         ).toBeInTheDocument();
       });
     });
