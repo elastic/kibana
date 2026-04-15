@@ -174,7 +174,8 @@ export const RunsListPage: React.FC = () => {
     }
   };
 
-  const lockedSuiteId = selectedRuns.length > 0 ? selectedRuns[0].suite_id : undefined;
+  const hasSelection = selectedRuns.length > 0;
+  const lockedSuiteId = hasSelection ? selectedRuns[0].suite_id : undefined;
   const selectedRunIds = useMemo(() => new Set(selectedRuns.map((r) => r.run_id)), [selectedRuns]);
   const selectionFull = selectedRuns.length >= 2;
 
@@ -184,7 +185,7 @@ export const RunsListPage: React.FC = () => {
       selectable: (run: EvaluationRunSummary) => {
         if (selectedRunIds.has(run.run_id)) return true;
         if (selectionFull) return false;
-        return lockedSuiteId === undefined || run.suite_id === lockedSuiteId;
+        return !hasSelection || run.suite_id === lockedSuiteId;
       },
       selectableMessage: (selectable: boolean, run: EvaluationRunSummary) => {
         if (selectable) return '';
@@ -192,7 +193,7 @@ export const RunsListPage: React.FC = () => {
         return i18n.COMPARE_DIFFERENT_SUITE_HINT;
       },
     }),
-    [lockedSuiteId, selectedRunIds, selectionFull]
+    [hasSelection, lockedSuiteId, selectedRunIds, selectionFull]
   );
 
   const totalRuns = data?.total ?? 0;
