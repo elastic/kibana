@@ -39,11 +39,8 @@ export const createAgentLiveUpdatesSubscription = ({
         );
       });
 
-    if (!incomingAttachments) {
-      return;
-    }
-    // TODO: handle multiple attachments in the future
-    const incomingAttachment = incomingAttachments.at(0);
+    // TODO: we're assuming only one attachment is coming in at a time
+    const incomingAttachment = incomingAttachments?.at(0);
     if (!incomingAttachment) {
       return;
     }

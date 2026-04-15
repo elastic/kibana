@@ -20,6 +20,7 @@ import type { SmlService } from './sml/sml_service';
 import type { PluginsService } from './plugins/plugins_service';
 import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
+import type { ConversationChangeHandler } from '../embeddable/types';
 
 export interface AgentBuilderInternalService {
   agentService: AgentService;
@@ -39,4 +40,5 @@ export interface AgentBuilderInternalService {
   openSidebarConversation: (
     options?: OpenConversationSidebarOptions
   ) => OpenConversationSidebarReturn;
+  notifyConversationChange: ConversationChangeHandler;
 }

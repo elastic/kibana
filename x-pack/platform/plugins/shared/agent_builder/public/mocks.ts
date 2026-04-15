@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EMPTY } from 'rxjs';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
@@ -62,6 +62,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     events: {
       chat$: EMPTY,
     },
+    chatOpen$: new BehaviorSubject(false),
     setChatConfig: jest.fn(),
     clearChatConfig: jest.fn(),
     toggleChat: jest.fn(),
@@ -74,6 +75,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       };
     }),
     addAttachment: jest.fn(),
+    subscribeToConversationChanges: jest.fn(),
     updateAttachmentOrigin: jest.fn(),
   };
 };
