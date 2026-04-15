@@ -105,13 +105,6 @@ export const allowedExperimentalValues = Object.freeze({
   leadGenerationEnabled: false,
 
   /**
-   * Enables lead generation details: the "i" icon on lead cards/list items
-   * and the "How this lead was generated" flyout.
-   * Requires `leadGenerationEnabled` to also be true.
-   */
-  leadGenerationDetailsEnabled: false,
-
-  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
