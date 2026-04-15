@@ -181,6 +181,11 @@ export const DIFF_HIGHER_IS_BETTER = i18n.translate('xpack.evals.compareRuns.dif
   defaultMessage: 'Higher is better for this metric',
 });
 
+export const FLYOUT_UNPAIRED_HINT = i18n.translate('xpack.evals.compareRuns.flyoutUnpairedHint', {
+  defaultMessage:
+    'This example only exists in one run and is excluded from the statistical comparison',
+});
+
 export const FLYOUT_NO_EXAMPLES_TITLE = i18n.translate(
   'xpack.evals.compareRuns.flyoutNoExamplesTitle',
   { defaultMessage: 'No paired examples' }

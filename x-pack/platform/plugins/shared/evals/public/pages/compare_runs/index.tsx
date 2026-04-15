@@ -235,7 +235,20 @@ const ExampleDrilldownFlyout: React.FC<{
         name: i18n.FLYOUT_COLUMN_EXAMPLE,
         render: (_id: string, item: ExampleScorePair) => {
           const isNumericFallback = /^\d+$/.test(item.exampleId);
-          return isNumericFallback ? `#${item.exampleId}` : item.exampleId;
+          const label = isNumericFallback ? `#${item.exampleId}` : item.exampleId;
+          const isPaired =
+            item.scoreA != null &&
+            item.scoreB != null &&
+            Number.isFinite(item.scoreA) &&
+            Number.isFinite(item.scoreB);
+          if (!isPaired) {
+            return (
+              <EuiToolTip content={i18n.FLYOUT_UNPAIRED_HINT}>
+                <span tabIndex={0}>{label}</span>
+              </EuiToolTip>
+            );
+          }
+          return label;
         },
       },
       {
