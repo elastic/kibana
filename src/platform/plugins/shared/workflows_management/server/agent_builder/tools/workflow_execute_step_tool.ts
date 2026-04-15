@@ -137,7 +137,10 @@ const ensureMinimalWorkflow = (yamlStr: string): string => {
  */
 const stubUnsafeChildren = (yamlStr: string, stepName: string): string => {
   const doc = parseDocument(yamlStr);
-  const stepsNode = (doc.contents as YAML.YAMLMap)?.get('steps');
+  if (!YAML.isMap(doc.contents)) {
+    return yamlStr;
+  }
+  const stepsNode = (doc.contents as YAML.YAMLMap).get('steps');
   if (!YAML.isSeq(stepsNode)) {
     return yamlStr;
   }
