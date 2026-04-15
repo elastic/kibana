@@ -29,7 +29,12 @@ import styled from 'styled-components';
 
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
 import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
-import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
+import type {
+  PackageInfo,
+  NewPackagePolicy,
+  RegistryVarsEntry,
+  AgentPolicy,
+} from '../../../../../types';
 import { Loading } from '../../../../../components';
 import {
   useGetEpmDatastreams,
@@ -64,6 +69,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   isEditPage?: boolean;
   noAdvancedToggle?: boolean;
   isAgentlessSelected?: boolean;
+  agentPolicies?: AgentPolicy[];
 }> = memo(
   ({
     namespacePlaceholder,
@@ -75,6 +81,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     noAdvancedToggle = false,
     isEditPage = false,
     isAgentlessSelected = false,
+    agentPolicies,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
@@ -187,8 +194,9 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     const advancedOptionsTitleId = useGeneratedHtmlId();
 
-    // Managed policy
-    const isManaged = packagePolicy.is_managed;
+    // Managed policy — true if the package policy itself is managed (e.g. Synthetics)
+    // OR if any parent agent policy is managed (e.g. Elastic Cloud Agent Policy)
+    const isManaged = packagePolicy.is_managed || agentPolicies?.some((p) => p.is_managed) === true;
 
     return validationResults ? (
       <>
@@ -436,6 +444,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         }
                       >
                         <EuiSelect
+                          disabled={isManaged}
                           data-test-subj="packagePolicyOutputInput"
                           isLoading={isOutputsLoading}
                           options={[
