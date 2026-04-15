@@ -72,23 +72,6 @@ jobs:
           mkdir -p "$HOME/.moon/temp" "$HOME/.moon/plugins/toolchains"
           yarn kbn bootstrap --no-vscode || yarn kbn bootstrap --no-vscode
 
-      - name: Verify type checker
-        run: |
-          TYPE_CHECK="x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js"
-          if [ -f "$TYPE_CHECK" ]; then
-            echo "Type checker found at $TYPE_CHECK"
-            echo "Contents:"
-            cat "$TYPE_CHECK"
-            echo ""
-            echo "Testing invocation..."
-            node "$TYPE_CHECK" --help 2>&1 | head -10 || true
-          else
-            echo "::error::Type checker not found at $TYPE_CHECK"
-            echo "Listing directory contents:"
-            ls -la "x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/" || true
-            find "x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/" -name "*.js" 2>/dev/null || true
-          fi
-
       - name: Install OpenCode
         run: |
           npm install -g opencode-ai@1.2.15
