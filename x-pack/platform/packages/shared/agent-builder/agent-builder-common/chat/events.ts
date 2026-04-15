@@ -184,6 +184,13 @@ export interface MessageCompleteEventData {
   message_content: string;
   /** optional structured data */
   structured_output?: object;
+  /** optional follow-up actions the agent suggests */
+  suggested_actions?: Array<{
+    label: string;
+    prompt: string;
+    icon?: string;
+    color?: string;
+  }>;
 }
 
 export type MessageCompleteEvent = ChatEventBase<
@@ -355,3 +362,9 @@ export type ChatEvent =
   | ConversationCreatedEvent
   | ConversationUpdatedEvent
   | ConversationIdSetEvent;
+
+/**
+ * Well-known UI event name for the suggest_follow_ups tool.
+ * Used to transport suggested actions from tool execution to round completion.
+ */
+export const SUGGESTED_ACTIONS_UI_EVENT = 'set_suggested_actions';

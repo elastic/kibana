@@ -14,8 +14,10 @@ import type {
   AttachmentRefActor,
   AttachmentRefOperation,
   VersionedAttachment,
+  A2UISurfaceAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 import {
+  AttachmentType,
   ATTACHMENT_REF_ACTOR,
   ATTACHMENT_REF_OPERATION,
   estimateTokens,
@@ -69,6 +71,22 @@ const resolveOperation = (
 
 const resolveActor = (actor: AttachmentRefActor | undefined): AttachmentRefActor => {
   return actor ?? ATTACHMENT_REF_ACTOR.system;
+};
+
+/**
+ * Resolves the description for a specific version of an attachment.
+ * For A2UI surfaces, reads the `title` from the version's data payload
+ * so each version shows its point-in-time name instead of the latest top-level description.
+ */
+const getVersionDescription = (attachment: VersionedAttachment, version: number): string => {
+  if (attachment.type === AttachmentType.a2uiSurface) {
+    const versionEntry = attachment.versions.find((v) => v.version === version);
+    const data = versionEntry?.data as A2UISurfaceAttachmentData | undefined;
+    if (data?.title) {
+      return `A2UI Surface: ${data.title}`;
+    }
+  }
+  return attachment.description ?? '';
 };
 
 const buildFallbackVersionedAttachments = (attachments: Attachment[]): VersionedAttachment[] => {
@@ -181,7 +199,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
           key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}
         >
           <EuiText color="subdued" size="xs">
-            {labels.attachmentAdded(ref.attachment.description ?? '')}
+            {labels.attachmentAdded(getVersionDescription(ref.attachment, ref.version))}
           </EuiText>
         </EuiFlexItem>
       ))}

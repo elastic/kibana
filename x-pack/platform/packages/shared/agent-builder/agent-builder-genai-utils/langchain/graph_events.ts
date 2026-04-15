@@ -122,7 +122,13 @@ export const createTextChunkEvent = (
 
 export const createMessageEvent = (
   content: string | object,
-  { messageId = 'unknown' }: { messageId?: string } = {}
+  {
+    messageId = 'unknown',
+    suggestedActions,
+  }: {
+    messageId?: string;
+    suggestedActions?: Array<{ label: string; prompt: string; icon?: string; color?: string }>;
+  } = {}
 ): MessageCompleteEvent => {
   return {
     type: ChatEventType.messageComplete,
@@ -130,6 +136,7 @@ export const createMessageEvent = (
       message_id: messageId,
       message_content: typeof content === 'string' ? content : '',
       ...(typeof content === 'object' ? { structured_output: content } : {}),
+      ...(suggestedActions?.length ? { suggested_actions: suggestedActions } : {}),
     },
   };
 };

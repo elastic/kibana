@@ -65,12 +65,23 @@ export const createA2UISurfaceTool = (): BuiltinToolDefinition<typeof createA2UI
       `- Stat: {title (label), value (number/string), description}\n` +
       `- Table: {columns [{field, name}], data_path (JSON Pointer to array in data_model)}\n` +
       `- DescriptionList: {items [{title, description}]}\n` +
-      `- Button: {text, action {event: {name, context}}, variant ("primary"|"default")}\n` +
+      `- Button: {text, action {event: {name, context}}, variant ("primary"|"default")}. Do NOT create backward-navigation buttons (e.g. "Back", "Previous") — this is a chat interface where users scroll up to revisit earlier steps.\n` +
       `- Divider: {size ("s"|"m"|"l")}\n` +
       `- Icon: {name (EUI icon name), color, size}\n` +
       `- Badge: {text, color}\n` +
       `- VisualizationRef: {attachment_id, version}\n` +
-      `- FieldValue: {field_name, field_value}\n\n` +
+      `- FieldValue: {field_name, field_value}\n` +
+      `- TextInput: {label, placeholder, field_id, default_value}\n` +
+      `- TextArea: {label, placeholder, field_id, default_value, rows}\n` +
+      `- Select: {label, options [{value, label}], field_id, default_value} - for short lists (<8)\n` +
+      `- ComboBox: {label, placeholder, options [{value, label, icon?}], field_id, default_value} - searchable single-select with optional icons, preferred for 8+ options\n` +
+      `- Switch: {label, field_id, default_value (boolean)}\n` +
+      `- FormGroup: {title, description, children}\n` +
+      `- Progress: {value, max (default 100), label, color}\n` +
+      `- Timeline: {timeline_items [{title, description, icon, color}]}\n` +
+      `- Callout: {heading, text, color (primary|success|warning|danger|accent), icon_type, children}\n` +
+      `- Accordion: {title, child or children, initially_open (boolean)}\n` +
+      `- StepsHeader: {steps [{title, status?}]} - horizontal step indicator (display only). Status: incomplete|current|complete|loading|warning|danger|disabled\n\n` +
       `Any string property accepts data binding via {path: "/pointer"} resolved against data_model.\n\n` +
       `After the tool returns an attachment_id, render it inline with <render_attachment id="ATTACHMENT_ID">.`,
     schema: createA2UISurfaceSchema,

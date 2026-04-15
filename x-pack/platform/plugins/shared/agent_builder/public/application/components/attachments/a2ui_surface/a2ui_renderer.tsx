@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import type { EuiFlexItemProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { A2UISurfaceAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type { A2UIComponent } from '@kbn/agent-builder-common/attachments';
 import { componentRenderers } from './component_map';
+import type { SurfaceActionPayload } from './component_map';
+import { SURFACE_ACTION_MARKER } from './surface_action_marker';
+import { useSurfaceFormState } from './use_surface_form_state';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
 
 const MAX_RENDER_DEPTH = 10;
 const VALID_GROW_SIZES: ReadonlySet<number> = new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -39,9 +44,26 @@ interface A2UIRendererProps {
  */
 export const A2UIRenderer: React.FC<A2UIRendererProps> = ({ surface }) => {
   const { euiTheme } = useEuiTheme();
-  const { components, data_model: dataModel = {} } = surface;
+  const { components, data_model: dataModel = {}, surface_id: surfaceId } = surface;
+  const { sendMessage } = useSendMessage();
+  const conversationId = useConversationId();
+  const cacheKey = conversationId ? `${conversationId}::${surfaceId}` : surfaceId;
+  const formState = useSurfaceFormState(cacheKey);
 
   const componentMap = useMemo(() => new Map(components.map((c) => [c.id, c])), [components]);
+
+  const onSurfaceAction = useCallback(
+    (payload: SurfaceActionPayload) => {
+      const enriched = { ...payload, surfaceId };
+      const actionDescription = `[Surface action: ${enriched.action.event.name}]`;
+      const hasFormData = Object.keys(enriched.formData).length > 0;
+      const formSummary = hasFormData ? `\nForm data: ${JSON.stringify(enriched.formData)}` : '';
+      sendMessage({
+        message: `${SURFACE_ACTION_MARKER}${actionDescription}${formSummary}`,
+      });
+    },
+    [sendMessage, surfaceId]
+  );
 
   const renderNode = (id: string, depth: number): React.ReactNode => {
     if (depth > MAX_RENDER_DEPTH) {
@@ -51,6 +73,17 @@ export const A2UIRenderer: React.FC<A2UIRendererProps> = ({ surface }) => {
     const comp = componentMap.get(id);
     if (!comp) {
       return null;
+    }
+
+    if (comp.visible_when) {
+      const currentVal = formState.getFieldValue(comp.visible_when.field);
+      const allowed = comp.visible_when.value;
+      const matches = Array.isArray(allowed)
+        ? allowed.includes(String(currentVal ?? ''))
+        : String(currentVal ?? '') === allowed;
+      if (!matches) {
+        return null;
+      }
     }
 
     const renderer = componentRenderers[comp.component];
@@ -71,6 +104,8 @@ export const A2UIRenderer: React.FC<A2UIRendererProps> = ({ surface }) => {
       dataModel,
       renderChildren,
       renderChild,
+      onSurfaceAction,
+      formState,
     });
   };
 

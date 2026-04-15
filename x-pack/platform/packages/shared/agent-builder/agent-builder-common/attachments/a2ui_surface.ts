@@ -27,6 +27,17 @@ export enum A2UIComponentType {
   Badge = 'Badge',
   VisualizationRef = 'VisualizationRef',
   FieldValue = 'FieldValue',
+  TextInput = 'TextInput',
+  TextArea = 'TextArea',
+  Select = 'Select',
+  ComboBox = 'ComboBox',
+  Switch = 'Switch',
+  FormGroup = 'FormGroup',
+  Progress = 'Progress',
+  Timeline = 'Timeline',
+  Callout = 'Callout',
+  Accordion = 'Accordion',
+  StepsHeader = 'StepsHeader',
 }
 
 /**
@@ -130,6 +141,44 @@ export interface A2UIComponent {
   justify?: string;
   weight?: number;
   size?: string;
+  /** Identifier for interactive form fields; used to collect form state on submit */
+  field_id?: string;
+  /** Placeholder text for input fields */
+  placeholder?: string;
+  /** Pre-set value for input fields or switches */
+  default_value?: DynamicValue<string | number | boolean>;
+  /** Option list for Select and ComboBox components. `icon` is an optional EUI icon type for ComboBox options. */
+  options?: Array<{ value: string; label: string; icon?: string }>;
+  /** Number of visible rows for TextArea */
+  rows?: number;
+  /** Label text for form fields */
+  label?: DynamicValue<string>;
+  /** Progress value (0-100) for Progress component */
+  max?: number;
+  /** Timeline items: array of {title, description, icon?, color?} */
+  timeline_items?: Array<{
+    title: DynamicValue<string>;
+    description?: DynamicValue<string>;
+    icon?: string;
+    color?: string;
+  }>;
+  /** Callout title for Callout component */
+  heading?: DynamicValue<string>;
+  /** EUI icon type for Callout component */
+  icon_type?: string;
+  /** Whether accordion starts expanded */
+  initially_open?: boolean;
+  /** Step items for StepsHeader: array of {title, status?} */
+  steps?: Array<{
+    title: string;
+    status?: 'incomplete' | 'disabled' | 'loading' | 'warning' | 'danger' | 'complete' | 'current';
+  }>;
+  /** Conditionally show this component only when a form field matches a value.
+   *  `field` is the field_id of a Select/ComboBox/Switch, `value` is the expected value(s). */
+  visible_when?: {
+    field: string;
+    value: string | string[];
+  };
 }
 
 /**
@@ -165,6 +214,44 @@ export const a2uiComponentSchema = z
     justify: z.string().optional(),
     weight: z.number().optional(),
     size: z.string().optional(),
+    field_id: z.string().optional(),
+    placeholder: z.string().optional(),
+    default_value: z.union([dynamicStringSchema, z.boolean()]).optional(),
+    options: z
+      .array(z.object({ value: z.string(), label: z.string(), icon: z.string().optional() }))
+      .optional(),
+    rows: z.number().int().optional(),
+    label: dynamicStringSchema.optional(),
+    max: z.number().optional(),
+    timeline_items: z
+      .array(
+        z.object({
+          title: dynamicStringSchema,
+          description: dynamicStringSchema.optional(),
+          icon: z.string().optional(),
+          color: z.string().optional(),
+        })
+      )
+      .optional(),
+    heading: dynamicStringSchema.optional(),
+    icon_type: z.string().optional(),
+    initially_open: z.boolean().optional(),
+    steps: z
+      .array(
+        z.object({
+          title: z.string(),
+          status: z
+            .enum(['incomplete', 'disabled', 'loading', 'warning', 'danger', 'complete', 'current'])
+            .optional(),
+        })
+      )
+      .optional(),
+    visible_when: z
+      .object({
+        field: z.string(),
+        value: z.union([z.string(), z.array(z.string())]),
+      })
+      .optional(),
   })
   .passthrough();
 

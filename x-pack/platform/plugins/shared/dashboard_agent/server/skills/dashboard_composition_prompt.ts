@@ -25,4 +25,15 @@ When the user's request is vague (e.g., "create a dashboard for my logs"), explo
 - Use sections when panels fall into distinct topics such as overview metrics, trends, breakdowns, or per-domain groupings.
 - Prefer sections for larger dashboards, especially when there are roughly 6 or more visualization panels or when the layout would otherwise feel long and hard to navigate.
 - Do not add sections only for decoration. Use them when they make the dashboard structure clearer.
+
+### When creating a dashboard from a prior A2UI summary
+
+The dashboard should faithfully represent the same data story as the summary:
+
+- Match the summary's metrics, tables, and charts 1:1 as dashboard panels.
+- Do not add panels beyond what the summary showed unless the user requests expansion.
+- Do not omit panels that appeared in the summary.
+- Use the ES|QL queries from prior tool results or \`data_model._queries\` metadata as the \`esql\` parameter on \`create_visualization_panels\` to ensure data consistency.
+- Map A2UI component types to dashboard panel types: Stat to metric, Table to datatable, VisualizationRef to \`add_panels_from_attachments\`.
+- Preserve the visual hierarchy: headline KPIs first, then trends, then breakdowns and detail tables.
 `;

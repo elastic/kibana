@@ -17,6 +17,7 @@ import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundResponseActions } from './round_response_actions';
+import { SuggestedActions } from './suggested_actions';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
@@ -31,7 +32,7 @@ export interface RoundResponseProps {
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
   hasError,
-  response: { message },
+  response: { message, suggested_actions: suggestedActions },
   steps,
   isLoading,
   isLastRound,
@@ -72,6 +73,11 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
     {!isLoading && !hasError && (
       <EuiFlexItem grow={false}>
         <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
+      </EuiFlexItem>
+    )}
+    {!isLoading && !hasError && isLastRound && suggestedActions && suggestedActions.length > 0 && (
+      <EuiFlexItem grow={false}>
+        <SuggestedActions actions={suggestedActions} />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>

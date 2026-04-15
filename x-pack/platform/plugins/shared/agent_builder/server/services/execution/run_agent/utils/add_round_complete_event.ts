@@ -37,7 +37,10 @@ import {
   isPromptRequestEvent,
   isReasoningEvent,
   isToolCallStep,
+  isToolUiEvent,
 } from '@kbn/agent-builder-common';
+import type { SuggestedAction } from '@kbn/agent-builder-common';
+import { SUGGESTED_ACTIONS_UI_EVENT } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
   RoundModelUsageStats,
@@ -306,6 +309,15 @@ const createRound = ({
     throw new Error('No response event found in round events');
   }
 
+  const suggestedActionsFromUiEvent: SuggestedAction[] | undefined = (() => {
+    const uiEvent = events.filter((e) => isToolUiEvent(e, SUGGESTED_ACTIONS_UI_EVENT)).at(-1);
+    if (!uiEvent) return undefined;
+    const { actions } = uiEvent.data.data as { actions?: SuggestedAction[] };
+    return actions?.length ? actions : undefined;
+  })();
+
+  const suggestedActions = lastMessage?.suggested_actions ?? suggestedActionsFromUiEvent;
+
   const timeToLastToken = endTime.getTime() - startTime.getTime();
   const timeToFirstToken = thinkingCompleteEvent
     ? thinkingCompleteEvent.data.time_to_first_token
@@ -346,6 +358,7 @@ const createRound = ({
       ? {
           message: lastMessage.message_content,
           structured_output: lastMessage.structured_output,
+          suggested_actions: suggestedActions,
         }
       : { message: '' },
     configuration_overrides: configurationOverrides,

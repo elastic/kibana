@@ -61,6 +61,26 @@ export interface ConverseInput {
 }
 
 /**
+ * A follow-up action the agent suggests after its response.
+ * Rendered as clickable pills below the assistant message.
+ *
+ * - **Prompt action** (default): clicking sends `prompt` as a new user message.
+ * - **Navigation action** (`url` set): clicking opens the Kibana-relative URL in a new tab.
+ */
+export interface SuggestedAction {
+  /** Button label shown to the user */
+  label: string;
+  /** Message sent on behalf of the user when clicked (fallback for navigation actions) */
+  prompt: string;
+  /** Optional EUI icon name */
+  icon?: string;
+  /** Optional semantic color: primary, success, accent, warning, danger */
+  color?: string;
+  /** Kibana-relative URL (e.g. `/app/dashboards#/view/abc123`). Opens in a new tab when set. */
+  url?: string;
+}
+
+/**
  * Represents the final answer from the agent in a conversation round.
  */
 export interface AssistantResponse {
@@ -69,6 +89,11 @@ export interface AssistantResponse {
    */
   message: string;
   structured_output?: object;
+  /**
+   * Optional follow-up actions the agent suggests.
+   * Only rendered on the most recent round; clicking sends the prompt as a new user message.
+   */
+  suggested_actions?: SuggestedAction[];
 }
 
 export enum ConversationRoundStepType {

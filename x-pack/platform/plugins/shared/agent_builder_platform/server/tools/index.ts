@@ -24,8 +24,11 @@ import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 import { createA2UISurfaceTool } from './create_a2ui_surface';
+import { suggestFollowUpsTool } from './suggest_follow_ups';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
+import { listConnectorSpecsTool } from './list_connector_specs';
+import { getConnectorSchemaTool } from './get_connector_schema';
 
 export const registerTools = ({
   coreSetup,
@@ -46,6 +49,9 @@ export const registerTools = ({
     indexExplorerTool(),
     createVisualizationTool(),
     createA2UISurfaceTool(),
+    suggestFollowUpsTool(),
+    listConnectorSpecsTool(),
+    getConnectorSchemaTool(),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
     casesTool(coreSetup),

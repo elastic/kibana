@@ -8,6 +8,7 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createExecuteConnectorSubActionTool } from './execute_connector_sub_action';
+import { createCreateConnectorTool } from './create_connector';
 import type { ConnectorToolsOptions } from './types';
 
 export type { ConnectorToolsOptions } from './types';
@@ -15,7 +16,10 @@ export type { ConnectorToolsOptions } from './types';
 /**
  * All connector tool IDs.
  */
-export const connectorToolIds = [platformCoreTools.executeConnectorSubAction] as const;
+export const connectorToolIds = [
+  platformCoreTools.executeConnectorSubAction,
+  platformCoreTools.createConnector,
+] as const;
 
 /**
  * Creates all connector tools with the given options.
@@ -23,5 +27,5 @@ export const connectorToolIds = [platformCoreTools.executeConnectorSubAction] as
 export const createConnectorTools = (
   options: ConnectorToolsOptions
 ): BuiltinToolDefinition<any>[] => {
-  return [createExecuteConnectorSubActionTool(options)];
+  return [createExecuteConnectorSubActionTool(options), createCreateConnectorTool(options)];
 };

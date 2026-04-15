@@ -125,6 +125,7 @@ export {
   type RoundInput,
   type ConverseInput,
   type AssistantResponse,
+  type SuggestedAction,
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
@@ -196,6 +197,7 @@ export {
   type CompactionCompletedEventData,
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
+  SUGGESTED_ACTIONS_UI_EVENT,
 } from './chat';
 export {
   type PublicSkillDefinition,
