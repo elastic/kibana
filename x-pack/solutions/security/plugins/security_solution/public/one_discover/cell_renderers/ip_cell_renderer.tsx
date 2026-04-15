@@ -9,11 +9,10 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { useHistory } from 'react-router-dom';
-import { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
-import { Network } from '../../flyout_v2/network_details';
 import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { buildFlyoutContent } from '../../flyout_v2/shared/utils/build_flyout_content';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { ONE_DISCOVER_SCOPE_ID } from '../constants';
@@ -34,31 +33,26 @@ const IpCellRendererComponent: React.FC<IpCellRendererProps> = ({ services, stor
     return [];
   }, [rawValue]);
 
-  const flowTarget = useMemo(
-    () =>
-      props.columnId.includes(FlowTargetSourceDest.destination)
-        ? FlowTargetSourceDest.destination
-        : FlowTargetSourceDest.source,
-    [props.columnId]
-  );
-
   const handleClick = useCallback(
     (ip: string) => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <Network ip={ip} flowTarget={flowTarget} scopeId={ONE_DISCOVER_SCOPE_ID} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          size: 's',
-          session: 'start',
-        }
-      );
+      const flyoutContent = buildFlyoutContent(props.columnId, ip, ONE_DISCOVER_SCOPE_ID);
+      if (flyoutContent) {
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: flyoutContent,
+          }),
+          {
+            ...defaultToolsFlyoutProperties,
+            size: 's',
+            session: 'start',
+          }
+        );
+      }
     },
-    [overlays, services, store, history, flowTarget]
+    [overlays, services, store, history, props.columnId]
   );
 
   if (addresses.length === 0) {
