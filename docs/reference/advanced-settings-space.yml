@@ -1154,7 +1154,7 @@ groups:
         description: |
           The average amortized per-core power consumption (based on 100% CPU utilization) for arm64 architecture.
         datatype: float
-        default: "2,8"
+        default: "2.8"
         applies_to:
           stack: ga
           serverless: unavailable
