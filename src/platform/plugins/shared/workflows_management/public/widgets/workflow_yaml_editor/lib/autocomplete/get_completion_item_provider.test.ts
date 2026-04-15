@@ -16,6 +16,7 @@ import {
   clearAllYamlProviders,
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
+import { getDeprecatedStepMetadataMap } from '../../../../../common/schema';
 
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
@@ -29,6 +30,10 @@ jest.mock('./context/build_autocomplete_context', () => ({
     linePrefix: '  - type:',
     lineSuffix: '',
   })),
+}));
+
+jest.mock('../../../../../common/schema', () => ({
+  getDeprecatedStepMetadataMap: jest.fn(() => ({})),
 }));
 
 describe('getCompletionItemProvider', () => {
@@ -58,6 +63,7 @@ describe('getCompletionItemProvider', () => {
     } as monaco.languages.CompletionContext;
 
     getState = jest.fn(() => ({} as any));
+    (getDeprecatedStepMetadataMap as jest.Mock).mockReturnValue({});
   });
 
   afterEach(() => {
@@ -134,6 +140,52 @@ describe('getCompletionItemProvider', () => {
       expect(result?.suggestions?.map((s) => s.label)).toEqual(
         expect.arrayContaining(['alert', 'scheduled'])
       );
+    });
+
+    it('should filter deprecated step types from workflow and YAML suggestions', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([
+        {
+          label: 'kibana.createCase',
+          insertText: 'kibana.createCase',
+          filterText: 'kibana.createCase',
+        },
+      ]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'kibana.createCaseDefaultSpace',
+              insertText: 'kibana.createCaseDefaultSpace',
+              filterText: 'kibana.createCaseDefaultSpace',
+            },
+            {
+              label: 'scheduled',
+              insertText: 'scheduled',
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      (getDeprecatedStepMetadataMap as jest.Mock).mockReturnValue({
+        'kibana.createCase': { replacementStepType: 'cases.createCase' },
+        'kibana.createCaseDefaultSpace': { replacementStepType: 'kibana.createCase' },
+      });
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions).toHaveLength(1);
+      expect(result?.suggestions?.[0].label).toBe('scheduled');
     });
 
     it('should deduplicate duplicate keys across YAML providers, preferring snippets', async () => {
