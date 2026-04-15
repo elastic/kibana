@@ -12,7 +12,7 @@ pageLoadAssetSize:
   automaticImport: 10662
   banners: 1144
   canvas: 6000
-  cases: 1940
+  cases: 1938
   charts: 1188
   cloud: 8389
   cloudConnect: 4940
@@ -22,7 +22,7 @@ pageLoadAssetSize:
   cloudFullStory: 1373
   cloudLinks: 13772
   cloudSecurityPosture: 12181
-  console: 24516
+  console: 24515
   contentConnectors: 2789
   contentManagement: 6725
   controls: 4379
@@ -42,12 +42,12 @@ pageLoadAssetSize:
   dataViewManagement: 1302
   dataViews: 1697
   dataVisualizer: 7421
-  developerToolbar: 1177
-  devTools: 4281
+  developerToolbar: 1175
+  devTools: 4280
   discover: 15239
   discoverEnhanced: 1091
   discoverShared: 1070
-  elasticAssistant: 141896
+  elasticAssistant: 141895
   elasticAssistantSharedState: 3353
   elasticConsole: 830
   embeddable: 760
@@ -57,7 +57,7 @@ pageLoadAssetSize:
   esql: 308
   esqlDataGrid: 215
   esUiShared: 2284
-  evals: 30665
+  evals: 1915
   eventAnnotation: 17299
   eventAnnotationListing: 2388
   exploratoryView: 707
@@ -162,7 +162,7 @@ pageLoadAssetSize:
   searchQueryRules: 2130
   searchSynonyms: 1897
   security: 215
-  securitySolution: 119101
+  securitySolution: 119099
   securitySolutionEss: 19484
   securitySolutionServerless: 31839
   serverless: 1259
