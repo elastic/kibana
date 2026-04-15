@@ -237,3 +237,16 @@ export {
   type PluginManifestMetadata,
   type PluginDefinition,
 } from './plugins';
+export type {
+  MemoryType,
+  MemoryStatus,
+  MemoryEdgeType,
+  MemorySourceRef,
+  MemoryLink,
+  MemoryNode,
+  MemoryCreateRequest,
+  MemoryUpdateRequest,
+  MemoryListOptions,
+  MemorySearchOptions,
+  RetrievalStage,
+} from './memory';
