@@ -488,10 +488,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.find('infraSuggestionsPanel');
     },
 
-    async ensureInventoryFeedbackLinkIsVisible() {
-      await testSubjects.existOrFail('infraInventoryFeedbackLink');
-    },
-
     async ensureKubernetesTourIsVisible() {
       const container = await testSubjects.find('infra-kubernetesTour-text');
       const containerText = await container.getVisibleText();
@@ -500,10 +496,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async ensureKubernetesTourIsClosed() {
       await testSubjects.missingOrFail('infra-kubernetesTour-text');
-    },
-
-    async ensureKubernetesFeedbackLinkIsVisible() {
-      return testSubjects.existOrFail('infra-kubernetes-feedback-link');
     },
 
     async clickDismissKubernetesTourButton() {
