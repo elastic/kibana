@@ -34,10 +34,8 @@ import { resolveRelativeLinksPlugin } from './plugins/resolve_relative_links';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 import { MarkdownRenderer } from './components/markdown_renderer';
-import { loadFromLibrary } from './markdown_client/load_from_library';
 import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
 import { markdownClient } from './markdown_client/markdown_client';
-import type { MarkdownAttributes } from '../server/markdown_saved_object';
 import type { MarkdownSettingsState } from '../server/embeddable/schemas';
 
 const flexCss = css({
@@ -54,29 +52,25 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const libraryId = (initialState as MarkdownByReferenceState).ref_id;
     const isByReference = libraryId !== undefined;
     const initialLibraryState = isByReference
-      ? await loadFromLibrary(libraryId)
-      : ({
-          title: '',
-          description: '',
-          content: '',
-        } as MarkdownAttributes);
+      ? (await markdownClient.get(libraryId)).data
+      : undefined;
 
     const titleManager = initializeTitleManager(initialState);
     const content$ = new BehaviorSubject<string>(
-      isByReference ? initialLibraryState.content : (initialState as MarkdownByValueState).content
+      initialLibraryState
+        ? initialLibraryState.content
+        : (initialState as MarkdownByValueState).content
     );
-    const defaultTitle$ = new BehaviorSubject<string | undefined>(
-      isByReference ? initialLibraryState.title : undefined
-    );
+    const defaultTitle$ = new BehaviorSubject<string | undefined>(initialLibraryState?.title);
     const defaultDescription$ = new BehaviorSubject<string | undefined>(
-      isByReference ? initialLibraryState.description : undefined
+      initialLibraryState?.description
     );
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
 
     const settings$ = new BehaviorSubject<MarkdownSettingsState>(
-      isByReference
+      initialLibraryState
         ? initialLibraryState.settings
         : (initialState as MarkdownByValueState).settings
     );
@@ -262,9 +256,12 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                 if (libraryId) {
                   await markdownClient.update(libraryId, {
                     content: value,
-                    title: titleManager.api.title$.getValue() ?? initialLibraryState.title,
+                    title:
+                      titleManager.api.title$.getValue() ??
+                      initialLibraryState?.title ??
+                      'new markdown',
                     description:
-                      titleManager.api.description$.getValue() ?? initialLibraryState.description,
+                      titleManager.api.description$.getValue() ?? initialLibraryState?.description,
                     settings: settings$.getValue(),
                   });
                 }

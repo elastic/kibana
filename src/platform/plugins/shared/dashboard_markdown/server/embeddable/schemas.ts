@@ -14,13 +14,11 @@ import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publ
 
 export const markdownByValueStateSchema = schema.object({
   content: schema.string({
-    minLength: 1
+    minLength: 1,
   }),
-  settings: 
-    schema.object({
-      open_links_in_new_tab: schema.boolean({ defaultValue: true }),
-    })
-  ,
+  settings: schema.object({
+    open_links_in_new_tab: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 const markdownByReferenceStateSchema = schema.object({

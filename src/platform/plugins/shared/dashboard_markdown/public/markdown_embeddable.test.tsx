@@ -21,21 +21,21 @@ import { markdownEmbeddableSchema } from '../server/embeddable/schemas';
 jest.mock('./markdown_client/markdown_client', () => {
   return {
     markdownClient: {
+      get: jest.fn(() => {
+        return Promise.resolve({
+          data: {
+            title: 'Markdown from library',
+            description: 'some description',
+            content: 'Loaded **markdown** content.',
+            settings: {
+              open_links_in_new_tab: true,
+            }
+          },
+        });
+      }),
       create: jest.fn().mockResolvedValue({ id: 'markdown-id-123' }),
       update: jest.fn().mockResolvedValue({ id: 'markdown-id-123' }),
     },
-  };
-});
-
-jest.mock('./markdown_client/load_from_library', () => {
-  return {
-    loadFromLibrary: jest.fn((savedObjectId) => {
-      return Promise.resolve({
-        title: 'Markdown from library',
-        description: 'some description',
-        content: 'Loaded **markdown** content.',
-      });
-    }),
   };
 });
 
