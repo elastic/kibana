@@ -18,7 +18,6 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettingsAttributes = {
   },
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
-  remoteKibanaUrls: {},
 };
 
 export const DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES: DynamicSettingsAttributes =

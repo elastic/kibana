@@ -8,13 +8,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiComboBox,
   EuiDescribedFormGroup,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -23,7 +21,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
@@ -35,12 +33,6 @@ import { useSyntheticsSettingsContext } from '../../../contexts';
 interface RemoteCluster {
   name: string;
   isConnected: boolean;
-}
-
-interface ClusterUrlRow {
-  clusterName: string;
-  isConnected: boolean;
-  kibanaUrl: string;
 }
 
 export const RemoteClustersForm = () => {
@@ -69,14 +61,12 @@ export const RemoteClustersForm = () => {
   // Local form state
   const [useAllRemoteClusters, setUseAllRemoteClusters] = useState(false);
   const [selectedRemoteClusters, setSelectedRemoteClusters] = useState<string[]>([]);
-  const [remoteKibanaUrls, setRemoteKibanaUrls] = useState<Record<string, string>>({});
 
   // Sync local state from saved settings when loaded
   useEffect(() => {
     if (savedSettings) {
       setUseAllRemoteClusters(savedSettings.useAllRemoteClusters);
       setSelectedRemoteClusters(savedSettings.selectedRemoteClusters);
-      setRemoteKibanaUrls(savedSettings.remoteKibanaUrls);
     }
   }, [savedSettings]);
 
@@ -90,9 +80,8 @@ export const RemoteClustersForm = () => {
     () => ({
       useAllRemoteClusters,
       selectedRemoteClusters,
-      remoteKibanaUrls,
     }),
-    [useAllRemoteClusters, selectedRemoteClusters, remoteKibanaUrls]
+    [useAllRemoteClusters, selectedRemoteClusters]
   );
 
   const isFormDirty = !isEqual(currentFormValues, savedSettings ?? DEFAULT_CCS_SETTINGS);
@@ -101,41 +90,12 @@ export const RemoteClustersForm = () => {
     if (savedSettings) {
       setUseAllRemoteClusters(savedSettings.useAllRemoteClusters);
       setSelectedRemoteClusters(savedSettings.selectedRemoteClusters);
-      setRemoteKibanaUrls(savedSettings.remoteKibanaUrls);
     }
   }, [savedSettings]);
 
   const handleSave = useCallback(async () => {
     await saveSettings(currentFormValues);
   }, [saveSettings, currentFormValues]);
-
-  // Determine which clusters to show in the Kibana URL table
-  const clustersForUrlTable: ClusterUrlRow[] = useMemo(() => {
-    const clusterList = remoteClusters ?? [];
-
-    let relevantClusters: RemoteCluster[];
-    if (useAllRemoteClusters) {
-      relevantClusters = clusterList;
-    } else {
-      relevantClusters = selectedRemoteClusters.map((name) => {
-        const found = clusterList.find((c) => c.name === name);
-        return found ?? { name, isConnected: false };
-      });
-    }
-
-    return relevantClusters.map((cluster) => ({
-      clusterName: cluster.name,
-      isConnected: cluster.isConnected,
-      kibanaUrl: remoteKibanaUrls[cluster.name] ?? '',
-    }));
-  }, [remoteClusters, useAllRemoteClusters, selectedRemoteClusters, remoteKibanaUrls]);
-
-  const handleUrlChange = useCallback((clusterName: string, url: string) => {
-    setRemoteKibanaUrls((prev) => ({
-      ...prev,
-      [clusterName]: url,
-    }));
-  }, []);
 
   // Combo box options for cluster selection
   const clusterOptions: EuiComboBoxOptionOption[] = useMemo(() => {
@@ -154,51 +114,11 @@ export const RemoteClustersForm = () => {
     return selectedRemoteClusters.map((name) => ({ label: name, value: name }));
   }, [selectedRemoteClusters]);
 
-  // Table columns for Kibana URL mapping
-  const urlTableColumns: Array<EuiBasicTableColumn<ClusterUrlRow>> = useMemo(
-    () => [
-      {
-        field: 'clusterName',
-        name: CLUSTER_NAME_LABEL,
-        width: '30%',
-        truncateText: false,
-      },
-      {
-        field: 'isConnected',
-        name: STATUS_LABEL,
-        width: '20%',
-        render: (isConnected: boolean) =>
-          isConnected ? (
-            <EuiHealth color="success">{CONNECTED_LABEL}</EuiHealth>
-          ) : (
-            <EuiHealth color="danger">{DISCONNECTED_LABEL}</EuiHealth>
-          ),
-      },
-      {
-        field: 'kibanaUrl',
-        name: KIBANA_URL_LABEL,
-        width: '50%',
-        render: (_: string, row: ClusterUrlRow) => (
-          <EuiFieldText
-            data-test-subj={`syntheticsRemoteClusterUrl-${row.clusterName}`}
-            placeholder="https://..."
-            value={row.kibanaUrl}
-            onChange={(e) => handleUrlChange(row.clusterName, e.target.value)}
-            disabled={!canEdit}
-            compressed
-          />
-        ),
-      },
-    ],
-    [handleUrlChange, canEdit]
-  );
-
   if (isServerless || !isCCSEnabled) {
     return null;
   }
 
   const hasNoClusters = !loading && (remoteClusters ?? []).length === 0;
-  const hasSelectedClusters = useAllRemoteClusters || selectedRemoteClusters.length > 0;
 
   return (
     <EuiForm>
@@ -254,22 +174,6 @@ export const RemoteClustersForm = () => {
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-
-      {hasSelectedClusters && clustersForUrlTable.length > 0 && (
-        <>
-          <EuiSpacer size="l" />
-          <h4>{KIBANA_URLS_TITLE}</h4>
-          <EuiSpacer size="s" />
-          <p>{KIBANA_URLS_DESCRIPTION}</p>
-          <EuiSpacer size="m" />
-          <EuiBasicTable
-            data-test-subj="syntheticsRemoteClusterUrlTable"
-            items={clustersForUrlTable}
-            columns={urlTableColumns}
-            rowHeader="clusterName"
-          />
-        </>
-      )}
 
       <EuiSpacer />
       <EuiFlexGroup justifyContent="flexEnd">
@@ -337,30 +241,6 @@ const SELECT_CLUSTERS_PLACEHOLDER = i18n.translate(
   'xpack.synthetics.settings.ccs.selectClustersPlaceholder',
   { defaultMessage: 'Search for remote clusters' }
 );
-
-const KIBANA_URLS_TITLE = i18n.translate('xpack.synthetics.settings.ccs.kibanaUrlsTitle', {
-  defaultMessage: 'Kibana URLs',
-});
-
-const KIBANA_URLS_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.settings.ccs.kibanaUrlsDescription',
-  {
-    defaultMessage:
-      'Configure the Kibana URL for each remote cluster. These URLs are used to create deep links to remote monitor details.',
-  }
-);
-
-const CLUSTER_NAME_LABEL = i18n.translate('xpack.synthetics.settings.ccs.clusterName', {
-  defaultMessage: 'Cluster',
-});
-
-const STATUS_LABEL = i18n.translate('xpack.synthetics.settings.ccs.status', {
-  defaultMessage: 'Status',
-});
-
-const KIBANA_URL_LABEL = i18n.translate('xpack.synthetics.settings.ccs.kibanaUrl', {
-  defaultMessage: 'Kibana URL',
-});
 
 const CONNECTED_LABEL = i18n.translate('xpack.synthetics.settings.ccs.connected', {
   defaultMessage: 'Connected',

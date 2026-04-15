@@ -30,12 +30,8 @@ export function getRemoteClusterName(index: string): string | undefined {
  * Returns undefined for local hits.
  *
  * @param index - The `_index` field from the ES search hit
- * @param remoteKibanaUrls - Map of remoteName → kibanaUrl from CCS settings
  */
-export function getRemoteMonitorInfo(
-  index: string,
-  remoteKibanaUrls: Record<string, string>
-): RemoteMonitorInfo | undefined {
+export function getRemoteMonitorInfo(index: string): RemoteMonitorInfo | undefined {
   const remoteName = getRemoteClusterName(index);
   if (!remoteName) {
     return undefined;
@@ -43,6 +39,5 @@ export function getRemoteMonitorInfo(
 
   return {
     remoteName,
-    kibanaUrl: remoteKibanaUrls[remoteName] ?? '',
   };
 }

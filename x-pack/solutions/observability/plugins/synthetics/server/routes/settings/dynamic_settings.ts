@@ -124,7 +124,6 @@ export const fromSettingsAttribute = (
     defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
     useAllRemoteClusters: attr.useAllRemoteClusters ?? false,
     selectedRemoteClusters: attr.selectedRemoteClusters ?? [],
-    remoteKibanaUrls: attr.remoteKibanaUrls ?? {},
   };
 };
 
@@ -163,5 +162,4 @@ export const DynamicSettingsSchema = schema.object({
   ),
   useAllRemoteClusters: schema.maybe(schema.boolean()),
   selectedRemoteClusters: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-  remoteKibanaUrls: schema.maybe(schema.recordOf(schema.string(), schema.string())),
 });

@@ -29,37 +29,19 @@ describe('remote_result_utils', () => {
   });
 
   describe('getRemoteMonitorInfo', () => {
-    const remoteKibanaUrls: Record<string, string> = {
-      cluster1: 'https://cluster1.example.com',
-      cluster2: 'https://cluster2.example.com',
-    };
-
-    it('returns remote info with kibanaUrl for a known remote cluster', () => {
-      expect(getRemoteMonitorInfo('cluster1:synthetics-browser-default', remoteKibanaUrls)).toEqual(
-        {
-          remoteName: 'cluster1',
-          kibanaUrl: 'https://cluster1.example.com',
-        }
-      );
-    });
-
-    it('returns remote info with empty kibanaUrl for an unknown remote cluster', () => {
-      expect(
-        getRemoteMonitorInfo('unknown-cluster:synthetics-browser-default', remoteKibanaUrls)
-      ).toEqual({
-        remoteName: 'unknown-cluster',
-        kibanaUrl: '',
+    it('returns remote info for a known remote cluster', () => {
+      expect(getRemoteMonitorInfo('cluster1:synthetics-browser-default')).toEqual({
+        remoteName: 'cluster1',
       });
     });
 
     it('returns undefined for a local index', () => {
-      expect(getRemoteMonitorInfo('synthetics-browser-default', remoteKibanaUrls)).toBeUndefined();
+      expect(getRemoteMonitorInfo('synthetics-browser-default')).toBeUndefined();
     });
 
-    it('returns remote info with empty kibanaUrl when remoteKibanaUrls is empty', () => {
-      expect(getRemoteMonitorInfo('cluster1:synthetics-browser-default', {})).toEqual({
-        remoteName: 'cluster1',
-        kibanaUrl: '',
+    it('returns remote info for a cluster with hyphens', () => {
+      expect(getRemoteMonitorInfo('my-remote-cluster:synthetics-http-default')).toEqual({
+        remoteName: 'my-remote-cluster',
       });
     });
   });

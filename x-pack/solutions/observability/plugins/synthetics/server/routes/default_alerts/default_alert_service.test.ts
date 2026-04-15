@@ -43,7 +43,6 @@ describe('DefaultAlertService', () => {
         defaultTLSRuleEnabled: true,
         useAllRemoteClusters: false,
         selectedRemoteClusters: [],
-        remoteKibanaUrls: {},
       });
       expect(soClient.get).toHaveBeenCalledTimes(1);
     });

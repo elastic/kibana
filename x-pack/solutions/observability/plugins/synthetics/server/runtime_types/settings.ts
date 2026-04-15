@@ -29,7 +29,6 @@ export const DynamicSettingsAttributesCodec = t.intersection([
     defaultTLSRuleEnabled: t.boolean,
     useAllRemoteClusters: t.boolean,
     selectedRemoteClusters: t.array(t.string),
-    remoteKibanaUrls: t.record(t.string, t.string),
   }),
 ]);
 

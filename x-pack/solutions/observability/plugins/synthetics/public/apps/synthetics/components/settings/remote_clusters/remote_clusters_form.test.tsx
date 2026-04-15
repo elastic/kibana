@@ -23,7 +23,6 @@ const mockSaveSettings = jest.fn();
 const mockCCSSettingsData = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [] as string[],
-  remoteKibanaUrls: {} as Record<string, string>,
 };
 
 jest.mock('./hooks/use_get_ccs_settings', () => ({
@@ -93,34 +92,6 @@ describe('<RemoteClustersForm />', () => {
 
     const comboBox = screen.getByTestId('syntheticsSelectRemoteClusters');
     expect(comboBox).toHaveAttribute('disabled');
-  });
-
-  it('shows the Kibana URL table when clusters are selected', () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
-      data: mockRemoteClusters,
-      status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
-      refetch: () => {},
-    });
-
-    // Toggle "use all" to show URLs for all clusters
-    render(<RemoteClustersForm />);
-    const toggle = screen.getByTestId('syntheticsUseAllRemoteClusters');
-    fireEvent.click(toggle);
-
-    expect(screen.getByText('cluster-a')).toBeInTheDocument();
-    expect(screen.getByText('cluster-b')).toBeInTheDocument();
-    expect(screen.getByTestId('syntheticsRemoteClusterUrl-cluster-a')).toBeInTheDocument();
-    expect(screen.getByTestId('syntheticsRemoteClusterUrl-cluster-b')).toBeInTheDocument();
-  });
-
-  it('shows connection status for remote clusters', () => {
-    renderWithClusters();
-
-    const toggle = screen.getByTestId('syntheticsUseAllRemoteClusters');
-    fireEvent.click(toggle);
-
-    expect(screen.getByText('Connected')).toBeInTheDocument();
-    expect(screen.getByText('Disconnected')).toBeInTheDocument();
   });
 
   it('enables the Apply button only when form is dirty', () => {

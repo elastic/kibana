@@ -165,17 +165,12 @@ describe('queryPings', () => {
   });
 
   describe('CCS remote decoration', () => {
-    const remoteKibanaUrls: Record<string, string> = {
-      cluster1: 'https://cluster1.example.com',
-    };
-
     it('should attach remote info to pings from a remote cluster', async () => {
       const params = {
         syntheticsEsClient: mockEsClient as SyntheticsEsClient,
         dateRange: { from: '2023-01-01', to: '2023-01-02' },
         size: 10,
         pageIndex: 0,
-        remoteKibanaUrls,
       };
 
       const mockResponse = {
@@ -205,7 +200,6 @@ describe('queryPings', () => {
             timestamp: '2023-01-01T00:00:00Z',
             remote: {
               remoteName: 'cluster1',
-              kibanaUrl: 'https://cluster1.example.com',
             },
           },
         ],
@@ -218,7 +212,6 @@ describe('queryPings', () => {
         dateRange: { from: '2023-01-01', to: '2023-01-02' },
         size: 10,
         pageIndex: 0,
-        remoteKibanaUrls,
       };
 
       const mockResponse = {
@@ -251,51 +244,12 @@ describe('queryPings', () => {
       });
     });
 
-    it('should not attach remote info when remoteKibanaUrls is not provided', async () => {
+    it('should attach remote info for unknown remote clusters', async () => {
       const params = {
         syntheticsEsClient: mockEsClient as SyntheticsEsClient,
         dateRange: { from: '2023-01-01', to: '2023-01-02' },
         size: 10,
         pageIndex: 0,
-      };
-
-      const mockResponse = {
-        body: {
-          hits: {
-            hits: [
-              {
-                _id: 'doc1',
-                _index: 'cluster1:synthetics-browser-default',
-                _source: { '@timestamp': '2023-01-01T00:00:00Z' },
-              },
-            ],
-            total: { value: 1 },
-          },
-        },
-      };
-
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
-
-      const result = await queryPings(params);
-      expect(result).toEqual({
-        total: 1,
-        pings: [
-          {
-            '@timestamp': '2023-01-01T00:00:00Z',
-            docId: 'doc1',
-            timestamp: '2023-01-01T00:00:00Z',
-          },
-        ],
-      });
-    });
-
-    it('should attach remote info with empty kibanaUrl for unknown clusters', async () => {
-      const params = {
-        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
-        dateRange: { from: '2023-01-01', to: '2023-01-02' },
-        size: 10,
-        pageIndex: 0,
-        remoteKibanaUrls,
       };
 
       const mockResponse = {
@@ -325,7 +279,6 @@ describe('queryPings', () => {
             timestamp: '2023-01-01T00:00:00Z',
             remote: {
               remoteName: 'unknown-cluster',
-              kibanaUrl: '',
             },
           },
         ],

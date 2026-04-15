@@ -15,7 +15,6 @@ export const remoteSyntheticsClusterSchema = t.type({
 export const syntheticsCCSSettingsSchema = t.type({
   useAllRemoteClusters: t.boolean,
   selectedRemoteClusters: t.array(t.string),
-  remoteKibanaUrls: t.record(t.string, t.string),
 });
 
 export type RemoteSyntheticsCluster = t.TypeOf<typeof remoteSyntheticsClusterSchema>;

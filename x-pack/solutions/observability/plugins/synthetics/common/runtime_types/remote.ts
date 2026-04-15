@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 
 export const remoteMonitorInfoSchema = t.type({
   remoteName: t.string,
-  kibanaUrl: t.string,
 });
 
 export type RemoteMonitorInfo = t.TypeOf<typeof remoteMonitorInfoSchema>;

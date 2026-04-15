@@ -40,7 +40,6 @@ type GetParamsWithoutFields = GetPingsParams;
 export async function queryPings<F>(
   params: (GetParamsWithFields<F> | GetParamsWithoutFields) & {
     syntheticsEsClient: SyntheticsEsClient;
-    remoteKibanaUrls?: Record<string, string>;
   }
 ): Promise<PingsResponse | { total: number; pings: F[] }> {
   const {
@@ -128,9 +127,7 @@ export async function queryPings<F>(
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
 
-    const remote = params.remoteKibanaUrls
-      ? getRemoteMonitorInfo(_index, params.remoteKibanaUrls)
-      : undefined;
+    const remote = getRemoteMonitorInfo(_index);
 
     return { ..._source, timestamp: _source['@timestamp'], docId: _id, ...(remote && { remote }) };
   });

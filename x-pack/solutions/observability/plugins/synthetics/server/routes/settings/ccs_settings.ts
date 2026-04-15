@@ -17,7 +17,6 @@ import {
 const DEFAULT_CCS_SETTINGS: SyntheticsCCSSettings = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
-  remoteKibanaUrls: {},
 };
 
 export const createGetCCSSettingsRoute: SyntheticsRestApiRouteFactory<
@@ -35,7 +34,6 @@ export const createGetCCSSettingsRoute: SyntheticsRestApiRouteFactory<
     return {
       useAllRemoteClusters: dynamicSettings.useAllRemoteClusters ?? false,
       selectedRemoteClusters: dynamicSettings.selectedRemoteClusters ?? [],
-      remoteKibanaUrls: dynamicSettings.remoteKibanaUrls ?? {},
     };
   },
 });
@@ -43,7 +41,6 @@ export const createGetCCSSettingsRoute: SyntheticsRestApiRouteFactory<
 const CCSSettingsSchema = schema.object({
   useAllRemoteClusters: schema.boolean(),
   selectedRemoteClusters: schema.arrayOf(schema.string(), { maxSize: 100 }),
-  remoteKibanaUrls: schema.recordOf(schema.string(), schema.string()),
 });
 
 export const createPutCCSSettingsRoute: SyntheticsRestApiRouteFactory<
@@ -69,13 +66,11 @@ export const createPutCCSSettingsRoute: SyntheticsRestApiRouteFactory<
       ...prevSettings,
       useAllRemoteClusters: body.useAllRemoteClusters,
       selectedRemoteClusters: body.selectedRemoteClusters,
-      remoteKibanaUrls: body.remoteKibanaUrls,
     });
 
     return {
       useAllRemoteClusters: updated.useAllRemoteClusters ?? false,
       selectedRemoteClusters: updated.selectedRemoteClusters ?? [],
-      remoteKibanaUrls: updated.remoteKibanaUrls ?? {},
     };
   },
 });

@@ -50,18 +50,15 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       server.authSavedObjectsClient = savedObjectsClient;
 
       let heartbeatIndices = SYNTHETICS_INDEX_PATTERN;
-      let remoteKibanaUrls: Record<string, string> = {};
       if (isCCSEnabled(server)) {
         try {
           const dynamicSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
           const ccsSettings = {
             useAllRemoteClusters: dynamicSettings.useAllRemoteClusters ?? false,
             selectedRemoteClusters: dynamicSettings.selectedRemoteClusters ?? [],
-            remoteKibanaUrls: dynamicSettings.remoteKibanaUrls ?? {},
           };
           const { indices } = await getSyntheticsIndices(esClient.asCurrentUser, ccsSettings);
           heartbeatIndices = indices;
-          remoteKibanaUrls = ccsSettings.remoteKibanaUrls;
         } catch (e) {
           server.logger.warn(`Failed to resolve CCS indices, falling back to local: ${e.message}`);
         }
@@ -106,7 +103,6 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           syntheticsMonitorClient,
           monitorConfigRepository,
           monitorIntegrationHealthApi,
-          remoteKibanaUrls,
         };
 
         const res = await server.fleet.runWithCache(() => syntheticsRoute.handler(data));

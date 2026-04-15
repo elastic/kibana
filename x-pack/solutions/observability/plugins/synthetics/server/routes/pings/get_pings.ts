@@ -32,7 +32,7 @@ export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
   validate: {
     query: getPingsRouteQuerySchema,
   },
-  handler: async ({ syntheticsEsClient, request, response, remoteKibanaUrls }): Promise<any> => {
+  handler: async ({ syntheticsEsClient, request, response }): Promise<any> => {
     const {
       from,
       to,
@@ -57,7 +57,6 @@ export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
       pageIndex,
       locations: locations ? JSON.parse(locations) : [],
       excludedLocations,
-      remoteKibanaUrls,
     });
   },
 });

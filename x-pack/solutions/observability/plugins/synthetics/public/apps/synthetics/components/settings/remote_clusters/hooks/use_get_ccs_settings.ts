@@ -15,7 +15,6 @@ import { SyntheticsRefreshContext } from '../../../../contexts';
 export const DEFAULT_CCS_SETTINGS: SyntheticsCCSSettings = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
-  remoteKibanaUrls: {},
 };
 
 const fetchCCSSettings = async () => {
