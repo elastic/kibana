@@ -5,13 +5,32 @@
  * 2.0.
  */
 
-import type { BatchGetCompositeSLOResponse, GetCompositeSLOResponse } from '@kbn/slo-schema';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import {
+  ALL_VALUE,
+  batchGetCompositeSLOResponseSchema,
+  getCompositeSLOResponseSchema,
+} from '@kbn/slo-schema';
+import type {
+  BatchGetCompositeSLOResponse,
+  CompositeSLOSummary,
+  GetCompositeSLOResponse,
+} from '@kbn/slo-schema';
 import { toRichRollingTimeWindow } from '../domain/models';
 import type { CompositeSLORepository } from './composite_slo_repository';
+import { fetchCompositeSloSummariesFromIndex } from './composite_slo_summary_index';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { SummaryClient } from './summary_client';
-import { computeCompositeSummary, type MemberSummaryData } from './compute_composite_summary';
+import {
+  computeCompositeSummary,
+  getNoDataCompositeSloSummary,
+  type MemberSummaryData,
+} from './compute_composite_summary';
+
+export interface GetCompositeSloSummaryReadContext {
+  spaceId: string;
+  esClient: ElasticsearchClient;
+}
 
 export class GetCompositeSLO {
   constructor(
@@ -20,15 +39,39 @@ export class GetCompositeSLO {
     private summaryClient: SummaryClient
   ) {}
 
-  public async executeBatch(ids: string[]): Promise<BatchGetCompositeSLOResponse> {
-    return await Promise.all(ids.map((id) => this.executeOne(id)));
+  public async executeBatch(
+    ids: string[],
+    summaryReadContext?: GetCompositeSloSummaryReadContext
+  ): Promise<BatchGetCompositeSLOResponse> {
+    const persistedSummaryById = await this.loadPersistedSummaries(ids, summaryReadContext);
+    const results = await Promise.all(ids.map((id) => this.executeOne(id, persistedSummaryById)));
+    return batchGetCompositeSLOResponseSchema.encode(results);
   }
 
-  public async execute(id: string): Promise<GetCompositeSLOResponse> {
-    return await this.executeOne(id);
+  public async execute(
+    id: string,
+    summaryReadContext?: GetCompositeSloSummaryReadContext
+  ): Promise<GetCompositeSLOResponse> {
+    const persistedSummaryById = await this.loadPersistedSummaries([id], summaryReadContext);
+    const result = await this.executeOne(id, persistedSummaryById);
+    return getCompositeSLOResponseSchema.encode(result);
   }
 
-  private async executeOne(id: string) {
+  private async loadPersistedSummaries(
+    ids: string[],
+    summaryReadContext?: GetCompositeSloSummaryReadContext
+  ): Promise<Map<string, CompositeSLOSummary>> {
+    if (!summaryReadContext || ids.length === 0) {
+      return new Map();
+    }
+    return await fetchCompositeSloSummariesFromIndex(
+      summaryReadContext.esClient,
+      summaryReadContext.spaceId,
+      ids
+    );
+  }
+
+  private async executeOne(id: string, persistedSummaryById: Map<string, CompositeSLOSummary>) {
     const compositeSlo = await this.compositeSloRepository.findById(id);
     const memberSloIds = compositeSlo.members.map((m) => m.sloId);
     const memberDefinitions = await this.sloDefinitionRepository.findAllByIds(memberSloIds);
@@ -62,11 +105,13 @@ export class GetCompositeSLO {
       burnRateWindows: summaryResults[i].burnRateWindows,
     }));
 
-    const { compositeSummary, members } = computeCompositeSummary(compositeSlo, memberSummaries);
+    const { members } = computeCompositeSummary(compositeSlo, memberSummaries);
+    const persistedSummary = persistedSummaryById.get(id);
+    const summary = persistedSummary ?? getNoDataCompositeSloSummary();
 
     return {
       ...compositeSlo,
-      summary: compositeSummary,
+      summary,
       members,
     };
   }

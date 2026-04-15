@@ -27,7 +27,7 @@ export const getCompositeSLORoute = createSloServerRoute({
   handler: async ({ params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { soClient, scopedClusterClient, repository } = await getScopedClients({
+    const { soClient, scopedClusterClient, repository, spaceId } = await getScopedClients({
       request,
       logger,
     });
@@ -40,6 +40,9 @@ export const getCompositeSLORoute = createSloServerRoute({
     );
     const getCompositeSLO = new GetCompositeSLO(compositeSloRepository, repository, summaryClient);
 
-    return await getCompositeSLO.execute(params.path.id);
+    return await getCompositeSLO.execute(params.path.id, {
+      spaceId,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
   },
 });
