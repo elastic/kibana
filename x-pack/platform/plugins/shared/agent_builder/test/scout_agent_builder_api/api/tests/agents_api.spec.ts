@@ -33,19 +33,8 @@ apiTest.describe(
       },
     };
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
+    apiTest.beforeAll(async ({ requestAuth }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
-      const cleanup = await apiClient.delete(
-        `${API_AGENT_BUILDER}/agents/${encodeURIComponent(mockAgent.id)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
-      );
-      if (cleanup.statusCode !== 200 && cleanup.statusCode !== 404) {
-        throw new Error(
-          `Unexpected status cleaning up ${mockAgent.id}: ${cleanup.statusCode} ${JSON.stringify(
-            cleanup.body
-          )}`
-        );
-      }
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
@@ -68,7 +57,7 @@ apiTest.describe(
         name: mockAgent.name,
         description: mockAgent.description,
       });
-      expect('configuration' in (response.body as object)).toBe(true);
+      expect(response.body.configuration).toBeDefined();
       expect(response.body.configuration).toMatchObject({
         instructions: mockAgent.configuration.instructions,
         tools: mockAgent.configuration.tools,
@@ -87,7 +76,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(400);
-      expect('message' in (response.body as object)).toBe(true);
+      expect(response.body.message).toBeDefined();
       expect(String(response.body.message)).toContain('Invalid agent id');
     });
 
@@ -135,9 +124,8 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(200);
         expect(response.body).toMatchObject({ id: agentId, visibility: AgentVisibility.Public });
-        const bodyWithCreatedBy = response.body as { created_by?: { username?: string } };
-        expect(bodyWithCreatedBy.created_by).toBeDefined();
-        expect(typeof bodyWithCreatedBy.created_by?.username).toBe('string');
+        expect(response.body.created_by).toBeDefined();
+        expect(typeof response.body.created_by.username).toBe('string');
         createdAgentIds.push(agentId);
       }
     );
@@ -174,7 +162,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(404);
-        expect('message' in (response.body as object)).toBe(true);
+        expect(response.body.message).toBeDefined();
         expect(String(response.body.message)).toContain('not found');
       }
     );
@@ -202,7 +190,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
-      expect('results' in (response.body as object)).toBe(true);
+      expect(response.body.results).toBeDefined();
       expect(Array.isArray(response.body.results)).toBe(true);
       expect(response.body.results.length).toBeGreaterThan(1);
     });
@@ -278,7 +266,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body).toMatchObject({ success: true });
       const removeIdx = createdAgentIds.indexOf('delete-test-agent');
-      // eslint-disable-next-line playwright/prefer-comparison-matcher -- toBeGreaterThanOrEqual doesn't exist
+      // eslint-disable-next-line playwright/prefer-comparison-matcher
       expect(removeIdx >= 0).toBe(true);
       createdAgentIds.splice(removeIdx, 1);
     });
@@ -291,7 +279,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(404);
-        expect('message' in (response.body as object)).toBe(true);
+        expect(response.body.message).toBeDefined();
         expect(String(response.body.message)).toContain('not found');
       }
     );

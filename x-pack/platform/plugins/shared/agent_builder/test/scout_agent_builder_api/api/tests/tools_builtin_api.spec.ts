@@ -76,7 +76,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
-      expect('results' in (response.body as object)).toBe(true);
+      expect(response.body.results).toBeDefined();
     });
   }
 );

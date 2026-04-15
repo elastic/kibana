@@ -244,7 +244,7 @@ apiTest.describe(
       expect(del).toHaveStatusCode(200);
       expect(del.body.success).toBe(true);
       const removeIdx = createdToolIds.indexOf('delete-search-test-tool');
-      // eslint-disable-next-line playwright/prefer-comparison-matcher -- toBeGreaterThanOrEqual doesn't exist
+      // eslint-disable-next-line playwright/prefer-comparison-matcher
       expect(removeIdx >= 0).toBe(true);
       createdToolIds.splice(removeIdx, 1);
     });

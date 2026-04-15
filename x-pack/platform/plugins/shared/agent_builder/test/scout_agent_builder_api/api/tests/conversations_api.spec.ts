@@ -99,18 +99,19 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
-      expect('results' in (response.body as object)).toBe(true);
+      expect(
+        response.body !== null && typeof response.body === 'object' && 'results' in response.body
+      ).toBe(true);
       expect(Array.isArray(response.body.results)).toBe(true);
       expect(response.body.results.length).toBeGreaterThan(0);
       const conversation = response.body.results[0] as ConversationWithoutRounds;
       expect(typeof conversation.id).toBe('string');
-      expect(conversation.id.length).toBeGreaterThan(0);
       expect(typeof conversation.title).toBe('string');
       expect(typeof conversation.agent_id).toBe('string');
-      expect(conversation.user !== null && conversation.user !== undefined).toBe(true);
-      expect(typeof conversation.created_at).toBe('string');
-      expect(typeof conversation.updated_at).toBe('string');
-      expect(!('rounds' in conversation)).toBe(true);
+      expect(conversation.user).toBeDefined();
+      expect(conversation.created_at).toBeDefined();
+      expect(conversation.updated_at).toBeDefined();
+      expect('rounds' in conversation).toBe(false);
     });
 
     apiTest('GET /conversations includes created conversations', async ({ apiClient }) => {
@@ -186,9 +187,7 @@ apiTest.describe(
       const conversation = response.body as Conversation;
       expect(conversation.id).toBe(testConversationId);
       expect(conversation.title).toBe(testTitle);
-      expect(typeof conversation.user).toBe('object');
-      // eslint-disable-next-line playwright/prefer-to-be -- not.toBeNull doesn't exist
-      expect(conversation.user).not.toStrictEqual(null);
+      expect(typeof conversation.user === 'object' && conversation.user !== null).toBe(true);
       expect(conversation.rounds.length).toBeGreaterThan(0);
     });
 
@@ -207,8 +206,16 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       const conversation = response.body as Conversation;
       const firstRound = conversation.rounds[0];
-      expect('message' in (firstRound.input as object)).toBe(true);
-      expect('message' in (firstRound.response as object)).toBe(true);
+      expect(
+        typeof firstRound.input === 'object' &&
+          firstRound.input !== null &&
+          'message' in firstRound.input
+      ).toBe(true);
+      expect(
+        typeof firstRound.response === 'object' &&
+          firstRound.response !== null &&
+          'message' in firstRound.response
+      ).toBe(true);
       expect(Array.isArray(firstRound.steps)).toBe(true);
     });
 

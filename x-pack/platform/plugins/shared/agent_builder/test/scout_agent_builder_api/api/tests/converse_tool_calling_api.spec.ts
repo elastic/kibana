@@ -47,10 +47,6 @@ apiTest.describe(
       connectorId = id;
     });
 
-    apiTest.beforeEach(() => {
-      llmProxy.clear();
-    });
-
     apiTest.afterAll(async ({ apiClient, kbnClient, apmSynthtraceEsClient }) => {
       for (const id of conversationIds) {
         await apiClient.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`, {
@@ -66,7 +62,6 @@ apiTest.describe(
       apiTest(
         `[${mode}] single tool call (search with esql)`,
         async ({ apiClient, apmSynthtraceEsClient }) => {
-          await apmSynthtraceEsClient.clean();
           const myService = apm
             .service({ name: 'java-backend', environment: 'production', agentName: 'java' })
             .instance('my-instance');
@@ -120,7 +115,7 @@ apiTest.describe(
           expect(queryResult.type).toBe('query');
           expect('esql' in queryResult.data ? queryResult.data.esql : '').toBe(MOCKED_ESQL_QUERY);
           expect(esqlResults.type).toBe('esql_results');
-          expect('tool_result_id' in esqlResults).toBe(true);
+          expect(esqlResults.tool_result_id).toBeDefined();
           expect(esqlResults.data.query).toBe(MOCKED_ESQL_QUERY);
           expect(esqlResults.data.values).toHaveLength(15);
           expect(body.response.message).toBe(MOCKED_LLM_RESPONSE);

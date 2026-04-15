@@ -135,10 +135,7 @@ apiTest.describe(
           agentBuilderDefaultAgentId,
           ...testAgents.filter((agent) => agent.spaceId === spaceId).map((agent) => agent.agentId),
         ].sort();
-        const agentIds = agents.map((agent) => agent.id).sort();
-        for (const expectedId of expectedAgents) {
-          expect(agentIds).toContain(expectedId);
-        }
+        expect(agents.map((agent) => agent.id).sort()).toStrictEqual(expectedAgents);
       });
     }
   }

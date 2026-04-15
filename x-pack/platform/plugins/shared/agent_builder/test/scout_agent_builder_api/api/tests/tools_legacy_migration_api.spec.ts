@@ -49,7 +49,7 @@ apiTest.describe(
       },
     };
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient, chatSystemEsClient }) => {
+    apiTest.beforeAll(async ({ requestAuth, apiClient, esClient }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
       await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
         headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
@@ -62,7 +62,7 @@ apiTest.describe(
         },
         responseType: 'json',
       });
-      await chatSystemEsClient.index({
+      await esClient.index({
         index: toolIndex,
         id: legacyToolId,
         refresh: 'wait_for',
@@ -77,10 +77,10 @@ apiTest.describe(
           updated_at: timestamp,
         },
       });
-      await chatSystemEsClient.indices.refresh({ index: toolIndex });
+      await esClient.indices.refresh({ index: toolIndex });
     });
 
-    apiTest.afterAll(async ({ apiClient, chatSystemEsClient }) => {
+    apiTest.afterAll(async ({ apiClient, esClient }) => {
       await apiClient.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(legacyToolId)}`, {
         headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
       });
@@ -88,7 +88,7 @@ apiTest.describe(
         headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
       });
       try {
-        await chatSystemEsClient.delete({ index: toolIndex, id: legacyToolId, refresh: true });
+        await esClient.delete({ index: toolIndex, id: legacyToolId, refresh: true });
       } catch {
         // ignore
       }

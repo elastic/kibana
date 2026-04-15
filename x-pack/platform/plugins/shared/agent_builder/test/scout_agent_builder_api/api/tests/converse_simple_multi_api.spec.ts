@@ -36,12 +36,6 @@ apiTest.describe(
       connectorId = id;
     });
 
-    // Clear after each test so a late proxy request from the previous test cannot
-    // land after the next test's setup (beforeEach clear caused empty interceptors + 500s in task_manager).
-    apiTest.afterEach(() => {
-      llmProxy.clear();
-    });
-
     apiTest.afterAll(async ({ apiClient, kbnClient }) => {
       for (const id of conversationIds) {
         await apiClient.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`, {
@@ -81,11 +75,7 @@ apiTest.describe(
             adminCredentials.apiKeyHeader,
             body.conversation_id
           );
-          // Task manager can persist the placeholder title if the mocked title LLM round does not
-          // run before persistence (ordering vs local execution); response body is still verified above.
-          const allowedTitles =
-            mode === 'task_manager' ? [MOCKED_LLM_TITLE, 'New conversation'] : [MOCKED_LLM_TITLE];
-          expect(allowedTitles).toContain(conversation.title);
+          expect(conversation.title).toBe(MOCKED_LLM_TITLE);
           expect(conversation.rounds[0].response.message).toBe(MOCKED_LLM_RESPONSE);
         }
       );

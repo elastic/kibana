@@ -6,32 +6,13 @@
  */
 
 import { last } from 'lodash';
-import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
 import { createToolCallMessage, createMultiToolCallMessage } from '../llm_proxy';
 
 const getToolChoiceFunctionName = (toolChoice: unknown): string | undefined => {
-  if (typeof toolChoice === 'string') {
-    return toolChoice;
-  }
   if (!toolChoice || typeof toolChoice !== 'object') return undefined;
   const maybe = toolChoice as { function?: { name?: unknown } };
   return typeof maybe.function?.name === 'string' ? maybe.function.name : undefined;
-};
-
-/** Inference/chat_complete may send `system` at the root instead of a `system` role in `messages`. */
-const getRequestSystemText = (body: ChatCompletionStreamParams): string => {
-  const fromMessages = body.messages?.find((message) => message.role === 'system');
-  if (fromMessages?.content !== undefined && fromMessages.content !== null) {
-    return typeof fromMessages.content === 'string'
-      ? fromMessages.content
-      : JSON.stringify(fromMessages.content);
-  }
-  const topLevel = (body as { system?: string }).system;
-  if (typeof topLevel === 'string') {
-    return topLevel;
-  }
-  return '';
 };
 
 export const mockTitleGeneration = (llmProxy: LlmProxy, title: string) => {
@@ -42,14 +23,10 @@ export const mockTitleGeneration = (llmProxy: LlmProxy, title: string) => {
     .intercept({
       name: 'set_title',
       when: (body) => {
-        const systemText = getRequestSystemText(body);
-        const tools = body.tools;
-        const hasSetTitleTool =
-          Array.isArray(tools) &&
-          tools.some((t) => t.type === 'function' && t.function?.name === 'set_title');
+        const systemMessage = body.messages.find((m) => m.role === 'system');
+        const systemText = String(systemMessage?.content ?? '');
         return (
           getToolChoiceFunctionName(body.tool_choice) === 'set_title' ||
-          hasSetTitleTool ||
           systemText.includes('You are a title-generation utility')
         );
       },
@@ -63,14 +40,10 @@ export const mockTitleGenerationWithError = (llmProxy: LlmProxy, error: LLmError
     .intercept({
       name: 'set_title',
       when: (body) => {
-        const systemText = getRequestSystemText(body);
-        const tools = body.tools;
-        const hasSetTitleTool =
-          Array.isArray(tools) &&
-          tools.some((t) => t.type === 'function' && t.function?.name === 'set_title');
+        const systemMessage = body.messages.find((m) => m.role === 'system');
+        const systemText = String(systemMessage?.content ?? '');
         return (
           getToolChoiceFunctionName(body.tool_choice) === 'set_title' ||
-          hasSetTitleTool ||
           systemText.includes('You are a title-generation utility')
         );
       },
@@ -93,7 +66,11 @@ export const mockAgentToolCall = ({
   void llmProxy.interceptors.userMessage({
     name,
     // Avoid accidentally intercepting title generation (it also ends with a user message).
-    when: (body) => !getRequestSystemText(body).includes('You are a title-generation utility'),
+    when: ({ messages }) => {
+      const systemMessage = messages.find((message) => message.role === 'system');
+      const systemText = String(systemMessage?.content ?? '');
+      return !systemText.includes('You are a title-generation utility');
+    },
     response: createToolCallMessage(toolName, toolArg),
   });
 };
@@ -109,7 +86,11 @@ export const mockAgentParallelToolCalls = ({
 }) => {
   void llmProxy.interceptors.userMessage({
     name,
-    when: (body) => !getRequestSystemText(body).includes('You are a title-generation utility'),
+    when: ({ messages }) => {
+      const systemMessage = messages.find((message) => message.role === 'system');
+      const systemText = String(systemMessage?.content ?? '');
+      return !systemText.includes('You are a title-generation utility');
+    },
     response: createMultiToolCallMessage(toolCalls),
   });
 };
@@ -118,10 +99,12 @@ export const mockHandoverToAnswer = (llmProxy: LlmProxy, answer: string | LLmErr
   void llmProxy
     .intercept({
       name: 'handover-to-answer',
-      when: (body) =>
-        getRequestSystemText(body).includes(
+      when: ({ messages }) => {
+        const systemMessage = messages.find((message) => message.role === 'system');
+        return (systemMessage?.content as string).includes(
           'This response will serve as a handover note for the answering agent'
-        ),
+        );
+      },
       responseMock: answer,
     })
     .completeAfterIntercept();
@@ -132,10 +115,7 @@ export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string) => {
     .intercept({
       name: 'final-assistant-response',
       when: (body) => {
-        const systemText = getRequestSystemText(body);
-        // Must not use a catch-all: the first LLM call (e.g. title generation) would match and
-        // pull this interceptor, leaving later calls with an empty proxy (task_manager path).
-        return systemText.includes('Your role is to be the **final answering agent**');
+        return true;
       },
       responseMock: answer,
     })
@@ -214,10 +194,12 @@ export const mockNlToEsql = ({
   // generate esql - generate query call
   void llmProxy.interceptors.toolMessage({
     name: 'generate_esql:generate_query',
-    when: (body) =>
-      getRequestSystemText(body).includes(
+    when: ({ messages }) => {
+      const systemMessage = messages.find((message) => message.role === 'system');
+      return (systemMessage?.content as string).includes(
         `respond to the user's question by providing a valid ES|QL query`
-      ),
+      );
+    },
     response: `Here's the ES|QL query:\`\`\`esql${esqlQuery}\`\`\``,
   });
 };
