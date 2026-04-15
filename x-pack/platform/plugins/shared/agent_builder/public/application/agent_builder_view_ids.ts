@@ -30,4 +30,9 @@ export const agentBuilderViewIds = {
   manageToolCreate: 'agent_builder_manage_tools_create',
   manageToolBulkImportMcp: 'agent_builder_manage_tools_bulk_import_mcp',
   manageToolDetails: 'agent_builder_manage_tools_detail',
+  manageMemory: 'agent_builder_manage_memory',
+  manageMemorySearch: 'agent_builder_manage_memory_search',
+  manageMemoryStats: 'agent_builder_manage_memory_stats',
+  manageMemoryReview: 'agent_builder_manage_memory_review',
+  manageMemoryConfig: 'agent_builder_manage_memory_config',
 } as const;

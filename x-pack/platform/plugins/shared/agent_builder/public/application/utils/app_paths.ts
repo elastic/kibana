@@ -40,6 +40,11 @@ export const appPaths = {
     plugins: '/manage/plugins',
     pluginDetails: ({ pluginId }: { pluginId: string }) => `/manage/plugins/${pluginId}`,
     connectors: '/manage/connectors',
+    memory: '/manage/memory',
+    memorySearch: '/manage/memory/search',
+    memoryStats: '/manage/memory/stats',
+    memoryReview: '/manage/memory/review',
+    memoryConfig: '/manage/memory/config',
   },
 
   // Legacy paths - redirect to new structure via LegacyConversationRedirect

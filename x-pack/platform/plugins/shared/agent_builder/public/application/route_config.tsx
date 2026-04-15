@@ -27,6 +27,11 @@ import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
 import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
+import { AgentBuilderMemoryPage } from './pages/memory';
+import { AgentBuilderMemorySearchPage } from './pages/memory_search';
+import { AgentBuilderMemoryStatsPage } from './pages/memory_stats';
+import { AgentBuilderMemoryReviewPage } from './pages/memory_review';
+import { AgentBuilderMemoryConfigPage } from './pages/memory_config';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
 
 export type SidebarView = 'conversation' | 'manage';
@@ -63,6 +68,9 @@ const navLabels = {
   }),
   agents: i18n.translate('xpack.agentBuilder.routeConfig.agents', {
     defaultMessage: 'Agents',
+  }),
+  memory: i18n.translate('xpack.agentBuilder.routeConfig.memory', {
+    defaultMessage: 'Memory',
   }),
 };
 
@@ -173,6 +181,37 @@ export const manageRoutes: RouteDefinition[] = [
     navLabel: navLabels.connectors,
     isExperimental: true,
     element: <AgentBuilderConnectorsPage />,
+  },
+  {
+    path: '/manage/memory/search',
+    viewId: agentBuilderViewIds.manageMemorySearch,
+    sidebarView: 'manage',
+    element: <AgentBuilderMemorySearchPage />,
+  },
+  {
+    path: '/manage/memory/stats',
+    viewId: agentBuilderViewIds.manageMemoryStats,
+    sidebarView: 'manage',
+    element: <AgentBuilderMemoryStatsPage />,
+  },
+  {
+    path: '/manage/memory/review',
+    viewId: agentBuilderViewIds.manageMemoryReview,
+    sidebarView: 'manage',
+    element: <AgentBuilderMemoryReviewPage />,
+  },
+  {
+    path: '/manage/memory/config',
+    viewId: agentBuilderViewIds.manageMemoryConfig,
+    sidebarView: 'manage',
+    element: <AgentBuilderMemoryConfigPage />,
+  },
+  {
+    path: '/manage/memory',
+    viewId: agentBuilderViewIds.manageMemory,
+    sidebarView: 'manage',
+    navLabel: navLabels.memory,
+    element: <AgentBuilderMemoryPage />,
   },
   {
     path: '/manage/tools',

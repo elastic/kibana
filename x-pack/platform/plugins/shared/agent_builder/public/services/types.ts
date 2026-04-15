@@ -20,6 +20,7 @@ import type { SmlService } from './sml/sml_service';
 import type { PluginsService } from './plugins/plugins_service';
 import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
+import type { MemoryService } from './memory';
 
 export interface AgentBuilderInternalService {
   agentService: AgentService;
@@ -32,6 +33,7 @@ export interface AgentBuilderInternalService {
   skillsService: SkillsService;
   smlService: SmlService;
   pluginsService: PluginsService;
+  memoryService: MemoryService;
   startDependencies: AgentBuilderStartDependencies;
   usageCollection?: UsageCollectionSetup;
   accessChecker: AgentBuilderAccessChecker;
