@@ -90,7 +90,7 @@ apiTest.describe(
         }
       );
       expect(response).toHaveStatusCode(404);
-      expect(response.body).toHaveProperty('message');
+      expect('message' in (response.body as object)).toBe(true);
       expect(String(response.body.message)).toContain('not found');
     });
   }

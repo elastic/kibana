@@ -46,7 +46,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toHaveProperty('message');
+      expect('message' in (response.body as object)).toBe(true);
     });
 
     apiTest('POST rejects duplicate skill id', async ({ apiClient }) => {

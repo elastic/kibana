@@ -50,7 +50,7 @@ export async function createGenAiConnectorForProxy(
       name: 'llm-proxy',
       config: {
         apiProvider: 'OpenAI',
-        apiUrl: `http://localhost:${proxy.getPort()}`,
+        apiUrl: `http://127.0.0.1:${proxy.getPort()}`,
         defaultModel: 'gpt-4',
       },
       secrets: { apiKey: 'myApiKey' },

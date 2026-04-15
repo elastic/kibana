@@ -122,7 +122,7 @@ apiTest.describe(
     });
 
     apiTest('POST /tools/_execute executes indexed ES|QL tool', async ({ apiClient, esClient }) => {
-      const testIndex = 'test-agent-builder-index';
+      const testIndex = `test-agent-builder-index-${Date.now()}`;
       await esClient.indices.create({
         index: testIndex,
         mappings: {
@@ -168,7 +168,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(executeResponse).toHaveStatusCode(200);
-      expect(executeResponse.body).toHaveProperty('results');
+      expect('results' in (executeResponse.body as object)).toBe(true);
 
       await esClient.indices.delete({ index: testIndex });
     });
@@ -260,7 +260,8 @@ apiTest.describe(
       expect(del).toHaveStatusCode(200);
       expect(del.body.success).toBe(true);
       const removeIdx = createdToolIds.indexOf('delete-test-tool');
-      expect(removeIdx).toBeGreaterThanOrEqual(0);
+      // eslint-disable-next-line playwright/prefer-comparison-matcher -- toBeGreaterThanOrEqual doesn't exist
+      expect(removeIdx >= 0).toBe(true);
       createdToolIds.splice(removeIdx, 1);
     });
 

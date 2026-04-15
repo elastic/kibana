@@ -30,11 +30,11 @@ apiTest.describe(
   () => {
     let adminCredentials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ requestAuth, esClient }) => {
+    apiTest.beforeAll(async ({ requestAuth, chatSystemEsClient }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
-      const exists = await esClient.indices.exists({ index: smlIndexName });
+      const exists = await chatSystemEsClient.indices.exists({ index: smlIndexName });
       if (!exists) {
-        await esClient.indices.create({
+        await chatSystemEsClient.indices.create({
           index: smlIndexName,
           mappings: smlElasticsearchIndexMappings,
         });
@@ -49,13 +49,13 @@ apiTest.describe(
 
     apiTest(
       'POST /internal/agent_builder/sml/_search autocomplete',
-      async ({ esClient, apiClient }) => {
+      async ({ chatSystemEsClient, apiClient }) => {
         const runId = randomUUID();
         const chunkId = `sml-ftr-autocomplete-${runId}`;
         const originId = `sml-ftr-origin-${runId}`;
         const indexedTitle = `sml ftr autocomplete pacific bluefin ${runId}`;
         const now = '2024-06-01T12:00:00.000Z';
-        await esClient.index({
+        await chatSystemEsClient.index({
           index: smlIndexName,
           id: chunkId,
           refresh: 'wait_for',
@@ -86,7 +86,11 @@ apiTest.describe(
         expect(match?.origin_id).toBe(originId);
         expect(match?.type).toBe('visualization');
 
-        await esClient.delete({ index: smlIndexName, id: chunkId, refresh: true });
+        try {
+          await chatSystemEsClient.delete({ index: smlIndexName, id: chunkId, refresh: true });
+        } catch {
+          // Document may already be removed.
+        }
       }
     );
 
@@ -164,7 +168,7 @@ apiTest.describe(
 
     apiTest(
       'POST /internal/agent_builder/sml/_attach attaches chunk and persists attachment refs',
-      async ({ apiClient, esClient, log, kbnClient }) => {
+      async ({ apiClient, chatSystemEsClient, log, kbnClient }) => {
         const runId = randomUUID();
         const chunkId = `sml-ftr-attach-${runId}`;
         const indexedTitle = `sml ftr attach ${runId}`;
@@ -172,7 +176,7 @@ apiTest.describe(
         const { id: connectorId } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
 
         const now = '2024-06-01T12:00:00.000Z';
-        await esClient.index({
+        await chatSystemEsClient.index({
           index: smlIndexName,
           id: chunkId,
           refresh: 'wait_for',
@@ -240,7 +244,11 @@ apiTest.describe(
         );
         llmProxy.close();
         await deleteConnectorById(kbnClient, connectorId);
-        await esClient.delete({ index: smlIndexName, id: chunkId, refresh: true });
+        try {
+          await chatSystemEsClient.delete({ index: smlIndexName, id: chunkId, refresh: true });
+        } catch {
+          // Chunk may already be removed by the product path under test.
+        }
       }
     );
   }
