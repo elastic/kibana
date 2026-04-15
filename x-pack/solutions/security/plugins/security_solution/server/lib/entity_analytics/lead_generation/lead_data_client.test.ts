@@ -249,60 +249,6 @@ describe('LeadDataClient', () => {
     });
   });
 
-  describe('getLeadById', () => {
-    it('returns the lead when found', async () => {
-      esClient.search.mockResolvedValueOnce({
-        hits: {
-          total: { value: 1, relation: 'eq' },
-          hits: [
-            {
-              _id: 'lead-1',
-              _index: adhocIndex,
-              _source: {
-                id: 'lead-1',
-                title: 'Found Lead',
-                byline: '',
-                description: '',
-                entities: [],
-                tags: [],
-                priority: 5,
-                chat_recommendations: [],
-                timestamp: new Date().toISOString(),
-                staleness: 'fresh',
-                status: 'active',
-                observations: [],
-                execution_uuid: 'e-1',
-                source_type: 'adhoc',
-              },
-            },
-          ],
-        },
-      } as never);
-
-      const lead = await client.getLeadById('lead-1');
-
-      expect(lead).not.toBeNull();
-      expect(lead!.id).toBe('lead-1');
-      expect(lead!.title).toBe('Found Lead');
-    });
-
-    it('returns null when lead is not found', async () => {
-      esClient.search.mockResolvedValueOnce({
-        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
-      } as never);
-
-      const lead = await client.getLeadById('nonexistent');
-      expect(lead).toBeNull();
-    });
-
-    it('returns null on search error', async () => {
-      esClient.search.mockRejectedValueOnce(new Error('index_not_found'));
-
-      const lead = await client.getLeadById('lead-1');
-      expect(lead).toBeNull();
-    });
-  });
-
   describe('dismissLead', () => {
     it('sets status to dismissed via updateByQuery', async () => {
       esClient.updateByQuery.mockResolvedValueOnce({

@@ -90,13 +90,13 @@ describe('aggregationStats', () => {
     expect(aggregationStats([keywordField()], true)).toBe(
       `${recentData(
         'host.name'
-      )} = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE host.name IS NOT NULL`
+      )} = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE TO_STRING(host.name) IS NOT NULL`
     );
   });
 
   it('should keep raw destination when renameToRecent is false', () => {
     expect(aggregationStats([keywordField()], false)).toBe(
-      `host.name = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE host.name IS NOT NULL`
+      `host.name = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE TO_STRING(host.name) IS NOT NULL`
     );
   });
 
@@ -108,7 +108,7 @@ describe('aggregationStats', () => {
       retention: { operation: 'collect_values', maxLength: 10 },
     };
     expect(aggregationStats([field], false)).toBe(
-      'tags = MV_DEDUPE(TOP(TO_STRING(tags), 10)) WHERE tags IS NOT NULL'
+      'tags = MV_DEDUPE(TOP(TO_STRING(tags), 10)) WHERE TO_STRING(tags) IS NOT NULL'
     );
   });
 
@@ -120,7 +120,7 @@ describe('aggregationStats', () => {
       retention: { operation: 'collect_values', maxLength: 50 },
     };
     expect(aggregationStats([field], false)).toBe(
-      'entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE entity.source IS NOT NULL'
+      'entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE TO_STRING(entity.source) IS NOT NULL'
     );
   });
 
@@ -132,7 +132,7 @@ describe('aggregationStats', () => {
       retention: { operation: 'prefer_oldest_value' },
     };
     expect(aggregationStats([field], false)).toBe(
-      `event.created = FIRST(TO_DATETIME(event.created), ${TIMESTAMP_FIELD}) WHERE event.created IS NOT NULL`
+      `event.created = FIRST(TO_DATETIME(event.created), ${TIMESTAMP_FIELD}) WHERE TO_DATETIME(event.created) IS NOT NULL`
     );
   });
 
