@@ -20,7 +20,6 @@ export const findService = {
         id,
         status: 'success',
         attributes: result.data,
-        references: result.data.references ?? [],
       };
     } catch (error) {
       return { id, status: 'error', notFound: error instanceof SavedObjectNotFound, error };
@@ -33,7 +32,7 @@ export const findService = {
   },
   findByTitle: async (title: string) => {
     const { dashboards } = await dashboardClient.search({
-      search: title,
+      query: title,
       per_page: 10,
     });
 

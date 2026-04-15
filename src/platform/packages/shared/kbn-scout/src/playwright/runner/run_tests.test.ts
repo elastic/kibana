@@ -8,12 +8,37 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { hasTestsInPlaywrightConfig } from './run_tests';
+import { getPlaywrightProject, hasTestsInPlaywrightConfig } from './run_tests';
 import { execPromise } from '../utils';
+import { ScoutTestTarget } from '@kbn/scout-info';
 
 jest.mock('../utils', () => ({
   execPromise: jest.fn(),
 }));
+
+describe('getPlaywrightProject', () => {
+  it('returns "local" for testTarget with location "local"', () => {
+    expect(getPlaywrightProject(new ScoutTestTarget('local', 'stateful', 'classic'))).toBe('local');
+  });
+
+  it('returns "ech" for cloud stateful testTarget', () => {
+    expect(getPlaywrightProject(new ScoutTestTarget('cloud', 'stateful', 'classic'))).toBe('ech');
+  });
+
+  it('returns "mki" for cloud serverless testTarget', () => {
+    expect(getPlaywrightProject(new ScoutTestTarget('cloud', 'serverless', 'search'))).toBe('mki');
+  });
+
+  it('throws for unknown location', () => {
+    expect(() =>
+      getPlaywrightProject({
+        location: 'unknown',
+        arch: 'stateful',
+        domain: 'classic',
+      } as unknown as ScoutTestTarget)
+    ).toThrow(/Unable to determine Playwright project for test target/);
+  });
+});
 
 describe('hasTestsInPlaywrightConfig', () => {
   let mockLog: ToolingLog;

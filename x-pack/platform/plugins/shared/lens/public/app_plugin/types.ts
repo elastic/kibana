@@ -76,6 +76,8 @@ export interface LensTopNavMenuProps {
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
   // The initial input passed in by the container when editing. Can be either by reference or by value.
   initialInput?: LensSerializedState;
+  // State passed in by the container when editing from a dashboard panel
+  incomingState?: EmbeddableEditorState;
   getIsByValueMode: () => boolean;
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -84,7 +86,6 @@ export interface LensTopNavMenuProps {
   lensInspector: LensInspector;
   goBackToOriginatingApp?: () => void;
   contextOriginatingApp?: string;
-  initialContextIsEmbedded?: boolean;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: LensDocument | undefined;

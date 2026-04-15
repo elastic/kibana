@@ -32,6 +32,8 @@
           "; signal: AbortSignal; configPath?: string | undefined; grpcPort?: number | undefined; httpPort?: number | undefined; }) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
             "label": "{\n  log,\n  signal,\n  configPath,\n  grpcPort = 4317,\n  httpPort = 4318,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+            "lineNumber": 71,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -63,6 +67,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "lineNumber": 72,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -77,6 +83,8 @@
                   "AbortSignal"
                 ],
                 "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "lineNumber": 73,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -91,6 +99,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "lineNumber": 74,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -105,6 +115,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "lineNumber": 75,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -119,6 +131,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "lineNumber": 76,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -127,9 +141,173 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/edot-collector",
+        "id": "def-server.getEdotCollectorConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "getEdotCollectorConfig",
+        "description": [
+          "\nReturns the EDOT Collector configuration as a plain object.\nUseful when callers need to extend the config before serializing.\n"
+        ],
+        "signature": [
+          "({\n  elasticsearchEndpoint,\n  username,\n  password,\n}: ",
+          {
+            "pluginId": "@kbn/edot-collector",
+            "scope": "server",
+            "docId": "kibKbnEdotCollectorPluginApi",
+            "section": "def-server.EdotCollectorParams",
+            "text": "EdotCollectorParams"
+          },
+          ") => Record<string, unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/edot-collector",
+            "id": "def-server.getEdotCollectorConfig.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  elasticsearchEndpoint,\n  username,\n  password,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/edot-collector",
+                "scope": "server",
+                "docId": "kibKbnEdotCollectorPluginApi",
+                "section": "def-server.EdotCollectorParams",
+                "text": "EdotCollectorParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts",
+            "lineNumber": 26,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/edot-collector",
+        "id": "def-server.getEdotCollectorConfiguration",
+        "type": "Function",
+        "tags": [],
+        "label": "getEdotCollectorConfiguration",
+        "description": [
+          "\nGenerates the OpenTelemetry Collector configuration for the EDOT Collector.\n"
+        ],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "@kbn/edot-collector",
+            "scope": "server",
+            "docId": "kibKbnEdotCollectorPluginApi",
+            "section": "def-server.EdotCollectorParams",
+            "text": "EdotCollectorParams"
+          },
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/edot-collector",
+            "id": "def-server.getEdotCollectorConfiguration.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/edot-collector",
+                "scope": "server",
+                "docId": "kibKbnEdotCollectorPluginApi",
+                "section": "def-server.EdotCollectorParams",
+                "text": "EdotCollectorParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts",
+            "lineNumber": 107,
+            "columnNumber": 47,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "YAML configuration string for the EDOT Collector"
+        ],
+        "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/edot-collector",
+        "id": "def-server.EdotCollectorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "EdotCollectorParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/edot-collector",
+            "id": "def-server.EdotCollectorParams.elasticsearchEndpoint",
+            "type": "string",
+            "tags": [],
+            "label": "elasticsearchEndpoint",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/edot-collector",
+            "id": "def-server.EdotCollectorParams.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/edot-collector",
+            "id": "def-server.EdotCollectorParams.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []

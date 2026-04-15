@@ -49,8 +49,10 @@ export interface ConfirmPromptDefinition {
 }
 
 export interface ConfirmationPromptResponse {
-  confirmed: boolean;
+  allow: boolean;
 }
+
+export type PromptResponse = ConfirmationPromptResponse;
 
 export interface ConfirmationPrompt extends ConfirmPromptDefinition {
   type: AgentPromptType.confirmation;
@@ -62,3 +64,17 @@ export type PromptRequest = ConfirmationPrompt;
 export const isConfirmationPrompt = (prompt: PromptRequest): prompt is ConfirmationPrompt => {
   return prompt.type === AgentPromptType.confirmation;
 };
+
+export interface ConfirmationPromptResponseState {
+  type: AgentPromptType.confirmation;
+  response: ConfirmationPromptResponse;
+}
+
+export type PromptResponseState = ConfirmationPromptResponseState;
+
+/**
+ * The internal representation of the prompt storage state for the conversation.
+ */
+export interface PromptStorageState {
+  responses: Record<string, PromptResponseState>;
+}

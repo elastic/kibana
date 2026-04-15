@@ -43,6 +43,7 @@ import {
   NoDataState,
 } from '../../ui_components/chart_preview/chart_preview_helper';
 import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
+import { DEFAULT_GROUP_BY_TRANSACTION_ERROR_RATE } from '../../../../../common/rules/get_all_groupby_fields';
 
 export interface ErrorRateRuleParams {
   windowSize?: number;
@@ -72,6 +73,8 @@ export function TransactionErrorRateRuleType(props: Props) {
     createCallApmApi(services as CoreStart);
   }, [services]);
 
+  const isNewRule = ruleParams.threshold === undefined;
+
   const params = defaults(
     { ...omit(metadata, ['start', 'end']), ...ruleParams },
     {
@@ -79,6 +82,7 @@ export function TransactionErrorRateRuleType(props: Props) {
       windowSize: 5,
       windowUnit: TIME_UNITS.MINUTE,
       environment: ENVIRONMENT_ALL.value,
+      ...(isNewRule && { groupBy: [...DEFAULT_GROUP_BY_TRANSACTION_ERROR_RATE] }),
     }
   );
 
@@ -209,14 +213,14 @@ export function TransactionErrorRateRuleType(props: Props) {
         })}
         helpText={i18n.translate('xpack.apm.ruleFlyout.errorRate.createAlertPerHelpText', {
           defaultMessage:
-            'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name, service.environment and transaction.type.',
+            'Create an alert for every unique value. By default, alert is created for every unique service.name, service.environment, transaction.type and transaction.name.',
         })}
         fullWidth
         display="rowCompressed"
       >
         <APMRuleGroupBy
           onChange={onGroupByChange}
-          options={{ groupBy: ruleParams.groupBy }}
+          options={{ groupBy: params.groupBy }}
           fields={[TRANSACTION_NAME]}
           preSelectedOptions={[SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE]}
         />

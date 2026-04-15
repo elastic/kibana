@@ -25,7 +25,7 @@ export const NoDeprecationIssues: FunctionComponent<Props> = (props) => {
     <EuiText color="success">
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="checkInCircleFilled" />
+          <EuiIcon type="checkCircleFill" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false} data-test-subj={props['data-test-subj']}>

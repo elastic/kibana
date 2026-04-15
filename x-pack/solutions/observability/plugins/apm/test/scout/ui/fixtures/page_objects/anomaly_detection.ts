@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '../constants';
@@ -55,7 +55,9 @@ export class AnomalyDetectionPage {
     await this.selectEnvironment(environmentName);
     await this.clickCreateJobsButton();
 
-    this.page.getByText('Anomaly detection jobs created');
+    await this.page
+      .getByText('Anomaly detection jobs created')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   async deleteMlJob() {

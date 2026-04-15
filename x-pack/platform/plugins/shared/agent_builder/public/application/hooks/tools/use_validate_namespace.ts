@@ -11,17 +11,22 @@ import { useAgentBuilderServices } from '../use_agent_builder_service';
 
 export interface UseValidateNamespaceOptions {
   namespace: string;
+  connectorId?: string;
   enabled?: boolean;
 }
 
-export const useValidateNamespace = ({ namespace, enabled }: UseValidateNamespaceOptions) => {
+export const useValidateNamespace = ({
+  namespace,
+  connectorId,
+  enabled,
+}: UseValidateNamespaceOptions) => {
   const { toolsService } = useAgentBuilderServices();
 
   const isEnabled = enabled ?? namespace.length > 0;
 
   const { data, isLoading, error, isError, isFetching } = useQuery({
-    queryKey: queryKeys.tools.namespace.validate(namespace),
-    queryFn: () => toolsService.validateNamespace({ namespace }),
+    queryKey: queryKeys.tools.namespace.validate(namespace, connectorId),
+    queryFn: () => toolsService.validateNamespace({ namespace, connectorId }),
     enabled: isEnabled,
     staleTime: 0,
   });

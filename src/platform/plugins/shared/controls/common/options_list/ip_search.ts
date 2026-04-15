@@ -13,13 +13,58 @@ export interface IpRangeQuery {
   validSearch: boolean;
   rangeQuery?: Array<{ key: string; from: string; to: string } | { key: string; mask: string }>;
 }
+
+export type IpType = 'ipv4' | 'ipv6';
 interface IpSegments {
   segments: string[];
-  type: 'ipv4' | 'ipv6' | 'unknown';
+  type: IpType | 'unknown';
 }
 
 export const getIsValidFullIp = (searchString: string) => {
   return ipaddr.IPv4.isValidFourPartDecimal(searchString) || ipaddr.IPv6.isValid(searchString);
+};
+
+export const getIsCidrNotation = (searchString: string): boolean => {
+  return /^[A-Fa-f0-9.:]+\/\d+$/.test(searchString);
+};
+
+/**
+ * Validates a CIDR notation string and determines the IP type (IPv4 or IPv6).
+ */
+export const getValidCidrRange = (searchString: string): { isValid: boolean; ipType?: IpType } => {
+  try {
+    // CIDR notation must contain a slash separating the IP part and the prefix length
+    // Valid examples: "192.168.0.0/24", "2001:db8::/64"
+    const slashIndex = searchString.lastIndexOf('/');
+    if (slashIndex === -1) {
+      return { isValid: false };
+    }
+    // Validate only the IP part before the slash
+    const ipPart = searchString.substring(0, slashIndex);
+    if (!getIsValidFullIp(ipPart)) {
+      return { isValid: false };
+    }
+    // Let ipaddr.js handle CIDR parsing and normalization
+    const [ip, prefixLength] = ipaddr.parseCIDR(searchString);
+    const ipType = ip.kind() as IpType;
+    // IPv4 allows prefixes up to /32, IPv6 up to /128
+    const maxPrefixLength = ipType === 'ipv4' ? 32 : 128;
+    if (prefixLength < 0 || prefixLength > maxPrefixLength) {
+      return { isValid: false };
+    }
+    return { isValid: true, ipType };
+  } catch {
+    // Any parsing error means the CIDR notation is invalid
+    return { isValid: false };
+  }
+};
+
+const buildCidrRangeQuery = (searchString: string): IpRangeQuery['rangeQuery'] => {
+  const cidrValidation = getValidCidrRange(searchString);
+  if (!cidrValidation.isValid || !cidrValidation.ipType) {
+    return undefined;
+  }
+  return [{ key: cidrValidation.ipType, mask: searchString }];
 };
 
 export const getIpSegments = (searchString: string): IpSegments => {
@@ -37,7 +82,7 @@ export const getIpSegments = (searchString: string): IpSegments => {
 };
 
 export const getMinMaxIp = (
-  type: 'ipv4' | 'ipv6',
+  type: IpType,
   segments: IpSegments['segments']
 ): { min: string; max: string } => {
   const isIpv4 = type === 'ipv4';
@@ -101,8 +146,13 @@ const buildPartialIpSearchRangeQuery = (segments: IpSegments): IpRangeQuery['ran
 };
 
 export const getIpRangeQuery = (searchString: string): IpRangeQuery => {
-  if (searchString.match(/^[A-Fa-f0-9.:]*$/) === null) {
+  if (searchString.match(/^[A-Fa-f0-9.:\/]*$/) === null) {
     return { validSearch: false };
+  }
+
+  if (getIsCidrNotation(searchString)) {
+    const cidrRangeQuery = buildCidrRangeQuery(searchString);
+    return { validSearch: Boolean(cidrRangeQuery), rangeQuery: cidrRangeQuery };
   }
 
   const ipSegments = getIpSegments(searchString);

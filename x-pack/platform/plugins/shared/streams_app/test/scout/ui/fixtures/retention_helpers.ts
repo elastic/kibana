@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, type Locator, type ScoutPage } from '@kbn/scout';
+import { type Locator, type ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 /**
  * Wait for an element to be visible and enabled (not disabled)
@@ -383,6 +384,7 @@ export async function setFailureStoreRetention(
   }
 
   await page.getByTestId('failureStoreModalSaveButton').click();
+  await expect(page.getByRole('dialog')).toBeHidden();
 }
 
 /**
@@ -399,6 +401,7 @@ export async function toggleFailureStore(page: ScoutPage, enabled: boolean): Pro
   await waitForElementToBeEnabled(page, 'enableFailureStoreToggle');
   await page.getByTestId('enableFailureStoreToggle').click();
   await page.getByTestId('failureStoreModalSaveButton').click();
+  await expect(page.getByRole('dialog')).toBeHidden();
 }
 
 /**

@@ -27,7 +27,7 @@ exports[`FieldIcon renders known field types _source is rendered 1`] = `
   aria-label="_source"
   className="kbnFieldIcon"
   color="gray"
-  iconType="editorCodeBlock"
+  iconType="code"
   size="s"
   title="_source"
 />
@@ -102,6 +102,16 @@ exports[`FieldIcon renders known field types date is rendered 1`] = `
   iconType="tokenDate"
   size="s"
   title="date"
+/>
+`;
+
+exports[`FieldIcon renders known field types date_nanos is rendered 1`] = `
+<EuiToken
+  aria-label="date_nanos"
+  className="kbnFieldIcon"
+  iconType="tokenDate"
+  size="s"
+  title="date_nanos"
 />
 `;
 
@@ -292,6 +302,16 @@ exports[`FieldIcon renders known field types nested is rendered 1`] = `
   iconType="tokenNested"
   size="s"
   title="nested"
+/>
+`;
+
+exports[`FieldIcon renders known field types null is rendered 1`] = `
+<EuiToken
+  aria-label="null"
+  className="kbnFieldIcon"
+  iconType="tokenNull"
+  size="s"
+  title="null"
 />
 `;
 

@@ -58,6 +58,12 @@ export const getLegendActions = (
       return null;
     }
 
+    // Don't show filter actions for computed columns
+    const column = visData.columns[columnIndex];
+    if (column?.isComputedColumn === true) {
+      return null;
+    }
+
     const title = getFilterPopoverTitle(
       visParams,
       visData,
@@ -77,7 +83,7 @@ export const getLegendActions = (
             defaultMessage: 'Filter for',
           }),
           'data-test-subj': `legend-${title}-filterIn`,
-          icon: <EuiIcon type="plusInCircle" size="m" />,
+          icon: <EuiIcon type="plusCircle" size="m" />,
           onClick: () => {
             setPopoverOpen(false);
             onFilter(filterData);
@@ -88,7 +94,7 @@ export const getLegendActions = (
             defaultMessage: 'Filter out',
           }),
           'data-test-subj': `legend-${title}-filterOut`,
-          icon: <EuiIcon type="minusInCircle" size="m" />,
+          icon: <EuiIcon type="minusCircle" size="m" />,
           onClick: () => {
             setPopoverOpen(false);
             onFilter(filterData, true);

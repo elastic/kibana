@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type, TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
+import type {
+  ObjectResultType,
+  ObjectType,
+  Props,
+  TypeOptions,
+} from '@kbn/config-schema/src/types';
+import type { ObjectUnionType } from './charts/utils/object_union';
+import { objectUnion } from './charts/utils/object_union';
 import type { MetricState } from './charts/metric';
 import { metricStateSchema } from './charts/metric';
 import type { LegacyMetricState } from './charts/legacy_metric';
@@ -19,42 +26,25 @@ import type { HeatmapState } from './charts/heatmap';
 import { heatmapStateSchema } from './charts/heatmap';
 import type { TagcloudState } from './charts/tagcloud';
 import { tagcloudStateSchema } from './charts/tagcloud';
-import type { MosaicStateESQL, MosaicStateNoESQL } from './charts/mosaic';
 import type { XYState } from './charts/xy';
 import { xyStateSchema } from './charts/xy';
-import { mosaicStateSchema } from './charts/mosaic';
-import type { PieStateESQL, PieStateNoESQL } from './charts/pie';
-import { pieStateSchema } from './charts/pie';
-import type { TreemapStateESQL, TreemapStateNoESQL } from './charts/treemap';
-import { treemapStateSchema } from './charts/treemap';
-import type { WaffleStateESQL, WaffleStateNoESQL } from './charts/waffle';
-import { waffleStateSchema } from './charts/waffle';
 import type { RegionMapState } from './charts/region_map';
 import { regionMapStateSchema } from './charts/region_map';
+import type { DatatableState } from './charts/datatable';
+import { datatableStateSchema } from './charts/datatable';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
-
-export const partitionStateSchema = schema.oneOf([
-  mosaicStateSchema,
-  pieStateSchema,
-  treemapStateSchema,
-  waffleStateSchema,
-]);
-
-export type PartitionState = TypeOf<typeof partitionStateSchema>;
-export type PartitionStateNoESQL =
-  | MosaicStateNoESQL
-  | PieStateNoESQL
-  | TreemapStateNoESQL
-  | WaffleStateNoESQL;
-export type PartitionStateESQL =
-  | MosaicStateESQL
-  | PieStateESQL
-  | TreemapStateESQL
-  | WaffleStateESQL;
+import type { MosaicState } from './charts/mosaic';
+import { mosaicStateSchema } from './charts/mosaic';
+import type { TreemapState } from './charts/treemap';
+import { treemapStateSchema } from './charts/treemap';
+import type { WaffleState } from './charts/waffle';
+import { waffleStateSchema } from './charts/waffle';
+import type { PieState } from './charts/pie';
+import { pieStateSchema } from './charts/pie';
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
@@ -64,18 +54,23 @@ export type PartitionStateESQL =
  *  - Defining the `LensApiState` type from the schema types
  *  - Exporting this value as `Type<LensApiState>`
  */
-export const _lensApiStateSchema: any = schema.oneOf([
-  metricStateSchema,
-  legacyMetricStateSchema,
-  xyStateSchema,
-  gaugeStateSchema,
-  heatmapStateSchema,
-  tagcloudStateSchema,
-  // disable for now to avoid type issues at the config builder root level
-  // TODO: enabled once transformations are available
-  // partitionStateSchema,
-  regionMapStateSchema,
-]);
+export const _lensApiStateSchema: any = objectUnion(
+  [
+    ...metricStateSchema.getUnionTypes(),
+    ...legacyMetricStateSchema.getUnionTypes(),
+    ...xyStateSchema.getUnionTypes(),
+    ...gaugeStateSchema.getUnionTypes(),
+    ...heatmapStateSchema.getUnionTypes(),
+    ...tagcloudStateSchema.getUnionTypes(),
+    ...regionMapStateSchema.getUnionTypes(),
+    ...datatableStateSchema.getUnionTypes(),
+    ...pieStateSchema.getUnionTypes(),
+    ...mosaicStateSchema.getUnionTypes(),
+    ...treemapStateSchema.getUnionTypes(),
+    ...waffleStateSchema.getUnionTypes(),
+  ],
+  { meta: { id: 'lensApiState', title: 'Visualizations' } }
+);
 
 export type LensApiState =
   | MetricState
@@ -84,19 +79,41 @@ export type LensApiState =
   | XYState
   | HeatmapState
   | TagcloudState
-  | RegionMapState;
+  | RegionMapState
+  | DatatableState
+  | PieState
+  | MosaicState
+  | TreemapState
+  | WaffleState;
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
+/**
+ * Extends `lensApiStateSchema` with extra props and options.
+ *
+ * This type will be be union of all `LensApiState` intersected with the new props.
+ */
+export function extendLensApiStateSchema<T extends Props>(
+  props: T,
+  options?: TypeOptions<LensApiState & T>
+): Type<LensApiState & ObjectResultType<T>> {
+  // these types are a bit of a hack mainly due to the tsc compiler limit
+  // but baseSchema can extend with any props correctly and return the correct `Type` wrapper
+  const baseSchema = _lensApiStateSchema as ObjectUnionType<[ObjectType<any>], LensApiState & T>;
+  return baseSchema.extends(props, options as any).toType();
+}
+
 export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
-export type { XYState } from './charts/xy';
+export type { XYState, XYStateNoESQL, XYStateESQL, XYLayer } from './charts/xy';
 export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
 export type { HeatmapState, heatmapStateSchemaNoESQL } from './charts/heatmap';
 export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
 export type { RegionMapState, RegionMapStateNoESQL, RegionMapStateESQL } from './charts/region_map';
+export type { DatatableState, DatatableStateNoESQL, DatatableStateESQL } from './charts/datatable';
 export { tagcloudStateSchema } from './charts/tagcloud';
 export { regionMapStateSchema } from './charts/region_map';
+export { datatableStateSchema } from './charts/datatable';
 
 export type {
   LensApiFieldMetricOrFormulaOperation,

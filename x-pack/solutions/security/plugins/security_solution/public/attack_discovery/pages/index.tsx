@@ -19,13 +19,16 @@ import {
   QUERY_LOCAL_STORAGE_KEY,
   START_LOCAL_STORAGE_KEY,
   useAssistantContext,
-  useLoadConnectors,
 } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import { ATTACKS_ALERTS_ALIGNMENT_ENABLED, SecurityPageName } from '../../../common/constants';
+import {
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  SecurityPageName,
+} from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { useKibana } from '../../common/lib/kibana';
@@ -52,13 +55,13 @@ export const ID = 'attackDiscoveryQuery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const {
-    services: { featureFlags, uiSettings, settings },
+    services: { uiSettings, settings },
   } = useKibana();
 
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
-    inferenceEnabled,
+    featureId: 'attack_discovery',
     settings,
   });
 
@@ -192,6 +195,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           size,
           start,
           overrideConnectorId: overrideOptions?.overrideConnectorId,
+          overrideConnectorName: overrideOptions?.overrideConnectorId
+            ? getConnectorNameFromId({
+                aiConnectors,
+                connectorId: overrideOptions.overrideConnectorId,
+              })
+            : undefined,
           overrideEnd: overrideOptions?.overrideEnd,
           overrideFilter: overrideOptions?.overrideFilter,
           overrideSize: overrideOptions?.overrideSize,
@@ -202,6 +211,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       }
     },
     [
+      aiConnectors,
       end,
       fetchAttackDiscoveries,
       filterQuery,
@@ -224,8 +234,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const onClose = useCallback(() => setShowFlyout(false), []);
 
-  const attacksAlertsAlignmentEnabled = featureFlags.getBooleanValue(
-    ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  const enableAlertsAndAttacksAlignment = uiSettings.get(
+    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
     false
   );
 
@@ -251,7 +261,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
         <EuiSpacer size="s" />
 
-        {attacksAlertsAlignmentEnabled && (
+        {enableAlertsAndAttacksAlignment && (
           <>
             <MovingAttacksCallout />
             <EuiSpacer size="s" />

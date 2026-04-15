@@ -230,6 +230,114 @@ describe('Textbased Data Source', () => {
         }
       `);
     });
+
+    it('uses label when customLabel is true', () => {
+      const map = TextBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'a',
+                  fieldName: 'bucket_0_0',
+                  label: 'Avg',
+                  customLabel: true,
+                  meta: {
+                    type: 'number',
+                  },
+                },
+                {
+                  columnId: 'b',
+                  fieldName: 'bucket_1_1',
+                  label: 'Sum',
+                  customLabel: true,
+                  meta: {
+                    type: 'number',
+                  },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState,
+        {}
+      );
+
+      expect(map).toMatchInlineSnapshot(`
+        Object {
+          "a": "Avg",
+          "b": "Sum",
+        }
+      `);
+    });
+
+    it('uses fieldName when customLabel is false even if label differs', () => {
+      const map = TextBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'a',
+                  fieldName: 'AVG(bytes)',
+                  label: 'count',
+                  customLabel: false,
+                  meta: {
+                    type: 'number',
+                  },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState,
+        {}
+      );
+
+      expect(map).toMatchInlineSnapshot(`
+        Object {
+          "a": "AVG(bytes)",
+        }
+      `);
+    });
+
+    it('falls back to fieldName when label is not present', () => {
+      const map = TextBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'a',
+                  fieldName: 'bucket_0_0',
+                  meta: {
+                    type: 'number',
+                  },
+                },
+                {
+                  columnId: 'b',
+                  fieldName: 'bucket_1_1',
+                  label: 'Sum',
+                  customLabel: true,
+                  meta: {
+                    type: 'number',
+                  },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState,
+        {}
+      );
+
+      expect(map).toMatchInlineSnapshot(`
+        Object {
+          "a": "bucket_0_0",
+          "b": "Sum",
+        }
+      `);
+    });
   });
 
   describe('#getPersistedState', () => {
@@ -699,7 +807,7 @@ describe('Textbased Data Source', () => {
   });
 
   describe('#isTimeBased', () => {
-    it('should return true if timefield name exists on the dataview', () => {
+    it('should return true if timeField is set on the layer', () => {
       const state = {
         layers: {
           a: {
@@ -721,6 +829,7 @@ describe('Textbased Data Source', () => {
             ],
             query: { esql: 'FROM foo' },
             index: '1',
+            timeField: '@timestamp',
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -730,7 +839,7 @@ describe('Textbased Data Source', () => {
         })
       ).toEqual(true);
     });
-    it('should return false if timefield name not exists on the selected dataview', () => {
+    it('should return false if timeField is not set on the layer', () => {
       const state = {
         layers: {
           a: {
@@ -758,9 +867,102 @@ describe('Textbased Data Source', () => {
       expect(
         TextBasedDatasource.isTimeBased(state, {
           ...indexPatterns,
-          '1': { ...indexPatterns['1'], timeFieldName: undefined },
         })
       ).toEqual(false);
+    });
+  });
+
+  describe('#initialize', () => {
+    it('should hydrate timeField from indexPatterns when layer has no timeField', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: '1',
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, indexPatterns);
+      expect(result.layers.a.timeField).toBe('timestamp');
+    });
+
+    it('should not overwrite timeField when layer already has one', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: '1',
+            timeField: 'custom_time',
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, indexPatterns);
+      expect(result.layers.a.timeField).toBe('custom_time');
+    });
+
+    it('should not hydrate when indexPatterns is undefined', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: '1',
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, undefined);
+      expect(result.layers.a.timeField).toBeUndefined();
+    });
+
+    it('should leave layer unchanged when layer.index does not match any indexPattern', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+            query: { esql: 'FROM unknown' },
+            index: 'non-existent',
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, indexPatterns);
+      expect(result.layers.a.timeField).toBeUndefined();
+    });
+
+    it('should hydrate each layer independently', () => {
+      const patternsWithNoTime = {
+        ...indexPatterns,
+        '2': { ...indexPatterns['1'], id: '2', timeFieldName: undefined },
+      };
+      const state = {
+        layers: {
+          a: {
+            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: '1',
+          },
+          b: {
+            columns: [{ columnId: 'col2', fieldName: 'src', meta: { type: 'string' } }],
+            query: { esql: 'FROM bar' },
+            index: '2',
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = TextBasedDatasource.initialize(
+        state,
+        [],
+        undefined,
+        undefined,
+        patternsWithNoTime
+      );
+      expect(result.layers.a.timeField).toBe('timestamp');
+      expect(result.layers.b.timeField).toBeUndefined();
     });
   });
 
@@ -878,6 +1080,52 @@ describe('Textbased Data Source', () => {
         expect(publicAPI.getTableSpec()).toEqual([
           { columnId: 'col1', fields: ['Test 1'] },
           { columnId: 'col2', fields: ['Test 2'] },
+        ]);
+      });
+
+      it('should return non-metric columns before metric columns', () => {
+        const state = {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'metric1',
+                  fieldName: 'bytes',
+                  meta: { type: 'number' },
+                  inMetricDimension: true,
+                },
+                {
+                  columnId: 'row1',
+                  fieldName: 'agent',
+                  meta: { type: 'string' },
+                },
+                {
+                  columnId: 'metric2',
+                  fieldName: 'memory',
+                  meta: { type: 'number' },
+                  inMetricDimension: true,
+                },
+                {
+                  columnId: 'row2',
+                  fieldName: 'host',
+                  meta: { type: 'string' },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState;
+
+        publicAPI = TextBasedDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+        });
+        expect(publicAPI.getTableSpec()).toEqual([
+          { columnId: 'row1', fields: ['agent'] },
+          { columnId: 'row2', fields: ['host'] },
+          { columnId: 'metric1', fields: ['bytes'] },
+          { columnId: 'metric2', fields: ['memory'] },
         ]);
       });
 
@@ -1034,6 +1282,34 @@ describe('Textbased Data Source', () => {
         'reduced',
         'reduced',
       ]);
+    });
+  });
+
+  describe('#getRenderEventCounters', () => {
+    it('should return correct counter for esql query', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [
+              {
+                columnId: 'col1',
+                fieldName: 'Test 1',
+                meta: {
+                  type: 'number',
+                },
+              },
+            ],
+            query: { esql: 'FROM foo' },
+            index: 'foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const counters =
+        TextBasedDatasource.getRenderEventCounters &&
+        TextBasedDatasource.getRenderEventCounters(state);
+
+      expect(counters).toEqual(['esql_chart']);
     });
   });
 });

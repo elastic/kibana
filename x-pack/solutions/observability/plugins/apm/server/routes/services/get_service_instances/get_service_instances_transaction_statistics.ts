@@ -6,6 +6,10 @@
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
+  getDurationFieldForTransactions,
+  calculateThroughputWithRange,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
@@ -15,13 +19,12 @@ import { EventOutcome } from '../../../../common/event_outcome';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import type { Coordinate } from '../../../../typings/timeseries';
+import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../../common/utils/red_metric_value_for_histogram_bucket';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getBackwardCompatibleDocumentTypeFilter,
-  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
@@ -166,21 +169,33 @@ export async function getServiceInstancesTransactionStatistics<T extends true | 
         const { timeseries } = serviceNodeBucket;
         return {
           serviceNodeName,
-          errorRate: timeseries.buckets.map((dateBucket) => ({
-            x: dateBucket.key,
-            y: dateBucket.failures.doc_count / dateBucket.doc_count,
-          })),
-          throughput: timeseries.buckets.map((dateBucket) => ({
-            x: dateBucket.key,
-            y: dateBucket.doc_count / bucketSizeInMinutes,
-          })),
-          latency: timeseries.buckets.map((dateBucket) => ({
-            x: dateBucket.key,
-            y: getLatencyValue({
-              aggregation: dateBucket.latency,
-              latencyAggregationType,
-            }),
-          })),
+          errorRate: nullifyLeadingTrailingEmptyRedMetricPoints(
+            timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              docCount: dateBucket.doc_count,
+              y:
+                dateBucket.doc_count > 0
+                  ? dateBucket.failures.doc_count / dateBucket.doc_count
+                  : null,
+            }))
+          ),
+          throughput: nullifyLeadingTrailingEmptyRedMetricPoints(
+            timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              docCount: dateBucket.doc_count,
+              y: dateBucket.doc_count / bucketSizeInMinutes,
+            }))
+          ),
+          latency: nullifyLeadingTrailingEmptyRedMetricPoints(
+            timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              docCount: dateBucket.doc_count,
+              y: getLatencyValue({
+                aggregation: dateBucket.latency,
+                latencyAggregationType,
+              }),
+            }))
+          ),
         };
       } else {
         const { failures, latency } = serviceNodeBucket;

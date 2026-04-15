@@ -13,6 +13,54 @@ import type { StoredLinksByValueState910 } from './bwc';
 import { transformOut } from './transform_out';
 
 describe('transformOut', () => {
+  test('should convert camelCase dashboard link options by-value state to snake_case', () => {
+    const byValueState = {
+      title: 'Custom title',
+      layout: 'vertical',
+      links: [
+        {
+          type: 'dashboardLink',
+          destination: 'https://github.com/',
+          options: {
+            openInNewTab: false,
+            useCurrentDateRange: false,
+            useCurrentFilters: false,
+          } as LinkOptions,
+        },
+      ],
+    } as LinksEmbeddableState;
+    expect(transformOut(byValueState, []).links?.[0].options).toMatchInlineSnapshot(`
+      Object {
+        "open_in_new_tab": false,
+        "use_filters": false,
+        "use_time_range": false,
+      }
+    `);
+  });
+
+  test('should convert camelCase external link options by-value state to snake_case', () => {
+    const byValueState = {
+      title: 'Custom title',
+      layout: 'vertical',
+      links: [
+        {
+          type: 'externalLink',
+          destination: 'https://github.com/',
+          options: {
+            openInNewTab: false,
+            encodeUrl: true,
+          } as LinkOptions,
+        },
+      ],
+    } as LinksEmbeddableState;
+    expect(transformOut(byValueState, []).links?.[0].options).toMatchInlineSnapshot(`
+      Object {
+        "encode_url": true,
+        "open_in_new_tab": false,
+      }
+    `);
+  });
+
   test('should remove options for other link types in by-value state', () => {
     const byValueState = {
       title: 'Custom title',
@@ -20,35 +68,44 @@ describe('transformOut', () => {
       links: [
         {
           type: 'externalLink',
-          id: 'e2ab286f-0945-4e17-b256-f497b6c3102e',
-          order: 0,
           destination: 'https://github.com/',
           options: {
-            openInNewTab: true,
+            open_in_new_tab: true,
             // these are dashboard link options saved in external link
             // state because of editor UI bug
-            useCurrentDateRange: true,
-            useCurrentFilters: true,
+            use_time_range: true,
+            use_filters: true,
           } as LinkOptions,
         },
       ],
     } as LinksEmbeddableState;
-    expect(transformOut(byValueState, [])).toMatchInlineSnapshot(`
+    expect(transformOut(byValueState, []).links?.[0].options).toMatchInlineSnapshot(`
       Object {
-        "layout": "vertical",
-        "links": Array [
-          Object {
-            "destination": "https://github.com/",
-            "id": "e2ab286f-0945-4e17-b256-f497b6c3102e",
-            "options": Object {
-              "openInNewTab": true,
-            },
-            "order": 0,
-            "type": "externalLink",
-          },
-        ],
-        "title": "Custom title",
+        "open_in_new_tab": true,
       }
+    `);
+  });
+
+  test('should remove 9.3.0 properties from links in by-value state', () => {
+    const byValueState = {
+      title: 'Custom title',
+      layout: 'vertical',
+      links: [
+        {
+          type: 'externalLink',
+          destination: 'https://github.com/',
+          id: 'e2ab286f-0945-4e17-b256-f497b6c3102e',
+          order: 0,
+        },
+      ],
+    } as StoredLinksEmbeddableState;
+    expect(transformOut(byValueState, []).links).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "destination": "https://github.com/",
+          "type": "externalLink",
+        },
+      ]
     `);
   });
 
@@ -59,8 +116,6 @@ describe('transformOut', () => {
       links: [
         {
           type: 'dashboardLink',
-          id: 'e2ab286f-0945-4e17-b256-f497b6c3102e',
-          order: 0,
           destinationRefName: 'link_e2ab286f-0945-4e17-b256-f497b6c3102e_dashboard',
         },
       ],
@@ -78,8 +133,6 @@ describe('transformOut', () => {
         "links": Array [
           Object {
             "destination": "7adfa750-4c81-11e8-b3d7-01146121b73d",
-            "id": "e2ab286f-0945-4e17-b256-f497b6c3102e",
-            "order": 0,
             "type": "dashboardLink",
           },
         ],
@@ -116,8 +169,6 @@ describe('transformOut', () => {
         "links": Array [
           Object {
             "destination": "7adfa750-4c81-11e8-b3d7-01146121b73d",
-            "id": "e2ab286f-0945-4e17-b256-f497b6c3102e",
-            "order": 0,
             "type": "dashboardLink",
           },
         ],

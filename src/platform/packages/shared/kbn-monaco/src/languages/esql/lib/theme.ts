@@ -94,6 +94,19 @@ export const buildEsqlTheme = ({
       foreground: colors.primary,
       fontStyle: 'bold',
     },
+
+    // ------------------------------------------------------------ promql query
+    // PromQL keywords are tokenized as "type"
+    {
+      token: 'type.promql',
+      foreground: colors.primary,
+    },
+
+    // PromQl tags (same as our identifiers)
+    {
+      token: 'tag.promql',
+      foreground: colors.textParagraph,
+    },
   ];
 
   // `lightestShade` and `emptyShade` are deprecated, so we backfill them with

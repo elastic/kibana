@@ -42,11 +42,17 @@ import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-
 import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
-import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { PluginSetup as KqlServerPluginSetup } from '@kbn/kql/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AnonymizationPluginStart } from '@kbn/anonymization-plugin/server';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import type { EntityStoreSetupContract, EntityStoreStartContract } from '@kbn/entity-store/server';
+import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -69,9 +75,11 @@ export interface SecuritySolutionPluginSetupDependencies {
   usageCollection?: UsageCollectionPluginSetup;
   licensing: LicensingPluginSetup;
   osquery: OsqueryPluginSetup;
-  unifiedSearch: UnifiedSearchServerPluginSetup;
+  kql: KqlServerPluginSetup;
   share?: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  entityStore?: EntityStoreSetupContract;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
@@ -81,6 +89,7 @@ export interface SecuritySolutionPluginStartDependencies {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  entityStore: EntityStoreStartContract;
   elasticAssistant: ElasticAssistantPluginStart;
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;
@@ -93,7 +102,9 @@ export interface SecuritySolutionPluginStartDependencies {
   share: SharePluginStart;
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
+  anonymization: AnonymizationPluginStart;
   llmTasks?: LlmTasksPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface SecuritySolutionPluginSetup {

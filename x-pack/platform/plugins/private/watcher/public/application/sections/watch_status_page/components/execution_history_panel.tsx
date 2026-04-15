@@ -330,6 +330,13 @@ export const ExecutionHistoryPanel = () => {
               </h4>
             </EuiTitle>
             <EuiInMemoryTable
+              tableCaption={i18n.translate(
+                'xpack.watcher.sections.watchHistory.watchHistoryDetail.actionsTableCaption',
+                {
+                  defaultMessage: 'Action statuses for execution on {date}',
+                  values: { date: watchHistoryDetails.startTime?.format() },
+                }
+              )}
               items={(watchHistoryDetails.watchStatus as any).actionStatuses}
               itemId="id"
               columns={detailColumns}
@@ -379,6 +386,9 @@ export const ExecutionHistoryPanel = () => {
       <EuiSpacer size="s" />
 
       <EuiInMemoryTable
+        tableCaption={i18n.translate('xpack.watcher.sections.watchHistory.watchTable.caption', {
+          defaultMessage: 'Watch execution history',
+        })}
         items={history || []}
         columns={columns}
         pagination={PAGINATION}

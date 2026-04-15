@@ -15,6 +15,7 @@ import type {
   graphResponseSchema,
   groupNodeDataSchema,
   labelNodeDataSchema,
+  relationshipNodeDataSchema,
   nodeColorSchema,
   nodeShapeSchema,
   nodeDocumentDataSchema,
@@ -22,7 +23,11 @@ import type {
 } from '../../schema/graph/v1';
 import { REACHED_NODES_LIMIT } from '../../schema/graph/v1';
 
-export { DOCUMENT_TYPE_ALERT, DOCUMENT_TYPE_EVENT } from '../../schema/graph/v1';
+export {
+  DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+} from '../../schema/graph/v1';
 
 export type GraphRequest = Omit<TypeOf<typeof graphRequestSchema>, 'query.esQuery'> & {
   query: { esQuery?: { bool: Partial<BoolQuery> } };
@@ -49,9 +54,17 @@ export type GroupNodeDataModel = TypeOf<typeof groupNodeDataSchema>;
 
 export type LabelNodeDataModel = TypeOf<typeof labelNodeDataSchema>;
 
+export type RelationshipNodeDataModel = TypeOf<typeof relationshipNodeDataSchema>;
+
 export type EdgeDataModel = TypeOf<typeof edgeDataSchema>;
 
-export type NodeDataModel = EntityNodeDataModel | GroupNodeDataModel | LabelNodeDataModel;
+export type ConnectorNodeType = 'label' | 'relationship';
+
+export type NodeDataModel =
+  | EntityNodeDataModel
+  | GroupNodeDataModel
+  | LabelNodeDataModel
+  | RelationshipNodeDataModel;
 
 export type NodeDocumentDataModel = TypeOf<typeof nodeDocumentDataSchema>;
 

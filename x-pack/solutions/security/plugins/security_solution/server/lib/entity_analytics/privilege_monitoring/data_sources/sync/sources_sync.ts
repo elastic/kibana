@@ -27,17 +27,20 @@ export const createSourcesSyncService = (dataClient: PrivilegeMonitoringDataClie
       soClient,
       namespace: deps.namespace,
     });
-    const sources = await monitoringIndexSourceClient.findSourcesByType(sourceType); // this will be index or integration
+    const { sources } = await monitoringIndexSourceClient.list({ type: sourceType }); // this will be index or integration
     if (sources.length === 0) {
       dataClient.log('debug', `No ${sourceType} monitoring sources found. Skipping sync.`);
       return;
     }
-    const results = await Promise.allSettled(sources.map((s) => process(s)));
-    results.forEach((result) => {
-      if (result.status === 'rejected') {
-        dataClient.log('warn', `Source processing failed: ${String(result.reason)}`);
+    // Process sources sequentially to avoid race conditions when multiple sources
+    // reference the same index and try to create/update the same users simultaneously
+    for (const source of sources) {
+      try {
+        await process(source);
+      } catch (error) {
+        dataClient.log('warn', `Source processing failed: ${String(error)}`);
       }
-    });
+    }
   };
 
   return {

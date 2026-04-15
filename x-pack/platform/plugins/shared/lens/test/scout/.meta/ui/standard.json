@@ -1,0 +1,18 @@
+{
+  "sha1": "465f30cd0567b92b8187c0effa76f92a87e8020e",
+  "tests": [
+    {
+      "id": "0c1ac4bcdc59b0c-2867e4a4bffc4e3",
+      "title": "Lens Convert to ES|QL button should not display button for inline visualizations when feature flag is set to false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion_disabled.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    }
+  ]
+}

@@ -27,15 +27,13 @@
       "kibanaReact",
       "kibanaUtils",
       "lens",
+      "licensing",
       "share",
-      "taskManager",
       "triggersActionsUi",
       "unifiedSearch",
     ],
     "optionalPlugins": [
       "alerting",
-      "telemetry",
-      "usageCollection",
     ],
     "requiredBundles": [
       "charts",

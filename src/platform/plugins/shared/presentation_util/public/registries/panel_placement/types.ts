@@ -8,7 +8,6 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { PanelPlacementStrategy } from './constants';
 
 export interface PanelPlacementSettings {
@@ -29,5 +28,5 @@ export type PanelSettings = Partial<{
 }>;
 
 export type PanelSettingsGetter<SerializedState extends object = object> = (
-  serializedState?: SerializedPanelState<SerializedState>
+  serializedState?: SerializedState
 ) => MaybePromise<PanelSettings>;

@@ -10,6 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import * as t from 'io-ts';
 import {
   budgetingMethodSchema,
+  dashboardsWithIdSchema,
   indicatorSchema,
   objectiveSchema,
   optionalSettingsSchema,
@@ -28,9 +29,16 @@ interface SearchParams {
   search?: string;
   tags?: string[];
 }
+
+interface TagsAggregationResponse {
+  tagsAggs: {
+    buckets: Array<{ key: string; doc_count: number }>;
+  };
+}
 export interface SLOTemplateRepository {
   findById(templateId: string): Promise<SLOTemplate>;
   search(params: SearchParams): Promise<Paginated<SLOTemplate>>;
+  tags(): Promise<string[]>;
 }
 
 export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
@@ -70,6 +78,27 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
       page: response.page,
       results: response.saved_objects.map((so) => this.toSloTemplate(so.id, so.attributes)),
     };
+  }
+
+  async tags(): Promise<string[]> {
+    const response = await this.soClient.find<StoredSLOTemplate>({
+      type: SO_SLO_TEMPLATE_TYPE,
+      perPage: 0,
+      aggs: {
+        tagsAggs: {
+          terms: {
+            field: `${SO_SLO_TEMPLATE_TYPE}.attributes.tags`,
+            size: 10000,
+            order: {
+              _key: 'asc',
+            },
+          },
+        },
+      },
+    });
+
+    const aggs = response.aggregations as TagsAggregationResponse | undefined;
+    return aggs?.tagsAggs?.buckets?.map(({ key }) => key) ?? [];
   }
 
   // We use .decode() instead of .is() when objects contains durationType fields
@@ -123,6 +152,10 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
 
       if (stored.groupBy && t.array(t.string).is(stored.groupBy)) {
         template.groupBy = stored.groupBy;
+      }
+
+      if (stored.artifacts && dashboardsWithIdSchema.is(stored.artifacts)) {
+        template.artifacts = stored.artifacts;
       }
 
       return template;

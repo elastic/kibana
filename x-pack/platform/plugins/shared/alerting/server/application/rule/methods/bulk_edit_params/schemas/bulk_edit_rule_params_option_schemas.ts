@@ -5,17 +5,26 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { validFields } from '../../../../../../common/constants';
 
-const bulkEditExceptionListField = schema.literal('exceptionsList');
+const bulkEditExceptionListField = schema.literal(validFields.EXCEPTIONS_LIST);
+const bulkEditNoteField = schema.literal(validFields.NOTE);
+const bulkEditInvestigationFieldsField = schema.literal(validFields.INVESTIGATION_FIELDS);
+const bulkEditRuleSourceField = schema.literal(validFields.RULE_SOURCE);
 
 export const bulkEditParamsOperationSchema = schema.object({
   operation: schema.literal('set'),
-  field: schema.oneOf([bulkEditExceptionListField]),
-  value: schema.any(),
+  field: schema.oneOf([
+    bulkEditExceptionListField,
+    bulkEditNoteField,
+    bulkEditInvestigationFieldsField,
+    bulkEditRuleSourceField,
+  ]),
+  value: schema.maybe(schema.any()),
 });
 
 export const bulkEditParamsOperationsSchema = schema.arrayOf(bulkEditParamsOperationSchema, {
-  minSize: 1,
+  maxSize: 2000,
 });
 
 export const bulkEditRuleParamsOptionsSchema = schema.object({
@@ -25,11 +34,19 @@ export const bulkEditRuleParamsOptionsSchema = schema.object({
 });
 
 const bulkEditExceptionListParamField = schema.literal('params.exceptionsList');
+const bulkEditNoteParamField = schema.literal('params.note');
+const bulkEditInvestigationFieldsParamField = schema.literal('params.investigationFields');
+const bulkEditRuleSourceParamField = schema.literal('params.ruleSource');
 
 export const bulkEditRuleParamsOperationSchema = schema.object({
   operation: schema.literal('set'),
-  field: schema.oneOf([bulkEditExceptionListParamField]),
-  value: schema.any(),
+  field: schema.oneOf([
+    bulkEditExceptionListParamField,
+    bulkEditNoteParamField,
+    bulkEditInvestigationFieldsParamField,
+    bulkEditRuleSourceParamField,
+  ]),
+  value: schema.maybe(schema.any()),
 });
 
 export const bulkEditRuleParamsOperationsSchema = schema.arrayOf(

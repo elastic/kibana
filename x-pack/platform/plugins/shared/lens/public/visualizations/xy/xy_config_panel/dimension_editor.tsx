@@ -18,34 +18,40 @@ import type { ValuesType } from 'utility-types';
 import type { KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
 import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
-import type { XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
+import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { XYVisualizationState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import type { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
 import { getDataLayers } from '../visualization_helpers';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { getSortedAccessors } from '../to_expression';
-import { getColorAssignments, getAssignedColorConfig } from '../color_assignment';
+import {
+  getColorAssignments,
+  getAssignedColorConfig,
+  getLayerPaletteName,
+} from '../color_assignment';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 
 export const idPrefix = htmlIdGenerator()();
 
 function updateLayer(
-  state: XYState,
+  state: XYVisualizationState,
   index: number,
-  layer: ValuesType<XYState['layers']>,
-  newLayer: Partial<ValuesType<XYState['layers']>>
-): XYState['layers'] {
+  layer: ValuesType<XYVisualizationState['layers']>,
+  newLayer: Partial<ValuesType<XYVisualizationState['layers']>>
+): XYVisualizationState['layers'] {
   const newLayers = [...state.layers];
   newLayers[index] = {
     ...layer,
     ...newLayer,
-  } as ValuesType<XYState['layers']>;
+  } as ValuesType<XYVisualizationState['layers']>;
 
   return newLayers;
 }
 
 export function DataDimensionEditor(
-  props: VisualizationDimensionEditorProps<XYState> & {
+  props: VisualizationDimensionEditorProps<XYVisualizationState> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
     palettes: KbnPalettes;
@@ -56,13 +62,14 @@ export function DataDimensionEditor(
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index] as XYDataLayerConfig;
 
-  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
-    value: props.state,
-    onChange: props.setState,
-  });
+  const { inputValue: localState, handleInputChange: setLocalState } =
+    useDebouncedValue<XYVisualizationState>({
+      value: props.state,
+      onChange: props.setState,
+    });
 
   const updateLayerState = useCallback(
-    (layerIndex: number, newLayer: Partial<ValuesType<XYState['layers']>>) => {
+    (layerIndex: number, newLayer: Partial<ValuesType<XYVisualizationState['layers']>>) => {
       setLocalState({
         ...localState,
         layers: updateLayer(localState, layerIndex, layer, newLayer),
@@ -136,10 +143,32 @@ export function DataDimensionEditor(
 
   if (props.groupId === 'breakdown') {
     const currentData = props.frame.activeData?.[layer.layerId];
-    const splitCategories = getColorCategories(currentData?.rows, layer.splitAccessor);
-    const columnMeta = currentData?.columns?.find(({ id }) => id === layer.splitAccessor)?.meta;
-    const allowCustomMatch = canCreateCustomMatch(columnMeta);
-    const formatter = props.formatFactory(columnMeta?.params);
+    const splitCategories = getColorCategories(currentData?.rows, layer.splitAccessors);
+
+    let formatter: IFieldFormat;
+    let allowCustomMatch = false;
+    if (layer.splitAccessors && layer.splitAccessors.length > 1) {
+      // build the splitAccessor formatter on the fly as combination of each columns formatter
+      formatter = props.formatFactory({
+        id: 'multi_terms',
+        params: {
+          paramsPerField: layer.splitAccessors.map((a) => {
+            const meta = currentData?.columns?.find(({ id }) => id === a)?.meta;
+            return {
+              id: meta?.params?.id ?? 'string',
+            };
+          }),
+          separator: MULTI_FIELD_KEY_SEPARATOR,
+        },
+      });
+      allowCustomMatch = false;
+    } else {
+      const columnMeta = currentData?.columns?.find(({ id }) =>
+        layer.splitAccessors?.includes(id)
+      )?.meta;
+      allowCustomMatch = canCreateCustomMatch(columnMeta);
+      formatter = props.formatFactory(columnMeta?.params);
+    }
 
     return !layer.collapseFn ? (
       <div className="lnsIndexPatternDimensionEditor--padded">
@@ -162,7 +191,9 @@ export function DataDimensionEditor(
   }
 
   const isHorizontal = isHorizontalChart(state.layers);
-  const disabledMessage = Boolean(!layer.collapseFn && layer.splitAccessor)
+  const swatchPalette =
+    props.palettes.get(getLayerPaletteName(layer)) ?? props.palettes.get(KbnPalette.Default);
+  const disabledMessage = Boolean(!layer.collapseFn && (layer.splitAccessors ?? []).length > 0)
     ? i18n.translate('xpack.lens.xyChart.colorPicker.tooltip.disabled', {
         defaultMessage:
           'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',
@@ -176,7 +207,7 @@ export function DataDimensionEditor(
         overwriteColor={overwriteColor}
         defaultColor={assignedColor}
         disabledMessage={disabledMessage}
-        swatches={props.palettes.get(KbnPalette.Default).colors(10)}
+        swatches={swatchPalette.colors(10)}
         setConfig={setConfig}
       />
 
@@ -237,7 +268,7 @@ export function DataDimensionEditor(
 }
 
 export function DataDimensionEditorDataSectionExtra(
-  props: VisualizationDimensionEditorProps<XYState> & {
+  props: VisualizationDimensionEditorProps<XYVisualizationState> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
   }
@@ -246,13 +277,14 @@ export function DataDimensionEditorDataSectionExtra(
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index] as XYDataLayerConfig;
 
-  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
-    value: props.state,
-    onChange: props.setState,
-  });
+  const { inputValue: localState, handleInputChange: setLocalState } =
+    useDebouncedValue<XYVisualizationState>({
+      value: props.state,
+      onChange: props.setState,
+    });
 
   const updateLayerState = useCallback(
-    (layerIndex: number, newLayer: Partial<ValuesType<XYState['layers']>>) => {
+    (layerIndex: number, newLayer: Partial<ValuesType<XYVisualizationState['layers']>>) => {
       setLocalState({
         ...localState,
         layers: updateLayer(localState, layerIndex, layer, newLayer),

@@ -28,13 +28,13 @@
     "optionalPlugins": [
       "cases",
       "observabilityAIAssistant",
-      "usageCollection"
+      "usageCollection",
+      "cps"
     ],
     "requiredBundles": [
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
-      "embeddable",
       "cases"
     ]
   }

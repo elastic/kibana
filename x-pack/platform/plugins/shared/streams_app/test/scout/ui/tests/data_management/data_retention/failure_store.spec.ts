@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
@@ -30,13 +31,15 @@ test.describe('Stream data retention - updating failure store', () => {
       },
       { meta: true }
     );
-    await apiServices.streams.forkStream('logs', 'logs.nginx', {
+    // Ensure logs.otel has a backing data stream (deferred by default) so retention UI renders
+    await apiServices.streams.restoreDataStream('logs.otel');
+    await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
       field: 'service.name',
       eq: 'nginx',
     });
     await esClient.indices.putDataStreamOptions(
       {
-        name: 'logs.nginx',
+        name: 'logs.otel.nginx',
         failure_store: {
           enabled: true,
         },
@@ -52,13 +55,13 @@ test.describe('Stream data retention - updating failure store', () => {
   });
 
   test.afterAll(async ({ logsSynthtraceEsClient, apiServices }) => {
-    await apiServices.streams.clearStreamChildren('logs');
+    await apiServices.streams.clearStreamChildren('logs.otel');
     await logsSynthtraceEsClient.clean();
   });
 
   test(
     'should edit failure store successfully for classic streams',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
@@ -74,7 +77,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should disable failure store for classic streams',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
@@ -87,7 +90,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should enable failure store for classic streams',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
@@ -103,7 +106,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should be able to disable lifecycle for classic if is not serverless',
-    { tag: '@ess' },
+    { tag: tags.stateful.classic },
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
@@ -126,7 +129,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should inherit failure store for classic streams',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
@@ -147,9 +150,9 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should edit failure store successfully for wired streams',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       await setFailureStoreRetention(page, '7', 'd');
       await verifyRetentionDisplay(page, '7 days', true);
@@ -163,9 +166,9 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should disable failure store for wired streams',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Disable failure store
       await page.getByTestId('streamFailureStoreEditRetention').click();
@@ -179,9 +182,9 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should enable failure store for wired streams',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Enable failure store again
       await page.getByTestId('streamsAppFailureStoreEnableButton').click();
@@ -200,9 +203,9 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should be able to disable lifecycle for wired streams on ESS',
-    { tag: '@ess' },
+    { tag: tags.stateful.classic },
     async ({ page, pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       await page.getByTestId('streamFailureStoreEditRetention').click();
 
@@ -223,9 +226,9 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should inherit failure store for child wired streams',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Enable inherit failure store
       await page.getByTestId('streamFailureStoreEditRetention').click();
@@ -242,9 +245,9 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should not inherit failure store for root wired streams',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel');
 
       // Try to enable inherit failure store - the switch should not be visible for root streams
       await page.getByTestId('streamFailureStoreEditRetention').click();
@@ -254,7 +257,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should set failure store retention to different value than main retention',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
@@ -276,7 +279,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should persist failure store retention across page reload',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
@@ -292,7 +295,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should cancel failure store retention edit',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
@@ -315,7 +318,7 @@ test.describe('Stream data retention - updating failure store', () => {
 
   test(
     'should show failure store disabled state',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 

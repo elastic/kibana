@@ -25,11 +25,15 @@
         "type": "Function",
         "tags": [],
         "label": "addReferences",
-        "description": [],
+        "description": [
+          "\nAdds package IDs to the `kbn_references` array in a JSONC source string.\nIf the `kbn_references` property does not exist, it is created."
+        ],
         "signature": [
           "(source: string, refsToAdd: string[]) => string"
         ],
         "path": "packages/kbn-json-ast/src/references.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,11 +43,15 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "- The JSONC source text to modify."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 25,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -54,17 +62,23 @@
             "type": "Array",
             "tags": [],
             "label": "refsToAdd",
-            "description": [],
+            "description": [
+              "- The package IDs to add."
+            ],
             "signature": [
               "string[]"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 25,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The modified JSONC source text."
+        ],
         "initialIsOpen": false
       },
       {
@@ -73,11 +87,15 @@
         "type": "Function",
         "tags": [],
         "label": "getPropFromSource",
-        "description": [],
+        "description": [
+          "\nParses a JSONC source string and returns the AST node for a named property."
+        ],
         "signature": [
           "(source: string, name: string) => (babel.types.ObjectProperty & { key: babel.types.StringLiteral; }) | undefined"
         ],
         "path": "packages/kbn-json-ast/src/props.ts",
+        "lineNumber": 107,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -87,11 +105,15 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "- The JSONC source text to parse."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 113,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -102,17 +124,23 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "- The property name to look up."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 113,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The matching `ObjectProperty` node, or `undefined` if not found."
+        ],
         "initialIsOpen": false
       },
       {
@@ -121,11 +149,15 @@
         "type": "Function",
         "tags": [],
         "label": "removeAllReferences",
-        "description": [],
+        "description": [
+          "\nRemoves the entire `kbn_references` property from a JSONC source string.\nIf the property does not exist, the source is returned unchanged."
+        ],
         "signature": [
           "(source: string) => string"
         ],
         "path": "packages/kbn-json-ast/src/references.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,17 +167,23 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "- The JSONC source text to modify."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 73,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The modified JSONC source text."
+        ],
         "initialIsOpen": false
       },
       {
@@ -154,11 +192,15 @@
         "type": "Function",
         "tags": [],
         "label": "removeCompilerOption",
-        "description": [],
+        "description": [
+          "\nRemoves a compiler option from a JSONC tsconfig source string. Throws if the\n`compilerOptions` block or the named option does not exist."
+        ],
         "signature": [
           "(source: string, name: string) => string"
         ],
         "path": "packages/kbn-json-ast/src/compiler_options.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,11 +210,15 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "- The JSONC tsconfig source text to modify."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
+            "lineNumber": 98,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -183,17 +229,23 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "- The compiler option name to remove."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
+            "lineNumber": 98,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The modified JSONC source text."
+        ],
         "initialIsOpen": false
       },
       {
@@ -203,12 +255,14 @@
         "tags": [],
         "label": "removeProp",
         "description": [
-          "\nRemoves a property from a JSONc object. If the property does not exist the source is just returned"
+          "\nRemoves a named property from a JSONC object. If the property does not exist\nthe source is returned unchanged."
         ],
         "signature": [
           "(source: string, key: string, opts: { node?: babel.types.ObjectExpression | undefined; } | undefined) => string"
         ],
         "path": "packages/kbn-json-ast/src/props.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -218,11 +272,15 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "- The JSONC source text to modify."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -233,11 +291,15 @@
             "type": "string",
             "tags": [],
             "label": "key",
-            "description": [],
+            "description": [
+              "- The property key to remove."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -248,8 +310,12 @@
             "type": "Object",
             "tags": [],
             "label": "opts",
-            "description": [],
+            "description": [
+              "- Optional configuration."
+            ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 43,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -259,18 +325,24 @@
                 "type": "Object",
                 "tags": [],
                 "label": "node",
-                "description": [],
+                "description": [
+                  "- The AST node of the object to modify. When provided, skips"
+                ],
                 "signature": [
                   "babel.types.ObjectExpression | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The modified JSONC source text, or the original if the property does not exist."
+        ],
         "initialIsOpen": false
       },
       {
@@ -279,11 +351,15 @@
         "type": "Function",
         "tags": [],
         "label": "removeReferences",
-        "description": [],
+        "description": [
+          "\nRemoves specific entries from the `kbn_references` array in a JSONC source string.\nThrows if the property does not exist or any of the specified refs are not found."
+        ],
         "signature": [
           "(source: string, refs: string[]) => string"
         ],
         "path": "packages/kbn-json-ast/src/references.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -293,11 +369,15 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "- The JSONC source text to modify."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 89,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -308,17 +388,23 @@
             "type": "Array",
             "tags": [],
             "label": "refs",
-            "description": [],
+            "description": [
+              "- The package IDs to remove."
+            ],
             "signature": [
               "string[]"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 89,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The modified JSONC source text."
+        ],
         "initialIsOpen": false
       },
       {
@@ -327,11 +413,15 @@
         "type": "Function",
         "tags": [],
         "label": "replaceReferences",
-        "description": [],
+        "description": [
+          "\nReplaces object-style reference entries (those with a `path` property) in\n`kbn_references` with plain package ID strings."
+        ],
         "signature": [
           "(source: string, replacements: [path: string, pkgId: string][]) => string"
         ],
         "path": "packages/kbn-json-ast/src/references.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -341,11 +431,15 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "- The JSONC source text to modify."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -356,17 +450,23 @@
             "type": "Array",
             "tags": [],
             "label": "replacements",
-            "description": [],
+            "description": [
+              "- Tuples of `[path, pkgId]` where `path` identifies the"
+            ],
             "signature": [
               "[path: string, pkgId: string][]"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The modified JSONC source text."
+        ],
         "initialIsOpen": false
       },
       {
@@ -375,11 +475,15 @@
         "type": "Function",
         "tags": [],
         "label": "setCompilerOption",
-        "description": [],
+        "description": [
+          "\nSets a compiler option in a JSONC tsconfig source string. If the\n`compilerOptions` property does not exist, it is created. If the option\nalready exists, its value is replaced."
+        ],
         "signature": [
           "(source: string, name: string, value: any) => string"
         ],
         "path": "packages/kbn-json-ast/src/compiler_options.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -389,11 +493,15 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "- The JSONC tsconfig source text to modify."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
+            "lineNumber": 41,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -404,11 +512,15 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "- The compiler option name to set."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
+            "lineNumber": 41,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -419,17 +531,23 @@
             "type": "Any",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "- The compiler option value. Intentionally typed as `any` because valid"
+            ],
             "signature": [
               "any"
             ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
+            "lineNumber": 41,
+            "columnNumber": 65,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The modified JSONC source text."
+        ],
         "initialIsOpen": false
       },
       {
@@ -438,11 +556,15 @@
         "type": "Function",
         "tags": [],
         "label": "setExtends",
-        "description": [],
+        "description": [
+          "\nSets the `extends` property at the top of a JSONC tsconfig source string.\nIf the property already exists, its value is replaced."
+        ],
         "signature": [
           "(jsonc: string, value: string) => string"
         ],
         "path": "packages/kbn-json-ast/src/extends.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -452,11 +574,15 @@
             "type": "string",
             "tags": [],
             "label": "jsonc",
-            "description": [],
+            "description": [
+              "- The JSONC tsconfig source text to modify."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/extends.ts",
+            "lineNumber": 19,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -467,17 +593,23 @@
             "type": "string",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "- The path to set as the `extends` value."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/extends.ts",
+            "lineNumber": 19,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The modified JSONC source text."
+        ],
         "initialIsOpen": false
       },
       {
@@ -486,11 +618,15 @@
         "type": "Function",
         "tags": [],
         "label": "setProp",
-        "description": [],
+        "description": [
+          "\nSets a property in a JSONC source string. If the property already exists its\nvalue is replaced; otherwise it is inserted according to the `opts` configuration."
+        ],
         "signature": [
           "(source: string, key: string, value: any, opts: { insertAtTop?: boolean | undefined; insertAfter?: babel.types.ObjectProperty | undefined; node?: babel.types.ObjectExpression | undefined; spaces?: string | undefined; } | undefined) => string"
         ],
         "path": "packages/kbn-json-ast/src/props.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -500,11 +636,15 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "- The JSONC source text to modify."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -515,11 +655,15 @@
             "type": "string",
             "tags": [],
             "label": "key",
-            "description": [],
+            "description": [
+              "- The property key to set."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -530,11 +674,15 @@
             "type": "Any",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "- The property value. Intentionally typed as `any` because valid JSON"
+            ],
             "signature": [
               "any"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -545,8 +693,12 @@
             "type": "Object",
             "tags": [],
             "label": "opts",
-            "description": [],
+            "description": [
+              "- Optional configuration."
+            ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 78,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -557,12 +709,14 @@
                 "tags": [],
                 "label": "insertAtTop",
                 "description": [
-                  "by default, if the key isn't already in the json, it will be added at the bottom. Set this to true to add the key at the top instead"
+                  "- When `true`, new properties are inserted at the top of the"
                 ],
                 "signature": [
                   "boolean | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
+                "lineNumber": 79,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -573,12 +727,14 @@
                 "tags": [],
                 "label": "insertAfter",
                 "description": [
-                  "by default, if the key isn't already in the json, it will be added at the bottom. Set this to an existing property node to have the key added after this node"
+                  "- An existing property node after which the new property is"
                 ],
                 "signature": [
                   "babel.types.ObjectProperty | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
+                "lineNumber": 80,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -589,12 +745,14 @@
                 "tags": [],
                 "label": "node",
                 "description": [
-                  "In order to set the property an object other than the root object, parse the source and pass the node of the desired object here (make sure to also pass spaces)"
+                  "- The AST node of the object to modify. When provided, skips"
                 ],
                 "signature": [
                   "babel.types.ObjectExpression | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
+                "lineNumber": 81,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -605,19 +763,23 @@
                 "tags": [],
                 "label": "spaces",
                 "description": [
-                  "This overrides the default \"  \" spacing used for multi line or new properties that are added"
+                  "- Overrides the default `\" \"` indentation used for new or"
                 ],
                 "signature": [
                   "string | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
+                "lineNumber": 82,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The modified JSONC source text."
+        ],
         "initialIsOpen": false
       },
       {
@@ -627,12 +789,14 @@
         "tags": [],
         "label": "snip",
         "description": [
-          "\nReplace or remove specific points of the source code"
+          "\nReplaces or removes specific character ranges in a source string. Snips are\napplied in order and non-overlapping deletion snips are automatically merged."
         ],
         "signature": [
           "(source: string, snips: Snip[]) => string"
         ],
         "path": "packages/kbn-json-ast/src/snip.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -642,11 +806,15 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": [],
+            "description": [
+              "- The source text to modify."
+            ],
             "signature": [
               "string"
             ],
             "path": "packages/kbn-json-ast/src/snip.ts",
+            "lineNumber": 21,
+            "columnNumber": 22,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -657,17 +825,23 @@
             "type": "Array",
             "tags": [],
             "label": "snips",
-            "description": [],
+            "description": [
+              "- An array of `[start, end]` ranges to delete or `[start, end,"
+            ],
             "signature": [
               "Snip[]"
             ],
             "path": "packages/kbn-json-ast/src/snip.ts",
+            "lineNumber": 21,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The modified source text."
+        ],
         "initialIsOpen": false
       }
     ],

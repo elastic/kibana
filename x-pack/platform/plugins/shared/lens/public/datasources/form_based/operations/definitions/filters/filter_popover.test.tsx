@@ -9,10 +9,15 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiPopover, EuiLink } from '@elastic/eui';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
 import { LabelInput } from '../shared_components';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { QueryStringInput } from '@kbn/kql/public';
 import { QueryInput } from '@kbn/visualization-ui-components';
 import type { Query } from '@kbn/es-query';
 
@@ -27,13 +32,36 @@ jest.mock('@kbn/visualization-ui-components', () => {
   };
 });
 
-jest.mock('@kbn/unified-search-plugin/public', () => ({
+jest.mock('@kbn/kql/public', () => ({
   QueryStringInput: () => 'QueryStringInput',
 }));
 
 describe('filter popover', () => {
   let defaultProps: Parameters<typeof FilterPopover>[0];
   let mockOnClick: jest.Mock;
+
+  const createMockStorage = () => ({
+    get: jest.fn(),
+    set: jest.fn(),
+    remove: jest.fn(),
+    clear: jest.fn(),
+  });
+
+  const coreMockStart = coreMock.createStart();
+  const mockServices = {
+    http: coreMockStart.http,
+    storage: createMockStorage(),
+    dataViews: dataViewPluginMocks.createStartContract(),
+    data: dataPluginMock.createStartContract(),
+    uiSettings: coreMockStart.uiSettings,
+    notifications: coreMockStart.notifications,
+    kql: kqlPluginMock.createStartContract(),
+    docLinks: coreMockStart.docLinks,
+  };
+
+  const wrapInContext = (component: React.ReactElement) => (
+    <KibanaContextProvider services={mockServices}>{component}</KibanaContextProvider>
+  );
 
   beforeEach(() => {
     mockOnClick = jest.fn();
@@ -54,18 +82,22 @@ describe('filter popover', () => {
 
   describe('interactions', () => {
     it('should open/close according to isOpen', () => {
-      const instance = mount(<FilterPopover {...{ ...defaultProps, isOpen: true }} />);
+      const instance = mount(
+        wrapInContext(<FilterPopover {...{ ...defaultProps, isOpen: true }} />)
+      );
 
       expect(instance.find(EuiPopover).prop('isOpen')).toEqual(true);
 
-      instance.setProps({ ...defaultProps, isOpen: false });
+      instance.setProps({
+        children: wrapInContext(<FilterPopover {...{ ...defaultProps, isOpen: false }} />),
+      });
       instance.update();
 
       expect(instance.find(EuiPopover).prop('isOpen')).toEqual(false);
     });
 
     it('should report click event', () => {
-      const instance = mount(<FilterPopover {...defaultProps} />);
+      const instance = mount(wrapInContext(<FilterPopover {...defaultProps} />));
 
       expect(mockOnClick).not.toHaveBeenCalled();
 
@@ -76,7 +108,7 @@ describe('filter popover', () => {
 
     it('should trigger close', () => {
       const props = { ...defaultProps, triggerClose: jest.fn() };
-      const instance = mount(<FilterPopover {...props} />);
+      const instance = mount(wrapInContext(<FilterPopover {...props} />));
       expect(instance.find(EuiPopover).prop('isOpen')).toEqual(true);
 
       // Trigger from EuiPopover
@@ -94,7 +126,7 @@ describe('filter popover', () => {
   });
 
   it('passes correct props to QueryStringInput', () => {
-    const instance = mount(<FilterPopover {...defaultProps} />);
+    const instance = mount(wrapInContext(<FilterPopover {...defaultProps} />));
     instance.update();
     expect(instance.find(QueryStringInput).props()).toEqual(
       expect.objectContaining({

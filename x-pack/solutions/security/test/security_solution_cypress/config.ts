@@ -54,15 +54,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // packages listed in fleet_packages.json
         // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'bulkEditAlertSuppressionEnabled',
-          'doesNotMatchForIndicatorMatchRuleEnabled',
-        ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
       ],
       runOptions: {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
+      },
+    },
+    uiSettings: {
+      ...xpackFunctionalTestsConfig.get('uiSettings'),
+      globalDefaults: {
+        ...xpackFunctionalTestsConfig.get('uiSettings.globalDefaults'),
+        hideAnnouncements: true,
       },
     },
   };

@@ -9,7 +9,6 @@
 
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import {
   EuiModal,
   EuiModalBody,
@@ -22,7 +21,6 @@ import {
   EuiCheckbox,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiLink,
   EuiHorizontalRule,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -39,7 +37,6 @@ export default function ESQLToDataViewTransitionModal({
   const onTransitionModalDismiss = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setDismissModalChecked(e.target.checked);
   }, []);
-
   const modalTitleId = useGeneratedHtmlId({
     prefix: 'discover-esql-to-dataview-modal-title',
   });
@@ -66,15 +63,6 @@ export default function ESQLToDataViewTransitionModal({
               'Switching data views removes the current ES|QL query. Save this session to avoid losing work.',
           })}
         </EuiText>
-        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiLink external href={FEEDBACK_LINK} target="_blank">
-              {i18n.translate('discover.esqlToDataViewTransitionModal.feedbackLink', {
-                defaultMessage: 'Submit ES|QL feedback',
-              })}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <EuiHorizontalRule margin="s" />
       </EuiModalBody>
       <EuiModalFooter css={{ paddingBlockStart: 0 }}>

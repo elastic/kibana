@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -19,9 +20,19 @@ import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
+import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
+import type { SidebarStart, SidebarSetup } from './sidebar';
+
+/**
+ * ChromeSetup exposes APIs available during the setup phase.
+ * @public
+ */
+export interface ChromeSetup {
+  /** {@link SidebarSetup} */
+  sidebar: SidebarSetup;
+}
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -39,11 +50,11 @@ import type { SolutionId } from './project_navigation';
  * ```
  *
  * @example
- * How to set the help dropdown extension:
+ * How to set the help dropdown extension (React-first, preferred):
  * ```tsx
- * core.chrome.setHelpExtension(elem => {
- *   ReactDOM.render(<MyHelpComponent />, elem);
- *   return () => ReactDOM.unmountComponentAtNode(elem);
+ * core.chrome.setHelpExtension({
+ *   appName: 'My App',
+ *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
  * });
  * ```
  *
@@ -73,18 +84,17 @@ export interface ChromeStart {
 
   /**
    * Get an observable of the current badge
+   * @deprecated Badges now render inline with breadcrumbs. Prefer {@link ChromeStart.setBreadcrumbsBadges}.
    */
   getBadge$(): Observable<ChromeBadge | undefined>;
 
   /**
-   * Override the current badge
+   * Override the current badge.
+   * Internally delegates to {@link ChromeStart.setBreadcrumbsBadges} so the badge
+   * renders inline with breadcrumbs in both classic and project layouts.
+   * @deprecated Use {@link ChromeStart.setBreadcrumbsBadges} directly for full control.
    */
   setBadge(badge?: ChromeBadge): void;
-
-  /**
-   * Set global footer; Meant to be used by developer toolbar
-   */
-  setGlobalFooter(node: ReactNode): void;
 
   /**
    * Get an observable of the current list of breadcrumbs
@@ -92,9 +102,45 @@ export interface ChromeStart {
   getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
 
   /**
+   * Get the current list of breadcrumbs synchronously
+   */
+  getBreadcrumbs(): ChromeBreadcrumb[];
+
+  /**
    * Override the current set of breadcrumbs
    */
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[], params?: ChromeSetBreadcrumbsParams): void;
+
+  /**
+   * Get an observable of the current app menu configuration
+   */
+  getAppMenu$(): Observable<AppMenuConfig | undefined>;
+
+  /**
+   * Set the app menu configuration for the current application.
+   *
+   * @example
+   *```tsx
+   * import React, { useEffect } from 'react';
+   * import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+   * import type { CoreStart } from '@kbn/core/public';
+   *
+   * interface Props {
+   *  config: AppMenuConfig;
+   *  core: CoreStart;
+   *}
+   *
+   * const Example = ({ config, core }: Props) => {
+   *  const { chrome } = core;
+   *
+   *  useEffect(() => {
+   *    chrome.setAppMenu(config);
+   *  }, [chrome.setAppMenu, config]);
+   *
+   *  return <div>Hello world!</div>;
+   * };
+   */
+  setAppMenu(config?: AppMenuConfig): void;
 
   /**
    * Get an observable of the current extensions appended to breadcrumbs
@@ -102,11 +148,49 @@ export interface ChromeStart {
   getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
   /**
-   * Mount an element next to the last breadcrumb
+   * Render an element next to the last breadcrumb.
+   *
+   * @example
+   * ```tsx
+   * import { dynamic } from '@kbn/shared-ux-utility';
+   *
+   * const LazyBadge = dynamic(() => import('./my_badge'));
+   *
+   * const unregister = chrome.setBreadcrumbsAppendExtension({
+   *   content: <LazyBadge />,
+   *   order: 10,
+   * });
+   * ```
    */
   setBreadcrumbsAppendExtension(
     breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
   ): () => void;
+
+  /**
+   * Set badges to be displayed in the breadcrumbs area.
+   * The badges will always be displayed as the last {@link ChromeBreadcrumbsAppendExtension} in the breadcrumbs.
+   * By default, when navigating within the same application, badges are not cleared automatically, you need to handle
+   * their removal manually.
+   *
+   * @param badges - Array of {@link ChromeBreadcrumbsBadge} to display in the breadcrumbs area.
+   *
+   * @example
+   * ```tsx
+   * useEffect(() => {
+   *  const badges: ChromeBreadcrumbsBadge[] = [
+   *   { badgeText: 'Example', color: '#F6E58D' },
+   *  ];
+   *
+   *  core.chrome.setBreadcrumbsBadges(badges);
+   *
+   *  return () => {
+   *    // Clear badges when component unmounts
+   *    core.chrome.setBreadcrumbsBadges([]);
+   *  };
+   * }, [core.chrome]);
+   * ```
+   */
+  setBreadcrumbsBadges(badges: ChromeBreadcrumbsBadge[]): void;
 
   /**
    * Get an observable of the current custom nav link
@@ -117,6 +201,11 @@ export interface ChromeStart {
    * Override the current set of custom nav link
    */
   setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
+
+  /**
+   * Get an observable of the current help menu links
+   */
+  getHelpMenuLinks$(): Observable<ChromeHelpMenuLink[]>;
 
   /**
    * Override the default links shown in the help menu
@@ -141,7 +230,8 @@ export interface ChromeStart {
   getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
 
   /**
-   * Override the current set of custom help content
+   * Override the current set of custom help content.
+   * Use {@link ChromeHelpExtension.content} to render custom React content below the links.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
@@ -169,6 +259,11 @@ export interface ChromeStart {
   hasHeaderBanner$(): Observable<boolean>;
 
   /**
+   * Get the current header banner presence synchronously.
+   */
+  hasHeaderBanner(): boolean;
+
+  /**
    * Sets the style type of the chrome.
    * @param style The style type to apply to the chrome.
    */
@@ -179,11 +274,21 @@ export interface ChromeStart {
    */
   getChromeStyle$(): Observable<ChromeStyle>;
 
+  /**
+   * Get the current style type synchronously.
+   */
+  getChromeStyle(): ChromeStyle;
+
   sideNav: {
     /**
      * Get an observable of the current collapsed state of the side nav.
      */
     getIsCollapsed$(): Observable<boolean>;
+
+    /**
+     * Get the current collapsed state of the side nav synchronously.
+     */
+    getIsCollapsed(): boolean;
 
     /**
      * Set the collapsed state of the side nav.
@@ -192,19 +297,33 @@ export interface ChromeStart {
     setIsCollapsed(isCollapsed: boolean): void;
 
     /**
-     * Get an observable of the visibility state of the feedback button in the side nav.
+     * Get an observable of the current width of the side nav.
      */
-    getIsFeedbackBtnVisible$: () => Observable<boolean>;
+    getWidth$(): Observable<number>;
 
     /**
-     * Set the visibility state of the feedback button in the side nav.
-     * @param isVisible The visibility state of the feedback button in the side nav.
+     * Get the current width of the side nav synchronously.
      */
-    setIsFeedbackBtnVisible: (isVisible: boolean) => void;
+    getWidth(): number;
   };
+
+  /**
+   * {@link SidebarStart}
+   */
+  sidebar: SidebarStart;
 
   /**
    * Get the id of the currently active project navigation or `null` otherwise.
    */
   getActiveSolutionNavId$(): Observable<SolutionId | null>;
+
+  /**
+   * Get the id of the currently active project navigation synchronously.
+   */
+  getActiveSolutionNavId(): SolutionId | null;
+
+  /**
+   * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers
+   */
+  withProvider(component: ReactNode): ReactNode;
 }

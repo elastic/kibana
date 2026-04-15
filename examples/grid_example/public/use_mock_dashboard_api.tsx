@@ -13,9 +13,8 @@ import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 
 import type { TimeRange } from '@kbn/es-query';
-import type { PanelPackage } from '@kbn/presentation-containers';
 
-import type { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode, PanelPackage } from '@kbn/presentation-publishing';
 import type {
   MockDashboardApi,
   MockSerializedDashboardState,
@@ -39,10 +38,7 @@ export const useMockDashboardApi = ({
 
     return {
       getSerializedStateForChild: (id: string) => {
-        return {
-          rawState: panels$.getValue()[id].explicitInput,
-          references: [],
-        };
+        return panels$.getValue()[id].explicitInput;
       },
       children$: new BehaviorSubject({}),
       timeRange$: new BehaviorSubject<TimeRange>({
@@ -79,7 +75,7 @@ export const useMockDashboardApi = ({
         const newId = v4();
         otherPanels[newId] = {
           ...oldPanel,
-          explicitInput: { ...(newPanel.serializedState?.rawState ?? {}), id: newId },
+          explicitInput: { ...(newPanel.serializedState ?? {}), id: newId },
         };
         mockDashboardApi.panels$.next(otherPanels);
         return newId;
@@ -106,7 +102,7 @@ export const useMockDashboardApi = ({
               i: newId,
             },
             explicitInput: {
-              ...(panelPackage.serializedState?.rawState ?? {}),
+              ...(panelPackage.serializedState ?? {}),
               id: newId,
             },
           },

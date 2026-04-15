@@ -183,6 +183,7 @@ describe('plugins discovery system', () => {
 
     instanceInfo = {
       uuid: 'instance-uuid',
+      airgapped: false,
     };
 
     nodeInfo = {

@@ -25,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     defaultColumns: ['message', 'extension', 'DestCountry'],
-    hideAnnouncements: true,
   };
 
   describe('discover default columns', function () {

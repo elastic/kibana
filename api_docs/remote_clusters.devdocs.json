@@ -12,6 +12,8 @@
         "label": "Cluster",
         "description": [],
         "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,6 +25,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37,6 +41,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -51,6 +57,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -65,6 +73,8 @@
               "number | null | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -79,6 +89,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -93,6 +105,8 @@
               "number | null | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -107,6 +121,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,6 +137,8 @@
               "\"proxy\" | \"sniff\" | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -135,6 +153,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -149,6 +169,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -163,6 +185,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -177,6 +201,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -191,6 +217,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -205,6 +233,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -219,6 +249,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -233,6 +265,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -247,6 +281,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -261,6 +297,8 @@
               "\"certificate\" | \"api_key\""
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -281,6 +319,8 @@
           "\"/api/remote_clusters\""
         ],
         "path": "x-pack/platform/plugins/private/remote_clusters/common/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -295,6 +335,8 @@
       "label": "RemoteClustersPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/private/remote_clusters/public/plugin.ts",
+      "lineNumber": 22,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -306,6 +348,8 @@
           "label": "isUiEnabled",
           "description": [],
           "path": "x-pack/platform/plugins/private/remote_clusters/public/plugin.ts",
+          "lineNumber": 23,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -329,6 +373,8 @@
       "label": "RemoteClustersPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts",
+      "lineNumber": 24,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -340,6 +386,8 @@
           "label": "isUiEnabled",
           "description": [],
           "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts",
+          "lineNumber": 25,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }

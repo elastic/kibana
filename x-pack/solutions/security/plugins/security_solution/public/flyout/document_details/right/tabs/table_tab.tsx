@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { css } from '@emotion/react';
@@ -15,6 +15,9 @@ import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-ta
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -25,10 +28,11 @@ import { isInTableScope, isTimelineScope } from '../../../../helpers';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { getTableItems } from '../utils/table_tab_utils';
 import { TableTabSettingButton } from '../components/table_tab_setting_button';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { getTableTabColumns } from '../utils/table_tab_columns';
-import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import { TableTabTour } from '../components/table_tab_tour';
 
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
@@ -118,11 +122,73 @@ export const TableTab = memo(() => {
     isRulePreview,
     eventId,
     investigationFields,
+    searchHit,
   } = useDocumentDetailsContext();
+
   const { ruleId, isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
+  const hit: DataTableRecord = useMemo(
+    () => buildDataTableRecord(searchHit as EsHitRecord),
+    [searchHit]
+  );
+
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const euidApi = useEntityStoreEuidApi();
+  const hostDocumentIdentityFields = useMemo(
+    () => euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) ?? null,
+    [euidApi?.euid, hit.flattened]
+  );
+  const userDocumentIdentityFields = useMemo(
+    () => euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) ?? null,
+    [euidApi?.euid, hit.flattened]
+  );
+  const isHostEntity = hostDocumentIdentityFields != null;
+  const hostEuidFromDocument = useMemo(
+    () => euidApi?.euid.getEuidFromObject('host', hit.flattened),
+    [euidApi?.euid, hit.flattened]
+  );
+  const userEuidFromDocument = useMemo(
+    () => euidApi?.euid.getEuidFromObject('user', hit.flattened),
+    [euidApi?.euid, hit.flattened]
+  );
+  const hostEntityFromStore = useEntityFromStore({
+    entityId: hostEuidFromDocument,
+    identityFields: hostDocumentIdentityFields ?? undefined,
+    entityType: 'host',
+    skip: !entityStoreV2Enabled || !isHostEntity,
+  });
+  const userEntityFromStore = useEntityFromStore({
+    entityId: userEuidFromDocument,
+    identityFields: userDocumentIdentityFields ?? undefined,
+    entityType: 'user',
+    skip: !entityStoreV2Enabled || isHostEntity,
+  });
+  const entityId = useMemo(() => {
+    if (entityStoreV2Enabled) {
+      if (isHostEntity) {
+        return (
+          hostEntityFromStore.entityRecord?.entity?.id ?? hostDocumentIdentityFields?.['entity.id']
+        );
+      }
+      return (
+        userEntityFromStore.entityRecord?.entity?.id ?? userDocumentIdentityFields?.['entity.id']
+      );
+    }
+    if (isHostEntity) {
+      return hostDocumentIdentityFields?.['entity.id'];
+    }
+    return userDocumentIdentityFields?.['entity.id'];
+  }, [
+    entityStoreV2Enabled,
+    isHostEntity,
+    hostDocumentIdentityFields,
+    userDocumentIdentityFields,
+    hostEntityFromStore.entityRecord,
+    userEntityFromStore.entityRecord,
+  ]);
+
   const highlightedFieldsResult = useHighlightedFields({
-    dataFormattedForFieldBrowser,
+    hit,
     investigationFields,
   });
   const highlightedFields = useMemo(
@@ -259,8 +325,9 @@ export const TableTab = memo(() => {
         ruleId,
         isRulePreview,
         onTogglePinned,
+        entityId,
       }),
-    [browserFields, eventId, scopeId, getLinkValue, ruleId, isRulePreview, onTogglePinned]
+    [browserFields, entityId, eventId, scopeId, getLinkValue, ruleId, isRulePreview, onTogglePinned]
   );
 
   const search = useMemo(() => {
@@ -279,6 +346,9 @@ export const TableTab = memo(() => {
         search={search}
         sorting={false}
         data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
+        tableCaption={i18n.translate('xpack.securitySolution.flyout.table.documentFieldsCaption', {
+          defaultMessage: 'Document fields',
+        })}
         css={css`
           .euiTableRow {
             font-size: ${smallFontSize};

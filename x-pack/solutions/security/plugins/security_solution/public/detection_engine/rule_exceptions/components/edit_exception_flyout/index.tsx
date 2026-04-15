@@ -68,6 +68,8 @@ import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/tran
 import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
+import * as headerI18n from '../flyout_components/header/translations';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 interface EditExceptionFlyoutProps {
   list: ExceptionListSchema;
@@ -109,7 +111,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
-  const { read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const { read: canReadExceptions } = useUserPrivileges().rulesPrivileges.exceptions;
+  const { hasAlertsUpdate } = useAlertsPrivileges();
 
   const [
     {
@@ -160,7 +163,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     useFindExceptionListReferences();
 
   useEffect(() => {
-    if (fetchReferences != null && canReadRules) {
+    if (fetchReferences != null && canReadExceptions) {
       fetchReferences([
         {
           id: list.id,
@@ -169,7 +172,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         },
       ]);
     }
-  }, [list, fetchReferences, canReadRules]);
+  }, [list, fetchReferences, canReadExceptions]);
 
   /**
    * Reducer action dispatchers
@@ -379,6 +382,12 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     prefix: 'exceptionFlyoutTitle',
   });
 
+  const flyoutAriaLabel = useMemo(() => {
+    return listType === ExceptionListTypeEnum.ENDPOINT
+      ? headerI18n.EDIT_ENDPOINT_EXCEPTION_TITLE
+      : headerI18n.EDIT_EXCEPTION_TITLE;
+  }, [listType]);
+
   const confirmModal = useMemo(() => {
     const { title, body, confirmButton, cancelButton } = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION
@@ -402,7 +411,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       size="l"
       onClose={handleCloseFlyout}
       data-test-subj="editExceptionFlyout"
-      aria-labelledby={exceptionFlyoutTitleId}
+      aria-label={flyoutAriaLabel}
     >
       <ExceptionFlyoutHeader
         isEdit
@@ -473,7 +482,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
             />
           </>
         )}
-        {showAlertCloseOptions && (
+        {hasAlertsUpdate && showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />
             <ExceptionItemsFlyoutAlertsActions

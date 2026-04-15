@@ -1,0 +1,81 @@
+# FUSE
+
+The FUSE command merges rows from multiple result sets and assigns new relevance scores. It enables hybrid search by combining and scoring results from multiple queries, typically used together with the FORK command. FUSE works by merging rows with matching key column values and assigning new relevance scores using the specified algorithm and values from the group and score columns.
+
+## Syntax
+
+Use default parameters:
+`FUSE`
+
+Specify custom parameters:
+`FUSE <fuse_method> SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>`
+
+### Parameters
+
+#### fuse_method
+
+Defaults to `RRF`. Can be either `RRF` (Reciprocal Rank Fusion) or `LINEAR` (linear combination of scores). Specifies the method used to assign new relevance scores.
+
+#### options
+
+Options for the selected fuse method.
+
+- For `RRF`:
+  - `rank_constant`: Defaults to `60`. Represents the constant used in the RRF formula.
+  - `weights`: Defaults to `{}`. Allows setting different weights for RRF scores based on group column values.
+
+- For `LINEAR`:
+  - `normalizer`: Defaults to `none`. Can be `none` or `minmax`. Specifies the score normalization method.
+  - `weights`: Defaults to `{}`. Allows setting different weights for scores based on group column values.
+
+#### score_column
+
+Defaults to `_score`. Specifies which column to use for retrieving relevance scores of the input rows and where to output the new relevance scores of the merged rows.
+
+#### group_column
+
+Defaults to `_fork`. Specifies which column represents the result set.
+
+#### key_columns
+
+Defaults to `_id, _index`. Rows with matching key column values are merged.
+
+## Examples
+
+Calculate relevance scores using Reciprocal Rank Fusion (RRF) to merge results from lexical and semantic queries:
+```esql
+FROM books METADATA _id, _index, _score 
+| FORK (WHERE title:"Shakespeare" | SORT _score DESC) 
+       (WHERE semantic_title:"Shakespeare" | SORT _score DESC) 
+| FUSE 
+```
+
+Combine scores from lexical and semantic queries using a linear combination method:
+```esql
+FROM books METADATA _id, _index, _score 
+| FORK (WHERE title:"Shakespeare" | SORT _score DESC) 
+       (WHERE semantic_title:"Shakespeare" | SORT _score DESC) 
+| FUSE LINEAR 
+```
+
+Apply minmax normalization to scores from each result set before combining them with a linear method:
+```esql
+FROM books METADATA _id, _index, _score
+| FORK (WHERE title:"Shakespeare" | SORT _score DESC) 
+       (WHERE semantic_title:"Shakespeare" | SORT _score DESC) 
+| FUSE LINEAR WITH { "normalizer": "minmax" } 
+```
+
+Use custom weights for each query branch and minmax normalization to control the influence of each result set when combining scores:
+```esql
+FROM books METADATA _id, _index, _score
+| FORK (WHERE title:"Shakespeare" | SORT _score DESC) 
+       (WHERE semantic_title:"Shakespeare" | SORT _score DESC) 
+| FUSE LINEAR WITH { "weights": { "fork1": 0.7, "fork2": 0.3 }, "normalizer": "minmax" } 
+```
+
+## Limitations
+
+- FUSE assumes that key columns are single valued. If key columns are multivalued, FUSE can produce unreliable relevance scores.
+- FUSE automatically assigns a score value of NULL if the score column or group column are multivalued.
+- FUSE assumes that the combination of key columns and group column is unique. If not, FUSE can produce unreliable relevance scores.

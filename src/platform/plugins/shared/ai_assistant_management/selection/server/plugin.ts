@@ -16,10 +16,6 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import {
-  AI_AGENTS_FEATURE_FLAG,
-  AI_AGENTS_FEATURE_FLAG_DEFAULT,
-} from '@kbn/ai-assistant-common/src/constants/feature_flags';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -86,43 +82,32 @@ export class AIAssistantManagementSelectionPlugin
 
     // Register chat experience setting for both stateful and serverless (except workplaceai)
     if (serverlessProjectType !== 'workplaceai') {
-      // Default Agent for Elasticsearch solution view, Classic for all other cases
+      // Agent is the default chat experience for Elasticsearch, Security, and
+      // Observability spaces. Other space solutions use Classic unless overridden in config.
       core.uiSettings.register({
         [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
           ...chatExperienceSetting,
           getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
             try {
-              const [coreStart, startServices] = await core.getStartServices();
-
-              const isAiAgentsEnabled = await coreStart.featureFlags.getBooleanValue(
-                AI_AGENTS_FEATURE_FLAG,
-                AI_AGENTS_FEATURE_FLAG_DEFAULT
-              );
-
-              if (!isAiAgentsEnabled) {
-                return AIChatExperience.Classic;
-              }
-
+              const [, startServices] = await core.getStartServices();
               // Avoid security exceptions before login - only check space when authenticated
-              if (request && startServices.spaces && request.auth.isAuthenticated) {
+              if (startServices.spaces && request?.auth.isAuthenticated) {
                 const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
                   request
                 );
-                if (activeSpace?.solution === 'es') {
+                const solution = activeSpace?.solution;
+                if (solution === 'es' || solution === 'security' || solution === 'oblt') {
                   return AIChatExperience.Agent;
                 }
+                if (solution != null) {
+                  return AIChatExperience.Classic;
+                }
               }
-
-              if (this.config.preferredChatExperience) {
-                return this.config.preferredChatExperience;
-              }
-
-              return AIChatExperience.Classic;
             } catch (e) {
-              this.logger.error('Error in chat experience setting:');
+              this.logger.error('Error getting active space:');
               this.logger.error(e);
-              return AIChatExperience.Classic;
             }
+            return this.config.preferredChatExperience ?? AIChatExperience.Agent;
           },
         },
       });

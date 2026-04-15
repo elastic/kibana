@@ -8,7 +8,7 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export class TestTrackError extends Error {
   // Base exception for test track errors
@@ -17,29 +17,32 @@ export class TestTrackError extends Error {
 export const TestTrackSpecSchema = z.object({
   stats: z.object({
     lane: z.object({
-      count: z.number().int(),
+      count: z.int(),
       saturationPercent: z.number(),
       longestEstimate: z.number(),
       shortestEstimate: z.number(),
     }),
     combinedRuntime: z.object({
-      target: z.number().int(),
-      expected: z.number().int(),
-      unused: z.number().int(),
-      overflow: z.number().int(),
+      target: z.int(),
+      expected: z.int(),
+      unused: z.int(),
+      overflow: z.int(),
     }),
   }),
   lanes: z.array(
     z.object({
-      number: z.number().int(),
-      runtimeTarget: z.number().int(),
+      number: z.int(),
+      estimatedSetupDuration: z.number(),
+      runtimeTarget: z.int(),
       runtimeEstimate: z.number(),
       availableCapacity: z.number(),
       status: z.enum(['open', 'closed']),
       isCongested: z.boolean(),
       loads: z.array(z.string()),
+      metadata: z.record(z.string(), z.any()),
     })
   ),
+  metadata: z.record(z.string(), z.any()),
 });
 
 export type TestTrackSpec = z.infer<typeof TestTrackSpecSchema>;
@@ -50,32 +53,39 @@ export type TestTrackLaneStatus = z.infer<
 export const TestTrackLoadSchema = z.object({
   id: z.string(),
   stats: z.object({
-    runCount: z.number().int(),
+    runCount: z.int(),
     runtime: z.object({
-      avg: z.number().int(),
-      median: z.number().int(),
-      pc95th: z.number().int(),
-      pc99th: z.number().int(),
-      max: z.number().int(),
-      estimate: z.number().int(),
+      avg: z.int(),
+      median: z.int(),
+      pc95th: z.int(),
+      pc99th: z.int(),
+      max: z.int(),
+      estimate: z.int(),
     }),
   }),
+  metadata: z.record(z.string(), z.any()),
 });
 
 export type TestTrackLoad = z.infer<typeof TestTrackLoadSchema>;
 
 export class TestTrackLane {
   number: number;
+  estimatedSetupDuration: number;
   runtimeTarget: number;
   loads: TestTrackLoad[] = [];
+  metadata: Record<string, any> = {};
 
-  constructor(options: { number: number; runtimeTarget: number }) {
+  constructor(options: { number: number; runtimeTarget: number; estimatedSetupDuration?: number }) {
     this.number = options.number;
+    this.estimatedSetupDuration = options.estimatedSetupDuration || 0;
     this.runtimeTarget = options.runtimeTarget;
   }
 
   public get runtimeEstimate(): number {
-    return this.loads.reduce((sum, load) => sum + load.stats.runtime.estimate, 0);
+    return (
+      this.estimatedSetupDuration +
+      this.loads.reduce((sum, load) => sum + load.stats.runtime.estimate, 0)
+    );
   }
 
   public get availableCapacity(): number {
@@ -93,10 +103,13 @@ export class TestTrackLane {
 
 export class TestTrack {
   runtimeTarget: number;
+  estimatedLaneSetupDuration: number;
   lanes: TestTrackLane[] = [];
+  metadata: Record<string, any> = {};
 
-  constructor(options: { runtimeTarget: number }) {
+  constructor(options: { runtimeTarget: number; estimatedLaneSetupDuration?: number }) {
     this.runtimeTarget = options.runtimeTarget;
+    this.estimatedLaneSetupDuration = options.estimatedLaneSetupDuration || 0;
   }
 
   public get laneCount(): number {
@@ -137,6 +150,7 @@ export class TestTrack {
     const lane = new TestTrackLane({
       number: this.laneCount + 1,
       runtimeTarget: this.runtimeTarget,
+      estimatedSetupDuration: this.estimatedLaneSetupDuration,
     });
     this.lanes.push(lane);
     return lane;
@@ -199,17 +213,18 @@ export class TestTrack {
       lanes.push(
         TestTrackSpecSchema.shape.lanes.element.parse({
           number: lane.number,
+          estimatedSetupDuration: lane.estimatedSetupDuration,
           runtimeTarget: lane.runtimeTarget,
           runtimeEstimate: lane.runtimeEstimate,
           availableCapacity: lane.availableCapacity,
           status: lane.status,
           isCongested: lane.isCongested,
           loads: lane.loads.map((load) => load.id),
+          metadata: lane.metadata,
         })
       );
     });
 
-    const unusedRuntimePercent = (unusedRuntime / provisionedRuntime || 0) * 100;
     let runtimeOverflow = 0;
 
     if (unusedRuntime < 0) {
@@ -221,7 +236,7 @@ export class TestTrack {
       stats: {
         lane: {
           count: this.laneCount,
-          saturationPercent: parseFloat((100 - unusedRuntimePercent).toFixed(2)),
+          saturationPercent: parseFloat(((expectedRuntime / provisionedRuntime) * 100).toFixed(2)),
           longestEstimate: longestLaneEstimate,
           shortestEstimate: shortestLaneEstimate,
         },
@@ -233,6 +248,7 @@ export class TestTrack {
         },
       },
       lanes,
+      metadata: this.metadata,
     });
   }
 }

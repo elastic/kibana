@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import systemPromptTemplate from './system_prompt.text';
@@ -18,6 +18,8 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     stream: Streams.all.Definition.right,
     pipeline_schema: z.string(),
     fields_schema: z.string(),
+    content_field: z.string(),
+    severity_field: z.string(),
     parsing_processor: z.string().optional(),
     initial_dataset_analysis: z.string(),
   }),
@@ -36,7 +38,7 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     tools: {
       simulate_pipeline: {
         description:
-          'Simulate a complete ingest pipeline design with processors, stages, and routing rules. The tool first validates structural integrity and schema compliance. If validation passes, it then automatically simulates the pipeline against the entire data stream to validate parsing coverage, field extraction, error rates, and type correctness. Returns validation results and simulation results with detailed metrics.',
+          'Test your pipeline against sample data. Use this iteratively: simulate → read errors → fix → simulate again. Returns validation errors and simulation metrics. Keep calling until errors are resolved.',
         schema: {
           type: 'object',
           properties: {
@@ -51,13 +53,14 @@ export const SuggestIngestPipelinePrompt = createPrompt({
       },
       commit_pipeline: {
         description:
-          'Finalize and commit the validated pipeline. Call this after successful validation when the pipeline meets all acceptance criteria.',
+          'Finalize the pipeline after your analysis is complete. Call this when: (1) simulate_pipeline passes with acceptable metrics, OR (2) you determine no pipeline is needed for already-structured data. For structured data that does not need processing, commit with { "steps": [] }.',
         schema: {
           type: 'object',
           properties: {
             pipeline: {
               type: 'object',
-              description: 'The pipeline definition object containing processing steps',
+              description:
+                'The pipeline definition object containing processing steps. Use { "steps": [] } if no processing is needed.',
               properties: {},
             },
           },

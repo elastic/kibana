@@ -48,7 +48,9 @@ components:
                 command:
                   $ref: '../../../model/schema/common.schema.yaml#/components/schemas/Command'
                 timeout:
-                  $ref: '../../../model/schema/common.schema.yaml#/components/schemas/Timeout'
+                  type: integer
+                  minimum: 1
+                  description: The maximum timeout value in seconds before the command is terminated.
     ExecuteRouteResponse:
       type: object
       properties: { }

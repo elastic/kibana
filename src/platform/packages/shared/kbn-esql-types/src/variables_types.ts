@@ -8,6 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
 
@@ -23,42 +24,53 @@ export enum ESQLVariableType {
   MULTI_VALUES = 'multi_values',
   FUNCTIONS = 'functions',
 }
-
 /**
  * Types of ES|QL controls
  * - STATIC_VALUES: Static values that are not dependent on any query
  * - VALUES_FROM_QUERY: Values that are dependent on an ES|QL query
  */
+
 export enum EsqlControlType {
   STATIC_VALUES = 'STATIC_VALUES',
   VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
 }
 
+export type StaticESQLControl = Extract<
+  OptionsListESQLControlState,
+  { control_type: 'STATIC_VALUES' }
+>;
+export const isStaticESQLControl = (control?: object): control is StaticESQLControl => {
+  return Boolean(
+    control && 'control_type' in control && control.control_type === EsqlControlType.STATIC_VALUES
+  );
+};
+
+export type QueryESQLControl = Extract<
+  OptionsListESQLControlState,
+  { control_type: 'VALUES_FROM_QUERY' }
+>;
+export const isQueryESQLControl = (control?: object): control is QueryESQLControl => {
+  return Boolean(
+    control &&
+      'control_type' in control &&
+      control.control_type === EsqlControlType.VALUES_FROM_QUERY
+  );
+};
+
 export interface ESQLControlVariable {
   key: string;
   value: string | number | (string | number)[];
   type: ESQLVariableType;
+  meta?: {
+    // `controlledBy` is the ID of the control that publishes the variable
+    controlledBy?: string;
+    // `group` allows grouping of variables
+    group?: string;
+  };
 }
 
 export interface PublishesESQLVariable {
   esqlVariable$: PublishingSubject<ESQLControlVariable>;
-}
-
-export type ControlWidthOptions = 'small' | 'medium' | 'large';
-
-export interface ESQLControlState {
-  grow?: boolean;
-  width?: ControlWidthOptions;
-  singleSelect?: boolean;
-  title: string;
-  selectedOptions: string[];
-  variableName: string;
-  variableType: ESQLVariableType;
-  esqlQuery: string;
-  controlType: EsqlControlType;
-  // If the controlType is STATIC_VALUES, store the list of availableOptions in the control state
-  // VALUES_FROM_QUERY controls will instead fetch available options at runtime
-  availableOptions?: string[];
 }
 
 export const apiPublishesESQLVariable = (
@@ -80,7 +92,7 @@ export const apiPublishesESQLVariables = (
 };
 
 interface HasVariableName {
-  variableName: string;
+  variable_name: string;
 }
 
 /**
@@ -91,7 +103,7 @@ interface HasVariableName {
 export const controlHasVariableName = (controlState: unknown): controlState is HasVariableName => {
   return Boolean(
     controlState &&
-      (controlState as HasVariableName)?.variableName !== undefined &&
-      typeof (controlState as HasVariableName).variableName === 'string'
+      (controlState as HasVariableName)?.variable_name !== undefined &&
+      typeof (controlState as HasVariableName).variable_name === 'string'
   );
 };

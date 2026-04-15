@@ -23,6 +23,8 @@
         "label": "loggingServiceMock",
         "description": [],
         "path": "src/core/packages/logging/server-mocks/src/logging_service.mock.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
               "() => jest.Mocked<LoggingServiceContract>"
             ],
             "path": "src/core/packages/logging/server-mocks/src/logging_service.mock.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
               ">"
             ],
             "path": "src/core/packages/logging/server-mocks/src/logging_service.mock.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -73,6 +79,8 @@
               ">"
             ],
             "path": "src/core/packages/logging/server-mocks/src/logging_service.mock.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -91,6 +99,8 @@
               ">"
             ],
             "path": "src/core/packages/logging/server-mocks/src/logging_service.mock.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -107,6 +117,8 @@
         "label": "loggingSystemMock",
         "description": [],
         "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -123,6 +135,8 @@
               ">"
             ],
             "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -197,6 +211,8 @@
               " | undefined])[]; }"
             ],
             "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -218,6 +234,8 @@
                   }
                 ],
                 "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
+                "lineNumber": 45,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -242,6 +260,8 @@
               ") => void"
             ],
             "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -263,6 +283,8 @@
                   }
                 ],
                 "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
+                "lineNumber": 50,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -286,6 +308,8 @@
               }
             ],
             "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -301,6 +325,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
+                "lineNumber": 15,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false
               }

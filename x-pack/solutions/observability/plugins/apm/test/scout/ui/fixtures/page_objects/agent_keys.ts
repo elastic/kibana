@@ -14,9 +14,7 @@ export class AgentKeysPage {
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/agent-keys`);
     await waitForApmSettingsHeaderLink(this.page);
-    this.page.getByRole('heading', { name: 'Settings', level: 1 });
-
-    return this.page;
+    await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 
   getCreateButtonLocator() {

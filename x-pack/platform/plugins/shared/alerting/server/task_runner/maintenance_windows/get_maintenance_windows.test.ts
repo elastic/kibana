@@ -251,31 +251,33 @@ describe('filterMaintenanceWindows', () => {
       eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,
       id: 'test-id1',
-      scopedQuery: {
-        kql: "_id: '1234'",
-        filters: [
-          {
-            meta: {
-              disabled: false,
-              negate: false,
-              alias: null,
-              key: 'kibana.alert.action_group',
-              field: 'kibana.alert.action_group',
-              params: {
-                query: 'test',
+      scope: {
+        alerting: {
+          kql: "_id: '1234'",
+          filters: [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                key: 'kibana.alert.action_group',
+                field: 'kibana.alert.action_group',
+                params: {
+                  query: 'test',
+                },
+                type: 'phrase',
               },
-              type: 'phrase',
-            },
-            $state: {
-              store: FilterStateStore.APP_STATE,
-            },
-            query: {
-              match_phrase: {
-                'kibana.alert.action_group': 'test',
+              $state: {
+                store: FilterStateStore.APP_STATE,
+              },
+              query: {
+                match_phrase: {
+                  'kibana.alert.action_group': 'test',
+                },
               },
             },
-          },
-        ],
+          ],
+        },
       },
     },
     {
@@ -319,31 +321,33 @@ describe('filterMaintenanceWindowsIds', () => {
       eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,
       id: 'test-id1',
-      scopedQuery: {
-        kql: "_id: '1234'",
-        filters: [
-          {
-            meta: {
-              disabled: false,
-              negate: false,
-              alias: null,
-              key: 'kibana.alert.action_group',
-              field: 'kibana.alert.action_group',
-              params: {
-                query: 'test',
+      scope: {
+        alerting: {
+          kql: "_id: '1234'",
+          filters: [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                key: 'kibana.alert.action_group',
+                field: 'kibana.alert.action_group',
+                params: {
+                  query: 'test',
+                },
+                type: 'phrase',
               },
-              type: 'phrase',
-            },
-            $state: {
-              store: FilterStateStore.APP_STATE,
-            },
-            query: {
-              match_phrase: {
-                'kibana.alert.action_group': 'test',
+              $state: {
+                store: FilterStateStore.APP_STATE,
+              },
+              query: {
+                match_phrase: {
+                  'kibana.alert.action_group': 'test',
+                },
               },
             },
-          },
-        ],
+          ],
+        },
       },
     },
     {

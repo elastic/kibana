@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { Test } from 'supertest';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const getDefaultPack = ({ policyIds = [] }: { policyIds?: string[] }) => ({
@@ -44,77 +46,117 @@ limit 1000;`;
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
+  const fleetApiVersion = '2023-10-31';
+  const osqueryPublicApiVersion = '2023-10-31';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/133259
-  describe.skip('Packs', () => {
+  const withFleetHeaders = (request: Test) =>
+    request.set('kbn-xsrf', 'true').set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
+
+  const withOsqueryHeaders = (request: Test) =>
+    request.set('kbn-xsrf', 'true').set('elastic-api-version', osqueryPublicApiVersion);
+
+  describe('Packs', () => {
     let packId: string = '';
     let hostedPolicy: Record<string, any>;
     let packagePolicyId: string;
+    let osqueryPackageVersion: string | undefined;
     before(async () => {
       await getService('kibanaServer').savedObjects.cleanStandardList();
       await getService('esArchiver').load(
         'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
       );
+
+      await fleetAndAgents.setup();
+
+      const { body: osqueryPackageResponse } = await supertest
+        .get('/api/fleet/epm/packages/osquery_manager')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion)
+        .set('x-elastic-internal-product', 'security-solution');
+
+      osqueryPackageVersion = osqueryPackageResponse.item?.version;
+
+      if (osqueryPackageVersion) {
+        await withFleetHeaders(
+          supertest.post(`/api/fleet/epm/packages/osquery_manager/${osqueryPackageVersion}`)
+        )
+          .send({ force: true })
+          .expect(200);
+      }
     });
     after(async () => {
       await getService('kibanaServer').savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
         'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
       );
+      if (packagePolicyId) {
+        await withFleetHeaders(supertest.post('/api/fleet/package_policies/delete')).send({
+          packagePolicyIds: [packagePolicyId],
+        });
+      }
       await supertest
-        .post(`/api/fleet/agent_policies/delete`)
-        .set('kbn-xsrf', 'xxxx')
+        .post('/api/fleet/agent_policies/delete')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion)
         .send({ agentPolicyId: hostedPolicy.id });
+
+      if (osqueryPackageVersion) {
+        await withFleetHeaders(
+          supertest.delete(`/api/fleet/epm/packages/osquery_manager/${osqueryPackageVersion}`)
+        );
+      }
     });
 
     it('create route should return 200 and multi line query, but single line query in packs config', async () => {
       const {
         body: { item: agentPolicy },
       } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
+        .post('/api/fleet/agent_policies')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion)
         .send({
           name: `Hosted policy from ${Date.now()}`,
           namespace: 'default',
-        });
+        })
+        .expect(200);
+
       hostedPolicy = agentPolicy;
 
-      const packagePolicyResponse = await supertest
+      const {
+        body: { item: packagePolicy },
+      } = await supertest
         .post('/api/fleet/package_policies')
         .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion)
         .send({
-          enabled: true,
           package: {
             name: 'osquery_manager',
-            version: '1.2.1',
-            title: 'test',
+            version: osqueryPackageVersion,
           },
-          inputs: [],
+          inputs: {
+            'osquery_manager-osquery': {
+              enabled: true,
+              streams: {},
+            },
+          },
           namespace: 'default',
-          policy_id: hostedPolicy.id,
+          policy_ids: [hostedPolicy.id],
           name: 'TEST',
           description: '123',
-          id: '123',
-        });
+        })
+        .expect(200);
 
-      if (!packagePolicyResponse.body.item) {
-        // eslint-disable-next-line no-console
-        console.error({ MISSING: packagePolicyResponse });
-      }
+      packagePolicyId = packagePolicy.id;
 
-      expect(packagePolicyResponse.status).to.be(200);
+      const createPackResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+        .send(getDefaultPack({ policyIds: [hostedPolicy.id] }))
+        .expect(200);
 
-      packagePolicyId = packagePolicyResponse.body.item.id;
+      packId = createPackResponse.body.data.saved_object_id;
+      expect(packId).to.be.ok();
 
-      const createPackResponse = await supertest
-        .post('/api/osquery/packs')
-        .set('kbn-xsrf', 'true')
-        .send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
-
-      packId = createPackResponse.body.data.id;
-      expect(createPackResponse.status).to.be(200);
-
-      const pack = await supertest.get('/api/osquery/packs/' + packId).set('kbn-xsrf', 'true');
+      const pack = await withOsqueryHeaders(supertest.get('/api/osquery/packs/' + packId));
 
       expect(pack.status).to.be(200);
       expect(pack.body.data.queries.testQuery.query).to.be(multiLineQuery);
@@ -123,33 +165,367 @@ export default function ({ getService }: FtrProviderContext) {
         body: {
           item: { inputs },
         },
-      } = await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`);
+      } = await supertest
+        .get(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
 
-      expect(inputs[0].config.osquery.value.packs.TestPack.queries.testQuery.query).to.be(
-        singleLineQuery
-      );
+      expect(
+        inputs[0].config.osquery.value.packs['default--TestPack'].queries.testQuery.query
+      ).to.be(singleLineQuery);
+    });
+
+    it('create route should include profile_uid fields in response', async () => {
+      const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+        .send({
+          name: `ProfileUidPack-${Date.now()}`,
+          description: 'Test profile uid',
+          enabled: false,
+          queries: {
+            q1: { query: 'select 1;', interval: 3600 },
+          },
+        })
+        .expect(200);
+
+      const { data } = createResponse.body;
+      expect(data).to.have.property('created_by_profile_uid');
+      expect(data).to.have.property('updated_by_profile_uid');
+      expect(data.created_by).to.be.ok();
+
+      // Clean up
+      await withOsqueryHeaders(
+        supertest.delete(`/api/osquery/packs/${data.saved_object_id}`)
+      ).expect(200);
+    });
+
+    it('find route supports search, enabled, and createdBy params', async () => {
+      // Create test packs with a unique prefix
+      const prefix = `FindTest-${Date.now()}`;
+      const createdIds: string[] = [];
+
+      for (const suffix of ['alpha', 'beta']) {
+        const resp = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `${prefix}-${suffix}`,
+            description: `Find test ${suffix}`,
+            enabled: suffix === 'alpha',
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+        createdIds.push(resp.body.data.saved_object_id);
+      }
+
+      // Search by name
+      const searchResponse = await withOsqueryHeaders(
+        supertest.get(`/api/osquery/packs?search=${prefix}`)
+      ).expect(200);
+      expect(searchResponse.body.total).to.be(2);
+
+      // Search with no match
+      const noMatchResponse = await withOsqueryHeaders(
+        supertest.get('/api/osquery/packs?search=zzzznonexistent999')
+      ).expect(200);
+      expect(noMatchResponse.body.total).to.be(0);
+
+      // Filter by enabled
+      const enabledResponse = await withOsqueryHeaders(
+        supertest.get(`/api/osquery/packs?search=${prefix}&enabled=true`)
+      ).expect(200);
+      expect(enabledResponse.body.total).to.be(1);
+      expect(enabledResponse.body.data[0].name).to.contain('alpha');
+
+      // Filter by createdBy
+      const createdByResponse = await withOsqueryHeaders(
+        supertest.get(`/api/osquery/packs?search=${prefix}&createdBy=elastic`)
+      ).expect(200);
+      expect(createdByResponse.body.total).to.be(2);
+
+      // Non-matching createdBy
+      const noUserResponse = await withOsqueryHeaders(
+        supertest.get(`/api/osquery/packs?search=${prefix}&createdBy=nonexistentuser`)
+      ).expect(200);
+      expect(noUserResponse.body.total).to.be(0);
+
+      // Profile uid fields present in find results
+      expect(searchResponse.body.data[0]).to.have.property('created_by_profile_uid');
+      expect(searchResponse.body.data[0]).to.have.property('updated_by_profile_uid');
+
+      // Clean up
+      for (const id of createdIds) {
+        await withOsqueryHeaders(supertest.delete(`/api/osquery/packs/${id}`)).expect(200);
+      }
+    });
+
+    describe('find route sorting and description search', () => {
+      const sortPrefix = `SortTest-${Date.now()}`;
+      const sortPackIds: string[] = [];
+
+      before(async () => {
+        for (const [suffix, enabled] of [
+          ['charlie', true],
+          ['alpha', false],
+          ['bravo', true],
+        ] as const) {
+          const resp = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+            .send({
+              name: `${sortPrefix}-${suffix}`,
+              description: `Sort test pack for ${suffix}`,
+              enabled,
+              queries: { q1: { query: 'select 1;', interval: 3600 } },
+            })
+            .expect(200);
+          sortPackIds.push(resp.body.data.saved_object_id);
+        }
+      });
+
+      after(async () => {
+        for (const id of sortPackIds) {
+          await withOsqueryHeaders(supertest.delete(`/api/osquery/packs/${id}`)).expect(200);
+        }
+      });
+
+      it('sorts by created_by (keyword) without error', async () => {
+        const response = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs?search=${sortPrefix}&sort=created_by&sortOrder=asc`)
+        ).expect(200);
+        expect(response.body.total).to.be(3);
+      });
+
+      it('sorts by updated_at (date) without error', async () => {
+        const response = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs?search=${sortPrefix}&sort=updated_at&sortOrder=desc`)
+        ).expect(200);
+        expect(response.body.total).to.be(3);
+      });
+
+      it('searches by description field', async () => {
+        const response = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs?search=Sort test pack for alpha`)
+        ).expect(200);
+        expect(response.body.total).to.be.greaterThan(0);
+        expect(
+          response.body.data.some((p: { name: string }) => p.name === `${sortPrefix}-alpha`)
+        ).to.be(true);
+      });
+    });
+
+    describe('users route', () => {
+      const usersPrefix = `UsersTest-${Date.now()}`;
+      const usersPackIds: string[] = [];
+
+      before(async () => {
+        for (const suffix of ['one', 'two']) {
+          const resp = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+            .send({
+              name: `${usersPrefix}-${suffix}`,
+              description: `Users test ${suffix}`,
+              enabled: true,
+              queries: { q1: { query: 'select 1;', interval: 3600 } },
+            })
+            .expect(200);
+          usersPackIds.push(resp.body.data.saved_object_id);
+        }
+      });
+
+      after(async () => {
+        for (const id of usersPackIds) {
+          await withOsqueryHeaders(supertest.delete(`/api/osquery/packs/${id}`)).expect(200);
+        }
+      });
+
+      it('returns unique users with profile UIDs', async () => {
+        const response = await supertest
+          .get('/internal/osquery/packs/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        expect(response.body.data).to.be.an(Array);
+        expect(response.body.data.length).to.be.greaterThan(0);
+
+        const users = response.body.data.map((c: { created_by: string }) => c.created_by);
+        expect(users).to.contain('elastic');
+
+        // Verify uniqueness
+        const uniqueUsers = [...new Set(users)];
+        expect(uniqueUsers.length).to.be(users.length);
+      });
+
+      it('includes created_by_profile_uid when available', async () => {
+        const response = await supertest
+          .get('/internal/osquery/packs/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        const elastic = response.body.data.find(
+          (c: { created_by: string }) => c.created_by === 'elastic'
+        );
+        expect(elastic).to.be.ok();
+        expect(elastic).to.have.property('created_by');
+      });
     });
 
     it('update route should return 200 and multi line query, but single line query in packs config', async () => {
-      const updatePackResponse = await supertest
-        .put('/api/osquery/packs/' + packId)
-        .set('kbn-xsrf', 'true')
-        .send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
+      expect(packId).to.be.ok();
+      const updatePackResponse = await withOsqueryHeaders(
+        supertest.put('/api/osquery/packs/' + packId)
+      ).send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
 
       expect(updatePackResponse.status).to.be(200);
-      expect(updatePackResponse.body.data.id).to.be(packId);
-      const pack = await supertest.get('/api/osquery/packs/' + packId).set('kbn-xsrf', 'true');
+      expect(updatePackResponse.body.data.saved_object_id).to.be(packId);
+      const pack = await withOsqueryHeaders(supertest.get('/api/osquery/packs/' + packId));
 
       expect(pack.body.data.queries.testQuery.query).to.be(multiLineQuery);
       const {
         body: {
           item: { inputs },
         },
-      } = await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`);
+      } = await supertest
+        .get(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
 
-      expect(inputs[0].config.osquery.value.packs.TestPack.queries.testQuery.query).to.be(
-        singleLineQuery
-      );
+      expect(
+        inputs[0].config.osquery.value.packs['default--TestPack'].queries.testQuery.query
+      ).to.be(singleLineQuery);
+    });
+
+    describe('created_by attribution', () => {
+      it('user-created pack records the creating user', async () => {
+        const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `Attribution-UserPack-${Date.now()}`,
+            description: 'Test user attribution',
+            enabled: false,
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+
+        const { data } = createResponse.body;
+        expect(data.created_by).to.be.ok();
+        expect(data.created_by).to.be('elastic');
+        expect(data.updated_by).to.be('elastic');
+
+        // Duplicate the user-created pack
+        const copyResponse = await withOsqueryHeaders(
+          supertest.post(`/api/osquery/packs/${data.saved_object_id}/copy`)
+        ).expect(200);
+
+        const copy = copyResponse.body.data;
+        expect(copy.created_by).to.be('elastic');
+        expect(copy.updated_by).to.be('elastic');
+        expect(copy.name).to.contain('Attribution-UserPack');
+
+        // Clean up
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${copy.saved_object_id}`)
+        ).expect(200);
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${data.saved_object_id}`)
+        ).expect(200);
+      });
+
+      it('prebuilt packs have "elastic" as created_by after asset install', async () => {
+        // Trigger asset install/update
+        await supertest
+          .post('/internal/osquery/assets/update')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        // Find all packs and look for prebuilt ones
+        const findResponse = await withOsqueryHeaders(
+          supertest.get('/api/osquery/packs?pageSize=100')
+        ).expect(200);
+
+        // Prebuilt packs should have created_by = 'elastic'
+        const prebuiltPacks = findResponse.body.data.filter(
+          (p: { read_only: boolean }) => p.read_only
+        );
+
+        expect(prebuiltPacks.length).to.be.greaterThan(0);
+        for (const pack of prebuiltPacks) {
+          expect(pack.created_by).to.be('elastic');
+          expect(pack.updated_by).to.be('elastic');
+        }
+      });
+
+      it('duplicating a prebuilt pack produces a mutable copy with valid attribution', async () => {
+        // Trigger asset install
+        await supertest
+          .post('/internal/osquery/assets/update')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        // Find a prebuilt pack
+        const findResponse = await withOsqueryHeaders(
+          supertest.get('/api/osquery/packs?pageSize=100')
+        ).expect(200);
+
+        const prebuiltPacks = findResponse.body.data.filter(
+          (p: { read_only: boolean }) => p.read_only
+        );
+        expect(prebuiltPacks.length).to.be.greaterThan(0);
+        const prebuiltPack = prebuiltPacks[0];
+
+        // Copy the prebuilt pack
+        const copyResponse = await withOsqueryHeaders(
+          supertest.post(`/api/osquery/packs/${prebuiltPack.saved_object_id}/copy`)
+        ).expect(200);
+
+        const copy = copyResponse.body.data;
+
+        // The copy uses getUserInfo() (dynamic resolution), not hardcoded 'elastic'.
+        // In FTR the test user is 'elastic', so we can only verify attribution is present.
+        expect(copy.created_by).to.be.a('string');
+        expect(copy.updated_by).to.be.a('string');
+        expect(copy.created_by).to.not.be.empty();
+
+        // The copy should NOT be read_only
+        expect(copy.read_only).to.not.be(true);
+
+        // Clean up
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${copy.saved_object_id}`)
+        ).expect(200);
+      });
+
+      it('users endpoint does not produce duplicate entries', async () => {
+        const response = await supertest
+          .get('/internal/osquery/packs/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        const usernames = response.body.data.map((c: { created_by: string }) => c.created_by);
+        const uniqueUsernames = [...new Set(usernames)];
+        expect(uniqueUsernames.length).to.be(usernames.length);
+      });
+    });
+
+    describe('404 for non-existent resources', () => {
+      it('returns 404 when reading a non-existent pack', async () => {
+        await withOsqueryHeaders(supertest.get('/api/osquery/packs/non-existent-id')).expect(404);
+      });
+
+      it('returns 404 when updating a non-existent pack', async () => {
+        await withOsqueryHeaders(supertest.put('/api/osquery/packs/non-existent-id'))
+          .send({
+            name: 'Updated Pack',
+            description: 'Updated',
+            enabled: true,
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(404);
+      });
+
+      it('returns 404 when deleting a non-existent pack', async () => {
+        await withOsqueryHeaders(supertest.delete('/api/osquery/packs/non-existent-id')).expect(
+          404
+        );
+      });
     });
   });
 }

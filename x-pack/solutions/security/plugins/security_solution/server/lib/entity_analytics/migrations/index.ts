@@ -15,6 +15,8 @@ import { renameRiskScoreComponentTemplate } from '../risk_engine/migrations/rena
 import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_ingested_pipeline';
 import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
 import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
+import { installPrebuiltWatchlists } from '../watchlists/migrations/install_prebuilt_watchlists';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -22,6 +24,7 @@ export interface EntityAnalyticsMigrationsParams {
   getStartServices: StartServicesAccessor<StartPlugins>;
   auditLogger: AuditLogger | undefined;
   kibanaVersion: string;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 /**
@@ -37,8 +40,19 @@ export interface EntityAnalyticsMigrationsParams {
  * ### How to update the risk score transform config?
  * - Update the transform config [here](../risk_score/configurations.ts)
  * - Pump the `version` [here](../risk_score/configurations.ts)
- *
+ * 
+ * ### How to update managed entity sources (privmon/watchlist data sources)?
+ * 1. For entity source mappings:
+ *     - Update the mapping object [here](../privilege_monitoring/saved_objects/monitoring_entity_source_type.ts)
+ *     - Pump the `version` [here](../privilege_monitoring/saved_objects/monitoring_entity_source_type.ts)
+ * 2. For entity source matchers: 
+ *     - Update the matchers definitions [here](../privilege_monitoring/data_sources/constants.ts)
+ *     - Pump the `MANAGED_SOURCES_VERSION` [here](../privilege_monitoring/saved_objects/monitoring_entity_source_type.ts)
  * note: If you change the `latest` property, the transform will reinstall after the engine task runs.
+ * 
+ * ### How to update prebuilt watchlists?
+ * - Update the prebuilt watchlists definitions [here](../watchlists/migrations/install_prebuilt_watchlists.ts)
+ * - Pump the `PREBUILT_WATCHLISTS_VERSION` [here](../watchlists/migrations/install_prebuilt_watchlists.ts)
  */
 export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMigrationsParams) => {
   const paramsWithScopedLogger = {
@@ -52,4 +66,8 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   await updateRiskScoreMappings(paramsWithScopedLogger);
   await updatePrivilegedMonitoringSourceIndex(paramsWithScopedLogger);
   await upsertPrivilegedMonitoringEntitySource(paramsWithScopedLogger);
+
+  if (paramsWithScopedLogger.experimentalFeatures?.entityAnalyticsWatchlistEnabled) {
+    await installPrebuiltWatchlists(paramsWithScopedLogger);
+  }
 };

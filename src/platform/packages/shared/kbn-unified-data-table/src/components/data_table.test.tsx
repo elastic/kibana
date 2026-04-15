@@ -357,7 +357,7 @@ describe('UnifiedDataTable', () => {
         // wait for async copy action to avoid act warning
         await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          '"\'@timestamp"\t"_index"\t"_score"\tbytes\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
+          '"\'@timestamp"\t"_index"\t"_score"\tbytesDisplayName\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
         );
       },
       EXTENDED_JEST_TIMEOUT
@@ -393,7 +393,7 @@ describe('UnifiedDataTable', () => {
         // wait for async copy action to avoid act warning
         await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          `| @timestamp | _index | _score | bytes | date | extension | message | name |
+          `| @timestamp | _index | _score | bytesDisplayName | date | extension | message | name |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | - | i | 1 | - | 2020-20-01T12:12:12.124 | jpg | - | test2 |
 | - | i | 1 | 50 | 2020-20-01T12:12:12.124 | gif | - | test3 |`
@@ -817,7 +817,7 @@ describe('UnifiedDataTable', () => {
 
         expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
         expect(
-          findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
+          findTestSubject(component, 'exampleRowControl-chartBarVerticalStack').exists()
         ).toBeTruthy();
 
         // The other actions are within the popover
@@ -900,10 +900,12 @@ describe('UnifiedDataTable', () => {
         <div data-test-subj="test-document-view">{hit.id}</div>
       ));
 
+      const setExpandedDocMock = jest.fn();
+
       const component = await getComponent({
         ...getProps(),
         expandedDoc,
-        setExpandedDoc: jest.fn(),
+        setExpandedDoc: setExpandedDocMock,
         columnsMeta: columnsMetaOverride,
         renderDocumentView: renderDocumentViewMock,
         externalControlColumns: [testLeadingControlColumn],
@@ -917,6 +919,56 @@ describe('UnifiedDataTable', () => {
         ['_source'],
         columnsMetaOverride
       );
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
+  it(
+    'should provide, clear, and re-provide document view metadata when rendered externally',
+    async () => {
+      const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+      const [expandedDoc] = rows;
+      const setRenderDocumentViewMeta = jest.fn();
+      const component = await getComponent({
+        ...getProps(),
+        rows,
+        expandedDoc,
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: 'external',
+        setRenderDocumentViewMeta,
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith({
+          displayedRows: rows,
+          displayedColumns: ['_source'],
+        });
+      });
+
+      setRenderDocumentViewMeta.mockClear();
+
+      await act(async () => {
+        component.setProps({ expandedDoc: undefined });
+        component.update();
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith(undefined);
+      });
+
+      setRenderDocumentViewMeta.mockClear();
+
+      await act(async () => {
+        component.setProps({ expandedDoc });
+        component.update();
+      });
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith({
+          displayedRows: rows,
+          displayedColumns: ['_source'],
+        });
+      });
     },
     EXTENDED_JEST_TIMEOUT
   );
@@ -1263,10 +1315,9 @@ describe('UnifiedDataTable', () => {
     it(
       'should render selected fields',
       async () => {
-        const columns = ['bytes', 'message'];
-        await renderDataTable({ enableComparisonMode: true, columns });
+        await renderDataTable({ enableComparisonMode: true, columns: ['bytes', 'message'] });
         await goToComparisonMode();
-        expect(getFieldColumns()).toEqual(['@timestamp', ...columns]);
+        expect(getFieldColumns()).toEqual(['@timestamp', 'bytesDisplayName', 'message']);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1279,7 +1330,7 @@ describe('UnifiedDataTable', () => {
         expect(getFieldColumns()).toEqual([
           '@timestamp',
           '_index',
-          'bytes',
+          'bytesDisplayName',
           'extension',
           'message',
         ]);

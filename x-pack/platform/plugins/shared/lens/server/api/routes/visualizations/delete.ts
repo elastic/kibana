@@ -6,14 +6,15 @@
  */
 
 import { boomify, isBoom } from '@hapi/boom';
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
   LENS_VIS_API_PATH,
   LENS_API_VERSION,
   LENS_API_ACCESS,
-  LENS_CONTENT_TYPE,
+  LENS_API_TAG,
 } from '../../../../common/constants';
 import type { LensSavedObject } from '../../../content_management';
-import type { RegisterAPIRouteFn } from '../../types';
+import type { RegisterAPIRouteFn } from '../../../types';
 import { lensDeleteRequestParamsSchema } from './schema';
 
 export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
@@ -23,11 +24,10 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
   const deleteRoute = router.delete({
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
-    enableQueryVersion: true,
-    summary: 'Delete Lens visualization',
-    description: 'Delete a Lens visualization by id.',
+    summary: 'Delete visualization',
+    description: 'Delete a visualization by id.',
     options: {
-      tags: ['oas-tag:Lens'],
+      tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
       },
@@ -70,7 +70,6 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
-      // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
@@ -88,7 +87,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
           if (error.output.statusCode === 404) {
             return res.notFound({
               body: {
-                message: `A Lens visualization with id [${req.params.id}] was not found.`,
+                message: `A visualization with id [${req.params.id}] was not found.`,
               },
             });
           }

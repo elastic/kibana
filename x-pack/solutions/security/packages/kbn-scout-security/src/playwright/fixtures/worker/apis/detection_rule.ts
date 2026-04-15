@@ -39,6 +39,8 @@ export const getDetectionRuleApiService = ({
             method: 'POST',
             path: `${basePath}${DETECTION_ENGINE_RULES_URL}`,
             body,
+            // Avoid duplicate rule creation if the request is retried
+            retries: 0,
           });
         }
       );

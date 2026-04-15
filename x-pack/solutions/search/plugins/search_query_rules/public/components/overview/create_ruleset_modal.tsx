@@ -57,11 +57,16 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
   } = useKibana();
 
   return (
-    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
+    <EuiModal
+      onClose={onClose}
+      aria-labelledby={modalTitleId}
+      initialFocus="[name=createRulesetModalFieldText]"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle
           id={modalTitleId}
           data-test-subj="searchRulesetCreateRulesetModalHeader"
+          component="h2"
         >
           <FormattedMessage
             id="xpack.queryRules.createRulesetModal.title"
@@ -106,6 +111,7 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
               isInvalid={conflictError}
               data-test-subj="searchRulesetCreateRulesetModalFieldText"
               value={rawName}
+              name="createRulesetModalFieldText"
               onChange={(e) => {
                 setRawName(e.target.value);
                 setName(formatRulesetName(e.target.value));

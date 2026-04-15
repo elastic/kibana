@@ -13,6 +13,9 @@ import { registerEntityStoreRoutes } from './entity_store/routes';
 import { registerPrivilegeMonitoringRoutes } from './privilege_monitoring/routes/register_privilege_monitoring_routes';
 import { registerMigrationsRoutes } from './migrations/routes';
 import { registerEntityDetailsRoutes } from './entity_details/routes';
+import { registerLeadGenerationRoutes } from './lead_generation/routes/register_lead_generation_routes';
+import { registerWatchlistRoutes } from './watchlists/register_watchlist_routes';
+import { registerEntityResolutionRoutes } from './entity_resolution/routes/register_entity_resolution_routes';
 
 export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {
   registerAssetCriticalityRoutes(routeDeps);
@@ -26,5 +29,16 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
 
   if (routeDeps.config.experimentalFeatures.entityDetailsHighlightsEnabled) {
     registerEntityDetailsRoutes(routeDeps);
+  }
+
+  if (routeDeps.config.experimentalFeatures.leadGenerationEnabled) {
+    registerLeadGenerationRoutes(routeDeps);
+  }
+  if (routeDeps.config.experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+    registerWatchlistRoutes(routeDeps);
+  }
+
+  if (!routeDeps.config.experimentalFeatures.entityStoreDisabled) {
+    registerEntityResolutionRoutes(routeDeps);
   }
 };

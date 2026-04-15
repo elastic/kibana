@@ -5,33 +5,31 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { ResourceResult, ToolResult } from '@kbn/agent-builder-common/tools';
+import type { TimeRange } from '@kbn/agent-builder-common';
+import type { Resource, ResourceListResult, ToolResult } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server/tools';
+import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server/tools';
 import { relevanceSearch } from '../relevance_search';
 import { naturalLanguageSearch } from '../nl_search';
 import type { MatchResult } from '../steps/perform_match_search';
+import type { TopSnippetsConfig } from '../steps/extract_snippets';
 import { progressMessages } from './i18n';
 
-const convertMatchResult = (result: MatchResult): ResourceResult => {
+const convertMatchResult = (result: MatchResult): Resource => {
   return {
-    tool_result_id: getToolResultId(),
-    type: ToolResultType.resource,
-    data: {
-      reference: {
-        id: result.id,
-        index: result.index,
-      },
-      partial: true,
-      content: {
-        highlights: result.highlights,
-      },
+    reference: {
+      id: result.id,
+      index: result.index,
+    },
+    partial: true,
+    content: {
+      snippets: result.snippets,
     },
   };
 };
@@ -42,10 +40,14 @@ export const createRelevanceSearchTool = ({
   model,
   esClient,
   events,
+  logger,
+  topSnippetsConfig,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   events?: ToolEventEmitter;
+  logger: Logger;
+  topSnippetsConfig?: TopSnippetsConfig;
 }) => {
   return toTool(
     async ({ term, index, size }) => {
@@ -60,11 +62,21 @@ export const createRelevanceSearchTool = ({
             size,
             model,
             esClient,
+            logger,
+            topSnippetsConfig,
           });
-          const results = rawResults.map(convertMatchResult);
+          const resources = rawResults.map(convertMatchResult);
 
-          const content = JSON.stringify(results);
-          const artifact = { results };
+          const result: ResourceListResult = {
+            type: ToolResultType.resourceList,
+            tool_result_id: getToolResultId(),
+            data: {
+              resources,
+            },
+          };
+
+          const content = JSON.stringify({ results: [result] });
+          const artifact = { results: [result] };
           return [content, artifact];
         }
       );
@@ -73,17 +85,12 @@ export const createRelevanceSearchTool = ({
       name: relevanceSearchToolName,
       responseFormat: 'content_and_artifact',
       schema: z.object({
-        term: z.string().describe('Term to search for'),
-        index: z.string().describe('Name of the index, alias or datastream to search against'),
-        size: z
-          .number()
-          .optional()
-          .default(10)
-          .describe('Number of documents to return. Defaults to 10.'),
+        term: z.string().describe('The search term or phrase to match against document content'),
+        index: z.string().describe('The index, alias, or datastream to search'),
+        size: z.number().optional().default(10).describe('Max documents to return (default: 10)'),
       }),
-      description: `Find relevant documents in an index, alias or datastream, based on a simple fulltext search.
-
-      Will search for documents performing a match query against the provided term(s).`,
+      description:
+        'Find documents using full-text search. Returns results ranked by relevance score.',
     }
   );
 };
@@ -97,6 +104,7 @@ export const createNaturalLanguageSearchTool = ({
   logger,
   rowLimit,
   customInstructions,
+  timeRange,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
@@ -104,6 +112,7 @@ export const createNaturalLanguageSearchTool = ({
   logger: Logger;
   rowLimit?: number;
   customInstructions?: string;
+  timeRange: TimeRange;
 }) => {
   return toTool(
     async ({ query, index }) => {
@@ -121,6 +130,7 @@ export const createNaturalLanguageSearchTool = ({
             logger,
             rowLimit,
             customInstructions,
+            timeRange,
           });
 
           const results: ToolResult[] = response.esqlData
@@ -134,12 +144,13 @@ export const createNaturalLanguageSearchTool = ({
                 },
                 {
                   tool_result_id: getToolResultId(),
-                  type: ToolResultType.tabularData,
+                  type: ToolResultType.esqlResults,
                   data: {
                     source: 'esql',
                     query: response.generatedQuery,
                     columns: response.esqlData.columns,
                     values: response.esqlData.values,
+                    time_range: timeRange,
                   },
                 },
               ]

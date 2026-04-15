@@ -43,12 +43,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
             defaultMessage: `We detected usage of this product. Click to start monitoring.`,
           })}
         >
-          <EuiBadge
-            color="warning"
-            iconType="flag"
-            href={badgeClickLink}
-            onClickAriaLabel={detectedText}
-          >
+          <EuiBadge color="warning" iconType="flag" href={badgeClickLink}>
             {detectedText}
           </EuiBadge>
         </EuiToolTip>
@@ -68,12 +63,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
             },
           })}
         >
-          <EuiBadge
-            color="hollow"
-            iconType="flag"
-            href={badgeClickLink}
-            onClickAriaLabel={noMonitoringText}
-          >
+          <EuiBadge color="hollow" iconType="flag" href={badgeClickLink}>
             {noMonitoringText}
           </EuiBadge>
         </EuiToolTip>
@@ -96,12 +86,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
           },
         })}
       >
-        <EuiBadge
-          color="danger"
-          iconType="flag"
-          href={badgeClickLink}
-          onClickAriaLabel={internalCollection}
-        >
+        <EuiBadge color="danger" iconType="flag" href={badgeClickLink}>
           {internalCollection}
         </EuiBadge>
       </EuiToolTip>
@@ -120,12 +105,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
           },
         })}
       >
-        <EuiBadge
-          color="warning"
-          iconType="flag"
-          href={badgeClickLink}
-          onClickAriaLabel={internalAndMB}
-        >
+        <EuiBadge color="warning" iconType="flag" href={badgeClickLink}>
           {internalAndMB}
         </EuiBadge>
       </EuiToolTip>
@@ -144,12 +124,7 @@ export function SetupModeTooltip({ setupModeData, badgeClickLink, productName })
           },
         })}
       >
-        <EuiBadge
-          color="success"
-          iconType="flag"
-          href={badgeClickLink}
-          onClickAriaLabel={metricbeatCollection}
-        >
+        <EuiBadge color="success" iconType="flag" href={badgeClickLink}>
           {metricbeatCollection}
         </EuiBadge>
       </EuiToolTip>

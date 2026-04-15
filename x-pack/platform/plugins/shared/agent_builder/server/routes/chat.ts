@@ -21,12 +21,15 @@ import {
   isConversationCreatedEvent,
   createBadRequestError,
 } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import {
+  ConnectorOrInferenceIdConflictError,
+  resolveConnectorOrInferenceId,
+} from '../../common/resolve_connector_or_inference_id';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
-import type { ChatService } from '../services/chat';
-import type { AttachmentServiceStart } from '../services/attachments';
+import type { AgentExecutionService } from '../services/execution';
+import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
@@ -37,7 +40,6 @@ export function registerChatRoutes({
   getInternalServices,
   coreSetup,
   logger,
-  analyticsService,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -49,11 +51,24 @@ export function registerChatRoutes({
       },
     }),
     connector_id: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Optional connector ID for the agent to use for external integrations.',
-        },
-      })
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'Optional connector ID for the agent to use for model routing. Mutually exclusive with `inference_id`; omit or use only one.',
+          },
+        })
+      )
+    ),
+    inference_id: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'Optional inference endpoint ID for model routing (public alias for the same internal identifier as `connector_id`). Mutually exclusive with `connector_id`.',
+          },
+        })
+      )
     ),
     conversation_id: schema.maybe(
       schema.string({
@@ -67,30 +82,59 @@ export function registerChatRoutes({
         meta: { description: 'The user input message to send to the agent.' },
       })
     ),
-    confirm: schema.maybe(
-      schema.boolean({ meta: { description: 'Can be used to respond to a confirmation prompt.' } })
+    prompts: schema.maybe(
+      schema.recordOf(schema.string(), schema.object({ allow: schema.boolean() }), {
+        meta: { description: 'Can be used to respond to a confirmation prompt.' },
+      })
     ),
     attachments: schema.maybe(
       schema.arrayOf(
-        schema.object({
-          id: schema.maybe(
-            schema.string({
-              meta: { description: 'Optional id for the attachment.' },
-            })
-          ),
-          type: schema.string({
-            meta: { description: 'Type of the attachment.' },
-          }),
-          data: schema.recordOf(schema.string(), schema.any(), {
-            meta: { description: 'Payload of the attachment.' },
-          }),
-          hidden: schema.maybe(
-            schema.boolean({
-              meta: { description: 'When true, the attachment will not be displayed in the UI.' },
-            })
-          ),
-        }),
-        { meta: { description: 'Optional attachments to send with the message.' } }
+        schema.object(
+          {
+            id: schema.maybe(
+              schema.string({
+                meta: { description: 'Optional id for the attachment.' },
+              })
+            ),
+            type: schema.string({
+              meta: { description: 'Type of the attachment.' },
+            }),
+            data: schema.maybe(
+              schema.recordOf(schema.string(), schema.any(), {
+                meta: {
+                  description:
+                    'Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).',
+                },
+              })
+            ),
+            origin: schema.maybe(
+              schema.string({
+                meta: {
+                  description:
+                    'Origin string (for example, saved object ID) for by-reference attachments. When provided without `data`, the content is resolved once using the attachment type’s `resolve` hook.',
+                },
+              })
+            ),
+            hidden: schema.maybe(
+              schema.boolean({
+                meta: { description: 'When true, the attachment will not be displayed in the UI.' },
+              })
+            ),
+          },
+          {
+            validate: (attachment) => {
+              if (attachment.data === undefined && attachment.origin === undefined) {
+                return 'Each attachment must include either data or origin (by-reference attachments require origin)';
+              }
+            },
+          }
+        ),
+        {
+          meta: {
+            description:
+              '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.',
+          },
+        }
       )
     ),
     capabilities: schema.maybe(
@@ -134,66 +178,140 @@ export function registerChatRoutes({
         }
       )
     ),
+    configuration_overrides: schema.maybe(
+      schema.object(
+        {
+          instructions: schema.maybe(
+            schema.string({
+              meta: { description: 'Custom instructions for the agent.' },
+            })
+          ),
+          tools: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                tool_ids: schema.arrayOf(schema.string()),
+              }),
+              { meta: { description: 'Tool selection to enable for this execution.' } }
+            )
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Runtime configuration overrides. These override the stored agent configuration for this execution only.',
+          },
+        }
+      )
+    ),
+    action: schema.maybe(
+      schema.oneOf([schema.literal('regenerate')], {
+        meta: {
+          description:
+            'The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.',
+        },
+      })
+    ),
+    _execution_mode: schema.maybe(
+      schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
+        meta: {
+          description:
+            '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)',
+        },
+      })
+    ),
   });
 
-  const validateAttachments = async ({
-    attachments,
-    attachmentsService,
-  }: {
-    attachments: AttachmentInput[];
-    attachmentsService: AttachmentServiceStart;
-  }) => {
-    const results: AttachmentInput[] = [];
-    for (const attachment of attachments) {
-      const validation = await attachmentsService.validate(attachment);
-      if (validation.valid) {
-        results.push(validation.attachment);
-      } else {
-        throw createBadRequestError(`Attachment validation failed: ${validation.error}`);
-      }
+  const validateAction = (payload: ChatRequestBodyPayload) => {
+    if (payload.action === 'regenerate' && !payload.conversation_id) {
+      throw createBadRequestError('conversation_id is required when action is regenerate');
     }
-    return results;
   };
 
-  const callConverse = ({
+  const resolveConnectorIdFromPayload = (payload: ChatRequestBodyPayload): string | undefined => {
+    try {
+      return resolveConnectorOrInferenceId({
+        connectorId: payload.connector_id,
+        inferenceId: payload.inference_id,
+      });
+    } catch (e) {
+      if (e instanceof ConnectorOrInferenceIdConflictError) {
+        throw createBadRequestError(e.message);
+      }
+      throw e;
+    }
+  };
+
+  const validateConfigurationOverrides = async ({
     payload,
-    attachments,
     request,
-    chatService,
-    abortSignal,
   }: {
-    payload: Omit<ChatRequestBodyPayload, 'attachments'>;
-    attachments: AttachmentInput[];
+    payload: ChatRequestBodyPayload;
     request: KibanaRequest;
-    chatService: ChatService;
+  }) => {
+    if (payload.configuration_overrides?.tools) {
+      const { tools: toolsService } = getInternalServices();
+      const toolRegistry = await toolsService.getRegistry({ request });
+      const errors = await validateToolSelection({
+        toolRegistry,
+        request,
+        toolSelection: payload.configuration_overrides.tools,
+      });
+      if (errors.length > 0) {
+        throw createBadRequestError(`Invalid tool override: ${errors.join(', ')}`);
+      }
+    }
+  };
+
+  const executeAgent = async ({
+    payload,
+    request,
+    abortSignal,
+    executionService,
+  }: {
+    payload: ChatRequestBodyPayload;
+    request: KibanaRequest;
     abortSignal: AbortSignal;
+    executionService: AgentExecutionService;
   }) => {
     const {
       agent_id: agentId,
-      connector_id: connectorId,
       conversation_id: conversationId,
       input,
-      confirm,
+      prompts,
+      attachments,
       capabilities,
       browser_api_tools: browserApiTools,
+      configuration_overrides: configurationOverrides,
+      action,
+      _execution_mode: executionMode,
     } = payload;
 
-    const promptResponse = confirm !== undefined ? { confirmed: confirm } : undefined;
+    const connectorId = resolveConnectorIdFromPayload(payload);
 
-    return chatService.converse({
-      agentId,
-      connectorId,
-      conversationId,
-      capabilities,
-      browserApiTools,
-      abortSignal,
-      nextInput: {
-        message: input,
-        prompt_response: promptResponse,
-        attachments,
-      },
+    const useTaskManager =
+      executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined;
+
+    const { events$ } = await executionService.executeAgent({
       request,
+      abortSignal,
+      useTaskManager,
+      params: {
+        agentId,
+        connectorId,
+        conversationId,
+        capabilities,
+        browserApiTools,
+        configurationOverrides,
+        action,
+        nextInput: {
+          message: input,
+          prompts,
+          attachments,
+        },
+      },
     });
+
+    return events$;
   };
 
   router.versioned
@@ -205,14 +323,13 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -228,27 +345,22 @@ export function registerChatRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
+        const { execution: executionService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
+
+        await validateConfigurationOverrides({ payload, request });
+        validateAction(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
           abortController.abort();
         });
 
-        const attachments = payload.attachments
-          ? await validateAttachments({
-              attachments: payload.attachments,
-              attachmentsService,
-            })
-          : [];
-
-        const chatEvents$ = callConverse({
+        const chatEvents$ = await executeAgent({
           payload,
-          attachments,
-          chatService,
           request,
           abortSignal: abortController.signal,
+          executionService,
         });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
@@ -265,10 +377,10 @@ export function registerChatRoutes({
           body: {
             conversation_id: convId,
             round_id: round.id,
-            ...omit(round, ['id', 'input', 'response', 'pending_prompt', 'state']),
+            ...omit(round, ['id', 'input', 'response', 'pending_prompts', 'state']),
             response: {
               ...round.response,
-              prompt: round.pending_prompt,
+              prompts: round.pending_prompts,
             },
           },
         });
@@ -290,7 +402,6 @@ export function registerChatRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -307,27 +418,22 @@ export function registerChatRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const [, { cloud }] = await coreSetup.getStartServices();
-        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
+        const { execution: executionService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
+
+        await validateConfigurationOverrides({ payload, request });
+        validateAction(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
           abortController.abort();
         });
 
-        const attachments = payload.attachments
-          ? await validateAttachments({
-              attachments: payload.attachments,
-              attachmentsService,
-            })
-          : [];
-
-        const chatEvents$ = callConverse({
+        const chatEvents$ = await executeAgent({
           payload,
-          attachments,
           request,
-          chatService,
           abortSignal: abortController.signal,
+          executionService,
         });
 
         return response.ok({
@@ -336,6 +442,8 @@ export function registerChatRoutes({
             'Content-Type': cloud?.isCloudEnabled
               ? 'application/octet-stream'
               : 'text/event-stream',
+            // another attempt at disabling compression
+            'Content-Encoding': 'identity',
             'Cache-Control': 'no-cache',
             Connection: 'keep-alive',
             'Transfer-Encoding': 'chunked',

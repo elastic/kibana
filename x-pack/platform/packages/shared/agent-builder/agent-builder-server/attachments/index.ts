@@ -12,6 +12,7 @@ export type {
   AttachmentValidationResult,
   AgentFormattedAttachment,
   AttachmentFormatContext,
+  AttachmentResolveContext,
 } from './type_definition';
 export type {
   AttachmentBoundedTool,

@@ -60,6 +60,10 @@ properties:
           $ref: 'case_tags.yaml'
         title:
           $ref: 'case_title.yaml'
+        closeReason:
+          $ref: 'case_close_sync_reason.yaml'
         version:
-          description: The current version of the case. To determine this value, use the get case or find cases APIs.
+          description: >
+            The current version of the case.
+            To determine this value, use the get case or search cases (`_find`) APIs.
           type: string

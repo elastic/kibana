@@ -6,12 +6,12 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { EuiButton, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
+import { EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import * as i18n from './translations';
-import { robotIconType } from './robot_icon';
 
 export const TryAIAgentContextMenuItem: React.FC<{
   analytics?: AnalyticsServiceStart;
@@ -43,11 +43,11 @@ export const TryAIAgentContextMenuItem: React.FC<{
               width: 100%;
             `}
           >
-            <EuiButton
+            <AiButton
               aria-label={i18n.TRY_AI_AGENT}
               onClick={() => handleOpenAIAgentModal('security_settings_menu')}
-              iconType={robotIconType}
-              color="accent"
+              iconType="productAgent"
+              variant="base"
               size="s"
               fullWidth
               isDisabled={!hasAgentBuilderManagePrivilege}
@@ -57,15 +57,15 @@ export const TryAIAgentContextMenuItem: React.FC<{
               `}
             >
               {i18n.TRY_AI_AGENT}
-            </EuiButton>
+            </AiButton>
           </span>
         </EuiToolTip>
       ) : (
-        <EuiButton
+        <AiButton
           aria-label={i18n.TRY_AI_AGENT}
           onClick={() => handleOpenAIAgentModal('security_settings_menu')}
-          iconType={robotIconType}
-          color="accent"
+          iconType="productAgent"
+          variant="base"
           size="s"
           fullWidth
           isDisabled={!hasAgentBuilderManagePrivilege}
@@ -75,7 +75,7 @@ export const TryAIAgentContextMenuItem: React.FC<{
           `}
         >
           {i18n.TRY_AI_AGENT}
-        </EuiButton>
+        </AiButton>
       )}
     </EuiContextMenuItem>
   );

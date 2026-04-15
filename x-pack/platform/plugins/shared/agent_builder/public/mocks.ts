@@ -5,35 +5,76 @@
  * 2.0.
  */
 
+import { EMPTY } from 'rxjs';
+import type {
+  AgentsServiceStartContract,
+  AttachmentServiceStartContract,
+  ToolServiceStartContract,
+} from '@kbn/agent-builder-browser';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
-  ConversationFlyoutRef,
+  ConversationSidebarRef,
 } from './types';
-import type { OpenConversationFlyoutOptions } from './flyout/types';
+import type { OpenConversationSidebarOptions } from './sidebar/types';
 
 const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
   return {};
 };
 
-const createStartContractMock = (): jest.Mocked<AgentBuilderPluginStart> => {
+export type AgentsServiceStartContractMock = jest.Mocked<AgentsServiceStartContract>;
+export type AttachmentServiceStartContractMock = jest.Mocked<AttachmentServiceStartContract>;
+export type ToolServiceStartContractMock = jest.Mocked<ToolServiceStartContract>;
+
+export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> & {
+  agents: AgentsServiceStartContractMock;
+  attachments: AttachmentServiceStartContractMock;
+  tools: ToolServiceStartContractMock;
+};
+
+const createAgentStartMock = (): AgentsServiceStartContractMock => {
   return {
-    agents: {} as any,
-    attachments: {} as any,
-    tools: {} as any,
-    setConversationFlyoutActiveConfig: jest.fn(),
-    clearConversationFlyoutActiveConfig: jest.fn(),
-    toggleConversationFlyout: jest.fn(),
-    openConversationFlyout: jest
-      .fn()
-      .mockImplementation((options: OpenConversationFlyoutOptions) => {
-        const mockFlyoutRef: ConversationFlyoutRef = {
-          close: jest.fn(),
-        };
-        return {
-          flyoutRef: mockFlyoutRef,
-        };
-      }),
+    list: jest.fn(),
+  };
+};
+
+const createAttachmentStartMock = (): AttachmentServiceStartContractMock => {
+  return {
+    addAttachmentType: jest.fn(),
+    getAttachmentUiDefinition: jest.fn(),
+  };
+};
+
+const createToolStartMock = (): ToolServiceStartContractMock => {
+  return {
+    get: jest.fn(),
+    list: jest.fn(),
+    execute: jest.fn(),
+    listWorkflows: jest.fn(),
+  };
+};
+
+const createStartContractMock = (): AgentBuilderPluginStartMock => {
+  return {
+    agents: createAgentStartMock(),
+    attachments: createAttachmentStartMock(),
+    tools: createToolStartMock(),
+    events: {
+      chat$: EMPTY,
+    },
+    setChatConfig: jest.fn(),
+    clearChatConfig: jest.fn(),
+    toggleChat: jest.fn(),
+    openChat: jest.fn().mockImplementation((options: OpenConversationSidebarOptions) => {
+      const mockSidebarRef: ConversationSidebarRef = {
+        close: jest.fn(),
+      };
+      return {
+        chatRef: mockSidebarRef,
+      };
+    }),
+    addAttachment: jest.fn(),
+    updateAttachmentOrigin: jest.fn(),
   };
 };
 

@@ -14,6 +14,7 @@ import type {
   OSQUERY_APP_ID,
   MANAGEMENT_APP_ID,
   CLOUD_CONNECT_NAV_ID,
+  RULES_APP_ID,
 } from './constants';
 
 // Monitoring
@@ -28,11 +29,14 @@ export type IntegrationsDeepLinkId = IntegrationsAppId | FleetAppId | OsQueryApp
 
 // Management
 export type ManagementAppId = typeof MANAGEMENT_APP_ID;
+export type RulesAppId = typeof RULES_APP_ID;
 export type ManagementId =
   | 'ad_settings'
   | 'aiAssistantManagementSelection'
   | 'analytics'
   | 'anomaly_detection'
+  | 'queryActivity'
+  | 'evals'
   | 'securityAiAssistantManagement'
   | 'observabilityAiAssistantManagement'
   | 'api_keys'
@@ -41,11 +45,15 @@ export type ManagementId =
   | 'dataViews'
   | 'data_quality'
   | 'data_usage'
+  | 'episodes'
   | 'content_connectors'
   | 'filesManagement'
   | 'license_management'
   | 'index_lifecycle_management'
   | 'index_management'
+  | 'elastic_inference_service'
+  | 'inference_endpoints'
+  | 'model_settings'
   | 'ingest_pipelines'
   | 'jobsListLink'
   | 'maintenanceWindows'
@@ -66,6 +74,8 @@ export type ManagementId =
   | 'tags'
   | 'trained_models'
   | 'transform'
+  | 'notification_policies'
+  | 'rules'
   | 'triggersActions'
   | 'triggersActionsAlerts'
   | 'triggersActionsConnectors'
@@ -79,7 +89,7 @@ export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${Manag
 export type CloudConnectDeepLinkId = typeof CLOUD_CONNECT_NAV_ID;
 
 // Combined
-export type AppId = MonitoringAppId | IntegrationsAppId | ManagementAppId;
+export type AppId = MonitoringAppId | IntegrationsAppId | ManagementAppId | RulesAppId;
 export type LinkId = ManagementId;
 export type DeepLinkId =
   | AppId

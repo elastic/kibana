@@ -14,6 +14,8 @@
           "\nCore's authentication service\n"
         ],
         "path": "src/core/packages/security/browser/src/authc.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               ">"
             ],
             "path": "src/core/packages/security/browser/src/authc.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -50,6 +54,8 @@
           "\nThe contract exposed by the security provider for Core to\nconsume and re-expose via its security service.\n"
         ],
         "path": "src/core/packages/security/browser/src/api_provider.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -64,6 +70,8 @@
               "CoreAuthenticationService"
             ],
             "path": "src/core/packages/security/browser/src/api_provider.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -80,6 +88,8 @@
           "\nSetup contract for Core's security service.\n"
         ],
         "path": "src/core/packages/security/browser/src/contracts.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -98,6 +108,8 @@
               ") => void"
             ],
             "path": "src/core/packages/security/browser/src/contracts.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -112,6 +124,8 @@
                   "CoreSecurityDelegateContract"
                 ],
                 "path": "src/core/packages/security/browser/src/contracts.ts",
+                "lineNumber": 24,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -132,6 +146,8 @@
           "\nStart contract for Core's security service.\n"
         ],
         "path": "src/core/packages/security/browser/src/contracts.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,6 +164,8 @@
               "CoreAuthenticationService"
             ],
             "path": "src/core/packages/security/browser/src/contracts.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -168,6 +186,8 @@
           "CoreAuthenticationService"
         ],
         "path": "src/core/packages/security/browser/src/api_provider.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

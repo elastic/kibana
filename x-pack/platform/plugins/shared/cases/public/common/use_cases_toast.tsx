@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ErrorToastOptions } from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -39,7 +39,7 @@ import type { ObservablePost } from '../../common/types/api';
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
   for (const attachment of attachments) {
-    if (attachment.type === AttachmentType.alert) {
+    if (attachment.type === AttachmentType.alert && `alertId` in attachment) {
       // alertId might be an array
       if (Array.isArray(attachment.alertId) && attachment.alertId.length > 1) {
         alertsCount += attachment.alertId.length;
@@ -184,8 +184,8 @@ export const useCasesToast = () => {
           toasts.addError(getError(error), { title: getErrorMessage(error), ...opts });
         }
       },
-      showSuccessToast: (title: string) => {
-        toasts.addSuccess({ title, className: 'eui-textBreakWord' });
+      showSuccessToast: (title: string, text?: ToastInputFields['text']) => {
+        toasts.addSuccess({ title, text, className: 'eui-textBreakWord' });
       },
       showDangerToast: (title: string, text?: string) => {
         toasts.addDanger({ title, text, className: 'eui-textBreakWord' });

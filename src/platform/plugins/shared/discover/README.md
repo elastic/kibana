@@ -46,4 +46,3 @@ Set constants for feature flag keys in [public/constants.ts](./public/constants.
 
 These are the feature flags used by Discover:
 
-* `discover.tabsEnabled`: Enabled the tabs feature.

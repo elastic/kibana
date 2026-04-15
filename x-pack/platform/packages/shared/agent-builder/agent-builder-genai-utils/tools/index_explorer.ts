@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { take } from 'lodash';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import { EsResourceType } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
@@ -18,7 +17,8 @@ import type {
   IndexSearchSource,
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
-import { flattenMapping, getDataStreamMappings, getIndexMappings } from './utils/mappings';
+import { flattenMapping, getDataStreamMappings } from './utils/mappings';
+import { getIndexFields, partitionByCcs, getBatchedFieldsFromFieldCaps } from './utils/ccs';
 
 export interface RelevantResource {
   type: EsResourceType;
@@ -37,6 +37,17 @@ export interface ResourceDescriptor {
   fields?: string[];
 }
 
+const truncateList = (fields: string[], max: number): string[] => {
+  if (fields.length <= max) {
+    return fields;
+  }
+  return [...fields.slice(0, max), `[and ${fields.length - max} more]`];
+};
+
+/**
+ * Builds resource descriptors for a list of indices by delegating
+ * the local-vs-CCS field resolution to {@link getIndexFields}.
+ */
 const createIndexSummaries = async ({
   indices,
   esClient,
@@ -44,20 +55,18 @@ const createIndexSummaries = async ({
   indices: IndexSearchSource[];
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
-  const allMappings = await getIndexMappings({
-    indices: indices.map((index) => index.name),
-    cleanup: true,
+  const indexFields = await getIndexFields({
+    indices: indices.map((i) => i.name),
     esClient,
   });
 
-  return indices.map<ResourceDescriptor>(({ name: indexName }) => {
-    const indexMappings = allMappings[indexName];
-    const flattened = flattenMapping(indexMappings.mappings);
+  return indices.map(({ name }) => {
+    const entry = indexFields[name];
     return {
       type: EsResourceType.index,
-      name: indexName,
-      description: indexMappings?.mappings._meta?.description,
-      fields: flattened.map((field) => field.path),
+      name,
+      description: entry?.rawMapping?._meta?.description,
+      fields: (entry?.fields ?? []).map((f) => f.path),
     };
   });
 };
@@ -72,7 +81,7 @@ const createAliasSummaries = async ({
     return {
       type: EsResourceType.alias,
       name: aliasName,
-      description: `Point to the following indices: ${indices.join(', ')}`,
+      description: `Point to the following indices: ${truncateList(indices, 20).join(', ')}`,
     };
   });
 };
@@ -84,22 +93,46 @@ const createDatastreamSummaries = async ({
   datastreams: DataStreamSearchSource[];
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
-  const allMappings = await getDataStreamMappings({
-    datastreams: datastreams.map((stream) => stream.name),
-    cleanup: true,
-    esClient,
-  });
+  const { local, remote } = partitionByCcs(datastreams);
+  const descriptors: ResourceDescriptor[] = [];
 
-  return datastreams.map<ResourceDescriptor>(({ name }) => {
-    const mappings = allMappings[name];
-    const flattened = flattenMapping(mappings.mappings);
-    return {
-      type: EsResourceType.dataStream,
-      name,
-      description: mappings?.mappings._meta?.description,
-      fields: flattened.map((field) => field.path),
-    };
-  });
+  // Local data streams: use _data_stream/_mappings API (full mapping tree + _meta.description)
+  if (local.length > 0) {
+    const allMappings = await getDataStreamMappings({
+      datastreams: local.map((stream) => stream.name),
+      cleanup: true,
+      esClient,
+    });
+
+    for (const { name } of local) {
+      const mappings = allMappings[name];
+      const flattened = flattenMapping(mappings.mappings);
+      descriptors.push({
+        type: EsResourceType.dataStream,
+        name,
+        description: mappings?.mappings._meta?.description,
+        fields: flattened.map((field) => field.path),
+      });
+    }
+  }
+
+  // Remote (CCS) data streams: single batched _field_caps request, then split per data stream
+  if (remote.length > 0) {
+    const fieldsByDs = await getBatchedFieldsFromFieldCaps({
+      resources: remote.map((r) => r.name),
+      esClient,
+    });
+
+    for (const { name } of remote) {
+      descriptors.push({
+        type: EsResourceType.dataStream,
+        name,
+        fields: (fieldsByDs[name] ?? []).map((f) => f.path),
+      });
+    }
+  }
+
+  return descriptors;
 };
 
 export const indexExplorer = async ({
@@ -188,19 +221,11 @@ export interface SelectedResource {
   reason: string;
 }
 
-// Helper function to format each resource in an XML-like block
 export const formatResource = (res: ResourceDescriptor): string => {
-  const topFields = take(res.fields ?? [], 10)
-    .map((f) => `      <field>${f}</field>`)
-    .join('\n');
-
-  const description = res.description ?? 'No description provided.';
-
-  return `<resource type="${res.type}" name="${res.name}" description="${description}">
-  <sample_fields>
-${topFields || '      (No fields available)'}
-  </sample_fields>
-</resource>`;
+  const topFields = truncateList(res.fields ?? [], 10);
+  const description = res.description ? `: ${res.description}` : '';
+  const fields = topFields.length > 0 ? `\n  fields: ${topFields.join(', ')}` : '';
+  return `- ${res.name} (${res.type})${description}${fields}`;
 };
 
 export const createIndexSelectorPrompt = ({
@@ -215,35 +240,47 @@ export const createIndexSelectorPrompt = ({
   return [
     [
       'system',
-      `You are an AI assistant for the Elasticsearch company.
+      `You are an AI assistant for Elasticsearch. Your task is to select the most relevant Elasticsearch resources based on a user query.
 
-Your sole function is to identify the most relevant Elasticsearch resources (indices, aliases, data streams) based on a user's query.
+## CRITICAL INSTRUCTIONS
 
-You MUST call the 'select_resources' tool to provide your answer. Do NOT respond with conversational text, explanations, or any data outside of the tool call.
+You MUST call the 'select_resources' tool. Do NOT respond with text or explanations.
 
-- The user's query will be provided.
-- A list of available resources will be provided in XML format.
-- You must analyze the query against the resource names, descriptions, and fields.
-- Select up to a maximum of ${limit} of the most relevant resources.
-- For each selected resource, you MUST provide its 'name', 'type', and a brief 'reason' for your choice.
-- If NO resources are relevant, you MUST call the 'select_resources' tool with an empty 'targets' array.
+## Tool Schema
 
-Now, perform your function for the following query and resources.
+The 'select_resources' tool expects this exact structure:
+{
+  "targets": [
+    {
+      "name": "resource_name",
+      "type": "index" | "alias" | "data_stream",
+      "reason": "why this resource is relevant"
+    }
+  ]
+}
+
+## Rules
+
+1. ALWAYS call the 'select_resources' tool - never respond with plain text
+2. The 'targets' property MUST be an array at the root level
+3. Select at most ${limit} resource(s)
+4. If no resources match, call the tool with: {"targets": []}
+5. Each target must have: "name", "type", and "reason" fields
 `,
     ],
     [
       'human',
       `## Query
 
-*The natural language query is:* "${nlQuery}"
+"${nlQuery}"
 
-## Available resources
-<resources>
+## Available Resources
+
+<available_resources>
 ${resources.map(formatResource).join('\n')}
-</resources>
+</available_resources>
 
-Based on the natural language query and the index descriptions, please return the most relevant indices with your reasoning.
-Remember, you should select at maximum ${limit} targets. If none match, just return an empty list.`,
+Call the 'select_resources' tool now with your selection. Maximum ${limit} target(s). Use an empty targets array if none match.`,
     ],
   ];
 };
@@ -263,23 +300,24 @@ const selectResources = async ({
   const indexSelectorModel = chatModel.withStructuredOutput(
     z
       .object({
-        reasoning: z
-          .string()
-          .optional()
+        targets: z
+          .array(
+            z.object({
+              reason: z
+                .string()
+                .describe('brief explanation of why this resource could be relevant'),
+              type: z
+                .enum([EsResourceType.index, EsResourceType.alias, EsResourceType.dataStream])
+                .describe('the type of the resource'),
+              name: z.string().describe('name of the resource'),
+            })
+          )
+          .default([])
           .describe(
-            'optional brief overall reasoning. Can be used to explain why you did not return any target.'
+            'The list of selected resources (indices, aliases and/or datastreams). Must be an array. Use an empty array if no resources match.'
           ),
-        targets: z.array(
-          z.object({
-            reason: z.string().describe('brief explanation of why this resource could be relevant'),
-            type: z
-              .enum([EsResourceType.index, EsResourceType.alias, EsResourceType.dataStream])
-              .describe('the type of the resource'),
-            name: z.string().describe('name of the index, alias or data stream'),
-          })
-        ),
       })
-      .describe('Tool to use to select the relevant targets to search against'),
+      .describe('Tool to select the relevant Elasticsearch resources to search against'),
     { name: 'select_resources' }
   );
 
@@ -289,7 +327,7 @@ const selectResources = async ({
     limit,
   });
 
-  const { targets } = await indexSelectorModel.invoke(promptContent);
-
-  return targets;
+  const response = await indexSelectorModel.invoke(promptContent);
+  // Handle case where response might be malformed or targets is not an array
+  return Array.isArray(response?.targets) ? response.targets : [];
 };

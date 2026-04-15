@@ -10,7 +10,7 @@ import { subj } from '@kbn/test-subj-selector';
 import { v4 as uuidv4 } from 'uuid';
 
 export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
+  esArchives: ['x-pack/performance/es_archives/sample_data_flights_many_fields'],
   kbnArchives: [
     'x-pack/performance/kbn_archives/flights_no_map_dashboard',
     'x-pack/performance/kbn_archives/logs_no_map_dashboard',

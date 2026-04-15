@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/jest-benchmarks'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-ui-devex-team'
-toolchain:
+  defaultOwner: '@elastic/observability-ui'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/jest-benchmarks'
+  title: '@kbn/jest-benchmarks'
   description: Moon project for @kbn/jest-benchmarks
   channel: ''
-  owner: '@elastic/obs-ui-devex-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-jest-benchmarks
+  owner: '@elastic/observability-ui'
+  sourceRoot: src/platform/packages/shared/kbn-jest-benchmarks
 dependsOn:
   - '@kbn/bench'
 tags:
@@ -30,16 +29,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

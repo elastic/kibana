@@ -5,56 +5,42 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
-import type { ReactWrapper } from 'enzyme';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { FieldRuleEditor } from './field_rule_editor';
 import { FieldRule } from '../../model';
 
-function assertField(wrapper: ReactWrapper<any, any, any>, index: number, field: string) {
-  const isFirst = index === 0;
-  if (isFirst) {
-    expect(
-      wrapper.find(`EuiComboBox[data-test-subj~="fieldRuleEditorField-${index}"]`).props()
-    ).toMatchObject({
-      selectedOptions: [{ label: field }],
-    });
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
-    expect(findTestSubject(wrapper, `fieldRuleEditorField-${index}-combo`)).toHaveLength(1);
-    expect(findTestSubject(wrapper, `fieldRuleEditorField-${index}-expression`)).toHaveLength(0);
+function assertField(index: number, field: string) {
+  const comboEl = document.querySelector(`[data-test-subj~="fieldRuleEditorField-${index}-combo"]`);
+  const expressionEl = document.querySelector(
+    `[data-test-subj~="fieldRuleEditorField-${index}-expression"]`
+  );
+
+  if (index === 0) {
+    expect(comboEl).toBeInTheDocument();
+    expect(expressionEl).not.toBeInTheDocument();
+    const input = comboEl!.querySelector('input');
+    expect(input).toHaveValue(field);
   } else {
-    expect(
-      wrapper.find(`EuiExpression[data-test-subj~="fieldRuleEditorField-${index}"]`).props()
-    ).toMatchObject({
-      value: field,
-    });
-
-    expect(findTestSubject(wrapper, `fieldRuleEditorField-${index}-combo`)).toHaveLength(0);
-    expect(findTestSubject(wrapper, `fieldRuleEditorField-${index}-expression`)).toHaveLength(1);
+    expect(expressionEl).toBeInTheDocument();
+    expect(comboEl).not.toBeInTheDocument();
+    expect(expressionEl).toHaveTextContent(field);
   }
 }
 
-function assertValueType(wrapper: ReactWrapper<any, any, any>, index: number, type: string) {
-  const valueTypeField = findTestSubject(wrapper, `fieldRuleEditorValueType-${index}`);
-  expect(valueTypeField.props()).toMatchObject({ value: type });
+function assertValue(index: number, value: any) {
+  const valueField = screen.getByTestId(`fieldRuleEditorValue-${index}`);
+  expect(valueField).toHaveValue(value);
 }
 
-function assertValue(wrapper: ReactWrapper<any, any, any>, index: number, value: any) {
-  const valueField = findTestSubject(wrapper, `fieldRuleEditorValue-${index}`);
-  expect(valueField.props()).toMatchObject({ value });
-}
-
-function assertValueTypeDisabled(wrapper: ReactWrapper<any, any, any>, index: number) {
-  const valueTypeField = findTestSubject(wrapper, `fieldRuleEditorValueType-${index}`);
-  expect(valueTypeField.props().disabled).toBeTruthy();
-}
-
-function assertValueDisabled(wrapper: ReactWrapper<any, any, any>, index: number) {
-  const valueField = findTestSubject(wrapper, `fieldRuleEditorValue-${index}`);
-  expect(valueField.props().disabled).toBeTruthy();
+function assertValueType(index: number, type: string) {
+  const valueTypeField = screen.getByTestId(`fieldRuleEditorValueType-${index}`);
+  expect(valueTypeField).toHaveValue(type);
 }
 
 describe('FieldRuleEditor', () => {
@@ -65,10 +51,10 @@ describe('FieldRuleEditor', () => {
       onDelete: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
-    assertField(wrapper, 0, 'username');
-    assertValueType(wrapper, 0, 'text');
-    assertValue(wrapper, 0, '*');
+    renderWithIntl(<FieldRuleEditor {...props} />);
+    assertField(0, 'username');
+    assertValueType(0, 'text');
+    assertValue(0, '*');
   });
 
   it('can render a number-based field rule', () => {
@@ -78,10 +64,10 @@ describe('FieldRuleEditor', () => {
       onDelete: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
-    assertField(wrapper, 0, 'username');
-    assertValueType(wrapper, 0, 'number');
-    assertValue(wrapper, 0, 12);
+    renderWithIntl(<FieldRuleEditor {...props} />);
+    assertField(0, 'username');
+    assertValueType(0, 'number');
+    assertValue(0, 12);
   });
 
   it('can render a null-based field rule', () => {
@@ -91,10 +77,10 @@ describe('FieldRuleEditor', () => {
       onDelete: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
-    assertField(wrapper, 0, 'username');
-    assertValueType(wrapper, 0, 'null');
-    assertValue(wrapper, 0, '-- null --');
+    renderWithIntl(<FieldRuleEditor {...props} />);
+    assertField(0, 'username');
+    assertValueType(0, 'null');
+    assertValue(0, '-- null --');
   });
 
   it('can render a boolean-based field rule (true)', () => {
@@ -104,10 +90,10 @@ describe('FieldRuleEditor', () => {
       onDelete: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
-    assertField(wrapper, 0, 'username');
-    assertValueType(wrapper, 0, 'boolean');
-    assertValue(wrapper, 0, 'true');
+    renderWithIntl(<FieldRuleEditor {...props} />);
+    assertField(0, 'username');
+    assertValueType(0, 'boolean');
+    assertValue(0, 'true');
   });
 
   it('can render a boolean-based field rule (false)', () => {
@@ -117,10 +103,10 @@ describe('FieldRuleEditor', () => {
       onDelete: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
-    assertField(wrapper, 0, 'username');
-    assertValueType(wrapper, 0, 'boolean');
-    assertValue(wrapper, 0, 'false');
+    renderWithIntl(<FieldRuleEditor {...props} />);
+    assertField(0, 'username');
+    assertValueType(0, 'boolean');
+    assertValue(0, 'false');
   });
 
   it('can render with alternate values specified', () => {
@@ -130,28 +116,28 @@ describe('FieldRuleEditor', () => {
       onDelete: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
-    expect(findTestSubject(wrapper, 'addAlternateValueButton')).toHaveLength(1);
+    renderWithIntl(<FieldRuleEditor {...props} />);
+    expect(screen.getByTestId('addAlternateValueButton')).toBeInTheDocument();
 
-    assertField(wrapper, 0, 'username');
-    assertValueType(wrapper, 0, 'text');
-    assertValue(wrapper, 0, '*');
+    assertField(0, 'username');
+    assertValueType(0, 'text');
+    assertValue(0, '*');
 
-    assertField(wrapper, 1, 'username');
-    assertValueType(wrapper, 1, 'number');
-    assertValue(wrapper, 1, 12);
+    assertField(1, 'username');
+    assertValueType(1, 'number');
+    assertValue(1, 12);
 
-    assertField(wrapper, 2, 'username');
-    assertValueType(wrapper, 2, 'null');
-    assertValue(wrapper, 2, '-- null --');
+    assertField(2, 'username');
+    assertValueType(2, 'null');
+    assertValue(2, '-- null --');
 
-    assertField(wrapper, 3, 'username');
-    assertValueType(wrapper, 3, 'boolean');
-    assertValue(wrapper, 3, 'true');
+    assertField(3, 'username');
+    assertValueType(3, 'boolean');
+    assertValue(3, 'true');
 
-    assertField(wrapper, 4, 'username');
-    assertValueType(wrapper, 4, 'boolean');
-    assertValue(wrapper, 4, 'false');
+    assertField(4, 'username');
+    assertValueType(4, 'boolean');
+    assertValue(4, 'false');
   });
 
   it('allows alternate values to be added when "allowAdd" is set to true', () => {
@@ -161,8 +147,8 @@ describe('FieldRuleEditor', () => {
       onDelete: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
-    findTestSubject(wrapper, 'addAlternateValueButton').simulate('click');
+    renderWithIntl(<FieldRuleEditor {...props} />);
+    fireEvent.click(screen.getByTestId('addAlternateValueButton'));
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [updatedRule] = props.onChange.mock.calls[0];
     expect(updatedRule.toRaw()).toEqual({
@@ -179,10 +165,10 @@ describe('FieldRuleEditor', () => {
       onDelete: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
+    const { rerender } = renderWithIntl(<FieldRuleEditor {...props} />);
 
-    expect(findTestSubject(wrapper, `fieldRuleEditorDeleteValue`)).toHaveLength(3);
-    findTestSubject(wrapper, `fieldRuleEditorDeleteValue-0`).simulate('click');
+    expect(screen.getAllByTestId(/fieldRuleEditorDeleteValue-\d+/)).toHaveLength(3);
+    fireEvent.click(screen.getByTestId(/fieldRuleEditorDeleteValue-0$/));
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [updatedRule1] = props.onChange.mock.calls[0];
@@ -194,11 +180,14 @@ describe('FieldRuleEditor', () => {
 
     props.onChange.mockReset();
 
-    // simulate updated rule being fed back in
-    wrapper.setProps({ rule: updatedRule1 });
+    rerender(
+      <I18nProvider>
+        <FieldRuleEditor {...props} rule={updatedRule1} />
+      </I18nProvider>
+    );
 
-    expect(findTestSubject(wrapper, `fieldRuleEditorDeleteValue`)).toHaveLength(2);
-    findTestSubject(wrapper, `fieldRuleEditorDeleteValue-1`).simulate('click');
+    expect(screen.getAllByTestId(/fieldRuleEditorDeleteValue-\d+/)).toHaveLength(2);
+    fireEvent.click(screen.getByTestId(/fieldRuleEditorDeleteValue-1$/));
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [updatedRule2] = props.onChange.mock.calls[0];
@@ -210,11 +199,14 @@ describe('FieldRuleEditor', () => {
 
     props.onChange.mockReset();
 
-    // simulate updated rule being fed back in
-    wrapper.setProps({ rule: updatedRule2 });
+    rerender(
+      <I18nProvider>
+        <FieldRuleEditor {...props} rule={updatedRule2} />
+      </I18nProvider>
+    );
 
-    expect(findTestSubject(wrapper, `fieldRuleEditorDeleteValue`)).toHaveLength(1);
-    findTestSubject(wrapper, `fieldRuleEditorDeleteValue-0`).simulate('click');
+    expect(screen.getAllByTestId(/fieldRuleEditorDeleteValue-\d+/)).toHaveLength(1);
+    fireEvent.click(screen.getByTestId(/fieldRuleEditorDeleteValue-0$/));
 
     expect(props.onChange).toHaveBeenCalledTimes(0);
     expect(props.onDelete).toHaveBeenCalledTimes(1);
@@ -227,10 +219,11 @@ describe('FieldRuleEditor', () => {
       onDelete: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
+    renderWithIntl(<FieldRuleEditor {...props} />);
 
-    const { onChange } = findTestSubject(wrapper, `fieldRuleEditorValueType-0`).props();
-    onChange!({ target: { value: 'number' } as any } as any);
+    fireEvent.change(screen.getByTestId('fieldRuleEditorValueType-0'), {
+      target: { value: 'number' },
+    });
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [updatedRule] = props.onChange.mock.calls[0];
@@ -242,31 +235,27 @@ describe('FieldRuleEditor', () => {
   });
 
   describe('can render a readonly view', () => {
-    const props = {
-      rule: new FieldRule('username', ['*', 12, null, true]),
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
-      readOnly: true,
-    };
+    it('disables all fields and hides buttons', () => {
+      const props = {
+        rule: new FieldRule('username', ['*', 12, null, true]),
+        onChange: jest.fn(),
+        onDelete: jest.fn(),
+        readOnly: true,
+      };
 
-    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
+      renderWithIntl(<FieldRuleEditor {...props} />);
 
-    // No add or delete buttons
-    expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
+      expect(screen.queryByTestId('addAlternateValueButton')).not.toBeInTheDocument();
+      expect(screen.queryAllByTestId(/fieldRuleEditorDeleteValue/)).toHaveLength(0);
 
-    // User field disabled
-    const userFields = wrapper.find(`EuiComboBox[data-test-subj~="fieldRuleEditorField-0"]`);
-    expect(userFields).toHaveLength(1);
-    expect(userFields.at(0).props().disabled).toBeTruthy();
-
-    // All type and value fields disabled
-    assertValueTypeDisabled(wrapper, 0); // text
-    assertValueDisabled(wrapper, 0);
-    assertValueTypeDisabled(wrapper, 1); // number
-    assertValueDisabled(wrapper, 1);
-    assertValueTypeDisabled(wrapper, 2); // null
-    assertValueDisabled(wrapper, 2);
-    assertValueTypeDisabled(wrapper, 3); // bool
-    assertValueDisabled(wrapper, 3);
+      expect(screen.getByTestId('fieldRuleEditorValueType-0')).toBeDisabled();
+      expect(screen.getByTestId('fieldRuleEditorValue-0')).toBeDisabled();
+      expect(screen.getByTestId('fieldRuleEditorValueType-1')).toBeDisabled();
+      expect(screen.getByTestId('fieldRuleEditorValue-1')).toBeDisabled();
+      expect(screen.getByTestId('fieldRuleEditorValueType-2')).toBeDisabled();
+      expect(screen.getByTestId('fieldRuleEditorValue-2')).toBeDisabled();
+      expect(screen.getByTestId('fieldRuleEditorValueType-3')).toBeDisabled();
+      expect(screen.getByTestId('fieldRuleEditorValue-3')).toBeDisabled();
+    });
   });
 });

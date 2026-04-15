@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { AgentBuilderUiFtrProviderContext } from '../../../agent_builder/services/functional';
 
 export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProviderContext) {
   const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('tools landing page', function () {
     it('should render', async () => {
       await agentBuilder.navigateToToolsLanding();
-      await testSubjects.existOrFail('agentBuilderToolsPage');
-      await testSubjects.existOrFail('agentBuilderToolsTable');
+      await retry.try(async () => {
+        await testSubjects.existOrFail('agentBuilderToolsPage');
+        await testSubjects.existOrFail('agentBuilderToolsTable');
+      });
     });
 
     it('should bulk delete tools from the table', async () => {
-      const ids = [`ftr.esql.${Date.now()}.a`, `ftr.esql.${Date.now()}.b`];
+      const timestamp = Date.now();
+      const ids = [`ftr.esql.${timestamp}.a`, `ftr.esql.${timestamp}.b`];
       for (const id of ids) {
         await supertest
           .post('/api/agent_builder/tools')
@@ -37,12 +40,24 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
       }
 
       await agentBuilder.navigateToToolsLanding();
-      await testSubjects.existOrFail('agentBuilderToolsTable');
+      await retry.try(async () => {
+        await testSubjects.existOrFail('agentBuilderToolsTable');
+      });
+
+      // Search for our specific tools to filter the table (avoids pagination issues)
+      const search = agentBuilder.toolsSearch();
+      await search.type(`ftr.esql.${timestamp}`);
+
+      // Wait for the tools data to load and the first row to appear before proceeding
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`agentBuilderToolsTableRow-${ids[0]}`);
+      });
+
       await agentBuilder.bulkDeleteTools(ids);
 
       await testSubjects.existOrFail('agentBuilderToolsTable');
       for (const id of ids) {
-        expect(await agentBuilder.isToolInTable(id)).to.be(false);
+        await testSubjects.missingOrFail(`agentBuilderToolsTableRow-${id}`);
       }
     });
   });

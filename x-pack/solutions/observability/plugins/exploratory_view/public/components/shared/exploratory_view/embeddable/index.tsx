@@ -103,10 +103,18 @@ export function getExploratoryViewEmbeddable(
         newProps.legendIsVisible = false;
         newProps.hideTicks = true;
       }
-      if (props.id && lastRefreshed[props.id] && loadCount < 2) {
+      const cachedTime = props.id ? lastRefreshed[props.id] : undefined;
+      const timeRangeChanged = cachedTime
+        ? cachedTime.from !== series.time.from || cachedTime.to !== series.time.to
+        : false;
+
+      // Use cached time only during initial load (loadCount < 2) and when time range hasn't changed
+      const shouldUseCachedTime =
+        Boolean(props.id) && Boolean(cachedTime) && loadCount < 2 && !timeRangeChanged;
+      if (shouldUseCachedTime && cachedTime) {
         newProps.attributes = props.attributes?.map((seriesT) => ({
           ...seriesT,
-          time: lastRefreshed[props.id!],
+          time: cachedTime,
         }));
       } else if (props.id) {
         lastRefreshed[props.id] = series.time;

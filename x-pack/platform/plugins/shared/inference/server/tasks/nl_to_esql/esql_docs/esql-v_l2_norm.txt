@@ -1,0 +1,27 @@
+# V_L2_NORM
+
+Calculates the l2 norm between two dense_vectors, which is a measure of similarity or distance between them.
+
+## Syntax
+
+`V_L2_NORM(left, right)`
+
+### Parameters
+
+#### left
+
+The first dense_vector to calculate l2 norm similarity.
+
+#### right
+
+The second dense_vector to calculate l2 norm similarity.
+
+## Examples
+
+Calculates the l2 norm similarity between the `rgb_vector` column and the vector `[0, 255, 255]`, adds the result as a new column called `similarity`, and sorts the results by similarity in descending order and color in ascending order:
+
+```esql
+from colors
+| eval similarity = v_l2_norm(rgb_vector, [0, 255, 255])
+| sort similarity desc, color asc
+```

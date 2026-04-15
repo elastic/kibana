@@ -33,6 +33,8 @@
           "\"AI_VALUE_REPORT_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"graph\" | \"dashboards\" | \"canvas\" | \"discover\" | \"maps\" | \"visualize\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/deep_links.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +67,8 @@
           "\"CANVAS_APP_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -78,6 +84,8 @@
           "\"dashboards\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -93,6 +101,8 @@
           "\"DASHBOARD_APP_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -108,6 +118,8 @@
           "\"graph\" | \"dashboards\" | \"canvas\" | \"discover\" | \"maps\" | \"visualize\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/deep_links.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,6 +135,8 @@
           "\"discover\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -138,6 +152,8 @@
           "\"DISCOVER_APP_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -153,6 +169,8 @@
           "\"DISCOVER_ESQL_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -168,6 +186,8 @@
           "\"LENS_APP_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -183,6 +203,8 @@
           "\"visualize\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -198,6 +220,8 @@
           "\"VISUALIZE_APP_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

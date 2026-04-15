@@ -33,6 +33,15 @@ export const EVENT_FILTERS_TAB = i18n.translate('xpack.securitySolution.eventFil
   defaultMessage: 'Event filters',
 });
 
+export const HOST_ISOLATION_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.artifacts.tabs.hostIsolationExceptions',
+  { defaultMessage: 'Host isolation exceptions' }
+);
+
+export const BLOCKLIST_TAB = i18n.translate('xpack.securitySolution.artifacts.tabs.blocklist', {
+  defaultMessage: 'Blocklist',
+});
+
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   [OperatingSystem.WINDOWS]: i18n.translate('xpack.securitySolution.administration.os.windows', {
     defaultMessage: 'Windows',
@@ -70,6 +79,15 @@ export const ERROR_LOADING_PENDING_ACTIONS = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.pendingActions.errorLoading',
   {
     defaultMessage: 'Error loading pending actions',
+  }
+);
+
+/** Used by multiple command */
+export const ENDPOINT_EXECUTION_TIMEOUT = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.executionTimeout',
+  {
+    defaultMessage:
+      'The timeout in units of time (h for hours, m for minutes, s for seconds) for the endpoint to wait for the script to complete. Example: 37m. If not given, it defaults to 4 hours.',
   }
 );
 
@@ -232,13 +250,7 @@ export const CONSOLE_COMMANDS = {
     }),
     args: {
       timeout: {
-        about: i18n.translate(
-          'xpack.securitySolution.endpointConsoleCommands.execute.args.timeout.about',
-          {
-            defaultMessage:
-              'The timeout in units of time (h for hours, m for minutes, s for seconds) for the endpoint to wait for the script to complete. Example: 37m. If not given, it defaults to 4 hours.',
-          }
-        ),
+        about: ENDPOINT_EXECUTION_TIMEOUT,
       },
     },
   },
@@ -284,6 +296,16 @@ export const CONSOLE_COMMANDS = {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.about', {
       defaultMessage: 'Run a script on the host',
     }),
+    title: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.title', {
+      defaultMessage: 'Run script',
+    }),
+    privileges: i18n.translate(
+      'xpack.securitySolution.endpointConsoleCommands.runscript.privileges',
+      {
+        defaultMessage:
+          'Insufficient privileges to create runscript actions. Contact your Kibana administrator if you think you should have this permission.',
+      }
+    ),
   },
   cancel: {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.about', {

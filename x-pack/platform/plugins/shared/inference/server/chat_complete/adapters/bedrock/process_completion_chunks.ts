@@ -22,8 +22,8 @@ import type {
   MessageStopEvent,
 } from '@aws-sdk/client-bedrock-runtime';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-
 import { isMessageStopChunk, type CompletionChunk, type MessageStopChunk } from './types';
+
 export function processCompletionChunks(model?: string) {
   return (source: Observable<CompletionChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {

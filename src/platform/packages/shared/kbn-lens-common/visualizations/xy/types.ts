@@ -67,7 +67,7 @@ export interface XYDataLayerConfig {
   xAccessor?: string;
   simpleView?: boolean;
   yConfig?: YConfig[];
-  splitAccessor?: string;
+  splitAccessors?: string[];
   /**
    * @deprecated use `colorMapping` config
    */
@@ -122,8 +122,10 @@ export interface ValidXYDataLayerConfig extends XYDataLayerConfig {
 
 export type ValidLayer = ValidXYDataLayerConfig | XYReferenceLineLayerConfig;
 
-// Persisted parts of the state
-export interface XYState {
+/**
+ * Runtime state... use XYPersistedLayerConfig for persisted state (i.e. what gets saved in the saved object)
+ */
+export interface XYVisualizationState {
   preferredSeriesType: SeriesType;
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;

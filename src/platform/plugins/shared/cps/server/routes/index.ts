@@ -8,10 +8,12 @@
  */
 
 import type { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
-import { registerGetProjectTagsRoute } from './get_projects_tags';
+import { registerProjectTagsRoute } from './get_projects_tags';
+import { registerGetNpreValueRoute } from './get_npre_value';
 
 export const registerRoutes = (setup: CoreSetup, initContext: PluginInitializerContext) => {
   const router = setup.http.createRouter();
 
-  registerGetProjectTagsRoute(router, initContext);
+  registerProjectTagsRoute(router, initContext);
+  registerGetNpreValueRoute(router, initContext);
 };

@@ -11,9 +11,11 @@
         "label": "TabbedTableListView",
         "description": [],
         "signature": [
-          "({ title, description, headingId, children, tabs, activeTabId, changeActiveTab, }: TabbedTableListViewProps) => React.JSX.Element"
+          "({ title, description, headingId, children, tabs, activeTabId, changeActiveTab, getBreadcrumbs, }: TabbedTableListViewProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+        "lineNumber": 44,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -22,12 +24,14 @@
             "id": "def-public.TabbedTableListView.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  title,\n  description,\n  headingId,\n  children,\n  tabs,\n  activeTabId,\n  changeActiveTab,\n}",
+            "label": "{\n  title,\n  description,\n  headingId,\n  children,\n  tabs,\n  activeTabId,\n  changeActiveTab,\n  getBreadcrumbs,\n}",
             "description": [],
             "signature": [
               "TabbedTableListViewProps"
             ],
             "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "lineNumber": 44,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -56,6 +60,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,6 +73,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -78,6 +86,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -100,13 +110,15 @@
               "<T>) => React.ReactNode | Promise<React.ReactNode>"
             ],
             "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
                 "id": "def-public.TableListTab.getTableList.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "propsFromParent",
                 "description": [],
@@ -121,6 +133,8 @@
                   "<T>"
                 ],
                 "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+                "lineNumber": 30,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -142,9 +156,21 @@
         "label": "TableListTabParentProps",
         "description": [],
         "signature": [
-          "{ onFetchSuccess: () => void; setPageDataTestSubject: (subject: string) => void; }"
+          "Pick<",
+          {
+            "pluginId": "@kbn/content-management-table-list-view-table",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTableListViewTablePluginApi",
+            "section": "def-public.TableListViewTableProps",
+            "text": "TableListViewTableProps"
+          },
+          "<T>, \"onFetchSuccess\" | \"setPageDataTestSubject\"> & { getBreadcrumbs?: ((appId: string) => ",
+          "TableListBreadcrumb",
+          "[]) | undefined; }"
         ],
         "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

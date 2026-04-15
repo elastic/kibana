@@ -90,7 +90,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const validateAttachment = async (type: string, attachmentId?: string | null) => {
     await testSubjects.existOrFail(`comment-${type}-.test`);
     await testSubjects.existOrFail(`copy-link-${attachmentId}`);
-    await testSubjects.existOrFail(`attachment-.test-${attachmentId}-arrowRight`);
+    await testSubjects.existOrFail(`attachment-.test-${attachmentId}-chevronSingleRight`);
   };
 
   /**
@@ -274,7 +274,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Modal', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/240166
+      describe.skip('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
@@ -427,7 +428,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
 
-        await testSubjects.existOrFail('comment-persistableState-.lens');
+        await testSubjects.existOrFail('comment-lens-lens');
       });
 
       it('adds lens visualization to an existing case from dashboard', async () => {
@@ -453,7 +454,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);
 
-        await testSubjects.existOrFail('comment-persistableState-.lens');
+        await testSubjects.existOrFail('comment-lens-lens');
       });
     });
   });

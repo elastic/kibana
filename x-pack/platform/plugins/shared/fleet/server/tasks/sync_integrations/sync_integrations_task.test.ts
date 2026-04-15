@@ -44,6 +44,7 @@ jest.mock('../../services/app_context', () => ({
     getLogger: jest.fn().mockReturnValue({
       debug: jest.fn(),
     }),
+    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
   },
 }));
 

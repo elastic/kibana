@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLMessage } from '../../definitions/types';
 import { validate } from './validate';
-import { Parser } from '../../../parser';
-import type { ESQLMessage } from '../../../types';
+import { Parser } from '@elastic/esql';
 
 const setExpectErrors = (query: string, expectedErrors: string[]) => {
   const { root } = Parser.parse(query);
@@ -34,10 +34,13 @@ describe('SET Validation', () => {
       setExpectErrors('set time_zone="value"', []);
     });
 
-    test('no errors on valid setting with different value types', () => {
+    test('no errors on valid setting with correct value type', () => {
       setExpectErrors('set time_zone = "string_value"', []);
-      setExpectErrors('set time_zone = 123', []);
-      setExpectErrors('set time_zone = true', []);
+    });
+
+    test('errors on valid setting with incorrect value type', () => {
+      setExpectErrors('set time_zone = 123', ['Invalid value "123" for setting "time_zone".']);
+      setExpectErrors('set time_zone = true', ['Invalid value "true" for setting "time_zone".']);
     });
 
     test('errors on unknown setting names', () => {
@@ -56,6 +59,39 @@ describe('SET Validation', () => {
       setExpectErrors('set TIME_ZONE = "value"', ['Unknown setting TIME_ZONE']);
 
       setExpectErrors('set Project_Routing = "value"', ['Unknown setting Project_Routing']);
+
+      setExpectErrors('set Approximation = "value"', ['Unknown setting Approximation']);
+
+      setExpectErrors('set APPROXIMATION = "value"', ['Unknown setting APPROXIMATION']);
+    });
+  });
+
+  describe('Setting: approximation', () => {
+    test('no errors on approximation setting with boolean value', () => {
+      setExpectErrors('set approximation = true', []);
+      setExpectErrors('set approximation = false', []);
+    });
+
+    test('no errors on approximation setting with map_param value and valid parameters', () => {
+      setExpectErrors('set approximation = { "rows": 1000, "confidence_level": 0.95 }', []);
+    });
+
+    test('errors on approximation setting with map_param value and invalid parameter name', () => {
+      setExpectErrors('set approximation = { "invalid_param": 1000 }', [
+        'Unknown parameter "invalid_param".',
+      ]);
+    });
+
+    test('errors on approximation setting with map_param value and invalid parameter type', () => {
+      setExpectErrors('set approximation = { "rows": "not_an_integer" }', [
+        'Invalid type for parameter "rows". Expected type: integer. Received: keyword.',
+      ]);
+    });
+
+    test('errors on approximation setting with invalid value type', () => {
+      setExpectErrors('set approximation = "not_a_boolean_or_map"', [
+        'Invalid value "not_a_boolean_or_map" for setting "approximation".',
+      ]);
     });
   });
 });

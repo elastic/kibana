@@ -8,4 +8,4 @@
  */
 
 export { ChromeService } from './chrome_service';
-export type { InternalChromeStart } from './types';
+export type { InternalChromeSetup, InternalChromeStart } from './types';

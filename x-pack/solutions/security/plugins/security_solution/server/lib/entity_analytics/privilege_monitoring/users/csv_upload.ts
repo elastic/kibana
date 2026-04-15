@@ -37,29 +37,31 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
       .pipe(privilegedUserParserTransform())
       .pipe(batchPartitions(100));
 
+    // initial state of results for accumulation
     let results: BulkProcessingResults = {
       users: [],
       errors: [],
       failed: 0,
       successful: 0,
     };
+
     for await (const batch of batches) {
       const usrs = await queryExistingUsers(esClient, index)(batch);
       const upserted = await bulkUpsertBatch(esClient, index, options)(usrs);
-      results = accumulateUpsertResults(
-        { users: [], errors: [], failed: 0, successful: 0 },
-        upserted
-      );
+      // pass previous results to accumulator, do not reset to empty
+      // just like a plain ol' JS accumulator
+      results = accumulateUpsertResults(results, upserted);
     }
-
     const softDeletedResults = await softDeleteOmittedUsers(esClient, index, options)(results);
 
     return {
       errors: softDeletedResults.updated.errors.concat(softDeletedResults.deleted.errors),
       stats: {
-        failed: softDeletedResults.updated.failed + softDeletedResults.deleted.failed,
-        successful: softDeletedResults.updated.successful + softDeletedResults.deleted.successful,
-        total:
+        failedOperations: softDeletedResults.updated.failed + softDeletedResults.deleted.failed,
+        successfulOperations:
+          softDeletedResults.updated.successful + softDeletedResults.deleted.successful,
+        uploaded: results.successful,
+        totalOperations:
           softDeletedResults.updated.failed +
           softDeletedResults.updated.successful +
           softDeletedResults.deleted.failed +

@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { IndexSelectorModal } from './select_index_modal';
 import { UploadPrivilegedUsersModal } from './file_uploader/upload_privileged_users_modal';
-import { IntegrationCards } from './integrations_cards';
+import { IntegrationCards } from '../../entity_analytics_integrations_cards';
 
 interface AddDataSourcePanelProps {
   onComplete: (userCount: number) => void;
@@ -94,7 +94,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
             data-test-subj="privilegedUserMonitoringAddIndexCard"
             hasBorder
             layout="horizontal"
-            icon={<EuiIcon size="l" type="indexOpen" />}
+            icon={<EuiIcon size="l" type="indexOpen" aria-hidden={true} />}
             titleSize="xs"
             title={
               <FormattedMessage
@@ -118,7 +118,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
           <EuiCard
             hasBorder
             layout="horizontal"
-            icon={<EuiIcon size="l" type="importAction" />}
+            icon={<EuiIcon size="l" type="download" aria-hidden={true} />}
             titleSize="xs"
             data-test-subj="privilegedUserMonitoringImportCSVCard"
             title={

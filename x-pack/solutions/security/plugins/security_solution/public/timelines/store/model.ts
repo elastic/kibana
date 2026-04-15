@@ -137,8 +137,6 @@ export interface TimelineModel {
   rowHeight?: number;
   /* sample size, total record number stored in in memory EuiDataGrid */
   sampleSize: number;
-  /** the note id pending deletion */
-  confirmingNoteId?: string | null;
 }
 
 export type SubsetTimelineModel = Readonly<

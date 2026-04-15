@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { DEFAULT_MODEL } from '../constants';
 
 export const TelemetryMetadataSchema = z
@@ -91,20 +91,7 @@ export const InvokeAIActionParamsSchema = z
   })
   .strict();
 
-export const InvokeAIRawActionParamsSchema = z
-  .object({
-    maxOutputTokens: z.coerce.number().optional(),
-    messages: z.any(),
-    systemInstruction: z.string().optional(),
-    model: z.string().optional(),
-    temperature: z.coerce.number().optional(),
-    stopSequences: z.array(z.string()).optional(),
-    signal: z.any().optional(),
-    timeout: z.coerce.number().optional(),
-    tools: z.array(z.any()).optional(),
-    telemetryMetadata: TelemetryMetadataSchema.optional(),
-  })
-  .strict();
+export const InvokeAIRawActionParamsSchema = InvokeAIActionParamsSchema;
 
 export const InvokeAIActionResponseSchema = z.object({
   message: z.string(),

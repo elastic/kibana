@@ -77,6 +77,7 @@ export const addAlertsToCase = ({
           userAction.type === 'comment' &&
           userAction.action === 'create' &&
           userAction.payload.comment.type === 'alert' &&
+          'alertId' in userAction.payload.comment &&
           alertIds.includes(userAction.payload.comment.alertId as string)
         ) {
           comments[userAction.payload.comment.alertId as string] = userAction.id;

@@ -14,15 +14,28 @@ import type {
   ToolResult,
   UserIdAndName,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
+  LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
 } from './types';
 import type { ConversationProperties } from './storage';
+import {
+  createAttachmentRefs,
+  migrateRoundAttachments,
+  needsMigration,
+  applyAttachmentRefsToRounds,
+} from './migrate_attachments';
 
 export type Document = Pick<
   GetResponse<ConversationProperties>,
@@ -63,47 +76,128 @@ function serializeStepResults(rounds: ConversationRound[]): PersistentConversati
   }));
 }
 
+/**
+ * Migrates legacy tool result types to their current names.
+ * This handles backward compatibility when tool result types are renamed.
+ */
+const migrateToolResultType = (result: ToolResult): ToolResult => {
+  // Migration: 'tabular_data' was renamed to 'esql_results'
+  if (result.type === 'tabular_data') {
+    return {
+      ...result,
+      type: ToolResultType.esqlResults,
+    };
+  }
+  return result;
+};
+
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
-  return rounds.map<ConversationRound>((round) => ({
-    ...round,
-    status: round.status ?? ConversationRoundStatus.completed,
-    started_at: round.started_at ?? new Date(0).toISOString(),
-    time_to_first_token: round.time_to_first_token ?? 0,
-    time_to_last_token: round.time_to_last_token ?? 0,
-    model_usage: round.model_usage ?? {
-      llm_calls: 0,
-      input_tokens: 0,
-      output_tokens: 0,
-    },
-    steps: round.steps.map<ConversationRoundStep>((step) => {
-      if (step.type === ConversationRoundStepType.toolCall) {
-        return {
-          ...step,
-          results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
-            return {
-              ...result,
-              tool_result_id: result.tool_result_id ?? getToolResultId(),
-            };
-          }),
-          progression: step.progression ?? [],
-        };
-      } else {
-        return step;
-      }
-    }),
-  }));
+  return rounds.map<ConversationRound>((round) => {
+    // Migration: pending_prompt (singular) -> pending_prompts (array)
+    const { pending_prompt: legacyPendingPrompt, ...roundWithoutLegacy } = round;
+    const pendingPrompts =
+      round.pending_prompts ?? (legacyPendingPrompt ? [legacyPendingPrompt] : undefined);
+
+    return {
+      ...roundWithoutLegacy,
+      pending_prompts: pendingPrompts,
+      state: round.state ? migrateRoundState(round.state) : undefined,
+      status: round.status ?? ConversationRoundStatus.completed,
+      started_at: round.started_at ?? new Date(0).toISOString(),
+      time_to_first_token: round.time_to_first_token ?? 0,
+      time_to_last_token: round.time_to_last_token ?? 0,
+      model_usage: round.model_usage ?? {
+        llm_calls: 0,
+        input_tokens: 0,
+        output_tokens: 0,
+      },
+      steps: round.steps.map<ConversationRoundStep>((step) => {
+        if (step.type === ConversationRoundStepType.toolCall) {
+          return {
+            ...step,
+            results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
+              return migrateToolResultType({
+                ...result,
+                tool_result_id: result.tool_result_id ?? getToolResultId(),
+              });
+            }),
+            progression: step.progression ?? [],
+          };
+        } else {
+          return step;
+        }
+      }),
+    };
+  });
+}
+
+/**
+ * Migrates legacy RoundState format.
+ * v1 stored a single `node`; current format uses `nodes` (array).
+ */
+function migrateRoundState(state: RoundState & { agent: LegacyAgentStateFields }): RoundState {
+  const { agent } = state;
+  if (agent.nodes) {
+    return state;
+  }
+  if (agent.node) {
+    const { node, ...agentWithoutLegacy } = agent;
+    return {
+      ...state,
+      agent: {
+        ...agentWithoutLegacy,
+        nodes: [node],
+      },
+    };
+  }
+  return state;
 }
 
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
-  const rounds = document._source!.rounds ?? document._source!.conversation_rounds;
+  const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
+  const deserializedRounds = deserializeStepResults(rawRounds);
+
+  const existingAttachments = document._source!.attachments;
+  const hasLegacyRoundAttachments = needsMigration(false, deserializedRounds);
+  const attachmentsForRefs =
+    existingAttachments && existingAttachments.length > 0
+      ? existingAttachments
+      : hasLegacyRoundAttachments
+      ? migrateRoundAttachments(deserializedRounds)
+      : [];
+
+  const refsByRound =
+    attachmentsForRefs.length > 0
+      ? createAttachmentRefs(deserializedRounds, attachmentsForRefs)
+      : new Map<number, AttachmentVersionRef[]>();
+
+  const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
+
+  if (existingAttachments && existingAttachments.length > 0) {
+    return {
+      ...base,
+      rounds: roundsWithRefs,
+      attachments: existingAttachments,
+      ...(document._source!.state && { state: document._source!.state }),
+    };
+  }
+
+  if (hasLegacyRoundAttachments) {
+    return {
+      ...base,
+      rounds: roundsWithRefs,
+      ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
+      ...(document._source!.state && { state: document._source!.state }),
+    };
+  }
 
   return {
     ...base,
-    rounds: deserializeStepResults(rounds),
-    ...(document._source!.attachments && { attachments: document._source!.attachments }),
+    rounds: roundsWithRefs,
+    ...(document._source!.state && { state: document._source!.state }),
   };
 };
 
@@ -124,6 +218,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     rounds: undefined,
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
+    state: conversation.state,
   };
 };
 
@@ -169,5 +264,6 @@ export const createRequestToEs = ({
     updated_at: creationDate.toISOString(),
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
+    state: conversation.state,
   };
 };

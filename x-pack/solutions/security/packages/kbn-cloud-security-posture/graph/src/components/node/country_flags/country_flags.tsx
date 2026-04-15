@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   useNodeDetailsPopover,
   type UseNodeDetailsPopoverReturn,
-} from '../../graph_investigation/use_node_details_popover';
+} from '../../popovers/details/use_node_details_popover';
 import {
   GRAPH_FLAGS_BADGE_ID,
   GRAPH_FLAGS_PLUS_COUNT_ID,

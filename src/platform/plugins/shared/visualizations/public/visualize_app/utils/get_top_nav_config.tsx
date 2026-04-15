@@ -28,10 +28,17 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableStateTransfer,
+  EmbeddableEditorBreadcrumb,
+} from '@kbn/embeddable-plugin/public';
 import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import {
+  AGG_BASED_VISUALIZATION_TRIGGER,
+  VISUALIZE_EDITOR_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
 import { getFullPath } from '../..';
 
@@ -43,7 +50,6 @@ import type {
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
 import type { VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
-import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import { serializeState } from '../../embeddable/state';
@@ -61,6 +67,7 @@ export interface TopNavConfigParams {
   openInspector: () => void;
   originatingApp?: string;
   originatingPath?: string;
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[];
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   hasUnappliedChanges: boolean;
   visInstance: VisualizeEditorVisInstance;
@@ -94,6 +101,7 @@ export const getTopNavConfig = (
     openInspector,
     originatingApp,
     originatingPath,
+    incomingBreadcrumbs,
     setOriginatingApp,
     hasUnappliedChanges,
     visInstance,
@@ -126,6 +134,10 @@ export const getTopNavConfig = (
 ) => {
   const { vis, embeddableHandler } = visInstance;
   const savedVis = visInstance.savedVis;
+  const isOriginatingFromDashboardPanel = Boolean(
+    originatingApp &&
+      !(originatingApp === 'dashboards' && Boolean(originatingPath?.includes('/list/')))
+  );
 
   /**
    * Called when the user clicks "Save" button.
@@ -168,7 +180,10 @@ export const getTopNavConfig = (
 
         chrome.recentlyAccessed.add(getFullPath(id), savedVis.title, String(id));
 
-        if ((originatingApp && saveOptions.returnToOrigin) || saveOptions.dashboardId) {
+        if (
+          (isOriginatingFromDashboardPanel && saveOptions.returnToOrigin) ||
+          saveOptions.dashboardId
+        ) {
           if (!embeddableId) {
             const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(id)}`;
 
@@ -177,7 +192,7 @@ export const getTopNavConfig = (
             setActiveUrl(appPath);
           }
 
-          const app = originatingApp || 'dashboards';
+          const app = isOriginatingFromDashboardPanel ? originatingApp! : 'dashboards';
 
           let path;
           if (saveOptions.dashboardId) {
@@ -193,9 +208,7 @@ export const getTopNavConfig = (
                 {
                   type: VISUALIZE_EMBEDDABLE_TYPE,
                   serializedState: {
-                    rawState: {
-                      savedObjectId: id,
-                    },
+                    savedObjectId: id,
                   },
                   embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
                   searchSessionId: data.search.session.getSessionId(),
@@ -214,9 +227,24 @@ export const getTopNavConfig = (
           }
           chrome.docTitle.change(savedVis.lastSavedTitle);
           if (serverless?.setBreadcrumbs) {
-            serverless.setBreadcrumbs(getEditServerlessBreadcrumbs({}, savedVis.lastSavedTitle));
+            serverless.setBreadcrumbs(getEditServerlessBreadcrumbs(savedVis.lastSavedTitle));
           } else {
-            chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
+            const originatingAppName = originatingApp
+              ? stateTransfer.getAppNameFromId(originatingApp)
+              : undefined;
+            const breadcrumbs = getEditBreadcrumbs(
+              {
+                ...(originatingAppName && {
+                  originatingAppName,
+                  redirectToOrigin: navigateToOriginatingApp,
+                }),
+                incomingBreadcrumbs,
+              },
+              savedVis.lastSavedTitle
+            );
+            chrome.setBreadcrumbs(breadcrumbs, {
+              project: { value: breadcrumbs, absolute: true },
+            });
           }
 
           if (id !== visualizationIdFromUrl) {
@@ -276,11 +304,11 @@ export const getTopNavConfig = (
   };
 
   const saveButtonLabel =
-    !savedVis.id && originatingApp
+    !savedVis.id && isOriginatingFromDashboardPanel
       ? i18n.translate('visualizations.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
-      : originatingApp && savedVis.id
+      : isOriginatingFromDashboardPanel && savedVis.id
       ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
           defaultMessage: 'Save as',
         })
@@ -289,7 +317,8 @@ export const getTopNavConfig = (
         });
 
   const showSaveButton =
-    visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);
+    visualizeCapabilities.save ||
+    (!isOriginatingFromDashboardPanel && dashboardCapabilities.showWriteControls);
 
   const showShareOptions = async (anchorElement: HTMLElement, asExport?: boolean) => {
     if (share) {
@@ -395,25 +424,27 @@ export const getTopNavConfig = (
                 ...navigateToLensConfig,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
+                legacyEditorOriginatingApp: VisualizeConstants.APP_ID,
                 originatingApp,
+                originatingPath,
+                breadcrumbs: incomingBreadcrumbs,
                 title: visInstance?.panelTitle || vis.title,
                 visTypeTitle: vis.type.title,
                 description: visInstance?.panelDescription || vis.description,
                 panelTimeRange: visInstance?.panelTimeRange,
-                isEmbeddable: Boolean(originatingApp),
+                isEmbeddable: isOriginatingFromDashboardPanel,
                 ...(searchFilters && { searchFilters }),
                 ...(searchQuery && { searchQuery }),
               };
               if (navigateToLensConfig) {
                 hideLensBadge();
                 setNavigateToLens(true);
-                getUiActions()
-                  .getTrigger(
-                    visInstance.vis.type.group === 'aggbased'
-                      ? AGG_BASED_VISUALIZATION_TRIGGER
-                      : VISUALIZE_EDITOR_TRIGGER
-                  )
-                  .exec(updatedWithMeta);
+                getUiActions().executeTriggerActions(
+                  visInstance.vis.type.group === 'aggbased'
+                    ? AGG_BASED_VISUALIZATION_TRIGGER
+                    : VISUALIZE_EDITOR_TRIGGER,
+                  updatedWithMeta
+                );
               }
             },
           },
@@ -478,7 +509,7 @@ export const getTopNavConfig = (
       // disable the Share button if no action specified and fot byValue visualizations
       disableButton: !share || Boolean(!savedVis.id && originatingApp),
     },
-    ...(originatingApp
+    ...(isOriginatingFromDashboardPanel
       ? [
           {
             id: 'cancel',
@@ -507,9 +538,9 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'save',
-            iconType: originatingApp ? undefined : 'save',
+            iconType: isOriginatingFromDashboardPanel ? undefined : 'save',
             label: saveButtonLabel,
-            emphasize: !originatingApp,
+            emphasize: !isOriginatingFromDashboardPanel,
             description: i18n.translate(
               'visualizations.topNavMenu.saveVisualizationButtonAriaLabel',
               {
@@ -542,6 +573,10 @@ export const getTopNavConfig = (
                 dashboardId?: string | null;
                 addToLibrary?: boolean;
               }): Promise<SaveResult> => {
+                const resolvedReturnToOrigin =
+                  typeof returnToOrigin === 'boolean'
+                    ? returnToOrigin
+                    : isOriginatingFromDashboardPanel;
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
                 embeddableHandler.updateInput({ title: newTitle });
@@ -588,7 +623,7 @@ export const getTopNavConfig = (
                   confirmOverwrite: false,
                   isTitleDuplicateConfirmed,
                   onTitleDuplicate,
-                  returnToOrigin,
+                  returnToOrigin: resolvedReturnToOrigin,
                   dashboardId: !!dashboardId ? dashboardId : undefined,
                   copyOnSave: newCopyOnSave,
                 });
@@ -618,7 +653,9 @@ export const getTopNavConfig = (
 
               let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
-              if (originatingApp) {
+              // Show simplified modal only when editing embedded panel (has both originatingApp and embeddableId)
+              // Dashboard Viz tab has originatingApp but no embeddableId, so shows full modal
+              if (isOriginatingFromDashboardPanel && embeddableId) {
                 saveModal = (
                   <SavedObjectSaveModalOrigin
                     documentInfo={savedVis || { title: '' }}
@@ -634,11 +671,11 @@ export const getTopNavConfig = (
                     onClose={() => {}}
                     originatingApp={originatingApp}
                     returnToOriginSwitchLabel={
-                      originatingApp && embeddableId
+                      isOriginatingFromDashboardPanel && embeddableId
                         ? i18n.translate('visualizations.topNavMenu.updatePanel', {
                             defaultMessage: 'Update panel on {originatingAppName}',
                             values: {
-                              originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
+                              originatingAppName: stateTransfer.getAppNameFromId(originatingApp!),
                             },
                           })
                         : undefined
@@ -680,7 +717,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(originatingApp
+    ...(isOriginatingFromDashboardPanel
       ? [
           {
             id: 'saveAndReturn',
@@ -691,7 +728,7 @@ export const getTopNavConfig = (
               }
             ),
             emphasize: true,
-            iconType: 'checkInCircleFilled',
+            iconType: 'checkCircleFill',
             description: i18n.translate(
               'visualizations.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
               {

@@ -1,43 +1,39 @@
-## CASE
+# CASE
 
-The `CASE` function evaluates a series of conditions and returns a value corresponding to the first condition that evaluates to `true`. If no conditions match, a default value or `null` is returned.
+The CASE function evaluates pairs of conditions and values, returning the value associated with the first condition that evaluates to `true`. If no condition matches, a default value is returned if provided; otherwise, the function returns `null`.
 
 ## Syntax
 
-`CASE (condition, trueValue, elseValue)`
+`CASE(condition, trueValue, elseValue)`
 
 ### Parameters
 
-#### `condition`
+#### condition
 
 A condition to evaluate.
 
-#### `trueValue`
+#### trueValue
 
 The value returned when the corresponding condition is the first to evaluate to `true`. If no condition matches, the default value is returned.
 
-#### `elseValue`
+#### elseValue
 
-The value returned when no condition evaluates to `true`.
+(Optional) The value returned when no condition evaluates to `true`.
 
 ## Examples
 
-### Determine whether employees are monolingual, bilingual, or polyglot
-
-Classify employees based on the number of languages they speak:
+Classify employees based on the number of languages they speak as monolingual, bilingual, or polyglot.
 
 ```esql
 FROM employees
 | EVAL type = CASE(
     languages <= 1, "monolingual",
     languages <= 2, "bilingual",
-    "polyglot")
+     "polyglot")
 | KEEP emp_no, languages, type
 ```
 
-### Calculate the total connection success rate based on log messages
-
-Determine the success rate of connections by analyzing log messages:
+Assign a success value based on log message content and calculate the average success rate.
 
 ```esql
 FROM sample_data
@@ -48,14 +44,12 @@ FROM sample_data
 | STATS success_rate = AVG(successful)
 ```
 
-### Calculate an hourly error rate as a percentage of the total number of log messages
-
-Compute the error rate for each hour based on log messages:
+Flag error messages and compute the average error rate per hour.
 
 ```esql
 FROM sample_data
 | EVAL error = CASE(message LIKE "*error*", 1, 0)
 | EVAL hour = DATE_TRUNC(1 hour, @timestamp)
-| STATS error_rate = AVG(error) BY hour
+| STATS error_rate = AVG(error) by hour
 | SORT hour
 ```

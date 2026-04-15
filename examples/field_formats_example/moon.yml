@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/field-formats-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/field-formats-example-plugin'
+  title: '@kbn/field-formats-example-plugin'
   description: Moon project for @kbn/field-formats-example-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: examples/field_formats_example
+  sourceRoot: examples/field_formats_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/developer-examples-plugin'
@@ -24,6 +23,7 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/field-types'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod

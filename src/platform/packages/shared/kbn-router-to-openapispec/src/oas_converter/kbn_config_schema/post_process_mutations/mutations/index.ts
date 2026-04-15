@@ -11,7 +11,13 @@ import type Joi from 'joi';
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 import { parse } from '../../parse';
-import { deleteField, stripBadDefault, processDeprecated, processDiscontinued } from './utils';
+import {
+  deleteField,
+  stripBadDefault,
+  processAvailability,
+  processDeprecated,
+  processDiscontinued,
+} from './utils';
 import type { IContext } from '../context';
 
 const {
@@ -56,7 +62,8 @@ export const processMap = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void 
   processAdditionalProperties(ctx, schema);
 };
 
-export const processAllTypes = (schema: OpenAPIV3.SchemaObject): void => {
+export const processAllTypes = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
+  processAvailability(ctx, schema);
   processDeprecated(schema);
   processDiscontinued(schema);
   stripBadDefault(schema);
@@ -72,3 +79,5 @@ export const processAnyType = (schema: OpenAPIV3.SchemaObject): void => {
 export { processObject } from './object';
 
 export { processEnum } from './enum';
+
+export { processDiscriminator } from './discriminator';

@@ -10,8 +10,10 @@
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { TimeRange } from '@kbn/es-query';
+import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
@@ -177,6 +179,8 @@ export async function getESQLResults({
   dropNullColumns,
   timeRange,
   variables,
+  timezone,
+  executionContext,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -185,6 +189,8 @@ export async function getESQLResults({
   dropNullColumns?: boolean;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
+  timezone?: string;
+  executionContext?: KibanaExecutionContext;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
@@ -198,11 +204,13 @@ export async function getESQLResults({
           query: esqlQuery,
           ...(dropNullColumns ? { dropNullColumns: true } : {}),
           ...(namedParams.length ? { params: namedParams } : {}),
+          ...(timezone ? { time_zone: getTimeZoneFromSettings(timezone) } : {}),
         },
       },
       {
         abortSignal: signal,
         strategy: 'esql_async',
+        ...(executionContext ? { executionContext } : {}),
       }
     )
   );

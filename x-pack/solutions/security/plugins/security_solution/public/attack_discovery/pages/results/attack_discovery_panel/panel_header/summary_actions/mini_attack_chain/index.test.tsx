@@ -15,7 +15,7 @@ import { MiniAttackChain } from '.';
 describe('MiniAttackChain', () => {
   it('displays the expected number of circles', () => {
     // get detected tactics from the attack discovery:
-    const tacticMetadata = getTacticMetadata(mockAttackDiscovery);
+    const tacticMetadata = getTacticMetadata(mockAttackDiscovery.mitreAttackTactics);
     expect(tacticMetadata.length).toBeGreaterThan(0); // test pre-condition
 
     render(<MiniAttackChain attackDiscovery={mockAttackDiscovery} />);

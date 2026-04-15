@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/graph-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/graph-plugin'
+  title: '@kbn/graph-plugin'
   description: Moon project for @kbn/graph-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/graph
+  sourceRoot: x-pack/platform/plugins/private/graph
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
@@ -28,7 +27,6 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/spaces-plugin'
-  - '@kbn/unified-search-plugin'
   - '@kbn/i18n'
   - '@kbn/config-schema'
   - '@kbn/i18n-react'
@@ -58,6 +56,8 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/licensing-types'
+  - '@kbn/kql'
+  - '@kbn/unified-search-plugin'
 tags:
   - plugin
   - prod
@@ -71,16 +71,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

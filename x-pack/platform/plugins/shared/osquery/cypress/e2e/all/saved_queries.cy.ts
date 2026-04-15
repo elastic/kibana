@@ -16,6 +16,7 @@ import {
   customActionEditSavedQuerySelector,
   customActionRunSavedQuerySelector,
   EDIT_PACK_HEADER_BUTTON,
+  rowActionsMenuSelector,
   SAVED_QUERY_DROPDOWN_SELECT,
 } from '../../screens/packs';
 import { preparePack } from '../../tasks/packs';
@@ -71,7 +72,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       const suffix = generateRandomStringName(1)[0];
       const savedQueryId = `Saved-Query-Id-${suffix}`;
       const savedQueryDescription = `Test saved query description ${suffix}`;
-      cy.contains('New live query').click();
+      cy.contains('Run query').click();
       selectAllAgents();
       inputQuery(BIG_QUERY);
       getAdvancedButton().click();
@@ -79,12 +80,12 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       submitQuery();
       checkResults();
       // enter fullscreen
-      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover', { force: true });
       cy.contains(/Enter fullscreen$/).should('exist');
       cy.contains('Exit fullscreen').should('not.exist');
-      cy.getBySel(RESULTS_TABLE_BUTTON).click();
+      cy.getBySel(RESULTS_TABLE_BUTTON).click({ force: true });
 
-      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover', { force: true });
       cy.contains(/Enter Fullscreen$/).should('not.exist');
       cy.contains('Exit fullscreen').should('exist');
 
@@ -102,32 +103,39 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
 
       // change pagination
-      cy.getBySel('pagination-button-next').click();
+      cy.getBySel('pagination-button-next').scrollIntoView().click({ force: true });
       cy.getBySel('globalLoadingIndicator').should('not.exist');
-      cy.getBySel('pagination-button-next').click();
+      cy.getBySel('pagination-button-next').scrollIntoView().click({ force: true });
       cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
 
-      // enter fullscreen
-      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      // exit fullscreen
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover', { force: true });
       cy.contains(/Enter fullscreen$/).should('not.exist');
       cy.contains('Exit fullscreen').should('exist');
-      cy.getBySel(RESULTS_TABLE_BUTTON).click();
+      cy.getBySel(RESULTS_TABLE_BUTTON).click({ force: true });
 
       // sorting
       cy.getBySel('dataGridHeaderCellActionButton-osquery.egid').click({ force: true });
       cy.contains(/Sort A-Z$/).click();
       cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
-      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
+      cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover', { force: true });
       cy.contains(/Enter fullscreen$/).should('exist');
 
       // visit Status results
       cy.getBySel('osquery-status-tab').click();
       cy.get('tbody > tr.euiTableRow').should('have.lengthOf', 2);
 
-      // save new query
+      // save new query from the detail page
       cy.contains('Exit full screen').should('not.exist');
-      cy.contains('Save for later').click();
-      cy.contains('Save query');
+      navigateTo('/app/osquery/live_queries');
+      cy.get('tbody tr', { timeout: 60000 })
+        .first()
+        .within(() => {
+          cy.get('[aria-label="Details"]').click();
+        });
+      cy.contains('Query results');
+      cy.getBySel('save-query-button').should('exist').click();
+      cy.getBySel('osquery-save-query-flyout').should('exist');
       cy.get('input[name="id"]').type(`${savedQueryId}{downArrow}{enter}`);
       cy.get('input[name="description"]').type(`${savedQueryDescription}{downArrow}{enter}`);
       cy.getBySel('savedQueryFlyoutSaveButton').click();
@@ -143,16 +151,18 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       submitQuery();
 
       // edit saved query
-      cy.contains('Saved queries').click();
+      navigateTo('/app/osquery/saved_queries');
       cy.contains(savedQueryId);
 
-      cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
+      cy.get(rowActionsMenuSelector(savedQueryId)).click();
+      cy.contains('Edit query').click();
       cy.get('input[name="description"]').type(` Edited{downArrow}{enter}`);
 
       // Run in test configuration
       cy.contains('Test configuration').click();
       selectAllAgents();
       verifyQueryTimeout(timeout);
+      cy.wait(500);
       submitQuery();
       checkResults();
 
@@ -174,7 +184,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
       // delete saved query
       cy.contains(savedQueryId);
-      cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
+      cy.get(rowActionsMenuSelector(savedQueryId)).click();
+      cy.contains('Edit query').click();
 
       deleteAndConfirm('query');
       cy.contains(savedQueryId).should('exist');
@@ -182,29 +193,48 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  // Failing: See https://github.com/elastic/kibana/issues/187388
-  it.skip('checks that user cant add a saved query with an ID that already exists', () => {
-    cy.contains('Saved queries').click();
-    cy.contains('Add saved query').click();
-    cy.get('input[name="id"]').type(`users_elastic{downArrow}{enter}`);
+  describe('checks that user cant add a saved query with an ID that already exists', () => {
+    const duplicateTestQueryId = 'duplicate-test-query';
+    let duplicateTestSavedQueryId: string;
 
-    cy.contains('ID must be unique').should('not.exist');
-    inputQuery('test');
-    cy.contains('Save query').click();
-    cy.contains('ID must be unique').should('exist');
+    before(() => {
+      loadSavedQuery({
+        id: duplicateTestQueryId,
+        query: 'select * from uptime;',
+        interval: '3600',
+      }).then((data) => {
+        duplicateTestSavedQueryId = data.saved_object_id;
+      });
+    });
+
+    after(() => {
+      cleanupSavedQuery(duplicateTestSavedQueryId);
+    });
+
+    it('shows ID must be unique error', () => {
+      cy.contains('Queries').click();
+      cy.contains('Create query').click();
+      cy.get('input[name="id"]').type(`${duplicateTestQueryId}{downArrow}{enter}`);
+
+      cy.contains('ID must be unique').should('not.exist');
+      inputQuery('test');
+      // The "Save query" button is disabled while saved query IDs are loading.
+      // Wait for it to become enabled so the ID uniqueness validation has data.
+      cy.contains('Save query').should('not.be.disabled').click();
+      cy.contains('ID must be unique').should('exist');
+    });
   });
 
   it('checks default values on new saved query', () => {
-    cy.contains('Saved queries').click();
-    cy.contains('Add saved query').click();
+    cy.contains('Queries').click();
+    cy.contains('Create query').click();
     // ADD MORE FIELDS HERE
     cy.getBySel('resultsTypeField').within(() => {
       cy.contains('Snapshot');
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/169787
-  describe.skip('prebuilt', () => {
+  describe('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;
@@ -240,13 +270,18 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('checks result type on prebuilt saved query', () => {
-      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
+      // Navigate to page 2 where users_elastic is located
+      cy.getBySel('pagination-button-1').click();
+      cy.get(rowActionsMenuSelector('users_elastic')).click();
+      cy.contains('Edit query').click();
       cy.getBySel('resultsTypeField').within(() => {
         cy.contains('Snapshot');
       });
     });
 
     it('user can run prebuilt saved query and add to case', () => {
+      // Navigate to page 2 where users_elastic is located
+      cy.getBySel('pagination-button-1').click();
       cy.get(customActionRunSavedQuerySelector('users_elastic')).click();
 
       selectAllAgents();
@@ -257,7 +292,10 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('user can not delete prebuilt saved query but can delete normal saved query', () => {
-      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
+      // Navigate to page 2 where users_elastic is located
+      cy.getBySel('pagination-button-1').click();
+      cy.get(rowActionsMenuSelector('users_elastic')).click();
+      cy.contains('Edit query').click();
       cy.contains('Delete query').should('not.exist');
       navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
 
@@ -273,12 +311,15 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('Attach next query');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
-      cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).click().type('users_elastic{downArrow} {enter}');
+      cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT)
+        .click()
+        .type('users_elastic{downArrow}{downArrow}{enter}');
+      // Wait for saved query data to fully load before modifying the query
+      cy.contains('Unique identifier of the us').should('exist');
+      cy.contains('User ID').should('exist');
       inputQuery('where name=1');
       cy.getBySel('resultsTypeField').click();
       cy.contains('Differential (Ignore removals)').click();
-      cy.contains('Unique identifier of the us').should('exist');
-      cy.contains('User ID').should('exist');
 
       cy.get(`[aria-labelledby="flyoutTitle"]`).within(() => {
         cy.getBySel('ECSMappingEditorForm')
@@ -289,7 +330,10 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       });
       cy.contains('Unique identifier of the us').should('not.exist');
       cy.contains('User ID').should('not.exist');
-      cy.get(`[aria-labelledby="flyoutTitle"]`).contains('Save').click();
+      // Wait for the editor debounce (500ms) to propagate query changes to the form
+      cy.wait(1000);
+      cy.getBySel('query-flyout-save-button').click();
+      cy.get(`[aria-labelledby="flyoutTitle"]`).should('not.exist');
 
       cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
 

@@ -15,7 +15,7 @@ import {
   ATTACK_TITLE_TEST_ID_SUFFIX,
   ATTACK_GROUP_TEST_ID_SUFFIX,
   ATTACK_STATUS_TEST_ID_SUFFIX,
-  ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX,
+  EXPAND_ATTACK_BUTTON_TEST_ID,
 } from '.';
 
 jest.mock(
@@ -36,7 +36,11 @@ const mockAttack = getMockAttackDiscoveryAlerts()[0];
 describe('AttackGroupContent', () => {
   it('should render component with attack details', () => {
     const { getByTestId } = render(
-      <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" />
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_GROUP_TEST_ID_SUFFIX}`)).toBeInTheDocument();
@@ -48,22 +52,75 @@ describe('AttackGroupContent', () => {
     expect(getByTestId(`test_id${ATTACK_STATUS_TEST_ID_SUFFIX}`)).toHaveTextContent(
       mockAttack.alertWorkflowStatus!
     );
-    expect(getByTestId(`test_id${ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX}`)).toBeInTheDocument();
     expect(getByTestId('mock-subtitle')).toBeInTheDocument();
+  });
+
+  it('should call openAttackDetailsFlyout when "Open attack details" button is clicked', () => {
+    const openAttackDetailsFlyoutMock = jest.fn();
+    const { getByTestId } = render(
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={openAttackDetailsFlyoutMock}
+      />
+    );
+
+    const button = getByTestId(EXPAND_ATTACK_BUTTON_TEST_ID);
+    expect(button).toBeInTheDocument();
+
+    button.click();
+
+    expect(openAttackDetailsFlyoutMock).toHaveBeenCalledTimes(1);
   });
 
   it('should render an empty state when the attack title is empty', () => {
     const attackWithEmptyTitle = { ...mockAttack, title: '' };
     const { getByTestId } = render(
-      <AttackGroupContent attack={attackWithEmptyTitle} dataTestSubj="test_id" />
+      <AttackGroupContent
+        attack={attackWithEmptyTitle}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toBeEmptyDOMElement();
   });
 
+  it('should render tags badge when attack has tags', () => {
+    const attackWithTags = { ...mockAttack, tags: ['tag1', 'tag2'] };
+    const { getByTestId } = render(
+      <AttackGroupContent
+        attack={attackWithTags}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
+    );
+
+    expect(getByTestId('attack-tags-badge')).toBeInTheDocument();
+    expect(getByTestId('attack-tags-badgeDisplayPopoverButton')).toHaveTextContent('2');
+  });
+
+  it('should not render tags badge when attack has no tags', () => {
+    const attackWithNoTags = { ...mockAttack, tags: [] };
+    const { queryByTestId } = render(
+      <AttackGroupContent
+        attack={attackWithNoTags}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
+    );
+
+    expect(queryByTestId('attack-tags-badge')).not.toBeInTheDocument();
+  });
+
   it('should show anonymized values in title when showAnonymized is true', () => {
     const { getByTestId } = render(
-      <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" showAnonymized />
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        showAnonymized
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(
@@ -73,7 +130,12 @@ describe('AttackGroupContent', () => {
 
   it('should show original values in title when showAnonymized is false', () => {
     const { getByTestId } = render(
-      <AttackGroupContent attack={mockAttack} dataTestSubj="test_id" showAnonymized={false} />
+      <AttackGroupContent
+        attack={mockAttack}
+        dataTestSubj="test_id"
+        showAnonymized={false}
+        openAttackDetailsFlyout={jest.fn()}
+      />
     );
 
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toHaveTextContent(

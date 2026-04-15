@@ -12,7 +12,7 @@ import {
 } from '@kbn/agent-builder-common/base/namespaces';
 import { toolIdRegexp, toolIdMaxLength } from '@kbn/agent-builder-common/tools';
 import { useQueryClient } from '@kbn/react-query';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { queryKeys } from '../../../../query_keys';
 
@@ -75,44 +75,54 @@ export const useBulkImportMcpToolFormValidationSchema = () => {
   const { toolsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
 
-  return z.object({
-    connectorId: z
-      .string()
-      .min(1, { message: bulkImportMcpI18nMessages.connectorId.requiredError }),
-    tools: z
-      .array(
-        z.object({
-          name: z.string(),
-          description: z.string(),
-        })
-      )
-      .min(1, { message: bulkImportMcpI18nMessages.tools.requiredError }),
-    namespace: z
-      .string()
-      .min(1, { message: bulkImportMcpI18nMessages.namespace.requiredError })
-      .max(toolIdMaxLength, { message: bulkImportMcpI18nMessages.namespace.tooLongError })
-      .regex(toolIdRegexp, { message: bulkImportMcpI18nMessages.namespace.formatError })
-      .refine(
-        (name) => !isInProtectedNamespace(name) && !hasNamespaceName(name),
-        (name) => ({
-          message: bulkImportMcpI18nMessages.namespace.protectedNamespaceError(name),
-        })
-      )
-      .superRefine(async (value, ctx) => {
-        if (value.length > 0) {
-          const { isValid } = await queryClient.fetchQuery({
-            queryKey: queryKeys.tools.namespace.validate(value),
-            queryFn: () => toolsService.validateNamespace({ namespace: value }),
-            staleTime: 0,
-          });
-          if (!isValid) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: bulkImportMcpI18nMessages.namespace.conflictError,
+  return z
+    .object({
+      connectorId: z
+        .string()
+        .min(1, { message: bulkImportMcpI18nMessages.connectorId.requiredError }),
+      tools: z
+        .array(
+          z.object({
+            name: z.string(),
+            description: z.string(),
+          })
+        )
+        .min(1, { message: bulkImportMcpI18nMessages.tools.requiredError }),
+      namespace: z
+        .string()
+        .min(1, { message: bulkImportMcpI18nMessages.namespace.requiredError })
+        .max(toolIdMaxLength, { message: bulkImportMcpI18nMessages.namespace.tooLongError })
+        .regex(toolIdRegexp, { message: bulkImportMcpI18nMessages.namespace.formatError })
+        .check((ctx) => {
+          const name = ctx.value as string;
+          if (isInProtectedNamespace(name) || hasNamespaceName(name)) {
+            ctx.issues.push({
+              code: 'custom',
+              message: bulkImportMcpI18nMessages.namespace.protectedNamespaceError(name),
+              input: name,
             });
           }
+        }),
+      labels: z.array(z.string()),
+    })
+    .superRefine(async (data, ctx) => {
+      if (data.namespace.length > 0 && data.connectorId.length > 0) {
+        const { isValid } = await queryClient.fetchQuery({
+          queryKey: queryKeys.tools.namespace.validate(data.namespace, data.connectorId),
+          queryFn: () =>
+            toolsService.validateNamespace({
+              namespace: data.namespace,
+              connectorId: data.connectorId,
+            }),
+          staleTime: 0,
+        });
+        if (!isValid) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: bulkImportMcpI18nMessages.namespace.conflictError,
+            path: ['namespace'],
+          });
         }
-      }),
-    labels: z.array(z.string()),
-  });
+      }
+    });
 };

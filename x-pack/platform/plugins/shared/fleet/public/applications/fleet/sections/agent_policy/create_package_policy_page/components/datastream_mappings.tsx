@@ -108,6 +108,12 @@ export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.fleet.packagePolicyEditor.datastreamMappings.tableCaption',
+            {
+              defaultMessage: 'Component template mappings',
+            }
+          )}
           items={componentTemplateItems}
           columns={[
             {
@@ -169,7 +175,7 @@ export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
           <EuiButtonEmpty
             size="xs"
             flush="left"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="datastreamAddCustomComponentTemplateBtn"
             onClick={async () => {
               const url = application.getUrlForApp('management', {

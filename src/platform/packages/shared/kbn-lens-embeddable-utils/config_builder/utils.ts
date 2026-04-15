@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
@@ -16,6 +18,7 @@ import type {
   PersistedIndexPatternLayer,
   TextBasedLayerColumn,
   TextBasedPersistedState,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -35,7 +38,7 @@ import type {
   LensESQLDataset,
 } from './types';
 import type { LensApiState } from './schema';
-import type { DatasetType } from './schema/dataset';
+import type { DataSourceType } from './schema/data_source';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -193,7 +196,7 @@ function buildDatasourceStatesLayer(
     dataView: DataView
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
-): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
+): [LensDatasourceId, DataSourceStateLayer | undefined] {
   function buildValueLayer(
     config: LensBaseLayer | LensBaseXYLayer
   ): TextBasedPersistedState['layers'][0] {
@@ -233,11 +236,11 @@ function buildDatasourceStatesLayer(
   }
 
   if (isESQLDataset(dataset)) {
-    return ['textBased', buildESQLLayer(layer)];
+    return [LENS_DATASOURCE_ID.TEXT_BASED, buildESQLLayer(layer)];
   } else if ('type' in dataset) {
-    return ['textBased', buildValueLayer(layer)];
+    return [LENS_DATASOURCE_ID.TEXT_BASED, buildValueLayer(layer)];
   }
-  return ['formBased', buildFormulaLayers(layer, i, dataView!)];
+  return [LENS_DATASOURCE_ID.FORM_BASED, buildFormulaLayers(layer, i, dataView!)];
 }
 export const buildDatasourceStates = async (
   config: (LensBaseConfig & { layers: LensBaseXYLayer[] }) | (LensBaseLayer & LensBaseConfig),
@@ -361,8 +364,22 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
   );
 }
 
-export function isEsqlTableTypeDataset(
-  dataset: DatasetType
-): dataset is Extract<DatasetType, { type: 'esql' | 'table' }> {
-  return dataset.type === 'esql' || dataset.type === 'table';
+export function isEsqlTableTypeDataSource(
+  dataSource: DataSourceType
+): dataSource is Extract<DataSourceType, { type: 'esql' }> {
+  return dataSource.type === 'esql';
+}
+
+export function groupIsNotCollapsed(def: {
+  collapse_by?: string;
+}): def is { collapse_by: undefined } {
+  return def.collapse_by == null;
+}
+
+export function isLensESQLConfig(config: LensApiState): boolean {
+  if (config.type === 'xy')
+    return config.layers.some(
+      (layer) => 'data_source' in layer && layer.data_source?.type === 'esql'
+    );
+  return config.data_source?.type === 'esql';
 }

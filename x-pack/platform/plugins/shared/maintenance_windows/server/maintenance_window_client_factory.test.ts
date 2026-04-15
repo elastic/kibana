@@ -107,12 +107,16 @@ test('creates an internal maintenance window client', async () => {
   const factory = new MaintenanceWindowClientFactory();
   factory.initialize(maintenanceWindowClientFactoryParams);
   const request = mockRouter.createKibanaRequest();
-  const mockRepository = savedObjectsService.createInternalRepository();
+  const mockRepository = savedObjectsService.createInternalRepository([
+    MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  ]);
   savedObjectsService.createInternalRepository.mockReturnValue(mockRepository);
 
   factory.createInternal(request);
 
-  expect(savedObjectsService.createInternalRepository).toHaveBeenCalledWith();
+  expect(savedObjectsService.createInternalRepository).toHaveBeenCalledWith([
+    MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  ]);
 
   const { MaintenanceWindowClient } = jest.requireMock('./client');
 

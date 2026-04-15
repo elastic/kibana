@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createFieldsMetadataClientMock } from './services/fields_metadata/fields_metadata_client.mock';
 import {
   createFieldsMetadataServiceSetupMock,
   createFieldsMetadataServiceStartMock,
@@ -16,6 +17,8 @@ const createFieldsMetadataServerSetupMock = (): jest.Mocked<FieldsMetadataServer
     createFieldsMetadataServiceSetupMock().registerIntegrationFieldsExtractor,
   registerIntegrationListExtractor:
     createFieldsMetadataServiceSetupMock().registerIntegrationListExtractor,
+  registerStreamsFieldsExtractor:
+    createFieldsMetadataServiceSetupMock().registerStreamsFieldsExtractor,
 });
 
 const createFieldsMetadataServerStartMock = (): jest.Mocked<FieldsMetadataServerStart> => ({
@@ -25,4 +28,5 @@ const createFieldsMetadataServerStartMock = (): jest.Mocked<FieldsMetadataServer
 export const fieldsMetadataPluginServerMock = {
   createSetupContract: createFieldsMetadataServerSetupMock,
   createStartContract: createFieldsMetadataServerStartMock,
+  createFieldsMetadataClientMock,
 };

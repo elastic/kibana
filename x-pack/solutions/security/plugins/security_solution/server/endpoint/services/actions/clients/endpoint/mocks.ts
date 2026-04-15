@@ -7,6 +7,11 @@
 
 import type { TransportResult } from '@elastic/transport/lib/types';
 import { kibanaPackageJson } from '@kbn/repo-info';
+import { merge } from 'lodash';
+import type {
+  EndpointRunScriptActionRequestParams,
+  RunScriptActionRequestBody,
+} from '../../../../../../common/api/endpoint';
 import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
 import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { responseActionsClientMock } from '../mocks';
@@ -63,6 +68,21 @@ const createConstructorOptionsMock = (): ResponseActionsClientOptions => {
   return options;
 };
 
+const createRunScriptOptionsMock = <
+  TParams extends EndpointRunScriptActionRequestParams = EndpointRunScriptActionRequestParams
+>(
+  overrides: Partial<RunScriptActionRequestBody<TParams>> = {}
+): RunScriptActionRequestBody<TParams> => {
+  const options: RunScriptActionRequestBody = {
+    agent_type: 'endpoint',
+    endpoint_ids: ['1-2-3'],
+    comment: 'test comment',
+    parameters: { scriptId: 'script-1-2-3', timeout: 60000 },
+  };
+  return merge(options, overrides);
+};
+
 export const endpointActionClientMock = Object.freeze({
   createConstructorOptions: createConstructorOptionsMock,
+  createRunScriptOptions: createRunScriptOptionsMock,
 });

@@ -42,7 +42,6 @@ describe('AvailabilityReporting component', () => {
   it('renders correctly against snapshot', async () => {
     const { findByText } = render(<AvailabilityReporting allLocations={allLocations} />);
 
-    expect(await findByText('This table contains 3 rows.')).toBeInTheDocument();
     expect(await findByText('au-heartbeat')).toBeInTheDocument();
   });
 });

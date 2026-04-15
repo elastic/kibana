@@ -40,6 +40,8 @@
           "; }) => Promise<void>"
         ],
         "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
+        "lineNumber": 70,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
             "label": "{ esClient, logger }",
             "description": [],
             "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
+            "lineNumber": 70,
+            "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -65,6 +69,8 @@
                   "default"
                 ],
                 "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
+                "lineNumber": 70,
+                "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -85,6 +91,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
+                "lineNumber": 70,
+                "columnNumber": 73,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -115,6 +123,8 @@
           "; }) => Promise<string>"
         ],
         "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,6 +136,8 @@
             "label": "{\n  esClient,\n  lookback,\n  logger,\n}",
             "description": [],
             "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
+            "lineNumber": 57,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -140,6 +152,8 @@
                   "default"
                 ],
                 "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
+                "lineNumber": 58,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -151,6 +165,8 @@
                 "label": "lookback",
                 "description": [],
                 "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
+                "lineNumber": 59,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -171,6 +187,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/private/kbn-infra-forge/src/run.ts",
+                "lineNumber": 60,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

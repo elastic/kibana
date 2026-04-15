@@ -38,6 +38,8 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   type UseEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -128,6 +130,18 @@ export enum DataLoadingState {
   loading = 'loading',
   loadingMore = 'loadingMore',
   loaded = 'loaded',
+}
+
+export type RenderDocumentViewCallback = (
+  hit: DataTableRecord,
+  displayedRows: DataTableRecord[],
+  displayedColumns: string[],
+  columnsMeta?: DataTableColumnsMeta
+) => JSX.Element | undefined;
+
+export interface RenderDocumentViewMeta {
+  displayedRows: DataTableRecord[];
+  displayedColumns: string[];
 }
 
 /**
@@ -323,14 +337,17 @@ interface InternalUnifiedDataTableProps {
     data: DataPublicPluginStart;
   };
   /**
-   * Callback to render DocumentView when the document is expanded
+   * Accepts one of two types:
+   * - Callback to render the document view when a document is expanded
+   * - 'external' const to indicate the consumer will handle rendering
+   *   the doc view themselves when a document is expanded
    */
-  renderDocumentView?: (
-    hit: DataTableRecord,
-    displayedRows: DataTableRecord[],
-    displayedColumns: string[],
-    columnsMeta?: DataTableColumnsMeta
-  ) => JSX.Element | undefined;
+  renderDocumentView?: RenderDocumentViewCallback | 'external';
+  /**
+   * Callback to set associated metadata when rendering the document view,
+   * only used when {@link renderDocumentView} is set to `external`
+   */
+  setRenderDocumentViewMeta?: (meta: RenderDocumentViewMeta | undefined) => void;
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
    */
@@ -478,6 +495,12 @@ interface InternalUnifiedDataTableProps {
    */
 
   onFullScreenChange?: (isFullScreen: boolean) => void;
+
+  /**
+   * Set to true when the table is used in an embedded context (e.g., dashboards).
+   * When true, filter actions on computed columns will be hidden.
+   */
+  hideFilteringOnComputedColumns?: boolean;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -537,6 +560,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       totalHits,
       onFetchMoreRecords,
       renderDocumentView,
+      setRenderDocumentViewMeta,
       setExpandedDoc,
       expandedDoc,
       configRowHeight,
@@ -563,6 +587,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       customBulkActions,
       shouldKeepAdHocDataViewImmutable,
       onFullScreenChange,
+      hideFilteringOnComputedColumns,
     },
     ref
   ) => {
@@ -727,6 +752,40 @@ const InternalUnifiedDataTable = React.forwardRef<
       currentPageSize,
       currentPageIndex,
       changeCurrentPageIndex,
+    ]);
+
+    // When the document view is rendered externally, we need to provide some metadata
+    // to the consumer to allow them to properly render the doc viewer component
+    const prevRenderDocumentViewMeta = useRef<RenderDocumentViewMeta>();
+
+    useEffect(() => {
+      if (renderDocumentView !== 'external' || !setRenderDocumentViewMeta) {
+        prevRenderDocumentViewMeta.current = undefined;
+        return;
+      }
+
+      if (!expandedDoc) {
+        prevRenderDocumentViewMeta.current = undefined;
+        setRenderDocumentViewMeta(undefined);
+        return;
+      }
+
+      const prevMeta = prevRenderDocumentViewMeta.current;
+      const metaChanged =
+        prevMeta?.displayedColumns !== displayedColumns ||
+        prevMeta?.displayedRows !== displayedRows;
+
+      if (metaChanged) {
+        const nextMeta: RenderDocumentViewMeta = { displayedColumns, displayedRows };
+        setRenderDocumentViewMeta(nextMeta);
+        prevRenderDocumentViewMeta.current = nextMeta;
+      }
+    }, [
+      displayedColumns,
+      displayedRows,
+      expandedDoc,
+      renderDocumentView,
+      setRenderDocumentViewMeta,
     ]);
 
     const unifiedDataTableContextValue = useMemo<DataTableContext>(
@@ -991,6 +1050,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           sortedColumns,
           disableCellActions,
           dataGridRef,
+          hideFilteringOnComputedColumns,
         }),
       [
         cellActionsHandling,
@@ -1016,6 +1076,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         visibleColumns,
         sortedColumns,
         disableCellActions,
+        hideFilteringOnComputedColumns,
       ]
     );
 
@@ -1082,26 +1143,32 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
 
       const leftControls = (
-        <>
+        <EuiFlexGroup gutterSize="s">
           {Boolean(selectedDocsCount) && (
-            <DataTableDocumentToolbarBtn
-              isPlainRecord={isPlainRecord}
-              isFilterActive={isFilterActive}
-              rows={rows!}
-              setIsFilterActive={setIsFilterActive}
-              selectedDocsState={selectedDocsState}
-              enableComparisonMode={enableComparisonMode}
-              setIsCompareActive={setIsCompareActive}
-              fieldFormats={fieldFormats}
-              pageIndex={unifiedDataTableContextValue.pageIndex}
-              pageSize={unifiedDataTableContextValue.pageSize}
-              toastNotifications={toastNotifications}
-              columns={visibleColumns}
-              customBulkActions={customBulkActions}
-            />
+            <EuiFlexItem grow={false}>
+              <DataTableDocumentToolbarBtn
+                isPlainRecord={isPlainRecord}
+                isFilterActive={isFilterActive}
+                rows={rows!}
+                setIsFilterActive={setIsFilterActive}
+                selectedDocsState={selectedDocsState}
+                enableComparisonMode={enableComparisonMode}
+                setIsCompareActive={setIsCompareActive}
+                fieldFormats={fieldFormats}
+                pageIndex={unifiedDataTableContextValue.pageIndex}
+                pageSize={unifiedDataTableContextValue.pageSize}
+                toastNotifications={toastNotifications}
+                columns={visibleColumns}
+                customBulkActions={customBulkActions}
+              />
+            </EuiFlexItem>
           )}
-          {externalAdditionalControls}
-        </>
+          <>
+            {externalAdditionalControls && (
+              <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
+            )}
+          </>
+        </EuiFlexGroup>
       );
 
       if (!renderCustomToolbar && inTableSearchControl) {
@@ -1298,7 +1365,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           css={styles.loadingAndEmpty}
           data-test-subj="unifiedDataTableLoading"
         >
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" textAlign="center">
             <EuiLoadingSpinner />
             <EuiSpacer size="s" />
             <FormattedMessage
@@ -1314,15 +1381,15 @@ const InternalUnifiedDataTable = React.forwardRef<
       return (
         <div
           className="euiDataGrid__noResults"
-          css={styles.loadingAndEmpty}
+          css={styles.emptyRow}
           data-render-complete={isRenderComplete}
           data-shared-item=""
           data-title={searchTitle}
           data-description={searchDescription}
           data-document-number={0}
         >
-          <EuiText size="xs" color="subdued">
-            <EuiIcon type="discoverApp" size="m" color="subdued" />
+          <EuiText size="xs" color="subdued" textAlign="center">
+            <EuiIcon type="discoverApp" size="m" color="subdued" aria-hidden="true" />
             <EuiSpacer size="s" />
             <FormattedMessage
               id="unifiedDataTable.noResultsFound"
@@ -1437,7 +1504,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           )}
           {canSetExpandedDoc &&
             expandedDoc &&
-            renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
+            typeof renderDocumentView === 'function' &&
+            renderDocumentView(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
         </span>
       </UnifiedDataTableContext.Provider>
     );
@@ -1458,6 +1526,9 @@ const componentStyles = {
     height: '100%',
     width: '100%',
   }),
+  emptyRow: ({ euiTheme }: UseEuiTheme) => {
+    return css([componentStyles.loadingAndEmpty, { padding: euiTheme.size.m }]);
+  },
   dataTableGlobal: ({ euiTheme }: UseEuiTheme) =>
     css({
       // Custom styles for data grid header cell.
@@ -1545,6 +1616,9 @@ const componentStyles = {
         {
           whiteSpace: 'pre-wrap',
         },
+      '.euiDataGrid__pagination': {
+        paddingTop: 0,
+      },
     }),
   dataTable: css({
     flexGrow: 1,

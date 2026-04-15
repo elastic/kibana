@@ -27,7 +27,7 @@ export const selectorRouteFactory = (
   id: 'datavisualizer',
   path: createPath(ML_PAGES.DATA_VISUALIZER),
   title: i18n.translate('xpack.ml.dataVisualizer.docTitle', {
-    defaultMessage: 'Data Visualizer',
+    defaultMessage: 'Data visualizer',
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [

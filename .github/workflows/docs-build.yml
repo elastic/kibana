@@ -1,22 +1,14 @@
 name: docs-build
-
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   push:
-    branches:
-      - main
-  pull_request_target:
-    types:
-      - opened
-      - reopened
-      - synchronize
-
+    branches: [main]
+permissions:
+  contents: read
+  pull-requests: read
 jobs:
-  docs-preview:
-    uses: elastic/docs-builder/.github/workflows/preview-build.yml@main
+  build:
+    uses: elastic/docs-actions/.github/workflows/docs-build.yml@v1
     with:
-      path-pattern: docs/**
-    permissions:
-      deployments: write
-      id-token: write
-      contents: read
-      pull-requests: write
+      enable-vale-linting: true

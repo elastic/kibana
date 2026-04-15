@@ -51,6 +51,7 @@ import {
   loadAndRemoveDashboardState,
   startSyncingExpandedPanelState,
 } from './url';
+import type { DashboardInternalApi } from '../dashboard_api/types';
 
 export interface DashboardAppProps {
   history: History;
@@ -58,6 +59,7 @@ export interface DashboardAppProps {
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
   expandedPanelId?: string;
+  setDashboardAppApi: (api: DashboardApi | undefined) => void;
 }
 
 export function DashboardApp({
@@ -66,6 +68,7 @@ export function DashboardApp({
   redirectTo,
   history,
   expandedPanelId,
+  setDashboardAppApi,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
@@ -97,7 +100,9 @@ export function DashboardApp({
     };
   }, [incomingEmbeddables]);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
-
+  const [dashboardInternalApi, setDashboardInternalApi] = useState<
+    DashboardInternalApi | undefined
+  >(undefined);
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
 
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
@@ -178,6 +183,9 @@ export function DashboardApp({
       // integrations
       useSessionStorageIntegration: true,
       useUnifiedSearchIntegration: true,
+      // Hide the control group from the dashboard renderer; the dashboard app handles displaying
+      // pinned controls in the top nav instead
+      useControlsIntegration: false,
       unifiedSearchSettings: {
         kbnUrlStateStorage,
       },
@@ -239,13 +247,15 @@ export function DashboardApp({
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
     <>
-      {dashboardApi && (
+      {dashboardApi && dashboardInternalApi && (
         <>
           <DashboardTabTitleSetter dashboardApi={dashboardApi} />
           <DashboardTopNav
+            key={dashboardApi.uuid}
             redirectTo={redirectTo}
             embedSettings={embedSettings}
             dashboardApi={dashboardApi}
+            dashboardInternalApi={dashboardInternalApi}
           />
         </>
       )}
@@ -254,13 +264,18 @@ export function DashboardApp({
       <DashboardRenderer
         key={regenerateId}
         locator={locator}
-        onApiAvailable={(dashboard) => {
-          if (dashboard && !dashboardApi) {
+        onApiAvailable={(dashboard, dashboardInternal) => {
+          setDashboardAppApi(dashboard);
+          if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
             setDashboardApi(dashboard);
+            setDashboardInternalApi(dashboardInternal);
             if (expandedPanelId) {
               dashboard?.expandPanel(expandedPanelId);
             }
           }
+        }}
+        onApiCleanup={() => {
+          setDashboardAppApi(undefined);
         }}
         dashboardRedirect={redirectTo}
         savedObjectId={savedDashboardId}

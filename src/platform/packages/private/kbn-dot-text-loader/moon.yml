@@ -4,36 +4,25 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dot-text-loader'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: javascript
 project:
-  name: '@kbn/dot-text-loader'
+  title: '@kbn/dot-text-loader'
   description: Moon project for @kbn/dot-text-loader
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-dot-text-loader
+  sourceRoot: src/platform/packages/private/kbn-dot-text-loader
 tags:
   - shared-common
   - package
   - dev
   - group-platform
   - private
-  - jest-unit-tests
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+fileGroups:
+  src:
+    - index.js
+tasks: {}

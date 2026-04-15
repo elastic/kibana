@@ -13,19 +13,29 @@ import type {
   ChatAgentEvent,
   AgentCapabilities,
   AgentConfigurationOverrides,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
   ModelProvider,
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
+  WritableSkillsStore,
   AttachmentsService,
   PromptManager,
   ConversationStateManager,
+  SkillsService,
+  PluginsService,
+  ToolManager,
 } from '../runner';
+import type { IFileStore } from '../runner/filestore';
+import type { AttachmentStateManager } from '../attachments';
+import type { AgentBuilderHooks } from '../hooks/types';
+import type { ToolRegistry } from '../tools';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -46,6 +56,16 @@ export interface AgentHandlerReturn {
   result: AgentResponse;
 }
 
+/**
+ * Experimental features configuration for agent builder.
+ */
+export interface ExperimentalFeatures {
+  /** Whether the filestore feature is enabled */
+  filestore: boolean;
+  /** Whether the skills feature is enabled */
+  skills: boolean;
+}
+
 export interface AgentHandlerContext {
   /**
    * The request that was provided when initiating that tool execution.
@@ -62,6 +82,10 @@ export interface AgentHandlerContext {
    */
   esClient: IScopedClusterClient;
   /**
+   * Saved objects client scoped to the current user.
+   */
+  savedObjectsClient?: SavedObjectsClientContract;
+  /**
    * Inference model provider scoped to the current user.
    * Can be used to access the inference APIs or chatModel.
    */
@@ -71,6 +95,11 @@ export interface AgentHandlerContext {
    */
   toolProvider: ToolProvider;
   /**
+   * Tool registry for accessing internal tool definitions.
+   * Used for features like tool-specific result summarization.
+   */
+  toolRegistry: ToolRegistry;
+  /**
    * AgentBuilder runner scoped to the current execution.
    */
   runner: ScopedRunner;
@@ -79,9 +108,30 @@ export interface AgentHandlerContext {
    */
   attachments: AttachmentsService;
   /**
+   * Skills service to interact with skills.
+   */
+  skills: SkillsService;
+  /**
+   * Plugins service to resolve plugin-contributed skill IDs during execution.
+   */
+  plugins: PluginsService;
+  /**
+   * Tool manager to manage active tools for the agent.
+   */
+  toolManager: ToolManager;
+  /**
    * Result store to access and add tool results during execution.
    */
   resultStore: WritableToolResultStore;
+  /**
+   * Skills store to populate with filtered skills during execution.
+   * Backs the skills volume in the virtual filesystem.
+   */
+  skillsStore: WritableSkillsStore;
+  /**
+   * Attachment state manager to manage conversation attachments during execution.
+   */
+  attachmentStateManager: AttachmentStateManager;
   /**
    * Used to manage interruptions.
    */
@@ -98,6 +148,19 @@ export interface AgentHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Hooks service for agent lifecycle interception.
+   */
+  hooks: AgentBuilderHooks;
+  /**
+   * File store to access data from the agent's virtual filesystem
+   */
+  filestore: IFileStore;
+  /**
+   * Experimental features configuration for this agent execution.
+   * Determined by the UI setting at the start of execution.
+   */
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -139,6 +202,10 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
+  /**
+   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
+   */
+  action?: ConversationAction;
 }
 
 export interface AgentResponse {

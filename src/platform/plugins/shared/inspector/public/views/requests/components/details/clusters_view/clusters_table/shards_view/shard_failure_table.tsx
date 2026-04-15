@@ -65,7 +65,7 @@ export function ShardFailureTable({ failures }: Props) {
                       defaultMessage: 'Expand table row to view shard details',
                     })
               }
-              iconType={item.rowId in expandedRows ? 'arrowDown' : 'arrowRight'}
+              iconType={item.rowId in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
             />
             <EuiText size="xs" color="subdued">
               {shard}
@@ -108,7 +108,7 @@ export function ShardFailureTable({ failures }: Props) {
       items={failures.map((failure) => {
         return {
           rowId: getRowId(failure),
-          shard: failure.shard,
+          shard: failure.shard!,
           index: failure.index,
           failureType: failure.reason.type,
         };

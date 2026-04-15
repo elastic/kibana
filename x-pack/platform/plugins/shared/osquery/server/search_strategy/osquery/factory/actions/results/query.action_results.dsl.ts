@@ -17,6 +17,7 @@ import {
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
 import { buildIndexNameWithNamespace } from '../../../../../utils/build_index_name_with_namespace';
+import { prefixIndexPatternsWithCcs } from '../../../../../utils/ccs_utils';
 
 export const buildActionResultsQuery = ({
   actionId,
@@ -26,6 +27,7 @@ export const buildActionResultsQuery = ({
   sort,
   pagination,
   componentTemplateExists,
+  ccsEnabled,
   useNewDataStream,
   integrationNamespaces,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
@@ -39,7 +41,7 @@ export const buildActionResultsQuery = ({
       ? [
           {
             range: {
-              started_at: {
+              'event.ingested': {
                 gte: startDate,
                 lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
               },
@@ -86,6 +88,8 @@ export const buildActionResultsQuery = ({
   } else {
     index = baseIndex;
   }
+
+  index = prefixIndexPatternsWithCcs(index, ccsEnabled ?? false);
 
   return {
     allow_no_indices: true,

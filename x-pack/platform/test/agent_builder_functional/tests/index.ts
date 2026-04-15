@@ -35,6 +35,7 @@ export default function ({ loadTestFile, getService }: AgentBuilderUiFtrProvider
       loadTestFile(require.resolve('./tools/landing_page.ts'));
       loadTestFile(require.resolve('./tools/manage_tool.ts'));
       loadTestFile(require.resolve('./agents/agents_list.ts'));
+      loadTestFile(require.resolve('./tools/mcp_tools.ts'));
     });
 
     describe('agents', function () {
@@ -42,6 +43,13 @@ export default function ({ loadTestFile, getService }: AgentBuilderUiFtrProvider
       loadTestFile(require.resolve('./agents/agents_list.ts'));
       loadTestFile(require.resolve('./agents/create_agent.ts'));
       loadTestFile(require.resolve('./agents/edit_agent.ts'));
+    });
+
+    describe('sidebar', function () {
+      loadTestFile(require.resolve('./sidebar/sidebar_conversation_flow.ts'));
+      loadTestFile(require.resolve('./sidebar/sidebar_conversation_history.ts'));
+      loadTestFile(require.resolve('./sidebar/sidebar_agent_switch.ts'));
+      loadTestFile(require.resolve('./sidebar/sidebar_error_handling.ts'));
     });
   });
 }

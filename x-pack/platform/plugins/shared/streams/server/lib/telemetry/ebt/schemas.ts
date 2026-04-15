@@ -6,7 +6,15 @@
  */
 
 import type { RootSchema } from '@elastic/ebt/client';
-import type { StreamEndpointLatencyProps, StreamsStateErrorProps } from './types';
+import type {
+  StreamEndpointLatencyProps,
+  StreamsDescriptionGeneratedProps,
+  StreamsSignificantEventsQueriesGeneratedProps,
+  StreamsInsightsGeneratedProps,
+  StreamsStateErrorProps,
+  StreamsProcessingPipelineSuggestedProps,
+  StreamsFeaturesIdentifiedProps,
+} from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
   name: {
@@ -61,4 +69,295 @@ const streamsStateErrorSchema: RootSchema<StreamsStateErrorProps> = {
   },
 };
 
-export { streamsEndpointLatencySchema, streamsStateErrorSchema };
+const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of input tokens used for the generation request',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of output tokens used for the generation request',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+};
+
+const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignificantEventsQueriesGeneratedProps> =
+  {
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of significant events queries generated',
+      },
+    },
+    input_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of input tokens used for the generation request',
+      },
+    },
+    output_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of output tokens used for the generation request',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    tool_usage: {
+      properties: {
+        get_stream_features: {
+          properties: {
+            calls: {
+              type: 'long',
+              _meta: {
+                description: 'The number of calls to the get_stream_features tool',
+              },
+            },
+            failures: {
+              type: 'long',
+              _meta: {
+                description: 'The number of failures to the get_stream_features tool',
+              },
+            },
+            latency_ms: {
+              type: 'long',
+              _meta: {
+                description: 'The latency of the get_stream_features tool in milliseconds',
+              },
+            },
+          },
+        },
+        add_queries: {
+          properties: {
+            calls: {
+              type: 'long',
+              _meta: {
+                description: 'The number of calls to the add_queries tool',
+              },
+            },
+            failures: {
+              type: 'long',
+              _meta: {
+                description: 'The number of failures to the add_queries tool',
+              },
+            },
+            latency_ms: {
+              type: 'long',
+              _meta: {
+                description: 'The latency of the add_queries tool in milliseconds',
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+const streamsInsightsGeneratedSchema: RootSchema<StreamsInsightsGeneratedProps> = {
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of input tokens used for the generation request',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of output tokens used for the generation request',
+    },
+  },
+  cached_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of cached tokens used for the generation request',
+      optional: true,
+    },
+  },
+};
+
+const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipelineSuggestedProps> =
+  {
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the pipeline suggestion generation in milliseconds',
+      },
+    },
+    steps_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of reasoning steps the LLM took to generate the suggestion',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the pipeline suggestion was generated successfully',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+  };
+
+const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps> = {
+  run_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'UUID identifying the full identification run (shared across iterations)',
+    },
+  },
+  iteration: {
+    type: 'long',
+    _meta: {
+      description: 'Iteration number (1-based); 0 for terminal failure/cancel events',
+    },
+  },
+  docs_count: {
+    type: 'long',
+    _meta: {
+      description: 'Number of documents used in this iteration',
+    },
+  },
+  features_new: {
+    type: 'long',
+    _meta: {
+      description: 'New features identified in this iteration',
+    },
+  },
+  features_updated: {
+    type: 'long',
+    _meta: {
+      description: 'Existing features updated in this iteration',
+    },
+  },
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Input tokens used in this iteration',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Output tokens used in this iteration',
+    },
+  },
+  total_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Total tokens used in this iteration',
+    },
+  },
+  excluded_features_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of excluded features present at the time of identification',
+    },
+  },
+  llm_ignored_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of features the LLM reported as matching excluded features',
+    },
+  },
+  code_ignored_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inferred features dropped server-side because they matched excluded features',
+    },
+  },
+  cached_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Cached tokens used in this iteration',
+    },
+  },
+  duration_ms: {
+    type: 'long',
+    _meta: {
+      description: 'Duration of this iteration in milliseconds',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  state: {
+    type: 'keyword',
+    _meta: {
+      description: 'The state of the features identification task (success, failure, or canceled)',
+    },
+  },
+  filters_capped: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the filters were capped',
+    },
+  },
+  total_filters: {
+    type: 'long',
+    _meta: {
+      description: 'The total number of filters available in features',
+    },
+  },
+  has_filtered_documents: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the sample query found documents after filters were applied',
+    },
+  },
+};
+
+export {
+  streamsEndpointLatencySchema,
+  streamsStateErrorSchema,
+  streamsDescriptionGeneratedSchema,
+  streamsSignificantEventsQueriesGeneratedSchema,
+  streamsInsightsGeneratedSchema,
+  streamsProcessingPipelineSuggestedSchema,
+  streamsFeaturesIdentifiedSchema,
+};

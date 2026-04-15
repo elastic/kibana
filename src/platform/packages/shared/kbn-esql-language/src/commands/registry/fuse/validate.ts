@@ -6,10 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { walk } from '../../../ast/walker';
-import type { ESQLAst, ESQLAstAllCommands, ESQLMessage, ESQLSingleAstItem } from '../../../types';
+import { walk } from '@elastic/esql';
+import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
 import type { ICommandContext } from '../types';
 import { buildMissingMetadataMessage } from './utils';
+import type { ESQLMessage } from '../..';
 
 const REQUIRED_METADATA_FIELDS = ['_id', '_index', '_score'];
 

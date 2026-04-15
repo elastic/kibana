@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AddData render 1`] = `
-<_EuiPageSection
+<EuiPageTemplate.Section
   aria-labelledby="homeDataAdd__title"
   bottomBorder={true}
   paddingSize="xl"
@@ -40,10 +40,10 @@ exports[`AddData render 1`] = `
         >
           <EuiButton
             data-test-subj="homeAddData"
-            fill={true}
+            fill={false}
             fullWidth={true}
             href="/app/integrations/browse"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={[Function]}
           >
             <MemoizedFormattedMessage
@@ -72,7 +72,7 @@ exports[`AddData render 1`] = `
           <EuiButtonEmpty
             data-test-subj="uploadFile"
             href="#/tutorial_directory/fileDataViz"
-            iconType="importAction"
+            iconType="download"
           >
             <MemoizedFormattedMessage
               defaultMessage="Upload a file"
@@ -116,5 +116,5 @@ exports[`AddData render 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</_EuiPageSection>
+</EuiPageTemplate.Section>
 `;

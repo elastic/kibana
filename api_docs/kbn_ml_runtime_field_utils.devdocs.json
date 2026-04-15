@@ -44,6 +44,8 @@
           " | undefined"
         ],
         "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,6 +69,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -85,6 +89,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -106,6 +112,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/is_runtime_field.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +130,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/is_runtime_field.ts",
+            "lineNumber": 20,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -143,6 +153,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -159,6 +171,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+            "lineNumber": 18,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -186,6 +200,8 @@
           "; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

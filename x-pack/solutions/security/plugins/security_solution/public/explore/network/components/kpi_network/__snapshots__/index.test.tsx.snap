@@ -2,19 +2,19 @@
 
 exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
 >
   <div
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
@@ -46,7 +46,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -96,7 +96,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
@@ -128,7 +128,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -179,13 +179,13 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
       class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
     />
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
@@ -217,7 +217,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -267,7 +267,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
@@ -299,7 +299,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -351,7 +351,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
     >
       <div
         class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
@@ -383,7 +383,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       color="inherit"
-                      data-euiicon-type="arrowDown"
+                      data-euiicon-type="chevronSingleDown"
                     />
                   </button>
                 </div>
@@ -413,7 +413,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 >
                   <span
                     color="#EE72A6"
-                    data-euiicon-type="visMapCoordinate"
+                    data-euiicon-type="waypoint"
                     data-test-subj="stat-icon"
                   />
                 </div>
@@ -451,7 +451,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 >
                   <span
                     color="#61A2FF"
-                    data-euiicon-type="visMapCoordinate"
+                    data-euiicon-type="waypoint"
                     data-test-subj="stat-icon"
                   />
                 </div>
@@ -480,7 +480,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
             </div>
           </div>
           <hr
-            class="euiHorizontalRule emotion-euiHorizontalRule-full-l"
+            class="euiHorizontalRule emotion-euiHorizontalRule-full-m"
           />
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"

@@ -7,44 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MOCK_IDP_UIAM_SHARED_SECRET, MOCK_IDP_UIAM_SIGNING_SECRET } from '@kbn/mock-idp-utils';
+import { writeFile, mkdir } from 'fs/promises';
+import { fetch } from 'undici';
+import { join } from 'path';
+import {
+  generateCosmosDBApiRequestHeaders,
+  MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
+  MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL,
+  MOCK_IDP_UIAM_COSMOS_DB_NAME,
+  MOCK_IDP_UIAM_COSMOS_DB_URL,
+  MOCK_IDP_UIAM_SHARED_SECRET,
+  MOCK_IDP_UIAM_SIGNING_SECRET,
+} from '@kbn/mock-idp-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import execa from 'execa';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { Agent } from 'undici';
-import { createHmac } from 'crypto';
-import type { ArrayElement } from '@kbn/utility-types';
-import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH } from '../paths';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import {
+  SERVERLESS_UIAM_ENTRYPOINT_PATH,
+  SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH,
+  SERVERLESS_IDP_METADATA_PATH,
+} from '../paths';
 
-const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'mcr.microsoft.com';
-const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/cosmosdb/linux/azure-cosmos-emulator`;
+const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'docker.elastic.co';
+const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/kibana-ci/uiam-azure-cosmos-emulator`;
 
-// Check new version at https://github.com/Azure/azure-cosmos-db-emulator-docker/releases. DON'T use the rolling
-// `vnext-preview` image tag.
-const COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG = 'vnext-EN20251205';
-export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:${COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG}`;
+export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:latest-verified`;
 
 const UIAM_DOCKER_REGISTRY = 'docker.elastic.co';
-const UIAM_DOCKER_REPO = `${UIAM_DOCKER_REGISTRY}/cloud-ci/uiam`;
-// Taken from GitOps version file for UIAM service (dev env, services/uiam/versions.yaml)
-const UIAM_DOCKER_LATEST_VERIFIED_TAG = 'git-f56eb1a3b9a8';
-export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_REPO}:${UIAM_DOCKER_LATEST_VERIFIED_TAG}`;
+const UIAM_DOCKER_PROMOTED_REPO = `${UIAM_DOCKER_REGISTRY}/kibana-ci/uiam`;
 
-const UIAM_COSMOS_DB_NAME = 'uiam-db';
-const UIAM_COSMOS_DB_VERSION = '2018-12-31';
-const UIAM_COSMOS_DB_ACCESS_KEY =
-  'C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==';
-const UIAM_COSMOS_DB_COLLECTION_API_KEYS = 'api-keys';
-const UIAM_COSMOS_DB_COLLECTION_USERS = 'users';
-const UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION = 'token-invalidation';
+export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`;
 
 const MAX_HEALTHCHECK_RETRIES = 30;
 
 const ENV_DEFAULTS = {
-  UIAM_API_PORT: '8080',
-  UIAM_COSMOS_DB_GATEWAY_PORT: '8081',
+  UIAM_COSMOS_DB_PORT: '8081',
   UIAM_COSMOS_DB_UI_PORT: '8082',
+  UIAM_SERVICE_PORT: '8443',
+  UIAM_OAUTH_SERVICE_PORT: '8444',
+  UIAM_APP_LOGGING_LEVEL: 'DEBUG',
   UIAM_LOGGING_LEVEL: 'INFO',
 };
 
@@ -67,7 +78,14 @@ const SHARED_DOCKER_PARAMS = [
   '3s',
 ];
 
-export const UIAM_CONTAINERS = [
+export interface UiamContainer {
+  name: string;
+  image: string;
+  params: string[];
+  cmdParams: string[];
+}
+
+const UIAM_BASE_CONTAINERS: UiamContainer[] = [
   {
     name: 'uiam-cosmosdb',
     image: process.env.UIAM_COSMOSDB_DOCKER_IMAGE || COSMOS_DB_EMULATOR_DEFAULT_IMAGE,
@@ -79,7 +97,7 @@ export const UIAM_CONTAINERS = [
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
 
       '-p',
-      `127.0.0.1:${env.UIAM_COSMOS_DB_GATEWAY_PORT}:8081`, // Cosmos DB gateway
+      `127.0.0.1:${env.UIAM_COSMOS_DB_PORT}:8081`, // Cosmos DB gateway
       '-p',
       `127.0.0.1:${env.UIAM_COSMOS_DB_UI_PORT}:1234`, // Cosmos DB emulator UI
 
@@ -111,12 +129,32 @@ export const UIAM_CONTAINERS = [
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/tmp/uiam_cosmosdb.pfx:z`,
+      '--volume',
+      `${CA_CERT_PATH}:/tmp/ca.crt:z`,
+      '--volume',
+      `${KBN_KEY_PATH}:/tmp/server.key:z`,
+      '--volume',
+      `${KBN_CERT_PATH}:/tmp/server.crt:z`,
 
       '-p',
-      `127.0.0.1:${env.UIAM_API_PORT}:8080`, // UIAM API port
+      `127.0.0.1:${env.UIAM_SERVICE_PORT}:8443`, // UIAM API port
 
       '--entrypoint',
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
+
+      '--env',
+      'uiam.apikey.convert.validation.endpoint.enabled=false',
+      '--env',
+      'quarkus.tls.https.key-store.pem.0.cert=/tmp/server.crt',
+      '--env',
+      'quarkus.tls.https.key-store.pem.0.key=/tmp/server.key',
+      '--env',
+      'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
+
+      '--env',
+      'quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt',
+      '--env',
+      'quarkus.tls.esclient.key-store.pem.0.key=/tmp/server.key',
 
       '--env',
       'quarkus.http.ssl.certificate.key-store-provider=JKS',
@@ -128,6 +166,10 @@ export const UIAM_CONTAINERS = [
       `quarkus.log.category."io".level=${env.UIAM_LOGGING_LEVEL}`,
       '--env',
       `quarkus.log.category."org".level=${env.UIAM_LOGGING_LEVEL}`,
+      '--env',
+      `quarkus.log.category."co.elastic.cloud.uiam".level=${env.UIAM_APP_LOGGING_LEVEL}`,
+      '--env',
+      `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
       '--env',
       'quarkus.log.console.json.enabled=false',
       '--env',
@@ -141,17 +183,17 @@ export const UIAM_CONTAINERS = [
       '--env',
       'uiam.api_keys.encoder.prefix=essu_dev',
       '--env',
-      `uiam.cosmos.account.access_key=${UIAM_COSMOS_DB_ACCESS_KEY}`,
+      `uiam.cosmos.account.access_key=${MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY}`,
       '--env',
-      `uiam.cosmos.account.endpoint=https://uiam-cosmosdb:${env.UIAM_COSMOS_DB_GATEWAY_PORT}`,
+      `uiam.cosmos.account.endpoint=${MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL}`,
       '--env',
-      `uiam.cosmos.container.apikey=${UIAM_COSMOS_DB_COLLECTION_API_KEYS}`,
+      `uiam.cosmos.container.apikey=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}`,
       '--env',
-      `uiam.cosmos.container.token_invalidation=${UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION}`,
+      `uiam.cosmos.container.token_invalidation=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION}`,
       '--env',
-      `uiam.cosmos.container.users=${UIAM_COSMOS_DB_COLLECTION_USERS}`,
+      `uiam.cosmos.container.users=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS}`,
       '--env',
-      `uiam.cosmos.database=${UIAM_COSMOS_DB_NAME}`,
+      `uiam.cosmos.database=${MOCK_IDP_UIAM_COSMOS_DB_NAME}`,
       '--env',
       'uiam.cosmos.gateway_connection_mode=true',
       '--env',
@@ -161,6 +203,12 @@ export const UIAM_CONTAINERS = [
       '--env',
       `uiam.tokens.jwt.signing.secret=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
 
+      '--env',
+      'uiam.tokens.jwt.verify.clock.skew=PT2S',
+
+      '--env',
+      'uiam.tokens.refresh.grace_period=PT3S',
+
       '--health-cmd',
       'timeout 1 bash -c "</dev/tcp/localhost/8080"',
     ],
@@ -168,13 +216,136 @@ export const UIAM_CONTAINERS = [
   },
 ];
 
+const UIAM_OAUTH_CONTAINER: UiamContainer = {
+  name: 'uiam-oauth',
+  image: process.env.UIAM_DOCKER_IMAGE || UIAM_DEFAULT_IMAGE,
+  params: [
+    '--net',
+    'elastic',
+
+    '--volume',
+    `${SERVERLESS_UIAM_ENTRYPOINT_PATH}:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z`,
+
+    '--volume',
+    `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/tmp/uiam_cosmosdb.pfx:z`,
+    '--volume',
+    `${CA_CERT_PATH}:/tmp/ca.crt:z`,
+    '--volume',
+    `${KBN_KEY_PATH}:/tmp/server.key:z`,
+    '--volume',
+    `${KBN_CERT_PATH}:/tmp/server.crt:z`,
+
+    '-p',
+    `127.0.0.1:${env.UIAM_OAUTH_SERVICE_PORT}:8443`, // UIAM OAuth HTTPS port
+
+    '--entrypoint',
+    '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
+
+    '--env',
+    'uiam.apikey.convert.validation.endpoint.enabled=false',
+    '--env',
+    'quarkus.tls.https.key-store.pem.0.cert=/tmp/server.crt',
+    '--env',
+    'quarkus.tls.https.key-store.pem.0.key=/tmp/server.key',
+    '--env',
+    'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
+
+    '--env',
+    'quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt',
+    '--env',
+    'quarkus.tls.esclient.key-store.pem.0.key=/tmp/server.key',
+
+    '--env',
+    'quarkus.http.ssl.certificate.key-store-provider=JKS',
+    '--env',
+    'quarkus.http.ssl.certificate.trust-store-provider=SUN',
+    '--env',
+    `quarkus.log.category."co".level=${env.UIAM_LOGGING_LEVEL}`,
+    '--env',
+    `quarkus.log.category."io".level=${env.UIAM_LOGGING_LEVEL}`,
+    '--env',
+    `quarkus.log.category."org".level=${env.UIAM_LOGGING_LEVEL}`,
+    '--env',
+    `quarkus.log.category."co.elastic.cloud.uiam".level=${env.UIAM_APP_LOGGING_LEVEL}`,
+    '--env',
+    `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
+    '--env',
+    'quarkus.log.console.json.enabled=false',
+    '--env',
+    `quarkus.log.level=${env.UIAM_LOGGING_LEVEL}`,
+    '--env',
+    'quarkus.otel.sdk.disabled=true',
+    '--env',
+    'quarkus.profile=dev',
+    '--env',
+    'uiam.api_keys.decoder.prefixes=essu_dev',
+    '--env',
+    'uiam.api_keys.encoder.prefix=essu_dev',
+    '--env',
+    `uiam.cosmos.account.access_key=${MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY}`,
+    '--env',
+    `uiam.cosmos.account.endpoint=${MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL}`,
+    '--env',
+    `uiam.cosmos.container.apikey=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}`,
+    '--env',
+    `uiam.cosmos.container.token_invalidation=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION}`,
+    '--env',
+    `uiam.cosmos.container.users=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS}`,
+    '--env',
+    `uiam.cosmos.database=${MOCK_IDP_UIAM_COSMOS_DB_NAME}`,
+    '--env',
+    'uiam.cosmos.gateway_connection_mode=true',
+    '--env',
+    `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+    '--env',
+    `uiam.tokens.jwt.signature.secrets=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
+    '--env',
+    `uiam.tokens.jwt.signing.secret=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
+
+    '--env',
+    'uiam.tokens.jwt.verify.clock.skew=PT2S',
+
+    '--env',
+    'UIAM_SERVICE_BOUNDARY=external',
+
+    '--env',
+    `uiam.oauth.base_url=https://localhost:${env.UIAM_OAUTH_SERVICE_PORT}`,
+    '--env',
+    `UIAM_OAUTH_BASE_URL=https://localhost:${env.UIAM_OAUTH_SERVICE_PORT}`,
+
+    '--env',
+    'uiam.tokens.refresh.grace_period=PT3S',
+
+    '--volume',
+    `${SERVERLESS_IDP_METADATA_PATH}:/tmp/mock-idp-metadata.xml:z`,
+    '--env',
+    'uiam.saml.idp.metadata=/tmp/mock-idp-metadata.xml',
+    '--env',
+    `uiam.saml.acs.url=https://localhost:${env.UIAM_OAUTH_SERVICE_PORT}/saml/consume`,
+
+    '--health-cmd',
+    'timeout 1 bash -c "</dev/tcp/localhost/8443"',
+  ],
+  cmdParams: [],
+};
+
+/**
+ * Returns the list of UIAM containers to run.
+ * When `includeOAuth` is true, includes the UIAM OAuth container.
+ */
+export function getUiamContainers({
+  includeOAuth = false,
+}: { includeOAuth?: boolean } = {}): UiamContainer[] {
+  return includeOAuth ? [...UIAM_BASE_CONTAINERS, UIAM_OAUTH_CONTAINER] : [...UIAM_BASE_CONTAINERS];
+}
+
+/** @deprecated Use {@link getUiamContainers} instead */
+export const UIAM_CONTAINERS = UIAM_BASE_CONTAINERS;
+
 /**
  * Run a single UIAM-related container.
  */
-export async function runUiamContainer(
-  log: ToolingLog,
-  container: ArrayElement<typeof UIAM_CONTAINERS>
-) {
+export async function runUiamContainer(log: ToolingLog, container: UiamContainer) {
   const dockerCommand = SHARED_DOCKER_PARAMS.concat(
     container.params,
     ['--name', container.name],
@@ -212,6 +383,7 @@ export async function runUiamContainer(
 
     healthcheckRetries++;
     if (healthcheckRetries >= MAX_HEALTHCHECK_RETRIES) {
+      await tryExportLogs(container.name, log);
       throw new Error(
         `The "${
           container.name
@@ -236,61 +408,76 @@ export async function runUiamContainer(
 }
 
 export async function initializeUiamContainers(log: ToolingLog) {
-  const COSMOS_DB_ENDPOINT = `https://127.0.0.1:${env.UIAM_COSMOS_DB_GATEWAY_PORT}`;
-
   const fetchDispatcher = new Agent({ connect: { rejectUnauthorized: false } });
 
-  log.info(chalk.bold(`Initializing Cosmos DB (${COSMOS_DB_ENDPOINT}/${UIAM_COSMOS_DB_NAME})…`));
+  log.info(
+    chalk.bold(
+      `Initializing Cosmos DB (${MOCK_IDP_UIAM_COSMOS_DB_URL}/${MOCK_IDP_UIAM_COSMOS_DB_NAME})…`
+    )
+  );
 
   // 1. Create database.
-  const dbDate = new Date().toUTCString();
-  const dbRes = await fetch(`${COSMOS_DB_ENDPOINT}/dbs`, {
+  const dbRes = await fetch(`${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs`, {
     method: 'POST',
-    headers: generateCosmosDBApiRequestHeaders('POST', 'dbs', '', dbDate),
-    body: JSON.stringify({ id: UIAM_COSMOS_DB_NAME }),
-    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+    headers: generateCosmosDBApiRequestHeaders('POST', 'dbs', ''),
+    body: JSON.stringify({ id: MOCK_IDP_UIAM_COSMOS_DB_NAME }),
     dispatcher: fetchDispatcher,
   });
 
   if (dbRes.status === 201) {
-    log.info(chalk.green(`✓ Database (${UIAM_COSMOS_DB_NAME}) created successfully`));
+    log.info(chalk.green(`✓ Database (${MOCK_IDP_UIAM_COSMOS_DB_NAME}) created successfully`));
   } else if (dbRes.status === 409) {
-    log.info(chalk.yellow(`✓ Database (${UIAM_COSMOS_DB_NAME}) already exists`));
+    log.info(chalk.yellow(`✓ Database (${MOCK_IDP_UIAM_COSMOS_DB_NAME}) already exists`));
   } else {
     throw new Error(
-      `Failed to create database (${UIAM_COSMOS_DB_NAME}): ${dbRes.status} ${await dbRes.text()}`
+      `Failed to create database (${MOCK_IDP_UIAM_COSMOS_DB_NAME}): ${
+        dbRes.status
+      } ${await dbRes.text()}`
     );
   }
 
-  // 2. Create collections.
-  for (const collection of [
-    UIAM_COSMOS_DB_COLLECTION_USERS,
-    UIAM_COSMOS_DB_COLLECTION_API_KEYS,
-    UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION,
-  ]) {
-    log.info(chalk.bold(`Creating a Cosmos DB collection (${collection})…`));
+  // 2. Create collections with their respective partition keys.
+  const collections: Array<{ name: string; partitionKeyPath: string }> = [
+    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS, partitionKeyPath: '/id' },
+    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS, partitionKeyPath: '/id' },
+    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION, partitionKeyPath: '/id' },
+    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS, partitionKeyPath: '/creator_id' },
+    {
+      name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
+      partitionKeyPath: '/id',
+    },
+    {
+      name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
+      partitionKeyPath: '/client_id',
+    },
+  ];
+  for (const collection of collections) {
+    log.info(chalk.bold(`Creating a Cosmos DB collection (${collection.name})…`));
 
-    const collDate = new Date().toUTCString();
-    const collectionRes = await fetch(`${COSMOS_DB_ENDPOINT}/dbs/${UIAM_COSMOS_DB_NAME}/colls`, {
-      method: 'POST',
-      headers: generateCosmosDBApiRequestHeaders(
-        'POST',
-        'colls',
-        `dbs/${UIAM_COSMOS_DB_NAME}`,
-        collDate
-      ),
-      body: JSON.stringify({ id: collection, partitionKey: { paths: ['/id'], kind: 'Hash' } }),
-      // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-      dispatcher: fetchDispatcher,
-    });
+    const collectionRes = await fetch(
+      `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls`,
+      {
+        method: 'POST',
+        headers: generateCosmosDBApiRequestHeaders(
+          'POST',
+          'colls',
+          `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}`
+        ),
+        body: JSON.stringify({
+          id: collection.name,
+          partitionKey: { paths: [collection.partitionKeyPath], kind: 'Hash' },
+        }),
+        dispatcher: fetchDispatcher,
+      }
+    );
 
     if (collectionRes.status === 201) {
-      log.info(chalk.green(`✓ Collection (${collection}) created successfully`));
+      log.info(chalk.green(`✓ Collection (${collection.name}) created successfully`));
     } else if (collectionRes.status === 409) {
-      log.info(chalk.yellow(`✓ Collection (${collection}) already exists`));
+      log.info(chalk.yellow(`✓ Collection (${collection.name}) already exists`));
     } else {
       throw new Error(
-        `Failed to create collection (${collection}): ${
+        `Failed to create collection (${collection.name}): ${
           collectionRes.status
         } ${await collectionRes.text()}`
       );
@@ -299,33 +486,19 @@ export async function initializeUiamContainers(log: ToolingLog) {
 
   log.info(
     chalk.bold(
-      `Cosmos DB (${COSMOS_DB_ENDPOINT}/${UIAM_COSMOS_DB_NAME}) has been successfully initialized.`
+      `Cosmos DB (${MOCK_IDP_UIAM_COSMOS_DB_URL}/${MOCK_IDP_UIAM_COSMOS_DB_NAME}) has been successfully initialized.`
     )
   );
 }
 
-function generateCosmosDBApiRequestHeaders(
-  httpVerb: 'POST',
-  resourceType: 'dbs' | 'colls',
-  resourceId: string,
-  timestamp: string
-) {
-  const key = Buffer.from(UIAM_COSMOS_DB_ACCESS_KEY, 'base64');
-
-  // Cosmos DB expects all inputs in the string-to-sign to be lowercased
-  // Format: Verb\nResourceType\nResourceID\nTimestamp\n\n
-  const stringToSign =
-    `${httpVerb.toLowerCase()}\n` +
-    `${resourceType.toLowerCase()}\n` +
-    `${resourceId}\n` +
-    `${timestamp.toLowerCase()}\n` +
-    `\n`;
-  return {
-    Authorization: encodeURIComponent(
-      `type=master&ver=1.0&sig=${createHmac('sha256', key).update(stringToSign).digest('base64')}`
-    ),
-    'x-ms-date': timestamp,
-    'x-ms-version': UIAM_COSMOS_DB_VERSION,
-    'Content-Type': 'application/json',
-  };
+async function tryExportLogs(containerName: string, log: ToolingLog) {
+  try {
+    const { stdout: logs } = await execa('docker', ['logs', containerName]);
+    await mkdir(join(REPO_ROOT, '.es'), {
+      recursive: true,
+    });
+    return writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
+  } catch (err) {
+    log.error(`Failed to export logs for container ${containerName}: ${err}`);
+  }
 }

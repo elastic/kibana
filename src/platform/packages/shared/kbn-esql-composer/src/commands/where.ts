@@ -13,6 +13,7 @@ import { append } from '../pipeline/append';
 /**
  * Appends a `WHERE` command to the ESQL composer pipeline.
  *
+ * @deprecated Migrate to `@kbn/esql-language` composer.
  * @param body The body of the `WHERE` command.
  * @param params The parameters to use in the `WHERE` command.
  * @returns A `QueryPipeline` instance with the `WHERE` command appended.

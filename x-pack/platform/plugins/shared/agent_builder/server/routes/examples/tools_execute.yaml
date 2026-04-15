@@ -65,7 +65,7 @@ responses:
                   data:
                     esql: "FROM financial_trades | LIMIT 3"
                 - tool_result_id: xTpT
-                  type: tabular_data
+                  type: esql_results
                   data:
                     source: esql
                     query: "FROM financial_trades | LIMIT 3"
@@ -87,7 +87,7 @@ responses:
             value:
               results:
                 - tool_result_id: Voy8
-                  type: tabular_data
+                  type: esql_results
                   data:
                     source: esql
                     query: "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit"
@@ -110,7 +110,7 @@ responses:
                   data:
                     esql: "FROM financial_trades\n| WHERE execution_price > 100\n| LIMIT 100"
                 - tool_result_id: uE8y
-                  type: tabular_data
+                  type: esql_results
                   data:
                     source: esql
                     query: "FROM financial_trades\n| WHERE execution_price > 100\n| LIMIT 100"
@@ -129,3 +129,26 @@ responses:
                       - ["ACC00407-0bbb", 660.4199829101562, "2020-09-25T11:06:08.687Z", "V", "buy"]
                       - ["ACC00179-1f91", 440.3599853515625, "2025-08-07T21:56:45.377Z", "KO", "buy"]
                       - ["ACC00407-0bbb", 132.8800048828125, "2020-11-19T04:39:13.655Z", "JAP_JGB_10YR", "sell"]
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+     -X POST "https://${KIBANA_URL}/api/agent_builder/tools/_execute" \
+     -H "Authorization: ApiKey ${API_KEY}" \
+     -H "kbn-xsrf: true" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "tool_id": "platform.core.search",
+       "tool_params": {
+         "query": "can you find john doe's email from the employee index?"}
+       }
+     }'
+- lang: Console
+  source: |
+    POST kbn:/api/agent_builder/tools/_execute
+    {
+      "tool_id": "platform.core.search",
+      "tool_params": {
+        "query": "can you find john doe's email from the employee index?"
+      }
+    }

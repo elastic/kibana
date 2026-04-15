@@ -51,6 +51,7 @@ import { filterAndSortUserMessages } from '../../app_plugin/get_application_user
 import { createMockFramePublicAPI } from '../../mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import type { Query } from '@kbn/es-query';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -210,6 +211,7 @@ describe('IndexPattern Data Source', () => {
 
     FormBasedDatasource = getFormBasedDatasource({
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data,
@@ -2474,6 +2476,59 @@ describe('IndexPattern Data Source', () => {
               [
                 { language: 'kuery', query: `geo.dest: "IT" AND myField: ""` },
                 { language: 'kuery', query: `geo.dest: "DE" AND myField: "MyOtherValue"` },
+              ],
+            ],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+      it('should escape special characters in term values for valid KQL syntax', () => {
+        publicAPI = FormBasedDatasource.getPublicAPI({
+          state: {
+            ...baseState,
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1'],
+                columns: {
+                  col1: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'path.keyword',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+          indexPatterns,
+        });
+        const data = {
+          first: {
+            type: 'datatable' as const,
+            columns: [{ id: 'col1', name: 'path.keyword', meta: { type: 'string' as const } }],
+            rows: [
+              { col1: 'C:\\' },
+              { col1: 'path with "quotes"' },
+              { col1: 'backslash\\and"quote' },
+            ],
+          },
+        };
+        expect(publicAPI.getFilters(data)).toEqual({
+          enabled: {
+            kuery: [
+              [
+                { language: 'kuery', query: 'path.keyword: "C:\\\\"' },
+                { language: 'kuery', query: 'path.keyword: "path with \\"quotes\\""' },
+                { language: 'kuery', query: 'path.keyword: "backslash\\\\and\\"quote"' },
               ],
             ],
             lucene: [],

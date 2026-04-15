@@ -33,7 +33,7 @@ describe('CPS usage overrides badge action', () => {
   });
 
   it('is compatible when embeddable has project routing overrides', async () => {
-    updateOverrides([{ value: '_alias: *' }]);
+    updateOverrides([{ value: '_alias:*' }]);
     expect(await action.isCompatible(context)).toBe(true);
   });
 
@@ -64,7 +64,7 @@ describe('CPS usage overrides badge action', () => {
 
   describe('getOverrideValues', () => {
     it('returns override values array for single override', async () => {
-      updateOverrides([{ value: '_alias: *' }]);
+      updateOverrides([{ value: '_alias:*' }]);
       expect(await action.isCompatible(context)).toBe(true);
     });
 

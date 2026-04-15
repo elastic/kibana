@@ -13,7 +13,7 @@
     "server": false,
     "requiredPlugins": [
       "dataViews",
-      "unifiedSearch"
+      "kql"
     ],
     "optionalPlugins": [
       "visualizations"

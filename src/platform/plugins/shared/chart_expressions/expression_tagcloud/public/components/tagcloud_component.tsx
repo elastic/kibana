@@ -257,7 +257,7 @@ export const TagCloudChart = ({
               angleCount={ORIENTATIONS[orientation].angleCount}
               padding={5}
               fontWeight={400}
-              fontFamily="Inter UI, sans-serif"
+              fontFamily="'Elastic UI Numeric', 'Inter UI', sans-serif"
               fontStyle="normal"
               minFontSize={visParams.minFontSize}
               maxFontSize={visParams.maxFontSize}
@@ -328,7 +328,7 @@ function getColorFromMappingFactory(
   }
   return getColorFactory(JSON.parse(colorMapping), palettes, isDarkMode, {
     type: 'categories',
-    categories: getColorCategories(rows, tagColumn),
+    categories: getColorCategories(rows, tagColumn ? [tagColumn] : undefined),
   });
 }
 

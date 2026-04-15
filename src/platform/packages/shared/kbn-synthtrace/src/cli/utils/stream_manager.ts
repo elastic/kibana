@@ -51,6 +51,7 @@ const asyncNoop = async () => {};
 
 export class StreamManager {
   private readonly clientStreams: Map<SynthtraceEsClient<Fields>, PassThrough> = new Map();
+  private readonly clientIndexPromises: Map<SynthtraceEsClient<Fields>, Promise<void>> = new Map();
   private readonly trackedGeneratorStreams: Writable[] = [];
   public readonly trackedWorkers: Worker[] = [];
 
@@ -103,6 +104,9 @@ export class StreamManager {
     const generatorArray = castArray(generator);
     const streams: Readable[] = [];
 
+    // Allow enough listeners for all source generators piping into generatorStream
+    generatorStream.setMaxListeners(generatorArray.length + 5);
+
     generatorArray.reverse().forEach((current) => {
       const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
       currentStream.pipe(generatorStream, { end: false });
@@ -135,6 +139,7 @@ export class StreamManager {
     this.trackedGeneratorStreams.push(generatorStream);
 
     await awaitStream(generatorStream).finally(() => {
+      generatorStream.unpipe(clientStream);
       pull(this.trackedGeneratorStreams, generatorStream);
       pull(streams, generatorStream);
     });
@@ -147,8 +152,11 @@ export class StreamManager {
       stream = this.clientStreams.get(client)!;
     } else {
       stream = new PassThrough({ objectMode: true });
+      // In live mode this stream receives a new pipe per bucket interval,
+      // so disable the default listener limit.
+      stream.setMaxListeners(0);
       this.clientStreams.set(client, stream);
-      client.index(stream);
+      this.clientIndexPromises.set(client, client.index(stream));
     }
 
     return stream;
@@ -212,6 +220,14 @@ export class StreamManager {
       this.logger.debug(`Ending ${clientStreams.length} client streams`);
 
       await Promise.all(clientStreams.map(endStream));
+    }
+    const clientIndexPromises = Array.from(this.clientIndexPromises.values());
+
+    if (clientIndexPromises.length) {
+      // ending client index promises
+      this.logger.debug(`Ending ${clientIndexPromises.length} client index promises`);
+
+      await Promise.all(clientIndexPromises);
     }
 
     await this.teardownCallback();

@@ -19,10 +19,6 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       return await testSubjects.getVisibleText('appTitle');
     },
 
-    async expectToBeOnSearchIndexManagement() {
-      await testSubjects.existOrFail('elasticsearchIndexManagement');
-    },
-
     async expectToBeOnIndexManagement() {
       const headingText = await testSubjects.getVisibleText('appTitle');
       expect(headingText).to.be('Index Management');
@@ -193,15 +189,15 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       },
       async expectEditSettingsToBeEnabled() {
         await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
-        const isEditSettingsButtonDisabled = await testSubjects.isEnabled(
-          'indexDetailsSettingsEditModeSwitch'
-        );
-        expect(isEditSettingsButtonDisabled).to.be(true);
+        await retry.waitFor('edit settings switch to be enabled', async () => {
+          return (await testSubjects.isEnabled('indexDetailsSettingsEditModeSwitch')) === true;
+        });
       },
       async expectIndexDetailsMappingsAddFieldToBeEnabled() {
         await testSubjects.existOrFail('indexDetailsMappingsAddField');
-        const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
-        expect(isMappingsFieldEnabled).to.be(true);
+        await retry.waitFor('mappings add field button to be enabled', async () => {
+          return (await testSubjects.isEnabled('indexDetailsMappingsAddField')) === true;
+        });
       },
       async expectTabsExists() {
         await testSubjects.existOrFail('indexDetailsTab-mappings', { timeout: 2000 });
@@ -251,6 +247,17 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       expect(indexNames.some((i) => i === indexName)).to.be(true);
     },
 
+    async clickCreateIndexShowApiButton() {
+      await testSubjects.existOrFail('createIndexShowApiButton');
+      await testSubjects.click('createIndexShowApiButton');
+    },
+    async getCreateIndexShowApiButtonText() {
+      return await testSubjects.getVisibleText('createIndexShowApiButton');
+    },
+    async getCreateIndexApiCodeBlockContent() {
+      await testSubjects.existOrFail('createIndexApiCodeBlock');
+      return await testSubjects.getVisibleText('createIndexApiCodeBlock');
+    },
     async confirmDeleteModalIsVisible() {
       await testSubjects.existOrFail('deleteIndexMenuButton');
       await testSubjects.click('deleteIndexMenuButton');

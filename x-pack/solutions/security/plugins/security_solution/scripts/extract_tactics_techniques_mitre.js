@@ -9,12 +9,10 @@ require('@kbn/setup-node-env');
 
 const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const fetch = require('node-fetch');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { camelCase, sortBy } = require('lodash');
 const { resolve } = require('path');
 
-const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
+const OUTPUT_DIRECTORY = resolve('common', 'detection_engine', 'mitre');
 
 // Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
 // This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.

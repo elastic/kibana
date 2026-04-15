@@ -8,7 +8,7 @@
  */
 
 import chroma from 'chroma-js';
-import type { KbnPalettes } from '@kbn/palettes';
+import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
 import type { RawValue, SerializedValue } from '@kbn/data-plugin/common';
 import { deserializeField } from '@kbn/data-plugin/common';
@@ -27,7 +27,7 @@ export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
   color:
     | ColorMapping.Assignment['color']
-    | (ColorMapping.LoopColor & { paletteId: string; colorIndex: number }),
+    | (ColorMapping.LoopColor & { paletteId: KbnPaletteId; colorIndex: number }),
   palettes: KbnPalettes,
   isDarkMode: boolean,
   index: number,
@@ -58,7 +58,7 @@ export function getColor(
   color:
     | ColorMapping.ColorCode
     | ColorMapping.CategoricalColor
-    | (ColorMapping.LoopColor & { paletteId: string; colorIndex: number }),
+    | (ColorMapping.LoopColor & { paletteId: KbnPaletteId; colorIndex: number }),
   palettes: KbnPalettes
 ): string {
   return color.type === 'colorCode'
@@ -92,11 +92,13 @@ export function getColorFactory(
   // find all categories that don't match with an assignment
   const unassignedAutoAssignmentsMap = new Map(
     data.type === 'categories'
-      ? data.categories
-          .map((category: SerializedValue) => deserializeField(category))
+      ? data.categories // data.categories contains the serialized values
+          .map((category: SerializedValue) => deserializeField(category)) // convert to rawValues/instances like MultiFieldKey etc
           .filter((category: RawValue) => {
+            // remove categories one maching an assignment
             return !assignmentMatcher.hasMatch(category);
           })
+          // setting the Map keys as the stringified version of the rawValue
           .map((category: RawValue, i) => {
             const key = getValueKey(category);
             const autoAssignment = autoAssignments[i];

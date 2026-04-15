@@ -25,6 +25,10 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 
 import { events } from './lib/telemetry/event_based_telemetry';
+import {
+  aiAssistantParentInferenceFeature,
+  elasticAiAssistantInferenceFeature,
+} from './inference_feature';
 import type {
   AssistantTool,
   ElasticAssistantPluginCoreSetupDependencies,
@@ -47,6 +51,7 @@ import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules
 import type { ConfigSchema } from './config_schema';
 import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
 import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
+import { getAttackDiscoveryDataGeneratorRuleType } from './lib/attack_discovery/data_generator_rule/definition';
 
 interface FeatureFlagDefinition {
   featureFlagName: string;
@@ -73,12 +78,14 @@ export class ElasticAssistantPlugin
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
+  private readonly isDev: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = initializerContext.logger.get();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.config = initializerContext.config.get<ConfigSchema>();
+    this.isDev = initializerContext.env.mode.dev;
   }
 
   public setup(
@@ -86,6 +93,11 @@ export class ElasticAssistantPlugin
     plugins: ElasticAssistantPluginSetupDependencies
   ) {
     this.logger.debug('elasticAssistant: Setup');
+
+    if (plugins.searchInferenceEndpoints) {
+      plugins.searchInferenceEndpoints.features.register(aiAssistantParentInferenceFeature);
+      plugins.searchInferenceEndpoints.features.register(elasticAiAssistantInferenceFeature);
+    }
 
     registerEventLogProvider(plugins.eventLog);
     const eventLogger = createEventLogger(plugins.eventLog); // must be created during setup phase
@@ -135,7 +147,18 @@ export class ElasticAssistantPlugin
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    registerRoutes(router, this.logger, this.config);
+    const enableDataGeneratorRoutes = this.isDev || plugins.cloud?.isElasticStaffOwned === true;
+
+    if (enableDataGeneratorRoutes) {
+      plugins.alerting.registerType(
+        getAttackDiscoveryDataGeneratorRuleType({
+          logger: this.logger,
+          publicBaseUrl: core.http.basePath.publicBaseUrl,
+        })
+      );
+    }
+
+    registerRoutes(router, this.logger, this.config, enableDataGeneratorRoutes);
 
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.
@@ -253,6 +276,7 @@ export class ElasticAssistantPlugin
     // Register the Attack Discovery Schedule type
     plugins.alerting.registerType(
       getAttackDiscoveryScheduleType({
+        core,
         logger: this.logger,
         publicBaseUrl: core.http.basePath.publicBaseUrl,
         telemetry: core.analytics,

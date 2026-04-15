@@ -33,6 +33,8 @@
           "\"workplace_ai\""
         ],
         "path": "src/platform/packages/shared/deeplinks/workplace_ai/deep_links.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"workplace_ai\""
         ],
         "path": "src/platform/packages/shared/deeplinks/workplace_ai/deep_links.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

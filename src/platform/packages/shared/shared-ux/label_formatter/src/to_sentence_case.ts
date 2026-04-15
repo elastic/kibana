@@ -13,10 +13,6 @@
  */
 const TITLE_CASE_GLOSSARY = [
   'Machine Learning',
-  'Data Visualizer',
-  'Log Rate Analysis',
-  'Log Pattern Analysis',
-  'Change Point Detection',
   'Index Management',
   'Index Lifecycle Policies',
   'Snapshot and Restore',
@@ -44,7 +40,6 @@ const TITLE_CASE_GLOSSARY = [
   'Developer Tools',
   'Stack Management',
   'Alerts and Insights',
-  'AIOps labs',
   'AI',
   'Ingest and Integrations',
   'API keys',
@@ -52,6 +47,9 @@ const TITLE_CASE_GLOSSARY = [
   'SLOs',
   'TLS certificates',
   'Cloud Connect',
+  'SIEM Readiness',
+  'V2 Alerting Preview',
+  'Ingest Hub',
 ] as const;
 
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));

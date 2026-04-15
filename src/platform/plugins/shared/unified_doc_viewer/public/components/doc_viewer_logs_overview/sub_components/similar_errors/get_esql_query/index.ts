@@ -19,12 +19,14 @@ function needsNormalization(message: string): boolean {
   return /\n|\t|\r/.test(message);
 }
 
-function normalizeAndEscapeMessage(message: string): string {
-  return message
-    .replace(/\t/g, '\\t')
-    .replace(/\r/g, '\\r')
-    .replace(/\n/g, '\\n')
-    .replace(/"/g, '\\"');
+function escapeEsqlStringLiteral(value: string): string {
+  // Backslashes must be escaped FIRST to prevent double-escaping issues
+  return value
+    .replace(/\\/g, '\\\\') // Escape backslashes first
+    .replace(/"/g, '\\"') // Escape double quotes
+    .replace(/\t/g, '\\t') // Escape tabs
+    .replace(/\r/g, '\\r') // Escape carriage returns
+    .replace(/\n/g, '\\n'); // Escape newlines
 }
 
 export function getEsqlQuery({
@@ -58,8 +60,8 @@ export function getEsqlQuery({
   if (message?.value !== undefined && message?.fieldName) {
     const messageValue = String(message.value);
     if (needsNormalization(messageValue)) {
-      const normalizedAndEscapedMessage = normalizeAndEscapeMessage(messageValue);
-      conditions.push(`MATCH_PHRASE(${message.fieldName}, "${normalizedAndEscapedMessage}")`);
+      const escapedMessage = escapeEsqlStringLiteral(messageValue);
+      conditions.push(`MATCH_PHRASE(${message.fieldName}, "${escapedMessage}")`);
     } else {
       const paramName = 'message';
       conditions.push(`${message.fieldName} == ?${paramName}`);
@@ -72,7 +74,9 @@ export function getEsqlQuery({
     if (Array.isArray(type.value)) {
       const matchConditions = type.value.map((val) => {
         const stringValue = String(val);
-        return `MATCH(${typeFieldName}, "${stringValue}")`;
+        // Security: Escape all special characters to prevent ESQL injection
+        const escapedValue = escapeEsqlStringLiteral(stringValue);
+        return `MATCH(${typeFieldName}, "${escapedValue}")`;
       });
       conditions.push(matchConditions.join(' AND '));
     } else {

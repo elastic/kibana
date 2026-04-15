@@ -12,7 +12,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
@@ -27,7 +27,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
   > = {
     type: APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject(state.serviceName);
       const transactionType$ = new BehaviorSubject(state.transactionType);
@@ -43,26 +43,24 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      function serializeState() {
+      function serializeState(): EmbeddableApmAlertingLatencyVizProps {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            serviceName: serviceName$.getValue(),
-            transactionType: transactionType$.getValue(),
-            transactionName: transactionName$.getValue(),
-            environment: environment$.getValue(),
-            latencyThresholdInMicroseconds: latencyThresholdInMicroseconds$.getValue(),
-            rangeFrom: rangeFrom$.getValue(),
-            rangeTo: rangeTo$.getValue(),
-            rule: rule$.getValue(),
-            alert: alert$.getValue(),
-            kuery: kuery$.getValue(),
-            filters: filters$.getValue(),
-          },
+          ...titleManager.getLatestState(),
+          serviceName: serviceName$.getValue(),
+          transactionType: transactionType$.getValue(),
+          transactionName: transactionName$.getValue(),
+          environment: environment$.getValue(),
+          latencyThresholdInMicroseconds: latencyThresholdInMicroseconds$.getValue(),
+          rangeFrom: rangeFrom$.getValue(),
+          rangeTo: rangeTo$.getValue(),
+          rule: rule$.getValue(),
+          alert: alert$.getValue(),
+          kuery: kuery$.getValue(),
+          filters: filters$.getValue(),
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<EmbeddableApmAlertingLatencyVizProps>({
         parentApi,
         uuid,
         serializeState,
@@ -95,18 +93,18 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
           filters: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          serviceName$.next(lastSaved?.rawState.serviceName ?? '');
-          transactionType$.next(lastSaved?.rawState.transactionType);
-          transactionName$.next(lastSaved?.rawState.transactionName);
-          environment$.next(lastSaved?.rawState.environment);
-          latencyThresholdInMicroseconds$.next(lastSaved?.rawState.latencyThresholdInMicroseconds);
-          rangeFrom$.next(lastSaved?.rawState.rangeFrom);
-          rangeTo$.next(lastSaved?.rawState.rangeTo);
-          rule$.next(lastSaved?.rawState.rule as EmbeddableApmAlertingLatencyVizProps['rule']);
-          alert$.next(lastSaved?.rawState.alert as EmbeddableApmAlertingLatencyVizProps['alert']);
-          kuery$.next(lastSaved?.rawState.kuery);
-          filters$.next(lastSaved?.rawState.filters);
+          titleManager.reinitializeState(lastSaved);
+          serviceName$.next(lastSaved?.serviceName ?? '');
+          transactionType$.next(lastSaved?.transactionType);
+          transactionName$.next(lastSaved?.transactionName);
+          environment$.next(lastSaved?.environment);
+          latencyThresholdInMicroseconds$.next(lastSaved?.latencyThresholdInMicroseconds);
+          rangeFrom$.next(lastSaved?.rangeFrom);
+          rangeTo$.next(lastSaved?.rangeTo);
+          rule$.next(lastSaved?.rule as EmbeddableApmAlertingLatencyVizProps['rule']);
+          alert$.next(lastSaved?.alert as EmbeddableApmAlertingLatencyVizProps['alert']);
+          kuery$.next(lastSaved?.kuery);
+          filters$.next(lastSaved?.filters);
         },
       });
 

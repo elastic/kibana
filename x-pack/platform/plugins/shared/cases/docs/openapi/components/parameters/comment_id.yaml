@@ -1,8 +1,7 @@
 in: path
 name: commentId
 description: >
-  The identifier for the comment. To retrieve comment IDs, use the get case or
-  find cases APIs.
+  The identifier for the comment. To retrieve comment IDs, use the get case or search cases (`_find`) APIs.
 required: true 
 schema:
   type: string

@@ -1,9 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/controls-plugin",
-  "owner": [
-    "@elastic/kibana-presentation"
-  ],
+  "owner": ["@elastic/kibana-presentation"],
   "group": "platform",
   "visibility": "shared",
   "description": "The Controls Plugin contains embeddable components intended to create a simple query interface for end users, and a powerful editing suite that allows dashboard authors to build controls",
@@ -13,14 +11,13 @@
     "server": true,
     "requiredPlugins": [
       "presentationUtil",
+      "presentationPanel",
       "embeddable",
       "dataViews",
       "data",
-      "unifiedSearch",
+      "kql",
       "uiActions",
-    ],
-    "extraPublicDirs": [
-      "common"
+      "kibanaReact"
     ]
   }
 }

@@ -13,6 +13,7 @@ import type {
   ISavedObjectsRepository,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import type {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -87,6 +88,9 @@ export interface RulesClientContext {
   readonly backfillClient: BackfillClient;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
+  readonly shouldGrantUiam?: boolean;
+  readonly isServerless: boolean;
+  readonly featureFlags: FeatureFlagsStart;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;
@@ -111,7 +115,11 @@ export type NormalizedAlertActionWithGeneratedValues =
 
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
-  | { apiKeysEnabled: true; result: SecurityPluginGrantAPIKeyResult };
+  | {
+      apiKeysEnabled: true;
+      result?: SecurityPluginGrantAPIKeyResult;
+      uiamResult?: SecurityPluginGrantAPIKeyResult;
+    };
 export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginInvalidateAPIKeyResult };
@@ -169,7 +177,7 @@ export interface BulkOperationError {
   };
 }
 
-export type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE' | 'GET';
+export type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE' | 'GET' | 'BULK_EDIT' | 'BULK_EDIT_PARAMS';
 
 export interface RuleBulkOperationAggregation {
   alertTypeId: {

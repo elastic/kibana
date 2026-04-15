@@ -15,7 +15,11 @@ import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { TestProviders } from '../../common/mock';
-import { ATTACK_DISCOVERY_PATH, SECURITY_FEATURE_ID } from '../../../common/constants';
+import {
+  ATTACK_DISCOVERY_PATH,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  SECURITY_FEATURE_ID,
+} from '../../../common/constants';
 import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
@@ -23,7 +27,7 @@ import { UpsellingProvider } from '../../common/components/upselling_provider';
 import { mockFindAnonymizationFieldsResponse } from './mock/mock_find_anonymization_fields_response';
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from './use_attack_discovery';
-import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { CALLOUT_TEST_DATA_ID } from './moving_attacks_callout';
 import { useMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout';
@@ -65,7 +69,7 @@ jest.mock(
   })
 );
 
-jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors', () => ({
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(() => ({
     isFetched: true,
     data: mockConnectors,
@@ -315,9 +319,14 @@ describe('AttackDiscovery', () => {
     });
   });
 
-  describe('`attacksAlertsAlignmentEnabled` feature', () => {
+  describe('`enableAlertsAndAttacksAlignment` feature', () => {
     it('renders callout about new Attacks page when feature is enabled', () => {
-      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(true);
+      mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {
+        if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
+          return true;
+        }
+        return false;
+      });
 
       render(
         <TestProviders>
@@ -333,7 +342,12 @@ describe('AttackDiscovery', () => {
     });
 
     it('does not render callout about new Attacks page when feature is disabled', () => {
-      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+      mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {
+        if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
+          return false;
+        }
+        return false;
+      });
 
       render(
         <TestProviders>

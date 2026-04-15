@@ -97,6 +97,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({
                 renderOption={renderJobOption}
                 rowHeight={50}
                 selectedOptions={selectedJobOptions}
+                aria-label={field.label}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

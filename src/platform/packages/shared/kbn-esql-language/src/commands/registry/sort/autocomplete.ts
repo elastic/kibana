@@ -6,18 +6,21 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands } from '../../../types';
-import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
+import type { ESQLAstAllCommands, ESQLCommand } from '@elastic/esql/types';
+import { isColumn } from '@elastic/esql';
 import {
   columnExists as _columnExists,
-  getFragmentData,
+  withAutoSuggest,
 } from '../../definitions/utils/autocomplete/helpers';
 import { suggestForExpression } from '../../definitions/utils';
 import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
-import type { ICommandCallbacks } from '../types';
-import { Location, type ICommandContext, type ISuggestionItem } from '../types';
 import {
-  getNullsPrefixRange,
+  Location,
+  type ICommandCallbacks,
+  type ICommandContext,
+  type ISuggestionItem,
+} from '../types';
+import {
   getSortPos,
   getSuggestionsAfterCompleteExpression,
   rightAfterColumn,
@@ -46,6 +49,9 @@ export async function autocomplete(
   switch (pos) {
     case 'expression': {
       const columnExists = (name: string) => _columnExists(name, context);
+      const alreadyDeclaredFields = (command as ESQLCommand).args
+        .filter(isColumn)
+        .map((arg) => arg.parts.join('.'));
 
       const { suggestions: expressionSuggestions, computed } = await suggestForExpression({
         query,
@@ -59,6 +65,7 @@ export async function autocomplete(
           addSpaceAfterFirstField: false,
           addSpaceAfterOperator: true,
           openSuggestions: true,
+          ignoredColumnsForEmptyExpression: alreadyDeclaredFields,
         },
       });
 
@@ -74,37 +81,19 @@ export async function autocomplete(
         suggestions.push(...expressionSuggestions);
       }
 
-      const nullsPrefixRange = getNullsPrefixRange(innerText);
-
-      if (nullsPrefixRange) {
-        suggestions.forEach((suggestion) => {
-          suggestion.rangeToReplace = nullsPrefixRange;
-        });
-      }
-
       return suggestions;
     }
 
     case 'order_complete': {
-      const { fragment, rangeToReplace } = getFragmentData(innerText);
-
       return [
-        { ...pipeCompleteItem, text: ' | ' },
-        { ...commaCompleteItem, text: ', ' },
-        prependSpace(sortModifierSuggestions.NULLS_FIRST),
-        prependSpace(sortModifierSuggestions.NULLS_LAST),
-      ].map((suggestion) =>
-        withAutoSuggest({
-          ...suggestion,
-          filterText: fragment,
-          text: fragment + suggestion.text,
-          rangeToReplace,
-        })
-      );
+        { ...pipeCompleteItem, text: ' | ', preserveTypedPrefix: true },
+        withAutoSuggest({ ...commaCompleteItem, text: ', ', preserveTypedPrefix: true }),
+        { ...prependSpace(sortModifierSuggestions.NULLS_FIRST), preserveTypedPrefix: true },
+        { ...prependSpace(sortModifierSuggestions.NULLS_LAST), preserveTypedPrefix: true },
+      ];
     }
 
     case 'after_order': {
-      const nullsPrefixRange = getNullsPrefixRange(innerText);
       return [
         sortModifierSuggestions.NULLS_FIRST,
         sortModifierSuggestions.NULLS_LAST,
@@ -112,24 +101,14 @@ export async function autocomplete(
         withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
       ].map((suggestion) => ({
         ...suggestion,
-        rangeToReplace: nullsPrefixRange,
       }));
     }
 
     case 'nulls_complete': {
-      const { fragment, rangeToReplace } = getFragmentData(innerText);
-
       return [
-        { ...pipeCompleteItem, text: ' | ' },
-        { ...commaCompleteItem, text: ', ' },
-      ].map((suggestion) =>
-        withAutoSuggest({
-          ...suggestion,
-          filterText: fragment,
-          text: fragment + suggestion.text,
-          rangeToReplace,
-        })
-      );
+        { ...pipeCompleteItem, text: ' | ', preserveTypedPrefix: true },
+        withAutoSuggest({ ...commaCompleteItem, text: ', ', preserveTypedPrefix: true }),
+      ];
     }
 
     case 'after_nulls': {

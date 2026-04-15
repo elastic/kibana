@@ -8,16 +8,16 @@
  */
 
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import type { OptionsListSelection, OptionsListSuggestions } from '../../../../common/options_list';
+import type { OptionsListSuggestions } from '../../../../common/options_list';
 import { MIN_OPTIONS_LIST_REQUEST_SIZE } from './constants';
 
-export interface TemporaryState {
+export interface TemporaryState<SelectionType> {
   searchString: string;
   searchStringValid: boolean;
   requestSize: number;
   dataLoading: boolean | undefined;
-  availableOptions: OptionsListSuggestions | undefined;
-  invalidSelections: Set<OptionsListSelection>;
+  availableOptions: OptionsListSuggestions<SelectionType>;
+  invalidSelections: Set<SelectionType>;
   totalCardinality: number;
 }
 
@@ -26,11 +26,14 @@ const defaultTemporaryState = {
   searchStringValid: true,
   requestSize: MIN_OPTIONS_LIST_REQUEST_SIZE,
   dataLoading: false,
-  availableOptions: undefined,
-  invalidSelections: new Set() as Set<OptionsListSelection>,
+  availableOptions: [],
+  invalidSelections: new Set(),
   totalCardinality: 0,
 };
 
-export const initializeTemporayStateManager = () => {
-  return initializeStateManager<TemporaryState>(defaultTemporaryState, defaultTemporaryState);
+export const initializeTemporayStateManager = <SelectionType>() => {
+  return initializeStateManager<TemporaryState<SelectionType>>(
+    defaultTemporaryState as TemporaryState<SelectionType>,
+    defaultTemporaryState as TemporaryState<SelectionType>
+  );
 };

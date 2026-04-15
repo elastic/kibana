@@ -10,509 +10,438 @@
 import type { ActionContext } from '../../connector_spec';
 import { GithubConnector } from './github';
 
-interface HttpError extends Error {
-  response?: {
-    status: number;
-    data?: unknown;
-  };
-}
+// Mock withMcpClient so action handlers don't need a real MCP transport.
+// The mock immediately invokes the callback with a fake McpClient.
+const mockCallTool = jest.fn();
+const mockListTools = jest.fn();
+
+jest.mock('../../lib/mcp/with_mcp_client', () => ({
+  withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+    return fn({ callTool: mockCallTool, listTools: mockListTools });
+  }),
+}));
+
+// Helper: parse raw input through the action schema the way the framework does,
+// so Zod defaults are applied before the handler receives the input.
+const parse = <K extends keyof typeof GithubConnector.actions>(
+  action: K,
+  raw: Record<string, unknown>
+) => GithubConnector.actions[action].input.parse(raw);
 
 describe('GithubConnector', () => {
-  const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-  };
-
   const mockContext = {
-    client: mockClient,
-    log: { debug: jest.fn() },
+    client: {},
+    log: {},
+    config: { serverUrl: 'https://api.githubcopilot.com/mcp/' },
   } as unknown as ActionContext;
+
+  const mockJson = { ok: true };
+  const mockContent = [{ type: 'text', text: JSON.stringify(mockJson) }];
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCallTool.mockResolvedValue({ content: mockContent });
+    mockListTools.mockResolvedValue({ tools: [{ name: 'get_me' }, { name: 'search_code' }] });
   });
 
-  describe('listRepos action', () => {
-    it('should list repositories for an owner', async () => {
-      const mockResponse = {
-        data: [
-          { name: 'repo1', full_name: 'owner/repo1' },
-          { name: 'repo2', full_name: 'owner/repo2' },
-          { name: 'repo3', full_name: 'owner/repo3' },
-        ],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
+  describe('getMe action', () => {
+    it('calls get_me tool and returns content', async () => {
+      const result = await GithubConnector.actions.getMe.handler(mockContext, {});
 
-      const result = await GithubConnector.actions.listRepos.handler(mockContext, {
-        owner: 'owner',
+      expect(mockCallTool).toHaveBeenCalledWith({ name: 'get_me', arguments: {} });
+      expect(result).toEqual(mockJson);
+    });
+  });
+
+  describe('searchCode action', () => {
+    it('applies default pagination when omitted', async () => {
+      const input = parse('searchCode', { query: 'elastic' });
+      await GithubConnector.actions.searchCode.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_code',
+        arguments: { query: 'elastic', page: 1, perPage: 10 },
+      });
+    });
+
+    it('passes custom page and perPage', async () => {
+      await GithubConnector.actions.searchCode.handler(mockContext, {
+        query: 'elastic',
+        page: 2,
+        perPage: 5,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/users/owner/repos');
-      expect(result).toEqual(['repo1', 'repo2', 'repo3']);
-    });
-
-    it('should handle empty repository list', async () => {
-      const mockResponse = {
-        data: [],
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await GithubConnector.actions.listRepos.handler(mockContext, {
-        owner: 'empty-owner',
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_code',
+        arguments: { query: 'elastic', page: 2, perPage: 5 },
       });
-
-      expect(result).toEqual([]);
     });
+  });
 
-    it('should throw error when owner is not found', async () => {
-      const error: HttpError = new Error('Not found');
-      error.response = { status: 404 };
-      mockClient.get.mockRejectedValue(error);
+  describe('searchRepositories action', () => {
+    it('applies default pagination when omitted', async () => {
+      const input = parse('searchRepositories', { query: 'kibana' });
+      await GithubConnector.actions.searchRepositories.handler(mockContext, input);
 
-      await expect(
-        GithubConnector.actions.listRepos.handler(mockContext, {
-          owner: 'nonexistent-owner',
-        })
-      ).rejects.toThrow('Not found');
-    });
-
-    it('should rethrow non-404 errors', async () => {
-      const error: HttpError = new Error('Server error');
-      error.response = { status: 500 };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        GithubConnector.actions.listRepos.handler(mockContext, {
-          owner: 'owner',
-        })
-      ).rejects.toThrow('Server error');
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_repositories',
+        arguments: { query: 'kibana', page: 1, perPage: 10 },
+      });
     });
   });
 
   describe('searchIssues action', () => {
-    it('should search for issues without query', async () => {
-      const mockResponse = {
-        data: {
-          total_count: 2,
-          items: [
-            { number: 1, title: 'Issue 1', state: 'open' },
-            { number: 2, title: 'Issue 2', state: 'open' },
-          ],
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
+    it('applies defaults for order, sort, and pagination when omitted', async () => {
+      const input = parse('searchIssues', { query: 'bug' });
+      await GithubConnector.actions.searchIssues.handler(mockContext, input);
 
-      const result = await GithubConnector.actions.searchIssues.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_issues',
+        arguments: { query: 'bug', order: 'desc', sort: 'created', page: 1, perPage: 10 },
       });
-
-      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
-        params: {
-          q: 'repo:owner/repo is:issue is:open',
-        },
-        headers: {
-          Accept: 'application/vnd.github.v3+json',
-        },
-      });
-      expect(result).toEqual(mockResponse.data);
     });
 
-    it('should search for issues with query', async () => {
-      const mockResponse = {
-        data: {
-          total_count: 1,
-          items: [{ number: 1, title: 'Bug fix', state: 'open' }],
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
+    it('passes custom order and sort', async () => {
+      const input = parse('searchIssues', { query: 'bug', order: 'asc', sort: 'updated' });
+      await GithubConnector.actions.searchIssues.handler(mockContext, input);
 
-      const result = await GithubConnector.actions.searchIssues.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-        query: 'bug',
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_issues',
+        arguments: { query: 'bug', order: 'asc', sort: 'updated', page: 1, perPage: 10 },
       });
-
-      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
-        params: {
-          q: 'repo:owner/repo is:issue is:open bug',
-        },
-        headers: {
-          Accept: 'application/vnd.github.v3+json',
-        },
-      });
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should handle invalid search query', async () => {
-      const error: HttpError = new Error('Validation failed');
-      error.response = {
-        status: 422,
-        data: {
-          message: 'Invalid query syntax',
-        },
-      };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        GithubConnector.actions.searchIssues.handler(mockContext, {
-          owner: 'owner',
-          repo: 'repo',
-          query: 'invalid query syntax',
-        })
-      ).rejects.toThrow('Validation failed');
-    });
-
-    it('should handle 422 error without message', async () => {
-      const error: HttpError = new Error('Validation failed');
-      error.response = {
-        status: 422,
-        data: {},
-      };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        GithubConnector.actions.searchIssues.handler(mockContext, {
-          owner: 'owner',
-          repo: 'repo',
-        })
-      ).rejects.toThrow('Validation failed');
-    });
-
-    it('should rethrow non-422 errors', async () => {
-      const error: HttpError = new Error('Server error');
-      error.response = { status: 500 };
-      mockClient.get.mockRejectedValue(error);
-
-      await expect(
-        GithubConnector.actions.searchIssues.handler(mockContext, {
-          owner: 'owner',
-          repo: 'repo',
-        })
-      ).rejects.toThrow('Server error');
     });
   });
 
-  describe('getDocs action', () => {
-    it('should get markdown files from repository', async () => {
-      const commitResponse = {
-        data: {
-          sha: 'abc123',
+  describe('searchPullRequests action', () => {
+    it('applies defaults when omitted', async () => {
+      const input = parse('searchPullRequests', { query: 'fix memory leak' });
+      await GithubConnector.actions.searchPullRequests.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_pull_requests',
+        arguments: {
+          query: 'fix memory leak',
+          order: 'desc',
+          sort: 'created',
+          page: 1,
+          perPage: 10,
         },
-      };
+      });
+    });
+  });
 
-      const treeResponse = {
-        data: {
-          tree: [
-            { type: 'blob', path: 'README.md', sha: 'sha1' },
-            { type: 'blob', path: 'docs/guide.md', sha: 'sha2' },
-            { type: 'tree', path: 'src', sha: 'sha3' },
-            { type: 'blob', path: 'file.txt', sha: 'sha4' },
-          ],
+  describe('searchUsers action', () => {
+    it('applies default pagination when omitted', async () => {
+      const input = parse('searchUsers', { query: 'torvalds' });
+      await GithubConnector.actions.searchUsers.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_users',
+        arguments: { query: 'torvalds', page: 1, perPage: 10 },
+      });
+    });
+  });
+
+  describe('listIssues action', () => {
+    it('applies defaults for state and first when omitted', async () => {
+      const input = parse('listIssues', { owner: 'elastic', repo: 'kibana' });
+      await GithubConnector.actions.listIssues.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'list_issues',
+        arguments: {
+          owner: 'elastic',
+          repo: 'kibana',
+          state: 'open',
+          first: 10,
+          after: undefined,
         },
-      };
+      });
+    });
 
-      const contentResponse1 = {
-        data: {
-          name: 'README.md',
-          path: 'README.md',
-          content: Buffer.from('Content 1').toString('base64'),
-          html_url: 'https://github.com/owner/repo/blob/main/README.md',
-        },
-      };
-
-      const contentResponse2 = {
-        data: {
-          name: 'guide.md',
-          path: 'docs/guide.md',
-          content: Buffer.from('Content 2').toString('base64'),
-          html_url: 'https://github.com/owner/repo/blob/main/docs/guide.md',
-        },
-      };
-
-      mockClient.get
-        .mockResolvedValueOnce(commitResponse)
-        .mockResolvedValueOnce(treeResponse)
-        .mockResolvedValueOnce(contentResponse1)
-        .mockResolvedValueOnce(contentResponse2);
-
-      const result = await GithubConnector.actions.getDocs.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
+    it('passes cursor and state overrides', async () => {
+      await GithubConnector.actions.listIssues.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        state: 'closed',
+        first: 5,
+        after: 'cursor123',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/commits/main',
-        {
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/git/trees/abc123',
-        {
-          params: { recursive: '1' },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/contents/README.md',
-        {
-          params: { ref: 'main' },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/contents/docs/guide.md',
-        {
-          params: { ref: 'main' },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-
-      expect(result).toEqual([
-        {
-          name: 'README.md',
-          path: 'README.md',
-          content: Buffer.from('Content 1').toString('base64'),
-          html_url: 'https://github.com/owner/repo/blob/main/README.md',
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'list_issues',
+        arguments: {
+          owner: 'elastic',
+          repo: 'kibana',
+          state: 'closed',
+          first: 5,
+          after: 'cursor123',
         },
-        {
-          name: 'guide.md',
-          path: 'docs/guide.md',
-          content: Buffer.from('Content 2').toString('base64'),
-          html_url: 'https://github.com/owner/repo/blob/main/docs/guide.md',
-        },
-      ]);
+      });
     });
+  });
 
-    it('should use custom ref when provided', async () => {
-      const commitResponse = {
-        data: {
-          sha: 'def456',
+  describe('listPullRequests action', () => {
+    it('applies defaults for state and first when omitted', async () => {
+      const input = parse('listPullRequests', { owner: 'elastic', repo: 'kibana' });
+      await GithubConnector.actions.listPullRequests.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'list_pull_requests',
+        arguments: {
+          owner: 'elastic',
+          repo: 'kibana',
+          state: 'open',
+          first: 10,
+          after: undefined,
         },
-      };
+      });
+    });
+  });
 
-      const treeResponse = {
-        data: {
-          tree: [{ type: 'blob', path: 'README.md', sha: 'sha1' }],
+  describe('listCommits action', () => {
+    it('applies default first when omitted', async () => {
+      const input = parse('listCommits', { owner: 'elastic', repo: 'kibana' });
+      await GithubConnector.actions.listCommits.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'list_commits',
+        arguments: {
+          owner: 'elastic',
+          repo: 'kibana',
+          sha: undefined,
+          first: 10,
+          after: undefined,
         },
-      };
+      });
+    });
+  });
 
-      const contentResponse = {
-        data: {
-          name: 'README.md',
-          path: 'README.md',
-          content: Buffer.from('Content').toString('base64'),
-          html_url: 'https://github.com/owner/repo/blob/develop/README.md',
-        },
-      };
+  describe('listBranches action', () => {
+    it('applies default first when omitted', async () => {
+      const input = parse('listBranches', { owner: 'elastic', repo: 'kibana' });
+      await GithubConnector.actions.listBranches.handler(mockContext, input);
 
-      mockClient.get
-        .mockResolvedValueOnce(commitResponse)
-        .mockResolvedValueOnce(treeResponse)
-        .mockResolvedValueOnce(contentResponse);
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'list_branches',
+        arguments: { owner: 'elastic', repo: 'kibana', first: 10, after: undefined },
+      });
+    });
+  });
 
-      await GithubConnector.actions.getDocs.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-        ref: 'develop',
+  describe('listReleases action', () => {
+    it('applies default first when omitted', async () => {
+      const input = parse('listReleases', { owner: 'elastic', repo: 'kibana' });
+      await GithubConnector.actions.listReleases.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'list_releases',
+        arguments: { owner: 'elastic', repo: 'kibana', first: 10, after: undefined },
+      });
+    });
+  });
+
+  describe('listTags action', () => {
+    it('applies default first when omitted', async () => {
+      const input = parse('listTags', { owner: 'elastic', repo: 'kibana' });
+      await GithubConnector.actions.listTags.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'list_tags',
+        arguments: { owner: 'elastic', repo: 'kibana', first: 10, after: undefined },
+      });
+    });
+  });
+
+  describe('getCommit action', () => {
+    it('calls get_commit with all required args', async () => {
+      await GithubConnector.actions.getCommit.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        sha: 'abc123',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/commits/develop',
-        {
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/contents/README.md',
-        {
-          params: { ref: 'develop' },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_commit',
+        arguments: { owner: 'elastic', repo: 'kibana', sha: 'abc123' },
+      });
     });
+  });
 
-    it('should throw error when no markdown files found', async () => {
-      const commitResponse = {
-        data: {
-          sha: 'abc123',
-        },
-      };
-
-      const treeResponse = {
-        data: {
-          tree: [
-            { type: 'blob', path: 'file.txt', sha: 'sha1' },
-            { type: 'tree', path: 'src', sha: 'sha2' },
-          ],
-        },
-      };
-
-      mockClient.get.mockResolvedValueOnce(commitResponse).mockResolvedValueOnce(treeResponse);
-
-      await expect(
-        GithubConnector.actions.getDocs.handler(mockContext, {
-          owner: 'owner',
-          repo: 'repo',
-        })
-      ).rejects.toThrow('No .md files found in repository owner/repo');
-    });
-
-    it('should filter only blob type files', async () => {
-      const commitResponse = {
-        data: {
-          sha: 'abc123',
-        },
-      };
-
-      const treeResponse = {
-        data: {
-          tree: [
-            { type: 'tree', path: 'docs', sha: 'sha1' },
-            { type: 'blob', path: 'README.md', sha: 'sha2' },
-          ],
-        },
-      };
-
-      const contentResponse = {
-        data: {
-          name: 'README.md',
-          path: 'README.md',
-          content: Buffer.from('Content').toString('base64'),
-          html_url: 'https://github.com/owner/repo/blob/main/README.md',
-        },
-      };
-
-      mockClient.get
-        .mockResolvedValueOnce(commitResponse)
-        .mockResolvedValueOnce(treeResponse)
-        .mockResolvedValueOnce(contentResponse);
-
-      const result = (await GithubConnector.actions.getDocs.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-      })) as Array<{ name: string; path: string; content: string; html_url: string }>;
-
-      expect(result).toHaveLength(1);
-      expect(result[0].path).toBe('README.md');
-    });
-
-    it('should filter case-insensitively for .md extension', async () => {
-      const commitResponse = {
-        data: {
-          sha: 'abc123',
-        },
-      };
-
-      const treeResponse = {
-        data: {
-          tree: [
-            { type: 'blob', path: 'README.MD', sha: 'sha1' },
-            { type: 'blob', path: 'docs/Guide.Md', sha: 'sha2' },
-            { type: 'blob', path: 'file.md', sha: 'sha3' },
-          ],
-        },
-      };
-
-      const contentResponse1 = {
-        data: {
-          name: 'README.MD',
-          path: 'README.MD',
-          content: Buffer.from('Content 1').toString('base64'),
-          html_url: 'https://github.com/owner/repo/blob/main/README.MD',
-        },
-      };
-
-      const contentResponse2 = {
-        data: {
-          name: 'Guide.Md',
-          path: 'docs/Guide.Md',
-          content: Buffer.from('Content 2').toString('base64'),
-          html_url: 'https://github.com/owner/repo/blob/main/docs/Guide.Md',
-        },
-      };
-
-      const contentResponse3 = {
-        data: {
-          name: 'file.md',
-          path: 'file.md',
-          content: Buffer.from('Content 3').toString('base64'),
-          html_url: 'https://github.com/owner/repo/blob/main/file.md',
-        },
-      };
-
-      mockClient.get
-        .mockResolvedValueOnce(commitResponse)
-        .mockResolvedValueOnce(treeResponse)
-        .mockResolvedValueOnce(contentResponse1)
-        .mockResolvedValueOnce(contentResponse2)
-        .mockResolvedValueOnce(contentResponse3);
-
-      const result = await GithubConnector.actions.getDocs.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
+  describe('getLatestRelease action', () => {
+    it('calls get_latest_release', async () => {
+      await GithubConnector.actions.getLatestRelease.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
       });
 
-      expect(result).toHaveLength(3);
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_latest_release',
+        arguments: { owner: 'elastic', repo: 'kibana' },
+      });
+    });
+  });
+
+  describe('pullRequestRead action', () => {
+    it('defaults method to get', async () => {
+      const input = parse('pullRequestRead', { owner: 'elastic', repo: 'kibana', pullNumber: 42 });
+      await GithubConnector.actions.pullRequestRead.handler(mockContext, input);
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'pull_request_read',
+        arguments: { owner: 'elastic', repo: 'kibana', pullNumber: 42, method: 'get' },
+      });
+    });
+
+    it('passes get_diff method', async () => {
+      await GithubConnector.actions.pullRequestRead.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        pullNumber: 42,
+        method: 'get_diff',
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'pull_request_read',
+        arguments: { owner: 'elastic', repo: 'kibana', pullNumber: 42, method: 'get_diff' },
+      });
+    });
+
+    it('passes get_review_comments method', async () => {
+      await GithubConnector.actions.pullRequestRead.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        pullNumber: 42,
+        method: 'get_review_comments',
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'pull_request_read',
+        arguments: {
+          owner: 'elastic',
+          repo: 'kibana',
+          pullNumber: 42,
+          method: 'get_review_comments',
+        },
+      });
+    });
+  });
+
+  describe('getFileContents action', () => {
+    it('calls get_file_contents with required args', async () => {
+      await GithubConnector.actions.getFileContents.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        path: 'README.md',
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_file_contents',
+        arguments: { owner: 'elastic', repo: 'kibana', path: 'README.md', ref: undefined },
+      });
+    });
+
+    it('passes optional ref', async () => {
+      await GithubConnector.actions.getFileContents.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        path: 'src/index.ts',
+        ref: 'main',
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_file_contents',
+        arguments: { owner: 'elastic', repo: 'kibana', path: 'src/index.ts', ref: 'main' },
+      });
+    });
+  });
+
+  describe('getIssue action', () => {
+    it('calls issue_read with required args', async () => {
+      await GithubConnector.actions.getIssue.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        issueNumber: 123,
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'issue_read',
+        arguments: { owner: 'elastic', repo: 'kibana', issue_number: 123, method: 'get' },
+      });
+    });
+  });
+
+  describe('getIssueComments action', () => {
+    it('calls get_issue_comments with required args', async () => {
+      await GithubConnector.actions.getIssueComments.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        issueNumber: 123,
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'issue_read',
+        arguments: { owner: 'elastic', repo: 'kibana', issue_number: 123, method: 'get_comments' },
+      });
+    });
+  });
+
+  describe('listTools action', () => {
+    it('returns the list of available tools', async () => {
+      const result = await GithubConnector.actions.listTools.handler(mockContext, {});
+
+      expect(mockListTools).toHaveBeenCalled();
+      expect(result).toEqual([{ name: 'get_me' }, { name: 'search_code' }]);
+    });
+  });
+
+  describe('callTool action', () => {
+    it('calls the named tool with provided arguments', async () => {
+      const result = await GithubConnector.actions.callTool.handler(mockContext, {
+        name: 'search_code',
+        arguments: { query: 'elastic', page: 1, perPage: 5 },
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'search_code',
+        arguments: { query: 'elastic', page: 1, perPage: 5 },
+      });
+      expect(result).toEqual(mockContent);
+    });
+
+    it('calls the named tool with no arguments when omitted', async () => {
+      await GithubConnector.actions.callTool.handler(mockContext, { name: 'get_me' });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'get_me',
+        arguments: {},
+      });
     });
   });
 
   describe('test handler', () => {
-    it('should return success when API is accessible', async () => {
-      const mockResponse = {
-        status: 200,
-        data: {
-          id: 'user-1',
-          login: 'alice',
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
+    it('returns ok with tool count on successful connection', async () => {
       if (!GithubConnector.test) {
-        throw new Error('Test handler not defined');
+        throw new Error('test handler not defined');
       }
       const result = await GithubConnector.test.handler(mockContext);
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/user');
-      expect(mockContext.log.debug).toHaveBeenCalledWith('Github test handler');
+      expect(mockListTools).toHaveBeenCalled();
       expect(result).toEqual({
         ok: true,
-        message: 'Successfully connected to Github API',
+        message: 'Connected to GitHub MCP server. 2 tools available.',
       });
     });
 
-    it('should return failure when API is not accessible', async () => {
-      const mockResponse = {
-        status: 401,
-        data: {},
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
+    it('propagates errors thrown by withMcpClient', async () => {
+      const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
+      withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
       if (!GithubConnector.test) {
-        throw new Error('Test handler not defined');
+        throw new Error('test handler not defined');
       }
-      const result = await GithubConnector.test.handler(mockContext);
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/user');
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Failed to connect to Github API');
+      await expect(GithubConnector.test.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });
 });

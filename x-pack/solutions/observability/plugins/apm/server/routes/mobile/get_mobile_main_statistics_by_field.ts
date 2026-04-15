@@ -7,6 +7,7 @@
 
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { merge } from 'lodash';
+import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
 import {
   SERVICE_NAME,
   SESSION_ID,
@@ -17,7 +18,6 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 

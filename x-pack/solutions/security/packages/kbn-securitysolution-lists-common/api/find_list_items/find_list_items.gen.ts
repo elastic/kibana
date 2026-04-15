@@ -14,8 +14,8 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { isNonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { ListId } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
@@ -49,10 +49,10 @@ export const FindListItemsRequestQuery = z.object({
    */
   sort_order: z.enum(['desc', 'asc']).optional(),
   cursor: FindListItemsCursor.optional(),
-  /** 
+  /**
       * Filters the returned results according to the value of the specified field,
 using the <field name>:<field value> syntax.
- 
+
       */
   filter: FindListItemsFilter.optional(),
 });

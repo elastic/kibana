@@ -36,6 +36,8 @@
           "<CtxExt>"
         ],
         "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -65,6 +67,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -86,6 +90,8 @@
                   "<any>"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+                "lineNumber": 52,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -114,6 +120,8 @@
               "<any>>"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -128,6 +136,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+                "lineNumber": 66,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -153,6 +163,8 @@
               "<CtxExt>[]"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -174,6 +186,8 @@
               "<CtxExt>"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -190,6 +204,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -205,6 +221,8 @@
                   "<CtxExt> | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+                "lineNumber": 95,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -227,6 +245,8 @@
               " & CtxExt) => Promise<void>) => this"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -241,6 +261,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+                "lineNumber": 122,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -258,6 +280,8 @@
                   " & CtxExt) => Promise<void>"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+                "lineNumber": 122,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -280,6 +304,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -294,6 +320,8 @@
                   "FtrProviderContext"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+                "lineNumber": 133,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -322,6 +350,8 @@
           "<CtxExt>"
         ],
         "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+        "lineNumber": 153,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -337,6 +367,8 @@
               "<CtxExt>"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -348,6 +380,8 @@
             "label": "#path",
             "description": [],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -359,6 +393,8 @@
             "label": "#name",
             "description": [],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -373,6 +409,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -387,6 +425,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+                "lineNumber": 158,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -403,6 +443,8 @@
                   "<CtxExt>"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+                "lineNumber": 158,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -421,6 +463,8 @@
               "() => string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -437,6 +481,8 @@
               "() => string[]"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -453,6 +499,8 @@
               "() => string[]"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -469,6 +517,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 176,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -485,6 +535,8 @@
               "() => { [x: string]: string; }"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -501,6 +553,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -517,6 +571,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -533,6 +589,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -549,6 +607,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -565,6 +625,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -589,6 +651,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 204,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -609,6 +673,8 @@
               " & CtxExt"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -623,6 +689,8 @@
                   "BaseStepCtx"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+                "lineNumber": 208,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -643,6 +711,8 @@
               " & CtxExt) => Promise<void>"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 217,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -658,6 +728,8 @@
                   " & CtxExt"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+                "lineNumber": 217,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -676,6 +748,8 @@
               "() => JourneySynthtrace<CtxExt, any> | undefined"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 225,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -692,6 +766,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 229,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -708,6 +784,8 @@
         "label": "JourneyScreenshots",
         "description": [],
         "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -730,6 +808,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -744,6 +824,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+                "lineNumber": 44,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -759,6 +841,8 @@
             "label": "#dir",
             "description": [],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -770,6 +854,8 @@
             "label": "#manifestPath",
             "description": [],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -781,6 +867,8 @@
             "label": "#manifest",
             "description": [],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -795,6 +883,8 @@
                   "never[]"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+                "lineNumber": 68,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -811,6 +901,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -825,6 +917,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+                "lineNumber": 71,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -844,6 +938,8 @@
               "<boolean>"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -858,6 +954,8 @@
               "(fn: () => Promise<void>) => Promise<void>"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -872,6 +970,8 @@
                   "() => Promise<void>"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+                "lineNumber": 77,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -892,6 +992,8 @@
               ", screenshot: Buffer, fullscreenScreenshot: Buffer) => Promise<void>"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -906,6 +1008,8 @@
                   "AnyStep"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+                "lineNumber": 92,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -921,6 +1025,8 @@
                   "Buffer"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+                "lineNumber": 92,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -936,6 +1042,8 @@
                   "Buffer"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+                "lineNumber": 92,
+                "columnNumber": 53,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -956,6 +1064,8 @@
               ", screenshot: Buffer, fullscreenScreenshot: Buffer) => Promise<void>"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -970,6 +1080,8 @@
                   "AnyStep"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+                "lineNumber": 113,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -985,6 +1097,8 @@
                   "Buffer"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+                "lineNumber": 113,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1000,6 +1114,8 @@
                   "Buffer"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+                "lineNumber": 113,
+                "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1018,6 +1134,8 @@
               "() => { path: string; fullscreenPath: string; type: \"success\" | \"failure\"; title: string; filename: string; fullscreenFilename: string; }[]"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1037,6 +1155,8 @@
         "label": "ScalabilitySetup",
         "description": [],
         "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1050,6 +1170,8 @@
               "\nDuration strings must be formatted as string that starts with an integer and\nends with either \"m\" or \"s\" for minutes and seconds, respectively\n\neg: \"1m\" or \"30s\""
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1071,6 +1193,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1085,6 +1209,8 @@
               "{ threshold1: number; threshold2: number; threshold3: number; } | undefined"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1106,6 +1232,8 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1127,6 +1255,8 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1151,6 +1281,8 @@
           "<CtxExt>"
         ],
         "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1162,6 +1294,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1173,6 +1307,8 @@
             "label": "index",
             "description": [],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1189,6 +1325,8 @@
               " & CtxExt) => Promise<void>"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1204,6 +1342,8 @@
                   " & CtxExt"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
+                "lineNumber": 46,
+                "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1228,6 +1368,8 @@
           "\"min\" | \"max\" | \"25%\" | \"50%\" | \"75%\" | \"80%\" | \"85%\" | \"90%\" | \"95%\" | \"99%\""
         ],
         "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1245,6 +1387,8 @@
           "ConstantConcurrentUsersAction"
         ],
         "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1259,6 +1403,8 @@
         "label": "JOURNEY_APM_CONFIG",
         "description": [],
         "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1272,6 +1418,8 @@
               "// capture request body for both errors and request transactions\n// https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-body"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1285,6 +1433,8 @@
               "// capture request headers\n// https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-headers"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1298,6 +1448,8 @@
               "// request body with bigger size will be trimmed.\n// 300_000 is the default of the APM server.\n// for a body with larger size, we might need to reconfigure the APM server to increase the limit.\n// https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#long-field-max-length"
             ],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1309,6 +1461,8 @@
             "label": "globalLabels",
             "description": [],
             "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1323,6 +1477,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
+                "lineNumber": 23,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1337,6 +1493,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
+                "lineNumber": 24,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1351,6 +1509,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
+                "lineNumber": 25,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1365,6 +1525,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
+                "lineNumber": 26,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -23,7 +23,7 @@ export const useRuleUpdateCallout = ({
   actionButton,
   onUpgrade,
 }: UseRuleUpdateCalloutProps): JSX.Element | null => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   return !rule || rule.rule_source.type !== 'external' || !canEditRules ? null : (
     <RuleUpdateCallout
       actionButton={actionButton}

@@ -14,6 +14,8 @@
           "\nSetup contract of the Feature Flags Service"
         ],
         "path": "src/core/packages/feature-flags/browser/src/types.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "() => Record<string, unknown>"
             ],
             "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -50,6 +54,8 @@
               ") => void"
             ],
             "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -66,6 +72,8 @@
                   "Provider"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 102,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -88,6 +96,8 @@
               ") => Promise<void>"
             ],
             "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -104,6 +114,8 @@
                   "EvaluationContext"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 109,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -124,6 +136,8 @@
           "\nSetup contract of the Feature Flags Service"
         ],
         "path": "src/core/packages/feature-flags/browser/src/types.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,6 +156,8 @@
               ") => Promise<void>"
             ],
             "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -158,6 +174,8 @@
                   "EvaluationContext"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 122,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -178,6 +196,8 @@
               "(flagName: string, fallbackValue: boolean) => boolean"
             ],
             "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -194,6 +214,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 130,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -211,6 +233,8 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 130,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -231,6 +255,8 @@
               "<Value extends string>(flagName: string, fallbackValue: Value) => Value"
             ],
             "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -247,6 +273,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 138,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -264,6 +292,8 @@
                   "Value"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 138,
+                "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -284,6 +314,8 @@
               "<Value extends number>(flagName: string, fallbackValue: Value) => Value"
             ],
             "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -300,6 +332,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 146,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -317,6 +351,8 @@
                   "Value"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 146,
+                "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -339,6 +375,8 @@
               "<boolean>"
             ],
             "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -355,6 +393,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 154,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -372,6 +412,8 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 154,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -394,6 +436,8 @@
               "<Value>"
             ],
             "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -410,6 +454,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 162,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -427,6 +473,8 @@
                   "Value"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 162,
+                "columnNumber": 59,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -449,6 +497,8 @@
               "<Value>"
             ],
             "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -465,6 +515,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 170,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -482,6 +534,8 @@
                   "Value"
                 ],
                 "path": "src/core/packages/feature-flags/browser/src/types.ts",
+                "lineNumber": 170,
+                "columnNumber": 59,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -510,6 +564,8 @@
           "SingleContextEvaluationContext"
         ],
         "path": "src/core/packages/feature-flags/browser/src/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -533,6 +589,8 @@
           " | undefined; }"
         ],
         "path": "src/core/packages/feature-flags/browser/src/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -552,6 +610,8 @@
           "> & { kind?: \"kibana\" | \"organization\" | undefined; }"
         ],
         "path": "src/core/packages/feature-flags/browser/src/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

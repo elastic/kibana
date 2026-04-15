@@ -13,4 +13,21 @@ export {
   AGENT_BUILDER_CONVERSATIONS_NEW_PATH,
   AGENT_BUILDER_AGENTS,
   STACK_CONNECTORS_MANAGEMENT_ID,
+  EARS_API_PATH,
+  EARS_START_OAUTH_ROUTE,
+  EARS_EXCHANGE_CODE_ROUTE,
+  EARS_REFRESH_TOKEN_ROUTE,
+  EARS_REVOKE_TOKEN_ROUTE,
 } from './routes';
+
+export { EarsOAuthProvider, ALL_EARS_OAUTH_PROVIDERS } from './http_api/ears';
+
+export type {
+  exchangeCodeResponseSchema,
+  ExchangeCodeResponse,
+  refreshTokenResponseSchema,
+  RefreshTokenResponse,
+  RevokeTokenResponse,
+  ExchangeCodeRequest,
+  GoogleUserInfo,
+} from './http_api/ears';

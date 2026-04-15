@@ -13,12 +13,12 @@ import { EuiLink } from '@elastic/eui';
 
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
-import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageLabels } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { BlocklistsApiClient } from '../services';
 import { BlockListForm } from './components/blocklist_form';
 
-const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
+const BLOCKLIST_PAGE_LABELS: ArtifactListPageLabels = {
   pageTitle: i18n.translate('xpack.securitySolution.blocklist.pageTitle', {
     defaultMessage: 'Blocklist',
   }),
@@ -29,6 +29,30 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageAddButtonTitle', {
     defaultMessage: 'Add blocklist entry',
   }),
+  pageImportButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageImportButtonTitle', {
+    defaultMessage: 'Import blocklist entries',
+  }),
+  pageExportButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageExportButtonTitle', {
+    defaultMessage: 'Export blocklist entries',
+  }),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.blocklist.pageExportSuccessToastTitle',
+    {
+      defaultMessage: 'Blocklist entries exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.blocklist.pageExportErrorToastTitle',
+    {
+      defaultMessage: 'Blocklist entries export failed',
+    }
+  ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.blocklist.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'You can only import blocklist entries here.',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.blocklist.showingTotal', {
       defaultMessage:
@@ -100,6 +124,10 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add blocklist entry' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.blocklist.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import blocklist entries' }
   ),
   searchPlaceholderInfo: i18n.translate('xpack.securitySolution.blocklist.searchPlaceholderInfo', {
     defaultMessage: 'Search on the fields below: name, description, value',

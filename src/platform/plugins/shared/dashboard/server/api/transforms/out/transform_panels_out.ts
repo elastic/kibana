@@ -8,98 +8,112 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
-import { embeddableService, logger } from '../../../kibana_services';
+import { embeddableService } from '../../../kibana_services';
 import { getPanelReferences } from './get_panel_references';
+import { panelBwc } from './panel_bwc';
+import type { Warnings } from '../../types';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
-  containerReferences?: SavedObjectReference[]
-): DashboardState['panels'] {
+  containerReferences?: SavedObjectReference[],
+  isDashboardAppRequest: boolean = false
+): { panels: DashboardState['panels']; warnings: Warnings } {
   const topLevelPanels: DashboardPanel[] = [];
+  const warnings: Warnings = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
   sections.forEach((section) => {
     const { gridData: grid, ...restOfSection } = section;
     const { i: sectionId, ...restOfGrid } = grid;
     sectionsMap[sectionId] = {
       ...restOfSection,
+      collapsed: restOfSection.collapsed ?? false,
       grid: restOfGrid,
       panels: [],
-      uid: sectionId,
+      id: sectionId,
     };
   });
 
-  JSON.parse(panelsJSON).forEach((panel: SavedDashboardPanel) => {
-    const panelReferences = getPanelReferences(containerReferences ?? [], panel);
-    const { sectionId } = panel.gridData;
-    if (sectionId) {
-      sectionsMap[sectionId].panels.push(
-        transformPanelProperties(panel, panelReferences, containerReferences)
+  JSON.parse(panelsJSON).forEach((storedPanel: SavedDashboardPanel) => {
+    const storedPanelReferences = getPanelReferences(containerReferences ?? [], storedPanel);
+    const { sectionId } = storedPanel.gridData;
+    const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
+    let panelProperties: DashboardPanel;
+    try {
+      panelProperties = transformPanel(
+        panel,
+        panelReferences,
+        containerReferences,
+        isDashboardAppRequest
       );
+    } catch (e) {
+      warnings.push({
+        type: 'dropped_panel',
+        panel_type: panel.type,
+        panel_config: panel.embeddableConfig,
+        panel_references: panelReferences,
+        message: `Unable to transform panel config. Error: ${e.message}`,
+      });
+      return;
+    }
+
+    if (sectionId) {
+      if (!sectionsMap[sectionId]) {
+        warnings.push({
+          type: 'dropped_panel',
+          panel_type: panelProperties.type,
+          panel_config: panelProperties.config,
+          message: `Panel references non-existent section '${sectionId}'`,
+        });
+        return;
+      }
+      sectionsMap[sectionId].panels.push(panelProperties);
     } else {
-      topLevelPanels.push(transformPanelProperties(panel, panelReferences, containerReferences));
+      topLevelPanels.push(panelProperties);
     }
   });
-  return [...topLevelPanels, ...Object.values(sectionsMap)];
+  return {
+    panels: [...topLevelPanels, ...Object.values(sectionsMap)],
+    warnings,
+  };
 }
 
-function transformPanelProperties(
-  {
-    embeddableConfig,
-    gridData,
-    id,
-    panelIndex,
-    panelRefName,
-    title,
-    type,
-    version,
-  }: SavedDashboardPanel,
-  panelReferences?: SavedObjectReference[],
-  containerReferences?: SavedObjectReference[]
+const defaultTransform = (
+  config: SavedDashboardPanel['embeddableConfig']
+): SavedDashboardPanel['embeddableConfig'] => {
+  const transformsFlow = flow(transformTitlesOut, transformTimeRangeOut);
+  return transformsFlow(config);
+};
+
+function transformPanel(
+  panel: SavedDashboardPanel,
+  panelReferences: SavedObjectReference[],
+  containerReferences?: SavedObjectReference[],
+  isDashboardAppRequest: boolean = false
 ) {
+  const { embeddableConfig, gridData, panelIndex, type } = panel;
+
   const { sectionId, i, ...restOfGrid } = gridData;
 
-  const matchingReference =
-    panelRefName && panelReferences
-      ? panelReferences.find((reference) => reference.name === panelRefName)
-      : undefined;
+  // Temporary escape hatch for lens as code
+  // TODO remove when lens as code transforms are ready for production
+  const transformType =
+    type === LENS_EMBEDDABLE_TYPE && isDashboardAppRequest ? 'lens-dashboard-app' : type;
+  const transforms = embeddableService?.getTransforms(transformType);
 
-  const storedSavedObjectId = id ?? embeddableConfig.savedObjectId;
-  const savedObjectId = matchingReference ? matchingReference.id : storedSavedObjectId;
-  const panelType = matchingReference ? matchingReference.type : type;
-
-  const transforms = embeddableService?.getTransforms(panelType);
-
-  const config = {
-    ...embeddableConfig,
-    // <8.19 savedObjectId and title stored as siblings to embeddableConfig
-    ...(savedObjectId !== undefined && { savedObjectId }),
-    ...(title !== undefined && { title }),
-  };
-
-  let transformedPanelConfig;
-  try {
-    if (transforms?.transformOut) {
-      transformedPanelConfig = transforms.transformOut(
-        config,
-        panelReferences,
-        containerReferences
-      );
-    }
-  } catch (transformOutError) {
-    // do not prevent read on transformOutError
-    logger.warn(
-      `Unable to transform "${panelType}" embeddable state on read. Error: ${transformOutError.message}`
-    );
-  }
+  const transformedPanelConfig =
+    transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
+    defaultTransform(embeddableConfig);
 
   return {
     grid: restOfGrid,
-    config: transformedPanelConfig ? transformedPanelConfig : config,
-    uid: panelIndex,
-    type: panelType,
-    ...(version && { version }),
+    config: transformedPanelConfig,
+    id: panelIndex,
+    type,
   };
 }

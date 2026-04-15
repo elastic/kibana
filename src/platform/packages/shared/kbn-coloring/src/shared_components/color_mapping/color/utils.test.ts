@@ -30,8 +30,8 @@ describe('Utils', () => {
       ['string', 'testing', 'testing'],
       ['boolean (false)', false, 'false'],
       ['boolean (true)', true, 'true'],
-      ['null', null, 'null'],
-      ['undefined', undefined, 'undefined'],
+      ['null', null, '__missing__'],
+      ['undefined', undefined, '__missing__'],
       ['class (with toString)', new WithToString(), 'with toString'],
       ['class (without toString)', new WithoutToString(), '{"value":"without toString"}'],
     ])('should return correct key for %s', (_, rawValue, expectedKey) => {

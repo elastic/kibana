@@ -71,7 +71,7 @@ describe('maybeAddCloudLinks', () => {
       },
       {
         href: 'billing-url',
-        iconType: 'visGauge',
+        iconType: 'chartGauge',
         label: 'Billing',
         order: 200,
       },
@@ -95,10 +95,6 @@ describe('maybeAddCloudLinks', () => {
           Object {
             "href": "https://www.elastic.co/support",
             "title": "Support",
-          },
-          Object {
-            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
-            "title": "Give feedback",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
@@ -151,7 +147,7 @@ describe('maybeAddCloudLinks', () => {
       },
       {
         href: 'billing-url',
-        iconType: 'visGauge',
+        iconType: 'chartGauge',
         label: 'Billing',
         order: 200,
       },
@@ -174,10 +170,6 @@ describe('maybeAddCloudLinks', () => {
           Object {
             "href": "https://www.elastic.co/support",
             "title": "Support",
-          },
-          Object {
-            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
-            "title": "Give feedback",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",

@@ -17,12 +17,12 @@ import {
 } from '@kbn/discover-utils';
 import { getFieldValueWithFallback } from '@kbn/discover-utils/src/utils';
 import { ContentFrameworkSection } from '../../../content_framework/lazy_content_framework_section';
-import type { ContentFrameworkSectionProps } from '../../../content_framework/section/section';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
-import { useGetGenerateDiscoverLink } from '../../../../hooks/use_generate_discover_link';
 import { getEsqlQuery } from './get_esql_query';
 import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_chart';
 import { buildSectionDescription, type FieldInfo } from './build_section_description';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../hooks/use_discover_link_and_esql_query';
+import { useOpenInDiscoverSectionAction } from '../../../../hooks/use_open_in_discover_section_action';
 
 const createFieldInfo = (value: unknown, field: string | undefined): FieldInfo | undefined => {
   return value && field ? { value, field } : undefined;
@@ -35,22 +35,12 @@ const sectionTitle = i18n.translate(
   }
 );
 
-const discoverBtnLabel = i18n.translate(
-  'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.openInDiscover.button',
-  { defaultMessage: 'Open in Discover' }
-);
-const discoverBtnAria = i18n.translate(
-  'unifiedDocViewer.observability.traces.similarErrors.openInDiscover.label',
-  { defaultMessage: 'Open in Discover link' }
-);
-
 export interface SimilarErrorsProps {
   hit: DataTableRecord;
 }
 
 export function SimilarErrors({ hit }: SimilarErrorsProps) {
   const { indexes } = useDataSourcesContext();
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.logs });
   const hitFlattened = hit.flattened;
   const { field: serviceNameField, value: serviceNameValue } = getFieldValueWithFallback(
     hitFlattened,
@@ -98,41 +88,39 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
     ]
   );
 
-  const esqlQuery = getEsqlQuery({
-    serviceName: serviceNameValue ? String(serviceNameValue) : undefined,
-    culprit: culpritValue ? String(culpritValue) : undefined,
-    message:
-      messageValue && messageField
-        ? { fieldName: messageField, value: String(messageValue) }
-        : undefined,
-    type:
-      typeValue && typeField
-        ? {
-            fieldName: typeField,
-            value: Array.isArray(typeValue) ? typeValue.map(String) : String(typeValue),
-          }
-        : undefined,
+  const esqlQueryWhereClause = useMemo(() => {
+    return getEsqlQuery({
+      serviceName: serviceNameValue ? String(serviceNameValue) : undefined,
+      culprit: culpritValue ? String(culpritValue) : undefined,
+      message:
+        messageValue && messageField
+          ? { fieldName: messageField, value: String(messageValue) }
+          : undefined,
+      type:
+        typeValue && typeField
+          ? {
+              fieldName: typeField,
+              value: Array.isArray(typeValue) ? typeValue.map(String) : String(typeValue),
+            }
+          : undefined,
+    });
+  }, [serviceNameValue, culpritValue, messageValue, messageField, typeValue, typeField]);
+
+  const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
+    indexPattern: indexes.logs,
+    whereClause: esqlQueryWhereClause,
   });
 
-  const discoverUrl = useMemo(
-    () => generateDiscoverLink(esqlQuery),
-    [generateDiscoverLink, esqlQuery]
-  );
+  const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
+    href: discoverUrl,
+    esql: esqlQueryString,
+    tabLabel: sectionTitle,
+    dataTestSubj: 'docViewerSimilarErrorsOpenInDiscoverButton',
+  });
 
-  const sectionActions: ContentFrameworkSectionProps['actions'] = useMemo(
-    () =>
-      discoverUrl
-        ? [
-            {
-              dataTestSubj: 'docViewerSimilarErrorsOpenInDiscoverButton',
-              label: discoverBtnLabel,
-              href: discoverUrl,
-              icon: 'discoverApp',
-              ariaLabel: discoverBtnAria,
-            },
-          ]
-        : [],
-    [discoverUrl]
+  const actions = useMemo(
+    () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+    [openInDiscoverSectionAction]
   );
 
   const hasAtLeastOneErrorField = culpritValue || messageValue || typeValue;
@@ -145,11 +133,11 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
       id="similarErrors"
       data-test-subj="docViewerSimilarErrorsSection"
       title={sectionTitle}
-      actions={sectionActions}
+      actions={actions}
       description={sectionDescription}
     >
       <SimilarErrorsOccurrencesChart
-        baseEsqlQuery={esqlQuery}
+        baseEsqlQuery={esqlQueryWhereClause}
         currentDocumentTimestamp={normalizedTimestamp}
       />
     </ContentFrameworkSection>

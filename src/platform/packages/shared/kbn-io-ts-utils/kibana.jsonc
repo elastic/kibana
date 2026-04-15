@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/io-ts-utils",
   "owner": [
-    "@elastic/obs-knowledge-team"
+    "@elastic/observability-ui"
   ],
   "group": "platform",
   "visibility": "shared"

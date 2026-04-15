@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { ContentFrameworkSection, type ContentFrameworkSectionProps } from './section';
 
@@ -17,7 +18,7 @@ const defaultProps: ContentFrameworkSectionProps = {
   description: 'Section description',
   actions: [
     {
-      icon: 'expand',
+      icon: 'maximize',
       onClick: jest.fn(),
       ariaLabel: 'Expand section',
       dataTestSubj: 'unifiedDocViewerSectionActionButton-expand',

@@ -19,6 +19,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 function validateQuery(query: Query) {
   try {
@@ -38,9 +39,7 @@ interface Props {
 
 export const QueryInput = (props: Props) => {
   const {
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = useKibana<{
     data: DataPublicPluginStart;
     dataViews: DataViewsPublicPluginStart;
@@ -50,6 +49,7 @@ export const QueryInput = (props: Props) => {
     uiSettings: IUiSettingsClient;
     storage: IStorageWrapper;
     unifiedSearch: UnifiedSearchPublicPluginStart;
+    kql: KqlPluginStart;
     usageCollection: UsageCollectionStart;
   }>().services;
 

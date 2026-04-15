@@ -64,11 +64,12 @@ export const ToggleAlertFlyoutButton = () => {
     },
     {
       id: 1,
+      title: STATUS_RULE_NAME,
       items: [
         {
           name: CREATE_STATUS_RULE,
           'data-test-subj': 'createNewStatusRule',
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
@@ -84,7 +85,9 @@ export const ToggleAlertFlyoutButton = () => {
           },
           toolTipContent: !hasUptimeWrite
             ? noWritePermissionsTooltipContent
-            : statusRuleNotAvailableTooltipContent,
+            : !statusRuleExists
+            ? statusRuleNotAvailableTooltipContent
+            : null,
           disabled: !hasUptimeWrite || loading || !statusRuleExists,
           icon: 'bell',
         },
@@ -92,11 +95,12 @@ export const ToggleAlertFlyoutButton = () => {
     },
     {
       id: 2,
+      title: TLS_RULE_NAME,
       items: [
         {
           name: CREATE_TLS_RULE_NAME,
           'data-test-subj': 'createNewTLSRule',
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
@@ -132,7 +136,7 @@ export const ToggleAlertFlyoutButton = () => {
             color="primary"
             aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
             data-test-subj="syntheticsAlertsRulesButton"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => setIsOpen(!isOpen)}
             disabled={!hasMonitors}

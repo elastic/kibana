@@ -9,18 +9,24 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import type { KnownParameters, OpenAPIConverter } from '../type';
+import type { Env } from '../generate_oas';
 
 import { kbnConfigSchemaConverter } from './kbn_config_schema';
 import { zodConverter } from './zod';
 import { catchAllConverter } from './catch_all';
 
 export class OasConverter {
+  readonly #env: Env;
   readonly #converters: OpenAPIConverter[] = [
     kbnConfigSchemaConverter,
     zodConverter,
     catchAllConverter,
   ];
   readonly #sharedSchemas = new Map<string, OpenAPIV3.SchemaObject>();
+
+  constructor(env: Env = { serverless: false }) {
+    this.#env = env;
+  }
 
   #getConverter(schema: unknown) {
     return this.#converters.find((c) => c.is(schema))!;
@@ -32,8 +38,15 @@ export class OasConverter {
     });
   }
 
+  public derefSharedSchema(id: string) {
+    return this.#sharedSchemas.get(id);
+  }
+
   public convert(schema: unknown) {
-    const { schema: oasSchema, shared } = this.#getConverter(schema)!.convert(schema);
+    const { schema: oasSchema, shared } = this.#getConverter(schema)!.convert(schema, {
+      env: this.#env,
+      sharedSchemas: this.#sharedSchemas,
+    });
     this.#addComponents(shared);
     return oasSchema as OpenAPIV3.SchemaObject;
   }

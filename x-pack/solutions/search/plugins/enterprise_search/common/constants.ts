@@ -13,9 +13,9 @@ import {
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   SEARCH_HOMEPAGE,
-  SEARCH_INDICES,
   SEARCH_INDEX_MANAGEMENT,
 } from '@kbn/deeplinks-search';
+import type { SearchIndexManagement } from '@kbn/deeplinks-search/deep_links';
 import { i18n } from '@kbn/i18n';
 
 import type { IngestPipelineParams } from '@kbn/search-connectors';
@@ -29,7 +29,7 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
   defaultMessage: 'Enterprise Search',
 });
 
-export { SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT, SEARCH_HOMEPAGE };
+export { SEARCH_HOMEPAGE };
 
 export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,
@@ -114,7 +114,7 @@ export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';
 export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-logs';
 
 export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
-export const PLAYGROUND_URL = '/playground';
+
 export const SEARCH_HOMEPAGE_URL = '/app/elasticsearch/home';
 
 export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';
@@ -179,3 +179,6 @@ export const SEARCH_APPS_TITLE = i18n.translate(
     defaultMessage: 'Search applications',
   }
 );
+
+export const SEARCH_INDEX_MANAGEMENT_APP_ID: SearchIndexManagement = SEARCH_INDEX_MANAGEMENT;
+export const SEARCH_INDEX_MANAGEMENT_APP_BASE = '/app/elasticsearch/index_management';

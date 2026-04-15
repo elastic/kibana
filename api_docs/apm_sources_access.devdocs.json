@@ -90,6 +90,8 @@
           ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, {}>; }, T>>"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -104,6 +106,8 @@
               "HttpSetup"
             ],
             "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -119,6 +123,8 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -141,6 +147,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -159,6 +167,8 @@
         "label": "SourcesApiOptions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -173,6 +183,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -187,6 +199,8 @@
               "AbortSignal | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -209,6 +223,8 @@
           "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -256,6 +272,8 @@
         "<{}>>; }"
       ],
       "path": "x-pack/platform/plugins/shared/apm_sources_access/public/plugin.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -274,6 +292,8 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/apm_sources_access/public/plugin.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -379,6 +399,8 @@
           " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/server/routes/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -394,6 +416,8 @@
           "\"GET /internal/apm-sources/settings/apm-indices\" | \"GET /internal/apm-sources/settings/apm-index-settings\" | \"POST /internal/apm-sources/settings/apm-indices/save\""
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/server/routes/index.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -473,6 +497,8 @@
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/server/routes/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -488,6 +514,8 @@
           "\".apm-agent-configuration\""
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/server/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -503,6 +531,8 @@
           "\".apm-custom-link\""
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/server/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -518,6 +548,8 @@
           "\".apm-source-map\""
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/server/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -535,6 +567,8 @@
           "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -552,6 +586,8 @@
           "{ readonly indices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -617,6 +653,8 @@
           ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, {}>; }"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/server/routes/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -699,6 +737,8 @@
           "<string>; }>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -719,6 +759,8 @@
         ") => Promise<{ error: string; onboarding: string; span: string; transaction: string; metric: string; sourcemap: string; }>; }"
       ],
       "path": "x-pack/platform/plugins/shared/apm_sources_access/server/plugin.ts",
+      "lineNumber": 24,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -739,6 +781,8 @@
         ") => Promise<{ error: string; onboarding: string; span: string; transaction: string; metric: string; sourcemap: string; }>; }"
       ],
       "path": "x-pack/platform/plugins/shared/apm_sources_access/server/plugin.ts",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

@@ -26,6 +26,7 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_THRESHOLD_RESULT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { createRule, deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import {
@@ -37,6 +38,7 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -742,6 +744,95 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests![1].description).toBe(
           'Find all terms that exceeds threshold value after host.id: f9c7ca2d33f548a8b37667f6fffc59ce'
         );
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      const { indexListOfDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const id = uuidv4();
+        const timestamp = new Date().toISOString();
+
+        // Create documents with different namespaces
+        const docNamespace1 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace1' },
+          host: { id: 'host-1' },
+        };
+        const docNamespace2 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace2' },
+          host: { id: 'host-2' },
+        };
+        const docNamespace3 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace3' },
+          host: { id: 'host-3' },
+        };
+
+        await indexListOfDocuments([
+          docNamespace1,
+          docNamespace1,
+          docNamespace2,
+          docNamespace2,
+          docNamespace3,
+          docNamespace3,
+        ]);
+
+        // Set UI setting to include only namespace1 and namespace2
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          threshold: {
+            field: ['host.id'],
+            value: 1,
+          },
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should only get alerts from namespace1 and namespace2, not namespace3
+        expect(previewAlerts.length).toEqual(2);
+        // @ts-expect-error namespace does not exist on type
+        const hostIds = previewAlerts.map((alert) => alert._source['host.id']);
+        expect(hostIds).toContain('host-1');
+        expect(hostIds).toContain('host-2');
+        expect(hostIds).not.toContain('host-3');
       });
     });
   });

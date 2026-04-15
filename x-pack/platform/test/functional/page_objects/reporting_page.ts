@@ -26,6 +26,7 @@ export class ReportingPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly exports = this.ctx.getPageObject('exports');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   async forceSharedItemsContainerSize({ width }: { width: number }) {
     await this.browser.execute(`
@@ -117,13 +118,13 @@ export class ReportingPageObject extends FtrService {
     this.log.debug(`openShareMenuItem title:${itemTitle}`);
     const isShareMenuOpen = await this.testSubjects.exists('shareContextMenu');
     if (!isShareMenuOpen) {
-      await this.testSubjects.click('shareTopNavButton');
+      await this.appMenu.clickMenuItem('shareTopNavButton');
     } else {
       // there is no easy way to ensure the menu is at the top level
       // so just close the existing menu
-      await this.testSubjects.click('shareTopNavButton');
+      await this.appMenu.clickMenuItem('shareTopNavButton');
       // and then re-open the menu
-      await this.testSubjects.click('shareTopNavButton');
+      await this.appMenu.clickMenuItem('shareTopNavButton');
     }
     const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
     await this.testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
@@ -132,7 +133,18 @@ export class ReportingPageObject extends FtrService {
 
   async openExportPopover() {
     this.log.debug('open export popover');
-    await this.exports.clickExportTopNavButton();
+
+    // First check if export button is directly visible
+    if (await this.testSubjects.exists('exportTopNavButton')) {
+      await this.exports.clickExportTopNavButton();
+      return;
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+      await this.exports.clickExportTopNavButton();
+    }
   }
 
   async selectExportItem(label: string) {

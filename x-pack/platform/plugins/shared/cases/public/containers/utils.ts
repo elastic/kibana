@@ -23,12 +23,14 @@ import {
 import type {
   CasePatchRequest,
   CaseResolveResponse,
+  CasesPatchResponse,
   CaseUserActionStatsResponse,
   FindCasesContainingAllAlertsResponse,
   SingleCaseMetricsResponse,
 } from '../../common/types/api';
 import {
   CaseResolveResponseRt,
+  PatchCasesResponseRt,
   CaseUserActionStatsResponseRt,
   FindCasesContainingAllAlertsResponseRt,
   SingleCaseMetricsResponseRt,
@@ -74,6 +76,9 @@ export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResp
 
 export const decodeCasesResponse = (respCase?: Cases) =>
   pipe(CasesRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
+
+export const decodeCasesWithUpdateSummaryResponse = (response?: CasesPatchResponse) =>
+  pipe(PatchCasesResponseRt.decode(response), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseConfigurationsResponse = (respCase?: Configurations) => {
   return pipe(
@@ -246,7 +251,7 @@ export const getIncrementalIdSearchOverrides = (search: string) => {
     // search only in `incremental_id` since types with `title`
     // and `description` don't overlap
     overrides = {
-      searchFields: ['incremental_id.text'],
+      searchFields: ['cases.incremental_id.text'],
       search: trimmedSearch,
     };
   }

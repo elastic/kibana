@@ -112,6 +112,7 @@ describe('initMetrics', () => {
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
       exporter: expect.any(OTLPMetricExporterGrpc),
       exportIntervalMillis: 5000,
+      exportTimeoutMillis: 5000,
     });
   });
 
@@ -138,6 +139,7 @@ describe('initMetrics', () => {
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
       exporter: expect.any(OTLPMetricExporterGrpc),
       exportIntervalMillis: 5000,
+      exportTimeoutMillis: 5000,
     });
   });
 
@@ -164,6 +166,7 @@ describe('initMetrics', () => {
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
       exporter: expect.any(OTLPMetricExporterGrpc),
       exportIntervalMillis: 5000,
+      exportTimeoutMillis: 5000,
     });
   });
 
@@ -192,10 +195,132 @@ describe('initMetrics', () => {
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
       exporter: expect.any(OTLPMetricExporterGrpc),
       exportIntervalMillis: 10000,
+      exportTimeoutMillis: 10000,
     });
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
       exporter: expect.any(OTLPMetricExporterHttp),
       exportIntervalMillis: 10000,
+      exportTimeoutMillis: 10000,
+    });
+  });
+
+  test('should define a custom export timeout if provided globally', () => {
+    initMetrics({
+      resource,
+      metricsConfig: {
+        enabled: true,
+        exporters,
+        interval: duration(10, 's'),
+        timeout: duration(5, 's'),
+      },
+      monitoringCollectionConfig: {
+        enabled: false,
+        opentelemetry: {
+          metrics: {
+            prometheus: { enabled: false },
+            otlp: { exportIntervalMillis: 5000, logLevel: 'error' }, // url set via env var
+          },
+        },
+      },
+    });
+    expect(MeterProviderMock).toHaveBeenCalledWith({
+      resource,
+      views: [],
+      readers: [
+        expect.any(metrics.PeriodicExportingMetricReader),
+        expect.any(metrics.PeriodicExportingMetricReader),
+      ],
+    });
+    expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
+      exporter: expect.any(OTLPMetricExporterGrpc),
+      exportIntervalMillis: 10000,
+      exportTimeoutMillis: 5000,
+    });
+    expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
+      exporter: expect.any(OTLPMetricExporterHttp),
+      exportIntervalMillis: 10000,
+      exportTimeoutMillis: 5000,
+    });
+  });
+
+  test('should discard the global export timeout if it is higher than the export interval', () => {
+    initMetrics({
+      resource,
+      metricsConfig: {
+        enabled: true,
+        exporters: [
+          {
+            grpc: {
+              url: 'http://remote',
+              headers: { Authorization: '1234' },
+              exportInterval: duration(5, 's'),
+              temporalityPreference: 'delta',
+            },
+          },
+        ],
+        interval: duration(10, 's'),
+        timeout: duration(10, 's'),
+      },
+      monitoringCollectionConfig: {
+        enabled: false,
+        opentelemetry: {
+          metrics: {
+            prometheus: { enabled: false },
+            otlp: { exportIntervalMillis: 5000, logLevel: 'error' }, // url set via env var
+          },
+        },
+      },
+    });
+    expect(MeterProviderMock).toHaveBeenCalledWith({
+      resource,
+      views: [],
+      readers: [expect.any(metrics.PeriodicExportingMetricReader)],
+    });
+    expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
+      exporter: expect.any(OTLPMetricExporterGrpc),
+      exportIntervalMillis: 5000,
+      exportTimeoutMillis: 5000,
+    });
+  });
+
+  test("should prioritize the exporter's export config over the global config if it is provided", () => {
+    initMetrics({
+      resource,
+      metricsConfig: {
+        enabled: true,
+        exporters: [
+          {
+            grpc: {
+              url: 'http://remote',
+              headers: { Authorization: '1234' },
+              exportInterval: duration(5, 's'),
+              exportTimeout: duration(2, 's'),
+              temporalityPreference: 'delta',
+            },
+          },
+        ],
+        interval: duration(10, 's'),
+        timeout: duration(10, 's'),
+      },
+      monitoringCollectionConfig: {
+        enabled: false,
+        opentelemetry: {
+          metrics: {
+            prometheus: { enabled: false },
+            otlp: { exportIntervalMillis: 5000, logLevel: 'error' }, // url set via env var
+          },
+        },
+      },
+    });
+    expect(MeterProviderMock).toHaveBeenCalledWith({
+      resource,
+      views: [],
+      readers: [expect.any(metrics.PeriodicExportingMetricReader)],
+    });
+    expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
+      exporter: expect.any(OTLPMetricExporterGrpc),
+      exportIntervalMillis: 5000,
+      exportTimeoutMillis: 2000,
     });
   });
 

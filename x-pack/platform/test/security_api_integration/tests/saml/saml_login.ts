@@ -31,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   const kibanaServerConfig = config.get('servers.kibana');
+  const isSSlEnabled = !!kibanaServerConfig.certificateAuthorities || false;
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
@@ -45,6 +46,16 @@ export default function ({ getService }: FtrProviderContext) {
       destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/logout`,
       ...options,
     });
+  }
+
+  function checkStandardSessionCookiePropsDefault(sessionCookie: Cookie) {
+    expect(sessionCookie.sameSite).to.be(undefined);
+    expect(sessionCookie.secure).to.be(isSSlEnabled);
+  }
+
+  function checkIntermediateSessionCookiePropsDefault(sessionCookie: Cookie) {
+    expect(sessionCookie.sameSite).to.be('none');
+    expect(sessionCookie.secure).to.be(true);
   }
 
   async function checkSessionCookie(sessionCookie: Cookie, username = 'a@b.c') {
@@ -141,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
+        checkIntermediateSessionCookiePropsDefault(handshakeCookie);
 
         const redirectURL = url.parse(
           handshakeResponse.headers.location,
@@ -177,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('finishing handshake', () => {
       let handshakeCookie: Cookie;
-      let samlRequestId: string;
+      let samlRequestId: string | undefined;
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
@@ -197,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('error');
+        expect(unauthenticatedResponse.text).to.contain('<h1>Unauthenticated</h1>');
       });
 
       it('should succeed if both SAML response and handshake cookie are provided', async () => {
@@ -215,7 +227,10 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = samlAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        await checkSessionCookie(parseCookie(cookies[0])!);
+        const authenticatedCookie = parseCookie(cookies[0])!;
+
+        await checkSessionCookie(authenticatedCookie);
+        checkStandardSessionCookiePropsDefault(authenticatedCookie);
       });
 
       it('should succeed in case of IdP initiated login', async () => {
@@ -231,7 +246,10 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = samlAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        await checkSessionCookie(parseCookie(cookies[0])!);
+        const authenticatedCookie = parseCookie(cookies[0])!;
+
+        await checkSessionCookie(authenticatedCookie);
+        checkStandardSessionCookiePropsDefault(authenticatedCookie);
       });
 
       it('should fail if SAML response is not valid', async () => {
@@ -244,7 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('error');
+        expect(unauthenticatedResponse.text).to.contain('<h1>Unauthenticated</h1>');
       });
     });
 
@@ -273,6 +291,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(sessionCookieOne.value).to.not.be.empty();
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
+        checkStandardSessionCookiePropsDefault(sessionCookieOne);
 
         const apiResponseTwo = await supertest
           .get('/internal/security/me')
@@ -285,6 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(sessionCookieTwo.value).to.not.be.empty();
         expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
+        checkStandardSessionCookiePropsDefault(sessionCookieTwo);
       });
 
       it('should not extend cookie for system API calls', async () => {
@@ -354,6 +374,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(logoutCookie.path).to.be('/');
         expect(logoutCookie.httpOnly).to.be(true);
         expect(logoutCookie.maxAge).to.be(0);
+        checkStandardSessionCookiePropsDefault(logoutCookie);
 
         const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
         expect(redirectURL.href!.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
@@ -405,6 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(logoutCookie.path).to.be('/');
         expect(logoutCookie.httpOnly).to.be(true);
         expect(logoutCookie.maxAge).to.be(0);
+        checkStandardSessionCookiePropsDefault(logoutCookie);
 
         const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
         expect(redirectURL.href!.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
@@ -497,6 +519,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstNewCookie = parseCookie(firstResponseCookies[0])!;
         expectNewSessionCookie(firstNewCookie);
+        checkStandardSessionCookiePropsDefault(firstNewCookie);
 
         // Request with old cookie should reuse the same refresh token if within 60 seconds.
         // Returned cookie will contain the same new access and refresh token pairs as the first request
@@ -511,6 +534,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const secondNewCookie = parseCookie(secondResponseCookies[0])!;
         expectNewSessionCookie(secondNewCookie);
+        checkStandardSessionCookiePropsDefault(secondNewCookie);
 
         expect(firstNewCookie.value).not.to.eql(secondNewCookie.value);
 
@@ -569,6 +593,7 @@ export default function ({ getService }: FtrProviderContext) {
             const newSessionCookie = parseCookie(newSessionCookies[0])!;
             expectNewSessionCookie(newSessionCookie);
             await checkSessionCookie(newSessionCookie);
+            checkStandardSessionCookiePropsDefault(newSessionCookie);
 
             // The second new cookie with fresh pair of access and refresh tokens should work.
             await supertest
@@ -647,6 +672,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
         expect(handshakeCookie.maxAge).to.be(0);
+        checkStandardSessionCookiePropsDefault(handshakeCookie);
 
         expect(handshakeResponse.headers.location).to.be(
           '/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2Bthree%26auth_provider_hint%3Dsaml'
@@ -668,6 +694,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
+        checkIntermediateSessionCookiePropsDefault(handshakeCookie);
 
         const redirectURL = url.parse(
           handshakeResponse.headers.location,
@@ -942,14 +969,53 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/authentication/app/auth_flow?statusCode=401')
           .set('Cookie', sessionCookie)
           .expect(401);
-        expect(authFlow401ResponseText).to.contain('We hit an authentication error');
+        expect(authFlow401ResponseText).to.contain('<h1>Unauthenticated</h1>');
 
         const { text: authFlow500ResponseText } = await supertest
           .get('/authentication/app/auth_flow?statusCode=500')
           .set('Cookie', sessionCookie)
           .expect(500);
-        expect(authFlow500ResponseText).to.contain('We hit an authentication error');
+        expect(authFlow500ResponseText).to.contain('<h1>Unauthenticated</h1>');
       });
+    });
+
+    it('should support minimal authentication', async () => {
+      // Authenticate via IdP initiated SAML login.
+      const samlAuthenticationResponse = await supertest
+        .post('/api/security/saml/callback')
+        .send({ SAMLResponse: await createSAMLResponse() })
+        .expect(302);
+
+      const cookies = samlAuthenticationResponse.headers['set-cookie'];
+      expect(cookies).to.have.length(1);
+
+      const sessionCookie = parseCookie(cookies[0])!;
+
+      // Access the minimal and default auth endpoint with the session cookie.
+      const minimalResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+      const defaultResponse = await supertest
+        .get('/internal/security/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+
+      expect(minimalResponse.body.principal.username).to.eql(defaultResponse.body.username);
+      expect(minimalResponse.body.principal.username).to.eql('a@b.c');
+
+      expect(minimalResponse.body.principal.authentication_provider).to.eql(
+        defaultResponse.body.authentication_provider
+      );
+      expect(minimalResponse.body.principal.authentication_provider).to.eql({
+        type: 'saml',
+        name: 'saml',
+      });
+
+      // In minimal authentication mode, unlike when in default authentication mode, we don't call ES Authenticate API,
+      // so we don't have `authentication_realm` information available.
+      expect(minimalResponse.body.principal).to.not.have.property('authentication_realm');
+      expect(defaultResponse.body).to.have.property('authentication_realm');
     });
   });
 }

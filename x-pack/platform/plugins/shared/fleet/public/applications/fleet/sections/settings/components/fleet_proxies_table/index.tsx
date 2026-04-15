@@ -124,5 +124,14 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
     ];
   }, [deleteFleetProxy, getHref, authz.fleet.allSettings]);
 
-  return <EuiBasicTable columns={columns} items={proxies} data-test-subj="fleetProxiesTable" />;
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={proxies}
+      data-test-subj="fleetProxiesTable"
+      tableCaption={i18n.translate('xpack.fleet.settings.fleetProxiesTable.tableCaption', {
+        defaultMessage: 'Fleet proxies',
+      })}
+    />
+  );
 };

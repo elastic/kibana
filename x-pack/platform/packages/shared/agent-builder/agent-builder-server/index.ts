@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export type { ProcessedAttachment, ProcessedRoundInput } from './processed_input';
 export type {
   ToolProvider,
   ToolProviderHasOptions,
@@ -29,12 +30,12 @@ export type {
   AgentBuilderToolEvent,
   ToolEventHandlerFn,
   ToolEventEmitter,
-  ToolProgressEmitterFn,
   ToolResultStore,
   WritableToolResultStore,
   ToolPromptManager,
   ToolStateManager,
 } from './runner';
+export { getAgentFromRunContext } from './runner';
 export type {
   ToolHandlerFn,
   ToolHandlerReturn,
@@ -51,8 +52,13 @@ export type {
   ToolAvailabilityConfig,
   InternalToolAvailabilityHandler,
   InternalToolDefinition,
+  ToolReturnSummarizerFn,
+  ToolRegistry,
+  ToolListParams,
+  ToolCreateParams,
+  ToolUpdateParams,
 } from './tools';
-export { getToolResultId, createErrorResult, isToolResultId } from './tools';
+export { getToolResultId, createErrorResult, createOtherResult, isToolResultId } from './tools';
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
@@ -66,5 +72,29 @@ export type {
   AgentEventEmitter,
   AgentEventEmitterFn,
   RunAgentOnEventFn,
+  ExperimentalFeatures,
 } from './agents';
+export type {
+  AgentBuilderHooks,
+  HookContext,
+  HookContextByLifecycle as HookContextByEvent,
+  BlockingHookHandler as HookHandler,
+  HookHandlerResult,
+  HookHandlerResultByLifecycle as HookHandlerResultByEvent,
+  HookRegistration,
+  HooksServiceSetup,
+  HooksServiceStart,
+  BeforeAgentHookContext,
+  BeforeToolCallHookContext,
+  AfterToolCallHookContext,
+} from './hooks/types';
+export { HookLifecycle, HookExecutionMode } from './hooks/types';
+export {
+  applyHookResultByLifecycle,
+  applyBeforeAgentResult,
+  applyBeforeToolCallResult,
+  applyAfterToolCallResult,
+} from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
+export type { BuiltInPluginDefinition } from './plugins';
+export { describeZodSchema, formatSchemaForLlm } from './tools';

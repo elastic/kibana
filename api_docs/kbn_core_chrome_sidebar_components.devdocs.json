@@ -1,0 +1,645 @@
+{
+  "id": "@kbn/core-chrome-sidebar-components",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.SidebarBody",
+        "type": "Function",
+        "tags": [],
+        "label": "SidebarBody",
+        "description": [
+          "Body component for sidebar apps"
+        ],
+        "signature": [
+          "({ children, scrollable }: ",
+          "SidebarBodyProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_body.tsx",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.SidebarBody.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, scrollable = false }",
+            "description": [],
+            "signature": [
+              "SidebarBodyProps"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_body.tsx",
+            "lineNumber": 38,
+            "columnNumber": 51,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.SidebarHeader",
+        "type": "Function",
+        "tags": [],
+        "label": "SidebarHeader",
+        "description": [
+          "Header component for sidebar apps"
+        ],
+        "signature": [
+          "({ title, children, onClose, actions }: ",
+          "SidebarHeaderProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_header.tsx",
+        "lineNumber": 52,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.SidebarHeader.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ title, children, onClose, actions }",
+            "description": [],
+            "signature": [
+              "SidebarHeaderProps"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_header.tsx",
+            "lineNumber": 52,
+            "columnNumber": 55,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.useSidebar",
+        "type": "Function",
+        "tags": [],
+        "label": "useSidebar",
+        "description": [
+          "Hook for global sidebar state. For app-specific ops, use `useSidebarApp`."
+        ],
+        "signature": [
+          "() => ",
+          "UseSidebarApi"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.useSidebarApp",
+        "type": "Function",
+        "tags": [],
+        "label": "useSidebarApp",
+        "description": [
+          "Hook for app-specific sidebar actions and state"
+        ],
+        "signature": [
+          "(appId: ",
+          "SidebarAppId",
+          ") => ",
+          "UseSidebarAppApi",
+          "<TState, TActions>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+        "lineNumber": 67,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.useSidebarApp.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "appId",
+            "description": [],
+            "signature": [
+              "SidebarAppId"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.useSidebarPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "useSidebarPanel",
+        "description": [
+          "Hook for consumer components to access the sidebar panel context. Throws outside SidebarPanel."
+        ],
+        "signature": [
+          "() => ",
+          "SidebarPanelContextValue"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+        "lineNumber": 58,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.useSidebarWidth",
+        "type": "Function",
+        "tags": [],
+        "label": "useSidebarWidth",
+        "description": [
+          "Hook for sidebar width"
+        ],
+        "signature": [
+          "() => number"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.SidebarBodyProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarBodyProps",
+        "description": [],
+        "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_body.tsx",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.SidebarBodyProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_body.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.SidebarBodyProps.scrollable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scrollable",
+            "description": [
+              "Makes the body keyboard-scrollable with `tabIndex={0}` and announces it as a region. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_body.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.SidebarHeaderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarHeaderProps",
+        "description": [],
+        "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_header.tsx",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.SidebarHeaderProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "Renders as heading and labels the panel via aria-labelledby. When children are provided, used only for the aria-label."
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_header.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.SidebarHeaderProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "Custom header content. Overrides title rendering; title still labels the panel."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_header.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.SidebarHeaderProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "Close handler (renders close button when provided)"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_header.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.SidebarHeaderProps.actions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "actions",
+            "description": [
+              "Action buttons before close button"
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/components/sidebar_panel_header.tsx",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.SidebarPanelContextValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarPanelContextValue",
+        "description": [
+          "Context for the sidebar panel, shared with consumer components"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.SidebarPanelContextValue.headingId",
+            "type": "string",
+            "tags": [],
+            "label": "headingId",
+            "description": [
+              "ID to place on the panel's heading element for aria-labelledby"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.SidebarPanelContextValue.setOnFocusRescue",
+            "type": "Function",
+            "tags": [],
+            "label": "setOnFocusRescue",
+            "description": [
+              "Override focus target when the panel unmounts with focus inside. Defaults to main content."
+            ],
+            "signature": [
+              "(callback: (() => void) | undefined) => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar-components",
+                "id": "def-public.SidebarPanelContextValue.setOnFocusRescue.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+                "lineNumber": 52,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.UseSidebarApi",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseSidebarApi",
+        "description": [
+          "Global sidebar state API"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.UseSidebarApi.isOpen",
+            "type": "boolean",
+            "tags": [],
+            "label": "isOpen",
+            "description": [],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.UseSidebarApi.currentAppId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "currentAppId",
+            "description": [],
+            "signature": [
+              "SidebarAppId",
+              " | null"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.UseSidebarApi.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.UseSidebarApi.setWidth",
+            "type": "Function",
+            "tags": [],
+            "label": "setWidth",
+            "description": [],
+            "signature": [
+              "(width: number) => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar-components",
+                "id": "def-public.UseSidebarApi.setWidth.$1",
+                "type": "number",
+                "tags": [],
+                "label": "width",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+                "lineNumber": 20,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-components",
+        "id": "def-public.UseSidebarAppApi",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseSidebarAppApi",
+        "description": [
+          "\nApp-specific sidebar API with reactive state and actions.\nFor stateless apps, `state` and `actions` are undefined."
+        ],
+        "signature": [
+          "UseSidebarAppApi",
+          "<TState, TActions>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.UseSidebarAppApi.state",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "Current state (reactive). Undefined for stateless apps."
+            ],
+            "signature": [
+              "TState"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.UseSidebarAppApi.actions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "actions",
+            "description": [
+              "Bound actions to modify state. Undefined for stateless apps."
+            ],
+            "signature": [
+              "TActions"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.UseSidebarAppApi.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "Current app status (reactive)"
+            ],
+            "signature": [
+              "\"pending\" | \"available\" | \"unavailable\""
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.UseSidebarAppApi.open",
+            "type": "Function",
+            "tags": [],
+            "label": "open",
+            "description": [
+              "Open sidebar to this app"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-components",
+            "id": "def-public.UseSidebarAppApi.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [
+              "Close sidebar"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-components/src/hooks/use_sidebar.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

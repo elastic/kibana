@@ -8,8 +8,9 @@
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
-import { AlertConsumers, getRuleDetailsRoute } from '@kbn/rule-data-utils';
-import { useLocation, useParams } from 'react-router-dom';
+import { AlertConsumers, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
@@ -20,6 +21,7 @@ export const RuleFormRoute = () => {
   const {
     http,
     application,
+    cps,
     notifications,
     charts,
     settings,
@@ -35,8 +37,10 @@ export const RuleFormRoute = () => {
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
+  const { getUrlForApp } = application;
 
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
+  const history = useHistory();
   const {
     id,
     ruleTypeId: ruleTypeIdParams,
@@ -46,7 +50,7 @@ export const RuleFormRoute = () => {
     ruleTypeId?: string;
     templateId?: string;
   }>();
-  const { returnApp, returnPath } = location.state || {};
+  const { returnPath } = location.state || {};
 
   const templateId = templateIdParams;
 
@@ -60,26 +64,30 @@ export const RuleFormRoute = () => {
     templateId,
   });
 
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
+
   const ruleTypeId = ruleTypeIdParams ?? ruleTemplate?.ruleTypeId;
 
   // Set breadcrumb and page title
   useEffect(() => {
+    const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
+    const breadcrumbHref = getUrlForApp('rules', { path: '/' });
+
+    const rulesBreadcrumbWithAppPath = {
+      ...rulesBreadcrumb,
+      href: breadcrumbHref,
+    };
+
     if (id) {
-      setBreadcrumbs([
-        getAlertingSectionBreadcrumb('rules', true),
-        getAlertingSectionBreadcrumb('editRule'),
-      ]);
+      setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('editRule')]);
       chrome.docTitle.change(getCurrentDocTitle('editRule'));
     }
     if (ruleTypeId || templateId) {
-      setBreadcrumbs([
-        getAlertingSectionBreadcrumb('rules', true),
-        getAlertingSectionBreadcrumb('createRule'),
-      ]);
+      setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('createRule')]);
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleTypeId, templateId]);
+  }, [ruleTypeId, templateId, id, getUrlForApp]);
 
   if (isLoadingRuleTemplate) {
     return <CenterJustifiedSpinner />;
@@ -112,18 +120,14 @@ export const RuleFormRoute = () => {
         id={id}
         ruleTypeId={ruleTypeId}
         onCancel={() => {
-          if (returnApp && returnPath) {
-            application.navigateToApp(returnApp, { path: returnPath });
-          } else {
-            application.navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/rules`,
-            });
-          }
+          history.push(returnPath || '/');
         }}
         onSubmit={(ruleId) => {
-          application.navigateToApp('management', {
-            path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
-          });
+          if (id && returnPath) {
+            history.push(returnPath);
+          } else {
+            history.push(getRulesAppDetailsRoute(ruleId));
+          }
         }}
         multiConsumerSelection={AlertConsumers.ALERTS}
       />

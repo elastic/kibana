@@ -11,6 +11,7 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
@@ -29,8 +30,9 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
         id: FIELD_FORMAT_IDS.DATE,
       });
 
-      const inputProps =
-        persistableStateAttachmentState as unknown as AnomalySwimLaneEmbeddableState;
+      const inputProps = transformTimeRangeOut(
+        persistableStateAttachmentState as unknown as AnomalySwimLaneEmbeddableState
+      );
 
       const listItems = [
         {
@@ -63,8 +65,8 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
             />
           ),
           description: `${dataFormatter.convert(
-            inputProps.timeRange!.from
-          )} - ${dataFormatter.convert(inputProps.timeRange!.to)}`,
+            inputProps.time_range!.from
+          )} - ${dataFormatter.convert(inputProps.time_range!.to)}`,
         },
       ];
 
@@ -87,9 +89,7 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
             maybeId={inputProps.id}
             type={CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}
             getParentApi={() => ({
-              getSerializedStateForChild: () => ({
-                rawState: inputProps,
-              }),
+              getSerializedStateForChild: () => inputProps,
               executionContext: {
                 type: 'cases',
                 description: caseData.title,

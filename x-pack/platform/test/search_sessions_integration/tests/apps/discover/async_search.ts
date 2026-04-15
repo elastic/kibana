@@ -182,12 +182,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await common.navigateToApp('discover');
       await discover.selectTextBaseLang();
       await header.waitUntilLoadingHasFinished();
+      await testSubjects.click('app-menu-overflow-button');
       expect(await searchSessions.exists()).to.be(true);
     });
   });
 
   async function getSearchSessionId(): Promise<string> {
-    await inspector.open();
+    await discover.openInspectorFromTabMenu();
     const searchSessionId = await (
       await testSubjects.find('inspectorRequestSearchSessionId')
     ).getAttribute('data-search-session-id');

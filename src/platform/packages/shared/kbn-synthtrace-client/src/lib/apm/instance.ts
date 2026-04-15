@@ -12,7 +12,12 @@ import { Entity } from '../entity';
 import { Metricset } from './metricset';
 import { Span } from './span';
 import { Transaction } from './transaction';
-import type { ApmApplicationMetricFields, ApmFields, SpanParams } from './apm_fields';
+import type {
+  ApmApplicationMetricFields,
+  ApmFields,
+  APMStacktrace,
+  SpanParams,
+} from './apm_fields';
 
 export class Instance extends Entity<ApmFields> {
   transaction(
@@ -76,19 +81,27 @@ export class Instance extends Entity<ApmFields> {
     type,
     culprit,
     groupingKey,
+    stacktrace,
     withoutErrorId = false,
   }: {
     message: string;
     type?: string;
     culprit?: string;
     groupingKey?: string;
+    stacktrace?: APMStacktrace[];
     withoutErrorId?: boolean;
   }) {
     return new ApmError(
       {
         ...this.fields,
         ...(groupingKey ? { 'error.grouping_key': groupingKey } : {}),
-        'error.exception': [{ message, ...(type ? { type } : {}) }],
+        'error.exception': [
+          {
+            message,
+            ...(type ? { type } : {}),
+            ...(stacktrace ? { stacktrace } : {}),
+          },
+        ],
         'error.culprit': culprit,
       },
       { withoutErrorId }

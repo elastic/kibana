@@ -48,7 +48,7 @@ const useStyles = ({ isSelected }: { isSelected: boolean }) => {
           position: absolute;
           top: 0;
           width: 100%;
-          z-index: 1;
+          z-index: ${Number(euiTheme.levels.content) + 1};
         }
       `}
     `,
@@ -59,7 +59,7 @@ const useStyles = ({ isSelected }: { isSelected: boolean }) => {
       position: absolute;
       right: ${euiTheme.size.base};
       top: ${euiTheme.size.base};
-      z-index: 2;
+      z-index: ${Number(euiTheme.levels.content) + 2};
     `,
   };
 };
@@ -92,19 +92,22 @@ export const ComponentTemplatesListItem = ({
             {isDraggable && (
               <EuiFlexItem>
                 <div {...dragHandleProps}>
-                  <EuiIcon type="grab" />
+                  <EuiIcon type="dragVertical" aria-hidden={true} />
                 </div>
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} data-test-subj="name">
               {/* <EuiText>{component.name}</EuiText> */}
-              <EuiLink onClick={() => onViewDetail(component)}>{component.name}</EuiLink>
+              <EuiLink onClick={() => onViewDetail(component)} disabled={isSelectedValue}>
+                {component.name}
+              </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem grow={false} css={styles.contentIndicator}>
               <TemplateContentIndicator
                 settings={component.hasSettings}
                 mappings={component.hasMappings}
                 aliases={component.hasAliases}
+                isDisabled={isSelectedValue}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -132,7 +135,9 @@ export const ComponentTemplatesListItem = ({
       </EuiFlexGroup>
 
       {/* Check icon when selected */}
-      {isSelectedValue && <EuiIcon css={styles.checkIcon} type="check" color="success" />}
+      {isSelectedValue && (
+        <EuiIcon css={styles.checkIcon} type="check" color="success" aria-hidden={true} />
+      )}
     </div>
   );
 };

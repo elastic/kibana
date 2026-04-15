@@ -15,7 +15,7 @@ import { mockAAD } from '../../fixtures';
 import { PerAlertActionScheduler } from './per_alert_action_scheduler';
 import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from '../test_fixtures';
 import type { SanitizedRuleAction } from '@kbn/alerting-types';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_DELAYED, ALERT_UUID } from '@kbn/rule-data-utils';
 import { Alert } from '../../../alert';
 import type { AlertInstanceContext, AlertInstanceState } from '@kbn/alerting-state-types';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
@@ -1266,6 +1266,44 @@ describe('Per-Alert Action Scheduler', () => {
       expect(spy).toHaveBeenCalledTimes(2); // 2 actions
       expect(spy).nthCalledWith(1, ['111-111', '222-222']);
       expect(spy).nthCalledWith(2, ['111-111', '222-222']);
+    });
+
+    test('should skip creating actions to schedule when alert is delayed', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
+      // but alert 2 is muted, so only actions for alert 1 should be scheduled
+
+      alerts['2'].setStatus(ALERT_STATUS_DELAYED);
+
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule,
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenNthCalledWith(
+        1,
+        `skipping scheduling of actions for '2' in rule rule-label: alert is delayed`
+      );
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 2,
+      });
+
+      expect(results).toHaveLength(2);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-2', '1', '222-222'),
+      ]);
+
+      // @ts-expect-error private variable
+      expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'delayed' } });
     });
   });
 });

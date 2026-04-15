@@ -42,9 +42,9 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
+import {
+  type TriggersAndActionsUIPublicPluginSetup,
+  type TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from, map, mergeMap, switchMap } from 'rxjs';
 
@@ -69,8 +69,10 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
@@ -79,6 +81,8 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -152,6 +156,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView?: ExploratoryViewPublicStart;
+  expressions: ExpressionsStart;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -167,6 +172,7 @@ export interface ObservabilityPublicPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
   aiops: AiopsPluginStart;
@@ -183,6 +189,8 @@ export interface ObservabilityPublicPluginsStart {
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
+  cps?: CPSPluginStart;
+  ingestHub?: IngestHubStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -211,16 +219,6 @@ export class Plugin
       order: 8001,
       path: ALERTS_PATH,
       visibleIn: [],
-      deepLinks: [
-        {
-          id: 'rules',
-          title: i18n.translate('xpack.observability.rulesLinkTitle', {
-            defaultMessage: 'Rules',
-          }),
-          path: RULES_PATH,
-          visibleIn: [],
-        },
-      ],
       keywords: ['alerts', 'rules'],
     },
   ];
@@ -228,6 +226,15 @@ export class Plugin
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
     this.telemetry = new TelemetryService();
   }
+
+  private canUseHistory = (history: AppMountParameters<unknown>['history']) => {
+    try {
+      history.createHref(history.location, { prependBasePath: false });
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
@@ -275,11 +282,30 @@ export class Plugin
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     const mount = async (params: AppMountParameters<unknown>) => {
-      // Load application bundle
-      const { renderApp } = await import('./application');
-      // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+
+      const { pathname, search } = params.history.location;
+
+      if (pathname.startsWith(RULES_PATH)) {
+        let suffix = pathname.slice(RULES_PATH.length) || '/';
+        const isTopLevelRoute =
+          suffix === '/' || suffix === '/logs' || suffix.startsWith('/create');
+        if (!isTopLevelRoute) {
+          suffix = `/rule${suffix}`;
+        }
+        await coreStart.application.navigateToApp('rules', {
+          path: suffix + search,
+          replace: true,
+        });
+        return () => {};
+      }
+
+      const { renderApp } = await import('./application');
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
+      if (!this.canUseHistory(params.history)) {
+        return () => {};
+      }
 
       return renderApp({
         appMountParameters: params,
@@ -337,6 +363,7 @@ export class Plugin
     registerObservabilityRuleTypes(
       this.observabilityRuleTypeRegistry,
       coreSetup.uiSettings,
+      coreSetup.getStartServices,
       logsLocator
     );
 
@@ -432,7 +459,7 @@ export class Plugin
                   //
                   // See https://github.com/elastic/kibana/issues/103325.
                   const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
-                  const alertsLink: NavigationEntry[] = otherLinks
+                  const alertsLinks: NavigationEntry[] = otherLinks
                     .filter((link) => link.id === 'alerts')
                     .map((link) => ({
                       app: observabilityAppId,
@@ -454,7 +481,7 @@ export class Plugin
                       sortKey: 100,
                       entries: [
                         ...overviewLink,
-                        ...alertsLink,
+                        ...alertsLinks,
                         ...sloLink,
                         ...casesLink,
                         ...aiAssistantLink,

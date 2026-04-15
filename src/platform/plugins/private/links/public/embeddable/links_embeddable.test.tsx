@@ -20,29 +20,21 @@ import { getMockLinksParentApi } from '../mocks';
 
 const getLinks = (): Link[] => [
   {
-    id: '001',
-    order: 0,
     type: 'dashboardLink',
     label: '',
     destination: '999',
   },
   {
-    id: '002',
-    order: 1,
     type: 'dashboardLink',
     label: 'Dashboard 2',
     destination: '888',
   },
   {
-    id: '003',
-    order: 2,
     type: 'externalLink',
     label: 'Example homepage',
     destination: 'https://example.com',
   },
   {
-    id: '004',
-    order: 3,
     type: 'externalLink',
     destination: 'https://elastic.co',
   },
@@ -51,7 +43,6 @@ const getLinks = (): Link[] => [
 const getResolvedLinks: () => ResolvedLink[] = () => [
   {
     id: '001',
-    order: 0,
     type: 'dashboardLink',
     label: '',
     destination: '999',
@@ -60,7 +51,6 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
   {
     id: '002',
-    order: 1,
     type: 'dashboardLink',
     label: 'Dashboard 2',
     destination: '888',
@@ -69,7 +59,6 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
   {
     id: '003',
-    order: 2,
     type: 'externalLink',
     label: 'Example homepage',
     destination: 'https://example.com',
@@ -77,7 +66,6 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
   {
     id: '004',
-    order: 3,
     type: 'externalLink',
     destination: 'https://elastic.co',
     title: 'https://elastic.co',
@@ -86,9 +74,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
 
 jest.mock('../lib/resolve_links', () => {
   return {
-    serializeResolvedLinks: (resolvedLinks: ResolvedLink[]) => {
-      return resolvedLinks.map(({ title, description, error, ...linkToSave }) => linkToSave);
-    },
+    ...jest.requireActual('../lib/resolve_links'),
     resolveLinks: jest.fn().mockResolvedValue(getResolvedLinks()),
   };
 });
@@ -120,9 +106,8 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
   const parentApi = getMockLinksParentApi(state);
   const uuid = '1234';
   return await factory.buildEmbeddable({
-    initialState: {
-      rawState: state,
-    },
+    initializeDrilldownsManager: jest.fn(),
+    initialState: state,
     finalizeApi: (api) => {
       return {
         ...api,
@@ -141,7 +126,8 @@ describe('getLinksEmbeddableFactory', () => {
     const byRefState: LinksEmbeddableState = {
       title: 'my links',
       description: 'just a few links',
-      hidePanelTitles: false,
+      hide_title: false,
+      hide_border: false,
       savedObjectId: '123',
     };
 
@@ -158,12 +144,11 @@ describe('getLinksEmbeddableFactory', () => {
     test('api methods', async () => {
       const { api } = await buildLinksEmbeddable(byRefState);
       expect(api.serializeState()).toEqual({
-        rawState: {
-          title: 'my links',
-          description: 'just a few links',
-          hidePanelTitles: false,
-          savedObjectId: '123',
-        },
+        title: 'my links',
+        description: 'just a few links',
+        hide_title: false,
+        hide_border: false,
+        savedObjectId: '123',
       });
       expect(await api.canUnlinkFromLibrary()).toBe(true);
       expect(api.defaultTitle$?.value).toBe('links 001');
@@ -173,13 +158,12 @@ describe('getLinksEmbeddableFactory', () => {
     test('unlink from library', async () => {
       const { api } = await buildLinksEmbeddable(byRefState);
       expect(api.getSerializedStateByValue()).toEqual({
-        rawState: {
-          title: 'my links',
-          description: 'just a few links',
-          hidePanelTitles: false,
-          links: getLinks(),
-          layout: 'vertical',
-        },
+        title: 'my links',
+        description: 'just a few links',
+        hide_title: false,
+        hide_border: false,
+        links: getLinks(),
+        layout: 'vertical',
       });
     });
   });
@@ -188,7 +172,8 @@ describe('getLinksEmbeddableFactory', () => {
     const byValueState: LinksEmbeddableState = {
       description: 'just a few links',
       title: 'my links',
-      hidePanelTitles: true,
+      hide_title: true,
+      hide_border: true,
       links: getLinks(),
       layout: 'horizontal',
     };
@@ -207,13 +192,12 @@ describe('getLinksEmbeddableFactory', () => {
     test('api methods', async () => {
       const { api } = await buildLinksEmbeddable(byValueState);
       expect(api.serializeState()).toEqual({
-        rawState: {
-          title: 'my links',
-          description: 'just a few links',
-          hidePanelTitles: true,
-          links: getLinks(),
-          layout: 'horizontal',
-        },
+        title: 'my links',
+        description: 'just a few links',
+        hide_title: true,
+        hide_border: true,
+        links: getLinks(),
+        layout: 'horizontal',
       });
 
       expect(await api.canLinkToLibrary()).toBe(true);
@@ -231,12 +215,11 @@ describe('getLinksEmbeddableFactory', () => {
       });
       expect(newId).toBe('333');
       expect(api.getSerializedStateByReference(newId)).toEqual({
-        rawState: {
-          title: 'my links',
-          description: 'just a few links',
-          hidePanelTitles: true,
-          savedObjectId: '333',
-        },
+        title: 'my links',
+        description: 'just a few links',
+        hide_title: true,
+        hide_border: true,
+        savedObjectId: '333',
       });
     });
   });

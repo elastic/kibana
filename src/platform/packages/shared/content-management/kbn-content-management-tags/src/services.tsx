@@ -82,17 +82,6 @@ export interface ContentManagementTagsKibanaDependencies {
 const ContentManagementTagsContext = createContext<Services | null>(null);
 
 /**
- * Pure parsing logic for extracting tag filters from a search query.
- *
- * This function is intentionally defined outside the component to avoid
- * recreation on each render. It contains no dependencies on React state
- * or callbacks.
- *
- * @param searchQuery - The raw search query string to parse.
- * @param tags - The list of available tags to resolve names against.
- * @returns Parsed query with extracted tag IDs and cleaned search text.
- */
-/**
  * Resolves tag names to tag IDs using the provided tag list.
  *
  * @param tagNames - Array of tag names to resolve.
@@ -171,7 +160,9 @@ const parseSearchQueryCore = (searchQuery: string, tags: Tag[]): ParsedQuery => 
   const uniqueTagIdsToExclude = [...new Set(tagIdsToExclude)];
 
   // Remove tag clauses from search query to get clean search term.
-  const cleanQuery = query.removeOrFieldClauses('tag');
+  // Both OR-field clauses (`tag:(A or B)`) and simple field clauses (`tag:A`) must be
+  // stripped, otherwise simple clauses leak into the text search sent to `findItems`.
+  const cleanQuery = query.removeOrFieldClauses('tag').removeSimpleFieldClauses('tag');
   const hasResolvedTags = uniqueTagIds.length > 0 || uniqueTagIdsToExclude.length > 0;
 
   if (!hasResolvedTags) {

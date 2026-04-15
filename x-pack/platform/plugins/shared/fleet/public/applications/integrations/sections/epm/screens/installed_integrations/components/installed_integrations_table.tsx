@@ -14,6 +14,7 @@ import {
   type CriteriaWithPagination,
   EuiText,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,11 +23,12 @@ import type { Action } from '@elastic/eui/src/components/basic_table/action_type
 import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
 import { type UrlPagination, useLink, useAuthz, useLicense } from '../../../../../../../hooks';
+
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
+import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import {
   hasPreviousVersion,
@@ -34,8 +36,13 @@ import {
   useRollbackAvailablePackages,
 } from '../hooks/use_rollback_available';
 
+import { wrapTitleWithDeprecated } from '../../../components/utils';
+
+import { isUpcomingDeprecation } from '../../detail/overview/deprecation_callout';
+
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
+import { AlertsCell } from './alerts_cell';
 import { DashboardsCell } from './dashboards_cell';
 
 function wrapActionWithDisabledTooltip(
@@ -69,6 +76,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
       bulkUpgradeIntegrationsWithConfirmModal,
       bulkRollbackIntegrationsWithConfirmModal,
     },
+    rollingbackIntegrations,
   } = useInstalledIntegrationsActions();
   const { enablePackageRollback } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
@@ -110,6 +118,9 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
         items={installedPackages}
         itemId="name"
         rowProps={{ 'data-test-subj': 'installedIntegrationsTableRow' }}
+        tableCaption={i18n.translate('xpack.fleet.epmInstalledIntegrations.tableCaption', {
+          defaultMessage: 'Installed integrations',
+        })}
         pagination={{
           pageIndex: pagination.pagination.currentPage - 1,
           totalItemCount: total,
@@ -137,6 +148,17 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               const url = getHref('integration_details_overview', {
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
               });
+              const isUpcomingDeprecated = isUpcomingDeprecation(
+                item.installationInfo!.version,
+                item.deprecated
+              );
+              const isDeprecated = !!item?.deprecated && !isUpcomingDeprecated;
+
+              const hasDeprecatedPolicyTemplates =
+                doesPackageHaveIntegrations(item) &&
+                !isDeprecated &&
+                !isUpcomingDeprecated &&
+                (item.policy_templates || []).some((pt) => !!pt.deprecated);
 
               return (
                 <EuiLink href={url}>
@@ -153,8 +175,42 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                       data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
                       grow={false}
                     >
-                      {item.title}
+                      {wrapTitleWithDeprecated({ title: item.title, deprecated: isDeprecated })}
                     </EuiFlexItem>
+                    {(isDeprecated || isUpcomingDeprecated || hasDeprecatedPolicyTemplates) && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="warning"
+                          color="warning"
+                          content={
+                            isUpcomingDeprecated && item.deprecated?.since
+                              ? i18n.translate(
+                                  'xpack.fleet.installedIntegrations.upcomingDeprecationTooltip',
+                                  {
+                                    defaultMessage:
+                                      'This integration will be deprecated starting from version {version}',
+                                    values: { version: item.deprecated?.since },
+                                  }
+                                )
+                              : isDeprecated
+                              ? i18n.translate(
+                                  'xpack.fleet.installedIntegrations.deprecatedTooltip',
+                                  {
+                                    defaultMessage: 'This integration is deprecated',
+                                  }
+                                )
+                              : hasDeprecatedPolicyTemplates
+                              ? i18n.translate(
+                                  'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
+                                  {
+                                    defaultMessage: 'This integration contains deprecated features',
+                                  }
+                                )
+                              : undefined
+                          }
+                        />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiLink>
               );
@@ -175,22 +231,32 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             render: (item: InstalledPackageUIPackageListItem) => <DashboardsCell package={item} />,
           },
           {
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.rulesColumnTitle', {
+              defaultMessage: 'Rules',
+            }),
+            render: (item: InstalledPackageUIPackageListItem) => <AlertsCell package={item} />,
+          },
+          {
             name: i18n.translate(
               'xpack.fleet.epmInstalledIntegrations.attachedPoliciesColumnTitle',
               {
                 defaultMessage: 'Attached policies',
               }
             ),
-            width: '206px',
+            width: '270px',
             render: (item: InstalledPackageUIPackageListItem) => {
               const policyCount = item.packagePoliciesInfo?.count ?? 0;
-              if (!policyCount) {
+              const status = item.ui.installation_status;
+              const review = item.installationInfo?.pending_upgrade_review;
+              const showPendingReview = status === 'pending_upgrade_review' && review;
+
+              if (!policyCount && !showPendingReview) {
                 return null;
               }
 
               const isDisabled = !authz.fleet.readAgentPolicies;
 
-              return (
+              const policiesLink = policyCount ? (
                 <DisabledWrapperTooltip
                   tooltipContent={
                     <FormattedMessage
@@ -206,7 +272,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     <FormattedMessage
                       id="xpack.fleet.epmInstalledIntegrations.viewAttachedPoliciesButton"
                       defaultMessage={
-                        'View {policyCount, plural, one {# policies} other {# policies}}'
+                        'View {policyCount, plural, one {# policy} other {# policies}}'
                       }
                       values={{
                         policyCount,
@@ -214,7 +280,31 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     />
                   </EuiLink>
                 </DisabledWrapperTooltip>
-              );
+              ) : null;
+              if (policyCount && showPendingReview) {
+                return (
+                  <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap={true}>
+                    {policiesLink && <EuiFlexItem grow={false}>{policiesLink}</EuiFlexItem>}
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="warning"
+                        color="warning"
+                        content={i18n.translate(
+                          'xpack.fleet.installedIntegrations.upgradeAvailableTooltip',
+                          {
+                            defaultMessage: 'Auto-upgrade to version {version} is available.',
+                            values: {
+                              version:
+                                item.installationInfo?.pending_upgrade_review?.target_version,
+                            },
+                          }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              }
+              return policiesLink;
             },
           },
           {
@@ -254,7 +344,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   name: i18n.translate('xpack.fleet.epmInstalledIntegrations.viewPoliciesLabel', {
                     defaultMessage: 'View policies',
                   }),
-                  icon: 'search',
+                  icon: 'magnify',
                   type: 'icon',
                   description: i18n.translate(
                     'xpack.fleet.epmInstalledIntegrations.viewPoliciesLabel',
@@ -333,11 +423,17 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                             defaultMessage: 'Rollback integration',
                           }
                         ),
-                        icon: 'returnKey',
+                        icon: 'return',
                         type: 'icon',
-
+                        'data-test-subj': 'rollbackButton',
                         onClick: (item) => bulkRollbackIntegrationsWithConfirmModal([item]),
-                        enabled: (item) => isRollbackAvailablePackages[item.name] ?? false,
+                        enabled: (item) => {
+                          const isAvailable = isRollbackAvailablePackages[item.name] ?? false;
+                          const isRollingBack =
+                            rollingbackIntegrations?.some((u) => u.name === item.name) ?? false;
+
+                          return isAvailable && !isRollingBack;
+                        },
                         description: (item) =>
                           !hasPreviousVersion(item)
                             ? i18n.translate(

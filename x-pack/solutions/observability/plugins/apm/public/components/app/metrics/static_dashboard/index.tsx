@@ -13,8 +13,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import type { NotificationsStart } from '@kbn/core/public';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -52,7 +52,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   return (
     <DashboardRenderer
-      getCreationOptions={() => getCreationOptions(dashboardProps, notifications, dataView)}
+      getCreationOptions={() => getCreationOptions(dashboardProps, notifications)}
       onApiAvailable={setDashboard}
     />
   );
@@ -60,30 +60,34 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
 async function getCreationOptions(
   dashboardProps: MetricsDashboardProps,
-  notifications: NotificationsStart,
-  dataView: DataView
+  notifications: NotificationsStart
 ): Promise<DashboardCreationOptions> {
   try {
-    const controlGroupState = {};
-
-    await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
-      dataViewId: dataView.id ?? '',
-      title: 'Node name',
-      fieldName: 'service.node.name',
-      width: 'medium',
-      grow: true,
-    });
-    const panels = await convertSavedDashboardToPanels(dashboardProps, dataView);
+    const { dataView } = dashboardProps;
+    const panels = await convertSavedDashboardToPanels(dashboardProps);
 
     if (!panels) {
       throw new Error('Failed parsing dashboard panels.');
     }
 
     return {
+      useControlsIntegration: true,
       getInitialInput: () => ({
         viewMode: 'view',
         panels,
-        controlGroupState,
+        pinned_panels: [
+          {
+            type: OPTIONS_LIST_CONTROL,
+            config: {
+              ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+              data_view_id: dataView.id ?? '',
+              title: 'Node name',
+              field_name: 'service.node.name',
+            },
+            width: 'medium',
+            grow: true,
+          },
+        ],
       }),
     };
   } catch (error) {

@@ -14,6 +14,7 @@ import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { FtrService } from '../ftr_provider_context';
 
+const APP_MENU_OVERFLOW_BUTTON = 'app-menu-overflow-button';
 const BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT = 'openBackgroundSearchFlyoutButton';
 const BACKGROUND_SEARCH_SUBMIT_BUTTON = 'querySubmitButton-secondary-button';
 const BACKGROUND_SEARCH_CANCEL_BUTTON = 'queryCancelButton-secondary-button';
@@ -82,6 +83,19 @@ export class SearchSessionsService extends FtrService {
   }
 
   public async openFlyout() {
+    await this.retry.try(async () => {
+      // 1. The background search button is already visible so we are ready to go
+      if (await this.testSubjects.exists(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT)) return;
+      // 2. The button is not visible but the overflow menu is, so we can try to open it.
+      if (await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON)) {
+        await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
+        await this.testSubjects.existOrFail(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
+        return;
+      }
+      // 3. Neither is visible so we fail to try again
+      throw new Error('Background search button not found');
+    });
+
     await this.testSubjects.click(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
     await this.expectManagementTable();
   }

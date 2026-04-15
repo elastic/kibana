@@ -514,7 +514,7 @@ class AnnotationsTableUI extends Component {
         actions.push({
           name: viewDataFeedText,
           description: viewDataFeedText,
-          icon: 'visAreaStacked',
+          icon: 'chartAreaStack',
           type: 'icon',
           onClick: (annotation) => {
             this.setState({
@@ -728,6 +728,9 @@ class AnnotationsTableUI extends Component {
       <Fragment>
         <EuiInMemoryTable
           data-test-subj={'mlAnnotationsTable'}
+          tableCaption={i18n.translate('xpack.ml.annotationsTable.annotation.tableCaption', {
+            defaultMessage: 'Annotations',
+          })}
           error={searchError}
           className="eui-textBreakWord"
           compressed={true}

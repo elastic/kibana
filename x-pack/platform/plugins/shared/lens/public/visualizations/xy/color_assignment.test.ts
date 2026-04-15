@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { getColorAssignments } from './color_assignment';
+import { getAssignedColorConfig, getColorAssignments } from './color_assignment';
 import type { FormatFactory } from '../../../common/types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { XYDataLayerConfig } from './types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { KbnPalette } from '@kbn/palettes';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 
 describe('color_assignment', () => {
   const layers: XYDataLayerConfig[] = [
@@ -18,7 +20,7 @@ describe('color_assignment', () => {
       palette: { type: 'palette', name: 'palette1' },
       layerId: '1',
       layerType: LayerTypes.DATA,
-      splitAccessor: 'split1',
+      splitAccessors: ['split1'],
       accessors: ['y1', 'y2'],
     },
     {
@@ -26,7 +28,7 @@ describe('color_assignment', () => {
       palette: { type: 'palette', name: 'palette2' },
       layerId: '2',
       layerType: LayerTypes.DATA,
-      splitAccessor: 'split2',
+      splitAccessors: ['split2'],
       accessors: ['y3', 'y4'],
     },
   ];
@@ -96,7 +98,7 @@ describe('color_assignment', () => {
 
     it('should calculate total number of series for non split series', () => {
       const assignments = getColorAssignments(
-        [layers[0], { ...layers[1], palette: layers[0].palette, splitAccessor: undefined }],
+        [layers[0], { ...layers[1], palette: layers[0].palette, splitAccessors: undefined }],
         data,
         formatFactory
       );
@@ -174,7 +176,7 @@ describe('color_assignment', () => {
     it('should return the correct rank for a series without a split', () => {
       const newLayers = [
         layers[0],
-        { ...layers[1], palette: layers[0].palette, splitAccessor: undefined },
+        { ...layers[1], palette: layers[0].palette, splitAccessors: undefined },
       ];
       const assignments = getColorAssignments(newLayers, data, formatFactory);
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1
@@ -225,6 +227,96 @@ describe('color_assignment', () => {
       );
       // if the split column is missing, assume it is the first splitted series. One series in front - 0/y1
       expect(assignments.palette1.getRank(layers[0], '2', 'y2')).toEqual(1);
+    });
+  });
+
+  describe('colorMapping palette support', () => {
+    it('should group layers by colorMapping.paletteId when present', () => {
+      const lineLayer: XYDataLayerConfig = {
+        ...layers[0],
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.ElasticLineOptimized,
+        },
+      };
+
+      const assignments = getColorAssignments([lineLayer], data, formatFactory);
+
+      expect(assignments[KbnPalette.ElasticLineOptimized].totalSeriesCount).toEqual(2 * 3);
+      expect(assignments.palette1).toBeUndefined();
+    });
+
+    it('should resolve assigned accessor colors from colorMapping.paletteId', () => {
+      const lineLayer: XYDataLayerConfig = {
+        ...layers[0],
+        splitAccessors: undefined,
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.ElasticLineOptimized,
+        },
+      };
+      const assignments = getColorAssignments([lineLayer], data, formatFactory);
+      const getCategoricalColor = jest.fn(() => '#16c5c0');
+      const paletteService = {
+        get: jest.fn().mockReturnValue({ getCategoricalColor }),
+      };
+
+      getAssignedColorConfig(
+        lineLayer,
+        'y1',
+        assignments,
+        {
+          datasourceLayers: {
+            [lineLayer.layerId]: {
+              getOperationForColumnId: () => undefined,
+            },
+          },
+        } as never,
+        paletteService as never
+      );
+
+      expect(paletteService.get).toHaveBeenCalledWith(KbnPalette.ElasticLineOptimized);
+      expect(getCategoricalColor).toHaveBeenCalled();
+    });
+
+    it('should fallback to default palette when colorMapping.paletteId is unsupported', () => {
+      const layerWithUnsupportedPalette: XYDataLayerConfig = {
+        ...layers[0],
+        splitAccessors: undefined,
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: 'eui_amsterdam_color_blind',
+        },
+      };
+      const assignments = getColorAssignments([layerWithUnsupportedPalette], data, formatFactory);
+      const defaultGetCategoricalColor = jest.fn(() => '#54b399');
+      const paletteService = {
+        get: jest.fn((name: string) => {
+          if (name === 'default') {
+            return { getCategoricalColor: defaultGetCategoricalColor };
+          }
+          return undefined;
+        }),
+      };
+
+      const assigned = getAssignedColorConfig(
+        layerWithUnsupportedPalette,
+        'y1',
+        assignments,
+        {
+          datasourceLayers: {
+            [layerWithUnsupportedPalette.layerId]: {
+              getOperationForColumnId: () => undefined,
+            },
+          },
+        } as never,
+        paletteService as never
+      );
+
+      expect(assigned.color).toEqual('#54b399');
+      expect(paletteService.get).toHaveBeenCalledWith('eui_amsterdam_color_blind');
+      expect(paletteService.get).toHaveBeenCalledWith('default');
+      expect(defaultGetCategoricalColor).toHaveBeenCalled();
     });
   });
 });

@@ -35,6 +35,10 @@
       "aiAssistantManagementSelection",
       "discover"
     ],
+    "optionalPlugins": [
+      "cloud",
+      "searchInferenceEndpoints"
+    ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",

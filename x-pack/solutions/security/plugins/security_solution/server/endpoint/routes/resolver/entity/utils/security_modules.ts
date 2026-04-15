@@ -98,8 +98,7 @@ export const CORE_SECURITY_MODULES = [
 ] as const;
 
 /**
- * Microsoft Defender modules that are conditionally enabled.
- * These modules are feature-flagged and may not always be available.
+ * Microsoft Defender modules supported in Resolver.
  */
 export const MICROSOFT_DEFENDER_MODULES = ['microsoft_defender_endpoint', 'm365_defender'] as const;
 

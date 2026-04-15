@@ -14,10 +14,18 @@ export const uiamServiceMock = {
       authorization: `Bearer ${accessToken}`,
       [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
     })),
-    getUserProfileGrant: jest.fn(),
+    getClientAuthentication: jest.fn(),
     refreshSessionTokens: jest
       .fn()
       .mockResolvedValue({ accessToken: 'new-access', refreshToken: 'new-refresh' }),
     invalidateSessionTokens: jest.fn().mockResolvedValue(undefined),
+    grantApiKey: jest.fn().mockResolvedValue({
+      id: 'mock-api-key-id',
+      key: 'mock-api-key-value',
+      description: 'mock-api-key-name',
+    }),
+    exchangeOAuthToken: jest.fn().mockResolvedValue('mock-ephemeral-token'),
+    revokeApiKey: jest.fn().mockResolvedValue(undefined),
+    convertApiKeys: jest.fn().mockResolvedValue({ results: [] }),
   }),
 };

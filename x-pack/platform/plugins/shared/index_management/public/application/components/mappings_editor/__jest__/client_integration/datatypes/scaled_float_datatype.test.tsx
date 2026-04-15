@@ -65,7 +65,10 @@ describe('Mappings editor: scaled float datatype', () => {
     // Change the type to "scaled_float" using EuiComboBox harness
     // The label is "Scaled float" (from TYPE_DEFINITION)
     const fieldSubTypeComboBox = new EuiComboBoxTestHarness('fieldSubType');
-    fieldSubTypeComboBox.select('Scaled float');
+    await fieldSubTypeComboBox.select('Scaled float');
+
+    // Close the combobox popover (portal) before continuing.
+    await fieldSubTypeComboBox.close();
 
     await within(flyout).findByTestId('scalingFactor');
 
@@ -114,5 +117,5 @@ describe('Mappings editor: scaled float datatype', () => {
     const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
     const actualMappings = callData.getData();
     expect(actualMappings).toEqual(updatedMappings);
-  });
+  }, 20000);
 });

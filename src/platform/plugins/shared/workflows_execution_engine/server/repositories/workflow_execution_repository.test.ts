@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
+import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
@@ -17,6 +17,7 @@ describe('WorkflowExecutionRepository', () => {
     index: jest.Mock;
     update: jest.Mock;
     search: jest.Mock;
+    get: jest.Mock;
     bulk: jest.Mock;
     indices: { exists: jest.Mock; create: jest.Mock };
   };
@@ -26,6 +27,7 @@ describe('WorkflowExecutionRepository', () => {
       index: jest.fn(),
       update: jest.fn(),
       search: jest.fn(),
+      get: jest.fn(),
       bulk: jest.fn(),
       indices: {
         exists: jest.fn().mockResolvedValue(false),
@@ -42,7 +44,7 @@ describe('WorkflowExecutionRepository', () => {
       expect(esClient.index).toHaveBeenCalledWith({
         index: WORKFLOWS_EXECUTIONS_INDEX,
         id: '1',
-        refresh: true,
+        refresh: false,
         document: workflowExecution,
       });
     });
@@ -53,10 +55,9 @@ describe('WorkflowExecutionRepository', () => {
       );
     });
 
-    it('should respect space isolation when searching for workflow executions', async () => {
+    it('should respect space isolation when getting workflow execution by ID', async () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
       await repository.createWorkflowExecution(workflowExecution);
-      esClient.search.mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
 
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -66,16 +67,53 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      await repository.getWorkflowExecutionById('1', 'space2');
+      // Mock get to return a document with different spaceId
+      esClient.get.mockResolvedValueOnce({
+        _source: { id: '1', workflowId: 'test-workflow', spaceId: 'space1' },
+      });
 
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ term: { spaceId: 'space2' } }]),
-            }),
-          }),
-        })
+      // Should return null when spaceId doesn't match
+      const result = await repository.getWorkflowExecutionById('1', 'space2');
+
+      expect(esClient.get).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        id: '1',
+      });
+      expect(result).toBeNull();
+    });
+
+    it('should return document when spaceId matches', async () => {
+      const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
+      esClient.get.mockResolvedValueOnce({
+        _source: workflowExecution,
+      });
+
+      const result = await repository.getWorkflowExecutionById('1', 'space1');
+
+      expect(esClient.get).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        id: '1',
+      });
+      expect(result).toEqual(workflowExecution);
+    });
+
+    it('should return null when document is not found', async () => {
+      const notFoundError = new Error('Not Found');
+      (notFoundError as any).meta = { statusCode: 404 };
+      esClient.get.mockRejectedValueOnce(notFoundError);
+
+      const result = await repository.getWorkflowExecutionById('non-existent', 'space1');
+
+      expect(result).toBeNull();
+    });
+
+    it('should throw error for non-404 errors', async () => {
+      const serverError = new Error('Internal Server Error');
+      (serverError as any).meta = { statusCode: 500 };
+      esClient.get.mockRejectedValueOnce(serverError);
+
+      await expect(repository.getWorkflowExecutionById('1', 'space1')).rejects.toThrow(
+        'Internal Server Error'
       );
     });
   });
@@ -87,7 +125,7 @@ describe('WorkflowExecutionRepository', () => {
       expect(esClient.update).toHaveBeenCalledWith({
         index: WORKFLOWS_EXECUTIONS_INDEX,
         id: '1',
-        refresh: true,
+        refresh: false,
         doc: workflowExecution,
       });
     });
@@ -159,8 +197,91 @@ describe('WorkflowExecutionRepository', () => {
     });
   });
 
+  describe('hasRunningExecution', () => {
+    it('should return true when running execution exists', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 1, relation: 'eq' } },
+      });
+
+      const result = await repository.hasRunningExecution('workflow-1', 'default');
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        size: 0,
+        terminate_after: 1,
+        track_total_hits: true,
+        _source: false,
+        query: {
+          bool: {
+            filter: [
+              { term: { workflowId: 'workflow-1' } },
+              { term: { spaceId: 'default' } },
+              {
+                terms: {
+                  status: NonTerminalExecutionStatuses,
+                },
+              },
+            ],
+          },
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    it('should return false when no running execution exists', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      const result = await repository.hasRunningExecution('workflow-1', 'default');
+
+      expect(result).toBe(false);
+    });
+
+    it('should filter by triggeredBy when provided', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 1, relation: 'eq' } },
+      });
+
+      const result = await repository.hasRunningExecution('workflow-1', 'default', 'scheduled');
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        size: 0,
+        terminate_after: 1,
+        track_total_hits: true,
+        _source: false,
+        query: {
+          bool: {
+            filter: [
+              { term: { workflowId: 'workflow-1' } },
+              { term: { spaceId: 'default' } },
+              {
+                terms: {
+                  status: NonTerminalExecutionStatuses,
+                },
+              },
+              { term: { triggeredBy: 'scheduled' } },
+            ],
+          },
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    it('should handle total as number', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: 5 },
+      });
+
+      const result = await repository.hasRunningExecution('workflow-1', 'default');
+
+      expect(result).toBe(true);
+    });
+  });
+
   describe('getRunningExecutionsByWorkflowId', () => {
-    it('should return running executions for a workflow', async () => {
+    it('should return running executions for a workflow using optimized query', async () => {
       const mockHits = [
         {
           _source: {
@@ -179,19 +300,21 @@ describe('WorkflowExecutionRepository', () => {
 
       expect(esClient.search).toHaveBeenCalledWith({
         index: WORKFLOWS_EXECUTIONS_INDEX,
+        size: 1,
+        terminate_after: 1,
         query: {
           bool: {
-            must: [{ term: { workflowId: 'workflow-1' } }, { term: { spaceId: 'default' } }],
-            must_not: [
+            filter: [
+              { term: { workflowId: 'workflow-1' } },
+              { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: TerminalExecutionStatuses,
+                  status: NonTerminalExecutionStatuses,
                 },
               },
             ],
           },
         },
-        size: 1,
       });
       expect(result).toEqual(mockHits);
     });
@@ -220,23 +343,22 @@ describe('WorkflowExecutionRepository', () => {
 
       expect(esClient.search).toHaveBeenCalledWith({
         index: WORKFLOWS_EXECUTIONS_INDEX,
+        size: 1,
+        terminate_after: 1,
         query: {
           bool: {
-            must: [
+            filter: [
               { term: { workflowId: 'workflow-1' } },
               { term: { spaceId: 'default' } },
-              { term: { triggeredBy: 'scheduled' } },
-            ],
-            must_not: [
               {
                 terms: {
-                  status: TerminalExecutionStatuses,
+                  status: NonTerminalExecutionStatuses,
                 },
               },
+              { term: { triggeredBy: 'scheduled' } },
             ],
           },
         },
-        size: 1,
       });
       expect(result).toEqual(mockHits);
     });
@@ -251,7 +373,7 @@ describe('WorkflowExecutionRepository', () => {
       expect(result).toEqual([]);
     });
 
-    it('should exclude terminal statuses', async () => {
+    it('should use filter context for better performance', async () => {
       esClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 0, relation: 'eq' } },
       });
@@ -262,13 +384,7 @@ describe('WorkflowExecutionRepository', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
-              must_not: [
-                {
-                  terms: {
-                    status: TerminalExecutionStatuses,
-                  },
-                },
-              ],
+              filter: expect.any(Array),
             }),
           }),
         })
@@ -286,41 +402,11 @@ describe('WorkflowExecutionRepository', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
-              must: expect.arrayContaining([{ term: { spaceId: 'space-1' } }]),
+              filter: expect.arrayContaining([{ term: { spaceId: 'space-1' } }]),
             }),
           }),
         })
       );
-    });
-
-    it('should include non-terminal statuses in results', async () => {
-      const nonTerminalStatuses = [
-        ExecutionStatus.PENDING,
-        ExecutionStatus.WAITING,
-        ExecutionStatus.WAITING_FOR_INPUT,
-        ExecutionStatus.RUNNING,
-      ];
-
-      for (const status of nonTerminalStatuses) {
-        const mockHits = [
-          {
-            _source: {
-              id: 'exec-1',
-              workflowId: 'workflow-1',
-              spaceId: 'default',
-              status,
-            },
-          },
-        ];
-        esClient.search.mockResolvedValue({
-          hits: { hits: mockHits, total: { value: 1, relation: 'eq' } },
-        });
-
-        const result = await repository.getRunningExecutionsByWorkflowId('workflow-1', 'default');
-
-        expect(result).toEqual(mockHits);
-        jest.clearAllMocks();
-      }
     });
   });
 
@@ -351,11 +437,12 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
-            must: [{ term: { concurrencyGroupKey: 'server-1' } }, { term: { spaceId: 'default' } }],
-            must_not: [
+            filter: [
+              { term: { concurrencyGroupKey: 'server-1' } },
+              { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: TerminalExecutionStatuses,
+                  status: NonTerminalExecutionStatuses,
                 },
               },
             ],
@@ -391,14 +478,19 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
-            must: [{ term: { concurrencyGroupKey: 'server-1' } }, { term: { spaceId: 'default' } }],
-            must_not: [
+            filter: [
+              { term: { concurrencyGroupKey: 'server-1' } },
+              { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: TerminalExecutionStatuses,
+                  status: NonTerminalExecutionStatuses,
                 },
               },
-              { term: { id: 'exec-1' } },
+              {
+                bool: {
+                  must_not: [{ term: { id: 'exec-1' } }],
+                },
+              },
             ],
           },
         },
@@ -601,6 +693,242 @@ describe('WorkflowExecutionRepository', () => {
       ).rejects.toThrow('Failed to update 1 workflow executions');
 
       expect(esClient.bulk).toHaveBeenCalled();
+    });
+  });
+
+  describe('findNonTerminalExecutionIdsByWorkflowIdPage', () => {
+    const baseSearchExpectation = {
+      index: WORKFLOWS_EXECUTIONS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            { term: { workflowId: 'wf-1' } },
+            { term: { spaceId: 'default' } },
+            {
+              terms: {
+                status: NonTerminalExecutionStatuses,
+              },
+            },
+          ],
+        },
+      },
+      _source: ['id'],
+      sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+      track_total_hits: true,
+    };
+
+    it('should search without search_after on the first page', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'a',
+              _source: { id: 'exec-a' },
+              sort: ['2024-01-01T00:00:00.000Z', 'exec-a'],
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        ...baseSearchExpectation,
+        size: 10,
+      });
+      expect(result).toEqual({
+        results: ['exec-a'],
+        total: 1,
+        nextSearchAfter: undefined,
+      });
+    });
+
+    it('should cap size at 10000 for ES max_result_window', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 50_000,
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        ...baseSearchExpectation,
+        size: 10000,
+      });
+    });
+
+    it('should pass search_after when continuing pagination', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      const searchAfter = ['2024-01-01T00:00:00.000Z', 'exec-a'] as const;
+
+      await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+        searchAfter: [...searchAfter],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        ...baseSearchExpectation,
+        size: 10,
+        search_after: [...searchAfter],
+      });
+    });
+
+    it('should omit search_after when searchAfter is an empty array', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+        searchAfter: [],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        ...baseSearchExpectation,
+        size: 10,
+      });
+    });
+
+    it('should return nextSearchAfter when the page is full', async () => {
+      const lastSort = ['2024-01-02T00:00:00.000Z', 'exec-b'] as const;
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'a',
+              _source: { id: 'exec-a' },
+              sort: ['2024-01-01T00:00:00.000Z', 'exec-a'],
+            },
+            {
+              _id: 'b',
+              _source: { id: 'exec-b' },
+              sort: [...lastSort],
+            },
+          ],
+          total: { value: 5, relation: 'eq' },
+        },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 2,
+      });
+
+      expect(result.results).toEqual(['exec-a', 'exec-b']);
+      expect(result.total).toBe(5);
+      expect(result.nextSearchAfter).toEqual([...lastSort]);
+    });
+
+    it('should not return nextSearchAfter when the page is not full', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'a',
+              _source: { id: 'exec-a' },
+              sort: ['2024-01-01T00:00:00.000Z', 'exec-a'],
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+      });
+
+      expect(result.results).toEqual(['exec-a']);
+      expect(result.nextSearchAfter).toBeUndefined();
+    });
+
+    it('should fall back to _id when _source.id is missing', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'exec-from-id',
+              _source: {},
+              sort: ['2024-01-01T00:00:00.000Z', 'exec-from-id'],
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+      });
+
+      expect(result.results).toEqual(['exec-from-id']);
+    });
+
+    it('should parse total when returned as a number', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: 0 },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+      });
+
+      expect(result.total).toBe(0);
+    });
+
+    it('should default total to 0 when total is missing', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [] },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 10,
+      });
+
+      expect(result.total).toBe(0);
+    });
+
+    it('should not set nextSearchAfter when the last hit has no sort values', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: 'a', _source: { id: 'exec-a' } },
+            { _id: 'b', _source: { id: 'exec-b' } },
+          ],
+          total: { value: 2, relation: 'eq' },
+        },
+      });
+
+      const result = await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 2,
+      });
+
+      expect(result.results).toEqual(['exec-a', 'exec-b']);
+      expect(result.nextSearchAfter).toBeUndefined();
     });
   });
 });

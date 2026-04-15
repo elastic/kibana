@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { AgentBuilderUiFtrProviderContext } from '../../../agent_builder/services/functional';
+import { deleteAllTools } from '../../utils/tool_helpers';
 
 export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProviderContext) {
   const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
+  const supertest = getService('supertest');
   const es = getService('es');
 
   describe('create tool', function () {
@@ -32,6 +33,7 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
     });
 
     after(async () => {
+      await deleteAllTools(supertest);
       try {
         await es.indices.delete({ index: testIndexName });
       } catch (e) {
@@ -55,7 +57,10 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
       await agentBuilder.saveTool();
 
-      expect(await agentBuilder.isToolInTable(toolId)).to.be(true);
+      // Search for the tool to handle pagination
+      const search = agentBuilder.toolsSearch();
+      await search.type(toolId);
+      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${toolId}`);
     });
 
     it('should create an index search tool', async () => {
@@ -74,7 +79,10 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
       await agentBuilder.saveTool();
 
-      expect(await agentBuilder.isToolInTable(toolId)).to.be(true);
+      // Search for the tool to handle pagination
+      const search = agentBuilder.toolsSearch();
+      await search.type(toolId);
+      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${toolId}`);
     });
   });
 }

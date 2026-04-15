@@ -25,6 +25,36 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
     'xpack.securitySolution.endpointExceptions.pageAddButtonTitle',
     { defaultMessage: 'Add endpoint exception' }
   ),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import Endpoint exceptions',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export Endpoint exceptions',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.exportSuccessToastTitle',
+    {
+      defaultMessage: 'Endpoint exceptions exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.exportErrorToastTitle',
+    {
+      defaultMessage: 'Endpoint exceptions export failed',
+    }
+  ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'You can only import Endpoint exceptions here.',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.endpointExceptions.showingTotal', {
       defaultMessage:
@@ -102,6 +132,10 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.endpointExceptions.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add endpoint exception' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import Endpoint exceptions' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.endpointExceptions.searchPlaceholderInfo',

@@ -16,18 +16,13 @@ import { getSearchSuggestionsAggregationBuilder } from './options_list_search_su
  * Suggestion aggregations
  */
 export const getSuggestionAggregationBuilder = (request: OptionsListRequestBody) => {
-  const { searchString, searchTechnique, allowExpensiveQueries } = request;
+  const { searchString, searchTechnique } = request;
   const hasSearchString = searchString && searchString.length > 0;
   if (!hasSearchString) {
-    // the field type only matters when there is a search string; so, if no search string,
-    // return generic "fetch all" aggregation builder
     return getAllSuggestionsAggregationBuilder();
-  } else if (!allowExpensiveQueries || searchTechnique === 'exact') {
-    // if `allowExpensiveQueries` is false, only support exact match searching; also, field type
-    // once again does not matter when building an exact match aggregation
+  } else if (searchTechnique === 'exact') {
     return getExactMatchAggregationBuilder();
   } else {
-    // at this point, the type of the field matters - so, fetch the type-specific search agg
     return getSearchSuggestionsAggregationBuilder(request);
   }
 };

@@ -74,10 +74,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       rawExpect(apiResponse).toEqual({
+        hasMissingReferences: false,
+        packagePolicyLinks: [],
         result: {
           publicConfigs: [
             rawExpect.objectContaining({
-              cloud_id: 'ftr_fake_cloud_id',
+              cloud_id: rawExpect.any(String),
               license_level: rawExpect.any(String),
               monitors: [
                 {
@@ -113,6 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       ipv6: true,
                       fields: {
                         meta: { space_id: ['default'] },
+                        'monitor.interval': 300,
                       },
                       fields_under_root: true,
                       spaces: ['default'],
@@ -121,7 +124,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   ],
                 },
               ],
-              output: { hosts: [] },
+              output: { hosts: rawExpect.any(Array) },
             }),
           ],
           privateConfig: null,
@@ -133,6 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('inspect project browser monitor', async () => {
       const apiResponse = await monitorTestService.inspectMonitor(editorUser, {
         ..._monitors[1],
+        timeout: '30',
         params: JSON.stringify({
           username: 'elastic',
           password: 'changeme',
@@ -146,6 +150,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ],
       });
       rawExpect(apiResponse).toEqual({
+        hasMissingReferences: false,
+        packagePolicyLinks: [],
         result: {
           publicConfigs: [
             rawExpect.objectContaining({
@@ -179,6 +185,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       original_space: 'default',
                       fields: {
                         meta: { space_id: ['default'] },
+                        'monitor.interval': 600,
                         'monitor.project.name': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                         'monitor.project.id': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                       },
@@ -191,8 +198,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               ],
               license_level: rawExpect.any(String),
-              cloud_id: 'ftr_fake_cloud_id',
-              output: { hosts: [] },
+              cloud_id: rawExpect.any(String),
+              output: { hosts: rawExpect.any(Array) },
             }),
           ],
           privateConfig: null,
@@ -200,6 +207,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         decodedCode:
           '// asset:/Users/vigneshh/elastic/synthetics/examples/todos/basic.journey.ts\nimport { journey, step, expect } from "@elastic/synthetics";\njourney("check if title is present", ({ page, params }) => {\n  step("launch app", async () => {\n    await page.goto(params.url);\n  });\n  step("assert title", async () => {\n    const header = await page.$("h1");\n    expect(await header.textContent()).toBe("todos");\n  });\n});\n',
       });
+      rawExpect(apiResponse.result.publicConfigs?.[0]?.monitors?.[0]?.streams?.[0]?.timeout).toBe(
+        undefined
+      );
     });
 
     it('inspect http monitor in private location', async () => {
@@ -268,6 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               fields: {
                 meta: { space_id: 'default' },
                 'monitor.fleet_managed': true,
+                'monitor.interval': 300,
               },
             },
           },

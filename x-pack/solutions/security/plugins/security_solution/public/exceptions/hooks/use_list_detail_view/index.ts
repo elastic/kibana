@@ -15,6 +15,7 @@ import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-i
 import { useApi } from '@kbn/securitysolution-list-hooks';
 import { isEqual } from 'lodash';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
@@ -54,13 +55,20 @@ export const useListDetailsView = (exceptionListId: string) => {
   const { navigateToApp } = services.application;
 
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
-  const { read: canReadRules, edit: canEditRules } = useUserPrivileges().rulesPrivileges;
+  const {
+    exceptions: { edit: canEditExceptions },
+    rules: { read: canReadRules },
+  } = useUserPrivileges().rulesPrivileges;
+
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
 
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const canUserWriteCurrentList =
     exceptionListId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
       ? canWriteEndpointExceptions
-      : canEditRules;
+      : canEditExceptions;
 
   const [isLoading, setIsLoading] = useState<boolean>();
   const [showManageButtonLoader, setShowManageButtonLoader] = useState<boolean>(false);
@@ -112,7 +120,13 @@ export const useListDetailsView = (exceptionListId: string) => {
   const initializeListRules = useCallback(
     async (result: Awaited<ReturnType<typeof getListById>>) => {
       if (result) {
-        const listRules = canReadRules ? await getListRules(result.list_id) : [];
+        const listRules = canReadRules
+          ? await getListRules({
+              id: result.id,
+              listId: result.list_id,
+              namespaceType: result.namespace_type,
+            })
+          : [];
         setLinkedRules(listRules);
       }
     },
@@ -121,9 +135,11 @@ export const useListDetailsView = (exceptionListId: string) => {
 
   const initializeList = useCallback(async () => {
     try {
-      const endpointArtifactIds = ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
-        (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-      );
+      const endpointArtifactIds = isEndpointExceptionsMovedFFEnabled
+        ? ALL_ENDPOINT_ARTIFACT_LIST_IDS
+        : ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+            (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+          );
       if ((endpointArtifactIds as string[]).includes(exceptionListId))
         return setInvalidListId(true);
       setIsLoading(true);
@@ -150,7 +166,13 @@ export const useListDetailsView = (exceptionListId: string) => {
         i18n.EXCEPTION_ERROR_DESCRIPTION
       );
     }
-  }, [exceptionListId, http, initializeListRules, handleErrorStatus]);
+  }, [
+    isEndpointExceptionsMovedFFEnabled,
+    exceptionListId,
+    http,
+    initializeListRules,
+    handleErrorStatus,
+  ]);
 
   useEffect(() => {
     initializeList();
@@ -242,12 +264,12 @@ export const useListDetailsView = (exceptionListId: string) => {
   // #region DeleteList
 
   const handleDeleteSuccess = useCallback(
-    (listId?: string) => () => {
+    (listName: string) => () => {
       notifications.toasts.addSuccess({
-        title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+        title: i18n.exceptionDeleteSuccessMessage(listName),
       });
     },
-    [notifications.toasts, referenceModalState.listId]
+    [notifications.toasts]
   );
 
   const handleDeleteError = useCallback(
@@ -264,17 +286,20 @@ export const useListDetailsView = (exceptionListId: string) => {
         id: list.id,
         namespaceType: list.namespace_type,
         onError: handleDeleteError,
-        onSuccess: handleDeleteSuccess,
+        onSuccess: () => {
+          handleDeleteSuccess(list.name)();
+          setReferenceModalState(exceptionReferenceModalInitialState);
+          setShowReferenceErrorModal(false);
+          navigateToApp(APP_UI_ID, {
+            deepLinkId: SecurityPageName.exceptions,
+            path: '',
+          });
+        },
       });
     } catch (error) {
       handleErrorStatus(error);
-    } finally {
       setReferenceModalState(exceptionReferenceModalInitialState);
       setShowReferenceErrorModal(false);
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.exceptions,
-        path: '',
-      });
     }
   }, [
     list,
@@ -416,7 +441,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     listName: list?.name,
     listDescription: list?.description,
     listId: exceptionListId,
-    canUserEditList,
+    canUserEditList: canUserEditList && canUserWriteCurrentList,
     linkedRules,
     exportedList,
     handleOnDownload,

@@ -51,12 +51,14 @@ export const SyntheticsSharedContext: React.FC<
         spaces: startPlugins.spaces,
         fleet: startPlugins.fleet,
         share: startPlugins.share,
+        kql: startPlugins.kql,
         unifiedSearch: startPlugins.unifiedSearch,
         embeddable: startPlugins.embeddable,
         slo: startPlugins.slo,
         serverless: startPlugins.serverless,
         charts: startPlugins.charts,
         uiActions: startPlugins.uiActions,
+        agentBuilder: startPlugins.agentBuilder,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>

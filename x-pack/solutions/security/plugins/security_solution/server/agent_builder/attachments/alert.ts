@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
@@ -16,8 +16,9 @@ import {
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_ALERTS_TOOL_ID,
 } from '../tools';
+import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-export const alertAttachmentDataSchema = z.object({
+export const alertAttachmentDataSchema = securityAttachmentDataSchema.extend({
   alert: z.string(),
 });
 

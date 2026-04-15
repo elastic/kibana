@@ -93,54 +93,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should disable link if dashboard does not exist', async () => {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        expect(await testSubjects.exists('dashboardLink--link004--error')).to.be(true);
-        expect(await testSubjects.isEnabled('dashboardLink--link004--error')).to.be(false);
-      });
-
-      it('useCurrentFilters should pass filter pills and query', async () => {
-        /**
-         * dashboard links002 has a saved filter and query bar.
-         * The link to dashboard links001 only has useCurrentFilters enabled
-         * so the link should pass the filters and query to dashboard links001
-         * but should not override the date range.
-         */
-        await dashboard.loadSavedDashboard('links 002');
-        await dashboard.waitForRenderComplete();
-        await testSubjects.clickWhenNotDisabled('dashboardLink--link001');
-        await header.waitUntilLoadingHasFinished();
-        expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
-          '0930f310-5bc2-11ee-9a85-7b86504227bc'
+        expect(await testSubjects.exists('dashboardLink--Error fetching dashboard--error')).to.be(
+          true
         );
-        await dashboard.waitForRenderComplete();
-        // Should pass the filters
-        expect(await filterBar.getFilterCount()).to.equal(2);
-        const filterLabels = await filterBar.getFiltersLabel();
         expect(
-          filterLabels.includes('This filter should only pass from links002 to links001')
-        ).to.equal(true);
-        expect(
-          filterLabels.includes('This filter should not pass from links001 to links002')
-        ).to.equal(true);
-
-        // Should not pass the date range
-        const time = await timePicker.getTimeConfig();
-        expect(time.start).to.be('Oct 31, 2018 @ 00:00:00.000');
-        expect(time.end).to.be('Nov 1, 2018 @ 00:00:00.000');
-
-        await dashboard.clickDiscardChanges();
+          await testSubjects.isEnabled('dashboardLink--Error fetching dashboard--error')
+        ).to.be(false);
       });
 
-      it('useCurrentDateRange should pass date range', async () => {
+      describe('useFilters', function () {
+        // FIPS mode with trial license triggers a different dashboard save flow causing
+        // clickDiscardChanges() to time out waiting for dashboardQuickSaveMenuItem-secondary-button
+        this.tags('skipFIPS');
+
+        it('useFilters should pass filter pills and query', async () => {
+          /**
+           * dashboard links002 has a saved filter and query bar.
+           * The link to dashboard links001 only has useFilters enabled
+           * so the link should pass the filters and query to dashboard links001
+           * but should not override the date range.
+           */
+          await dashboard.loadSavedDashboard('links 002');
+          await dashboard.waitForRenderComplete();
+          await testSubjects.clickWhenNotDisabled('dashboardLink--links 001');
+          await header.waitUntilLoadingHasFinished();
+          expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
+            '0930f310-5bc2-11ee-9a85-7b86504227bc'
+          );
+          await dashboard.waitForRenderComplete();
+          // Should pass the filters
+          expect(await filterBar.getFilterCount()).to.equal(2);
+          const filterLabels = await filterBar.getFiltersLabel();
+          expect(
+            filterLabels.includes('This filter should only pass from links002 to links001')
+          ).to.equal(true);
+          expect(
+            filterLabels.includes('This filter should not pass from links001 to links002')
+          ).to.equal(true);
+
+          // Should not pass the date range
+          const time = await timePicker.getTimeConfig();
+          expect(time.start).to.be('Oct 31, 2018 @ 00:00:00.000');
+          expect(time.end).to.be('Nov 1, 2018 @ 00:00:00.000');
+
+          await dashboard.clickDiscardChanges();
+        });
+      });
+
+      it('useTimeRange should pass date range', async () => {
         /**
          * dashboard links001 has saved filters and a saved date range.
          * dashboard links002 has a different saved date range than links001.
-         * The link to dashboard links002 only has useCurrentDateRange enabled
+         * The link to dashboard links002 only has useTimeRange enabled
          * so the link should override the date range on dashboard links002
          * but should not pass its filters.
          */
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        await testSubjects.clickWhenNotDisabled('dashboardLink--link002');
+        await testSubjects.clickWhenNotDisabled('dashboardLink--links 002');
         await header.waitUntilLoadingHasFinished();
         expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
           '24751520-5bc2-11ee-9a85-7b86504227bc'
@@ -174,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          */
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        await testSubjects.clickWhenNotDisabled('dashboardLink--link003');
+        await testSubjects.clickWhenNotDisabled('dashboardLink--links 003');
         await header.waitUntilLoadingHasFinished();
 
         // Should have opened another tab
@@ -211,13 +221,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should disable link if forbidden by external url policy', async () => {
-        const button = await testSubjects.find('externalLink--link777--error');
+        const button = await testSubjects.find('externalLink--external link violation--error');
         const isDisabled = await button.getAttribute('disabled');
         expect(isDisabled).to.be('true');
       });
 
       it('should create an external link when openInNewTab is enabled', async () => {
-        await testSubjects.clickWhenNotDisabled('externalLink--link999');
+        await testSubjects.clickWhenNotDisabled('externalLink--opens in new tab');
 
         // Should have opened another tab
         const windowHandlers = await browser.getAllWindowHandles();
@@ -228,7 +238,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should open in same tab when openInNewTab is disabled', async () => {
-        await testSubjects.clickWhenNotDisabled('externalLink--link888');
+        await testSubjects.clickWhenNotDisabled('externalLink--opens in same tab');
 
         // Should have opened in the same tab
         const windowHandlers = await browser.getAllWindowHandles();

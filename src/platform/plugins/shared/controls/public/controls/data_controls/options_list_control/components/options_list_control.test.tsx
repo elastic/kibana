@@ -9,20 +9,21 @@
 
 import React from 'react';
 
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { render } from '@testing-library/react';
+
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
-import type { OptionsListComponentApi } from '../types';
+import type { DSLOptionsListComponentApi } from '../types';
 import { OptionsListControl } from './options_list_control';
-import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
 
 describe('Options list control', () => {
   const mountComponent = ({
     componentApi,
     displaySettings,
   }: {
-    componentApi: OptionsListComponentApi;
+    componentApi: DSLOptionsListComponentApi;
     displaySettings: OptionsListDisplaySettings;
   }) => {
     return render(
@@ -32,7 +33,7 @@ describe('Options list control', () => {
           displaySettings,
         }}
       >
-        <OptionsListControl controlPanelClassName="controlPanel" />
+        <OptionsListControl isPinned={true} />
       </OptionsListControlContext.Provider>
     );
   };

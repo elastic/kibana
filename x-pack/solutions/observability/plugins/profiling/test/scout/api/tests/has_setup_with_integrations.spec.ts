@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esResourcesEndpoint } from '../../common/fixtures/constants';
 
-apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, () => {
+apiTest.describe('Collector integration is not installed', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
     await profilingSetup.cleanup();
@@ -30,9 +31,9 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
 
     const adminRes = await apiClient.get(esResourcesEndpoint);
     const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBeFalsy();
-    expect(adminStatus.has_data).toBeFalsy();
-    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
+    expect(adminStatus.has_setup).toBeUndefined();
+    expect(adminStatus.has_data).toBeUndefined();
+    expect(adminStatus.pre_8_9_1_data).toBeUndefined();
 
     const readRes = await apiClient.get(esResourcesEndpoint, {
       headers: {
@@ -42,10 +43,10 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
       },
     });
     const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBeFalsy();
-    expect(readStatus.has_data).toBeFalsy();
-    expect(readStatus.pre_8_9_1_data).toBeFalsy();
-    expect(readStatus.has_required_role).toBeFalsy();
+    expect(readStatus.has_setup).toBe(false);
+    expect(readStatus.has_data).toBe(false);
+    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.has_required_role).toBe(false);
   });
 
   apiTest(
@@ -67,9 +68,9 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
         },
       });
       const adminStatus = adminRes.body;
-      expect(adminStatus.has_setup).toBeFalsy();
-      expect(adminStatus.has_data).toBeFalsy();
-      expect(adminStatus.pre_8_9_1_data).toBeFalsy();
+      expect(adminStatus.has_setup).toBe(false);
+      expect(adminStatus.has_data).toBe(false);
+      expect(adminStatus.pre_8_9_1_data).toBe(false);
 
       const readRes = await apiClient.get(esResourcesEndpoint, {
         headers: {
@@ -77,10 +78,10 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
         },
       });
       const readStatus = readRes.body;
-      expect(readStatus.has_setup).toBeFalsy();
-      expect(readStatus.has_data).toBeFalsy();
-      expect(readStatus.pre_8_9_1_data).toBeFalsy();
-      expect(readStatus.has_required_role).toBeFalsy();
+      expect(readStatus.has_setup).toBe(false);
+      expect(readStatus.has_data).toBe(false);
+      expect(readStatus.pre_8_9_1_data).toBe(false);
+      expect(readStatus.has_required_role).toBe(false);
     }
   );
 });

@@ -35,7 +35,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
-import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts';
@@ -140,7 +141,14 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
       hasPartialCodeSignatureEntry([exception])
     );
 
-    const showAssignmentSection = useCanAssignArtifactPerPolicy(exception, mode, hasFormChanged);
+    const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+
+    const canAssignArtifactPerPolicy = useCanAssignArtifactPerPolicy(
+      exception,
+      mode,
+      hasFormChanged
+    );
+    const showAssignmentSection = isPerPolicyOptIn?.status === true && canAssignArtifactPerPolicy;
 
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
       ENDPOINT_ALERTS_INDEX_NAMES,

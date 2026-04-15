@@ -29,6 +29,7 @@ import type { MlLicense } from '../../common/license';
 import type { MlClient } from './ml_client';
 import { MlAuditLogger, getMlClient } from './ml_client';
 import { getDataViewsServiceFactory } from './data_views_utils';
+import type { ServerlessInfo } from '../types';
 
 type MLRequestHandlerContext = CustomRequestHandlerContext<{
   alerting?: AlertingApiRequestHandlerContext;
@@ -58,6 +59,7 @@ export class RouteGuard {
   private _isMlReady: () => Promise<void>;
   private _getDataViews: GetDataViews;
   private _getStartServices: CoreSetup['getStartServices'];
+  private _serverless: ServerlessInfo;
 
   constructor(
     mlLicense: MlLicense,
@@ -67,7 +69,8 @@ export class RouteGuard {
     authorization: SecurityPluginSetup['authz'] | undefined,
     isMlReady: () => Promise<void>,
     getDataViews: GetDataViews,
-    getStartServices: CoreSetup['getStartServices']
+    getStartServices: CoreSetup['getStartServices'],
+    serverless: ServerlessInfo
   ) {
     this._mlLicense = mlLicense;
     this._getMlSavedObjectClient = getSavedObject;
@@ -77,6 +80,7 @@ export class RouteGuard {
     this._isMlReady = isMlReady;
     this._getDataViews = getDataViews;
     this._getStartServices = getStartServices;
+    this._serverless = serverless;
   }
 
   public fullLicenseAPIGuard<P, Q, B>(handler: Handler<P, Q, B>) {
@@ -131,7 +135,13 @@ export class RouteGuard {
           response,
           context,
           mlSavedObjectService,
-          mlClient: getMlClient(client, mlSavedObjectService, auditLogger),
+          mlClient: getMlClient(
+            client,
+            mlSavedObjectService,
+            auditLogger,
+            this._mlLicense,
+            this._serverless
+          ),
           getDataViewsService: getDataViewsServiceFactory(
             this._getDataViews,
             savedObjectClient,

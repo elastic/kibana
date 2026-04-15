@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const toasts = getService('toasts');
 
   describe('telemetry', () => {
     describe('context', () => {
@@ -399,6 +400,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
 
         // event 3
+        // preventing flakiness in this case, there were 2 toasts displayed, covering the cell in the flaky case
+        await toasts.dismissAll();
         await dataGrid.clickFieldActionInFlyout('log.level', 'addFilterOutValueButton');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -433,16 +436,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('trackSubmittingQuery telemetry', () => {
       beforeEach(async () => {
+        await discover.resetQueryMode();
         await common.navigateToApp('discover');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await ebtUIHelper.setOptIn(true);
       });
 
       it('should track field usage for KQL queries', async () => {
         await queryBar.setQuery('agent.name: "java" and log.level : "debug"');
         await queryBar.submitQuery();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['discover_query_fields_usage'],
@@ -461,7 +464,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'from my-example-* | where agent.name == "java" and log.level == "debug"'
         );
         await testSubjects.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['discover_query_fields_usage'],
@@ -480,7 +483,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'from my-example-* | where agent.name == "java" and KQL("""log.level:"debug" """)'
         );
         await testSubjects.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['discover_query_fields_usage'],
@@ -496,7 +499,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should track free text search as __FREE_TEXT__ placeholder', async () => {
         await queryBar.setQuery('error occurred');
         await queryBar.submitQuery();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['discover_query_fields_usage'],

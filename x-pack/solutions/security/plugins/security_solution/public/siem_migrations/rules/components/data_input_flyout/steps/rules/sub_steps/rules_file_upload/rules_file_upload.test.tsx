@@ -119,7 +119,7 @@ describe('RulesFileUpload', () => {
     expect(mockCreateMigration).toHaveBeenNthCalledWith(1, {
       migrationName,
       rules: rulesToExpect,
-      migrationSource: MigrationSource.SPLUNK,
+      vendor: MigrationSource.SPLUNK,
     });
   });
 

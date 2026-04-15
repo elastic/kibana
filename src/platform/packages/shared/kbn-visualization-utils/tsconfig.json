@@ -4,15 +4,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/interpreter",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
-    "@kbn/data-plugin",
+    "@kbn/data-plugin"
   ]
 }

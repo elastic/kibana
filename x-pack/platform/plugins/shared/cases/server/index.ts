@@ -19,6 +19,12 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     incrementalId: {
       enabled: true,
     },
+    templates: {
+      enabled: true,
+    },
+    attachments: {
+      enabled: true,
+    },
   },
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
@@ -29,4 +35,4 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   return new CasePlugin(initializerContext);
 };
 
-export type { CasesServerSetup, CasesServerStart } from './types';
+export type { CasesServerSetup, CasesServerStart, CloseReasonValidator } from './types';

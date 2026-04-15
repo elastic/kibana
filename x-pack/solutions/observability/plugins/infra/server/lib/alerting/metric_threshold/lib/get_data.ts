@@ -7,6 +7,7 @@
 
 import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DataViewBase } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -121,6 +122,7 @@ export const getData = async (
   alertOnGroupDisappear: boolean,
   timeframe: { start: number; end: number },
   logger: Logger,
+  dataView?: DataViewBase,
   lastPeriodEnd?: number,
   previousResults: GetDataResponse = {},
   afterKey?: Record<string, string>
@@ -195,6 +197,7 @@ export const getData = async (
           alertOnGroupDisappear,
           timeframe,
           logger,
+          dataView,
           lastPeriodEnd,
           previous,
           nextAfterKey
@@ -238,7 +241,7 @@ export const getData = async (
             : false;
         return {
           [UNGROUPED_FACTORY_KEY]: {
-            value,
+            value: trigger || warn ? value : null,
             warn,
             trigger,
             bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
@@ -275,7 +278,8 @@ export const getData = async (
       groupBy,
       filterQuery,
       afterKey,
-      fieldsExisted
+      fieldsExisted,
+      dataView
     ),
   };
   logger.trace(() => `Request: ${JSON.stringify(request)}`);

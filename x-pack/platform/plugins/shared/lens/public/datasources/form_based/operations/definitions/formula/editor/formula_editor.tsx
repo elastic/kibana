@@ -103,7 +103,7 @@ export function FormulaEditor({
   columnId,
   indexPattern,
   operationDefinitionMap,
-  unifiedSearch,
+  kql,
   dataViews,
   toggleFullscreen,
   isFullscreen,
@@ -457,7 +457,7 @@ export function FormulaEditor({
             context,
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
-            unifiedSearch,
+            kql,
             dataViews,
             dateHistogramInterval: baseIntervalRef.current,
             timefilter: data.query.timefilter.timefilter,
@@ -470,7 +470,7 @@ export function FormulaEditor({
           context,
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
-          unifiedSearch,
+          kql,
           dataViews,
           dateHistogramInterval: baseIntervalRef.current,
           timefilter: data.query.timefilter.timefilter,
@@ -489,7 +489,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, data.query.timefilter.timefilter]
+    [indexPattern, visibleOperationsMap, kql, dataViews, data.query.timefilter.timefilter]
   );
 
   const provideSignatureHelp = useCallback(
@@ -866,7 +866,7 @@ export function FormulaEditor({
                       onClick={() => setIsHelpOpen(!isHelpOpen)}
                     >
                       <EuiIcon type="documentation" />
-                      <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
+                      <EuiIcon type={isHelpOpen ? 'chevronSingleDown' : 'chevronSingleUp'} />
                     </EuiLink>
                   </EuiToolTip>
                 ) : (

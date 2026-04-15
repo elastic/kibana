@@ -6,6 +6,7 @@
  */
 
 import type { ReactWrapper } from 'enzyme';
+import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { Simulator } from '../test_utilities/simulator';
@@ -41,6 +42,7 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
       databaseDocumentID,
       dataAccessLayer,
       resolverComponentInstanceID,
+      history: createMemoryHistory(),
       indices: [],
       shouldUpdate: false,
       filters: {},
@@ -96,6 +98,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       databaseDocumentID,
       dataAccessLayer,
       resolverComponentInstanceID,
+      history: createMemoryHistory(),
       indices: [],
       shouldUpdate: false,
       filters: {},
@@ -302,6 +305,7 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
         databaseDocumentID,
         dataAccessLayer: { ...generatorDAL, nodeData: nodeDataError },
         resolverComponentInstanceID,
+        history: createMemoryHistory(),
         indices: [],
         shouldUpdate: false,
         filters: {},
@@ -360,6 +364,7 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
         databaseDocumentID,
         dataAccessLayer: generatorDAL,
         resolverComponentInstanceID,
+        history: createMemoryHistory(),
         indices: [],
         shouldUpdate: false,
         filters: {},
@@ -436,6 +441,7 @@ describe('Resolver, when analyzing a tree that has 2 related registry and 1 rela
       databaseDocumentID,
       dataAccessLayer,
       resolverComponentInstanceID,
+      history: createMemoryHistory(),
       indices: [],
       shouldUpdate: false,
       filters: {},

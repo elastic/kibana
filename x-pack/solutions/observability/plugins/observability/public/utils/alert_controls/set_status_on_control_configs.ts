@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Writable } from '@kbn/utility-types';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
@@ -13,15 +14,17 @@ import type { AlertStatus } from '../../../common/typings';
 
 export function setStatusOnControlConfigs(
   status: AlertStatus,
-  controlConfigs?: FilterControlConfig[]
+  controlConfigs?: Writable<FilterControlConfig>[]
 ) {
-  const updateControlConfigs = controlConfigs ? [...controlConfigs] : DEFAULT_CONTROLS;
-  const statusControl = updateControlConfigs.find((control) => control.fieldName === ALERT_STATUS);
+  const updateControlConfigs = controlConfigs
+    ? [...controlConfigs]
+    : (DEFAULT_CONTROLS as Writable<FilterControlConfig>[]);
+  const statusControl = updateControlConfigs.find((control) => control.field_name === ALERT_STATUS);
   if (statusControl) {
     if (status === ALERT_STATUS_ALL) {
-      statusControl.selectedOptions = [];
+      statusControl.selected_options = [];
     } else {
-      statusControl.selectedOptions = [status];
+      statusControl.selected_options = [status];
     }
   }
 

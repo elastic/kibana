@@ -30,6 +30,8 @@
           "\nConfiguration schema for the OTLP exporter (gRPC or HTTP)."
         ],
         "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               "\nThe URL for OTLP receiver endpoint."
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -59,6 +63,8 @@
               "Record<string, string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -72,6 +78,8 @@
               "\nThe delay in milliseconds before the exporter sends another\nbatch of spans."
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -88,6 +96,8 @@
           "\nConfiguration for OpenTelemetry tracing"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,6 +111,8 @@
               "\nWhether OpenTelemetry tracing is enabled."
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -114,6 +126,8 @@
               "\nAt which rate spans get sampled if a sampling decision\nneeds to be made. Should be between 0-1."
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,6 +159,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -181,9 +197,19 @@
             "section": "def-common.OTLPExportConfig",
             "text": "OTLPExportConfig"
           },
+          "; } | { proto: ",
+          {
+            "pluginId": "@kbn/tracing-config",
+            "scope": "common",
+            "docId": "kibKbnTracingConfigPluginApi",
+            "section": "def-common.OTLPExportConfig",
+            "text": "OTLPExportConfig"
+          },
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -218,6 +244,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-config/src/schema.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

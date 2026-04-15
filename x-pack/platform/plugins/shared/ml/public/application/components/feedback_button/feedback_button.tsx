@@ -70,7 +70,7 @@ export const getSurveyFeedbackURL = ({
 
 export const FeedBackButton: FC<Props> = ({ jobIds }) => {
   const {
-    services: { kibanaVersion },
+    services: { kibanaVersion, notifications },
   } = useMlKibana();
   const { isCloud: isCloudEnv } = useCloudCheck();
   // ML does not have an explicit isServerless flag,
@@ -79,6 +79,7 @@ export const FeedBackButton: FC<Props> = ({ jobIds }) => {
   // showNodeInfo will always be false in a serverless environment
   // and true in a non-serverless environment.
   const { showNodeInfo } = useEnabledFeatures();
+  const isFeedbackEnabled = notifications.feedback.isEnabled();
 
   const href = useMemo(() => {
     if (jobIds.length === 0) {
@@ -97,12 +98,14 @@ export const FeedBackButton: FC<Props> = ({ jobIds }) => {
     return null;
   }
 
+  if (!isFeedbackEnabled) return null;
+
   return (
     <EuiButtonEmpty
       aria-label={FEEDBACK_BUTTON_DEFAULT_TEXT}
       href={href}
       size="s"
-      iconType={'popout'}
+      iconType="external"
       iconSide="right"
       target="_blank"
       data-test-subj={'mlFeatureFeedbackButton'}

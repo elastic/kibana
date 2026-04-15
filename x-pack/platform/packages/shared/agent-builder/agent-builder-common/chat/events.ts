@@ -7,13 +7,15 @@
 
 import type { AgentBuilderEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
-import type { ConversationRound } from './conversation';
+import type { ConversationInternalState, ConversationRound } from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
+import type { VersionedAttachment } from '../attachments';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
   browserToolCall = 'browser_tool_call',
   toolProgress = 'tool_progress',
+  toolUi = 'tool_ui',
   toolResult = 'tool_result',
   reasoning = 'reasoning',
   messageChunk = 'message_chunk',
@@ -24,6 +26,8 @@ export enum ChatEventType {
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
   conversationIdSet = 'conversation_id_set',
+  compactionStarted = 'compaction_started',
+  compactionCompleted = 'compaction_completed',
 }
 
 export type ChatEventBase<
@@ -37,6 +41,7 @@ export interface ToolCallEventData {
   tool_call_id: string;
   tool_id: string;
   params: Record<string, unknown>;
+  tool_call_group_id?: string;
 }
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;
@@ -77,6 +82,30 @@ export const isToolProgressEvent = (
   return event.type === ChatEventType.toolProgress;
 };
 
+// Tool UI events
+
+export interface ToolUiEventData<TEvent = string, TData extends object = object> {
+  tool_id: string;
+  tool_call_id: string;
+  custom_event: TEvent;
+  data: TData;
+}
+
+export type ToolUiEvent<
+  TEvent extends string = string,
+  TData extends object = object
+> = ChatEventBase<ChatEventType.toolUi, ToolUiEventData<TEvent, TData>>;
+
+export const isToolUiEvent = <TEvent extends string = string, TData extends object = object>(
+  event: AgentBuilderEvent<string, any>,
+  customType?: TEvent
+): event is ToolUiEvent<TEvent, TData> => {
+  if (event.type !== ChatEventType.toolUi) {
+    return false;
+  }
+  return customType ? event.data.custom_event === customType : true;
+};
+
 // Tool result
 
 export interface ToolResultEventData {
@@ -113,6 +142,10 @@ export const isPromptRequestEvent = (
 export interface ReasoningEventData {
   /** plain text reasoning content */
   reasoning: string;
+  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  tool_call_id?: string;
+  /** when reasoning is bound to a tool call, the corresponding tool call group */
+  tool_call_group_id?: string;
   /** if true, will not be persisted or displaying in the thinking panel, only displayed as "current thinking" **/
   transient?: boolean;
 }
@@ -189,6 +222,12 @@ export interface RoundCompleteEventData {
   round: ConversationRound;
   /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
   resumed?: boolean;
+  /** if the prompt state was updated during the round, contains the up-to-date version */
+  conversation_state?: ConversationInternalState;
+  /**
+   * Updated conversation-level attachments after this round.
+   **/
+  attachments?: VersionedAttachment[];
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
@@ -252,6 +291,44 @@ export const isConversationIdSetEvent = (
   return event.type === ChatEventType.conversationIdSet;
 };
 
+// Compaction started
+
+export interface CompactionStartedEventData {
+  /** Estimated token count before compaction */
+  token_count_before: number;
+}
+
+export type CompactionStartedEvent = ChatEventBase<
+  ChatEventType.compactionStarted,
+  CompactionStartedEventData
+>;
+
+export const isCompactionStartedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is CompactionStartedEvent => {
+  return event.type === ChatEventType.compactionStarted;
+};
+
+// Compaction completed
+
+export interface CompactionCompletedEventData {
+  /** Estimated token count after compaction */
+  token_count_after: number;
+  /** Number of rounds that were summarized */
+  summarized_round_count: number;
+}
+
+export type CompactionCompletedEvent = ChatEventBase<
+  ChatEventType.compactionCompleted,
+  CompactionCompletedEventData
+>;
+
+export const isCompactionCompletedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is CompactionCompletedEvent => {
+  return event.type === ChatEventType.compactionCompleted;
+};
+
 /**
  * All types of events that can be emitted from an agent execution.
  */
@@ -259,13 +336,16 @@ export type ChatAgentEvent =
   | ToolCallEvent
   | BrowserToolCallEvent
   | ToolProgressEvent
+  | ToolUiEvent
   | ToolResultEvent
   | PromptRequestEvent
   | ReasoningEvent
   | MessageChunkEvent
   | MessageCompleteEvent
   | ThinkingCompleteEvent
-  | RoundCompleteEvent;
+  | RoundCompleteEvent
+  | CompactionStartedEvent
+  | CompactionCompletedEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

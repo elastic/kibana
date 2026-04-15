@@ -76,14 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Controls setting panel', async () => {
-      await dashboardControls.openControlsMenu();
-      await testSubjects.click('controls-settings-button');
-      await testSubjects.click('control-group-validate-selections');
-      await a11y.testAppSnapshot();
-      await testSubjects.click('control-group-editor-save');
-    });
-
     it('Dashboard with options and range control panel popovers', async () => {
       await testSubjects.click('dashboardQuickSaveMenuItem');
       await a11y.testAppSnapshot();

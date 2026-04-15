@@ -1,0 +1,93 @@
+# ST_X
+
+The ST_X command extracts the `x` coordinate from a supplied point. For points of type `geo_point`, this is equivalent to extracting the longitude value.
+
+## Syntax
+
+`ST_X(point)`
+
+### Parameters
+
+#### point
+
+Expression of type `geo_point` or `cartesian_point`. If the value is `null`, the function returns `null`.
+
+## Examples
+
+Extracts the x (longitude) and y (latitude) coordinates from a geo_point.
+```esql
+ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
+| EVAL x = ST_X(point), y = ST_Y(point)
+```
+
+# ST_Y
+
+The ST_Y command extracts the `y` coordinate from a supplied point. For points of type `geo_point`, this is equivalent to extracting the latitude value.
+
+## Syntax
+
+`ST_Y(point)`
+
+### Parameters
+
+#### point
+
+Expression of type `geo_point` or `cartesian_point`. If the value is `null`, the function returns `null`.
+
+## Examples
+
+Extracts the x (longitude) and y (latitude) coordinates from a geo_point.
+```esql
+ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
+| EVAL x = ST_X(point), y = ST_Y(point)
+```
+
+# ST_NPOINTS
+
+The ST_NPOINTS command counts the number of points in the supplied geometry.
+
+## Syntax
+
+`ST_NPOINTS(geometry)`
+
+### Parameters
+
+#### geometry
+
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function returns `null`.
+
+## Examples
+
+Counts the number of points in the city boundary geometry for the airport with abbreviation "CPH".
+```esql
+FROM airport_city_boundaries
+| WHERE abbrev == "CPH"
+| EVAL points = ST_NPOINTS(city_boundary)
+| KEEP abbrev, airport, points
+```
+
+# ST_SIMPLIFY
+
+The ST_SIMPLIFY command simplifies the input geometry by applying the Douglas-Peucker algorithm with a specified tolerance. Vertices within the tolerance distance from the simplified shape are removed. The resulting geometry may be invalid, even if the original input was valid.
+
+## Syntax
+
+`ST_SIMPLIFY(geometry, tolerance)`
+
+### Parameters
+
+#### geometry
+
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function returns `null`.
+
+#### tolerance
+
+Tolerance for the geometry simplification, in the units of the input spatial reference system (SRS).
+
+## Examples
+
+Simplifies a polygon geometry using a tolerance of 0.7 units.
+```esql
+ROW wkt = "POLYGON ((7.998 53.827, 9.470 53.068, 15.754 53.801, 16.523 57.160, 11.162 57.868, 8.064 57.445, 6.219 55.317, 7.998 53.827))"
+| EVAL simplified = ST_SIMPLIFY(TO_GEOSHAPE(wkt), 0.7)
+```

@@ -44,6 +44,8 @@ import { SearchBar } from '../../../components';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
+import { OPAMP_POLICY_NAME } from '../../agents/agent_list_page/components/add_collector_flyout';
+
 import { CreateAgentPolicyFlyout } from './components';
 
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
@@ -88,10 +90,11 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
 
   // Hide agentless policies by default unless showAgentless toggle is enabled
   const getSearchWithDefaults = (newSearch: string) => {
+    const kueryHideOpAMP = `NOT ${agentPolicySavedObjectType}.name:"${OPAMP_POLICY_NAME}"`;
     if (showAgentless) {
-      return newSearch;
+      return newSearch.trim() ? `(${kueryHideOpAMP}) AND (${newSearch})` : kueryHideOpAMP;
     }
-    const defaultSearch = `NOT ${agentPolicySavedObjectType}.supports_agentless:true`;
+    const defaultSearch = `NOT ${agentPolicySavedObjectType}.supports_agentless:true AND (${kueryHideOpAMP})`;
     return newSearch.trim() ? `(${defaultSearch}) AND (${newSearch})` : defaultSearch;
   };
 
@@ -262,7 +265,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     () => (
       <EuiButton
         fill
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={!hasFleetAllAgentPoliciesPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
         data-test-subj="createAgentPolicyButton"
@@ -280,7 +283,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     () => (
       <EuiButton
         fill
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={!hasFleetAllAgentPoliciesPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
         data-test-subj="emptyPromptCreateAgentPolicyButton"
@@ -386,6 +389,9 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
             />
           )
         }
+        tableCaption={i18n.translate('xpack.fleet.agentPolicyList.agentPolicies.tableCaption', {
+          defaultMessage: 'List of agent policies',
+        })}
         items={agentPolicyData ? agentPolicyData.items : []}
         itemId="id"
         columns={columns}

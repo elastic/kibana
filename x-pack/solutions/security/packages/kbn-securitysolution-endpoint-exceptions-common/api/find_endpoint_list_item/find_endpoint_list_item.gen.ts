@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
@@ -24,10 +24,10 @@ export const FindEndpointListItemsFilter = NonEmptyString;
 
 export type FindEndpointListItemsRequestQuery = z.infer<typeof FindEndpointListItemsRequestQuery>;
 export const FindEndpointListItemsRequestQuery = z.object({
-  /** 
+  /**
       * Filters the returned results according to the value of the specified field,
 using the `<field name>:<field value>` syntax.
- 
+
       */
   filter: FindEndpointListItemsFilter.optional(),
   /**

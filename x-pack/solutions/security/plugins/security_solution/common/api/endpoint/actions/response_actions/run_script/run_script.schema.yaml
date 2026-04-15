@@ -24,8 +24,8 @@ paths:
                   endpoint_ids: [ "ed518850-681a-4d60-bb98-e22640cae2a8" ]
                   agent_type: "sentinel_one"
                   parameters:
-                    script: "1111-2222-3333-4444-5555-6666-7777-8888"
-                    inputParams: "--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt"
+                    scriptId: "1111-2222-3333-4444-5555-6666-7777-8888"
+                    scriptInput: "--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt"
               MDE:
                 summary: "Run a script against a Microsoft Defender Endpoint agent"
                 description: "Microsoft Defender Endpoint runscript"
@@ -115,20 +115,20 @@ components:
       type: object
       title: SentinelOne Run Script Parameters
       required:
-        - script
+        - scriptId
       description: Parameters for Run Script response action against SentinelOne agent type.
       example:
         endpoint_ids: [ "endpoint-id-1" ]
         agent_type: "sentinel_one"
         parameters:
-          script: "1111-2222-3333-4444-5555-6666-7777-8888"
-          inputParams: "--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt"
+          scriptId: "1111-2222-3333-4444-5555-6666-7777-8888"
+          scriptInput: "--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt"
       properties:
-        script:
+        scriptId:
           type: string
           minLength: 1
           description: The script ID from SentinelOne scripts library that will be executed.
-        inputParams:
+        scriptInput:
           type: string
           minLength: 1
           description: The input parameter arguments for the script that was selected.

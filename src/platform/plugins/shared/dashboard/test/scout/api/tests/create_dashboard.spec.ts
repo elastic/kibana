@@ -1,0 +1,121 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { RoleApiCredentials } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
+import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
+
+apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => {
+  let editorCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
+
+  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+    // returns editor role in most deployment project and deployment types
+    editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
+    await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
+    await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
+  });
+
+  apiTest.afterAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.cleanStandardList();
+  });
+
+  apiTest('should create a dashboard', async ({ apiClient }) => {
+    const title = 'Hello world dashboard';
+
+    const response = await apiClient.post(DASHBOARD_API_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.data.title).toStrictEqual(title);
+  });
+
+  // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards
+  apiTest('can create a dashboard in a defined space', async ({ apiClient }) => {
+    const title = `foo-${Date.now()}-${Math.random()}`;
+    const spaceId = 'space-1';
+
+    const response = await apiClient.post(`s/${spaceId}/${DASHBOARD_API_PATH}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(201);
+  });
+
+  apiTest('validation - returns error when title is not provided', async ({ apiClient }) => {
+    const response = await apiClient.post(DASHBOARD_API_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {},
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      '[request body.title]: expected value of type [string] but got [undefined]'
+    );
+  });
+
+  apiTest('validation - returns error if panels is not an array', async ({ apiClient }) => {
+    const response = await apiClient.post(DASHBOARD_API_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title: 'foo',
+        panels: {},
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      '[request body.panels]: expected value of type [array] but got [Object]'
+    );
+  });
+
+  apiTest(
+    'validation - returns error if user does not have permission to create a dashboard',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(DASHBOARD_API_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: {
+          title: 'foo',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to create dashboard');
+    }
+  );
+});

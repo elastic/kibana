@@ -7,8 +7,12 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { DEFAULT_MODEL as BEDROCK_DEFAULT_MODEL } from '@kbn/connector-schemas/bedrock/constants';
+import { DEFAULT_MODEL as GEMINI_DEFAULT_MODEL } from '@kbn/connector-schemas/gemini/constants';
+import { DEFAULT_MODEL as OPENAI_DEFAULT_MODEL } from '@kbn/connector-schemas/openai/constants';
 import { GEMINI, DOCUMENTATION_BASE as DOCUMENTATION } from './translations';
-import { FieldType, type InternalOverrideFieldsType } from './types/types';
+import type { InternalOverrideFieldsType } from './types/types';
+import { FieldType } from './types/types';
 
 export enum ServiceProviderKeys {
   'alibabacloud-ai-search' = 'alibabacloud-ai-search',
@@ -33,6 +37,8 @@ export enum ServiceProviderKeys {
   ai21 = 'ai21',
   llama = 'llama',
   contextualai = 'contextualai',
+  fireworksai = 'fireworksai',
+  nvidia = 'nvidia',
 }
 
 export const GEMINI_REGION_DOC_LINK = (
@@ -74,8 +80,14 @@ export const internalProviderKeys: Array<ServiceProviderKeys | string> = [
 
 export const MAX_NUMBER_OF_ALLOCATIONS = 'max_number_of_allocations';
 export const CONTEXT_WINDOW_LENGTH = 'contextWindowLength';
+export const SERVICE_SETTINGS = 'service_settings';
+export const TASK_SETTINGS = 'task_settings';
+export const TASK_TYPE_CONFIG = 'taskTypeConfig';
+export const PROVIDER_CONFIG = 'providerConfig';
+export const PROVIDER_SECRETS = 'providerSecrets';
 
 // This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint
+// defaultValues can be used to set default values for model_id fields for providers
 export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
   [ServiceProviderKeys.elasticsearch]: {
     hidden: ['num_allocations', 'num_threads'],
@@ -95,5 +107,34 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
       },
     ],
     serverlessOnly: true,
+  },
+  // Default model values for providers
+  [ServiceProviderKeys.openai]: {
+    defaultValues: { model_id: OPENAI_DEFAULT_MODEL },
+    supplementalData: [
+      {
+        headers: {
+          location: TASK_SETTINGS,
+        },
+      },
+    ],
+  },
+  [ServiceProviderKeys.anthropic]: {
+    supplementalData: [
+      {
+        max_tokens: {
+          location: TASK_SETTINGS,
+        },
+      },
+    ],
+  },
+  [ServiceProviderKeys.amazonbedrock]: {
+    defaultValues: { model: BEDROCK_DEFAULT_MODEL },
+  },
+  [ServiceProviderKeys.googlevertexai]: {
+    defaultValues: { model_id: GEMINI_DEFAULT_MODEL },
+  },
+  [ServiceProviderKeys.googleaistudio]: {
+    defaultValues: { model_id: GEMINI_DEFAULT_MODEL },
   },
 };

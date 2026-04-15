@@ -9,8 +9,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import type { EuiCheckboxProps } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiIcon,
-  EuiToolTip,
+  EuiIconTip,
   EuiAccordion,
   EuiButtonIcon,
   EuiPopover,
@@ -136,12 +135,7 @@ const StringArrayCondition = ({
   const restrictedValues = getRestrictedValuesForCondition(selector.type, prop);
 
   return (
-    <EuiFormRow
-      label={label}
-      fullWidth={true}
-      key={prop}
-      isInvalid={!!Object.hasOwn(errorMap, prop)}
-    >
+    <EuiFormRow label={label} fullWidth={true} key={prop} isInvalid={Object.hasOwn(errorMap, prop)}>
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
           <EuiComboBox
@@ -378,9 +372,11 @@ export const ControlGeneralViewSelector = ({
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
-            <EuiToolTip content={i18n.getSelectorIconTooltip(selector.type)}>
-              <EuiIcon color="primary" type={getSelectorTypeIcon(selector.type)} />
-            </EuiToolTip>
+            <EuiIconTip
+              content={i18n.getSelectorIconTooltip(selector.type)}
+              type={getSelectorTypeIcon(selector.type)}
+              color="primary"
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s">
@@ -458,11 +454,7 @@ export const ControlGeneralViewSelector = ({
       }
     >
       <EuiForm component="form" error={errors} isInvalid={errors.length > 0}>
-        <EuiFormRow
-          label={i18n.name}
-          fullWidth={true}
-          isInvalid={!!Object.hasOwn(errorMap, 'name')}
-        >
+        <EuiFormRow label={i18n.name} fullWidth={true} isInvalid={Object.hasOwn(errorMap, 'name')}>
           <EuiFieldText
             fullWidth={true}
             name="name"

@@ -7,19 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isFunction, isEqual } from 'lodash';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import {
+  type AggregateQuery,
+  type Query,
+  type TimeRange,
+  isOfAggregateQueryType,
+  isOfQueryType,
+} from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
   type TabActionPayload,
+  transitionedFromEsqlToDataView,
+  transitionedFromDataViewToEsql,
 } from '../internal_state';
 import { selectTab } from '../selectors';
-import type { DiscoverInternalState, TabState } from '../types';
+import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
+import type {
+  DiscoverAppState,
+  DiscoverInternalState,
+  TabState,
+  UpdateESQLQueryActionPayload,
+} from '../types';
+import { addLog } from '../../../../../utils/add_log';
+import { FetchStatus } from '../../../../types';
 
-type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
+export interface RawAppStatePayload {
+  appState: DiscoverAppState;
+  /**
+   * Marks app state changes that come from URL syncing or other internal updates
+   * instead of direct user actions. These updates skip profile state snapshot
+   * syncing so they do not overwrite restorable profile state. This should
+   * rarely be needed outside of URL syncing and specific edge cases.
+   */
+  isSystemTriggered?: boolean;
+}
+
+type AppStatePayload = TabActionPayload<RawAppStatePayload>;
 
 const mergeAppState = (
   currentState: DiscoverInternalState,
@@ -30,17 +62,29 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
+export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
+  function setAppStateThunkFn(dispatch, _, { runtimeStateManager }) {
+    const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
+    dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
+  };
+
+export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
+  [TabActionPayload<{ appState?: DiscoverAppState }>]
+> = (payload) =>
+  function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
+    const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
+    dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
+  };
+
 /**
  * Partially update the tab app state, merging with existing state and pushing to URL history
  */
 export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
-  async function updateAppStateThunkFn(dispatch, getState) {
+  function updateAppStateThunkFn(dispatch, getState) {
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
 
     if (hasStateChanges) {
-      dispatch(
-        internalStateSlice.actions.setAppState({ tabId: payload.tabId, appState: mergedAppState })
-      );
+      dispatch(setAppState({ ...payload, appState: mergedAppState }));
     }
   };
 
@@ -59,6 +103,15 @@ export const updateAppStateAndReplaceUrl: InternalStateThunkActionCreator<
     }
 
     const { mergedAppState } = mergeAppState(currentState, payload);
+
+    if (!payload.isSystemTriggered) {
+      dispatch(
+        syncProfileStateSnapshot({
+          tabId: payload.tabId,
+          appState: mergedAppState,
+        })
+      );
+    }
 
     await urlStateStorage.set(APP_STATE_URL_KEY, mergedAppState, { replace: true });
   };
@@ -81,7 +134,7 @@ const mergeGlobalState = (
  * Partially update the tab global state, merging with existing state and pushing to URL history
  */
 export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayload]> = (payload) =>
-  async function updateGlobalStateThunkFn(dispatch, getState) {
+  function updateGlobalStateThunkFn(dispatch, getState) {
     const { mergedGlobalState, hasStateChanges } = mergeGlobalState(getState(), payload);
 
     if (hasStateChanges) {
@@ -89,6 +142,37 @@ export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayl
         internalStateSlice.actions.setGlobalState({
           tabId: payload.tabId,
           globalState: mergedGlobalState,
+        })
+      );
+    }
+  };
+
+type AttributesPayload = TabActionPayload<{ attributes: Partial<TabState['attributes']> }>;
+
+const mergeAttributes = (
+  currentState: DiscoverInternalState,
+  { tabId, attributes }: AttributesPayload
+) => {
+  const currentAttributes = selectTab(currentState, tabId).attributes;
+  const mergedAttributes = { ...currentAttributes, ...attributes };
+  return {
+    mergedAttributes,
+    hasStateChanges: !isEqual(currentAttributes, mergedAttributes),
+  };
+};
+
+/**
+ * Partially update the tab attributes, merging with existing state
+ */
+export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayload]> = (payload) =>
+  function updateAttributesThunkFn(dispatch, getState) {
+    const { mergedAttributes, hasStateChanges } = mergeAttributes(getState(), payload);
+
+    if (hasStateChanges) {
+      dispatch(
+        internalStateSlice.actions.setAttributes({
+          tabId: payload.tabId,
+          attributes: mergedAttributes,
         })
       );
     }
@@ -130,4 +214,203 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
     ]);
+  };
+
+/**
+ * Triggered when transitioning from ESQL to Dataview
+ * Clean ups the ES|QL query and moves to the dataview mode
+ */
+export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataViewId: string }>]
+> = ({ tabId, dataViewId }) =>
+  function transitionFromESQLToDataViewThunkFn(dispatch) {
+    // Mark all profile state fields to reset when transitioning to data view mode
+    dispatch(
+      internalStateSlice.actions.setProfileStateFieldsToReset({
+        tabId,
+        fieldsToReset: 'all',
+      })
+    );
+
+    dispatch(
+      updateAppState({
+        tabId,
+        appState: {
+          query: {
+            language: 'kuery',
+            query: '',
+          },
+          columns: [],
+          dataSource: {
+            type: DataSourceType.DataView,
+            dataViewId,
+          },
+        },
+      })
+    );
+
+    dispatch(transitionedFromEsqlToDataView({ tabId }));
+  };
+
+const clearTimeFieldFromSort = (
+  sort: DiscoverAppState['sort'],
+  timeFieldName: string | undefined
+) => {
+  if (!Array.isArray(sort) || !timeFieldName) return sort;
+
+  const filteredSort = sort.filter(([field]) => field !== timeFieldName);
+
+  return filteredSort;
+};
+
+/**
+ * Triggered when transitioning from ESQL to Dataview
+ * Clean ups the ES|QL query and moves to the dataview mode
+ */
+export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView }>]
+> = ({ tabId, dataView }) =>
+  function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+    // Mark all profile state fields to reset when transitioning to ES|QL mode
+    dispatch(
+      internalStateSlice.actions.setProfileStateFieldsToReset({
+        tabId,
+        fieldsToReset: 'all',
+      })
+    );
+
+    const currentState = getState();
+    const tabState = selectTab(currentState, tabId);
+    const { appState } = tabState;
+    const { query, sort } = appState;
+    const filterQuery = query && isOfQueryType(query) ? query : undefined;
+
+    const allFilters = [...(appState.filters ?? []), ...(tabState.globalState?.filters ?? [])];
+    const queryString = getInitialESQLQuery(dataView, filterQuery, allFilters);
+    const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
+
+    dispatch(
+      updateAppState({
+        tabId,
+        appState: {
+          query: { esql: queryString },
+          filters: [],
+          dataSource: {
+            type: DataSourceType.Esql,
+          },
+          columns: [],
+          sort: clearedSort,
+        },
+      })
+    );
+
+    // clears pinned filters
+    dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
+
+    dispatch(transitionedFromDataViewToEsql({ tabId }));
+  };
+
+/**
+ * Updates the ES|QL query string
+ */
+export const updateESQLQuery: InternalStateThunkActionCreator<[UpdateESQLQueryActionPayload]> = ({
+  tabId,
+  queryOrUpdater,
+}) =>
+  function updateESQLQueryThunkFn(dispatch, getState) {
+    addLog('updateESQLQuery');
+    const currentState = getState();
+    const appState = selectTab(currentState, tabId).appState;
+    const { query: currentQuery } = appState;
+
+    if (!isOfAggregateQueryType(currentQuery)) {
+      throw new Error(
+        'Cannot update a non-ES|QL query. Make sure this function is only called once in ES|QL mode.'
+      );
+    }
+
+    const queryUpdater = isFunction(queryOrUpdater) ? queryOrUpdater : () => queryOrUpdater;
+    const query = { esql: queryUpdater(currentQuery.esql) };
+
+    dispatch(updateAppState({ tabId, appState: { query } }));
+  };
+
+/**
+ * Triggered when a user submits a query in the search bar
+ */
+export const onQuerySubmit: InternalStateThunkActionCreator<
+  [
+    TabActionPayload<{
+      payload: { dateRange: TimeRange; query?: Query | AggregateQuery };
+      isUpdate?: boolean;
+    }>
+  ]
+> = ({ tabId, payload, isUpdate }) =>
+  function onQuerySubmitThunkFn(
+    dispatch,
+    getState,
+    { searchSessionManager, runtimeStateManager, services }
+  ) {
+    const { scopedEbtManager$, dataStateContainer$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
+
+    const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
+      const scopedEbtManager = scopedEbtManager$.getValue();
+      const { fieldsMetadata } = services;
+
+      scopedEbtManager.trackSubmittingQuery({
+        query,
+        fieldsMetadata,
+      });
+    };
+
+    trackQueryFields(payload.query);
+
+    if (isUpdate === false) {
+      // remove the search session if the given query is not just updated
+      searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
+      addLog('onQuerySubmit triggers data fetching');
+      dataStateContainer$.getValue()?.fetch();
+    }
+  };
+
+/**
+ * Triggers fetching of new data from Elasticsearch
+ * If initial is true, when SEARCH_ON_PAGE_LOAD_SETTING is set to false and it's a new saved search no fetch is triggered
+ */
+export const fetchData: InternalStateThunkActionCreator<
+  [TabActionPayload<{ initial?: boolean }>]
+> = ({ tabId, initial }) =>
+  function fetchDataThunkFn(dispatch, getState, { runtimeStateManager }) {
+    addLog('fetchData', { initial });
+    const { dataStateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const dataStateContainer = dataStateContainer$.getValue();
+    if (!initial || dataStateContainer?.getInitialFetchStatus() === FetchStatus.LOADING) {
+      dataStateContainer?.fetch();
+    }
+  };
+
+/**
+ * Pause auto refresh interval if the data view is not time-based or is a rollup
+ */
+export const pauseAutoRefreshInterval: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView }>]
+> = ({ tabId, dataView }) =>
+  function pauseAutoRefreshIntervalThunkFn(dispatch, getState) {
+    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
+      const currentState = getState();
+      const globalState = selectTab(currentState, tabId).globalState;
+      if (globalState?.refreshInterval && !globalState.refreshInterval.pause) {
+        dispatch(
+          updateGlobalState({
+            tabId,
+            globalState: {
+              refreshInterval: { ...globalState.refreshInterval, pause: true },
+            },
+          })
+        );
+      }
+    }
   };

@@ -14,7 +14,6 @@ export {
   getControlSuggestionIfSupported,
   getControlSuggestion,
   getSafeInsertText,
-  pushItUpInTheList,
 } from './autocomplete/helpers';
 export {
   suggestForExpression,
@@ -26,10 +25,9 @@ export {
   getFunctionDefinition,
 } from './functions';
 export { getDateLiterals, getCompatibleLiterals } from './literals';
-export { getColumnForASTNode, pipePrecedesCurrentWord } from './shared';
+export { getColumnForASTNode, pipePrecedesCurrentWord, techPreviewLabel } from './shared';
 export { getExpressionType } from './expressions';
 export { getMessageFromId, errors } from './errors';
 export { sourceExists } from './sources';
 export { getColumnExists } from './columns';
-export { getValidSignaturesAndTypesToSuggestNext } from './autocomplete/helpers';
 export { getFormattedFunctionSignature } from './hover/functions';

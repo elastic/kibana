@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { GenericPopoverItem } from '../../graph_investigation/use_node_details_popover';
+import type { GenericPopoverItem } from '../../popovers/details/use_node_details_popover';
 import { NETWORK_PREVIEW_BANNER } from '../../constants';
 import { GRAPH_POPOVER_PREVIEW_PANEL } from '../../test_ids';
 

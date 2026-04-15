@@ -8,12 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isLiteral } from '../../../../ast/is';
-import { getExpressionType } from '..';
-import type { ESQLColumnData } from '../../../registry/types';
-import type { ESQLFunction } from '../../../../types';
-import type { FunctionDefinition } from '../../types';
-import { getMatchingSignatures } from '../expressions';
+import type { ESQLFunction } from '@elastic/esql/types';
+import { resolveArgumentTypes } from '../expressions';
+import type { UnmappedFieldsStrategy } from '../../../registry/types';
+import { type ESQLColumnData } from '../../../registry/types';
+import type { FunctionDefinition, PromQLFunctionDefinition } from '../../types';
+import { getMatchingSignatures } from '../signatures';
 
 /**
  * Formats a list of types with optional limiting and overflow indicator.
@@ -66,6 +66,7 @@ export function getFormattedFunctionSignature(
   functionDef: FunctionDefinition,
   fnNode?: ESQLFunction,
   columns?: Map<string, ESQLColumnData>,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy,
   maxTypesToShow?: number
 ): string {
   if (!functionDef.signatures || functionDef.signatures.length === 0) {
@@ -73,7 +74,7 @@ export function getFormattedFunctionSignature(
   }
 
   // Get the signatures that matches the given args so far
-  const signatures = getFilteredSignatures(functionDef, fnNode, columns);
+  const signatures = getFilteredSignatures(functionDef, fnNode, columns, unmappedFieldsStrategy);
 
   const returnTypes = new Set<string>();
   const parameterTypeMap = new Map<string, Set<string>>();
@@ -144,34 +145,36 @@ export function getFormattedFunctionSignature(
 function getFilteredSignatures(
   functionDef: FunctionDefinition,
   fnNode?: ESQLFunction,
-  columns?: Map<string, ESQLColumnData>
+  columns?: Map<string, ESQLColumnData>,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): FunctionDefinition['signatures'] {
   let signatures = functionDef.signatures;
 
   if (fnNode && columns && fnNode.args.length > 0) {
-    const argTypes = fnNode.args.map((arg) => getExpressionType(arg, columns));
-    const literalMask = fnNode.args.map((arg) => isLiteral(arg));
+    const { argTypes, literalMask } = resolveArgumentTypes(fnNode.args, {
+      columns,
+      unmappedFieldsStrategy,
+    });
 
     const matchingSignatures = getMatchingSignatures(
       functionDef.signatures,
       argTypes,
       literalMask,
-      false, // Accepts unknown
-      true // Accepts partial matches
+      false,
+      true
     );
+
     if (matchingSignatures.length > 0) {
       signatures = matchingSignatures;
     } else {
-      // Try again without the last argument (in case user is typing it and it's incomplete)
-      const argTypesWithoutLast = argTypes.slice(0, -1);
-      const literalMaskWithoutLast = literalMask.slice(0, -1);
       const partialMatchingSignatures = getMatchingSignatures(
         functionDef.signatures,
-        argTypesWithoutLast,
-        literalMaskWithoutLast,
+        argTypes.slice(0, -1),
+        literalMask.slice(0, -1),
         false,
         true
       );
+
       if (partialMatchingSignatures.length > 0) {
         signatures = partialMatchingSignatures;
       }
@@ -179,4 +182,24 @@ function getFilteredSignatures(
   }
 
   return signatures;
+}
+
+// ============================================================================
+// PromQL Functions
+// ============================================================================
+
+/* Formats a PromQL function signature in a readable format. */
+export function getFormattedPromqlFunctionSignature(fnDef: PromQLFunctionDefinition): string {
+  if (!fnDef.signatures || fnDef.signatures.length === 0) {
+    return `${fnDef.name}()`;
+  }
+
+  const signature = fnDef.signatures[0];
+
+  const formattedParams = signature.params.map(({ name, type, optional }) => {
+    const optionalMarker = optional ? '?' : '';
+    return `${name}${optionalMarker}: ${type}`;
+  });
+
+  return `${fnDef.name}(${formattedParams.join(', ')}) → ${signature.returnType}`;
 }

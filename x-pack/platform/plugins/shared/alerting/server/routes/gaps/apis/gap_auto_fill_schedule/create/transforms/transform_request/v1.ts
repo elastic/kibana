@@ -26,6 +26,7 @@ export const transformRequest = (
       type: ruleType.type,
       consumer: ruleType.consumer,
     })),
+    excludedReasons: body.excluded_reasons,
     request,
   };
 };

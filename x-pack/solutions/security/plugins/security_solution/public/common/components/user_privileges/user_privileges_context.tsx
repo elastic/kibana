@@ -7,14 +7,23 @@
 
 import React, { createContext, useMemo } from 'react';
 import type { Capabilities } from '@kbn/core/types';
-import { RULES_UI_EDIT, RULES_UI_READ } from '@kbn/security-solution-features/constants';
-import { SECURITY_FEATURE_ID, RULES_FEATURE_ID } from '../../../../common/constants';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { getEndpointPrivilegesInitialState, useEndpointPrivileges } from './endpoint';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 import { extractTimelineCapabilities } from '../../utils/timeline_capabilities';
 import { extractNotesCapabilities } from '../../utils/notes_capabilities';
+import type { RulesUICapabilities } from '../../utils/rules_capabilities';
+import {
+  extractRulesCapabilities,
+  getRulesCapabilitiesInitialState,
+} from '../../utils/rules_capabilities';
+import type { AlertsUICapabilities } from '../../utils/alerts_capabilities';
+import {
+  extractAlertsCapabilities,
+  getAlertsCapabilitiesInitialState,
+} from '../../utils/alerts_capabilities';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
@@ -23,7 +32,8 @@ export interface UserPrivilegesState {
   siemPrivileges: { crud: boolean; read: boolean };
   timelinePrivileges: { crud: boolean; read: boolean };
   notesPrivileges: { crud: boolean; read: boolean };
-  rulesPrivileges: { read: boolean; edit: boolean };
+  rulesPrivileges: RulesUICapabilities;
+  alertsPrivileges: AlertsUICapabilities;
 }
 
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
@@ -33,7 +43,8 @@ export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   siemPrivileges: { crud: false, read: false },
   timelinePrivileges: { crud: false, read: false },
   notesPrivileges: { crud: false, read: false },
-  rulesPrivileges: { read: false, edit: false },
+  rulesPrivileges: getRulesCapabilitiesInitialState(),
+  alertsPrivileges: getAlertsCapabilitiesInitialState(),
 });
 export const UserPrivilegesContext = createContext<UserPrivilegesState>(
   initialUserPrivilegesState()
@@ -51,14 +62,24 @@ export const UserPrivilegesProvider = ({
   const crud: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].crud === true;
   const read: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].show === true;
 
-  const rulesCapabilities = kibanaCapabilities[RULES_FEATURE_ID];
-  const readRules = rulesCapabilities?.[RULES_UI_READ] === true;
-  const editRules = rulesCapabilities?.[RULES_UI_EDIT] === true;
+  const rulesPrivileges = useMemo(
+    () => extractRulesCapabilities(kibanaCapabilities),
+    [kibanaCapabilities]
+  );
 
-  const shouldFetchListPrivileges = read || readRules;
+  const alertsPrivileges = useMemo(
+    () => extractAlertsCapabilities(kibanaCapabilities),
+    [kibanaCapabilities]
+  );
+
+  const shouldFetchListPrivileges = read || rulesPrivileges.rules.read;
+  const shouldFetchDetectionEnginePrivileges =
+    read || rulesPrivileges.rules.read || alertsPrivileges.alerts.read;
 
   const listPrivileges = useFetchListPrivileges(shouldFetchListPrivileges);
-  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges();
+  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges(
+    shouldFetchDetectionEnginePrivileges
+  );
   const endpointPrivileges = useEndpointPrivileges();
 
   const siemPrivileges = useMemo(
@@ -79,13 +100,6 @@ export const UserPrivilegesProvider = ({
     [kibanaCapabilities]
   );
 
-  const rulesPrivileges = useMemo(() => {
-    return {
-      read: readRules,
-      edit: editRules,
-    };
-  }, [readRules, editRules]);
-
   const contextValue = useMemo(
     () => ({
       listPrivileges,
@@ -95,6 +109,7 @@ export const UserPrivilegesProvider = ({
       timelinePrivileges,
       notesPrivileges,
       rulesPrivileges,
+      alertsPrivileges,
     }),
     [
       listPrivileges,
@@ -104,6 +119,7 @@ export const UserPrivilegesProvider = ({
       timelinePrivileges,
       notesPrivileges,
       rulesPrivileges,
+      alertsPrivileges,
     ]
   );
 

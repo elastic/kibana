@@ -9,14 +9,14 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { RepairActionsGroupResult } from '@kbn/slo-schema';
-
+import type { SLODefinition } from '../../server/domain/models';
+import { sloKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 import { usePluginContext } from './use_plugin_context';
-import { sloKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useRepairSlo({ id, name }: { id: string; name: string }) {
+export function useRepairSlo({ id, name }: Pick<SLODefinition, 'id' | 'name'>) {
   const {
     notifications: { toasts },
   } = useKibana().services;

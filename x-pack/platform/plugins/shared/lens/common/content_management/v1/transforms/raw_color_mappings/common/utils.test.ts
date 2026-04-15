@@ -75,7 +75,7 @@ describe('utils', () => {
           mockFieldType
         );
         const resultFn = getColumnMetaFn(mockDatasourceState)!;
-        const result = resultFn(layerId, columnId);
+        const result = resultFn(layerId, [columnId]);
 
         expect(result.dataType).toBe(mockDataType);
         expect(result.fieldType).toBe(mockFieldType);
@@ -84,7 +84,7 @@ describe('utils', () => {
       it('should undefined dataType and fieldType if column not found', () => {
         const mockDatasourceState = getDatasourceStatesMock('formBased');
         const resultFn = getColumnMetaFn(mockDatasourceState)!;
-        const result = resultFn(layerId, 'bad-column');
+        const result = resultFn(layerId, ['bad-column']);
 
         expect(result.dataType).toBeUndefined();
         expect(result.fieldType).toBeUndefined();
@@ -93,7 +93,7 @@ describe('utils', () => {
       it('should undefined dataType and fieldType if layer not found', () => {
         const mockDatasourceState = getDatasourceStatesMock('formBased');
         const resultFn = getColumnMetaFn(mockDatasourceState)!;
-        const result = resultFn('bad-layer', columnId);
+        const result = resultFn('bad-layer', [columnId]);
 
         expect(result.dataType).toBeUndefined();
         expect(result.fieldType).toBeUndefined();
@@ -102,7 +102,7 @@ describe('utils', () => {
       it('should undefined dataType and fieldType if missing', () => {
         const mockDatasourceState = getDatasourceStatesMock('formBased');
         const resultFn = getColumnMetaFn(mockDatasourceState)!;
-        const result = resultFn(layerId, columnId);
+        const result = resultFn(layerId, [columnId]);
 
         expect(result.dataType).toBeUndefined();
         expect(result.fieldType).toBeUndefined();
@@ -117,7 +117,7 @@ describe('utils', () => {
           mockFieldType
         );
         const resultFn = getColumnMetaFn(mockDatasourceState)!;
-        const result = resultFn(layerId, columnId);
+        const result = resultFn(layerId, [columnId]);
 
         expect(result.dataType).toBe(mockDataType);
         expect(result.fieldType).toBeUndefined(); // no fieldType needed for textBased
@@ -126,7 +126,7 @@ describe('utils', () => {
       it('should undefined dataType and fieldType if column not found', () => {
         const mockDatasourceState = getDatasourceStatesMock('textBased');
         const resultFn = getColumnMetaFn(mockDatasourceState)!;
-        const result = resultFn(layerId, 'bad-column');
+        const result = resultFn(layerId, ['bad-column']);
 
         expect(result.dataType).toBeUndefined();
         expect(result.fieldType).toBeUndefined();
@@ -135,7 +135,7 @@ describe('utils', () => {
       it('should undefined dataType and fieldType if layer not found', () => {
         const mockDatasourceState = getDatasourceStatesMock('textBased');
         const resultFn = getColumnMetaFn(mockDatasourceState)!;
-        const result = resultFn('bad-layer', columnId);
+        const result = resultFn('bad-layer', [columnId]);
 
         expect(result.dataType).toBeUndefined();
         expect(result.fieldType).toBeUndefined();
@@ -144,7 +144,7 @@ describe('utils', () => {
       it('should undefined dataType and fieldType if missing', () => {
         const mockDatasourceState = getDatasourceStatesMock('textBased');
         const resultFn = getColumnMetaFn(mockDatasourceState)!;
-        const result = resultFn(layerId, columnId);
+        const result = resultFn(layerId, [columnId]);
 
         expect(result.dataType).toBeUndefined();
         expect(result.fieldType).toBeUndefined();

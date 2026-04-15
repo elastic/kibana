@@ -114,13 +114,9 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   return { group1Importable, group1NonImportable, group1All, group2, refOrigins };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
+export default function (context: FtrProviderContext) {
   const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
-    resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
+    resolveImportErrorsTestSuiteFactory(context);
   const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     // use singleRequest to reduce execution time and/or test combined cases
     const singleRequest = true;

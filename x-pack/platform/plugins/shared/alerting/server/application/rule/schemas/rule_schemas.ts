@@ -134,6 +134,13 @@ export const monitoringSchema = schema.object({
             })
           )
         ),
+        gap_reason: schema.maybe(
+          schema.nullable(
+            schema.object({
+              type: schema.string(),
+            })
+          )
+        ),
       }),
     }),
   }),
@@ -173,6 +180,7 @@ export const ruleDomainSchema = schema.object({
   apiKey: schema.nullable(schema.string()),
   apiKeyOwner: schema.nullable(schema.string()),
   apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
+  uiamApiKey: schema.maybe(schema.nullable(schema.string())),
   throttle: schema.maybe(schema.nullable(schema.string())),
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
@@ -188,6 +196,7 @@ export const ruleDomainSchema = schema.object({
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
+  lastEnabledAt: schema.maybe(dateSchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),
@@ -230,6 +239,7 @@ export const ruleSchema = schema.object({
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
+  lastEnabledAt: schema.maybe(dateSchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),

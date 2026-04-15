@@ -18,15 +18,24 @@ export function toggleFieldAccordion(fieldName: string): void {
 }
 
 export function switchFieldToEditMode(fieldName: string): void {
-  cy.get(`${FIELD_UPGRADE_WRAPPER(fieldName)} ${PER_FIELD_EDIT_BUTTON}`).click();
+  cy.get(FIELD_UPGRADE_WRAPPER(fieldName)).scrollIntoView();
+  cy.get(`${FIELD_UPGRADE_WRAPPER(fieldName)} ${PER_FIELD_EDIT_BUTTON}`)
+    .should('be.visible')
+    .click();
 }
 
 export function acceptFieldValue(fieldName: string): void {
-  cy.get(`${FIELD_UPGRADE_WRAPPER(fieldName)} ${PER_FIELD_ACCEPT_BUTTON}`).click();
+  cy.get(FIELD_UPGRADE_WRAPPER(fieldName)).scrollIntoView();
+  cy.get(`${FIELD_UPGRADE_WRAPPER(fieldName)} ${PER_FIELD_ACCEPT_BUTTON}`)
+    .should('be.visible')
+    .click();
 }
 
 export function saveFieldValue(fieldName: string): void {
-  cy.get(`${FIELD_UPGRADE_WRAPPER(fieldName)} ${PER_FIELD_SAVE_BUTTON}`).click();
+  cy.get(FIELD_UPGRADE_WRAPPER(fieldName)).scrollIntoView();
+  cy.get(`${FIELD_UPGRADE_WRAPPER(fieldName)} ${PER_FIELD_SAVE_BUTTON}`)
+    .should('be.visible')
+    .click();
 }
 
 export function cancelFieldValue(fieldName: string): void {

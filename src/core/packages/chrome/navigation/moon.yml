@@ -4,24 +4,24 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-chrome-navigation'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/eui-team'
-toolchain:
+  defaultOwner: '@elastic/appex-sharedux'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-chrome-navigation'
+  title: '@kbn/core-chrome-navigation'
   description: Moon project for @kbn/core-chrome-navigation
   channel: ''
-  owner: '@elastic/eui-team'
-  metadata:
-    sourceRoot: src/core/packages/chrome/navigation
+  owner: '@elastic/appex-sharedux'
+  sourceRoot: src/core/packages/chrome/navigation
 dependsOn:
-  - '@kbn/core-chrome-layout-components'
-  - '@kbn/core-chrome-layout-constants'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
+  - '@kbn/core-chrome-layout-components'
+  - '@kbn/core-chrome-layout-utils'
+  - '@kbn/core-chrome-layout-constants'
 tags:
   - shared-browser
   - package
@@ -34,16 +34,8 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+    - '!packaging/target/**/*'
+    - '!packaging/example/**/*'
+  jest-config:
+    - jest.config.js
+tasks: {}

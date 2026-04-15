@@ -49,7 +49,7 @@ export const convertPieToRawColorMappings = (
       (layer.colorMapping?.assignments || layer.colorMapping?.specialAssignments)
     ) {
       const [accessor] = layer.primaryGroups;
-      const columnMeta = accessor ? getColumnMeta?.(layer.layerId, accessor) : null;
+      const columnMeta = accessor ? getColumnMeta?.(layer.layerId, [accessor]) : null;
 
       return {
         ...layer,

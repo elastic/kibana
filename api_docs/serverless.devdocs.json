@@ -15,6 +15,8 @@
       "label": "ServerlessPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "ServerlessPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -49,6 +53,8 @@
             "> | undefined) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+          "lineNumber": 22,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -66,6 +72,8 @@
                 "[]"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 23,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -83,41 +91,11 @@
                 "> | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 24,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "serverless",
-          "id": "def-public.ServerlessPluginStart.setProjectHome",
-          "type": "Function",
-          "tags": [],
-          "label": "setProjectHome",
-          "description": [],
-          "signature": [
-            "(homeHref: string) => void"
-          ],
-          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.setProjectHome.$1",
-              "type": "string",
-              "tags": [],
-              "label": "homeHref",
-              "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
             }
           ],
           "returnComment": []
@@ -130,15 +108,17 @@
           "label": "initNavigation",
           "description": [],
           "signature": [
-            "(id: \"security\" | \"workplaceai\" | \"oblt\" | \"es\", navigationTree$: ",
+            "(id: \"security\" | \"es\" | \"workplaceai\" | \"oblt\", navigationTree$: ",
             "Observable",
             "<",
             "NavigationTreeDefinition",
             "<",
             "AppDeepLinkId",
-            ", string, string>>, config?: { dataTestSubj?: string | undefined; } | undefined) => void"
+            ", string, string>>) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+          "lineNumber": 26,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -150,9 +130,11 @@
               "label": "id",
               "description": [],
               "signature": [
-                "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
+                "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 26,
+              "columnNumber": 18,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -173,36 +155,11 @@
                 ", string, string>>"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 26,
+              "columnNumber": 34,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
-            },
-            {
-              "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.initNavigation.$3",
-              "type": "Object",
-              "tags": [],
-              "label": "config",
-              "description": [],
-              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "children": [
-                {
-                  "parentPluginId": "serverless",
-                  "id": "def-public.ServerlessPluginStart.initNavigation.$3.dataTestSubj",
-                  "type": "string",
-                  "tags": [],
-                  "label": "dataTestSubj",
-                  "description": [],
-                  "signature": [
-                    "string | undefined"
-                  ],
-                  "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                }
-              ]
             }
           ],
           "returnComment": []
@@ -234,6 +191,8 @@
             "> | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+          "lineNumber": 27,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -248,6 +207,8 @@
                 "boolean | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 28,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -271,6 +232,8 @@
                 "> | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
+              "lineNumber": 29,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -298,6 +261,8 @@
       "label": "ServerlessServerSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+      "lineNumber": 8,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -312,6 +277,8 @@
             "(keys: string[]) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+          "lineNumber": 9,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -326,6 +293,8 @@
                 "string[]"
               ],
               "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+              "lineNumber": 9,
+              "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -345,6 +314,8 @@
       "label": "ServerlessServerStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/serverless/server/types.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -369,6 +340,8 @@
           "\"serverless\""
         ],
         "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -384,6 +357,8 @@
           "\"serverless\""
         ],
         "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

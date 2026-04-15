@@ -10,70 +10,94 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import {
+  toSavedSearchAttributes,
+  type DiscoverSession,
+  type SavedSearchByValueAttributes,
+} from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import {
   getSerializedSearchSourceDataViewDetails,
   internalStateActions,
   selectAllTabs,
   selectTabRuntimeState,
+  selectTabSavedSearch,
+  type DiscoverInternalState,
+  type InternalStateDispatch,
+  type RuntimeStateManager,
 } from '../../../state_management/redux';
 import type { DiscoverSessionSaveModalOnSaveCallback } from './save_modal';
 import { DiscoverSessionSaveModal } from './save_modal';
 
 export interface OnSaveDiscoverSessionParams {
   services: DiscoverServices;
-  state: DiscoverStateContainer;
+  dispatch: InternalStateDispatch;
+  getState: () => DiscoverInternalState;
+  runtimeStateManager: RuntimeStateManager;
   initialCopyOnSave?: boolean;
   onClose?: () => void;
-  onSaveCb?: () => void;
+  onSaveCb?: (valueState?: SavedSearchByValueAttributes) => void;
 }
 
 export const onSaveDiscoverSession = async ({
   services,
-  state,
+  dispatch,
+  getState,
+  runtimeStateManager,
   initialCopyOnSave,
   onClose,
   onSaveCb,
 }: OnSaveDiscoverSessionParams) => {
-  const internalState = state.internalState.getState();
-  const persistedDiscoverSession = internalState.persistedDiscoverSession;
-  const allTabs = selectAllTabs(internalState);
+  const internalState = getState();
+  const tabId = internalState.tabs.unsafeCurrentId;
+  if (services.embeddableEditor.isByValueEditor() && onSaveCb) {
+    const savedSearch = await selectTabSavedSearch({
+      tabId,
+      getState,
+      runtimeStateManager,
+      services,
+    });
 
-  const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
-  const isTimeBased = allTabs.some((tab) => {
-    const tabRuntimeState = selectTabRuntimeState(state.runtimeStateManager, tab.id);
-    const tabDataView = tabRuntimeState.currentDataView$.getValue();
+    const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
+    const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
-    if (tabDataView) {
-      return tabDataView.isTimeBased();
-    }
+    onSaveCb({ ...attributes, references });
+  } else {
+    const persistedDiscoverSession = internalState.persistedDiscoverSession;
+    const allTabs = selectAllTabs(internalState);
 
-    const tabDataViewDetails = getSerializedSearchSourceDataViewDetails(
-      tab.initialInternalState?.serializedSearchSource,
-      internalState.savedDataViews
-    );
+    const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
+    const isTimeBased = allTabs.some((tab) => {
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
+      const tabDataView = tabRuntimeState.currentDataView$.getValue();
 
-    return Boolean(tabDataViewDetails?.timeFieldName);
-  });
+      if (tabDataView) {
+        return tabDataView.isTimeBased();
+      }
 
-  const onSave: DiscoverSessionSaveModalOnSaveCallback = async ({
-    newTitle,
-    newCopyOnSave,
-    newTimeRestore,
-    newDescription,
-    newTags,
-    isTitleDuplicateConfirmed,
-    onTitleDuplicate,
-  }) => {
-    let response: { discoverSession: DiscoverSession | undefined; nextSelectedTabId?: string } = {
-      discoverSession: undefined,
-    };
+      const tabDataViewDetails = getSerializedSearchSourceDataViewDetails(
+        tab.initialInternalState?.serializedSearchSource,
+        internalState.savedDataViews
+      );
 
-    try {
-      response = await state.internalState
-        .dispatch(
+      return Boolean(tabDataViewDetails?.timeFieldName);
+    });
+
+    const onSave: DiscoverSessionSaveModalOnSaveCallback = async ({
+      newTitle,
+      newCopyOnSave,
+      newTimeRestore,
+      newDescription,
+      newTags,
+      isTitleDuplicateConfirmed,
+      onTitleDuplicate,
+    }) => {
+      let response: { discoverSession: DiscoverSession | undefined; nextSelectedTabId?: string } = {
+        discoverSession: undefined,
+      };
+
+      try {
+        response = await dispatch(
           internalStateActions.saveDiscoverSession({
             newTitle,
             newTimeRestore,
@@ -83,59 +107,60 @@ export const onSaveDiscoverSession = async ({
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           })
-        )
-        .unwrap();
-    } catch (error) {
-      services.toastNotifications.addDanger({
-        title: i18n.translate('discover.notifications.notSavedSearchTitle', {
-          defaultMessage: `Discover session ''{savedSearchTitle}'' was not saved`,
-          values: {
-            savedSearchTitle: newTitle,
-          },
-        }),
-        text: error.message,
-      });
-    }
-
-    if (response.discoverSession) {
-      services.toastNotifications.addSuccess({
-        title: i18n.translate('discover.notifications.savedSearchTitle', {
-          defaultMessage: `Discover session ''{savedSearchTitle}'' was saved`,
-          values: {
-            savedSearchTitle: newTitle,
-          },
-        }),
-        'data-test-subj': 'saveSearchSuccess',
-      });
-
-      if (onSaveCb) {
-        onSaveCb();
-      } else if (response.discoverSession.id !== persistedDiscoverSession?.id) {
-        services.locator.navigate({
-          savedSearchId: response.discoverSession.id,
-          ...(response?.nextSelectedTabId ? { tab: { id: response.nextSelectedTabId } } : {}),
+        ).unwrap();
+      } catch (error) {
+        services.toastNotifications.addDanger({
+          title: i18n.translate('discover.notifications.notSavedSearchTitle', {
+            defaultMessage: `Discover session ''{savedSearchTitle}'' was not saved`,
+            values: {
+              savedSearchTitle: newTitle,
+            },
+          }),
+          text: error.message,
         });
       }
-    }
 
-    return { id: response.discoverSession?.id };
-  };
+      if (response.discoverSession) {
+        services.toastNotifications.addSuccess({
+          title: i18n.translate('discover.notifications.savedSearchTitle', {
+            defaultMessage: `Discover session ''{savedSearchTitle}'' was saved`,
+            values: {
+              savedSearchTitle: newTitle,
+            },
+          }),
+          'data-test-subj': 'saveSearchSuccess',
+        });
 
-  const saveModal = (
-    <DiscoverSessionSaveModal
-      isTimeBased={isTimeBased}
-      services={services}
-      title={persistedDiscoverSession?.title ?? ''}
-      showCopyOnSave={!!persistedDiscoverSession?.id}
-      initialCopyOnSave={initialCopyOnSave}
-      description={persistedDiscoverSession?.description}
-      timeRestore={timeRestore}
-      tags={persistedDiscoverSession?.tags ?? []}
-      managed={persistedDiscoverSession?.managed ?? false}
-      onSave={onSave}
-      onClose={onClose ?? (() => {})}
-    />
-  );
+        if (onSaveCb) {
+          onSaveCb();
+        } else if (response.discoverSession.id !== persistedDiscoverSession?.id) {
+          services.embeddableEditor.clearEditorState();
+          services.locator.navigate({
+            savedSearchId: response.discoverSession.id,
+            ...(response?.nextSelectedTabId ? { tab: { id: response.nextSelectedTabId } } : {}),
+          });
+        }
+      }
 
-  showSaveModal(saveModal);
+      return { id: response.discoverSession?.id };
+    };
+
+    const saveModal = (
+      <DiscoverSessionSaveModal
+        isTimeBased={isTimeBased}
+        services={services}
+        title={persistedDiscoverSession?.title ?? ''}
+        showCopyOnSave={!!persistedDiscoverSession?.id}
+        initialCopyOnSave={initialCopyOnSave}
+        description={persistedDiscoverSession?.description}
+        timeRestore={timeRestore}
+        tags={persistedDiscoverSession?.tags ?? []}
+        managed={persistedDiscoverSession?.managed ?? false}
+        onSave={onSave}
+        onClose={onClose ?? (() => {})}
+      />
+    );
+
+    showSaveModal(saveModal);
+  }
 };

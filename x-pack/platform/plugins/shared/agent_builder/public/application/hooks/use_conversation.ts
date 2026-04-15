@@ -9,6 +9,8 @@ import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
 import { newConversationId, createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -30,6 +32,8 @@ export const useConversation = () => {
     isLoading,
     isFetching,
     isFetched,
+    isError,
+    error,
   } = useQuery({
     queryKey,
     // Disable query if we are on a new conversation or if there is a message currently being sent
@@ -41,14 +45,43 @@ export const useConversation = () => {
       }
       return conversationsService.get({ conversationId });
     },
+    retry: (failureCount, httpError: IHttpFetchError) => {
+      // Never retry if conversation doesn't exist
+      if (httpError?.response?.status === 404) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 
-  return { conversation, isLoading, isFetching, isFetched };
+  return { conversation, isLoading, isFetching, isFetched, isError, error };
 };
 
 export const useConversationStatus = () => {
   const { isLoading, isFetching, isFetched } = useConversation();
   return { isLoading, isFetching, isFetched };
+};
+
+const getErrorTypeFromStatus = (status?: number): ErrorPromptType => {
+  if (status === 404) {
+    return 'CONVERSATION_NOT_FOUND';
+  }
+  return 'GENERIC_ERROR';
+};
+
+export const useConversationError = () => {
+  const { isError, error } = useConversation();
+
+  const httpError = error as IHttpFetchError | undefined;
+  const errorStatus = httpError?.response?.status;
+  const errorType = isError && errorStatus ? getErrorTypeFromStatus(errorStatus) : undefined;
+
+  return {
+    isError,
+    error: httpError,
+    errorStatus,
+    errorType,
+  };
 };
 
 const useGetNewConversationAgentId = () => {
@@ -68,25 +101,22 @@ const useGetNewConversationAgentId = () => {
 export const useAgentId = () => {
   const { conversation } = useConversation();
   const context = useConversationContext();
-  const agentId = conversation?.agent_id;
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
   const getNewConversationAgentId = useGetNewConversationAgentId();
 
-  if (agentId) {
-    return agentId;
-  }
-
-  if (context.agentId) {
-    return context.agentId;
-  }
-
-  // For new conversations, agent id must be defined
+  // For new conversations, URL (context.agentId) is the source of truth
   if (isNewConversation) {
-    return getNewConversationAgentId();
+    return context.agentId ?? getNewConversationAgentId();
   }
 
-  return undefined;
+  // For existing conversations, use the conversation's stored agent_id
+  if (conversation?.agent_id) {
+    return conversation.agent_id;
+  }
+
+  // Fallback to context (URL) for edge cases
+  return context.agentId;
 };
 
 export const useConversationTitle = () => {

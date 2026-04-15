@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-
 import type {
-  DashboardSearchRequestBody,
+  DashboardSearchRequestParams,
   DashboardSearchResponseBody,
   DashboardState,
 } from '../../server';
@@ -20,12 +18,12 @@ import type {
  */
 
 export type FindDashboardsByIdResponse = { id: string } & (
-  | { status: 'success'; attributes: DashboardState; references: Reference[] }
+  | { status: 'success'; attributes: DashboardState }
   | { status: 'error'; notFound: boolean; error: Error }
 );
 
 export interface FindDashboardsService {
-  search: (search: DashboardSearchRequestBody) => Promise<DashboardSearchResponseBody>;
+  search: (search: DashboardSearchRequestParams) => Promise<DashboardSearchResponseBody>;
   findById: (id: string) => Promise<FindDashboardsByIdResponse>;
   findByIds: (ids: string[]) => Promise<FindDashboardsByIdResponse[]>;
   findByTitle: (title: string) => Promise<{ id: string } | undefined>;

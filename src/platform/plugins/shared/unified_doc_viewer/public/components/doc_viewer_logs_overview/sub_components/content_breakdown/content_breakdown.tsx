@@ -15,10 +15,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+
 import {
   getMessageFieldWithFallbacks,
   type DataTableRecord,
   type LogDocumentOverview,
+  getHighlightedFieldValue,
 } from '@kbn/discover-utils';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -30,21 +32,29 @@ export const ContentBreakdown = ({
   formattedDoc,
   hit,
   renderFlyoutStreamProcessingLink,
+  renderCpsWarning,
 }: {
   dataView: DataView;
   formattedDoc: LogDocumentOverview;
   hit: DataTableRecord;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+  renderCpsWarning?: boolean;
 }) => {
-  const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(hit.flattened, {
     includeFormattedValue: true,
   });
 
   const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
+  const highlights = field ? hit.raw.highlight?.[field] : undefined;
 
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
-    : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
+    : {
+        language: 'txt',
+        dangerouslySetInnerHTML: {
+          __html: getHighlightedFieldValue(value ?? '', highlights),
+        },
+      };
   const hasMessageField = field && value;
 
   return (
@@ -71,6 +81,7 @@ export const ContentBreakdown = ({
                 hit={hit}
                 formattedDoc={formattedDoc}
                 renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+                renderCpsWarning={renderCpsWarning}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

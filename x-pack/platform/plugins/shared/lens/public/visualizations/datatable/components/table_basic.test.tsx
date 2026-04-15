@@ -350,6 +350,60 @@ describe('DatatableComponent', () => {
     );
   });
 
+  test('it sorts rows ascending by the specified string column', () => {
+    data.rows = [
+      { a: 'banana', b: 1588024800000, c: 2 },
+      { a: 'apple', b: 1588024800001, c: 1 },
+      { a: 'cherry', b: 1588024800002, c: 3 },
+    ];
+    renderDatatableComponent({
+      args: {
+        ...args,
+        sortingColumnId: 'a',
+        sortingDirection: 'asc',
+      },
+    });
+    const cells = screen.queryAllByRole('gridcell').map((cell) => cell.textContent);
+    expect(cells).toEqual([
+      'apple',
+      '1588024800001',
+      '1',
+      'banana',
+      '1588024800000',
+      '2',
+      'cherry',
+      '1588024800002',
+      '3',
+    ]);
+  });
+
+  test('it sorts rows descending by the specified string column', () => {
+    data.rows = [
+      { a: 'banana', b: 1588024800000, c: 2 },
+      { a: 'apple', b: 1588024800001, c: 1 },
+      { a: 'cherry', b: 1588024800002, c: 3 },
+    ];
+    renderDatatableComponent({
+      args: {
+        ...args,
+        sortingColumnId: 'a',
+        sortingDirection: 'desc',
+      },
+    });
+    const cells = screen.queryAllByRole('gridcell').map((cell) => cell.textContent);
+    expect(cells).toEqual([
+      'cherry',
+      '1588024800002',
+      '3',
+      'banana',
+      '1588024800000',
+      '2',
+      'apple',
+      '1588024800001',
+      '1',
+    ]);
+  });
+
   test('it does not render a hidden column', () => {
     renderDatatableComponent({
       args: {
@@ -815,6 +869,61 @@ describe('DatatableComponent', () => {
         },
       });
       expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
+    });
+  });
+
+  describe('row numbers', () => {
+    it('should show row numbers when enabled', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: true,
+        },
+      });
+
+      const rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells).toHaveLength(1);
+      expect(rowNumberCells[0]).toHaveTextContent('1');
+    });
+
+    it('should not show row numbers when disabled', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: false,
+        },
+      });
+
+      expect(screen.queryByRole('gridcell', { name: '' })).not.toBeInTheDocument();
+    });
+
+    it('should show correct row numbers with pagination', async () => {
+      const rowNumbers = 13;
+      const pageSize = 4;
+      data.rows = new Array(rowNumbers).fill({
+        a: 'shoes',
+        b: 1588024800000,
+        c: faker.number.int(),
+      });
+
+      args.pageSize = pageSize;
+
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: true,
+        },
+        data,
+      });
+
+      // Page 1
+      let rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
+
+      // Page 2
+      await userEvent.click(screen.getByRole('link', { name: `Page 2 of 4` }));
+      rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
     });
   });
 });

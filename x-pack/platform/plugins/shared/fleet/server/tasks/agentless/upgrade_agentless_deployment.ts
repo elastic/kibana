@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClient, type CoreSetup, type Logger } from '@kbn/core/server';
-import type { ElasticsearchClient, LoggerFactory } from '@kbn/core/server';
+import { type CoreSetup, type Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  LoggerFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
@@ -153,12 +157,12 @@ export class UpgradeAgentlessDeploymentsTask {
 
   private processUpgradeAgentlessDeployments = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient,
+    soClient: SavedObjectsClientContract,
     abortController: AbortController
   ) => {
     const SAVED_OBJECT_TYPE = 'fleet-agent-policies';
 
-    const policiesKuery = `${SAVED_OBJECT_TYPE}.supports_agentless: true`;
+    const policiesKuery = `${SAVED_OBJECT_TYPE}.supports_agentless: true AND NOT ${SAVED_OBJECT_TYPE}.is_verifier: true`;
 
     try {
       const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
@@ -275,7 +279,7 @@ export class UpgradeAgentlessDeploymentsTask {
     this.logger.info(`[runTask()] started`);
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     await this.processUpgradeAgentlessDeployments(esClient, soClient, abortController);
   };
 }

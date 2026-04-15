@@ -8,7 +8,6 @@
  */
 
 import { join } from 'path';
-import loadJsonFile from 'load-json-file';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
@@ -27,6 +26,7 @@ import {
 } from '@kbn/test';
 import type { CliArgs, RawPackageInfo } from '@kbn/config';
 import { Env } from '@kbn/config';
+import { loadJsonFile } from '@kbn/utils';
 
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
@@ -74,7 +74,7 @@ export function createRootWithSettings(
 ) {
   let pkg: RawPackageInfo | undefined;
   if (customKibanaVersion) {
-    pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+    pkg = loadJsonFile<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
     pkg.version = customKibanaVersion;
   }
 
@@ -87,6 +87,12 @@ export function createRootWithSettings(
     set(settings, 'xpack.security.fipsMode.enabled', true);
     oss = false;
     delete cliArgs.oss;
+    if (cliArgs.serverless) {
+      // In serverless mode, spaces config keys use schema.literal(false) with no defaultValue.
+      // They are only validated when the spaces plugin loads (oss=false), so set them explicitly.
+      set(settings, 'xpack.spaces.allowFeatureVisibility', false);
+      set(settings, 'xpack.spaces.allowSolutionVisibility', false);
+    }
   }
 
   const env = Env.createDefault(

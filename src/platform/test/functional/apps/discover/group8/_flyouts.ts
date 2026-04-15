@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const dataGrid = getService('dataGrid');
   const esql = getService('esql');
+  const testSubjects = getService('testSubjects');
 
   describe('discover flyouts', function () {
     before(async function () {
@@ -85,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await esql.isOpenQuickReferenceFlyout()).to.be(true);
       await discover.openLensEditFlyout();
       expect(await discover.isLensEditFlyoutOpen()).to.be(true);
+      await testSubjects.missingOrFail('InlineEditingESQLEditor');
       expect(await esql.isOpenQuickReferenceFlyout()).to.be(false);
     });
 

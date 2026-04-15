@@ -7,7 +7,7 @@
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
@@ -20,8 +20,8 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { BurnRate } from './burn_rate';
-import { SLO_BURN_RATE_EMBEDDABLE_ID } from './constants';
-import type { BurnRateApi, BurnRateCustomInput, SloBurnRateEmbeddableState } from './types';
+import { SLO_BURN_RATE_EMBEDDABLE_ID } from '../../../../common/embeddables/burn_rate/constants';
+import type { BurnRateApi, BurnRateCustomState, BurnRateEmbeddableState } from './types';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
 
@@ -39,51 +39,61 @@ export const getBurnRateEmbeddableFactory = ({
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
 }) => {
-  const factory: EmbeddableFactory<SloBurnRateEmbeddableState, BurnRateApi> = {
+  const factory: EmbeddableFactory<BurnRateEmbeddableState, BurnRateApi> = {
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      initialState,
+      finalizeApi,
+      uuid,
+      parentApi,
+      initializeDrilldownsManager,
+    }) => {
       const deps = { ...coreStart, ...pluginsStart };
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
-      const sloBurnRateManager = initializeStateManager<BurnRateCustomInput>(
-        initialState.rawState,
-        {
-          sloId: '',
-          sloInstanceId: '',
-          duration: '',
-        }
-      );
+      const sloBurnRateManager = initializeStateManager<BurnRateCustomState>(initialState, {
+        slo_id: '',
+        slo_instance_id: '*',
+        duration: '',
+      });
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
       const reload$ = new Subject<boolean>();
 
-      function serializeState() {
+      function serializeState(): BurnRateEmbeddableState {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...sloBurnRateManager.getLatestState(),
-          },
+          ...titleManager.getLatestState(),
+          ...sloBurnRateManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<BurnRateEmbeddableState>({
         uuid,
         parentApi,
-        anyStateChange$: merge(titleManager.anyStateChange$, sloBurnRateManager.anyStateChange$),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          sloBurnRateManager.anyStateChange$,
+          drilldownsManager.anyStateChange$
+        ),
         serializeState,
         getComparators: () => ({
           ...titleComparators,
-          sloId: 'referenceEquality',
-          sloInstanceId: 'referenceEquality',
+          ...drilldownsManager.comparators,
+          slo_id: 'referenceEquality',
+          slo_instance_id: 'referenceEquality',
           duration: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
-          sloBurnRateManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
+          sloBurnRateManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          drilldownsManager.reinitializeState(lastSaved ?? {});
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
         ...unsavedChangesApi,
+        ...drilldownsManager.api,
         defaultTitle$,
         serializeState,
       });
@@ -98,14 +108,15 @@ export const getBurnRateEmbeddableFactory = ({
         api,
         Component: () => {
           const [sloId, sloInstanceId, duration] = useBatchedPublishingSubjects(
-            sloBurnRateManager.api.sloId$,
-            sloBurnRateManager.api.sloInstanceId$,
+            sloBurnRateManager.api.sloId$, // from slo_id key
+            sloBurnRateManager.api.sloInstanceId$, // from slo_instance_id key
             sloBurnRateManager.api.duration$
           );
 
           useEffect(() => {
             return () => {
               fetchSubscription.unsubscribe();
+              drilldownsManager.cleanup();
             };
           }, []);
 

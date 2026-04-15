@@ -47,7 +47,7 @@ export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationPr
     browserToolExecutor,
   });
 
-  const resumeRound = async ({ confirm }: { confirm: boolean }) => {
+  const resumeRound = async ({ prompts }: { prompts: Record<string, { allow: boolean }> }) => {
     const signal = resumeControllerRef.current?.signal;
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
@@ -59,7 +59,7 @@ export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationPr
 
     const events$ = chatService.resume({
       signal,
-      confirm,
+      prompts,
       conversationId,
       agentId,
       connectorId,
@@ -74,8 +74,8 @@ export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationPr
     mutationFn: resumeRound,
     onMutate: () => {
       resumeControllerRef.current = new AbortController();
-      // Clear the pending prompt from the round - we're now processing
-      conversationActions.clearPendingPrompt();
+      // Clear the pending prompts from the round - we're now processing
+      conversationActions.clearPendingPrompts();
       setIsResuming(true);
     },
     onSettled: () => {

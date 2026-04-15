@@ -100,7 +100,7 @@ export const DashboardMigrationResultPanel = React.memo<DashboardMigrationResult
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                iconType={isCollapsed ? 'arrowDown' : 'arrowUp'}
+                iconType={isCollapsed ? 'chevronSingleDown' : 'chevronSingleUp'}
                 onClick={toggleCollapsed}
                 aria-label={
                   isCollapsed ? i18n.DASHBOARD_MIGRATION_EXPAND : i18n.DASHBOARD_MIGRATION_COLLAPSE
@@ -306,6 +306,7 @@ const TranslationResultsTable = React.memo<{
       items={items}
       columns={columns}
       compressed
+      tableCaption={i18n.DASHBOARD_MIGRATION_SUMMARY_TITLE}
     />
   );
 });

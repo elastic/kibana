@@ -19,7 +19,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-application-browser-internal",
     "@kbn/core-saved-objects-common",
-    "@kbn/core-apps-browser-internal",
     "@kbn/core-root-browser-internal",
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-base-browser-mocks",
@@ -175,6 +174,8 @@
     "@kbn/core-pricing-common",
     "@kbn/lazy-object",
     "@kbn/migrator-test-kit",
+    "@kbn/core-user-activity-server-mocks",
+    "@kbn/core-user-activity-server-internal",
   ],
   "exclude": [
     "target/**/*",

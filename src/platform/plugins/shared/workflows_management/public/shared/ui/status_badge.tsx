@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBeacon,
   EuiFlexGroup,
   type EuiFlexGroupProps,
   EuiFlexItem,
@@ -25,9 +24,10 @@ import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { TokenColor } from '@elastic/eui/src/components/token/token_types';
 import { css } from '@emotion/react';
 import React from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
+import { FormattedRelativeEnhanced } from './formatted_relative_enhanced/formatted_relative_enhanced';
 import { getStatusLabel } from '../translations';
+
 interface ExecutionStatusColors {
   color: string;
   backgroundColor: string;
@@ -101,15 +101,15 @@ export const getExecutionStatusColors = (
 };
 
 const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
-  [ExecutionStatus.COMPLETED]: 'checkInCircleFilled',
-  [ExecutionStatus.FAILED]: 'errorFilled',
-  [ExecutionStatus.TIMED_OUT]: 'errorFilled',
+  [ExecutionStatus.COMPLETED]: 'checkCircleFill',
+  [ExecutionStatus.FAILED]: 'errorFill',
+  [ExecutionStatus.TIMED_OUT]: 'errorFill',
   [ExecutionStatus.PENDING]: 'clock',
   [ExecutionStatus.RUNNING]: 'play',
   [ExecutionStatus.WAITING]: 'clock',
-  [ExecutionStatus.WAITING_FOR_INPUT]: 'dot',
-  [ExecutionStatus.CANCELLED]: 'crossInCircle',
-  [ExecutionStatus.SKIPPED]: 'minusInCircleFilled',
+  [ExecutionStatus.WAITING_FOR_INPUT]: 'hourglass',
+  [ExecutionStatus.CANCELLED]: 'crossCircle',
+  [ExecutionStatus.SKIPPED]: 'minusCircle',
 };
 
 export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: ExecutionStatus) => {
@@ -118,15 +118,58 @@ export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: Execu
   }
 
   if (status === ExecutionStatus.WAITING_FOR_INPUT) {
-    return <EuiBeacon size={14} color="warning" />;
+    return (
+      <EuiIcon
+        type="hourglass"
+        color={getExecutionStatusColors(euiTheme, status).color}
+        aria-hidden={true}
+      />
+    );
   }
 
   return (
     <EuiIcon
       type={ExecutionStatusIconTypeMap[status]}
       color={getExecutionStatusColors(euiTheme, status).color}
+      aria-hidden={true}
     />
   );
+};
+
+const CONTAINER_BREAKPOINT_HIDE = '500px';
+const CONTAINER_BREAKPOINT_NARROW = '1000px';
+
+const statusBadgeStyles = {
+  tooltipAnchor: css({
+    maxWidth: '100%',
+  }),
+  textContainer: css({
+    minWidth: 0,
+    overflow: 'hidden',
+    flexShrink: 1,
+    [`@container (max-width: ${CONTAINER_BREAKPOINT_HIDE})`]: {
+      display: 'none',
+    },
+  }),
+  text: css({
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  }),
+  longFormat: css({
+    [`@container (max-width: ${CONTAINER_BREAKPOINT_NARROW})`]: {
+      display: 'none',
+    },
+  }),
+  narrowFormat: css({
+    display: 'none',
+    [`@container (max-width: ${CONTAINER_BREAKPOINT_NARROW})`]: {
+      display: 'inline',
+    },
+    [`@container (max-width: ${CONTAINER_BREAKPOINT_HIDE})`]: {
+      display: 'none',
+    },
+  }),
 };
 
 export function StatusBadge({
@@ -140,24 +183,34 @@ export function StatusBadge({
   textProps?: EuiTextProps;
 } & EuiFlexGroupProps) {
   const { euiTheme } = useEuiTheme();
-  if (!status) return;
+  if (!status) {
+    return null;
+  }
 
   const statusLabel = getStatusLabel(status);
   const icon = getExecutionStatusIcon(euiTheme, status);
 
   return (
-    <EuiToolTip content={date ? `${statusLabel} ${date ? `on ${formatDate(date)}` : ''}` : null}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" {...props}>
+    <EuiToolTip
+      content={date ? `${statusLabel} ${date ? `on ${formatDate(date)}` : ''}` : null}
+      anchorProps={{ css: statusBadgeStyles.tooltipAnchor }}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false} {...props}>
         <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-        <EuiFlexItem grow={false} className="eui-hideFor--s">
-          <EuiText
-            size="s"
-            {...textProps}
-            css={css`::first-letter {
-              text-transform: capitalize;
-            `}
-          >
-            {date ? <FormattedRelative value={date} /> : statusLabel}
+        <EuiFlexItem grow={false} css={statusBadgeStyles.textContainer}>
+          <EuiText size="s" {...textProps} css={statusBadgeStyles.text}>
+            {date ? (
+              <>
+                <span css={statusBadgeStyles.longFormat}>
+                  <FormattedRelativeEnhanced value={date} style="long" />
+                </span>
+                <span css={statusBadgeStyles.narrowFormat}>
+                  <FormattedRelativeEnhanced value={date} style="narrow" />
+                </span>
+              </>
+            ) : (
+              statusLabel
+            )}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

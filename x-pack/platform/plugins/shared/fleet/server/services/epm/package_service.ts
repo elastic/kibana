@@ -18,8 +18,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
-
 import type { PackageList } from '../../../common';
 
 import type {
@@ -67,7 +65,8 @@ import {
   getInstalledPackages,
 } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
-import { getEsPackage } from './archive/storage';
+import { getAsset, getEsPackage } from './archive/storage';
+import type { PackageAsset } from './archive/storage';
 import { createArchiveIteratorFromMap } from './archive/archive_iterator';
 import { rollbackInstallation } from './packages/rollback';
 
@@ -145,7 +144,8 @@ export interface PackageClient {
     pkgVersion?: string,
     isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
-    ignoreUnverified?: boolean
+    ignoreUnverified?: boolean,
+    injectWiredStreamsRouting?: boolean
   ): Promise<string>;
 
   reinstallEsAssets(
@@ -158,6 +158,11 @@ export interface PackageClient {
   ): Promise<GetInstalledPackagesResponse>;
 
   rollbackPackage(options: { pkgName: string }): Promise<RollbackPackageResponse>;
+
+  getPackageAsset(
+    assetPath: string,
+    savedObjectsClient?: SavedObjectsClientContract
+  ): Promise<PackageAsset | undefined>;
 }
 
 export class PackageServiceImpl implements PackageService {
@@ -200,8 +205,6 @@ export class PackageServiceImpl implements PackageService {
 }
 
 class PackageClientImpl implements PackageClient {
-  private authorizationHeader?: HTTPAuthorizationHeader | null = undefined;
-
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
@@ -211,13 +214,6 @@ class PackageClientImpl implements PackageClient {
     ) => void | Promise<void>,
     private readonly request?: KibanaRequest
   ) {}
-
-  private getAuthorizationHeader() {
-    if (this.request) {
-      this.authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(this.request);
-      return this.authorizationHeader;
-    }
-  }
 
   public async getInstallation(
     pkgName: string,
@@ -313,7 +309,7 @@ class PackageClientImpl implements PackageClient {
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,
-      authorizationHeader: this.getAuthorizationHeader(),
+      request: this.request,
     });
   }
 
@@ -337,7 +333,8 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string,
     isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
-    ignoreUnverified?: boolean
+    ignoreUnverified?: boolean,
+    injectWiredStreamsRouting?: boolean
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
 
@@ -354,7 +351,8 @@ class PackageClientImpl implements PackageClient {
       'yml',
       isInputIncluded,
       prerelease,
-      ignoreUnverified
+      ignoreUnverified,
+      injectWiredStreamsRouting
     );
   }
 
@@ -457,8 +455,6 @@ class PackageClientImpl implements PackageClient {
   }
 
   async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
-    const authorizationHeader = this.getAuthorizationHeader();
-
     const installation = await this.getInstallation(packageInfo.name);
 
     if (!installation) {
@@ -490,9 +486,18 @@ class PackageClientImpl implements PackageClient {
       logger: this.logger,
       force: true,
       esReferences: undefined,
-      authorizationHeader,
+      request: this.request,
     });
     return installedTransforms;
+  }
+
+  public async getPackageAsset(
+    assetPath: string,
+    savedObjectsClient: SavedObjectsClientContract = this.internalSoClient
+  ): Promise<PackageAsset | undefined> {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+
+    return getAsset({ savedObjectsClient, path: assetPath });
   }
 
   async #runPreflight(requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']) {

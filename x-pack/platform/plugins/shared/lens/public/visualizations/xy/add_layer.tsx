@@ -25,7 +25,7 @@ import { css } from '@emotion/react';
 import type { AddLayerFunction, VisualizationLayerDescription } from '@kbn/lens-common';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
-import type { SeriesType, XYState } from './types';
+import type { SeriesType, XYVisualizationState } from './types';
 import { visualizationTypes } from './types';
 import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
@@ -33,7 +33,7 @@ import { ExperimentalBadge } from '../../shared_components';
 import { ChartOption } from '../../editor_frame_service/editor_frame/config_panel/chart_switch/chart_option';
 
 export interface AddLayerButtonProps {
-  state: XYState;
+  state: XYVisualizationState;
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction<ExtraAppendLayerArg>;
   eventAnnotationService: EventAnnotationServiceType;
@@ -76,7 +76,7 @@ export function AddLayerButton({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      icon: icon && <EuiIcon size="m" type={icon} />,
+      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
   };
@@ -93,7 +93,7 @@ export function AddLayerButton({
       toolTipContent,
       disabled,
       name: label,
-      icon: icon && <EuiIcon size="m" type={icon} />,
+      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
   };
@@ -160,7 +160,7 @@ export function AddLayerButton({
                       toolTipContent,
                       disabled,
                       name: label,
-                      icon: icon && <EuiIcon size="m" type={icon} />,
+                      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
                       ['data-test-subj']: `lnsLayerAddButton-${type}`,
                       onClick: () => {
                         addLayer(type);
@@ -174,7 +174,7 @@ export function AddLayerButton({
                   toolTipContent,
                   disabled,
                   name: label,
-                  icon: icon && <EuiIcon size="m" type={icon} />,
+                  icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
                   ['data-test-subj']: `lnsLayerAddButton-${type}`,
                   onClick: () => {
                     addLayer(type);
@@ -194,7 +194,7 @@ export function AddLayerButton({
                   name: i18n.translate('xpack.lens.configPanel.newAnnotation', {
                     defaultMessage: 'New annotation',
                   }),
-                  icon: 'plusInCircle',
+                  icon: 'plusCircle',
                   onClick: () => {
                     addLayer(LayerTypes.ANNOTATIONS);
                     toggleLayersChoice(false);
