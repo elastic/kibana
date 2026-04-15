@@ -15,12 +15,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
 
 import { AgentIds, AgentId } from '../../model/schema/common.gen';
 
