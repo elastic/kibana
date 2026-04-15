@@ -1746,6 +1746,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_policies.test.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.test.ts @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/failure_store.ts @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/lifecycle_retention.ts @elastic/kibana-management
 
 # Streams - Data quality overrides (owned by Kibana Management)
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_data_quality @elastic/kibana-management
