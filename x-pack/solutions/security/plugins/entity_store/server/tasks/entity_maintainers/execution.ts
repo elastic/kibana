@@ -72,15 +72,17 @@ export function createMaintainerStatus({
   namespace?: string;
   initialState: EntityMaintainerState;
 }): EntityMaintainerStatus {
-  const currentStatusNamespace =
-    typeof currentStatus?.namespace === 'string' ? currentStatus.namespace : undefined;
+  const resolvedNamespace = namespace || currentStatus?.namespace || currentStatus?.metadata?.namespace;
+  if (!resolvedNamespace) {
+    throw new Error('Entity maintainer namespace is required');
+  }
 
   return {
     metadata: {
       runs: currentStatus?.metadata?.runs || 0,
       lastSuccessTimestamp: currentStatus?.metadata?.lastSuccessTimestamp || null,
       lastErrorTimestamp: currentStatus?.metadata?.lastErrorTimestamp || null,
-      namespace: namespace ?? currentStatusNamespace ?? currentStatus?.metadata?.namespace ?? '',
+      namespace: resolvedNamespace,
     },
     state: currentStatus?.metadata?.runs ? currentStatus.state ?? initialState : initialState,
     taskStatus: currentStatus?.taskStatus ?? EntityMaintainerTaskStatus.STARTED,
