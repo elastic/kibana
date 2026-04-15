@@ -22,6 +22,7 @@ describe('getSourceFieldsFromNode', () => {
           id: 'doc1',
           type: 'entity',
           entity: {
+            engine_type: 'user',
             sourceFields: { 'user.id': 'admin', 'user.email': 'admin@example.com' },
           },
         },
@@ -40,6 +41,7 @@ describe('getSourceFieldsFromNode', () => {
           id: 'user:admin@gcp',
           type: 'entity',
           entity: {
+            engine_type: 'user',
             sourceFields: {
               'user.email': 'admin@example.com',
               'user.id': ['id-1', 'id-2'],
