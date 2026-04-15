@@ -111,9 +111,6 @@ export class ObservabilitySharedPlugin implements Plugin {
 
   public start(core: CoreStart, plugins: ObservabilitySharedStart) {
     const { application } = core;
-    const { agentBuilder } = plugins;
-
-    this.setupObservabilityAgentDefault(application, agentBuilder);
 
     const PageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: application.currentAppId$,
@@ -136,19 +133,6 @@ export class ObservabilitySharedPlugin implements Plugin {
 
   public stop() {
     this.appChangeSubscription?.unsubscribe();
-  }
-
-  /**
-   * Sets up the Observability Agent as the default AI agent when navigating to Observability apps.
-   * Subscribes to app changes and configures the AI flyout accordingly.
-   */
-  private setupObservabilityAgentDefault(
-    application: CoreStart['application'],
-    agentBuilder: AgentBuilderPluginStart | undefined
-  ) {
-    if (!agentBuilder) {
-      return;
-    }
   }
 
   private createLocators(urlService: BrowserUrlService): ObservabilitySharedLocators {
