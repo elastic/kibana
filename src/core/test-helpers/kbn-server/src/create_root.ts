@@ -342,13 +342,18 @@ export function createTestServers({
       };
     },
     startKibana: async (abortSignal?: AbortSignal) => {
-      // Get the actual running ES version so we can compute a version that is guaranteed to
-      // differ from it, regardless of what the Kibana package.json says.
-      const {
-        version: { number: esVersion },
-      } = await es.getClient().info();
-
-      const resolvedKibanaVersion = resolveKibanaVersion(customKibanaVersion, esVersion);
+      // Only fetch the live ES version when a relative token ('nextMinor' / 'previousMinor')
+      // is used. Calling info() unconditionally breaks callers that run startES() and
+      // startKibana() concurrently with Promise.all(), because ES may not be listening yet.
+      let resolvedKibanaVersion: string | undefined;
+      if (customKibanaVersion === 'nextMinor' || customKibanaVersion === 'previousMinor') {
+        const {
+          version: { number: esVersion },
+        } = await es.getClient().info();
+        resolvedKibanaVersion = resolveKibanaVersion(customKibanaVersion, esVersion);
+      } else {
+        resolvedKibanaVersion = resolveKibanaVersion(customKibanaVersion, '');
+      }
 
       const root = createRootWithCorePlugins(kbnSettings, cliArgs, resolvedKibanaVersion);
 
