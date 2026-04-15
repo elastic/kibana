@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 
-import { get, uniq } from 'lodash';
+import { uniq } from 'lodash';
 
 import type { WatchlistEntityAssignResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/entities/assign.gen';
 import type { WatchlistEntityUnassignResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/entities/unassign.gen';
@@ -114,7 +114,7 @@ export const createManualEntityService = ({
         status: 'success' as const,
       }));
       const failureItems: WatchlistEntityAssignResponseItem[] = failed.map((f) => ({
-        euid: get(f.item, 'euid') ?? '',
+        euid: f.entity.euid,
         status: 'failure' as const,
         error: f.error,
       }));
@@ -260,7 +260,7 @@ const buildResponse = <T extends { readonly euid: string }>(
   failed: number;
   not_found: number;
   total: number;
-  items: readonly T[];
+  items: T[];
 } => ({
   successful: successItems.length,
   failed: failureItems.length,

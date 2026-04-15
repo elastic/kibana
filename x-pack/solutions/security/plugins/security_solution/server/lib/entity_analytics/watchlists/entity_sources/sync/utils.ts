@@ -29,6 +29,7 @@ export const partitionBulkResults = <T>(resp: BulkResponse, entities: T[]): Bulk
     const error = actionResult(item)?.error;
     return error
       ? E.left({
+          entity,
           item,
           error: `${error.type}: ${error.reason}`,
         })

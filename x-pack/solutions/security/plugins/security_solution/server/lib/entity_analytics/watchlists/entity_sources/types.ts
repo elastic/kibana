@@ -20,5 +20,5 @@ export interface WatchlistBulkEntity {
 
 export interface BulkItemOutcome<T> {
   succeeded: readonly T[];
-  failed: readonly { item: BulkResponse['items'][number]; error: string }[];
+  failed: readonly { entity: T; item: BulkResponse['items'][number]; error: string }[];
 }

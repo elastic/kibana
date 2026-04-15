@@ -18,7 +18,7 @@ import {
   AssignWatchlistEntitiesRequestBody,
   type AssignWatchlistEntitiesResponse,
 } from '../../../../../../../common/api/entity_analytics/watchlists/entities/assign.gen';
-import type { EntityAnalyticsRoutesDeps } from '../../../../../types';
+import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
 import { getRequestSavedObjectClient } from '../../../shared/utils';

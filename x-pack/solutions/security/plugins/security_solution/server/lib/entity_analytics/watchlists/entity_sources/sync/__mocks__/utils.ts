@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+const actual = jest.requireActual('../utils');
+
 export const getExistingEntitiesMap = jest.fn().mockResolvedValue(new Map());
 export const getErrorFromBulkResponse = jest.fn().mockReturnValue([]);
 export const errorsMsg = jest.fn().mockReturnValue('');
 export const isTimestampGreaterThan = jest.fn().mockReturnValue(false);
+export const partitionBulkResults = actual.partitionBulkResults;

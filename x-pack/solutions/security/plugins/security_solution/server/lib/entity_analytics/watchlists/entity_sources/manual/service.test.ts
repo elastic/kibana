@@ -12,13 +12,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { bulkUpsertOperationsFactory } from '../bulk/upsert';
 
-jest.mock('../sync/utils', () => {
-  const actual = jest.requireActual('../sync/utils');
-  return {
-    ...actual,
-    getExistingEntitiesMap: jest.fn().mockResolvedValue(new Map()),
-  };
-});
+jest.mock('../sync/utils');
 jest.mock('../bulk/upsert');
 jest.mock('../sync/entity_store_sync');
 jest.mock('../bulk/soft_delete');
@@ -84,9 +78,10 @@ describe('manual entity service', () => {
           },
         ],
       });
-      (esClient.bulk as jest.Mock).mockResolvedValue({
+      esClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ index: { _id: 'user:known', status: 200 } }],
+        took: 1,
+        items: [{ index: { _id: 'user:known', _index: 'test-index', status: 200 } }],
       });
 
       const result = await service.assign(['user:known', 'user:unknown']);
@@ -126,13 +121,15 @@ describe('manual entity service', () => {
           },
         ],
       });
-      (esClient.bulk as jest.Mock).mockResolvedValue({
+      esClient.bulk.mockResolvedValue({
         errors: true,
+        took: 1,
         items: [
-          { index: { _id: 'user:ok', status: 200 } },
+          { index: { _id: 'user:ok', _index: 'test-index', status: 200 } },
           {
             index: {
               _id: 'user:fail',
+              _index: 'test-index',
               status: 400,
               error: { type: 'mapper_parsing_exception', reason: 'field mapping error' },
             },
@@ -163,8 +160,7 @@ describe('manual entity service', () => {
       (crudClient.listEntities as jest.Mock).mockResolvedValue({
         entities: [{ entity: { id: 'user:known', type: 'user' } }],
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (esClient.bulk as any).mockRejectedValue(new Error('Bulk failed'));
+      esClient.bulk.mockRejectedValue(new Error('Bulk failed'));
 
       const result = await service.assign(['user:known']);
 
@@ -181,8 +177,12 @@ describe('manual entity service', () => {
   describe('unassign', () => {
     it('returns not_found for entities not manually assigned', async () => {
       const { esClient, service } = createService();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (esClient.search as any).mockResolvedValue({ hits: { hits: [] } });
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+      });
 
       const result = await service.unassign(['user:unknown']);
 
@@ -197,14 +197,14 @@ describe('manual entity service', () => {
 
     it('unassigns manually assigned entities successfully', async () => {
       const { esClient, crudClient, service } = createService();
-      // First: findManualWatchlistDocs via esClient.search
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (esClient.search as any).mockResolvedValueOnce({
+      esClient.search.mockResolvedValueOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
         hits: {
-          hits: [{ _id: 'doc-1', _source: { entity: { id: 'user:known' } } }],
+          hits: [{ _id: 'doc-1', _index: 'test-index', _source: { entity: { id: 'user:known' } } }],
         },
       });
-      // Second: findEntitiesInStore via crudClient.listEntities
       (crudClient.listEntities as jest.Mock).mockResolvedValue({
         entities: [
           {
@@ -248,10 +248,12 @@ describe('manual entity service', () => {
 
     it('handles errors during unassignment', async () => {
       const { esClient, crudClient, service } = createService();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (esClient.search as any).mockResolvedValueOnce({
+      esClient.search.mockResolvedValueOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
         hits: {
-          hits: [{ _id: 'doc-1', _source: { entity: { id: 'user:known' } } }],
+          hits: [{ _id: 'doc-1', _index: 'test-index', _source: { entity: { id: 'user:known' } } }],
         },
       });
       (crudClient.listEntities as jest.Mock).mockRejectedValue(new Error('Store search failed'));
