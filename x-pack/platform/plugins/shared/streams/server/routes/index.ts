@@ -28,7 +28,7 @@ import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
 import { internalDescriptionGenerationRoutes } from './internal/sig_events/description_generation/route';
 import { featureRoutes as internalFeatureRoutes } from './internal/sig_events/features/route';
-import { identifyRoutes as internalIdentifyRoutes } from './internal/sig_events/features/identify_route';
+import { identifyFeaturesRoutes as internalIdentifyFeaturesRoutes } from './internal/sig_events/features/identify_route';
 import { internalInsightsRoutes } from './internal/sig_events/insights/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
 import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
@@ -54,7 +54,7 @@ export const streamsRouteRepository = {
   ...internalAttachmentRoutes,
   ...internalDescriptionGenerationRoutes,
   ...internalFeatureRoutes,
-  ...internalIdentifyRoutes,
+  ...internalIdentifyFeaturesRoutes,
   ...internalInsightsRoutes,
   ...internalTasksRoutes,
   ...internalOnboardingRoutes,
