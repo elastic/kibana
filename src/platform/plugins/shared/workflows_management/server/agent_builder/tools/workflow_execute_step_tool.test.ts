@@ -144,7 +144,8 @@ describe('registerWorkflowExecuteStepTool', () => {
 
     expect(result.results[0].data).toEqual({
       success: false,
-      error: 'No workflow YAML attachment found in the conversation',
+      error:
+        'No workflow YAML attachment found. Provide the `yaml` parameter with inline YAML, or create a workflow first.',
     });
   });
 
@@ -310,6 +311,28 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(data.status).toBe(ExecutionStatus.COMPLETED);
     });
 
+    it('stubs unsafe children for a nested if step before execution', async () => {
+      jest.useRealTimers();
+
+      mockApi.testStep.mockResolvedValue('exec-inner-if');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'inner_if', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 70,
+      });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML);
+      const result = await invokeHandler(registeredTool, { stepName: 'inner_if' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+      const stubbedYaml = mockApi.testStep.mock.calls[0][0] as string;
+
+      expect(data.success).toBe(true);
+      expect(data.conditionTest).toBe(true);
+      expect(stubbedYaml).toContain('name: __stub_then');
+      expect(stubbedYaml).not.toContain('name: deep_http');
+    });
+
     it('returns error when testStep throws', async () => {
       jest.useRealTimers();
 
@@ -373,19 +396,27 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
-    it('blocks an if step that contains an unsafe child', async () => {
-      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+    it('stubs and executes an if step that contains an unsafe child', async () => {
+      jest.useRealTimers();
 
+      mockApi.testStep.mockResolvedValue('exec-check-alerts');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'check_alerts', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 110,
+      });
       const context = createMockContext(VALID_WORKFLOW_YAML);
       const result = await invokeHandler(registeredTool, { stepName: 'check_alerts' }, context);
       const data = result.results[0].data as Record<string, unknown>;
+      const stubbedYaml = mockApi.testStep.mock.calls[0][0] as string;
 
-      expect(data.blocked).toBe(true);
-      expect(data.stepType).toBe('if');
-      expect(data.unsafeStepType).toBe('slack');
-      expect(data.unsafeChildStepId).toBe('nested_slack');
-      expect(data.reason).toContain('contains child step "nested_slack"');
-      expect(mockApi.testStep).not.toHaveBeenCalled();
+      expect(data.success).toBe(true);
+      expect(data.conditionTest).toBe(true);
+      expect(data.blocked).toBeUndefined();
+      expect(stubbedYaml).toContain('name: __stub_then');
+      expect(stubbedYaml).toContain('name: __stub_else');
+      expect(stubbedYaml).not.toContain('name: nested_slack');
     });
 
     it('blocks a foreach with a deeply nested unsafe step', async () => {

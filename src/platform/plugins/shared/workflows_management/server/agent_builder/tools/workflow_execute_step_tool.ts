@@ -138,7 +138,9 @@ const ensureMinimalWorkflow = (yamlStr: string): string => {
 const stubUnsafeChildren = (yamlStr: string, stepName: string): string => {
   const doc = parseDocument(yamlStr);
   const stepsNode = (doc.contents as YAML.YAMLMap)?.get('steps');
-  if (!YAML.isSeq(stepsNode)) return yamlStr;
+  if (!YAML.isSeq(stepsNode)) {
+    return yamlStr;
+  }
 
   const stubStep = (branch: string) =>
     doc.createNode({
@@ -158,13 +160,20 @@ const stubUnsafeChildren = (yamlStr: string, stepName: string): string => {
     }
   };
 
-  const findAndReplace = (seq: YAML.YAMLSeq) => {
+  const findAndReplace = (seq: YAML.YAMLSeq): boolean => {
     for (const item of seq.items) {
       if (YAML.isMap(item)) {
         const name = (item as YAML.YAMLMap).get('name');
         if (name === stepName) {
           replaceChildren(item as YAML.YAMLMap);
           return true;
+        }
+
+        for (const key of ['steps', 'then', 'else']) {
+          const child = (item as YAML.YAMLMap).get(key);
+          if (YAML.isSeq(child) && findAndReplace(child)) {
+            return true;
+          }
         }
       }
     }
@@ -304,7 +313,7 @@ Provide yaml to execute a step without needing a workflow.yaml attachment (usefu
 
       const unsafeStep = findUnsafeStep(stepName, lookup.steps);
 
-      // For container steps (if/while/foreach) with unsafe children, auto-stub
+      // For condition steps (if/while) with unsafe children, auto-stub
       // the children with safe console steps so the condition can be tested.
       const CONDITION_STEP_TYPES = new Set(['if', 'while']);
       if (unsafeStep && CONDITION_STEP_TYPES.has(stepInfo.stepType)) {
