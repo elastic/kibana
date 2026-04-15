@@ -12,26 +12,23 @@ import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 
-// Markdown by-value state schema (contains content)
-const markdownByValueStateSchema = schema.object({
+export const markdownByValueStateSchema = schema.object({
   content: schema.string({
-    defaultValue: '',
+    minLength: 1
   }),
-  settings: schema.maybe(
+  settings: 
     schema.object({
       open_links_in_new_tab: schema.boolean({ defaultValue: true }),
     })
-  ),
+  ,
 });
 
-// Markdown by-reference state schema (contains savedObjectId)
 const markdownByReferenceStateSchema = schema.object({
   ref_id: schema.string({
     meta: { description: 'The unique identifier of the markdown library item.' },
   }),
 });
 
-// Markdown by-value embeddable schema (by-value state + titles)
 export const markdownByValueEmbeddableSchema = schema.allOf(
   [markdownByValueStateSchema, serializedTitlesSchema],
   {
@@ -39,7 +36,6 @@ export const markdownByValueEmbeddableSchema = schema.allOf(
   }
 );
 
-// Markdown by-reference embeddable schema (by-reference state + titles)
 const markdownByReferenceEmbeddableSchema = schema.allOf(
   [markdownByReferenceStateSchema, serializedTitlesSchema],
   {
@@ -47,11 +43,9 @@ const markdownByReferenceEmbeddableSchema = schema.allOf(
   }
 );
 
-// Complete markdown embeddable schema (union of by-value and by-reference embeddables)
 export const markdownEmbeddableSchema = schema.oneOf(
   [markdownByValueEmbeddableSchema, markdownByReferenceEmbeddableSchema],
   {
-    defaultValue: { content: '', settings: { open_links_in_new_tab: true } },
     meta: {
       description: 'Markdown panel config',
     },

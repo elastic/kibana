@@ -38,7 +38,7 @@ import { loadFromLibrary } from './markdown_client/load_from_library';
 import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
 import { markdownClient } from './markdown_client/markdown_client';
 import type { MarkdownAttributes } from '../server/markdown_saved_object';
-import type { MarkdownSettingsState } from '../server/schemas';
+import type { MarkdownSettingsState } from '../server/embeddable/schemas';
 
 const flexCss = css({
   display: 'flex',
@@ -76,11 +76,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const isPreview$ = new BehaviorSubject<boolean>(false);
 
     const settings$ = new BehaviorSubject<MarkdownSettingsState>(
-      (isByReference
+      isByReference
         ? initialLibraryState.settings
-        : (initialState as MarkdownByValueState).settings) ?? {
-        open_links_in_new_tab: true,
-      }
+        : (initialState as MarkdownByValueState).settings
     );
 
     const overrideHoverActions$ = new BehaviorSubject<boolean>(false);
