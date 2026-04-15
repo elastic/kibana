@@ -48,7 +48,7 @@ const bulkActionsSchema = z.object({
     .max(MAX_RULES_PER_BULK_ACTION)
     .optional()
     .describe(
-      'Array of rule saved object IDs (the alerting framework "id") to apply the action to. At least one of "rule_ids" or "rule_signature_ids" must be provided.'
+      'Array of rule saved object IDs (the alerting framework "id") to apply the action to. At least one of "ids" or "rule_ids" must be provided.'
     ),
   rule_ids: z
     .array(z.string())
@@ -56,7 +56,7 @@ const bulkActionsSchema = z.object({
     .max(MAX_RULES_PER_BULK_ACTION)
     .optional()
     .describe(
-      'Array of rule signature IDs ("rule_id") to apply the action to. At least one of "rule_ids" or "rule_signature_ids" must be provided.'
+      'Array of rule signature IDs ("rule_id") to apply the action to. At least one of "ids" or "rule_ids" must be provided.'
     ),
   tags: z
     .array(z.string())
@@ -97,7 +97,7 @@ export const bulkActionsTool = (
       },
     },
     handler: async (params, { request, savedObjectsClient }) => {
-      const { action, rule_ids: ids, rule_ids: ruleIds, tags } = params;
+      const { action, ids, rule_ids: ruleIds, tags } = params;
 
       const totalRequested = (ids?.length ?? 0) + (ruleIds?.length ?? 0);
 
