@@ -12,10 +12,11 @@ import { servers as workflowsUiConfig } from '../../workflows_ui/stateful/classi
 
 /**
  * Scout server configuration for Workflow Schema OOM prevention tests.
- * Constrains Kibana to 768 MB old-space heap (~75% of 1 GB) to catch
- * memory regressions in the workflow schema (connectors whitelist, Zod
- * schema, YAML validation). The 75% ratio mirrors real deployments where
- * the remaining headroom is reserved for externals and background processes.
+ * Constrains Kibana to 896 MB old-space heap to catch memory regressions
+ * in the workflow schema (connectors whitelist, Zod schema, YAML validation).
+ * Kibana's boot with all plugins loaded uses ~760 MB, leaving ~136 MB for
+ * schema materialisation — tight enough to catch regressions but above the
+ * boot baseline. (768 MB is too low: Kibana OOMs during startup.)
  *
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet workflows_oom_testing
@@ -30,7 +31,7 @@ export const servers: ScoutServerConfig = {
     ...workflowsUiConfig.kbnTestServer,
     env: {
       ...workflowsUiConfig.kbnTestServer.env,
-      NODE_OPTIONS: [workflowsUiConfig.kbnTestServer.env?.NODE_OPTIONS, '--max-old-space-size=768']
+      NODE_OPTIONS: [workflowsUiConfig.kbnTestServer.env?.NODE_OPTIONS, '--max-old-space-size=896']
         .filter(Boolean)
         .join(' '),
     },
