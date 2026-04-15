@@ -134,7 +134,7 @@ export const ActionTypeMenu = ({
           return isWorkflowsUiEnabled;
         }
 
-        return false;
+        return actionType.enabledInConfig === true;
       }
 
       if (!actionTypeModel) {
