@@ -11,7 +11,7 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { maintainerIdParamsSchema } from './utils/validator';
+import { maintainerIdParamsSchema, validateMaintainersRequest } from './utils/validator';
 
 export function registerStartMaintainer(router: EntityStorePluginRouter) {
   router.versioned
@@ -34,10 +34,15 @@ export function registerStartMaintainer(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, entityMaintainersClient } = entityStoreCtx;
+        const { logger, assetManagerClient, entityMaintainersClient } = entityStoreCtx;
         const { id } = req.params;
 
         logger.debug(`Start maintainer API invoked for id: ${id}`);
+
+        const validationError = await validateMaintainersRequest(assetManagerClient, req, res);
+        if (validationError) {
+          return validationError;
+        }
 
         await entityMaintainersClient.start(id, req);
 

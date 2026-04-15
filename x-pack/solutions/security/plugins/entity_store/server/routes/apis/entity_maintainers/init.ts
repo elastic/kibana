@@ -6,14 +6,11 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
-import { ENTITY_STORE_STATUS } from '../../../domain/constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { getMissingPrivileges } from '../utils/get_missing_privileges';
-import type { AssetManagerClient } from '../../../domain/asset_manager';
+import { validateMaintainersRequest } from './utils/validator';
 
 export function registerInitMaintainers(router: EntityStorePluginRouter) {
   router.versioned
@@ -36,7 +33,7 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
 
         logger.debug('Entity maintainers init API called');
 
-        const validationError = await validateInitMaintainersRequest(assetManagerClient, req, res);
+        const validationError = await validateMaintainersRequest(assetManagerClient, req, res);
         if (validationError) {
           return validationError;
         }
@@ -46,38 +43,4 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
         return res.ok({ body: { ok: true } });
       })
     );
-}
-
-/**
- * Validates that the request can proceed with entity maintainers init:
- * 1. User has required privileges (cluster, index, saved object).
- * 2. Entity store is installed (init is only valid when entity store exists).
- * Returns an error response if validation fails, or null if validation passes.
- */
-async function validateInitMaintainersRequest(
-  assetManagerClient: AssetManagerClient,
-  req: KibanaRequest,
-  res: KibanaResponseFactory
-): Promise<IKibanaResponse | null> {
-  const privileges = await assetManagerClient.getPrivileges(req);
-  if (!privileges.hasAllRequested) {
-    return res.forbidden({
-      body: {
-        attributes: getMissingPrivileges(privileges),
-        message: `User '${privileges.username}' has insufficient privileges`,
-      },
-    });
-  }
-
-  const { status } = await assetManagerClient.getStatus(false);
-  if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
-    return res.badRequest({
-      body: {
-        message:
-          'Entity store is not installed. Install the entity store first, then initialize entity maintainers.',
-      },
-    });
-  }
-
-  return null;
 }
