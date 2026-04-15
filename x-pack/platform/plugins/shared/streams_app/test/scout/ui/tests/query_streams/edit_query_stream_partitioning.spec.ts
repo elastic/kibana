@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { getEsqlViewName } from '@kbn/streams-schema';
+import { getEsqlViewName } from '@kbn/streams-schema/src/models/query/view_name';
 import { test } from '../../fixtures';
 import {
   createQueryStream,
