@@ -9,7 +9,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
-import { DependencyNode } from '../dependency_node';
+import { DependencyNode } from '../../../shared/service_map/dependency_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { DependencyNodeData } from '../../../../../common/service_map';
 
