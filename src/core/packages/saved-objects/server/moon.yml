@@ -44,7 +44,6 @@ dependsOn:
   - '@kbn/core-saved-objects-common'
   - '@kbn/core-security-common'
   - '@kbn/core-status-common'
-  - '@kbn/core-usage-data-server'
   - '@kbn/doc-links'
   - '@kbn/es-errors'
   - '@kbn/es-query'
@@ -58,6 +57,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/utility-types-jest'
   - '@kbn/utils'
+  - '@kbn/core-usage-data-base-server-internal'
 tags:
   - shared-server
   - package
