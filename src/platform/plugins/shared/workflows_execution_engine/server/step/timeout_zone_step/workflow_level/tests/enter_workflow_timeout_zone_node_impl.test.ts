@@ -12,11 +12,14 @@ jest.mock('../../../../utils', () => ({
   parseDuration: jest.fn(),
 }));
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import { parseDuration } from '../../../../utils';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../../../workflow_event_logger';
+import type { WorkflowTaskManager } from '../../../../workflow_task_manager/workflow_task_manager';
 import { EnterWorkflowTimeoutZoneNodeImpl } from '../enter_workflow_timeout_zone_node_impl';
 
 const mockParseDuration = parseDuration as jest.MockedFunction<typeof parseDuration>;
@@ -25,6 +28,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
   let node: EnterTimeoutZoneNode;
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let stepExecutionRuntimeFactoryMock: StepExecutionRuntimeFactory;
+  let workflowTaskManagerMock: { scheduleResumeTask: jest.Mock };
   let impl: EnterWorkflowTimeoutZoneNodeImpl;
 
   const originalDateCtor = global.Date;
@@ -56,7 +60,11 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     };
 
     wfExecutionRuntimeManagerMock = {
-      getWorkflowExecution: jest.fn(),
+      getWorkflowExecution: jest.fn().mockReturnValue({
+        id: 'wf-exec-1',
+        spaceId: 'default',
+        startedAt: '2025-09-25T10:14:30.000Z',
+      }),
       setWorkflowError: jest.fn(),
       navigateToNextNode: jest.fn(),
       markWorkflowTimeouted: jest.fn(),
@@ -66,13 +74,26 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       createStepExecutionRuntime: jest.fn(),
     } as unknown as StepExecutionRuntimeFactory;
 
+    workflowTaskManagerMock = {
+      scheduleResumeTask: jest.fn().mockResolvedValue({ taskId: 'task-1' }),
+    };
+
+    const fakeRequest = { headers: {} } as KibanaRequest;
+
+    const workflowLogger = {
+      logWarn: jest.fn(),
+    } as unknown as IWorkflowEventLogger;
+
     impl = new EnterWorkflowTimeoutZoneNodeImpl(
       node,
       wfExecutionRuntimeManagerMock,
-      stepExecutionRuntimeFactoryMock
+      stepExecutionRuntimeFactoryMock,
+      workflowTaskManagerMock as unknown as WorkflowTaskManager,
+      fakeRequest,
+      workflowLogger
     );
 
-    mockDateNow = new Date('2025-09-25T10:15:30.000Z');
+    mockDateNow = new Date('2025-09-25T10:14:35.000Z');
     mockParseDuration.mockReturnValue(60000); // 60 seconds default
   });
 
@@ -81,6 +102,16 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       await impl.run();
       expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledTimes(1);
       expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledWith();
+    });
+
+    it('schedules a Task Manager resume at the workflow timeout deadline', async () => {
+      await impl.run();
+      expect(workflowTaskManagerMock.scheduleResumeTask).toHaveBeenCalledTimes(1);
+      const scheduled = workflowTaskManagerMock.scheduleResumeTask.mock.calls[0][0];
+      expect(scheduled.workflowExecution).toEqual(expect.objectContaining({ id: 'wf-exec-1' }));
+      expect(scheduled.fakeRequest).toEqual(expect.objectContaining({ headers: {} }));
+      const deadlineMs = new Date('2025-09-25T10:15:30.000Z').getTime();
+      expect(scheduled.resumeAt.getTime()).toBeGreaterThanOrEqual(deadlineMs);
     });
   });
 

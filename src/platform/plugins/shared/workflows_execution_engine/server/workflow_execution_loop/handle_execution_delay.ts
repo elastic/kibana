@@ -25,7 +25,6 @@ export async function handleExecutionDelay(
     stepStatus === ExecutionStatus.WAITING_FOR_INPUT ||
     stepStatus === ExecutionStatus.WAITING_FOR_CHILD
   ) {
-    // Indefinite wait: exit the loop. Step timeout zones do not advance until a later resume.
     params.workflowExecutionState.updateWorkflowExecution({
       status: stepStatus,
     });
@@ -50,7 +49,6 @@ export async function handleExecutionDelay(
   params.workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.WAITING,
   });
-
   if (diff < SHORT_DURATION_THRESHOLD) {
     const timeout = diff > 0 ? diff : 0;
 

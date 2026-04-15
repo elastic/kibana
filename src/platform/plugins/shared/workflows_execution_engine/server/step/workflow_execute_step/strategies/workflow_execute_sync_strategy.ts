@@ -130,9 +130,6 @@ export class WorkflowExecuteSyncStrategy {
         return { status: 'cancelled' };
       }
 
-      // Note: while the parent workflow is WAITING_FOR_CHILD, the execution loop exits and
-      // in-loop step timeout monitoring (enter-timeout-zone) does not run. A dedicated
-      // scheduled timeout path would be needed to enforce step timeouts during this wait; see PR discussion.
       this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_CHILD);
       return { status: 'waiting' };
     } catch (error) {

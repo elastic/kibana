@@ -12,6 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
 import { catchError } from './catch_error';
 import { handleExecutionDelay } from './handle_execution_delay';
+import { processNodeStackMonitoring } from './run_stack_monitor/process_node_stack_monitoring';
 import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
 import { isCancellableNode } from '../step/node_implementation';
@@ -95,6 +96,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
     monitorAbortController = new AbortController();
 
+    // Run stack monitoring once before the race so timeouts/cancel win over step.run().
+    await processNodeStackMonitoring(params, stepExecutionRuntime);
+
     /**
      * Run monitoring in parallel with step execution to handle:
      * - Cancellation detection
@@ -106,7 +110,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     let runStepPromise: Promise<void> = Promise.resolve();
 
     // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occurred right before running step, etc.
-    if (!monitorAbortController.signal.aborted) {
+    if (
+      !monitorAbortController.signal.aborted &&
+      !stepExecutionRuntime.abortController.signal.aborted
+    ) {
       runStepPromise = Promise.resolve(nodeImplementation.run()).then(
         () => stepExecutionRuntime && handleExecutionDelay(params, stepExecutionRuntime)
       );

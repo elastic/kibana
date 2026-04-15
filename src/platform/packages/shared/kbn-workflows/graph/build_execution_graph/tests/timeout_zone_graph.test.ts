@@ -8,7 +8,8 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { ConnectorStep, WorkflowYaml } from '../../../spec/schema';
+import type { ConnectorStep, WorkflowExecuteStep, WorkflowYaml } from '../../../spec/schema';
+import { WorkflowGraph } from '../../workflow_graph/workflow_graph';
 import { convertToWorkflowGraph } from '../build_execution_graph';
 
 describe('convertToWorkflowGraph', () => {
@@ -73,6 +74,43 @@ describe('convertToWorkflowGraph', () => {
         stepId: 'testAtomicStep1',
         stepType: 'step_level_timeout',
       });
+    });
+
+    it('WorkflowGraph.getEnclosingStepLevelTimeout returns timeout for the wrapped step node', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
+      const wfGraph = new WorkflowGraph(executionGraph);
+      expect(wfGraph.getEnclosingStepLevelTimeout('testAtomicStep1')).toBe('30s');
+      expect(wfGraph.getEnclosingStepLevelTimeout('enterTimeoutZone_testAtomicStep1')).toBe(
+        undefined
+      );
+    });
+
+    it('getEnclosingStepLevelTimeout ignores other steps for workflow.execute', () => {
+      const multiStepWorkflow = {
+        name: 'Parent with timed step then workflow.execute',
+        version: '1' as const,
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        steps: [
+          {
+            name: 'parent-preflight',
+            type: 'console',
+            timeout: '30s',
+            with: { message: 'started' },
+          },
+          {
+            name: 'run-child-sync',
+            type: 'workflow.execute',
+            with: { 'workflow-id': 'child-workflow-id' },
+          } as WorkflowExecuteStep,
+        ],
+      } as WorkflowYaml;
+
+      const executionGraph = convertToWorkflowGraph(multiStepWorkflow);
+      const wfGraph = new WorkflowGraph(executionGraph);
+
+      expect(wfGraph.getEnclosingStepLevelTimeout('parent-preflight')).toBe('30s');
+      expect(wfGraph.getEnclosingStepLevelTimeout('run-child-sync')).toBeUndefined();
     });
   });
 

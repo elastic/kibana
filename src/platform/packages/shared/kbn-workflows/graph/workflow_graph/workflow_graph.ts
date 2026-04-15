@@ -13,6 +13,7 @@ import { createTypedGraph } from './create_typed_graph';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import type { GraphNodeUnion } from '../types';
+import { isEnterStepTimeoutZone } from '../types/guards';
 
 /**
  * A class that encapsulates the logic of workflow graph operations and provides
@@ -175,6 +176,27 @@ export class WorkflowGraph {
     return successors.map((id) => this.graph.node(id));
   }
 
+  /**
+   * Returns the step-level timeout wrapping `nodeId`, if any.
+   *
+   * Only checks **direct** predecessors, so this is correct only for leaf
+   * nodes that are not wrapped in a step-level `foreach`/`while` (which
+   * would insert an intermediate enter-foreach/enter-while node between the
+   * timeout zone and the leaf). Currently used exclusively for
+   * `workflow.execute` nodes, whose schema forbids `foreach`/`while`.
+   */
+  public getEnclosingStepLevelTimeout(nodeId: string): string | undefined {
+    const target = this.graph.node(nodeId);
+    const predIds = this.graph.predecessors(nodeId) ?? [];
+    for (const predId of predIds) {
+      const n = this.graph.node(predId);
+      if (isEnterStepTimeoutZone(n) && n.stepId === target.stepId) {
+        return n.timeout;
+      }
+    }
+    return undefined;
+  }
+
   public getAllPredecessors(nodeId: string): GraphNodeUnion[] {
     const visited = new Set<string>();
     const collectPredecessors = (predNodeId: string) => {
@@ -193,14 +215,7 @@ export class WorkflowGraph {
     return Array.from(visited).map((id) => this.graph.node(id));
   }
 
-  /**
-   * Returns the set of unique child stepIds contained within a compound step
-   * (foreach, while, if, switch, etc.), excluding the compound step itself.
-   *
-   * Results are cached because the graph is immutable after construction and
-   * this method may be called on every loop exit (including inner loops that
-   * exit once per outer iteration).
-   */
+  /** Inner stepIds for a compound step (excluding that step). Cached. */
   public getInnerStepIds(compoundStepId: string): Set<string> {
     const cached = this.innerStepIdsCache.get(compoundStepId);
     if (cached) {

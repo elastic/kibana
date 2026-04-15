@@ -92,6 +92,7 @@ import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export class NodesFactory {
   constructor(
@@ -101,7 +102,8 @@ export class NodesFactory {
     private workflowGraph: WorkflowGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private dependencies: ContextDependencies,
-    private workflowExecutionState: WorkflowExecutionState
+    private workflowExecutionState: WorkflowExecutionState,
+    private workflowTaskManager: WorkflowTaskManager
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
@@ -277,7 +279,10 @@ export class NodesFactory {
           return new EnterWorkflowTimeoutZoneNodeImpl(
             node,
             this.workflowRuntime,
-            this.stepExecutionRuntimeFactory
+            this.stepExecutionRuntimeFactory,
+            this.workflowTaskManager,
+            this.dependencies.request,
+            this.workflowLogger
           );
         }
 
@@ -393,6 +398,8 @@ export class NodesFactory {
           stepExecutionRepository: this.dependencies.stepExecutionRepository,
           workflowLogger: this.workflowLogger,
           maxWorkflowDepth: this.dependencies.workflowsExecutionEngine.getMaxWorkflowDepth(),
+          workflowExecutionGraph: this.workflowGraph,
+          workflowTaskManager: this.workflowTaskManager,
         });
       case 'workflow.output':
         this.workflowLogger.logDebug(`Creating workflow.output step`, {
