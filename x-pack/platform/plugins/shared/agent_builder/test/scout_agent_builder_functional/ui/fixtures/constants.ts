@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const CHAT_CONVERSATIONS_INDEX = '.chat-conversations';
-
-/** Matches `chatSystemIndex('agents')` from `@kbn/agent-builder-server`. */
-export const CHAT_AGENTS_INDEX = '.chat-agents';
+export {
+  CHAT_CONVERSATIONS_INDEX,
+  CHAT_AGENTS_INDEX,
+} from '../../../scout_agent_builder_shared/lib/constants';

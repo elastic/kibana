@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { apiTest, testData } from '../../../scout_agent_builder_api/api/fixtures';
+export { apiTest } from '@kbn/scout';
+
+export * as testData from './constants';

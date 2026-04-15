@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createAgentViaKbn,
   deleteAllAgentsFromEs,
 } from '../../../scout_agent_builder_shared/lib/agents_kbn';
-import {
-  createGenAiConnectorForProxy,
-  deleteAllConnectors,
-} from '../../../scout_agent_builder_shared/lib/connector_kbn';
+import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_shared/lib/conversations_es';
 import { test, testData } from '../fixtures';
 
 const agents = [
@@ -29,12 +25,8 @@ test.describe(
   'Agent Builder — edit agent',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let llmProxy: LlmProxy;
-
-    test.beforeAll(async ({ log, kbnClient, esClient }) => {
-      llmProxy = await createLlmProxy(log);
-      await deleteAllConnectors(kbnClient);
-      await createGenAiConnectorForProxy(kbnClient, llmProxy);
+    test.beforeAll(async ({ kbnClient, esClient, llmProxy }) => {
+      void llmProxy;
       await deleteAllAgentsFromEs(esClient, testData.CHAT_AGENTS_INDEX);
       for (const agent of agents) {
         await createAgentViaKbn(kbnClient, {
@@ -49,18 +41,10 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
-      llmProxy.close();
-      await deleteAllConnectors(kbnClient);
+    test.afterAll(async ({ esClient, llmProxy }) => {
+      void llmProxy;
       await deleteAllAgentsFromEs(esClient, testData.CHAT_AGENTS_INDEX);
-      await esClient.deleteByQuery({
-        index: testData.CHAT_CONVERSATIONS_INDEX,
-        query: { match_all: {} },
-        wait_for_completion: true,
-        refresh: true,
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-      });
+      await deleteAllConversationsFromEs(esClient);
     });
 
     test('edit and clone agent journeys', async ({ page, pageObjects }) => {

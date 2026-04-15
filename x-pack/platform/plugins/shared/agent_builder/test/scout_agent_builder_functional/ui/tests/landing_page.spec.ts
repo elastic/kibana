@@ -5,47 +5,31 @@
  * 2.0.
  */
 
-import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  createGenAiConnectorForProxy,
-  deleteAllConnectors,
-} from '../../../scout_agent_builder_shared/lib/connector_kbn';
+import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_shared/lib/conversations_es';
 import {
   createToolViaKbn,
   deleteAllTools,
 } from '../../../scout_agent_builder_shared/lib/tools_kbn';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 
 test.describe(
   'Agent Builder — tools landing page',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let llmProxy: LlmProxy;
-
-    test.beforeAll(async ({ log, kbnClient }) => {
-      llmProxy = await createLlmProxy(log);
-      await deleteAllConnectors(kbnClient);
-      await createGenAiConnectorForProxy(kbnClient, llmProxy);
+    test.beforeAll(async ({ llmProxy }) => {
+      void llmProxy;
     });
 
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
-      llmProxy.close();
-      await deleteAllConnectors(kbnClient);
+    test.afterAll(async ({ kbnClient, esClient, llmProxy }) => {
+      void llmProxy;
       await deleteAllTools(kbnClient);
-      await esClient.deleteByQuery({
-        index: testData.CHAT_CONVERSATIONS_INDEX,
-        query: { match_all: {} },
-        wait_for_completion: true,
-        refresh: true,
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-      });
+      await deleteAllConversationsFromEs(esClient);
     });
 
     test('renders tools page and table', async ({ page, pageObjects }) => {

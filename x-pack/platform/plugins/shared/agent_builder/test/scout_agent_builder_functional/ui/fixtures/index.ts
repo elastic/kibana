@@ -7,7 +7,16 @@
 
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
+import {
+  createGenAiConnectorForProxy,
+  deleteAllConnectors,
+} from '../../../scout_agent_builder_shared/lib/connector_kbn';
 import { AgentBuilderApp } from './page_objects';
+
+interface AgentBuilderWorkerFixtures extends ScoutWorkerFixtures {
+  llmProxy: LlmProxy;
+}
 
 export interface AgentBuilderUiFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
@@ -15,7 +24,18 @@ export interface AgentBuilderUiFixtures extends ScoutTestFixtures {
   };
 }
 
-export const test = baseTest.extend<AgentBuilderUiFixtures, ScoutWorkerFixtures>({
+export const test = baseTest.extend<AgentBuilderUiFixtures, AgentBuilderWorkerFixtures>({
+  llmProxy: [
+    async ({ log, kbnClient }, use) => {
+      const proxy = await createLlmProxy(log);
+      await deleteAllConnectors(kbnClient);
+      await createGenAiConnectorForProxy(kbnClient, proxy);
+      await use(proxy);
+      proxy.close();
+      await deleteAllConnectors(kbnClient);
+    },
+    { scope: 'worker' },
+  ],
   page: async ({ page }, use) => {
     await page.addInitScript(() => {
       window.localStorage.setItem('home:welcome:show', 'false');

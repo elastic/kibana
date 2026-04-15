@@ -6,51 +6,31 @@
  */
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  createGenAiConnectorForProxy,
-  deleteAllConnectors,
-} from '../../../scout_agent_builder_shared/lib/connector_kbn';
+import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_shared/lib/conversations_es';
 import {
   setupAgentDirectAnswer,
   setupAgentDirectError,
 } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 
 test.describe(
   'Agent Builder — conversation error handling',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let llmProxy: LlmProxy;
-
-    test.beforeAll(async ({ log, kbnClient }) => {
-      llmProxy = await createLlmProxy(log);
-      await deleteAllConnectors(kbnClient);
-      await createGenAiConnectorForProxy(kbnClient, llmProxy);
-    });
-
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
-      llmProxy.close();
-      await deleteAllConnectors(kbnClient);
-      await esClient.deleteByQuery({
-        index: testData.CHAT_CONVERSATIONS_INDEX,
-        query: { match_all: {} },
-        wait_for_completion: true,
-        refresh: true,
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-      });
+    test.afterAll(async ({ esClient }) => {
+      await deleteAllConversationsFromEs(esClient);
     });
 
     test('shows error message when there is an error and allows user to retry', async ({
       page,
       pageObjects,
+      llmProxy,
     }) => {
       const MOCKED_INPUT = 'test error message';
       const MOCKED_RESPONSE = 'This is a successful response after retry';
@@ -120,7 +100,11 @@ test.describe(
       await expect(page.testSubj.locator('agentBuilderWelcomePage')).toBeVisible();
     });
 
-    test('can start a new conversation when there is an error', async ({ page, pageObjects }) => {
+    test('can start a new conversation when there is an error', async ({
+      page,
+      pageObjects,
+      llmProxy,
+    }) => {
       const MOCKED_INPUT = 'test error message for new conversation';
       const MOCKED_RESPONSE = 'This is a successful response in new conversation';
       const MOCKED_TITLE = 'New Conversation After Error';
@@ -166,7 +150,11 @@ test.describe(
       }).toPass({ timeout: 120_000 });
     });
 
-    test('an error does not persist across conversations', async ({ page, pageObjects }) => {
+    test('an error does not persist across conversations', async ({
+      page,
+      pageObjects,
+      llmProxy,
+    }) => {
       const SUCCESSFUL_INPUT = 'successful conversation message';
       const SUCCESSFUL_RESPONSE = 'This is a successful response';
       const SUCCESSFUL_TITLE = 'Successful Conversation';
@@ -213,7 +201,11 @@ test.describe(
       }).toPass({ timeout: 120_000 });
     });
 
-    test('clears the error when the user sends a new message', async ({ page, pageObjects }) => {
+    test('clears the error when the user sends a new message', async ({
+      page,
+      pageObjects,
+      llmProxy,
+    }) => {
       const ERROR_INPUT = 'error message';
       const NEW_INPUT = 'new message after error';
       const NEW_RESPONSE = 'This is a successful response after error';
@@ -259,6 +251,7 @@ test.describe(
     test('keeps the previous conversation rounds visible when there is an error', async ({
       page,
       pageObjects,
+      llmProxy,
     }) => {
       const FIRST_INPUT = 'first successful message';
       const FIRST_RESPONSE = 'This is the first successful response';

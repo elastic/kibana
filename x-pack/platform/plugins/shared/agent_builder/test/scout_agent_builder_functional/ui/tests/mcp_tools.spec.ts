@@ -6,14 +6,10 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  createGenAiConnectorForProxy,
-  createMcpConnectorViaKbn,
-  deleteAllConnectors,
-} from '../../../scout_agent_builder_shared/lib/connector_kbn';
+import { createMcpConnectorViaKbn } from '../../../scout_agent_builder_shared/lib/connector_kbn';
+import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_shared/lib/conversations_es';
 import {
   createTestMcpServer,
   type McpServerSimulator,
@@ -22,21 +18,18 @@ import {
   createToolViaKbn,
   deleteAllTools,
 } from '../../../scout_agent_builder_shared/lib/tools_kbn';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 
 test.describe(
   'Agent Builder — MCP tools',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let llmProxy: LlmProxy;
     let mcpServer: McpServerSimulator;
     let mcpServerUrl: string;
     let connectorId: string;
 
-    test.beforeAll(async ({ log, kbnClient }) => {
-      llmProxy = await createLlmProxy(log);
-      await deleteAllConnectors(kbnClient);
-      await createGenAiConnectorForProxy(kbnClient, llmProxy);
+    test.beforeAll(async ({ kbnClient, llmProxy }) => {
+      void llmProxy;
       await deleteAllTools(kbnClient);
 
       mcpServer = createTestMcpServer();
@@ -49,23 +42,15 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
-      llmProxy.close();
-      await deleteAllConnectors(kbnClient);
+    test.afterAll(async ({ kbnClient, esClient, llmProxy }) => {
+      void llmProxy;
       await deleteAllTools(kbnClient);
       try {
         await mcpServer.stop();
       } catch {
         // ignore
       }
-      await esClient.deleteByQuery({
-        index: testData.CHAT_CONVERSATIONS_INDEX,
-        query: { match_all: {} },
-        wait_for_completion: true,
-        refresh: true,
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-      });
+      await deleteAllConversationsFromEs(esClient);
     });
 
     test('MCP tool flows', async ({ page, pageObjects, kbnClient }) => {

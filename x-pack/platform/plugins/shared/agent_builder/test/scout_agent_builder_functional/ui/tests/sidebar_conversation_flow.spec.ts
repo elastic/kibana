@@ -5,46 +5,25 @@
  * 2.0.
  */
 
-import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  createGenAiConnectorForProxy,
-  deleteAllConnectors,
-} from '../../../scout_agent_builder_shared/lib/connector_kbn';
+import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_shared/lib/conversations_es';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 
 test.describe(
   'Agent Builder — sidebar conversation flow',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let llmProxy: LlmProxy;
-
-    test.beforeAll(async ({ log, kbnClient }) => {
-      llmProxy = await createLlmProxy(log);
-      await deleteAllConnectors(kbnClient);
-      await createGenAiConnectorForProxy(kbnClient, llmProxy);
-    });
-
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
-      llmProxy.close();
-      await deleteAllConnectors(kbnClient);
-      await esClient.deleteByQuery({
-        index: testData.CHAT_CONVERSATIONS_INDEX,
-        query: { match_all: {} },
-        wait_for_completion: true,
-        refresh: true,
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-      });
+    test.afterAll(async ({ esClient }) => {
+      await deleteAllConversationsFromEs(esClient);
     });
 
-    test('embeddable sidebar conversation flow', async ({ page, pageObjects }) => {
+    test('embeddable sidebar conversation flow', async ({ page, pageObjects, llmProxy }) => {
       await test.step('shows initial state', async () => {
         await pageObjects.agentBuilder.prepareEmbeddableSidebar();
         await expect(page.testSubj.locator('agentBuilderEmbeddableMenuButton')).toBeVisible();

@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-export const COMMON_HEADERS = {
-  'kbn-xsrf': 'kibana',
-  'x-elastic-internal-origin': 'kibana',
-  'Content-Type': 'application/json',
-};
-
-export const API_AGENT_BUILDER = '/api/agent_builder';
-export const INTERNAL_AGENT_BUILDER = '/internal/agent_builder';
-
-/** Public Agent Builder HTTP APIs use this Elastic API version header. */
-export const ELASTIC_API_VERSION = '2023-10-31';
-
-/**
- * Fixed port for GitHub-style plugin mock; must match
- * `agent_builder_api` Scout server config (`kbn-scout` config_sets).
- */
-export const SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT = 18387;
-
-/** Matches Agent Builder chat conversations system index naming. */
-export const CHAT_CONVERSATIONS_INDEX = '.chat-conversations';
+export {
+  COMMON_HEADERS,
+  API_AGENT_BUILDER,
+  INTERNAL_AGENT_BUILDER,
+  ELASTIC_API_VERSION,
+  SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT,
+  CHAT_CONVERSATIONS_INDEX,
+  CHAT_AGENTS_INDEX,
+} from '../../../scout_agent_builder_shared/lib/constants';

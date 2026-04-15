@@ -91,7 +91,6 @@ apiTest.describe(
 
     for (const connector of allStaticConnectors) {
       apiTest(`static connector ${connector.id} — simple message`, async ({ apiClient }) => {
-        // eslint-disable-next-line playwright/no-skipped-test
         apiTest.skip(!selectedStaticConnectorIds.has(connector.id), 'not in FTR_GEN_AI_LLM_SAMPLE');
         const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
           headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },

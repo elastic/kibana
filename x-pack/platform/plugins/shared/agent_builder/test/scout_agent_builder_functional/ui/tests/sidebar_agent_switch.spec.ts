@@ -6,19 +6,15 @@
  */
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createAgentViaKbn,
   deleteAgentViaKbn,
 } from '../../../scout_agent_builder_shared/lib/agents_kbn';
-import {
-  createGenAiConnectorForProxy,
-  deleteAllConnectors,
-} from '../../../scout_agent_builder_shared/lib/connector_kbn';
+import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_shared/lib/conversations_es';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 
 const CUSTOM_AGENT_ID = 'sidebar-test-agent';
 const CUSTOM_AGENT_NAME = 'Sidebar Test Agent';
@@ -27,12 +23,8 @@ test.describe(
   'Agent Builder — sidebar agent switch',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let llmProxy: LlmProxy;
-
-    test.beforeAll(async ({ log, kbnClient }) => {
-      llmProxy = await createLlmProxy(log);
-      await deleteAllConnectors(kbnClient);
-      await createGenAiConnectorForProxy(kbnClient, llmProxy);
+    test.beforeAll(async ({ kbnClient, llmProxy }) => {
+      void llmProxy;
       try {
         await deleteAgentViaKbn(kbnClient, CUSTOM_AGENT_ID);
       } catch {
@@ -49,25 +41,17 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
-      llmProxy.close();
-      await deleteAllConnectors(kbnClient);
+    test.afterAll(async ({ kbnClient, esClient, llmProxy }) => {
+      void llmProxy;
       try {
         await deleteAgentViaKbn(kbnClient, CUSTOM_AGENT_ID);
       } catch {
         // ignore
       }
-      await esClient.deleteByQuery({
-        index: testData.CHAT_CONVERSATIONS_INDEX,
-        query: { match_all: {} },
-        wait_for_completion: true,
-        refresh: true,
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-      });
+      await deleteAllConversationsFromEs(esClient);
     });
 
-    test('embeddable sidebar agent switch', async ({ page, pageObjects }) => {
+    test('embeddable sidebar agent switch', async ({ page, pageObjects, llmProxy }) => {
       await test.step('starts with the default agent selected', async () => {
         await pageObjects.agentBuilder.prepareEmbeddableSidebar();
         await pageObjects.agentBuilder.openEmbeddableMenu();

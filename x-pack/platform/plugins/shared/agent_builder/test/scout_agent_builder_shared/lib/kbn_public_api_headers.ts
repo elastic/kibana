@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { ELASTIC_API_VERSION } from './constants';
+
 /**
  * Extra headers for versioned public Agent Builder REST routes when using
  * {@link @kbn/kbn-client#KbnClient}.
  */
 export const AGENT_BUILDER_PUBLIC_API_HEADERS = {
   'Content-Type': 'application/json',
-  'elastic-api-version': '2023-10-31',
+  'elastic-api-version': ELASTIC_API_VERSION,
 } as const;

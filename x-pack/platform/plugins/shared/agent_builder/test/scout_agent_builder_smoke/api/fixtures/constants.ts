@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from '../../../scout_agent_builder_api/api/fixtures/constants';
+export * from '../../../scout_agent_builder_shared/lib/constants';
