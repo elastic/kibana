@@ -8,7 +8,8 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { PrevalenceDetails, resetColdFrozenTierCalloutDismissedStateForTests } from './prevalence';
+import { PrevalenceDetails } from './prevalence';
+import { resetColdFrozenTierCalloutDismissedStateForTests } from './components/prevalence_details_view';
 import {
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
