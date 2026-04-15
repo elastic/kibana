@@ -168,7 +168,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
               <EuiText size="s" css={{ color: euiTheme.colors.textSubdued }}>
                 <span>
                   {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.description', {
-                    defaultMessage: 'Get helpful insights from our Observability Agent',
+                    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
                   })}
                 </span>
               </EuiText>

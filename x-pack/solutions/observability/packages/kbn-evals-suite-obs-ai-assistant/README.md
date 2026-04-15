@@ -57,9 +57,9 @@ EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
   --project="my-connector" \
 ```
 
-### Running Evaluations with Observability Agent (Agent Builder)
+### Running Evaluations with Elastic AI Agent (Agent Builder)
 
-The evaluation suite supports running evaluations against both the Obs AI Assistant API and the Agent Builder API. This allows engineers to evaluate the Observability Agent early in the migration process.
+The evaluation suite supports running evaluations against both the Obs AI Assistant API and the Agent Builder API. This allows engineers to evaluate the Elastic AI Agent early in the migration process.
 
 #### Client Selection
 
@@ -72,15 +72,15 @@ When using `agent_builder`, you can optionally specify which agent to invoke usi
 
 #### Local Setup for Agent Builder Evaluations
 
-The Scout server **cannot be used for Observability Agent evaluations**, because the Observability Agent requires a feature flag enabled at Kibana start time. Instead, run evaluations against a local Kibana instance:
+The Scout server **cannot be used for Elastic AI Agent evaluations**, because the Elastic AI Agent requires a feature flag enabled at Kibana start time. Instead, run evaluations against a local Kibana instance:
 
-**1. Enable the Observability Agent feature flag**
+**1. Enable AI Agents (Agent Builder)**
 
 Add the following to your Kibana config file (e.g., `config/kibana.dev.yml`):
 
 ```yaml
 feature_flags.overrides:
-  observabilityAgent.enabled: true
+  aiAssistant.aiAgents.enabled: true
 ```
 
 **2. Start Kibana without base path**
@@ -125,7 +125,7 @@ EVALUATION_CONNECTOR_ID="your-connector-id" \
 
 #### Important Notes
 
-- Current evaluation criteria are designed for the Obs AI Assistant and may not be fully applicable to the Observability Agent due to differences in tool implementations (e.g., knowledge base is now a tool rather than returned via the `context` tool, alerts tool behavior differs)
+- Current evaluation criteria are designed for the Obs AI Assistant and may not be fully applicable to the Elastic AI Agent due to differences in tool implementations (e.g., knowledge base is now a tool rather than returned via the `context` tool, alerts tool behavior differs)
 - The Agent Builder client implementation and infrastructure are ready for when Agent-specific evaluation criteria are developed
 
 ### Evaluation Reporting

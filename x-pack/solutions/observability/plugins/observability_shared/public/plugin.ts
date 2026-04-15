@@ -14,7 +14,7 @@ import type {
 } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { BehaviorSubject, type Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
@@ -87,7 +87,6 @@ interface ObservabilitySharedLocators {
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
-  private appChangeSubscription?: Subscription;
 
   constructor() {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
@@ -131,9 +130,7 @@ export class ObservabilitySharedPlugin implements Plugin {
     };
   }
 
-  public stop() {
-    this.appChangeSubscription?.unsubscribe();
-  }
+  public stop() {}
 
   private createLocators(urlService: BrowserUrlService): ObservabilitySharedLocators {
     return {

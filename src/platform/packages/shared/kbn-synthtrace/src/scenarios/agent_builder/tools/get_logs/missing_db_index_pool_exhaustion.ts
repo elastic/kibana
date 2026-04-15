@@ -59,7 +59,7 @@
  * }
  * ```
  *
- * Validate via Observability agent (with log search skill):
+ * Validate via Elastic AI Agent (with log search skill):
  *
  * ```
  * POST kbn:///api/agent_builder/converse
