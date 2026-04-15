@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { useController, useFormContext, useWatch, type FieldPath } from 'react-hook-form';
+import { useController, useFormContext, useWatch } from 'react-hook-form';
 
 import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
 import { getRelativeBoundsInMs } from '../utils';
@@ -133,11 +133,7 @@ const MinAgeFieldControl = ({
               }
 
               setTimeout(() => {
-                void trigger(
-                  getMinAgeFieldsToValidateOnChange(phaseName) as Array<
-                    FieldPath<IlmPhasesFlyoutFormInternal>
-                  >
-                );
+                void trigger(getMinAgeFieldsToValidateOnChange(phaseName));
               }, 0);
             }}
           />
@@ -157,11 +153,7 @@ const MinAgeFieldControl = ({
               minAgeUnitField.onChange(nextUnit);
 
               setTimeout(() => {
-                void trigger(
-                  getMinAgeFieldsToValidateOnChange(phaseName) as Array<
-                    FieldPath<IlmPhasesFlyoutFormInternal>
-                  >
-                );
+                void trigger(getMinAgeFieldsToValidateOnChange(phaseName));
               }, 0);
             }}
           />

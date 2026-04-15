@@ -29,7 +29,7 @@ export const RemovePhaseButton = ({
   if (!phaseName) return null;
   if (phaseName === 'hot') return null;
 
-  const enabledPath = `_meta.${phaseName}.enabled` as FieldPath<IlmPhasesFlyoutFormInternal>;
+  const enabledPath = `_meta.${phaseName}.enabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
   const hotEnabled = enabledPhases.includes('hot');
   const nonDeleteEnabledPhases = enabledPhases.filter((p) => p !== 'delete');

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PhaseName } from '@kbn/streams-schema';
 import {
   EuiCheckbox,
   EuiFlexGroup,
@@ -16,30 +15,25 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useController, useFormContext, type FieldPath } from 'react-hook-form';
-import type { IlmPhasesFlyoutFormInternal } from '../types';
+import type { IlmPhasesFlyoutFormInternal, ReadonlyAllowedPhase } from '../types';
 
 export interface ReadOnlyToggleFieldProps {
-  phaseName: PhaseName | undefined;
+  phaseName: ReadonlyAllowedPhase;
   dataTestSubj: string;
-  allowedPhases: ReadonlyArray<PhaseName>;
 }
 
-export const ReadOnlyToggleField = ({
-  phaseName,
-  dataTestSubj,
-  allowedPhases,
-}: ReadOnlyToggleFieldProps) => {
+export const ReadOnlyToggleField = ({ phaseName, dataTestSubj }: ReadOnlyToggleFieldProps) => {
   const checkboxId = useGeneratedHtmlId({
     prefix: `${dataTestSubj}ReadOnlyCheckbox-${phaseName}`,
   });
 
-  if (!phaseName) return null;
-  const readonlyAllowed = allowedPhases.includes(phaseName);
-  if (!readonlyAllowed) return null;
-
-  const path = `_meta.${phaseName}.readonlyEnabled` as FieldPath<IlmPhasesFlyoutFormInternal>;
-
-  return <ReadOnlyToggleControl checkboxId={checkboxId} path={path} dataTestSubj={dataTestSubj} />;
+  return (
+    <ReadOnlyToggleControl
+      checkboxId={checkboxId}
+      path={`_meta.${phaseName}.readonlyEnabled`}
+      dataTestSubj={dataTestSubj}
+    />
+  );
 };
 
 const ReadOnlyToggleControl = ({

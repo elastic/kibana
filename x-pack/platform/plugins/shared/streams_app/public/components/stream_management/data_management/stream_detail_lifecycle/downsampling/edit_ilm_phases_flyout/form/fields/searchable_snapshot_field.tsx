@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useController, useFormContext, useWatch } from 'react-hook-form';
+import { type FieldPath, useController, useFormContext, useWatch } from 'react-hook-form';
 import { EuiButtonIcon, EuiFormRow, EuiLink, EuiSelect, EuiText } from '@elastic/eui';
 import type { IlmPhasesFlyoutFormInternal } from '../types';
 
@@ -28,7 +28,8 @@ export const SearchableSnapshotRepositoryField = ({
   showCreateRepositoryLink = true,
   dataTestSubj,
 }: SearchableSnapshotRepositoryFieldProps) => {
-  const path = '_meta.searchableSnapshot.repository' as const;
+  const path =
+    '_meta.searchableSnapshot.repository' satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
   const { control, trigger } = useFormContext<IlmPhasesFlyoutFormInternal>();
   useWatch({ control, name: path });
 

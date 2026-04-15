@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { PhaseName } from '@kbn/streams-schema';
-import type { FieldPath } from 'react-hook-form';
 import { Controller, useFormContext } from 'react-hook-form';
 import { PHASE_MOUNT_PATHS } from '../constants';
 import type { IlmPhasesFlyoutFormInternal } from '../form';
@@ -17,12 +16,7 @@ export const PhaseFieldsMount = ({ phase }: { phase: PhaseName }) => {
   return (
     <>
       {PHASE_MOUNT_PATHS[phase].map((path) => (
-        <Controller
-          key={path}
-          name={path as FieldPath<IlmPhasesFlyoutFormInternal>}
-          control={control}
-          render={() => <></>}
-        />
+        <Controller key={path} name={path} control={control} render={() => <></>} />
       ))}
     </>
   );

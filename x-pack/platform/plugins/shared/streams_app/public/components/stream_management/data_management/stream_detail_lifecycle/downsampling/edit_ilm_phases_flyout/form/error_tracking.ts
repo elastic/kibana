@@ -22,7 +22,9 @@ import { ILM_PHASE_ORDER } from '../constants';
 export const ILM_PHASES_FLYOUT_TAB_ERROR_INDICATOR_WATCH_PATHS: Array<
   FieldPath<IlmPhasesFlyoutFormInternal>
 > = [
-  ...ILM_PHASE_ORDER.map((p) => `_meta.${p}.enabled` as FieldPath<IlmPhasesFlyoutFormInternal>),
+  ...ILM_PHASE_ORDER.map(
+    (p) => `_meta.${p}.enabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>
+  ),
   // Enable/disable toggles that gate validations (tabs need to update when these change).
   '_meta.hot.downsampleEnabled',
   '_meta.warm.downsampleEnabled',
@@ -41,7 +43,8 @@ export const useIlmPhasesFlyoutTabErrors = (
 ) => {
   const tabHasErrors = useCallback(
     (phaseName: PhaseName) => {
-      const hasErrorAt = (path: string) => Boolean(get(errors, path));
+      const hasErrorAt = (path: FieldPath<IlmPhasesFlyoutFormInternal>) =>
+        Boolean(get(errors, path));
 
       // Min age validations live on the value field for warm/cold/frozen/delete.
       if (phaseName !== 'hot' && hasErrorAt(`_meta.${phaseName}.minAgeValue`)) return true;

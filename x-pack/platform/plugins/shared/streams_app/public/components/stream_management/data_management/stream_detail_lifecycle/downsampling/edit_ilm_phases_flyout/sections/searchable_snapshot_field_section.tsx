@@ -40,9 +40,9 @@ export const SearchableSnapshotFieldSection = ({
 }: SearchableSnapshotFieldSectionProps) => {
   const { control, getValues, setValue, trigger } = useFormContext<IlmPhasesFlyoutFormInternal>();
   const repositoryPath =
-    `_meta.searchableSnapshot.repository` as FieldPath<IlmPhasesFlyoutFormInternal>;
+    `_meta.searchableSnapshot.repository` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
   const enabledPath =
-    `_meta.cold.searchableSnapshotEnabled` as FieldPath<IlmPhasesFlyoutFormInternal>;
+    `_meta.cold.searchableSnapshotEnabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
   const titleId = useGeneratedHtmlId({
     prefix: dataTestSubj,

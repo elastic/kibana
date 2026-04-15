@@ -39,9 +39,9 @@ const DownsampleIntervalFieldControl = ({
   const { control, getValues, trigger } = useFormContext<IlmPhasesFlyoutFormInternal>();
 
   const valuePath =
-    `_meta.${phaseName}.downsample.fixedIntervalValue` as FieldPath<IlmPhasesFlyoutFormInternal>;
+    `_meta.${phaseName}.downsample.fixedIntervalValue` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
   const unitPath =
-    `_meta.${phaseName}.downsample.fixedIntervalUnit` as FieldPath<IlmPhasesFlyoutFormInternal>;
+    `_meta.${phaseName}.downsample.fixedIntervalUnit` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
   const { field: valueField, fieldState: valueFieldState } = useController({
     control,
@@ -168,11 +168,7 @@ const DownsampleIntervalFieldControl = ({
                 valueField.onChange(nextValue);
               }
 
-              void trigger(
-                getDownsampleFieldsToValidateOnChange(phaseName) as Array<
-                  FieldPath<IlmPhasesFlyoutFormInternal>
-                >
-              );
+              void trigger(getDownsampleFieldsToValidateOnChange(phaseName));
             }}
           />
         </EuiFlexItem>
@@ -191,11 +187,7 @@ const DownsampleIntervalFieldControl = ({
               const nextUnit = e.target.value as PreservedTimeUnit;
               unitField.onChange(nextUnit);
 
-              void trigger(
-                getDownsampleFieldsToValidateOnChange(phaseName) as Array<
-                  FieldPath<IlmPhasesFlyoutFormInternal>
-                >
-              );
+              void trigger(getDownsampleFieldsToValidateOnChange(phaseName));
             }}
           />
         </EuiFlexItem>

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
+import type { FieldPath } from 'react-hook-form';
 import { PRESERVED_TIME_UNITS } from '../../shared';
 import type { IlmPhasesFlyoutFormInternal } from './types';
 import { DOWNSAMPLE_PHASES, type DownsamplePhase } from './types';
@@ -15,20 +16,29 @@ import { toMilliseconds } from './utils';
 export const getDownsampleFieldsToValidateOnChange = (
   phase: DownsamplePhase,
   includeCurrentPhase = true
-) => {
-  const getIntervalPath = (p: DownsamplePhase) => `_meta.${p}.downsample.fixedIntervalValue`;
+): Array<FieldPath<IlmPhasesFlyoutFormInternal>> => {
+  const getIntervalPath = (p: DownsamplePhase): FieldPath<IlmPhasesFlyoutFormInternal> =>
+    `_meta.${p}.downsample.fixedIntervalValue`;
+
   const phasesToValidate = DOWNSAMPLE_PHASES.slice(
     DOWNSAMPLE_PHASES.indexOf(phase) + (includeCurrentPhase ? 0 : 1)
   );
+
   // When a phase is validated, also validate all downsample intervals in the next phases.
   return phasesToValidate.map(getIntervalPath);
 };
 
-export const getMinAgeFieldsToValidateOnChange = (phase: 'warm' | 'cold' | 'frozen' | 'delete') => {
+export const getMinAgeFieldsToValidateOnChange = (
+  phase: 'warm' | 'cold' | 'frozen' | 'delete'
+): Array<FieldPath<IlmPhasesFlyoutFormInternal>> => {
+  const getMinAgePath = (
+    p: 'warm' | 'cold' | 'frozen' | 'delete'
+  ): FieldPath<IlmPhasesFlyoutFormInternal> => `_meta.${p}.minAgeValue`;
+
   const ordered = ['warm', 'cold', 'frozen', 'delete'] as const;
   const startIndex = ordered.indexOf(phase);
   const phasesToValidate = startIndex < 0 ? ordered : ordered.slice(startIndex);
-  return phasesToValidate.map((p) => `_meta.${p}.minAgeValue`);
+  return phasesToValidate.map(getMinAgePath);
 };
 
 /**

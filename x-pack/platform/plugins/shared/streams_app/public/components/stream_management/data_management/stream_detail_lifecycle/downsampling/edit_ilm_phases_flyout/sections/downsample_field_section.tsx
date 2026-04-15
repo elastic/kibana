@@ -45,13 +45,13 @@ export const DownsampleFieldSection = ({
     useFormContext<IlmPhasesFlyoutFormInternal>();
 
   const enabledPath =
-    `_meta.${phaseName}.downsampleEnabled` as FieldPath<IlmPhasesFlyoutFormInternal>;
+    `_meta.${phaseName}.downsampleEnabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
   const intervalValuePath =
-    `_meta.${phaseName}.downsample.fixedIntervalValue` as FieldPath<IlmPhasesFlyoutFormInternal>;
+    `_meta.${phaseName}.downsample.fixedIntervalValue` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
   const intervalUnitPath =
-    `_meta.${phaseName}.downsample.fixedIntervalUnit` as FieldPath<IlmPhasesFlyoutFormInternal>;
+    `_meta.${phaseName}.downsample.fixedIntervalUnit` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
   const readonlyPath =
-    `_meta.${phaseName}.readonlyEnabled` as FieldPath<IlmPhasesFlyoutFormInternal>;
+    `_meta.${phaseName}.readonlyEnabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
   const titleId = useGeneratedHtmlId({ prefix: dataTestSubj });
 

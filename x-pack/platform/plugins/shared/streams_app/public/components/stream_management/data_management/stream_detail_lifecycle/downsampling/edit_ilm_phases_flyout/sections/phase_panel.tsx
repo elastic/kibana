@@ -15,7 +15,7 @@ import { useIlmPhasesColorAndDescription } from '../../../hooks/use_ilm_phases_c
 import { useStyles } from '../use_styles';
 import type { IlmPhasesFlyoutFormInternal } from '../form';
 import { DeleteSearchableSnapshotToggleField, MinAgeField, ReadOnlyToggleField } from '../form';
-import { READONLY_ALLOWED_PHASES, TIME_UNIT_OPTIONS } from '../constants';
+import { TIME_UNIT_OPTIONS } from '../constants';
 import { DownsampleFieldSection } from './downsample_field_section';
 import { PhaseFieldsMount } from './phase_fields_mount';
 import { RemovePhaseButton } from './remove_phase_button';
@@ -106,11 +106,7 @@ export const PhasePanel = ({
 
           {(isHotPhase || isWarmPhase || isColdPhase) && !isDownsampleEnabled && (
             <EuiFlexItem grow={false}>
-              <ReadOnlyToggleField
-                phaseName={phase}
-                dataTestSubj={dataTestSubj}
-                allowedPhases={READONLY_ALLOWED_PHASES}
-              />
+              <ReadOnlyToggleField phaseName={phase} dataTestSubj={dataTestSubj} />
             </EuiFlexItem>
           )}
 

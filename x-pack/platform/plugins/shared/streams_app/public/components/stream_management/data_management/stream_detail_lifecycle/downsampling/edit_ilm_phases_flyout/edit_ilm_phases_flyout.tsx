@@ -242,7 +242,7 @@ export const EditIlmPhasesFlyout = ({
         return true;
       }
 
-      methods.setValue(`_meta.${phase}.enabled` as FieldPath<IlmPhasesFlyoutFormInternal>, true);
+      methods.setValue(`_meta.${phase}.enabled`, true);
 
       if (phase === 'frozen' && searchableSnapshotRepositories.length === 1) {
         const currentValue = String(
@@ -257,8 +257,10 @@ export const EditIlmPhasesFlyout = ({
       }
 
       if (phase !== 'hot') {
-        const valuePath = `_meta.${phase}.minAgeValue` as FieldPath<IlmPhasesFlyoutFormInternal>;
-        const unitPath = `_meta.${phase}.minAgeUnit` as FieldPath<IlmPhasesFlyoutFormInternal>;
+        const valuePath =
+          `_meta.${phase}.minAgeValue` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
+        const unitPath =
+          `_meta.${phase}.minAgeUnit` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
         // When enabling a previously-disabled phase, preserve existing values.
         // Otherwise default based on the closest enabled previous phase.
@@ -272,7 +274,7 @@ export const EditIlmPhasesFlyout = ({
       // Force re-validation for the (re-)enabled phase.
       // Phases are not unmounted when disabled, so fields may have been validated while the phase
       // was disabled (validators no-op) and would otherwise remain "valid" when re-enabled.
-      const fieldsToValidate: string[] = [];
+      const fieldsToValidate: Array<FieldPath<IlmPhasesFlyoutFormInternal>> = [];
       if (phase !== 'hot') {
         fieldsToValidate.push(`_meta.${phase}.minAgeValue`);
       }
@@ -285,7 +287,7 @@ export const EditIlmPhasesFlyout = ({
       if (fieldsToValidate.length > 0) {
         // Delay to the next tick so RHF updates are visible to dependent validations.
         setTimeout(() => {
-          void methods.trigger(fieldsToValidate as Array<FieldPath<IlmPhasesFlyoutFormInternal>>);
+          void methods.trigger(fieldsToValidate);
         }, 0);
       }
 

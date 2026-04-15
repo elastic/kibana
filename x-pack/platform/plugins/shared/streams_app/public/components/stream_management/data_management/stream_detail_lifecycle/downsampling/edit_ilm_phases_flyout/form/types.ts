@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { IlmPolicyHotPhase, IlmPolicyPhases } from '@kbn/streams-schema';
+import type { IlmPolicyHotPhase, IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import type { PreservedTimeUnit, TimeUnit } from '../../shared';
 
 export type { PreservedTimeUnit, TimeUnit };
 
-export const DOWNSAMPLE_PHASES = ['hot', 'warm', 'cold'] as const;
+export const DOWNSAMPLE_PHASES = ['hot', 'warm', 'cold'] as const satisfies PhaseName[];
 export type DownsamplePhase = (typeof DOWNSAMPLE_PHASES)[number];
+
+export const READONLY_ALLOWED_PHASES = ['hot', 'warm', 'cold'] as const satisfies PhaseName[];
+export type ReadonlyAllowedPhase = (typeof READONLY_ALLOWED_PHASES)[number];
 
 export interface MinAgeMetaFields {
   minAgeValue: string;
