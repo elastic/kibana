@@ -8,8 +8,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -24,8 +24,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -40,8 +40,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -56,8 +56,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -72,8 +72,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -88,8 +88,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -104,8 +104,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -120,8 +120,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -136,8 +136,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -152,8 +152,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -168,8 +168,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -184,8 +184,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -200,8 +200,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/agents_api.spec.ts",
@@ -258,8 +258,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/attachments_api.spec.ts",
@@ -274,8 +274,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/attachments_api.spec.ts",
@@ -290,8 +290,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/attachments_api.spec.ts",
@@ -306,8 +306,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/attachments_api.spec.ts",
@@ -322,8 +322,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -338,8 +338,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -354,8 +354,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -370,8 +370,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -386,8 +386,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -402,8 +402,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -418,8 +418,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -434,8 +434,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -450,8 +450,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -466,8 +466,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -482,8 +482,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/conversations_api.spec.ts",
@@ -498,8 +498,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -514,8 +514,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -530,8 +530,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -546,8 +546,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -562,8 +562,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -578,8 +578,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -594,8 +594,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -610,8 +610,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -626,8 +626,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -642,8 +642,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -658,8 +658,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -674,8 +674,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -690,8 +690,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -706,8 +706,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_attachments_api.spec.ts",
@@ -722,8 +722,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_error_regenerate_api.spec.ts",
@@ -738,8 +738,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_error_regenerate_api.spec.ts",
@@ -754,8 +754,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_error_regenerate_api.spec.ts",
@@ -770,8 +770,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_error_regenerate_api.spec.ts",
@@ -786,8 +786,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_error_regenerate_api.spec.ts",
@@ -802,8 +802,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_error_regenerate_api.spec.ts",
@@ -818,8 +818,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_error_regenerate_api.spec.ts",
@@ -834,8 +834,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_error_regenerate_api.spec.ts",
@@ -850,8 +850,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_simple_multi_api.spec.ts",
@@ -866,8 +866,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_simple_multi_api.spec.ts",
@@ -882,8 +882,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_simple_multi_api.spec.ts",
@@ -898,8 +898,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_simple_multi_api.spec.ts",
@@ -914,8 +914,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_simple_multi_api.spec.ts",
@@ -930,8 +930,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_simple_multi_api.spec.ts",
@@ -946,8 +946,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_tool_calling_api.spec.ts",
@@ -962,8 +962,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_tool_calling_api.spec.ts",
@@ -978,8 +978,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_tool_calling_api.spec.ts",
@@ -994,8 +994,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/converse_tool_calling_api.spec.ts",
@@ -1346,8 +1346,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/spaces_api.spec.ts",
@@ -1362,8 +1362,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/spaces_api.spec.ts",
@@ -1378,8 +1378,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/spaces_api.spec.ts",
@@ -1394,8 +1394,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/spaces_api.spec.ts",
@@ -1410,8 +1410,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/spaces_api.spec.ts",
@@ -1426,8 +1426,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/spaces_api.spec.ts",
@@ -1442,8 +1442,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_builtin_api.spec.ts",
@@ -1458,8 +1458,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_builtin_api.spec.ts",
@@ -1474,8 +1474,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_builtin_api.spec.ts",
@@ -1490,8 +1490,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_builtin_api.spec.ts",
@@ -1506,8 +1506,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_builtin_internal_api.spec.ts",
@@ -1522,8 +1522,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_builtin_internal_api.spec.ts",
@@ -1538,8 +1538,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_delete_force_api.spec.ts",
@@ -1554,8 +1554,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_delete_force_api.spec.ts",
@@ -1570,8 +1570,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_delete_force_api.spec.ts",
@@ -1586,8 +1586,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_delete_force_api.spec.ts",
@@ -1602,8 +1602,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_delete_force_api.spec.ts",
@@ -1618,8 +1618,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1634,8 +1634,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1650,8 +1650,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1666,8 +1666,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1682,8 +1682,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1698,8 +1698,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1714,8 +1714,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1730,8 +1730,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1746,8 +1746,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1762,8 +1762,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1778,8 +1778,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1794,8 +1794,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1810,8 +1810,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_api.spec.ts",
@@ -1826,8 +1826,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_internal_api.spec.ts",
@@ -1842,8 +1842,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_internal_api.spec.ts",
@@ -1858,8 +1858,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_esql_internal_api.spec.ts",
@@ -1874,8 +1874,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -1890,8 +1890,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -1906,8 +1906,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -1922,8 +1922,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -1938,8 +1938,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -1954,8 +1954,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -1970,8 +1970,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -1986,8 +1986,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -2002,8 +2002,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -2018,8 +2018,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -2034,8 +2034,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -2050,8 +2050,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -2066,8 +2066,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -2082,8 +2082,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -2098,8 +2098,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_index_search_api.spec.ts",
@@ -2114,8 +2114,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_legacy_migration_api.spec.ts",
@@ -2130,8 +2130,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_api/api/tests/tools_legacy_migration_api.spec.ts",

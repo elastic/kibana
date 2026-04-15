@@ -25,7 +25,7 @@ const CUSTOM_AGENT_NAME = 'Sidebar Test Agent';
 
 test.describe(
   'Agent Builder — sidebar agent switch',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let llmProxy: LlmProxy;
 

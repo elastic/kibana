@@ -13,7 +13,7 @@ import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — index search tools API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     const createdToolIds: string[] = [];

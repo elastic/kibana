@@ -28,7 +28,7 @@ import { postConverse, type ScoutAgentBuilderApiClient } from '../fixtures/conve
 
 apiTest.describe(
   'Agent Builder — conversation attachments API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;

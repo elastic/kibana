@@ -21,7 +21,7 @@ import { test, testData } from '../fixtures';
 
 test.describe(
   'Agent Builder — conversation error handling',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let llmProxy: LlmProxy;
 

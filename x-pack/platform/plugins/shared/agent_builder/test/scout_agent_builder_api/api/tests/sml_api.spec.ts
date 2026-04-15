@@ -25,13 +25,16 @@ import { API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } from '../fi
 import { postConverse } from '../fixtures/converse_http';
 
 apiTest.describe(
-  'Agent Builder — SML internal API (stateful)',
-  { tag: [...tags.stateful.classic] },
+  'Agent Builder — SML internal API',
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
+    let adminInteractiveCookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, esClient }) => {
+    apiTest.beforeAll(async ({ requestAuth, samlAuth, esClient }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      adminInteractiveCookieHeader = cookieHeader;
       const exists = await esClient.indices.exists({ index: smlIndexName });
       if (!exists) {
         await esClient.indices.create({
@@ -43,8 +46,7 @@ apiTest.describe(
 
     const ih = () => ({
       ...COMMON_HEADERS,
-      ...adminCredentials.apiKeyHeader,
-      'x-elastic-internal-origin': 'kibana',
+      ...adminInteractiveCookieHeader,
     });
 
     apiTest(

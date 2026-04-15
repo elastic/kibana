@@ -13,7 +13,7 @@ import { API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } from '../fi
 
 apiTest.describe(
   'Agent Builder — ES|QL tools internal API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     const createdToolIds: string[] = [];
@@ -29,8 +29,12 @@ apiTest.describe(
       },
     };
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
+    let adminInteractiveCookieHeader: Record<string, string>;
+
+    apiTest.beforeAll(async ({ requestAuth, samlAuth }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      adminInteractiveCookieHeader = cookieHeader;
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
@@ -42,7 +46,7 @@ apiTest.describe(
     });
 
     const h = () => ({ ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader });
-    const ih = () => ({ ...h(), 'x-elastic-internal-origin': 'kibana' });
+    const ih = () => ({ ...COMMON_HEADERS, ...adminInteractiveCookieHeader });
 
     apiTest('bulk delete removes created tools', async ({ apiClient }) => {
       for (let i = 0; i < 4; i++) {
@@ -69,8 +73,7 @@ apiTest.describe(
       }
       for (const id of toolIdsToDelete) {
         const removeIdx = createdToolIds.indexOf(id);
-        // eslint-disable-next-line playwright/prefer-comparison-matcher
-        expect(removeIdx >= 0).toBe(true);
+        expect(removeIdx).toBeGreaterThanOrEqual(0);
         createdToolIds.splice(removeIdx, 1);
       }
     });
@@ -95,8 +98,7 @@ apiTest.describe(
       expect(String(failure?.reason?.error?.message)).toContain('not found');
       for (const id of toolIdsToDelete) {
         const removeIdx = createdToolIds.indexOf(id);
-        // eslint-disable-next-line playwright/prefer-comparison-matcher
-        expect(removeIdx >= 0).toBe(true);
+        expect(removeIdx).toBeGreaterThanOrEqual(0);
         createdToolIds.splice(removeIdx, 1);
       }
     });

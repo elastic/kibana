@@ -14,18 +14,20 @@ import { API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } from '../fi
 
 apiTest.describe(
   'Agent Builder — builtin tools internal API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
+    let adminInteractiveCookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
+    apiTest.beforeAll(async ({ requestAuth, samlAuth }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      adminInteractiveCookieHeader = cookieHeader;
     });
 
     const internalHeaders = () => ({
       ...COMMON_HEADERS,
-      ...adminCredentials.apiKeyHeader,
-      'x-elastic-internal-origin': 'kibana',
+      ...adminInteractiveCookieHeader,
     });
 
     apiTest('POST /internal/tools/_bulk_delete rejects builtin tools', async ({ apiClient }) => {

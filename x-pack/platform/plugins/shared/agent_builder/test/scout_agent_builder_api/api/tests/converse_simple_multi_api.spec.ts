@@ -22,7 +22,7 @@ const EXECUTION_MODES: ExecutionMode[] = ['local', 'task_manager'];
 
 apiTest.describe(
   'Agent Builder — converse simple & multi-round API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;

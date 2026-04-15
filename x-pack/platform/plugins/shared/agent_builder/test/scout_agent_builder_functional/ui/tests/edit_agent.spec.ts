@@ -27,7 +27,7 @@ type Agent = (typeof agents)[number];
 
 test.describe(
   'Agent Builder — edit agent',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let llmProxy: LlmProxy;
 

@@ -17,7 +17,7 @@ import { test, testData } from '../fixtures';
 
 test.describe(
   'Agent Builder — sidebar conversation flow',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let llmProxy: LlmProxy;
 

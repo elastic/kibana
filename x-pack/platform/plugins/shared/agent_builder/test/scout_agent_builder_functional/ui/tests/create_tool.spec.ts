@@ -18,7 +18,7 @@ import { test, testData } from '../fixtures';
 
 test.describe(
   'Agent Builder — create tool',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let llmProxy: LlmProxy;
     let testIndexName: string;

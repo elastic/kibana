@@ -18,7 +18,7 @@ import { spaceUrl } from '../fixtures/space_paths';
 
 apiTest.describe(
   'Agent Builder — spaces API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     const testTools: Array<{ toolId: string; spaceId: string }> = [

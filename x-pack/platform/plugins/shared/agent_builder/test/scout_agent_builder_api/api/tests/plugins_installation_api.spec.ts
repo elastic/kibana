@@ -29,8 +29,8 @@ const SKILL_DIR_NAME = 'test-skill';
 const EXPECTED_SKILL_NAME = 'Test Skill';
 
 apiTest.describe(
-  'Agent Builder — plugin installation API (stateful)',
-  { tag: [...tags.stateful.classic] },
+  'Agent Builder — plugin installation API',
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let pluginsServer: PluginsTestServer;

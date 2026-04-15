@@ -33,7 +33,7 @@ const agents = [
 
 test.describe(
   'Agent Builder — agents list',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let llmProxy: LlmProxy;
 

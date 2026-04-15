@@ -41,16 +41,19 @@ function esqlToolPayload(id: string, description: string) {
 
 apiTest.describe(
   'Agent Builder — tool delete force API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
+    let adminInteractiveCookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
+    apiTest.beforeAll(async ({ requestAuth, samlAuth }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      adminInteractiveCookieHeader = cookieHeader;
     });
 
     const h = () => ({ ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader });
-    const ih = () => ({ ...h(), 'x-elastic-internal-origin': 'kibana' });
+    const ih = () => ({ ...COMMON_HEADERS, ...adminInteractiveCookieHeader });
 
     async function deleteAgent(apiClient: ScoutAgentBuilderApiClient, agentId: string) {
       await apiClient.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`, {

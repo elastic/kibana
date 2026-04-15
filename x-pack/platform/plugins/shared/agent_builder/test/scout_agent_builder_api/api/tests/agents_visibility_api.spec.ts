@@ -13,8 +13,8 @@ import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
-  'Agent Builder — agents visibility API (stateful)',
-  { tag: [...tags.stateful.classic] },
+  'Agent Builder — agents visibility API',
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     const createdAgentIds: string[] = [];

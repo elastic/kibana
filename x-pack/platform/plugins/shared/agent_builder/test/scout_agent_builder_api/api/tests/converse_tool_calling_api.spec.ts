@@ -33,7 +33,7 @@ const EXECUTION_MODES: ExecutionMode[] = ['local', 'task_manager'];
 
 apiTest.describe(
   'Agent Builder — converse tool calling API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;

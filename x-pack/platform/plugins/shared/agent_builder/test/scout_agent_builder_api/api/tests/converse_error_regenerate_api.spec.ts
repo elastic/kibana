@@ -36,7 +36,7 @@ const toolContentToErrorMessage = (toolContent: string): string => {
 
 apiTest.describe(
   'Agent Builder — converse error handling & regenerate API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;
