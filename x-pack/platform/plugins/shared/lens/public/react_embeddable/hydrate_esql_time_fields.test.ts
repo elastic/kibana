@@ -52,6 +52,76 @@ describe('hydrateESQLTimeFields', () => {
     spy.mockRestore();
   });
 
+  it('does not mark TBUCKET on a non-time field as date type', async () => {
+    const attrs: LensRuntimeState['attributes'] = {
+      version: LENS_ITEM_LATEST_VERSION,
+      title: '',
+      description: '',
+      visualizationType: 'lnsXY',
+      references: [],
+      state: {
+        query: { query: '', language: 'kuery' },
+        filters: [],
+        internalReferences: [],
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer1: {
+                query: {
+                  esql: 'FROM logs-* | STATS count() BY ts = TBUCKET(other_date_field, 1 day)',
+                },
+                timeField: '@timestamp',
+                columns: [
+                  { columnId: 'c1', fieldName: 'count()', meta: { type: 'number' } },
+                  { columnId: 'c2', fieldName: 'ts', meta: { type: 'string' } },
+                ],
+              },
+            },
+          },
+        },
+        visualization: {},
+      },
+    };
+    const result = await hydrateESQLTimeFields(attrs, http);
+    const { layers } = result.state.datasourceStates?.textBased as TextBasedPersistedState;
+    expect(layers.layer1.columns[1].meta?.type).toBe('string');
+  });
+
+  it('marks TBUCKET on the time field as date type', async () => {
+    const attrs: LensRuntimeState['attributes'] = {
+      version: LENS_ITEM_LATEST_VERSION,
+      title: '',
+      description: '',
+      visualizationType: 'lnsXY',
+      references: [],
+      state: {
+        query: { query: '', language: 'kuery' },
+        filters: [],
+        internalReferences: [],
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer1: {
+                query: {
+                  esql: 'FROM logs-* | STATS count() BY ts = TBUCKET(@timestamp, 1 day)',
+                },
+                timeField: '@timestamp',
+                columns: [
+                  { columnId: 'c1', fieldName: 'count()', meta: { type: 'number' } },
+                  { columnId: 'c2', fieldName: 'ts', meta: { type: 'string' } },
+                ],
+              },
+            },
+          },
+        },
+        visualization: {},
+      },
+    };
+    const result = await hydrateESQLTimeFields(attrs, http);
+    const { layers } = result.state.datasourceStates?.textBased as TextBasedPersistedState;
+    expect(layers.layer1.columns[1].meta?.type).toBe('date');
+  });
+
   it('marks renamed direct time-field references as date type', async () => {
     const attrs: LensRuntimeState['attributes'] = {
       version: LENS_ITEM_LATEST_VERSION,

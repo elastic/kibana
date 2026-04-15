@@ -149,11 +149,6 @@ function getTimeFieldDerivedColumns(esqlQuery: string, timeFieldName: string): S
       const funcName = def.name.toLowerCase();
       if (funcName === '=') continue;
 
-      if (funcName === 'tbucket') {
-        result.add(field);
-        continue;
-      }
-
       if (!TEMPORAL_GROUPING_FUNCTIONS.has(funcName)) continue;
 
       let referencesTimeField = false;
