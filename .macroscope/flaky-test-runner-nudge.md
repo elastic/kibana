@@ -18,7 +18,7 @@ exclude:
 conclusion: neutral
 ---
 
-Your only job is to decide whether this PR should nudge the author to run the **Flaky Test Runner**, and to output the **exact** PR comment text below. Do not add anything else.
+Decide whether this PR should nudge the author to run the **Flaky Test Runner**. When a nudge applies, output **only** the markdown block in **Output format** below. When it does not apply, output nothing and leave no comment.
 
 ## When this applies
 
@@ -27,13 +27,11 @@ Process **only** changed files that match **either**:
 1. **Scout (Playwright):** paths under `**/test/scout*/**` (specs, fixtures, page objects, API services, global setup, etc.), or under `**/kbn-scout*/**` when the change is under that package’s own `**/test/scout/**` tree.
 2. **FTR (Functional Test Runner):** see **FTR locations and patterns** below.
 
-If **no** changed file matches Scout or FTR test work, output **exactly** this single line (verbatim, nothing else):
-
-`No Scout or FTR test paths changed in this PR. No flaky test runner nudge needed.`
+If **no** changed file matches Scout or FTR test work, **stop**. Do not output any text.
 
 ## Constants (do not change)
 
-- **RUN_COUNT** is always **`30`** in the `/flaky` comment (same order of magnitude as the 20–50 guidance in `docs/extend/scout/best-practices.md`).
+- **RUN_COUNT** is always **`30`** in the `/flaky` comment (same order of magnitude as the 20 to 50 range in `docs/extend/scout/best-practices.md`).
 - Paths are **repo-root-relative**, **no leading slash**, **no `..`** (same as `node scripts/functional_tests --config` and Playwright `--config`).
 
 ## GitHub comment format
@@ -56,29 +54,17 @@ PR comments are parsed as: `/flaky <type>:<path>:<count> [<type>:<path>:<count> 
 
 ## FTR locations and patterns
 
-**Typical folder roots** (FTR tests and configs are almost always under a `test/` tree; many suites use a leaf `config.ts`):
+**Where FTR tests live** (prefixes, repo-relative):
 
-| Area                       | Example paths                                                                                                                                                                                                                     |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Platform OSS functional    | `src/platform/test/functional/`                                                                                                                                                                                                   |
-| Platform x-pack functional | `x-pack/platform/test/functional/`                                                                                                                                                                                                |
-| Platform API integration   | `x-pack/platform/test/api_integration/`                                                                                                                                                                                           |
-| Other platform suites      | `x-pack/platform/test/alerting_api_integration/`, `fleet_api_integration/`, `plugin_functional/`, `functional_with_es_ssl/`, `functional_basic/`, `serverless/`, `api_integration_deployment_agnostic/`, `ui_capabilities/`, etc. |
-| Observability              | `x-pack/solutions/observability/test/functional/`, `**/observability/test/api_integration/`, `api_integration_deployment_agnostic/`                                                                                               |
-| Security                   | `x-pack/solutions/security/test/functional/`, `plugin_functional/`, `security_solution_endpoint/`, etc.                                                                                                                           |
-| Search                     | `x-pack/solutions/search/test/` (e.g. `functional_search/`)                                                                                                                                                                       |
-| Workplace AI               | `x-pack/solutions/workplaceai/test/serverless/` (and similar)                                                                                                                                                                     |
+- `src/platform/test/**`
+- `x-pack/platform/test/**`
+- `x-pack/solutions/<solution>/test/**` (`<solution>` examples: `observability`, `security`, `search`, `workplaceai`)
+- `x-pack/platform/test/serverless/**`
+- `x-pack/solutions/<solution>/test/serverless/**`
 
-**What makes a file an FTR test (heuristics)**
+**Recognize FTR:** mocha suites with **`FtrProviderContext`** (`getService`, `loadTestFile`, …), **`@kbn/expect`**, or leaf **`config*.ts`** used by `node scripts/functional_tests --config`.
 
-- It is loaded by the Functional Test Runner: default export is a function of **`FtrProviderContext`** with **`getService`**, **`getPageObjects`**, **`loadTestFile`**, and tests use mocha **`describe`/`it`** with **`@kbn/expect`** (or re-export), **or** it is referenced from such a file via **`loadTestFile`**.
-- Config files: **`export default async function`** (or default export) receiving **`FtrConfigProviderContext`** with **`readConfigFile`**, defining **`testFiles`**, **`services`**, etc.
-
-**Not FTR**
-
-- Scout: `**/test/scout/**/*.spec.ts` and Playwright configs listed above.
-- Cypress: `**/*.cy.ts` in plugin cypress trees, and Cypress **driver** config trees (e.g. `**/fleet_cypress/**`, `**/security_solution_cypress/**`). Those use Cypress flaky flows, not `ftrConfig:` here.
-- Plain Jest unit tests under `src/**` (no FTR provider).
+**Not FTR:** Scout (`**/test/scout/**`), Cypress (`*.cy.ts` and `*cypress*` driver trees), plain Jest units without FTR.
 
 ## Output format (mandatory, follow verbatim)
 

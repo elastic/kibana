@@ -5,19 +5,19 @@ reasoning: high
 effort: high
 input: full_diff
 exclude:
-  - "api_docs/**"
-  - "config/**"
-  - "dev_docs/**"
-  - "docs/**"
-  - "legacy_rfcs/**"
-  - "licenses/**"
-  - "node_modules/**"
-  - "oas_docs/**"
-  - "packages/**"
-  - "plugins/**"
-  - "scripts/**"
-  - "typings/**"
-  - ".buildkite/**"
+  - 'api_docs/**'
+  - 'config/**'
+  - 'dev_docs/**'
+  - 'docs/**'
+  - 'legacy_rfcs/**'
+  - 'licenses/**'
+  - 'node_modules/**'
+  - 'oas_docs/**'
+  - 'packages/**'
+  - 'plugins/**'
+  - 'scripts/**'
+  - 'typings/**'
+  - '.buildkite/**'
 conclusion: neutral
 ---
 
@@ -30,7 +30,7 @@ Only review files that are:
 
 Skip all other changed files entirely.
 
-If no matching files were changed in this PR, report "No Scout files in this PR. Nothing to review." and conclude with no comments.
+If no matching files were changed in this PR, report "No Scout files in this PR — nothing to review" and conclude with no comments.
 
 ## Best practices reference
 
