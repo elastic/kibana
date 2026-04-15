@@ -8,15 +8,16 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, first } from 'rxjs';
 
 import { EuiThemeProvider } from '@elastic/eui';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { OptionsListDisplaySettings, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RenderResult } from '@testing-library/react';
-import { act, render as rtlRender, waitFor, within } from '@testing-library/react';
+import { render as rtlRender, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { OptionsListComponentApi } from '../../../types';
@@ -39,8 +40,14 @@ const mockFetch = jest.fn();
 const contextSpy = jest.spyOn(ControlContextModule, 'useOptionsListContext');
 
 describe('Options list popover', () => {
-  const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-
+  const waitForSubjectToPublish = async (subject: PublishingSubject<any>) => {
+    return await waitFor(
+      async () =>
+        new Promise<void>((resolve) => {
+          subject.pipe(first()).subscribe(() => resolve());
+        })
+    );
+  };
   const getRealControlContext = async ({
     uuid,
     overwriteState,
@@ -172,7 +179,6 @@ describe('Options list popover', () => {
 
     // simulate `makeSelection`
     contextMock.componentApi.setSelectedOptions(['woof']);
-    await waitOneTick();
 
     await clickShowOnlySelections(popover);
     woofOption = popover.getByTestId('optionsList-control-selection-woof');
@@ -211,7 +217,6 @@ describe('Options list popover', () => {
       ]);
       const popover = mountComponent(contextMock);
       contextMock.componentApi.setSelectedOptions(selections);
-      await waitOneTick();
 
       await clickShowOnlySelections(popover);
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
@@ -292,7 +297,7 @@ describe('Options list popover', () => {
       const popover = mountComponent(contextMock);
       contextMock.componentApi.setSelectedOptions(['woof', 'bark']);
       contextMock.componentApi.setInvalidSelections(new Set(['woof']));
-      await waitOneTick();
+      await waitForSubjectToPublish(contextMock.componentApi.selectedOptions$);
 
       const validSelection = popover.getByTestId('optionsList-control-selection-bark');
       expect(validSelection).toHaveTextContent('bark. Checked option.');
@@ -335,7 +340,7 @@ describe('Options list popover', () => {
       const contextMock = getOptionsListContextMock();
       const popover = mountComponent(contextMock);
       contextMock.componentApi.setExclude(true);
-      await waitOneTick();
+      await waitForSubjectToPublish(contextMock.componentApi.exclude$);
 
       const includeButton = popover.getByTestId('optionsList__includeResults');
       const excludeButton = popover.getByTestId('optionsList__excludeResults');
@@ -351,7 +356,6 @@ describe('Options list popover', () => {
       const popover = mountComponent(contextMock);
 
       contextMock.componentApi.setExistsSelected(false);
-      await waitOneTick();
 
       const existsOption = popover.queryByTestId('optionsList-control-selection-exists');
       expect(existsOption).toBeNull();
@@ -366,7 +370,6 @@ describe('Options list popover', () => {
       const popover = mountComponent(contextMock);
 
       contextMock.componentApi.setExistsSelected(true);
-      await waitOneTick();
       await clickShowOnlySelections(popover);
 
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
