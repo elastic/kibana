@@ -69,8 +69,8 @@ export const NetworkPanel: FC<NetworkPanelProps> = memo(
             isRulePreview={scopeId === TableId.rulePreview}
           />
         )}
-        <PanelHeader ip={ip} flowTarget={flowTarget} isOldFlyout={isOldFlyout} />
-        <PanelContent ip={ip} flowTarget={flowTarget} isOldFlyout={isOldFlyout} />
+        <PanelHeader ip={ip} flowTarget={flowTarget} />
+        <PanelContent ip={ip} flowTarget={flowTarget} />
         {isPreviewMode && <PreviewPanelFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />}
       </>
     );

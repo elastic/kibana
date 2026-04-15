@@ -7,12 +7,10 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import type { EuiPaddingSize } from '@elastic/eui';
 import { EuiFlyoutHeader, EuiPanel } from '@elastic/eui';
 
 interface FlyoutHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
   children: React.ReactNode;
-  paddingSize?: EuiPaddingSize;
 }
 
 /**
@@ -21,7 +19,7 @@ interface FlyoutHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader>
 export const FlyoutHeader: FC<FlyoutHeaderProps> = memo(({ children, ...flyoutHeaderProps }) => {
   return (
     <EuiFlyoutHeader hasBorder {...flyoutHeaderProps}>
-      <EuiPanel hasShadow={false} color="transparent" paddingSize={flyoutHeaderProps.paddingSize}>
+      <EuiPanel hasShadow={false} color="transparent">
         {children}
       </EuiPanel>
     </EuiFlyoutHeader>

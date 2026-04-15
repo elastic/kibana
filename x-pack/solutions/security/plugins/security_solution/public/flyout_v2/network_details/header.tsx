@@ -25,10 +25,6 @@ export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutH
    * Destination or source information
    */
   flowTarget: FlowTargetSourceDest;
-  /**
-   * True for old flyout, false for v2, should remove when old flyout is removed
-   */
-  isOldFlyout?: boolean;
 }
 
 const urlParamOverride = { timeline: { isOpen: false } };
@@ -37,11 +33,11 @@ const urlParamOverride = { timeline: { isOpen: false } };
  * Header component for the network details flyout.
  */
 export const PanelHeader: FC<PanelHeaderProps> = memo(
-  ({ ip, flowTarget, isOldFlyout, ...flyoutHeaderProps }: PanelHeaderProps) => {
+  ({ ip, flowTarget, ...flyoutHeaderProps }: PanelHeaderProps) => {
     const href = useMemo(() => getNetworkDetailsUrl(encodeIpv6(ip), flowTarget), [flowTarget, ip]);
 
     return (
-      <FlyoutHeader {...flyoutHeaderProps} paddingSize={isOldFlyout ? undefined : 'none'}>
+      <FlyoutHeader {...flyoutHeaderProps}>
         <SecuritySolutionLinkAnchor
           deepLinkId={SecurityPageName.network}
           path={href}
