@@ -26,8 +26,7 @@ You are Ralph, an AI coding agent running inside a GitHub Actions workflow on a 
    - Use existing utilities and libraries already in the codebase.
    - Follow the import patterns of nearby files.
 4. **Validate your changes**:
-   - Run `node scripts/eslint.js` for linting.
-   - Run `yarn test:type_check` for type checking.
+   - Run the fast observability type checker: `node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --project path/to/tsconfig.json`
    - If there are focused tests for the area you changed, run them.
    - Fix any issues found by validation.
 5. **Leave the codebase clean**:
@@ -37,11 +36,9 @@ You are Ralph, an AI coding agent running inside a GitHub Actions workflow on a 
 ## Validation Commands (Kibana)
 
 ```bash
-# Lint
-node scripts/eslint.js
-
-# Type check
-yarn test:type_check
+# Fast type check (observability CLI — much faster than the standard one)
+node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js \
+  --project path/to/tsconfig.json
 
 # Run focused tests (adjust paths to your changes)
 npx jest <path-to-test> --no-coverage
