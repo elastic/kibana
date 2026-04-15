@@ -24,11 +24,13 @@ import { labels } from '../../../utils/i18n';
 
 const { agentOverview: overviewLabels } = labels;
 
+const CARD_BODY_BLOCK_SIZE = '275px';
+
 const settingRowStyles = css`
   width: 100%;
 `;
 const instructionsContainerStyles = css`
-  max-block-size: 275px;
+  max-block-size: ${CARD_BODY_BLOCK_SIZE};
   overflow: auto;
 `;
 const instructionsTextStyles = css`
