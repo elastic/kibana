@@ -63,7 +63,7 @@ describe('Scout path globs', () => {
       'x-pack/solutions/security/plugins/my_plugin/test/scout_custom/ui/playwright.config.ts',
       'src/core/packages/my_package/test/scout/api/playwright.config.ts',
       'src/core/test/scout/api/playwright.config.ts',
-      'src/core/test/scout_custom/ui/playwright.config.ts',
+      'src/core/test/scout_custom/api/playwright.config.ts',
       'examples/hello_world/test/scout_examples/api/playwright.config.ts',
       'examples/hello_world/test/scout_examples/ui/playwright.config.ts',
       'x-pack/examples/hello_world/test/scout_examples/api/playwright.config.ts',
@@ -284,14 +284,14 @@ describe('Scout path regexes', () => {
     });
 
     it('matches src/core root path with custom server config set', () => {
-      const match = 'src/core/test/scout_custom/ui/playwright.config.ts'.match(
+      const match = 'src/core/test/scout_custom/api/playwright.config.ts'.match(
         SCOUT_UNIFIED_CONFIG_PATH_REGEX
       );
       expect(match?.groups).toEqual(
         expect.objectContaining({
           coreRoot: 'src/core',
           serverConfigSet: 'custom',
-          testCategory: 'ui',
+          testCategory: 'api',
         })
       );
     });
