@@ -5,9 +5,9 @@
 # features in a single endpoint call, making every step observable.
 #
 # Flow:
-#   init → while(iteration < max) {
-#     identify_inferred → if(noDocuments) break → update_state
-#   } → identify_computed → output
+#   init → while(iterationResults.size < max) {
+#     identify_inferred → if(noDocuments) break → update_state → mark_success
+#   } → if(allFailed) fail → identify_computed → output
 #
 # Concurrency is keyed per stream so only one identification run can be active
 # for a given stream at any time; overlapping triggers are dropped.
@@ -77,23 +77,16 @@ steps:
   - name: init
     type: data.set
     with:
-      iteration: 0
-      successCount: 0
+      hasSuccess: false
       discoveredFeatures: []
       iterationResults: []
-      totalTokensUsed:
-        prompt: 0
-        completion: 0
-        total: 0
-        cached: 0
 
   # -----------------------------------------------------------------------
   # Step 2: Main loop — each pass runs identify_inferred_features.
   # -----------------------------------------------------------------------
   - name: identify_loop
     type: while
-    condition: "variables.iteration < {{ inputs.maxIterations }}"
-    max-iterations: "${{ inputs.maxIterations }}"
+    condition: "${{ variables.iterationResults.size < inputs.maxIterations }}"
     steps:
       # 2a: Sample, infer, and reconcile in one call.
       - name: identify_inferred
@@ -109,8 +102,8 @@ steps:
             start: "${{ inputs.start }}"
             end: "${{ inputs.end }}"
             runId: "${{ execution.id }}"
-            iteration: "${{ variables.iteration | plus: 1 }}"
             discoveredFeatures: "${{ variables.discoveredFeatures }}"
+            iterationResults: "${{ variables.iterationResults }}"
             featureTtlDays: "${{ inputs.featureTtlDays }}"
             sampleSize: "${{ inputs.sampleSize }}"
             entityFilteredRatio: "${{ inputs.entityFilteredRatio }}"
@@ -118,9 +111,6 @@ steps:
             maxEntityFilters: "${{ inputs.maxEntityFilters }}"
             maxExcludedFeaturesInPrompt: "${{ inputs.maxExcludedFeaturesInPrompt }}"
             maxPreviouslyIdentifiedFeatures: "${{ inputs.maxPreviouslyIdentifiedFeatures }}"
-            totalTokensUsed: "${{ variables.totalTokensUsed }}"
-            successCount: "${{ variables.successCount }}"
-            iterationResults: "${{ variables.iterationResults }}"
 
       # 2b: If no documents were returned, stop the loop.
       - name: check_docs
@@ -134,17 +124,38 @@ steps:
       - name: update_state
         type: data.set
         with:
-          iteration: "${{ variables.iteration | plus: 1 }}"
-          successCount: "${{ steps.identify_inferred.output.state.successCount }}"
           discoveredFeatures: "${{ steps.identify_inferred.output.state.discoveredFeatures }}"
-          totalTokensUsed: "${{ steps.identify_inferred.output.state.totalTokensUsed }}"
           iterationResults: "${{ steps.identify_inferred.output.state.iterationResults }}"
 
+      # 2d: Track whether at least one iteration succeeded.
+      - name: mark_success
+        type: if
+        condition: "steps.identify_inferred.output.iterationResult.state:success"
+        steps:
+          - name: set_success
+            type: data.set
+            with:
+              hasSuccess: true
+
   # -----------------------------------------------------------------------
-  # Step 3: Identify computed features.
+  # Step 3: Fail if iterations ran but none succeeded.
+  # -----------------------------------------------------------------------
+  - name: check_all_failed
+    type: if
+    condition: "${{ variables.iterationResults.size > 0 and variables.hasSuccess == false }}"
+    steps:
+      - name: all_failed
+        type: workflow.fail
+        with:
+          message: "All LLM iterations failed for stream {{ inputs.streamName }}"
+
+  # -----------------------------------------------------------------------
+  # Step 4: Identify computed features.
   # -----------------------------------------------------------------------
   - name: identify_computed
     type: kibana.request
+    on-failure:
+      continue: true
     with:
       method: POST
       path: "/internal/streams/{{ inputs.streamName }}/features/_identify/computed"
@@ -154,12 +165,10 @@ steps:
       body:
         start: "${{ inputs.start }}"
         end: "${{ inputs.end }}"
-        iteration: "${{ variables.iteration }}"
-        successCount: "${{ variables.successCount }}"
         featureTtlDays: "${{ inputs.featureTtlDays }}"
 
   # -----------------------------------------------------------------------
-  # Step 4: Output results.
+  # Step 5: Output results.
   # -----------------------------------------------------------------------
   - name: output_result
     type: workflow.output
@@ -167,6 +176,4 @@ steps:
       streamName: "${{ inputs.streamName }}"
       discoveredFeatures: "${{ variables.discoveredFeatures }}"
       computedFeaturesCount: "${{ steps.identify_computed.output.computedFeaturesCount }}"
-      tokensUsed: "${{ variables.totalTokensUsed }}"
       iterations: "${{ variables.iterationResults }}"
-      iterationCount: "${{ variables.iteration }}"

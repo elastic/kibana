@@ -7,38 +7,16 @@
 
 import { z } from '@kbn/zod/v4';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import { TaskStatus, baseFeatureSchema } from '@kbn/streams-schema';
+import { TaskStatus, baseFeatureSchema, iterationResultSchema } from '@kbn/streams-schema';
 import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import type { WorkflowExecutionResult } from '../../lib/workflows/workflow_client';
-
-export const tokensSchema = z.object({
-  prompt: z.number(),
-  completion: z.number(),
-  total: z.number(),
-  cached: z.number().optional(),
-});
-
-const featureSummarySchema = z.object({
-  id: z.string(),
-  title: z.string(),
-});
-
-export const iterationResultSchema = z.object({
-  iteration: z.number(),
-  durationMs: z.number(),
-  state: z.enum(['success', 'failure']),
-  tokensUsed: tokensSchema,
-  newFeatures: z.array(featureSummarySchema),
-  updatedFeatures: z.array(featureSummarySchema),
-});
+import { deriveTotalTokensUsed } from '../../lib/sig_events/features/features_identification_service';
 
 const workflowOutputSchema = z.object({
   streamName: z.string().optional(),
   discoveredFeatures: z.array(baseFeatureSchema).default([]),
   computedFeaturesCount: z.number().optional(),
-  tokensUsed: tokensSchema.optional(),
   iterations: z.array(iterationResultSchema).optional(),
-  iterationCount: z.number().optional(),
 });
 
 export function workflowExecutionToTaskResult(
@@ -54,13 +32,13 @@ export function workflowExecutionToTaskResult(
       };
     }
 
-    const { discoveredFeatures, tokensUsed, iterations } = parsed.data;
+    const { discoveredFeatures, iterations } = parsed.data;
 
     return {
       status: TaskStatus.Completed,
       features: discoveredFeatures,
       durationMs: execution.duration ?? 0,
-      totalTokensUsed: tokensUsed,
+      totalTokensUsed: iterations ? deriveTotalTokensUsed(iterations) : undefined,
       iterations,
     };
   }

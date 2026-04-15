@@ -111,7 +111,9 @@ export function deriveSuccessCount(results: IterationResult[]): number {
   return results.filter((r) => r.state === 'success').length;
 }
 
-export function deriveTotalTokensUsed(results: IterationResult[]): ChatCompletionTokenCount {
+export function deriveTotalTokensUsed(
+  results: ReadonlyArray<{ tokensUsed: ChatCompletionTokenCount }>
+): ChatCompletionTokenCount {
   return results.reduce((acc, r) => sumTokens(acc, r.tokensUsed), { ...EMPTY_TOKENS });
 }
 
