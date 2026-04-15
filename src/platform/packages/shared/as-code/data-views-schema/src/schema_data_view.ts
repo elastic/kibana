@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { fieldSettingsSchema } from './schema_field_settings';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE, AS_CODE_DATA_VIEW_SPEC_TYPE } from './constants';
 import { runtimeFieldSchema } from './schema_runtime_field';
 
@@ -41,7 +42,10 @@ export const dataViewSpecSchema = schema.object(
         },
       })
     ),
-    runtime_fields: schema.maybe(schema.arrayOf(runtimeFieldSchema, { maxSize: 100 })),
+    runtime_fields: schema.maybe(schema.arrayOf(runtimeFieldSchema, { maxSize: 1000 })),
+    field_settings: schema.maybe(
+      schema.recordOf(schema.string({ minLength: 1 }), fieldSettingsSchema)
+    ),
   },
   { meta: { id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' } }
 );

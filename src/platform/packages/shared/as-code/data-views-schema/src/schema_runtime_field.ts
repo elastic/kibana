@@ -13,6 +13,7 @@ import type {
   PrimitiveRuntimeFieldTypes,
   RuntimeFieldCompositeType,
 } from '@kbn/data-views-plugin/common';
+import { fieldSettingsSchema } from './schema_field_settings';
 
 const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
   'keyword',
@@ -65,7 +66,7 @@ const commonRuntimeFieldSchema = {
 /**
  * The field definition is applicable for both top level fields in a primitive runtime field and subfields in a composite runtime field.
  */
-const commonFieldSchema = {
+const commonFieldSchema = fieldSettingsSchema.extends({
   /**
    * The type of the runtime field (e.g., 'keyword', 'long', 'date').
    * Example: 'keyword'
@@ -82,53 +83,11 @@ const commonFieldSchema = {
       },
     }
   ),
-  /**
-   * Optional format definition for the runtime field. The structure depends on the field type and use case.
-   * If not provided, no format is applied.
-   */
-  format: schema.maybe(
-    schema.object(
-      {
-        type: schema.string(),
-        params: schema.any(),
-      },
-      {
-        meta: {
-          id: 'kbn-runtime-field-format',
-          title: 'Format',
-          description:
-            'Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.',
-        },
-      }
-    )
-  ),
-  custom_label: schema.maybe(
-    schema.string({
-      minLength: 1,
-      meta: {
-        id: 'kbn-runtime-field-custom-label',
-        title: 'Custom label',
-        description:
-          'Create a label to display in place of the field name in Discover, Maps, Lens, Visualize, and TSVB. Useful for shortening a long field name. Queries and filters use the original field name.',
-      },
-    })
-  ),
-  custom_description: schema.maybe(
-    schema.string({
-      minLength: 1,
-      meta: {
-        id: 'kbn-runtime-field-custom-description',
-        title: 'Custom description',
-        description:
-          "Add a description to the field. It's displayed next to the field on the Discover, Lens, and Data View Management pages.",
-      },
-    })
-  ),
-};
+});
 
 export const primitiveRuntimeFieldSchema = schema.object(
   {
-    ...commonFieldSchema,
+    ...commonFieldSchema.getPropSchemas(),
     ...commonRuntimeFieldSchema,
   },
   { meta: { id: 'kbn-runtime-field-schema', title: 'Runtime field' } }
@@ -151,9 +110,9 @@ export const compositeRuntimeFieldSchema = schema.object(
               'The name of the runtime subfield, it gets appended to the parent field name. Example: "parent_name.my_runtime_subfield".',
           },
         }),
-        ...commonFieldSchema,
+        ...commonFieldSchema.getPropSchemas(),
       }),
-      { maxSize: 100 }
+      { maxSize: 1000 }
     ),
     ...commonRuntimeFieldSchema,
   },

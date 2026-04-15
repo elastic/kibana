@@ -13,7 +13,7 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   type AsCodeDataView,
 } from '@kbn/as-code-data-views-schema';
-import { fromStoredRuntimeFields } from './from_stored_runtime_fields';
+import { fromStoredFields } from './from_stored_fields';
 
 /**
  * Convert a stored search-source `index` value (saved object / serialized search source)
@@ -34,10 +34,6 @@ export function fromStoredDataView(
     type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: index.title,
     time_field: index.timeFieldName,
-    runtime_fields: fromStoredRuntimeFields(
-      index.runtimeFieldMap,
-      index.fieldFormats,
-      index.fieldAttrs
-    ),
+    ...fromStoredFields(index.runtimeFieldMap, index.fieldFormats, index.fieldAttrs),
   };
 }

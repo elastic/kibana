@@ -70,4 +70,61 @@ describe('toStoredDataView', () => {
       timeFieldName: '@timestamp',
     });
   });
+
+  it('writes indexed field_settings to fieldFormats and fieldAttrs', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_settings: {
+        bytes_field: {
+          format: { type: 'bytes', params: { pattern: '0,0.[000]b' } },
+        },
+        host_name: {
+          custom_label: 'Host',
+          custom_description: 'Hostname',
+        },
+      },
+    };
+
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'logs-*',
+      fieldFormats: {
+        bytes_field: { id: 'bytes', params: { pattern: '0,0.[000]b' } },
+      },
+      fieldAttrs: {
+        host_name: { customLabel: 'Host', customDescription: 'Hostname' },
+      },
+    });
+  });
+
+  it('prefers runtime_fields over overlapping field_settings', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      runtime_fields: [{ name: 'rt', type: 'keyword', format: { type: 'string' } }],
+      field_settings: {
+        rt: {
+          format: { type: 'bytes' },
+          custom_label: 'Mapped',
+        },
+      },
+    };
+
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'logs-*',
+      runtimeFieldMap: {
+        rt: {
+          type: 'keyword',
+        },
+      },
+      fieldFormats: {
+        rt: { id: 'string', params: undefined },
+      },
+      fieldAttrs: {
+        rt: {},
+      },
+    });
+  });
 });

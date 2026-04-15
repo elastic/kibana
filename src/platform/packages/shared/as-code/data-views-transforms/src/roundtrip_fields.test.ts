@@ -7,46 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
-import type { AsCodeRuntimeField } from '@kbn/as-code-data-views-schema';
 import {
-  toStoredRuntimeFields,
-  toStoredFieldFormats,
-  toStoredFieldAttributes,
-} from './to_stored_runtime_fields';
-import { fromStoredRuntimeFields } from './from_stored_runtime_fields';
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+  type AsCodeDataViewSpec,
+  type AsCodeRuntimeField,
+} from '@kbn/as-code-data-views-schema';
+import { fromStoredFields } from './from_stored_fields';
+import { toStoredDataView } from './to_stored_data_view';
 
-const toStored = (fields: AsCodeRuntimeField[]) => ({
-  runtimeFieldMap: toStoredRuntimeFields(fields),
-  fieldFormats: toStoredFieldFormats(fields),
-  fieldAttrs: toStoredFieldAttributes(fields),
-});
-
-const roundtripFromAsCode = (fields: AsCodeRuntimeField[]): AsCodeRuntimeField[] => {
-  const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStored(fields);
-  return fromStoredRuntimeFields(runtimeFieldMap, fieldFormats, fieldAttrs);
-};
-
-const roundtripFromStored = (
-  runtimeFieldMap: Parameters<typeof fromStoredRuntimeFields>[0],
-  fieldFormats: Parameters<typeof fromStoredRuntimeFields>[1],
-  fieldAttrs: Parameters<typeof fromStoredRuntimeFields>[2]
+const toStoredFromAsCodeFields = (
+  fields: Pick<AsCodeDataViewSpec, 'runtime_fields' | 'field_settings'>
 ) => {
-  const fields = fromStoredRuntimeFields(runtimeFieldMap, fieldFormats, fieldAttrs);
-  return toStored(fields);
+  const stored = toStoredDataView({
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'logs-*',
+    ...fields,
+  });
+
+  if (typeof stored === 'string') {
+    throw new Error('Expected inline data view spec');
+  }
+
+  return {
+    runtimeFieldMap: stored.runtimeFieldMap ?? {},
+    fieldFormats: stored.fieldFormats ?? {},
+    fieldAttrs: stored.fieldAttrs ?? {},
+  };
 };
 
 describe('roundtrip: AsCode → stored → AsCode', () => {
   describe('primitive fields', () => {
     it('preserves a minimal field (type + name only)', () => {
       const fields: AsCodeRuntimeField[] = [{ type: 'keyword', name: 'my_field' }];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
 
     it('preserves a field with a script', () => {
       const fields: AsCodeRuntimeField[] = [
         { type: 'keyword', name: 'my_field', script: 'emit("hello")' },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
 
     it('preserves a field with a format', () => {
@@ -57,7 +73,15 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
           format: { type: 'date', params: { pattern: 'MM/DD/YYYY' } },
         },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
 
     it('preserves a field with custom_label and custom_description', () => {
@@ -69,7 +93,15 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
           custom_description: 'A description',
         },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
 
     it('preserves a field with all optional attrs set', () => {
@@ -83,7 +115,15 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
           custom_description: 'Event timestamp',
         },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
   });
 
@@ -92,7 +132,15 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
       const fields: AsCodeRuntimeField[] = [
         { type: RUNTIME_FIELD_COMPOSITE_TYPE, name: 'my_composite', fields: [] },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
 
     it('preserves subfield type and name', () => {
@@ -106,7 +154,15 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
           ],
         },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
 
     it('preserves script on the composite parent', () => {
@@ -118,7 +174,15 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
           fields: [{ name: 'part', type: 'keyword' }],
         },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
 
     it('preserves custom_label and custom_description on subfields', () => {
@@ -136,7 +200,15 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
           ],
         },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
 
     it('preserves format on subfields', () => {
@@ -153,7 +225,15 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
           ],
         },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
 
     it('preserves all attrs on a fully-populated composite field', () => {
@@ -179,7 +259,15 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
           ],
         },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
     });
   });
 
@@ -197,7 +285,47 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
           ],
         },
       ];
-      expect(roundtripFromAsCode(fields)).toEqual(fields);
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields({
+        runtime_fields: fields,
+      });
+      const { runtime_fields: runtimeFields = [] } = fromStoredFields(
+        runtimeFieldMap,
+        fieldFormats,
+        fieldAttrs
+      );
+      expect(runtimeFields).toEqual(fields);
+    });
+  });
+
+  describe('field settings', () => {
+    it('preserves indexed field settings without runtime_fields', () => {
+      const fields: Pick<AsCodeDataViewSpec, 'runtime_fields' | 'field_settings'> = {
+        field_settings: {
+          mapped: {
+            custom_label: 'Mapped label',
+            custom_description: 'Mapped description',
+            format: { type: 'bytes', params: { pattern: '0,0.[000]b' } },
+          },
+        },
+      };
+
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields(fields);
+      expect(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs)).toEqual(fields);
+    });
+
+    it('preserves field settings alongside runtime_fields', () => {
+      const fields: Pick<AsCodeDataViewSpec, 'runtime_fields' | 'field_settings'> = {
+        runtime_fields: [{ type: 'keyword', name: 'rt', custom_label: 'Runtime' }],
+        field_settings: {
+          mapped: {
+            custom_label: 'Mapped label',
+            format: { type: 'bytes', params: { pattern: '0,0.[000]b' } },
+          },
+        },
+      };
+
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields(fields);
+      expect(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs)).toEqual(fields);
     });
   });
 });
@@ -206,7 +334,9 @@ describe('roundtrip: stored → AsCode → stored', () => {
   describe('primitive fields', () => {
     it('preserves runtimeFieldMap for a basic field', () => {
       const runtimeFieldMap = { my_field: { type: 'keyword' as const } };
-      const { runtimeFieldMap: result } = roundtripFromStored(runtimeFieldMap, {}, {});
+      const { runtimeFieldMap: result } = toStoredFromAsCodeFields(
+        fromStoredFields(runtimeFieldMap, {}, {})
+      );
       expect(result).toEqual(runtimeFieldMap);
     });
 
@@ -214,14 +344,18 @@ describe('roundtrip: stored → AsCode → stored', () => {
       const runtimeFieldMap = {
         my_field: { type: 'keyword' as const, script: { source: 'emit("x")' } },
       };
-      const { runtimeFieldMap: result } = roundtripFromStored(runtimeFieldMap, {}, {});
+      const { runtimeFieldMap: result } = toStoredFromAsCodeFields(
+        fromStoredFields(runtimeFieldMap, {}, {})
+      );
       expect(result).toEqual(runtimeFieldMap);
     });
 
     it('preserves fieldFormats for a field with a format', () => {
       const runtimeFieldMap = { my_field: { type: 'date' as const } };
       const fieldFormats = { my_field: { id: 'date', params: { pattern: 'MM/DD/YYYY' } } };
-      const { fieldFormats: result } = roundtripFromStored(runtimeFieldMap, fieldFormats, {});
+      const { fieldFormats: result } = toStoredFromAsCodeFields(
+        fromStoredFields(runtimeFieldMap, fieldFormats, {})
+      );
       expect(result).toEqual(fieldFormats);
     });
 
@@ -230,7 +364,9 @@ describe('roundtrip: stored → AsCode → stored', () => {
       const fieldAttrs = {
         my_field: { customLabel: 'My Field', customDescription: 'A description' },
       };
-      const { fieldAttrs: result } = roundtripFromStored(runtimeFieldMap, {}, fieldAttrs);
+      const { fieldAttrs: result } = toStoredFromAsCodeFields(
+        fromStoredFields(runtimeFieldMap, {}, fieldAttrs)
+      );
       expect(result).toEqual(fieldAttrs);
     });
 
@@ -247,7 +383,7 @@ describe('roundtrip: stored → AsCode → stored', () => {
         runtimeFieldMap: rm,
         fieldFormats: ff,
         fieldAttrs: fa,
-      } = roundtripFromStored(runtimeFieldMap, fieldFormats, fieldAttrs);
+      } = toStoredFromAsCodeFields(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs));
 
       expect(rm).toEqual(runtimeFieldMap);
       expect(ff).toEqual(fieldFormats);
@@ -266,7 +402,9 @@ describe('roundtrip: stored → AsCode → stored', () => {
           },
         },
       };
-      const { runtimeFieldMap: result } = roundtripFromStored(runtimeFieldMap, {}, {});
+      const { runtimeFieldMap: result } = toStoredFromAsCodeFields(
+        fromStoredFields(runtimeFieldMap, {}, {})
+      );
       expect(result).toEqual(runtimeFieldMap);
     });
 
@@ -278,7 +416,9 @@ describe('roundtrip: stored → AsCode → stored', () => {
           fields: { sub: { type: 'keyword' as const } },
         },
       };
-      const { runtimeFieldMap: result } = roundtripFromStored(runtimeFieldMap, {}, {});
+      const { runtimeFieldMap: result } = toStoredFromAsCodeFields(
+        fromStoredFields(runtimeFieldMap, {}, {})
+      );
       expect(result).toEqual(runtimeFieldMap);
     });
 
@@ -292,7 +432,9 @@ describe('roundtrip: stored → AsCode → stored', () => {
       const fieldFormats = {
         'my_composite.sub': { id: 'date', params: { pattern: 'MM/DD/YYYY' } },
       };
-      const { fieldFormats: result } = roundtripFromStored(runtimeFieldMap, fieldFormats, {});
+      const { fieldFormats: result } = toStoredFromAsCodeFields(
+        fromStoredFields(runtimeFieldMap, fieldFormats, {})
+      );
       expect(result).toEqual(fieldFormats);
     });
 
@@ -310,7 +452,9 @@ describe('roundtrip: stored → AsCode → stored', () => {
         'my_composite.sub_a': { customLabel: 'Sub A' },
         'my_composite.sub_b': { customLabel: 'Sub B', customDescription: 'Second subfield' },
       };
-      const { fieldAttrs: result } = roundtripFromStored(runtimeFieldMap, {}, fieldAttrs);
+      const { fieldAttrs: result } = toStoredFromAsCodeFields(
+        fromStoredFields(runtimeFieldMap, {}, fieldAttrs)
+      );
       expect(result).toEqual(fieldAttrs);
     });
 
@@ -337,7 +481,7 @@ describe('roundtrip: stored → AsCode → stored', () => {
         runtimeFieldMap: rm,
         fieldFormats: ff,
         fieldAttrs: fa,
-      } = roundtripFromStored(runtimeFieldMap, fieldFormats, fieldAttrs);
+      } = toStoredFromAsCodeFields(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs));
 
       expect(rm).toEqual(runtimeFieldMap);
       expect(ff).toEqual(fieldFormats);
@@ -371,7 +515,28 @@ describe('roundtrip: stored → AsCode → stored', () => {
         runtimeFieldMap: rm,
         fieldFormats: ff,
         fieldAttrs: fa,
-      } = roundtripFromStored(runtimeFieldMap, fieldFormats, fieldAttrs);
+      } = toStoredFromAsCodeFields(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs));
+
+      expect(rm).toEqual(runtimeFieldMap);
+      expect(ff).toEqual(fieldFormats);
+      expect(fa).toEqual(fieldAttrs);
+    });
+  });
+
+  describe('indexed field settings', () => {
+    it('preserves non-runtime fieldFormats and fieldAttrs through AsCode roundtrip', () => {
+      const runtimeFieldMap = { rt: { type: 'keyword' as const } };
+      const fieldFormats = { rt: { id: 'string' }, mapped: { id: 'bytes' } };
+      const fieldAttrs = {
+        rt: { customLabel: 'Runtime' },
+        mapped: { customLabel: 'Mapped', customDescription: 'Mapped description' },
+      };
+
+      const {
+        runtimeFieldMap: rm,
+        fieldFormats: ff,
+        fieldAttrs: fa,
+      } = toStoredFromAsCodeFields(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs));
 
       expect(rm).toEqual(runtimeFieldMap);
       expect(ff).toEqual(fieldFormats);

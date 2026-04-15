@@ -16,7 +16,7 @@ import {
   toStoredFieldAttributes,
   toStoredFieldFormats,
   toStoredRuntimeFields,
-} from './to_stored_runtime_fields';
+} from './to_stored_fields';
 
 /**
  * Convert an as-code data view back to a stored search-source `index` value
@@ -27,9 +27,11 @@ import {
  */
 export function toStoredDataView(dataView: AsCodeDataView): string | DataViewSpec {
   if (dataView.type === AS_CODE_DATA_VIEW_REFERENCE_TYPE) return dataView.ref_id;
-  const runtimeFieldMap = toStoredRuntimeFields(dataView.runtime_fields);
-  const fieldFormats = toStoredFieldFormats(dataView.runtime_fields);
-  const fieldAttrs = toStoredFieldAttributes(dataView.runtime_fields);
+
+  const runtimeFieldMap = toStoredRuntimeFields(dataView);
+  const fieldFormats = toStoredFieldFormats(dataView);
+  const fieldAttrs = toStoredFieldAttributes(dataView);
+
   return {
     title: dataView.index_pattern,
     timeFieldName: dataView.time_field,

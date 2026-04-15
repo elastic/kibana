@@ -8,15 +8,15 @@
  */
 
 /**
- * Functions for converting AsCodeRuntimeField[] back to the three DataViewSpec maps
+ * Functions for converting as-code fields back to the three DataViewSpec maps
  *
  * CONVERSION APPROACH:
- * - A single AsCodeRuntimeField is split into up to three DataViewSpec contributions:
+ * - Runtime fields are split into up to three DataViewSpec contributions:
  *   runtimeFieldMap (type + script), fieldFormats (display format), fieldAttrs (label/description)
  * - Composite fields: subfields are written under the `parent.child` key in formats and attrs
  * - Primitive fields: written directly under the field name
  *
- * Use the three exported helpers together to fully reconstruct the DataViewSpec runtime-field state.
+ * Use the three exported helpers together to reconstruct DataViewSpec field state.
  */
 
 import {
@@ -25,20 +25,20 @@ import {
   type RuntimePrimitiveTypes,
   RUNTIME_FIELD_COMPOSITE_TYPE,
 } from '@kbn/data-views-plugin/common';
-import type { AsCodeRuntimeField } from '@kbn/as-code-data-views-schema';
+import type { AsCodeDataViewSpec, AsCodeFieldSettings } from '@kbn/as-code-data-views-schema';
 
 /**
- * Convert AsCodeRuntimeField[] to the `runtimeFieldMap` entry of a DataViewSpec.
+ * Convert as-code runtime fields to the `runtimeFieldMap` entry of a DataViewSpec.
  *
  * Composite fields are expanded into a `fields` record keyed by subfield name.
  * Script source strings are wrapped in the `{ source }` shape expected by the stored format.
  *
- * @param runtimeFields Array of as-code runtime field definitions
+ * @param fields Input containing `runtime_fields`
  * @returns A `runtimeFieldMap` object suitable for use in a DataViewSpec
  */
-export function toStoredRuntimeFields(
-  runtimeFields: AsCodeRuntimeField[] = []
-): DataViewSpec['runtimeFieldMap'] {
+export function toStoredRuntimeFields({
+  runtime_fields: runtimeFields = [],
+}: Pick<AsCodeDataViewSpec, 'runtime_fields'> = {}): DataViewSpec['runtimeFieldMap'] {
   const runtimeFieldMap: DataViewSpec['runtimeFieldMap'] = {};
 
   for (const runtimeField of runtimeFields) {
@@ -66,72 +66,79 @@ export function toStoredRuntimeFields(
 }
 
 /**
- * Convert AsCodeRuntimeField[] to the `fieldFormats` entry of a DataViewSpec.
+ * Convert as-code runtime fields and field settings to the `fieldFormats` entry of a DataViewSpec.
  *
  * Only fields that declare a `format` are included. Composite subfields are written
  * under the fully-qualified `parent.child` key.
  *
- * @param runtimeFields Array of as-code runtime field definitions
+ * @param fields Input containing `runtime_fields` and `field_settings`
  * @returns A `fieldFormats` object suitable for use in a DataViewSpec
  */
-export function toStoredFieldFormats(
-  runtimeFields: AsCodeRuntimeField[] = []
-): DataViewSpec['fieldFormats'] {
+export function toStoredFieldFormats({
+  runtime_fields: runtimeFields = [],
+  field_settings: fieldSettings = {},
+}: Pick<
+  AsCodeDataViewSpec,
+  'runtime_fields' | 'field_settings'
+> = {}): DataViewSpec['fieldFormats'] {
   const fieldFormats: DataViewSpec['fieldFormats'] = {};
+  const addToFieldFormats = (name: string, { format }: AsCodeFieldSettings) => {
+    if (!format) return;
+    fieldFormats[name] = {
+      id: format.type,
+      params: format.params,
+    };
+  };
+
+  Object.entries(fieldSettings).forEach(([name, attrs]) => addToFieldFormats(name, attrs));
 
   for (const runtimeField of runtimeFields) {
     if (runtimeField.type === RUNTIME_FIELD_COMPOSITE_TYPE) {
       for (const field of runtimeField.fields) {
-        if (!field.format) continue;
-        fieldFormats[`${runtimeField.name}.${field.name}`] = {
-          id: field.format.type,
-          params: field.format.params,
-        };
+        addToFieldFormats(`${runtimeField.name}.${field.name}`, field);
       }
-      continue;
+    } else {
+      addToFieldFormats(runtimeField.name, runtimeField);
     }
-    if (!runtimeField.format) continue;
-    fieldFormats[runtimeField.name] = {
-      id: runtimeField.format.type,
-      params: runtimeField.format.params,
-    };
   }
 
   return fieldFormats;
 }
 
 /**
- * Convert AsCodeRuntimeField[] to the `fieldAttrs` entry of a DataViewSpec.
+ * Convert as-code runtime fields and field settings to the `fieldAttrs` entry of a DataViewSpec.
  *
- * Only fields that declare `custom_label` or `custom_description` produce an entry.
+ * Indexed field settings without attrs are skipped. Runtime fields and composite runtime subfields
+ * always produce an entry (possibly empty) to preserve current stored shape.
  * Composite subfields are written under the fully-qualified `parent.child` key.
  *
- * @param runtimeFields Array of as-code runtime field definitions
+ * @param fields Input containing `runtime_fields` and `field_settings`
  * @returns A `fieldAttrs` object suitable for use in a DataViewSpec
  */
-export function toStoredFieldAttributes(
-  runtimeFields: AsCodeRuntimeField[] = []
-): DataViewSpec['fieldAttrs'] {
+export function toStoredFieldAttributes({
+  runtime_fields: runtimeFields = [],
+  field_settings: fieldSettings = {},
+}: Pick<AsCodeDataViewSpec, 'runtime_fields' | 'field_settings'> = {}): DataViewSpec['fieldAttrs'] {
   const fieldAttrs: DataViewSpec['fieldAttrs'] = {};
+  const addToFieldAttrs = (name: string, attrs: AsCodeFieldSettings, alwaysWrite = false) => {
+    const { custom_label: customLabel, custom_description: customDescription } = attrs;
+    if (!customLabel && !customDescription && !alwaysWrite) return;
+    fieldAttrs[name] = {
+      ...(customLabel && { customLabel }),
+      ...(customDescription && { customDescription }),
+    };
+  };
+
+  Object.entries(fieldSettings).forEach(([name, attrs]) => addToFieldAttrs(name, attrs));
 
   for (const runtimeField of runtimeFields) {
     if (runtimeField.type === RUNTIME_FIELD_COMPOSITE_TYPE) {
       for (const field of runtimeField.fields) {
-        const compositeName = `${runtimeField.name}.${field.name}`;
-        fieldAttrs[compositeName] = {
-          ...(field.custom_label && { customLabel: field.custom_label }),
-          ...(field.custom_description && { customDescription: field.custom_description }),
-        };
+        addToFieldAttrs(`${runtimeField.name}.${field.name}`, field, true);
       }
-      continue;
+    } else {
+      addToFieldAttrs(runtimeField.name, runtimeField, true);
     }
-
-    fieldAttrs[runtimeField.name] = {
-      ...(runtimeField.custom_label && { customLabel: runtimeField.custom_label }),
-      ...(runtimeField.custom_description && {
-        customDescription: runtimeField.custom_description,
-      }),
-    };
   }
 
   return fieldAttrs;

@@ -20,6 +20,7 @@ export {
 export { esqlDataSourceSchema } from './src/schema_esql_data_source';
 export { runtimeFieldSchema } from './src/schema_runtime_field';
 export type {
+  AsCodeFieldSettings,
   AsCodeDataView,
   AsCodeDataViewReference,
   AsCodeDataViewSpec,
