@@ -105,8 +105,10 @@ function reverseBuildVisualizationState(
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
     axes: getGridConfigProps(visualization.gridConfig, xAxisScale),
-    cells: {
-      labels: { visible: visualization.gridConfig.isCellLabelVisible },
+    styling: {
+      cells: {
+        labels: { visible: visualization.gridConfig.isCellLabelVisible },
+      },
     },
   } satisfies Partial<HeatmapState>;
 
