@@ -10,15 +10,13 @@
 import React from 'react';
 import { AppHeaderShell } from './app_header_shell';
 import { AppBadges } from './app_badges';
-import { BackButton } from './back_button';
-import { AppTitle } from './app_title';
+import { TitleArea } from './title_area';
 import { GlobalActions } from './global_actions';
 import { AppMenu } from './app_menu';
 
 export const AppHeader = React.memo(() => (
   <AppHeaderShell
-    leading={<BackButton />}
-    title={<AppTitle />}
+    title={<TitleArea />}
     badges={<AppBadges />}
     titleActions={<GlobalActions />}
     trailing={<AppMenu />}

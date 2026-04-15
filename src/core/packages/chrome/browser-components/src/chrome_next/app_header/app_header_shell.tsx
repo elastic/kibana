@@ -13,11 +13,9 @@ import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { useReportTopBarHeight } from './hooks';
 
-/** Minimum row height; aligns with project layout `applicationTopBarHeight`. */
-const APPLICATION_TOP_BAR_HEIGHT_PX = 48;
+const APPLICATION_TOP_BAR_MIN_HEIGHT_PX = 48;
 
 export interface AppHeaderShellProps {
-  leading?: ReactNode;
   title?: ReactNode;
   badges?: ReactNode;
   titleActions?: ReactNode;
@@ -35,20 +33,26 @@ const useHeaderStyles = () => {
       display: flex;
       flex-direction: column;
       min-width: 0;
-      min-height: ${APPLICATION_TOP_BAR_HEIGHT_PX}px;
+      min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
       box-sizing: border-box;
-      padding: 0 ${euiTheme.size.s};
+      padding: 0 ${euiTheme.size.m};
       background: ${euiTheme.colors.backgroundBasePlain};
       border-bottom: ${euiTheme.border.thin};
       margin-bottom: -${euiTheme.border.width.thin};
+
+      &:hover .titleActionsReveal,
+      &:focus-within .titleActionsReveal {
+        opacity: 1;
+        pointer-events: auto;
+      }
     `;
 
     const primaryRow = css`
       display: flex;
       align-items: center;
-      gap: ${euiTheme.size.xs};
+      gap: ${euiTheme.size.m};
       min-width: 0;
-      min-height: ${APPLICATION_TOP_BAR_HEIGHT_PX}px;
+      min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
     `;
 
     const titleCluster = css`
@@ -88,12 +92,23 @@ const useHeaderStyles = () => {
       align-items: stretch;
     `;
 
+    const titleActionsReveal = css`
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity ${euiTheme.animation.fast} ease;
+    `;
+
     return {
       root,
       primaryRow,
       titleCluster,
       titleGroup,
       titleClusterSpacer,
+      titleActionsReveal,
       metadataRow,
       calloutRow,
       tabsRow,
@@ -102,19 +117,22 @@ const useHeaderStyles = () => {
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
-  ({ leading, title, badges, titleActions, trailing, metadata, callout, tabs }) => {
+  ({ title, badges, titleActions, trailing, metadata, callout, tabs }) => {
     const styles = useHeaderStyles();
     const heightRef = useReportTopBarHeight();
 
     return (
       <div ref={heightRef} css={styles.root} data-test-subj="chromeNextAppHeader">
         <div css={styles.primaryRow}>
-          {leading}
           <div css={styles.titleCluster}>
             <div css={styles.titleGroup}>
               {title}
               {badges}
-              {titleActions}
+              {titleActions && (
+                <div className="titleActionsReveal" css={styles.titleActionsReveal}>
+                  {titleActions}
+                </div>
+              )}
             </div>
             <div css={styles.titleClusterSpacer} aria-hidden />
           </div>
