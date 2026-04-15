@@ -68,7 +68,6 @@ export const stepDefinitionSchema = z.object({
         timeout: z.string().optional(),
         description: z.string().optional(),
         do: z.array(z.record(z.string(), z.unknown())).optional(),
-        then: z.array(z.record(z.string(), z.unknown())).optional(),
         else: z.array(z.record(z.string(), z.unknown())).optional(),
         condition: z.string().optional(),
       }

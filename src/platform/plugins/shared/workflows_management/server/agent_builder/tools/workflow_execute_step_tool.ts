@@ -169,7 +169,7 @@ const stubUnsafeChildren = (yamlStr: string, stepName: string): string => {
           return true;
         }
 
-        for (const key of ['steps', 'then', 'else']) {
+        for (const key of ['steps', 'else']) {
           const child = (item as YAML.YAMLMap).get(key);
           if (YAML.isSeq(child) && findAndReplace(child)) {
             return true;
