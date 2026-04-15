@@ -34,8 +34,8 @@ responses:
             summary: Snooze schedule response
             description: A response that contains the created snooze schedule.
             value:
-              id: 9ac67950-6737-11ec-8ded-d7f6e1581b26
               schedule:
+                id: 9ac67950-6737-11ec-8ded-d7f6e1581b26
                 custom:
                   start: "2025-03-12T12:00:00.000Z"
                   duration: 24h

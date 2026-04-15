@@ -96,6 +96,7 @@ export const findRulesRequestQuerySchema = schema.object({
   ),
   filter_consumers: schema.maybe(
     schema.arrayOf(schema.string(), {
+      maxSize: 100,
       meta: {
         description: 'List of consumers to filter.',
       },
