@@ -640,13 +640,16 @@ export class WorkflowsExecutionEnginePlugin
       // execution document. The route-level check (run_workflow.ts:75) may have
       // read a stale value if a concurrent hard-delete disabled the workflow
       // between the route read and this point.
-      const executionSpaceId = (context.spaceId as string | undefined) || 'default';
-      const stillEnabled = await workflowRepository.isWorkflowEnabled(
-        workflow.id,
-        executionSpaceId
-      );
-      if (!stillEnabled) {
-        throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
+      // Skipped for test runs — unsaved workflows don't exist in the index.
+      if (!workflow.isTestRun) {
+        const executionSpaceId = (context.spaceId as string | undefined) || 'default';
+        const stillEnabled = await workflowRepository.isWorkflowEnabled(
+          workflow.id,
+          executionSpaceId
+        );
+        if (!stillEnabled) {
+          throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
+        }
       }
 
       const { workflowExecution } = await createAndPersistWorkflowExecution(
