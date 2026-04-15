@@ -79,6 +79,6 @@ describe('useBulkCreateAlertActions', () => {
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.actionsAll() });
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.groupActionsAll() });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.alertActionTagSuggestions() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.tagSuggestions() });
   });
 });
