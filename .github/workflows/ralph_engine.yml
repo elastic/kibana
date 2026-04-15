@@ -61,7 +61,16 @@ jobs:
 
       - name: Install OpenCode
         run: |
-          npm install -g opencode
+          OPENCODE_VERSION="v0.0.55"
+          curl -fsSL "https://github.com/opencode-ai/opencode/releases/download/${OPENCODE_VERSION}/opencode-linux-x86_64.tar.gz" | sudo tar xz -C /usr/local/bin
+
+      - name: Configure OpenCode
+        run: |
+          cat > opencode.json <<'EOF'
+          {
+            "snapshot": false
+          }
+          EOF
 
       - name: Build Task Prompt
         run: |
