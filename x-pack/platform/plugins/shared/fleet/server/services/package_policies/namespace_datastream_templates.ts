@@ -720,13 +720,14 @@ export async function syncNamespaceTemplates({
             savedObjectsClient: soClient,
             pkgName: packageName,
           });
-          const assetsToAdd = dataStreams.map((ds) => ({
-            id: generateNamespaceTemplateName(getRegistryDataStreamAssetBaseName(ds), namespace),
-            type: ElasticsearchAssetType.indexTemplate,
-          }));
+          const assetsToAdd: Array<{ id: string; type: ElasticsearchAssetType }> =
+            updatedIndexTemplates.map((t) => ({
+              id: t.templateName,
+              type: ElasticsearchAssetType.indexTemplate,
+            }));
           assetsToAdd.push({
             id: `${namespace}@custom`,
-            type: ElasticsearchAssetType.componentTemplate as ElasticsearchAssetType,
+            type: ElasticsearchAssetType.componentTemplate,
           });
 
           await updateEsAssetReferences(
