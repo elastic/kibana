@@ -83,15 +83,13 @@ export const useGridNavigation = ({
 
         case keys.ARROW_DOWN: {
           event.preventDefault();
-          const nextRow = Math.min(gridRows - 1, rowIndex + 1);
-          if (nextRow > rowIndex) {
-            newRowIndex = nextRow;
-            const rowStartIndex = nextRow * gridColumns;
-            const maxColInRow = Math.min(
-              gridColumns - 1,
-              Math.max(0, totalRows - 1 - rowStartIndex)
+          if (rowIndex < gridRows - 1) {
+            newRowIndex = rowIndex + 1;
+            const itemsInTargetRow = Math.min(
+              gridColumns,
+              totalRows - newRowIndex * gridColumns
             );
-            newColIndex = Math.min(colIndex, maxColInRow);
+            newColIndex = Math.min(colIndex, itemsInTargetRow - 1);
           }
           break;
         }
