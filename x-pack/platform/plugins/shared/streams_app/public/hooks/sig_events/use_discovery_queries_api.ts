@@ -8,15 +8,11 @@
 import { useMemo } from 'react';
 import { groupBy } from 'lodash';
 import type { SignificantEventQueryRow } from './use_fetch_discovery_queries';
+import type { BulkOperationResult } from './use_discovery_features_api';
 import { useQueriesApi } from './use_queries_api';
 
-export interface BulkDeleteResult {
-  succeededCount: number;
-  failedCount: number;
-}
-
 interface DiscoveryQueriesApi {
-  deleteQueriesInBulk: (queries: SignificantEventQueryRow[]) => Promise<BulkDeleteResult>;
+  deleteQueriesInBulk: (queries: SignificantEventQueryRow[]) => Promise<BulkOperationResult>;
 }
 
 export function useDiscoveryQueriesApi(): DiscoveryQueriesApi {
@@ -26,7 +22,7 @@ export function useDiscoveryQueriesApi(): DiscoveryQueriesApi {
     () => ({
       deleteQueriesInBulk: async (
         queries: SignificantEventQueryRow[]
-      ): Promise<BulkDeleteResult> => {
+      ): Promise<BulkOperationResult> => {
         const queriesByStream = groupBy(queries, 'stream_name');
         const entries = Object.entries(queriesByStream);
 

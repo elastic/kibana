@@ -296,6 +296,12 @@ export const PROMOTE_SELECTED_LABEL = i18n.translate(
   { defaultMessage: 'Promote selected' }
 );
 
+export const getSelectedCountLabel = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.selectedCount', {
+    defaultMessage: '{count} selected',
+    values: { count },
+  });
+
 export const DELETE_QUERIES_MODAL_TITLE = (count: number) =>
   i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.deleteModalTitle', {
     defaultMessage:

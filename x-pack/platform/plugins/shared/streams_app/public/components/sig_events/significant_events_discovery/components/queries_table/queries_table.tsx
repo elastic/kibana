@@ -43,10 +43,8 @@ import {
 } from '../../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useQueriesApi, type PromoteResult } from '../../../../../hooks/sig_events/use_queries_api';
-import {
-  useDiscoveryQueriesApi,
-  type BulkDeleteResult,
-} from '../../../../../hooks/sig_events/use_discovery_queries_api';
+import { useDiscoveryQueriesApi } from '../../../../../hooks/sig_events/use_discovery_queries_api';
+import type { BulkOperationResult } from '../../../../../hooks/sig_events/use_discovery_features_api';
 import {
   HIGH_SEVERITY_THRESHOLD,
   UNBACKED_QUERIES_COUNT_QUERY_KEY,
@@ -100,6 +98,7 @@ import {
   CLEAR_SELECTION_LABEL,
   DELETE_SELECTED_LABEL,
   PROMOTE_SELECTED_LABEL,
+  getSelectedCountLabel,
   DELETE_QUERIES_MODAL_TITLE,
   BULK_DELETE_SUCCESS_MESSAGE,
   BULK_DELETE_ALL_FAILED_MESSAGE,
@@ -190,7 +189,7 @@ export function QueriesTable() {
     [queryClient]
   );
 
-  const bulkDeleteMutation = useMutation<BulkDeleteResult, Error, SignificantEventQueryRow[]>({
+  const bulkDeleteMutation = useMutation<BulkOperationResult, Error, SignificantEventQueryRow[]>({
     mutationFn: (items) => deleteQueriesInBulk(items),
     onSuccess: async ({ succeededCount, failedCount }) => {
       setSelectedItems([]);
@@ -280,9 +279,10 @@ export function QueriesTable() {
     mutationFn: async ({ queryId, streamName }) => {
       await removeQuery({ queryId, streamName });
     },
-    onSuccess: async () => {
+    onSuccess: async (_, { queryId }) => {
       await invalidateQueriesData();
       setSelectedQuery(null);
+      setSelectedItems((prev) => prev.filter((item) => item.query.id !== queryId));
     },
     onError: (error) => {
       toasts.addError(error, {
@@ -617,7 +617,6 @@ export function QueriesTable() {
               iconType="trash"
               color="danger"
               size="xs"
-              aria-label={DELETE_SELECTED_LABEL}
               isDisabled={isSelectionEmpty || bulkDeleteMutation.isLoading}
               isLoading={bulkDeleteMutation.isLoading}
               onClick={() => setItemsToDelete(selectedItems)}
@@ -629,7 +628,6 @@ export function QueriesTable() {
             <EuiButtonEmpty
               iconType="plusInCircle"
               size="xs"
-              aria-label={PROMOTE_SELECTED_LABEL}
               isDisabled={!hasPromotableSelected || bulkPromoteMutation.isLoading}
               isLoading={bulkPromoteMutation.isLoading}
               onClick={() => bulkPromoteMutation.mutate(unbackedNonStatsSelected)}
@@ -637,6 +635,13 @@ export function QueriesTable() {
               {PROMOTE_SELECTED_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
+          {!isSelectionEmpty && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {getSelectedCountLabel(selectedItems.length)}
+              </EuiText>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
