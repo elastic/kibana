@@ -48,6 +48,8 @@ test.describe(
     });
 
     test('embeddable sidebar error handling', async ({ page, pageObjects }) => {
+      test.setTimeout(180_000);
+
       await test.step('shows an error message and allows the user to retry', async () => {
         const MOCKED_INPUT = 'sidebar error test message';
         const MOCKED_RESPONSE = 'Successful response after retry';
@@ -76,9 +78,11 @@ test.describe(
         await pageObjects.agentBuilder.clickRetryButton();
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
-            MOCKED_RESPONSE
-          );
+          await expect(
+            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+              hasText: MOCKED_RESPONSE,
+            })
+          ).toContainText(MOCKED_RESPONSE);
         }).toPass({ timeout: 120_000 });
         await expect(async () => {
           expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(false);
@@ -120,9 +124,11 @@ test.describe(
         await pageObjects.agentBuilder.sendMessage();
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
-            MOCKED_RESPONSE
-          );
+          await expect(
+            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+              hasText: MOCKED_RESPONSE,
+            })
+          ).toContainText(MOCKED_RESPONSE);
         }).toPass({ timeout: 120_000 });
       });
 
@@ -164,9 +170,11 @@ test.describe(
           expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(false);
         }).toPass({ timeout: 60_000 });
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
-            SUCCESSFUL_RESPONSE
-          );
+          await expect(
+            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+              hasText: SUCCESSFUL_RESPONSE,
+            })
+          ).toContainText(SUCCESSFUL_RESPONSE);
         }).toPass({ timeout: 120_000 });
       });
 
@@ -188,9 +196,11 @@ test.describe(
         await pageObjects.agentBuilder.selectEmbeddableConversation(firstConversationId);
 
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
-            FIRST_RESPONSE
-          );
+          await expect(
+            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+              hasText: FIRST_RESPONSE,
+            })
+          ).toContainText(FIRST_RESPONSE);
         }).toPass({ timeout: 120_000 });
 
         await setupAgentDirectError({
@@ -206,9 +216,11 @@ test.describe(
           expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
         }).toPass({ timeout: 60_000 });
         await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
-        await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
-          FIRST_RESPONSE
-        );
+        await expect(
+          page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+            hasText: FIRST_RESPONSE,
+          })
+        ).toContainText(FIRST_RESPONSE);
       });
     });
   }

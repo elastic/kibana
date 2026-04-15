@@ -7,13 +7,13 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 
-const XSFR = { 'kbn-xsrf': 'scout-agent-builder' };
+import { AGENT_BUILDER_PUBLIC_API_HEADERS } from './kbn_public_api_headers';
 
 export async function createToolViaKbn(kbnClient: KbnClient, body: unknown): Promise<void> {
   await kbnClient.request({
     method: 'POST',
     path: '/api/agent_builder/tools',
-    headers: XSFR,
+    headers: { ...AGENT_BUILDER_PUBLIC_API_HEADERS },
     body,
   });
 }
@@ -22,6 +22,7 @@ export async function deleteAllTools(kbnClient: KbnClient): Promise<void> {
   const res = await kbnClient.request<{ results?: Array<{ id: string; readonly?: boolean }> }>({
     method: 'GET',
     path: '/api/agent_builder/tools',
+    headers: { ...AGENT_BUILDER_PUBLIC_API_HEADERS },
   });
   const tools = res.data.results ?? [];
   await Promise.allSettled(
@@ -31,7 +32,7 @@ export async function deleteAllTools(kbnClient: KbnClient): Promise<void> {
         kbnClient.request({
           method: 'DELETE',
           path: `/api/agent_builder/tools/${encodeURIComponent(id)}`,
-          headers: XSFR,
+          headers: { ...AGENT_BUILDER_PUBLIC_API_HEADERS },
         })
       )
   );

@@ -77,7 +77,9 @@ test.describe(
       });
 
       await test.step('does not enable save until edits', async () => {
-        await expect(page.testSubj.locator('agentFormSaveButton')).toBeDisabled();
+        await expect(
+          page.getByTestId('agentBuilderWrapper').getByTestId('agentFormSaveButton')
+        ).toBeDisabled();
       });
 
       await test.step('disables agent id input', async () => {
@@ -89,8 +91,10 @@ test.describe(
         expect(await pageObjects.agentBuilder.getAgentFormDisplayName()).toBe(agent.name);
         const editedName = 'Edited Test Agent';
         await pageObjects.agentBuilder.setAgentFormDisplayName(editedName);
-        await expect(page.testSubj.locator('agentFormSaveButton')).toBeEnabled();
-        await page.testSubj.click('agentFormSaveButton');
+        await expect(
+          page.getByTestId('agentBuilderWrapper').getByTestId('agentFormSaveButton')
+        ).toBeEnabled();
+        await page.getByTestId('agentBuilderWrapper').getByTestId('agentFormSaveButton').click();
         await page.testSubj
           .locator('agentBuilderAgentsListPageTitle')
           .waitFor({ state: 'visible' });

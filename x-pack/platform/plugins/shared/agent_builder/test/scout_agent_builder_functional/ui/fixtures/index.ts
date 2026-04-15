@@ -16,6 +16,12 @@ export interface AgentBuilderUiFixtures extends ScoutTestFixtures {
 }
 
 export const test = baseTest.extend<AgentBuilderUiFixtures, ScoutWorkerFixtures>({
+  page: async ({ page }, use) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('home:welcome:show', 'false');
+    });
+    await use(page);
+  },
   pageObjects: async (
     {
       pageObjects,

@@ -272,9 +272,9 @@ test.describe(
         llmProxy
       );
 
-      await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
-        FIRST_RESPONSE
-      );
+      await expect(
+        page.locator('[data-test-subj="agentBuilderRoundResponse"]', { hasText: FIRST_RESPONSE })
+      ).toContainText(FIRST_RESPONSE);
 
       await setupAgentDirectError({
         proxy: llmProxy,
@@ -293,9 +293,9 @@ test.describe(
       await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
       await expect(page.testSubj.locator('agentBuilderRoundErrorRetryButton')).toBeVisible();
 
-      await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
-        FIRST_RESPONSE
-      );
+      await expect(
+        page.locator('[data-test-subj="agentBuilderRoundResponse"]', { hasText: FIRST_RESPONSE })
+      ).toContainText(FIRST_RESPONSE);
     });
   }
 );

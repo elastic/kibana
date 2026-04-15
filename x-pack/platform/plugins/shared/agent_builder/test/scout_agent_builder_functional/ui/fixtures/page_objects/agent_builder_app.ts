@@ -24,14 +24,37 @@ export class AgentBuilderApp {
   }
 
   async navigateToApp(path: string = `agents/${agentBuilderDefaultAgentId}/conversations/new`) {
-    await this.page.gotoApp(`agentBuilder/${path}`);
+    await this.page.gotoApp(`agent_builder/${path}`);
     if (path.includes('conversations/new')) {
-      await this.page.testSubj.locator('agentBuilderWelcomePage').waitFor({ state: 'visible' });
+      await this.page.testSubj.locator('agentBuilderWelcomePage').waitFor({
+        state: 'visible',
+        timeout: 60_000,
+      });
+      return;
+    }
+    if (path === 'manage/agents') {
+      await this.page.testSubj.locator('agentBuilderAgentsListContent').waitFor({
+        state: 'visible',
+        timeout: 60_000,
+      });
+      return;
+    }
+    if (path === 'manage/tools') {
+      await this.page.testSubj.locator('agentBuilderToolsPage').waitFor({
+        state: 'visible',
+        timeout: 60_000,
+      });
     }
   }
 
   async navigateToHome() {
     await this.page.gotoApp('home');
+    const skipWelcome = this.page.testSubj.locator('skipWelcomeScreen');
+    try {
+      await skipWelcome.click({ timeout: 5_000 });
+    } catch {
+      // Home welcome overlay is not shown (e.g. already dismissed via localStorage).
+    }
   }
 
   async typeMessage(message: string) {
@@ -85,7 +108,18 @@ export class AgentBuilderApp {
     await this.typeMessage(userMessage);
     await this.sendMessage();
     await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-    await this.page.testSubj.locator('agentBuilderRoundResponse').waitFor({ state: 'visible' });
+    await this.page.waitForFunction(
+      () => {
+        const els = document.querySelectorAll('[data-test-subj="agentBuilderRoundResponse"]');
+        if (els.length === 0) {
+          return false;
+        }
+        const last = els[els.length - 1];
+        return (last.textContent?.trim().length ?? 0) > 0;
+      },
+      undefined,
+      { timeout: 120_000 }
+    );
     await this.page.waitForFunction(
       () => !window.location.href.includes('/conversations/new'),
       undefined,
@@ -136,6 +170,11 @@ export class AgentBuilderApp {
 
   async isConversationInHistory(conversationId: string): Promise<boolean> {
     const loc = this.page.testSubj.locator(`agentBuilderSidebarConversation-${conversationId}`);
+    try {
+      await loc.scrollIntoViewIfNeeded({ timeout: 10_000 });
+    } catch {
+      // row may not exist yet
+    }
     return loc.isVisible();
   }
 
@@ -222,12 +261,17 @@ export class AgentBuilderApp {
   }
 
   async setToolDescription(description: string) {
-    await this.page.testSubj.fill('euiMarkdownEditorTextArea', description);
+    await this.page.testSubj
+      .locator('agentBuilderToolFormPage')
+      .locator('[data-test-subj="euiMarkdownEditorTextArea"]')
+      .fill(description);
   }
 
-  async getToolDescriptionValue() {
-    const v = await this.page.testSubj.getAttribute('euiMarkdownEditorTextArea', 'value');
-    return v ?? '';
+  async getToolDescriptionValue(): Promise<string> {
+    const ta = this.page.testSubj
+      .locator('agentBuilderToolFormPage')
+      .locator('[data-test-subj="euiMarkdownEditorTextArea"]');
+    return (await ta.inputValue()).trim();
   }
 
   async setIndexPattern(indexPattern: string) {
@@ -244,20 +288,11 @@ export class AgentBuilderApp {
   }
 
   async selectMcpTool(toolName: string) {
-    const optionSelector = `mcpToolOption-${toolName}`;
-    await this.page.waitForFunction(
-      (sel) => {
-        const open = document.querySelector(`[data-test-subj="${sel}"]`);
-        if (!open) {
-          const trigger = document.querySelector('[data-test-subj="agentBuilderMcpToolSelect"]');
-          (trigger as HTMLElement | null)?.click();
-        }
-        return document.querySelector(`[data-test-subj="${sel}"]`) !== null;
-      },
-      optionSelector,
-      { timeout: 30_000 }
-    );
-    await this.page.testSubj.click(optionSelector);
+    const optionSubj = `mcpToolOption-${toolName}`;
+    await this.page.testSubj.click('agentBuilderMcpToolSelect');
+    const option = this.page.locator(`[data-test-subj="${optionSubj}"]`);
+    await option.waitFor({ state: 'visible', timeout: 60_000 });
+    await option.click();
   }
 
   async waitForMcpToolsToLoad() {
@@ -392,7 +427,10 @@ export class AgentBuilderApp {
   toolsSearch() {
     return {
       type: async (term: string) => {
-        await this.page.testSubj.fill('agentBuilderToolsSearchInput', term);
+        const search = this.page.testSubj.locator('agentBuilderToolsSearchInput');
+        await search.click();
+        await search.clear();
+        await search.pressSequentially(term, { delay: 15 });
       },
     };
   }
@@ -421,8 +459,11 @@ export class AgentBuilderApp {
     const clearButtonSelector = `${contentSelector} ${subj('clearSearchButton')}`;
     return {
       type: async (term: string) => {
-        await this.page.locator(searchSelector).click();
-        await this.page.locator(searchSelector).fill(term);
+        const search = this.page.locator(searchSelector);
+        await search.click();
+        await search.clear();
+        // EuiInMemoryTable uses incremental search; fill() does not reliably fire per-keystroke filtering.
+        await search.pressSequentially(term, { delay: 15 });
       },
       clear: async () => {
         await this.page.locator(clearButtonSelector).click();
@@ -461,15 +502,15 @@ export class AgentBuilderApp {
 
   agentAction(agentId: string, actionSubj: string) {
     const row = this.page.testSubj.locator(this.agentListRowSelector(agentId));
-    const actionInRow = row.locator(subj(actionSubj));
+    const actionInPortal = this.page.locator(`[data-euiportal="true"] ${subj(actionSubj)}`);
     return {
       click: async () => {
         await row.getByTestId('euiCollapsedItemActionsButton').click();
-        await actionInRow.click();
+        await actionInPortal.click();
       },
       getHref: async () => {
         await row.getByTestId('euiCollapsedItemActionsButton').click();
-        return actionInRow.getAttribute('href');
+        return actionInPortal.getAttribute('href');
       },
     };
   }

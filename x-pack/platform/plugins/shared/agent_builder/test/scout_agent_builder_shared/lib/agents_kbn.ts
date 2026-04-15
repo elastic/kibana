@@ -8,7 +8,7 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { EsClient } from '@kbn/scout';
 
-const XSFR = { 'kbn-xsrf': 'scout-agent-builder' };
+import { AGENT_BUILDER_PUBLIC_API_HEADERS } from './kbn_public_api_headers';
 
 export async function deleteAllAgentsFromEs(
   esClient: EsClient,
@@ -34,9 +34,16 @@ export async function createAgentViaKbn(
   }
 ): Promise<void> {
   await kbnClient.request({
+    method: 'DELETE',
+    path: `/api/agent_builder/agents/${encodeURIComponent(agent.id)}`,
+    headers: { ...AGENT_BUILDER_PUBLIC_API_HEADERS },
+    ignoreErrors: [404],
+  });
+
+  await kbnClient.request({
     method: 'POST',
     path: '/api/agent_builder/agents',
-    headers: XSFR,
+    headers: { ...AGENT_BUILDER_PUBLIC_API_HEADERS },
     body: {
       id: agent.id,
       name: agent.name,
@@ -44,7 +51,7 @@ export async function createAgentViaKbn(
       labels: agent.labels ?? [],
       configuration: {
         instructions: 'Run this agent',
-        tools: [{ tool_ids: [] }],
+        tools: [{ tool_ids: ['*'] }],
       },
     },
   });
@@ -54,6 +61,6 @@ export async function deleteAgentViaKbn(kbnClient: KbnClient, agentId: string): 
   await kbnClient.request({
     method: 'DELETE',
     path: `/api/agent_builder/agents/${encodeURIComponent(agentId)}`,
-    headers: XSFR,
+    headers: { ...AGENT_BUILDER_PUBLIC_API_HEADERS },
   });
 }

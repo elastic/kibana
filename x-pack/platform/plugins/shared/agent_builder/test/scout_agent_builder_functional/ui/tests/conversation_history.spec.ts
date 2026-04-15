@@ -90,9 +90,11 @@ test.describe(
           const conv = CONVERSATION_DATA[i];
           const convId = conversationIds[i];
           await pageObjects.agentBuilder.navigateToConversationViaHistory(convId);
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
-            conv.expectedResponse
-          );
+          await expect(
+            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+              hasText: conv.expectedResponse,
+            })
+          ).toContainText(conv.expectedResponse);
         }
       });
 
@@ -101,9 +103,11 @@ test.describe(
           const conv = CONVERSATION_DATA[i];
           const convId = conversationIds[i];
           await pageObjects.agentBuilder.navigateToConversationById(convId);
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
-            conv.expectedResponse
-          );
+          await expect(
+            page.locator('[data-test-subj="agentBuilderRoundResponse"]', {
+              hasText: conv.expectedResponse,
+            })
+          ).toContainText(conv.expectedResponse);
         }
       });
 

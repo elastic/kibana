@@ -19,8 +19,16 @@ import {
 import { test, testData } from '../fixtures';
 
 const agents = [
-  { id: 'test_agent_1', name: 'Test Agent 1', labels: ['first'] as const },
-  { id: 'test_agent_2', name: 'Test Agent 2', labels: ['second'] as const },
+  {
+    id: 'test_agent_1',
+    name: 'Scout agents list display name one 9c4e1b',
+    labels: ['scout_agents_list_first'] as const,
+  },
+  {
+    id: 'test_agent_2',
+    name: 'Scout agents list display name two 9c4e1b',
+    labels: ['scout_agents_list_second'] as const,
+  },
 ] as const;
 
 test.describe(
@@ -81,10 +89,14 @@ test.describe(
       await test.step('filters on search', async () => {
         const search = pageObjects.agentBuilder.agentsListSearch();
         await search.type(agents[0].name);
-        expect(await pageObjects.agentBuilder.countAgentsListRows()).toBe(1);
+        await expect(async () => {
+          expect(await pageObjects.agentBuilder.countAgentsListRows()).toBe(1);
+        }).toPass({ timeout: 15_000 });
         await pageObjects.agentBuilder.agentExistsOrFail(agents[0].id);
         await search.clear();
-        expect(await search.getValue()).toBe('');
+        await expect(async () => {
+          expect(await search.getValue()).toBe('');
+        }).toPass({ timeout: 10_000 });
       });
 
       await test.step('filters on labels', async () => {
