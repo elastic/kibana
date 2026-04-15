@@ -7,11 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import { tags, test as baseTest } from '@kbn/scout-security';
-import type {
-  EsClient,
-  SecurityTestFixtures,
-  SecurityWorkerFixtures,
-} from '@kbn/scout-security';
+import type { EsClient, SecurityTestFixtures, SecurityWorkerFixtures } from '@kbn/scout-security';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -85,7 +81,7 @@ export const test = baseTest.extend<
   cpsTestData: [
     async ({ esClient, linkedProject }, use) => {
       const runId = randomUUID().slice(0, 8);
-      const testIndex = `scout-cps-ui-${runId}`;
+      const testIndex = `logstash-scout-cps-ui-${runId}`;
 
       await createMarkerFieldIndex(esClient, testIndex, ORIGIN_MARKER_FIELD);
       await createMarkerFieldIndex(linkedProject.esClient, testIndex, LINKED_MARKER_FIELD);
