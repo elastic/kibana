@@ -29,42 +29,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TelemetryContextProvider>{children}</TelemetryContextProvider>
 );
 
-describe('TelemetryContextProvider', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('fires CreateIntegrationPageLoaded once on mount', () => {
-    render(
-      <TelemetryContextProvider>
-        <div />
-      </TelemetryContextProvider>
-    );
-
-    expect(mockReportEvent).toHaveBeenCalledTimes(1);
-    expect(mockReportEvent).toHaveBeenCalledWith(
-      AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded,
-      expect.objectContaining({ sessionId: expect.any(String) })
-    );
-  });
-
-  it('does not fire CreateIntegrationPageLoaded more than once on re-render', () => {
-    const { rerender } = render(
-      <TelemetryContextProvider>
-        <div />
-      </TelemetryContextProvider>
-    );
-
-    rerender(
-      <TelemetryContextProvider>
-        <div />
-      </TelemetryContextProvider>
-    );
-
-    expect(mockReportEvent).toHaveBeenCalledTimes(1);
-  });
-});
-
 describe('useTelemetry', () => {
   beforeEach(() => {
     jest.clearAllMocks();

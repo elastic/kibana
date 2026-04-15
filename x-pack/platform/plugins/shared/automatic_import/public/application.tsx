@@ -43,13 +43,11 @@ export const renderApp = ({
     renderUpselling$,
   };
 
-  const editIntegrationId = history.location.pathname.split('/edit/')[1]?.split('/')[0];
-
   ReactDOM.render(
     coreStart.rendering.addContext(
       <QueryClientProvider client={queryClient}>
         <KibanaContextProvider services={services}>
-          <TelemetryContextProvider integrationId={editIntegrationId}>
+          <TelemetryContextProvider>
             <UIStateProvider>
               <AvailabilityWrapper>
                 <Router history={history}>
