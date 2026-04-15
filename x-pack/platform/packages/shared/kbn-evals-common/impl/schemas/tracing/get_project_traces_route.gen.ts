@@ -16,13 +16,6 @@
 
 import { z } from '@kbn/zod/v4';
 
-export type TraceSummaryTokens = z.infer<typeof TraceSummaryTokens>;
-export const TraceSummaryTokens = z.object({
-  input: z.number().int().optional(),
-  output: z.number().int().optional(),
-  total: z.number().int().optional(),
-});
-
 export type TraceSummary = z.infer<typeof TraceSummary>;
 export const TraceSummary = z.object({
   trace_id: z.string(),
@@ -34,16 +27,16 @@ export const TraceSummary = z.object({
   input_preview: z.string().optional(),
   output_preview: z.string().optional(),
   error: z.string().optional(),
-  tokens: TraceSummaryTokens.optional(),
+  tokens: z
+    .object({
+      input: z.number().int().optional(),
+      output: z.number().int().optional(),
+      total: z.number().int().optional(),
+    })
+    .optional(),
   prompt_id: z.string().optional(),
   model: z.string().optional(),
 });
-
-export type GetProjectTracesRequestParams = z.infer<typeof GetProjectTracesRequestParams>;
-export const GetProjectTracesRequestParams = z.object({
-  projectName: z.string(),
-});
-export type GetProjectTracesRequestParamsInput = z.input<typeof GetProjectTracesRequestParams>;
 
 export type GetProjectTracesRequestQuery = z.infer<typeof GetProjectTracesRequestQuery>;
 export const GetProjectTracesRequestQuery = z.object({
@@ -65,6 +58,12 @@ export const GetProjectTracesRequestQuery = z.object({
   per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
 });
 export type GetProjectTracesRequestQueryInput = z.input<typeof GetProjectTracesRequestQuery>;
+
+export type GetProjectTracesRequestParams = z.infer<typeof GetProjectTracesRequestParams>;
+export const GetProjectTracesRequestParams = z.object({
+  projectName: z.string(),
+});
+export type GetProjectTracesRequestParamsInput = z.input<typeof GetProjectTracesRequestParams>;
 
 export type GetProjectTracesResponse = z.infer<typeof GetProjectTracesResponse>;
 export const GetProjectTracesResponse = z.object({

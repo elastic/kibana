@@ -8,11 +8,12 @@
  */
 
 import type { DataSourceTypeESQL, DataSourceTypeNoESQL } from './data_source';
-import { dataSourceSchema, dataSourceEsqlTypeSchema } from './data_source';
+import { dataSourceSchema } from './data_source';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   dataViewSchema,
+  esqlDataSourceSchema,
 } from '@kbn/as-code-data-views-schema';
 
 describe('DataSource Schema', () => {
@@ -93,7 +94,7 @@ describe('DataSource Schema', () => {
         query: 'FROM my-index | LIMIT 100',
       } satisfies DataSourceTypeESQL;
 
-      const validated = dataSourceEsqlTypeSchema.validate(input);
+      const validated = esqlDataSourceSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -103,7 +104,7 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore query prop for test purposes
       } satisfies DataSourceTypeESQL;
 
-      expect(() => dataSourceEsqlTypeSchema.validate(input)).toThrow(
+      expect(() => esqlDataSourceSchema.validate(input)).toThrow(
         /\[query\]: expected value of type/
       );
     });

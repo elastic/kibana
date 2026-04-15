@@ -208,6 +208,7 @@ describe('createSmlAttachTool', () => {
       {
         type: 'visualization',
         data: { layers: [] },
+        description: 'visualization/Test Viz',
         origin: 'ref-1',
       },
       'agent'

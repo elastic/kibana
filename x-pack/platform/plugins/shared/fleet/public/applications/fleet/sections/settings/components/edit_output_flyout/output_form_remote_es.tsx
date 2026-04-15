@@ -46,7 +46,7 @@ export interface IsConvertedToSecret {
 }
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
-  const { docLinks, cloud } = useStartServices();
+  const { docLinks } = useStartServices();
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState<IsConvertedToSecret>({
     serviceToken: false,
@@ -54,8 +54,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     sslKey: false,
   });
   const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
-  const enableSyncIntegrations =
-    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
+  const enableSyncIntegrations = enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
 
   const [isRemoteClusterInstructionsOpen, setIsRemoteClusterInstructionsOpen] =
     React.useState(false);

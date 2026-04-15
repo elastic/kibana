@@ -441,10 +441,10 @@
           },
           {
             "parentPluginId": "cloud",
-            "id": "def-public.CloudConfigType.is_ece",
+            "id": "def-public.CloudConfigType.isSaasContainer",
             "type": "CompoundType",
             "tags": [],
-            "label": "is_ece",
+            "label": "isSaasContainer",
             "description": [],
             "signature": [
               "boolean | undefined"
