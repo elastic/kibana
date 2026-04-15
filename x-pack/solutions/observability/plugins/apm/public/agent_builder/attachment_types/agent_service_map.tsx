@@ -32,7 +32,7 @@ const nodeTypes: NodeTypes = {
   groupedResources: GroupedResourcesNode,
 };
 
-interface AgentServiceMapProps {
+export interface AgentServiceMapProps {
   connections: ServiceMapAttachmentData['connections'];
 }
 
