@@ -89,6 +89,11 @@ export const ensurePrebuiltWatchlists = async ({
   }
 };
 
+const isConflictError = (e: unknown): boolean => {
+  const message = e instanceof Error ? e.message : String(e);
+  return message.includes('conflict');
+};
+
 const getOrCreateWatchlist = async ({
   watchlistClient,
   logger,
@@ -111,11 +116,25 @@ const getOrCreateWatchlist = async ({
     }
 
     logger.info(`Prebuilt watchlist '${attrs.name}' not found, creating...`);
-    const created = await watchlistClient.create(attrs, { id });
-    if (!created.id) {
-      throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
+    try {
+      const created = await watchlistClient.create(attrs, { id });
+      if (!created.id) {
+        throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
+      }
+      return created.id;
+    } catch (createError) {
+      if (isConflictError(createError)) {
+        logger.info(
+          `Prebuilt watchlist '${attrs.name}' ID conflicts across namespaces, creating with auto-generated ID`
+        );
+        const created = await watchlistClient.create(attrs, {});
+        if (!created.id) {
+          throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
+        }
+        return created.id;
+      }
+      throw createError;
     }
-    return created.id;
   }
 };
 

@@ -59,15 +59,16 @@ export const enableEntityStoreRoute = (
         const core = await context.core;
         const namespace = secSol.getSpaceId();
         const soClient = getRequestSavedObjectClient(core);
-        const watchlistClient = new WatchlistConfigClient({
-          namespace,
-          soClient,
-          esClient: core.elasticsearch.client.asCurrentUser,
-          logger,
-        });
-        await ensurePrebuiltWatchlists({ watchlistClient, soClient, namespace, logger });
 
         try {
+          const watchlistClient = new WatchlistConfigClient({
+            namespace,
+            soClient,
+            esClient: core.elasticsearch.client.asCurrentUser,
+            logger,
+          });
+          await ensurePrebuiltWatchlists({ watchlistClient, soClient, namespace, logger });
+
           const body: InitEntityStoreResponse = await secSol
             .getEntityStoreDataClient()
             .enable(request.body, { pipelineDebugMode });
