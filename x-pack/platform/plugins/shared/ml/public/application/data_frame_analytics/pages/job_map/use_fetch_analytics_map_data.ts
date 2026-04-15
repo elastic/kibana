@@ -9,10 +9,10 @@ import { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import { uniqWith, isEqual } from 'lodash';
-import type cytoscape from 'cytoscape';
 import {
   JOB_MAP_NODE_TYPES,
   type AnalyticsMapReturnType,
+  type MapElements,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { useMlApi } from '../../../contexts/kibana';
 interface GetDataObjectParameter {
@@ -25,7 +25,7 @@ interface GetDataObjectParameter {
 export const useFetchAnalyticsMapData = () => {
   const mlApi = useMlApi();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
+  const [elements, setElements] = useState<MapElements[]>([]);
   const [error, setError] = useState<any>();
   const [message, setMessage] = useState<string | undefined>();
   // Keeps track of which nodes have been used as root so we can refetch related nodes on refresh
