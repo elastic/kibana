@@ -25,6 +25,9 @@ export const EXPLORE_PAGE =
 export const THREAT_INTELLIGENCE_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Intelligence"]';
 
+export const LAUNCHPAD_PAGE =
+  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Launchpad"]';
+
 export const MANAGE_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Manage"]';
 
