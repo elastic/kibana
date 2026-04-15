@@ -139,8 +139,10 @@ export const MarkdownEditor = ({
                   settings={settings}
                   updateSettings={updateSettings}
                 />
-                {/* TODO: Add tooltipPosition: bottom when https://github.com/elastic/eui/pull/9546 merges */}
-                <EuiMarkdownEditorHelpButton uiPlugins={uiPlugins} />
+                <EuiMarkdownEditorHelpButton
+                  uiPlugins={uiPlugins}
+                  tooltipProps={{ position: 'bottom', delay: 'regular' }}
+                />
               </>
             ),
           }}
