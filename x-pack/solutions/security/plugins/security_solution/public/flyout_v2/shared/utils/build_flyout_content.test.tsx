@@ -23,9 +23,7 @@ jest.mock('../../../flyout/document_details/right/components/table_field_name_ce
 
 jest.mock('../../network_details', () => ({
   Network: ({ ip, flowTarget }: { ip: string; flowTarget: string }) => (
-    <div data-test-subj="mockNetwork">
-      {ip}-{flowTarget}
-    </div>
+    <div data-test-subj="mockNetwork">{`${ip}-${flowTarget}`}</div>
   ),
 }));
 
