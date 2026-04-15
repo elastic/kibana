@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const browser = getService('browser');
 
-  describe('dashboard time', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/261894
+  describe.skip('dashboard time', () => {
     before(async function () {
       await dashboard.initTests();
       await dashboard.preserveCrossAppState();
