@@ -32,6 +32,9 @@ import type { ESQLStartServices } from './esql';
  * This runs once during `deserializeState` — the earliest async entry point for
  * the embeddable — before any downstream consumer (`getUsedDataViews`,
  * `persistedStateToExpression`, etc.) can touch the DataViewsService cache.
+ *
+ * If the time-field HTTP request fails (for example a transient network error),
+ * that layer is left unchanged rather than rejecting deserialization.
  */
 export async function hydrateESQLTimeFields(
   attributes: LensRuntimeState['attributes'],
@@ -55,8 +58,13 @@ export async function hydrateESQLTimeFields(
 
     let timeFieldName = layer.timeField;
     if (!timeFieldName) {
-      timeFieldName =
-        (await getESQLTimeFieldFromQuery({ query: layer.query.esql, http })) ?? undefined;
+      try {
+        timeFieldName =
+          (await getESQLTimeFieldFromQuery({ query: layer.query.esql, http })) ?? undefined;
+      } catch {
+        // Network or server errors during time-field detection should not fail
+        // deserialization; continue without runtime hydration for this layer.
+      }
     }
 
     if (!timeFieldName) {
