@@ -693,6 +693,7 @@ src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
 src/platform/packages/shared/kbn-workspaces @elastic/observability-ui
 src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-yaml-loader @elastic/fleet
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
@@ -3273,6 +3274,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # Appex QA to own auto-generated scout metadata
 /**/scout/.meta/**
 /**/scout_*/.meta/**
+
+# Macroscope Check Run Agents
+/.macroscope/scout-review.md @elastic/appex-qa
+/.macroscope/flaky-test-runner-nudge.md @elastic/appex-qa
 
 # These files influence agent behavior and are loaded into every new agent session.
 # Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
