@@ -30,7 +30,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.js'
     - '!**/*.config.js'
-    - '!src/set_public_path.js'
     - '!target/**/*'
     - version_dependencies.txt
 tasks:
