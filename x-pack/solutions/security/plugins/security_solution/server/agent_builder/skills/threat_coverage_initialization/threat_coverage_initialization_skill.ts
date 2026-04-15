@@ -125,7 +125,8 @@ Before installing rules, present the user with a coverage plan:
 ### Step 6: Add "auto-installed" tag
 
 - Use '${SECURITY_BULK_ACTIONS_TOOL_ID}' to add tags to rules
-- Add 'auto-install' tag to the rules installed at the Step 5
+- Add 'auto-installed' tag to the rules installed at the Step 5
+- Add tags to rules in batches (max 1000 rules per call)
 
 ### Step 7: Enable installed rules
 
