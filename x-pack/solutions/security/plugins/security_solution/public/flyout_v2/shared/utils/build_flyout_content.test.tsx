@@ -36,9 +36,7 @@ describe('buildFlyoutContent', () => {
     expect(result).not.toBeNull();
 
     const { getByTestId } = render(result!);
-    expect(getByTestId('mockNetwork')).toHaveTextContent(
-      `10.0.0.1-${FlowTargetSourceDest.source}`
-    );
+    expect(getByTestId('mockNetwork')).toHaveTextContent(`10.0.0.1-${FlowTargetSourceDest.source}`);
   });
 
   it('should return a Network element for a destination IP field', () => {
