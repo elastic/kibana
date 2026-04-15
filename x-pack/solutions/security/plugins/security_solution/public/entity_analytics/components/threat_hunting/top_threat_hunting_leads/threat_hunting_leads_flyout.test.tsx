@@ -97,33 +97,6 @@ describe('ThreatHuntingLeadsFlyout', () => {
     );
   });
 
-  it('info button calls onInfoClick when defined', () => {
-    const onInfoClick = jest.fn();
-    mockUseQuery.mockReturnValue({
-      data: { leads: [createApiLead({ id: 'lead-info' })], total: 1 },
-      isLoading: false,
-    });
-
-    render(<ThreatHuntingLeadsFlyout {...defaultProps} onInfoClick={onInfoClick} />);
-
-    fireEvent.click(screen.getByTestId('leadListInfoButton-lead-info'));
-
-    expect(onInfoClick).toHaveBeenCalledTimes(1);
-    expect(onInfoClick).toHaveBeenCalledWith(expect.objectContaining({ id: 'lead-info' }));
-  });
-
-  it('info button not rendered when onInfoClick is undefined', () => {
-    mockUseQuery.mockReturnValue({
-      data: { leads: [createApiLead({ id: 'lead-no-info' })], total: 1 },
-      isLoading: false,
-    });
-
-    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
-
-    expect(screen.getByTestId('leadListItem-lead-no-info')).toBeInTheDocument();
-    expect(screen.queryByTestId('leadListInfoButton-lead-no-info')).not.toBeInTheDocument();
-  });
-
   it('renders lead byline in list items', () => {
     mockUseQuery.mockReturnValue({
       data: {

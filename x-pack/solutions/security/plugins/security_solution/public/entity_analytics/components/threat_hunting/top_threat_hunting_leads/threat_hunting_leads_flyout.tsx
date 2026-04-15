@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,13 +30,11 @@ import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
 interface ThreatHuntingLeadsFlyoutProps {
   onClose: () => void;
   onSelectLead: (lead: HuntingLead) => void;
-  onInfoClick?: (lead: HuntingLead) => void;
 }
 
 export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> = ({
   onClose,
   onSelectLead,
-  onInfoClick,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -107,7 +104,7 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
             <EuiFlexGroup direction="column" gutterSize="s">
               {filteredLeads.map((lead) => (
                 <EuiFlexItem key={lead.id}>
-                  <LeadListItem lead={lead} onClick={onSelectLead} onInfoClick={onInfoClick} />
+                  <LeadListItem lead={lead} onClick={onSelectLead} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
@@ -121,18 +118,10 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
 interface LeadListItemProps {
   lead: HuntingLead;
   onClick: (lead: HuntingLead) => void;
-  onInfoClick?: (lead: HuntingLead) => void;
 }
 
-const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick }) => {
+const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick }) => {
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
-  const handleInfoClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onInfoClick?.(lead);
-    },
-    [onInfoClick, lead]
-  );
   const renderedByline = useMemo(
     () => renderTextWithEntities(lead.byline, lead.entities),
     [lead.byline, lead.entities]
@@ -152,16 +141,6 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick 
                 <strong>{lead.title}</strong>
               </EuiText>
             </EuiFlexItem>
-            {onInfoClick && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="iInCircle"
-                  aria-label={i18n.VIEW_LEAD_DETAILS}
-                  onClick={handleInfoClick}
-                  data-test-subj={`leadListInfoButton-${lead.id}`}
-                />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         </EuiFlexItem>
 

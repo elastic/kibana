@@ -45,7 +45,6 @@ interface TopThreatHuntingLeadsProps {
   onSeeAll: () => void;
   onLeadClick: (lead: HuntingLead) => void;
   onHuntInChat: () => void;
-  onLeadInfoClick?: (lead: HuntingLead) => void;
   onGenerate: () => void;
 }
 
@@ -61,7 +60,6 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   onSeeAll,
   onLeadClick,
   onHuntInChat,
-  onLeadInfoClick,
   onGenerate,
 }) => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -250,7 +248,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                     min-width: 0;
                   `}
                 >
-                  <LeadCard lead={lead} onClick={onLeadClick} onInfoClick={onLeadInfoClick} />
+                  <LeadCard lead={lead} onClick={onLeadClick} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>

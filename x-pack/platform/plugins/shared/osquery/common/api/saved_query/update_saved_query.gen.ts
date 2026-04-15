@@ -41,5 +41,68 @@ export const UpdateSavedQueryRequestBody = z.object({
   removed: RemovedOrUndefined.optional(),
 });
 
+/**
+ * The response for updating a saved query.
+ */
 export type UpdateSavedQueryResponse = z.infer<typeof UpdateSavedQueryResponse>;
-export const UpdateSavedQueryResponse = z.object({});
+export const UpdateSavedQueryResponse = z.object({
+  /**
+   * The updated saved query.
+   */
+  data: z
+    .object({
+      /**
+       * The saved object ID of the saved query.
+       */
+      saved_object_id: z.string().optional(),
+      /**
+       * The saved query ID.
+       */
+      id: z.string().optional(),
+      /**
+       * The saved query description.
+       */
+      description: z.string().optional(),
+      /**
+       * The SQL query.
+       */
+      query: z.string().optional(),
+      /**
+       * The query interval in seconds.
+       */
+      interval: z.string().optional(),
+      /**
+       * The query timeout in seconds.
+       */
+      timeout: z.number().int().optional(),
+      /**
+       * Whether the query is a snapshot query.
+       */
+      snapshot: z.boolean().optional(),
+      /**
+       * Whether to include results for removed processes.
+       */
+      removed: z.boolean().optional(),
+      /**
+       * The target platform(s).
+       */
+      platform: z.string().optional(),
+      /**
+       * The minimum osquery version.
+       */
+      version: z.string().optional(),
+      /**
+       * The ECS mapping configuration.
+       */
+      ecs_mapping: z.object({}).optional(),
+      /**
+       * The last update timestamp.
+       */
+      updated_at: z.string().optional(),
+      /**
+       * The user who last updated the saved query.
+       */
+      updated_by: z.string().optional(),
+    })
+    .optional(),
+});

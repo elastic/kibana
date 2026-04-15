@@ -6,35 +6,18 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { HuntingLead } from './types';
-import { VIEW_LEAD_DETAILS } from './translations';
 import { MAX_VISIBLE_TAGS } from './utils';
 import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
 
 interface LeadCardProps {
   lead: HuntingLead;
   onClick: (lead: HuntingLead) => void;
-  onInfoClick?: (lead: HuntingLead) => void;
 }
 
-export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }) => {
+export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
-  const handleInfoClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onInfoClick?.(lead);
-    },
-    [onInfoClick, lead]
-  );
   const renderedByline = useMemo(
     () => renderTextWithEntities(lead.byline, lead.entities),
     [lead.byline, lead.entities]
@@ -47,15 +30,6 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }
       onClick={handleClick}
       data-test-subj={`leadCard-${lead.id}`}
     >
-      {onInfoClick && (
-        <EuiButtonIcon
-          iconType="info"
-          aria-label={VIEW_LEAD_DETAILS}
-          onClick={handleInfoClick}
-          data-test-subj={`leadInfoButton-${lead.id}`}
-        />
-      )}
-
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
