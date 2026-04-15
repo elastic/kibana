@@ -135,7 +135,7 @@ describe('streams ILM phases flyout mappers', () => {
     });
   });
 
-  it('deserializes empty phases into schema-compatible defaults', () => {
+  it('maps empty phases into schema-compatible defaults', () => {
     const internal = toFormValues({});
 
     expect(internal._meta.hot.enabled).toBe(false);
@@ -176,7 +176,7 @@ describe('streams ILM phases flyout mappers', () => {
     expect(out).toEqual(baseline);
   });
 
-  it('deserializes searchable snapshot repository from cold first, then frozen', () => {
+  it('maps searchable snapshot repository from cold first, then frozen', () => {
     const internal = toFormValues({
       cold: {
         name: 'cold',
@@ -235,7 +235,7 @@ describe('streams ILM phases flyout mappers', () => {
     expect(out).toEqual(input);
   });
 
-  it('serializes searchable_snapshot for cold only when enabled; frozen always when enabled', () => {
+  it('maps searchable_snapshot for cold only when enabled; frozen always when enabled', () => {
     const internal: IlmPhasesFlyoutFormInternal = cloneDeep(formInternal);
     internal._meta.searchableSnapshot.repository = 'repo1';
 

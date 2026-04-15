@@ -68,7 +68,7 @@ export interface DeletePhaseMetaFields extends MinAgeMetaFields {
 
 /**
  * All UI controls write to dedicated form paths under `_meta.*`.
- * Output `IlmPolicyPhases` is constructed solely by the serializer.
+ * Output `IlmPolicyPhases` is constructed solely by the mapper.
  */
 export interface IlmPhasesFlyoutFormInternal {
   _meta: {
@@ -84,7 +84,7 @@ export interface IlmPhasesFlyoutFormInternal {
 }
 
 /**
- * Output/serialized shape for consumers.
+ * Output shape for consumers.
  * This matches the existing component contract: `onChange(next: IlmPolicyPhases)`.
  */
 export type IlmPhasesFlyoutFormOutput = IlmPolicyPhases;

@@ -177,7 +177,7 @@ describe('EditIlmPhasesFlyout', () => {
   });
 
   describe('save and cancel', () => {
-    it('calls onSave with the current serialized phases when valid', async () => {
+    it('calls onSave with the current mapped phases when valid', async () => {
       const { onSave, initialPhases } = renderFlyout({
         initialPhases: {
           hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
