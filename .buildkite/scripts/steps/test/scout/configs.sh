@@ -86,6 +86,7 @@ fi
 
 results=()
 failedConfigs=()
+configWithoutTests=()
 
 FINAL_EXIT_CODE=0
 
@@ -218,7 +219,12 @@ while read -r config_path; do
       duration="${timeSec}s"
     fi
 
-    if [[ $EXIT_CODE -ne 0 ]]; then
+    # Now handle test results - retry logic depends only on test success/failure
+    if [[ $EXIT_CODE -eq 2 ]]; then
+      # No tests found - mark as executed so we don't retry it
+      buildkite-agent meta-data set "$CONFIG_MODE_EXECUTION_KEY" "true"
+      configWithoutTests+=("$config_path ($mode)")
+    elif [[ $EXIT_CODE -ne 0 ]]; then
       # Test run failed - try to upload events for observability, then mark as failed
       upload_events_if_available "$config_path" "$mode"
       failedConfigs+=("$config_path ($mode)")
@@ -236,11 +242,22 @@ done <<< "$configs"
 
 echo "--- Scout Test Run Complete: Summary"
 echo "✅ Passed: ${#results[@]}"
+echo "⚠️ Configs without tests: ${#configWithoutTests[@]}"
 echo "❌ Failed: ${#failedConfigs[@]}"
 
 if [[ ${#results[@]} -gt 0 ]]; then
   echo "✅ Successful tests:"
   printf '%s\n' "${results[@]}"
+fi
+
+if [[ ${#configWithoutTests[@]} -gt 0 ]]; then
+{
+  echo "Scout Playwright configs without tests:"
+  echo ""
+  for config in "${configWithoutTests[@]}"; do
+    echo "- $config"
+  done
+} | buildkite-agent annotate --style "warning" --context "no-tests"
 fi
 
 if [[ ${#failedConfigs[@]} -gt 0 ]]; then
