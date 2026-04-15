@@ -30,8 +30,12 @@ export function getRemoteClusterName(index: string): string | undefined {
  * Returns undefined for local hits.
  *
  * @param index - The `_index` field from the ES search hit
+ * @param kibanaUrl - Optional kibanaUrl from the document source, for deep linking
  */
-export function getRemoteMonitorInfo(index: string): RemoteMonitorInfo | undefined {
+export function getRemoteMonitorInfo(
+  index: string,
+  kibanaUrl?: string
+): RemoteMonitorInfo | undefined {
   const remoteName = getRemoteClusterName(index);
   if (!remoteName) {
     return undefined;
@@ -39,5 +43,6 @@ export function getRemoteMonitorInfo(index: string): RemoteMonitorInfo | undefin
 
   return {
     remoteName,
+    ...(kibanaUrl ? { kibanaUrl } : {}),
   };
 }

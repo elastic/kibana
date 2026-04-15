@@ -106,6 +106,9 @@ describe('ProjectMonitorFormatter', () => {
     logger,
     syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: soClient,
+    basePath: {
+      publicBaseUrl: 'https://localhost:5601',
+    },
     config: {
       service: {
         username: 'dev',

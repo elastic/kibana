@@ -113,6 +113,7 @@ export class SyntheticsMonitorClient {
         params: paramsBySpace[spaceId],
         monitor: editedMonitor.monitor,
         configId: editedMonitor.id,
+        kibanaUrl: this.server.basePath.publicBaseUrl ?? undefined,
       };
 
       const editedConfig = formatHeartbeatRequest(configData, paramsString);
@@ -283,6 +284,7 @@ export class SyntheticsMonitorClient {
       monitor,
       configId: id,
       params: paramsBySpace[spaceId],
+      kibanaUrl: this.server.basePath.publicBaseUrl ?? undefined,
     };
 
     const { str: paramsString, params } = mixParamsWithGlobalParams(
