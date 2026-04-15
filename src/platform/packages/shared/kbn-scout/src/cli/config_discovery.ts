@@ -217,6 +217,22 @@ const splitStreamsTestsByServerRunFlags = (
   });
 };
 
+const validateAllConfigsHaveTests = (modules: ModuleDiscoveryInfo[], log: ToolingLog): void => {
+  const configsWithoutTests = modules.flatMap((module) =>
+    module.configs
+      .filter((config) => !config.hasTests)
+      .map((config) => `  - [${module.name}] ${config.path}`)
+  );
+
+  if (configsWithoutTests.length > 0) {
+    throw createFailError(
+      `The following Scout Playwright config(s) reported 0 test files:\n` +
+        `${configsWithoutTests.join('\n')}\n\n` +
+        `Run 'npx playwright test --list --config <config>' to see Playwright errors for a specific config.`
+    );
+  }
+};
+
 const handleNonFlattenedOutput = (
   filteredModules: ModuleDiscoveryInfo[],
   flagsReader: FlagsReader,
@@ -227,6 +243,7 @@ const handleNonFlattenedOutput = (
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
     // 'streams_app' tests are quite time consuming, let's split run by 'serverRunFlags' before saving
     const splitModules = splitStreamsTestsByServerRunFlags(filteredForCiModules);
+    validateAllConfigsHaveTests(splitModules, log);
     saveModuleDiscoveryInfo(splitModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =

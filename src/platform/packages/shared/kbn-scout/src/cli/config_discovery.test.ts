@@ -808,6 +808,36 @@ describe('runDiscoverPlaywrightConfigs', () => {
     );
   });
 
+  it('throws when "--save" is set and a config has no tests', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag) => {
+      if (flag === 'save') return true;
+      return false;
+    });
+
+    (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue([
+      {
+        name: 'pluginEmpty',
+        group: 'groupA',
+        type: 'plugin',
+        configs: [
+          {
+            path: 'x-pack/platform/plugins/private/pluginEmpty/test/scout/ui/playwright.config.ts',
+            hasTests: false,
+            tags: ['@local-stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
+            usesParallelWorkers: false,
+          },
+        ],
+      },
+    ]);
+
+    expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
+      /The following Scout Playwright config\(s\) reported 0 test files/
+    );
+    expect(fs.writeFileSync).not.toHaveBeenCalled();
+  });
+
   it('filters out modules with no matching configs after tag filtering', () => {
     flagsReader.enum.mockReturnValue('ech'); // @cloud-stateful-* tags only
     flagsReader.boolean.mockReturnValue(false);
