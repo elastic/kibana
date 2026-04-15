@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiNotificationBadge,
   EuiText,
-  useEuiTheme,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
-import { ConsoleMonitor } from './console_monitor';
-
-const DISPLAY_DURATION = 5000;
+import type { ConsoleErrorInfo } from './console_monitor';
+import {
+  CONSOLE_ERROR_DISPLAY_DURATION,
+  TOOLBAR_ERROR_COLOR,
+  TOOLBAR_WARNING_COLOR,
+} from './constants';
 
 const fadeOut = keyframes`
   0% {
@@ -47,7 +49,7 @@ const getErrorOverlayStyles = (euiTheme: EuiThemeComputed, errorType: 'error' | 
   display: flex;
   align-items: center;
   white-space: nowrap;
-  animation: ${fadeOut} ${DISPLAY_DURATION}ms ease-out forwards;
+  animation: ${fadeOut} ${CONSOLE_ERROR_DISPLAY_DURATION}ms ease-out forwards;
   position: absolute;
 
   mask-image: linear-gradient(
@@ -67,65 +69,26 @@ const getErrorOverlayStyles = (euiTheme: EuiThemeComputed, errorType: 'error' | 
   padding: ${euiTheme.size.xxs} ${euiTheme.size.s};
   padding-right: ${FADE_WIDTH}px;
   height: 100%;
-  z-index: 100;
+  z-index: ${euiTheme.levels.toast};
 `;
 
-export const ConsoleErrorIndicator: React.FC = () => {
+export interface ConsoleErrorIndicatorProps {
+  error: ConsoleErrorInfo | null;
+  errorCount: number;
+  onDismiss: () => void;
+}
+
+export const ConsoleErrorIndicator: React.FC<ConsoleErrorIndicatorProps> = ({
+  error,
+  errorCount,
+  onDismiss,
+}) => {
   const { euiTheme } = useEuiTheme();
-  const [error, setError] = useState<{ message: string; type: 'error' | 'warn' } | null>(null);
-  const [errorCount, setErrorCount] = useState<number>(0);
-  const monitorRef = useRef<ConsoleMonitor | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const monitor = new ConsoleMonitor();
-    monitorRef.current = monitor;
-    monitor.startMonitoring();
-
-    const unsubscribe = monitor.subscribe((newError) => {
-      setError(newError);
-
-      // Track error count - increment when new error, reset when cleared
-      if (newError) {
-        setErrorCount((prev) => prev + 1);
-      } else {
-        setErrorCount(0);
-      }
-
-      // Clear any existing timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      // Set auto-dismiss timeout if there's an error
-      if (newError) {
-        timeoutRef.current = setTimeout(() => {
-          monitorRef.current?.dismiss();
-        }, DISPLAY_DURATION);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-      monitor.destroy();
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  const dismissError = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    monitorRef.current?.dismiss();
-  }, []);
 
   if (!error) {
     return null;
   }
 
-  const iconType = error.type === 'error' ? 'warning' : 'alert';
   const iconColor = error.type === 'error' ? 'danger' : 'warning';
 
   return (
@@ -138,23 +101,39 @@ export const ConsoleErrorIndicator: React.FC = () => {
           min-width: 0; // allow text truncation;
         `}
       >
-        <EuiFlexItem grow={false}>
-          {errorCount > 1 ? (
-            <EuiToolTip content={`Total recent errors: ${errorCount}`}>
-              <EuiNotificationBadge color="accent" size="s">
-                {errorCount}
-              </EuiNotificationBadge>
-            </EuiToolTip>
-          ) : (
-            <EuiIcon type={iconType} color={iconColor} size="s" aria-hidden={true} />
-          )}
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            line-height: 0;
+          `}
+        >
+          <EuiToolTip content={`Total recent console issues: ${errorCount}`}>
+            <EuiNotificationBadge
+              color="accent"
+              size="s"
+              css={css`
+                background-color: ${error.type === 'error'
+                  ? TOOLBAR_ERROR_COLOR
+                  : TOOLBAR_WARNING_COLOR};
+              `}
+            >
+              {errorCount}
+            </EuiNotificationBadge>
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem
           css={css`
             min-width: 0; // allow text truncation;
           `}
         >
-          <EuiText size="xs" color="inherit" className="eui-textTruncate">
+          <EuiText
+            size="xs"
+            color="inherit"
+            className="eui-textTruncate"
+            css={css`
+              line-height: 1;
+            `}
+          >
             <span>{error.message}</span>
           </EuiText>
         </EuiFlexItem>
@@ -164,8 +143,8 @@ export const ConsoleErrorIndicator: React.FC = () => {
             iconType="cross"
             color={iconColor}
             size="xs"
-            onClick={dismissError}
-            aria-label="Dismiss all errors"
+            onClick={onDismiss}
+            aria-label="Dismiss console issues"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

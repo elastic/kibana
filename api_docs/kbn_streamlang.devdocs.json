@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "addDeterministicCustomIdentifiers",
-        "description": [],
+        "description": [
+          "\nAdds deterministic `customIdentifier` values on every step. Input must be a pure\n{@link StreamlangDSL}; use {@link addDeterministicCustomIdentifiersFromIngestProcessing} for\n`ingest.processing` values that include `updated_at`."
+        ],
         "signature": [
           "(dsl: ",
           {
@@ -45,7 +47,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-        "lineNumber": 44,
+        "lineNumber": 68,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -67,8 +69,68 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 44,
+            "lineNumber": 68,
             "columnNumber": 51,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.addDeterministicCustomIdentifiersFromIngestProcessing",
+        "type": "Function",
+        "tags": [],
+        "label": "addDeterministicCustomIdentifiersFromIngestProcessing",
+        "description": [
+          "\nSame as {@link addDeterministicCustomIdentifiers} after normalizing ingest `processing`."
+        ],
+        "signature": [
+          "(processing: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSLWithUpdatedAt",
+            "text": "StreamlangDSLWithUpdatedAt"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.addDeterministicCustomIdentifiersFromIngestProcessing.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "processing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSLWithUpdatedAt",
+                "text": "StreamlangDSLWithUpdatedAt"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,7 +154,7 @@
           "; stepPath: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-        "lineNumber": 73,
+        "lineNumber": 111,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -108,7 +170,7 @@
               "StreamlangStep"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 73,
+            "lineNumber": 111,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -125,7 +187,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 73,
+            "lineNumber": 111,
             "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
@@ -142,7 +204,7 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 73,
+            "lineNumber": 111,
             "columnNumber": 73,
             "deprecated": false,
             "trackAdoption": false,
@@ -169,7 +231,7 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-        "lineNumber": 53,
+        "lineNumber": 88,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -186,7 +248,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 57,
+            "lineNumber": 92,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -203,7 +265,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 57,
+            "lineNumber": 92,
             "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
@@ -247,7 +309,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-        "lineNumber": 222,
+        "lineNumber": 268,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -269,7 +331,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 223,
+            "lineNumber": 269,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -292,7 +354,194 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 224,
+            "lineNumber": 270,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.combineConditionsAsAnd",
+        "type": "Function",
+        "tags": [],
+        "label": "combineConditionsAsAnd",
+        "description": [
+          "\nCombines two conditions with logical AND. Undefined operands are ignored."
+        ],
+        "signature": [
+          "(condA: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          " | undefined, condB: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/combine_conditions.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.combineConditionsAsAnd.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "condA",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/combine_conditions.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.combineConditionsAsAnd.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "condB",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/combine_conditions.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.combineConditionsForElseBranch",
+        "type": "Function",
+        "tags": [],
+        "label": "combineConditionsForElseBranch",
+        "description": [
+          "\nEffective `where` for steps in the else branch of a condition block: the\ninherited parent scope combined with NOT(block predicate), where\n`blockPredicate` is the condition object with `steps` / `else` stripped.\n\nShared by {@link flattenSteps} and simulation noop injection so transpilation\nand simulation stay aligned."
+        ],
+        "signature": [
+          "(parentCondition: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          " | undefined, blockPredicate: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/combine_conditions.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.combineConditionsForElseBranch.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "parentCondition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/combine_conditions.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.combineConditionsForElseBranch.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "blockPredicate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/combine_conditions.ts",
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -878,7 +1127,15 @@
         "signature": [
           "<TStepDefinition extends ",
           "StreamlangStep",
-          ">(step: TStepDefinition, options: { parentId: string | null; }) => ",
+          ">(step: TStepDefinition, options: { parentId: string | null; branch?: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangUIBranch",
+            "text": "StreamlangUIBranch"
+          },
+          " | undefined; }) => ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -888,7 +1145,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
-        "lineNumber": 44,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -904,7 +1161,7 @@
               "TStepDefinition"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
-            "lineNumber": 45,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -918,7 +1175,7 @@
             "label": "options",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
-            "lineNumber": 46,
+            "lineNumber": 54,
             "columnNumber": 12,
             "deprecated": false,
             "trackAdoption": false,
@@ -934,8 +1191,31 @@
                   "string | null"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
-                "lineNumber": 46,
+                "lineNumber": 54,
                 "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.convertStepToUIDefinition.$2.branch",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "branch",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/streamlang",
+                    "scope": "common",
+                    "docId": "kibKbnStreamlangPluginApi",
+                    "section": "def-common.StreamlangUIBranch",
+                    "text": "StreamlangUIBranch"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
+                "lineNumber": 54,
+                "columnNumber": 68,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -971,7 +1251,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
-        "lineNumber": 69,
+        "lineNumber": 83,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -994,7 +1274,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
-            "lineNumber": 70,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1011,7 +1291,7 @@
               "boolean"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
-            "lineNumber": 71,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1320,7 +1600,7 @@
           "() => { uri: string; fileMatch: string[]; schema: Record<string, unknown>; } | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/schema/get_json_schema_from_streamlang_schema.ts",
-        "lineNumber": 1092,
+        "lineNumber": 1191,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1732,7 +2012,7 @@
           ") => number"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-        "lineNumber": 251,
+        "lineNumber": 297,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1756,7 +2036,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 251,
+            "lineNumber": 297,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -1981,7 +2261,7 @@
           ">(obj?: TBlock | undefined) => obj is Extract<TBlock, { action: string; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 84,
+        "lineNumber": 85,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1997,7 +2277,7 @@
               "TBlock | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-            "lineNumber": 85,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2221,7 +2501,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 61,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2237,7 +2517,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
@@ -2829,6 +3109,66 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.streamlangDSLFromIngestProcessing",
+        "type": "Function",
+        "tags": [],
+        "label": "streamlangDSLFromIngestProcessing",
+        "description": [
+          "\nDrops ingest-only fields and returns a plain {@link StreamlangDSL} (`steps` only)."
+        ],
+        "signature": [
+          "(processing: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSLWithUpdatedAt",
+            "text": "StreamlangDSLWithUpdatedAt"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.streamlangDSLFromIngestProcessing.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "processing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSLWithUpdatedAt",
+                "text": "StreamlangDSLWithUpdatedAt"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.stripCustomIdentifiers",
         "type": "Function",
         "tags": [],
@@ -2855,7 +3195,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-        "lineNumber": 12,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2877,7 +3217,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 17,
+            "lineNumber": 21,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -3364,7 +3704,7 @@
           "\nResult of checking if changes are purely additive"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-        "lineNumber": 87,
+        "lineNumber": 125,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3379,7 +3719,7 @@
               "True if changes are purely additive (only new steps at the end, no modifications or deletions)"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 91,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3398,7 +3738,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 93,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3416,7 +3756,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
-            "lineNumber": 95,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6882,7 +7222,7 @@
           "\nNested condition block (recursive)"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6898,7 +7238,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6920,10 +7260,12 @@
               },
               " & { steps: ",
               "StreamlangStep",
-              "[]; }"
+              "[]; else?: ",
+              "StreamlangStep",
+              "[] | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6941,7 +7283,7 @@
           "\nStreamlang DSL Root Type"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 90,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6958,7 +7300,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-            "lineNumber": 94,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7365,7 +7707,7 @@
         "label": "UIAttributes",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
-        "lineNumber": 11,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7381,7 +7723,7 @@
               "string | null"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
-            "lineNumber": 15,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7394,7 +7736,30 @@
             "label": "customIdentifier",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
-            "lineNumber": 18,
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.UIAttributes.branch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "branch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangUIBranch",
+                "text": "StreamlangUIBranch"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8342,7 +8707,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
-        "lineNumber": 25,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8359,7 +8724,7 @@
           "{}"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
-        "lineNumber": 24,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8378,8 +8743,34 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 108,
+        "lineNumber": 118,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangDSLWithUpdatedAt",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamlangDSLWithUpdatedAt",
+        "description": [
+          "\nStreamlang as stored on stream `ingest.processing`: the DSL plus the server-managed\n`updated_at` cursor. Use {@link StreamlangDSL} anywhere you need the pipeline document only\n(YAML, simulation body, DeepStrict validation)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          " & { updated_at: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8675,7 +9066,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
-        "lineNumber": 21,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8723,7 +9114,26 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
-        "lineNumber": 32,
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangUIBranch",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamlangUIBranch",
+        "description": [
+          "Which branch of a parent condition block a step belongs to: main (if) vs else."
+        ],
+        "signature": [
+          "\"if\" | \"else\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11495,7 +11905,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
-        "lineNumber": 100,
+        "lineNumber": 110,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
