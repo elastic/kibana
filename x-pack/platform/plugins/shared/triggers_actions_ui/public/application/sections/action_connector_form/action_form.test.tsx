@@ -530,10 +530,11 @@ describe('action_form', () => {
       // Open the EuiSuperSelect to see options in the popover
       await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-1'));
       await screen.findByTestId('addNewActionConnectorActionGroup-1-option-default');
-      // Recovered action group option is disabled (not currently supported)
-      expect(
-        screen.getByTestId('addNewActionConnectorActionGroup-1-option-recovered')
-      ).toBeInTheDocument();
+      const recoveredOption = screen.getByTestId(
+        'addNewActionConnectorActionGroup-1-option-recovered'
+      );
+      expect(recoveredOption).toBeInTheDocument();
+      expect(recoveredOption).toBeDisabled();
     });
 
     it('renders disabled action groups for custom recovered action groups', async () => {
