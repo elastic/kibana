@@ -128,7 +128,7 @@ export const useDeprecatedRuleDetailsCallout = ({
 
   const deprecatedRule = data?.rules?.[0];
 
-  if (!deprecatedRule || isLoading) {
+  if (!deprecatedRule || deprecatedRule?.id !== rule?.id || isLoading) {
     return null;
   }
 
