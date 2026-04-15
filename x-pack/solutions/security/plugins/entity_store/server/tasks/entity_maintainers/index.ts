@@ -108,15 +108,15 @@ export function registerEntityMaintainerTask({
             description,
             createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
               run: async () => {
-                const currentStatus = taskInstance.state;
+                const status = taskInstance.state;
 
                 if (!fakeRequest) {
                   logger.error(`No fake request found, skipping run`);
-                  return { state: currentStatus };
+                  return { state: status };
                 }
 
                 const result = await executeMaintainerRun({
-                  currentStatus,
+                  status,
                   request: fakeRequest,
                   taskId: taskInstance.id,
                   taskAbortController: abortController,
@@ -132,7 +132,7 @@ export function registerEntityMaintainerTask({
                   logger,
                 });
 
-                return result ?? { state: currentStatus };
+                return result ?? { state: status };
               },
             }),
           },

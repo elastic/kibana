@@ -61,7 +61,6 @@ interface EntityMaintainersClientDeps {
 
 interface SyncExecutionContext extends EntityMaintainerTaskMethodContext {
   taskId: string;
-  currentStatus: EntityMaintainerStatus;
 }
 
 export class EntityMaintainersClient {
@@ -292,8 +291,8 @@ export class EntityMaintainersClient {
     const taskId = getTaskId(id, this.namespace);
     const task = await this.taskManager.get(taskId);
     const taskStatus = task.state as Partial<EntityMaintainerStatus>;
-    const currentStatus = createMaintainerStatus({
-      currentStatus: taskStatus,
+    const status = createMaintainerStatus({
+      status: taskStatus,
       namespace: this.namespace,
       initialState,
     });
@@ -301,14 +300,14 @@ export class EntityMaintainersClient {
     const crudClient = new CRUDClient({
       logger: this.logger,
       esClient,
-      namespace: currentStatus.metadata.namespace,
+      namespace: status.metadata.namespace,
     });
     const abortController = new AbortController();
     const logger = this.logger.get(taskId);
 
     return {
       taskId,
-      currentStatus,
+      status,
       fakeRequest: request,
       logger,
       abortController,

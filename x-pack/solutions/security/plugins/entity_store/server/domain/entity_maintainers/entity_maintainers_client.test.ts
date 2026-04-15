@@ -319,7 +319,7 @@ describe('EntityMaintainersClient', () => {
       expect(taskManagerGet).toHaveBeenCalledWith('maintainer-a:default');
       expect(createMaintainerStatus).toHaveBeenCalledWith(
         expect.objectContaining({
-          currentStatus: taskState,
+          status: taskState,
           namespace: 'default',
           initialState: {},
         })
@@ -332,7 +332,7 @@ describe('EntityMaintainersClient', () => {
       );
       expect(runEntityMaintainerTask).toHaveBeenCalledWith(
         expect.objectContaining({
-          currentStatus: expect.objectContaining({
+          status: expect.objectContaining({
             taskStatus: EntityMaintainerTaskStatus.STARTED,
           }),
           fakeRequest: request,

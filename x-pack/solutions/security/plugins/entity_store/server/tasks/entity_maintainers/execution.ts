@@ -25,7 +25,7 @@ import { wrapTaskRun } from '../../telemetry/traces';
 const ENTITY_MAINTAINER_LICENSE_CHECK_VALID = 'valid' as const satisfies LicenseCheckState;
 
 export interface ExecuteMaintainerRunParams {
-  currentStatus: Partial<EntityMaintainerStatus>;
+  status: Partial<EntityMaintainerStatus>;
   request: KibanaRequest;
   taskId: string;
   taskAbortController?: AbortController;
@@ -64,34 +64,40 @@ export async function canRunMaintainerWithLicense({
 }
 
 export function createMaintainerStatus({
-  currentStatus,
+  status,
   namespace,
   initialState,
 }: {
-  currentStatus: Partial<EntityMaintainerStatus>;
+  status: Partial<EntityMaintainerStatus>;
   namespace?: string;
   initialState: EntityMaintainerState;
 }): EntityMaintainerStatus {
-  const resolvedNamespace =
-    namespace || currentStatus?.namespace || currentStatus?.metadata?.namespace;
+const topLevelNamespace =
+    typeof status?.namespace === 'string' ? status.namespace : undefined;
+  const metadataNamespace =
+    typeof status?.metadata?.namespace === 'string'
+      ? status.metadata.namespace
+      : undefined;
+  const resolvedNamespace = namespace || topLevelNamespace || metadataNamespace;
+
   if (!resolvedNamespace) {
     throw new Error('Entity maintainer namespace is required');
   }
 
   return {
     metadata: {
-      runs: currentStatus?.metadata?.runs || 0,
-      lastSuccessTimestamp: currentStatus?.metadata?.lastSuccessTimestamp || null,
-      lastErrorTimestamp: currentStatus?.metadata?.lastErrorTimestamp || null,
+      runs: status?.metadata?.runs || 0,
+      lastSuccessTimestamp: status?.metadata?.lastSuccessTimestamp || null,
+      lastErrorTimestamp: status?.metadata?.lastErrorTimestamp || null,
       namespace: resolvedNamespace,
     },
-    state: currentStatus?.metadata?.runs ? currentStatus.state ?? initialState : initialState,
-    taskStatus: currentStatus?.taskStatus ?? EntityMaintainerTaskStatus.STARTED,
+    state: status?.metadata?.runs ? status.state ?? initialState : initialState,
+    taskStatus: status?.taskStatus ?? EntityMaintainerTaskStatus.STARTED,
   };
 }
 
 export async function executeMaintainerRun({
-  currentStatus,
+  status,
   request,
   taskId,
   taskAbortController,
@@ -107,7 +113,7 @@ export async function executeMaintainerRun({
   analytics,
   logger,
 }: ExecuteMaintainerRunParams): Promise<{ state: EntityMaintainerStatus } | null> {
-  if (currentStatus.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
+  if (status.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
     logger.debug(`Entity maintainer task is stopped, skipping run`);
     return null;
   }
@@ -122,7 +128,7 @@ export async function executeMaintainerRun({
     return null;
   }
 
-  const maintainerStatus = createMaintainerStatus({ currentStatus, namespace, initialState });
+  const maintainerStatus = createMaintainerStatus({ status, namespace, initialState });
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
   const crudClient = new CRUDClient({
     logger,
@@ -142,7 +148,7 @@ export async function executeMaintainerRun({
     },
     run: () =>
       runEntityMaintainerTask({
-        currentStatus: maintainerStatus,
+        status: maintainerStatus,
         fakeRequest: request,
         logger: taskLogger,
         setup,
@@ -171,7 +177,7 @@ export async function persistMaintainerState({
 }
 
 export async function runEntityMaintainerTask({
-  currentStatus,
+  status,
   fakeRequest,
   logger,
   setup,
@@ -182,7 +188,7 @@ export async function runEntityMaintainerTask({
   id,
   analytics,
 }: {
-  currentStatus: EntityMaintainerStatus;
+  status: EntityMaintainerStatus;
   fakeRequest: KibanaRequest;
   logger: Logger;
   setup?: EntityMaintainerTaskMethod;
@@ -193,7 +199,7 @@ export async function runEntityMaintainerTask({
   id: string;
   analytics: TelemetryReporter;
 }): Promise<{ state: EntityMaintainerStatus }> {
-  const namespace = currentStatus.metadata.namespace;
+  const namespace = status.metadata.namespace;
   const onAbort = () => {
     logger.debug(`Abort signal received, stopping Entity Maintainer`);
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
@@ -204,11 +210,11 @@ export async function runEntityMaintainerTask({
   };
   try {
     abortController.signal.addEventListener('abort', onAbort);
-    const isFirstRun = currentStatus.metadata.runs === 0;
+    const isFirstRun = status.metadata.runs === 0;
     if (isFirstRun && setup) {
       logger.debug(`First run, executing setup`);
-      currentStatus.state = await setup({
-        status: { ...currentStatus },
+      status.state = await setup({
+        status: { ...status },
         abortController,
         logger,
         fakeRequest,
@@ -222,8 +228,8 @@ export async function runEntityMaintainerTask({
       });
     }
     logger.debug(`Executing run`);
-    currentStatus.state = await run({
-      status: { ...currentStatus },
+    status.state = await run({
+      status: { ...status },
       abortController,
       logger,
       fakeRequest,
@@ -235,9 +241,9 @@ export async function runEntityMaintainerTask({
       namespace,
       type: EntityMaintainerTelemetryEventType.RUN,
     });
-    currentStatus.metadata.lastSuccessTimestamp = new Date().toISOString();
+    status.metadata.lastSuccessTimestamp = new Date().toISOString();
   } catch (err) {
-    currentStatus.metadata.lastErrorTimestamp = new Date().toISOString();
+    status.metadata.lastErrorTimestamp = new Date().toISOString();
     logger.debug(`Run failed - ${err?.message}`);
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
       id,
@@ -246,11 +252,11 @@ export async function runEntityMaintainerTask({
       errorMessage: err?.message?.substring(0, 500), // limit error message length to prevent excessively long strings in telemetry
     });
   } finally {
-    currentStatus.metadata.runs++;
+    status.metadata.runs++;
     abortController.signal.removeEventListener('abort', onAbort);
   }
 
   return {
-    state: currentStatus,
+    state: status,
   };
 }
