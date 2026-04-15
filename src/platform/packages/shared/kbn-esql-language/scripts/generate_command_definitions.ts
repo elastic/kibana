@@ -21,7 +21,7 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
 
   const esCommandDefinitions = readElasticsearchDefinitions<ElasticsearchCommandDefinition>({
     pathToElasticsearch,
-    definitionType: 'commands',
+    keywordType: 'commands',
     language: 'esql',
   });
 

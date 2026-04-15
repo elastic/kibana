@@ -557,13 +557,13 @@ export const promqlLabelMatcherDefinitions: PromQLFunctionDefinition[] = [
   // read all ES function definitions (the directory is full of JSON files) and create an array of definitions
   const ESFunctionDefinitions = readElasticsearchDefinitions({
     pathToElasticsearch,
-    definitionType: 'functions',
+    keywordType: 'functions',
     language: 'esql',
   });
 
   const ESOperatorDefinitions = readElasticsearchDefinitions({
     pathToElasticsearch,
-    definitionType: 'operators',
+    keywordType: 'operators',
     language: 'esql',
   });
 
@@ -701,7 +701,7 @@ export const inlineCastsMapping = ${castsMap} as const;
   const promqlDefinitions: PromQLESFunctionDefinition[] =
     readElasticsearchDefinitions<PromQLESFunctionDefinition>({
       pathToElasticsearch,
-      definitionType: 'functions',
+      keywordType: 'functions',
       language: 'promql',
     });
 
@@ -714,7 +714,7 @@ export const inlineCastsMapping = ${castsMap} as const;
   const allPromqlOperatorDefs: PromQLESFunctionDefinition[] =
     readElasticsearchDefinitions<PromQLESFunctionDefinition>({
       pathToElasticsearch,
-      definitionType: 'operators',
+      keywordType: 'operators',
       language: 'promql',
     });
 
