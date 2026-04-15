@@ -1,4 +1,3 @@
-`````markdown
 ---
 title: Flaky Test Runner nudge
 model: claude-opus-4-6
@@ -63,7 +62,6 @@ Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigge
 /flaky <scoutConfig or ftrConfig>:<resolved-ftr-config-path>:30
 ```
 ````
-`````
 
 Replace the example paths with the resolved paths from Step 3. Drop whichever line doesn't apply. If Scout config could not be resolved (shared `kbn-scout*` package with no traceable imports), replace the `scoutConfig` line with a note asking the author to pick a suite manually in the UI. Sample commands:
 
