@@ -53,18 +53,6 @@ export const installPrebuiltRulesTool = (
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    confirmation: {
-      askUser: 'always',
-      getConfirmation: ({ toolParams }) => {
-        const ruleIds = (toolParams as z.infer<typeof installPrebuiltRulesSchema>).rule_ids;
-        return {
-          title: 'Install prebuilt rules',
-          message: `Install ${ruleIds.length} prebuilt detection rule${
-            ruleIds.length > 1 ? 's' : ''
-          }?`,
-        };
-      },
-    },
     handler: async (params, { request, savedObjectsClient }) => {
       const { rule_ids: ruleIds } = params;
 
