@@ -8,7 +8,9 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import { matchPath, useLocation } from 'react-router-dom';
 
+import { SIEM_MIGRATIONS_MANAGE_PATH } from '../../../../../../../../common/constants';
 import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { ActiveIntegrationsCallout } from './active_integrations_callout';
@@ -21,6 +23,7 @@ export const IntegrationCardTopCallout = React.memo<{
   isAgentRequired?: boolean;
   selectedTabId: IntegrationTabId;
 }>(({ activeIntegrationsCount, isAgentRequired, selectedTabId }) => {
+  const { pathname } = useLocation();
   const { isAgentlessAvailable$ } = useOnboardingService();
   const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
 
@@ -31,6 +34,12 @@ export const IntegrationCardTopCallout = React.memo<{
     activeIntegrationsCount === 0 &&
     selectedTabId !== IntegrationTabId.endpoint;
 
+  const showMigrationsCallout = !matchPath(pathname, {
+    path: SIEM_MIGRATIONS_MANAGE_PATH,
+    exact: false,
+    strict: false,
+  });
+
   const showEndpointCallout =
     activeIntegrationsCount === 0 && selectedTabId === IntegrationTabId.endpoint;
 
@@ -38,8 +47,8 @@ export const IntegrationCardTopCallout = React.memo<{
 
   return (
     <>
-      <MigrationsCallout />
-      {showAnyLegacyCallout && <EuiSpacer size="s" />}
+      {showMigrationsCallout && <MigrationsCallout />}
+      {showMigrationsCallout && showAnyLegacyCallout && <EuiSpacer size="s" />}
       {showEndpointCallout && <EndpointCallout />}
       {showAgentlessCallout && <AgentlessAvailableCallout />}
       {showActiveCallout && (
