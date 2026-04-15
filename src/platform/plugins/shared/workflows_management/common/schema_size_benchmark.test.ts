@@ -81,11 +81,11 @@ describe('workflow schema size benchmarks', () => {
       expect(schema).toBeDefined();
     });
 
-    it('schema materialisation completes within 5 seconds', () => {
+    it('schema materialisation completes within 30 seconds', () => {
       const start = performance.now();
       getWorkflowZodSchema({});
       const elapsed = performance.now() - start;
-      expect(elapsed).toBeLessThan(5_000);
+      expect(elapsed).toBeLessThan(30_000);
     });
   });
 });

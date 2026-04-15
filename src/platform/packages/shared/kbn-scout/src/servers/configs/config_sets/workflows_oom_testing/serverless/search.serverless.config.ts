@@ -8,15 +8,12 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as workflowsUiConfig } from '../../workflows_ui/stateful/classic.stateful.config';
+import { servers as workflowsUiConfig } from '../../workflows_ui/serverless/search.serverless.config';
 
 /**
- * Scout server configuration for Workflow Schema OOM prevention tests.
+ * Scout server configuration for Workflow Schema OOM prevention tests (serverless search).
  * Constrains Kibana to 1 GB heap to catch memory regressions in the
  * workflow schema (connectors whitelist, Zod schema, YAML validation).
- *
- * Usage:
- *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet workflows_oom_testing
  */
 export const servers: ScoutServerConfig = {
   ...workflowsUiConfig,

@@ -10,7 +10,12 @@ echo "--- Workflow Schema OOM Prevention Test"
 echo "Config: $CONFIG_PATH"
 echo "Server config set: workflows_oom_testing (1 GB Kibana heap)"
 
-RUN_MODES=("--arch stateful --domain classic")
+RUN_MODES=(
+  "--arch stateful --domain classic"
+  "--arch serverless --domain security_complete"
+  "--arch serverless --domain search"
+  "--arch serverless --domain observability_complete"
+)
 
 for mode in "${RUN_MODES[@]}"; do
   echo "--- Running OOM prevention test: $mode"
