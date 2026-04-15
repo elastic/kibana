@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useBackButton } from './hooks';
 
 export const BackButton = React.memo(() => {
+  const { euiTheme } = useEuiTheme();
   const back = useBackButton();
 
   const ariaLabel = useMemo(() => {
@@ -36,10 +37,11 @@ export const BackButton = React.memo(() => {
 
   return (
     <EuiButtonIcon
-      iconType="arrowLeft"
+      iconType="sortLeft"
       color="text"
       display="empty"
-      size="s"
+      size="xs"
+      css={{ color: euiTheme.colors.textSubdued }}
       aria-label={ariaLabel}
       data-test-subj="chromeNextAppHeaderBack"
       href={back.backHref}
