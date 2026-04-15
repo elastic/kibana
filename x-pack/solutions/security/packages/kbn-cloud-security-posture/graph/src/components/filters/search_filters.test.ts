@@ -14,6 +14,7 @@ import {
   isCombinedFilter,
 } from '@kbn/es-query';
 import type {
+  CombinedFilterMeta,
   PhraseFilter,
   PhraseFilterMetaParams,
   PhrasesFilter,
@@ -374,7 +375,7 @@ describe('search_filters', () => {
 
         expect(newFilters).toHaveLength(1);
         expect(newFilters[0].meta.type).toBe('combined');
-        expect(newFilters[0].meta.relation).toBe(BooleanRelation.OR);
+        expect((newFilters[0].meta as CombinedFilterMeta).relation).toBe(BooleanRelation.OR);
         expect(newFilters[0].meta.controlledBy).toBe(CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER);
 
         const params = newFilters[0].meta.params as Filter[];
