@@ -187,6 +187,7 @@ describe('initialize edit api', () => {
         isEditable: () => true,
         discoverServices: discoverServiceMock,
         getTitle: () => 'test-title',
+        getControls: () => undefined,
       });
 
       await editApi?.onEdit();
@@ -210,6 +211,7 @@ describe('initialize edit api', () => {
         isEditable: () => true,
         discoverServices: discoverServiceMock,
         getTitle: () => 'test-title',
+        getControls: () => undefined,
       });
 
       await editApi?.onEdit();
@@ -230,6 +232,7 @@ describe('initialize edit api', () => {
         isEditable: () => true,
         discoverServices: discoverServiceMock,
         getTitle: () => 'test-title',
+        getControls: () => undefined,
       });
 
       await editApi?.onEdit();
@@ -248,6 +251,7 @@ describe('initialize edit api', () => {
         isEditable: () => true,
         discoverServices: discoverServiceMock,
         getTitle: () => 'test-title',
+        getControls: () => undefined,
       });
 
       await editApi?.onEdit();
