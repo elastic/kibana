@@ -15,6 +15,7 @@ import { runPlaywrightTestCheckCmd } from './run_playwright_test_check';
 import { discoverPlaywrightConfigsCmd } from './config_discovery';
 import { createTestTracks } from './create_test_tracks';
 import { generateCmd } from './generate';
+import { validatePlaywrightConfigsCmd } from './validate_playwright_configs';
 
 export async function run() {
   await new RunWithCommands(
@@ -25,6 +26,7 @@ export async function run() {
       startServerCmd,
       runTestsCmd,
       runPlaywrightTestCheckCmd,
+      validatePlaywrightConfigsCmd,
       discoverPlaywrightConfigsCmd,
       reportingCLI.initializeReportDatastream,
       reportingCLI.uploadEvents,

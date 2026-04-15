@@ -91,6 +91,9 @@ else
     --save
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"
+
+  echo '--- Validate Playwright configs have tests'
+  node scripts/scout validate-playwright-configs
 fi
 
 source .buildkite/scripts/steps/test/scout/upload_report_events.sh
