@@ -16,7 +16,7 @@ import type { PluginConfig } from '../../../config';
 import { ApiKeyInvalidationTaskRunner } from './task_runner';
 
 jest.mock('@kbn/task-manager-plugin/server', () => ({
-  runInvalidate: jest.fn().mockResolvedValue(3),
+  runInvalidate: jest.fn().mockResolvedValue({ totalInvalidated: 3, missingApiKeyRetries: {} }),
 }));
 
 const { runInvalidate } = jest.requireMock('@kbn/task-manager-plugin/server');
@@ -69,21 +69,23 @@ describe('ApiKeyInvalidationTaskRunner', () => {
     );
 
     expect(result).toEqual({
-      state: { runs: 1, total_invalidated: 3 },
+      state: { runs: 1, total_invalidated: 3, missing_api_key_retries: {} },
       schedule: { interval: '5m' },
     });
   });
 
   it('returns updated state on success', async () => {
-    runInvalidate.mockResolvedValue(5);
+    runInvalidate.mockResolvedValue({ totalInvalidated: 5, missingApiKeyRetries: {} });
 
     const result = await runner.run({
-      taskInstance: { state: { runs: 2, total_invalidated: 10 } } as never,
+      taskInstance: {
+        state: { runs: 2, total_invalidated: 10, missing_api_key_retries: {} },
+      } as never,
       abortController: new AbortController(),
     });
 
     expect(result).toEqual({
-      state: { runs: 3, total_invalidated: 5 },
+      state: { runs: 3, total_invalidated: 5, missing_api_key_retries: {} },
       schedule: { interval: '5m' },
     });
   });
@@ -92,7 +94,9 @@ describe('ApiKeyInvalidationTaskRunner', () => {
     runInvalidate.mockRejectedValue(new Error('invalidation failed'));
 
     const result = await runner.run({
-      taskInstance: { state: { runs: 1, total_invalidated: 0 } } as never,
+      taskInstance: {
+        state: { runs: 1, total_invalidated: 0, missing_api_key_retries: {} },
+      } as never,
       abortController: new AbortController(),
     });
 
@@ -101,7 +105,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
       expect.any(Object)
     );
     expect(result).toEqual({
-      state: { runs: 2, total_invalidated: 0 },
+      state: { runs: 2, total_invalidated: 0, missing_api_key_retries: {} },
       schedule: { interval: '5m' },
     });
   });

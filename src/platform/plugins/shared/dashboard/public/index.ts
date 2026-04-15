@@ -15,6 +15,7 @@ export type {
   DashboardApi,
   DashboardInternalApi,
   DashboardCreationOptions,
+  DashboardSaveEvent,
   DashboardInitializationState,
 } from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';

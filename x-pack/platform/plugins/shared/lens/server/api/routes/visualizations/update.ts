@@ -20,7 +20,9 @@ import {
   LENS_API_TAG,
 } from '../../../../common/constants';
 import type { LensUpdateIn, LensSavedObject } from '../../../content_management';
-import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../../types';
+
+import type { RegisterAPIRouteFn } from '../../types';
+import type { LensUpdateResponseBody } from './types';
 import {
   lensUpdateRequestBodySchema,
   lensUpdateRequestParamsSchema,
@@ -35,7 +37,6 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   const updateRoute = router.put({
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
-    enableQueryVersion: true,
     summary: 'Create or update visualization',
     description:
       'Create or update a visualization with the given id. When no visualization exists for the id, one is created.',
@@ -119,11 +120,6 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
       try {
         const { result } = await client.update(req.params.id, data, options);
-
-        if (result.item.error) {
-          throw result.item.error;
-        }
-
         const responseItem = getLensResponseItem(builder, result.item);
 
         if (createdNew) {

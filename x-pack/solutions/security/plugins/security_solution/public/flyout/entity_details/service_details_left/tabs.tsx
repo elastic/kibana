@@ -11,25 +11,36 @@ import {
   getResolutionGroupTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { EntityType } from '../../../../common/entity_analytics/types';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
+import { getGraphViewTab } from '../shared/components/left';
 
 export const useTabs = (
   name: string,
   scopeId: string,
   entityStoreEntityId?: string
-): LeftPanelTabsType =>
-  useMemo(() => {
+): LeftPanelTabsType => {
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+
+  return useMemo(() => {
     const riskTab = [
       getRiskInputTab({
         entityName: name,
         entityType: EntityType.service,
         scopeId,
+        entityId: entityStoreEntityId,
       }),
     ];
 
-    const resolutionTab = entityStoreEntityId
-      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'service' })]
+    const graphTab = entityStoreEntityId
+      ? [getGraphViewTab({ entityId: entityStoreEntityId, scopeId })]
       : [];
 
-    return [...riskTab, ...resolutionTab];
-  }, [name, scopeId, entityStoreEntityId]);
+    const resolutionTab =
+      entityStoreEntityId && hasEntityResolutionLicense
+        ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.service })]
+        : [];
+
+    return [...riskTab, ...graphTab, ...resolutionTab];
+  }, [name, scopeId, entityStoreEntityId, hasEntityResolutionLicense]);
+};

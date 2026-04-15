@@ -427,6 +427,13 @@ interface SelectionDetails {
   }>;
 }
 
+interface StepSelectionValues {
+  /** Root-level step properties (everything outside the `with` block). */
+  config: Record<string, unknown>;
+  /** Properties nested under the `with` block. */
+  input: Record<string, unknown>;
+}
+
 interface SelectionContext {
   /** The step type ID (e.g., "ai.runAgent", "one-chat.invoke") */
   stepType: string;
@@ -434,8 +441,14 @@ interface SelectionContext {
   scope: 'config' | 'input';
   /** The property key (e.g., "agent-id") */
   propertyKey: string;
+  /** Sibling values of the current step, keyed by scope. */
+  values: StepSelectionValues;
 }
 ```
+
+`context.values` gives handlers access to the current step's other property values.
+For example, if the YAML step has `with: { owner: securitySolution }`, the handler
+can read `context.values.input.owner`. Missing properties are `undefined`.
 
 #### Example Implementation
 

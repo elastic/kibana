@@ -176,7 +176,23 @@
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          "; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; applySerializedState: (state?: ",
+          {
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -322,15 +338,7 @@
           },
           "<string | undefined>; hasUnsavedChanges$: ",
           "Observable",
-          "<boolean>; resetUnsavedChanges: () => ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.MaybePromise",
-            "text": "MaybePromise"
-          },
-          "<void>; projectRoutingOverrides$: ",
+          "<boolean>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -551,7 +559,7 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/type_guards.ts",
-        "lineNumber": 32,
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -567,7 +575,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/type_guards.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
@@ -1532,7 +1540,7 @@
           "\nThis is an API provided to visualizations by the frame, which calls the publicAPI on the datasource"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-        "lineNumber": 882,
+        "lineNumber": 885,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1545,7 +1553,7 @@
             "label": "datasourceId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 886,
+            "lineNumber": 889,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1561,7 +1569,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 887,
+            "lineNumber": 890,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1577,7 +1585,7 @@
               "() => { columnId: string; fields: string[]; }[]"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 888,
+            "lineNumber": 891,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1603,7 +1611,7 @@
               " | null"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 889,
+            "lineNumber": 892,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1619,7 +1627,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-                "lineNumber": 889,
+                "lineNumber": 892,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1641,7 +1649,7 @@
               "() => Record<string, Record<string, unknown>>"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 890,
+            "lineNumber": 893,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1661,7 +1669,7 @@
               "() => string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 894,
+            "lineNumber": 897,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1681,7 +1689,7 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 898,
+            "lineNumber": 901,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1733,7 +1741,7 @@
               "[][]; }>"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 902,
+            "lineNumber": 905,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1757,7 +1765,7 @@
                   "> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-                "lineNumber": 906,
+                "lineNumber": 909,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1781,7 +1789,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-                "lineNumber": 907,
+                "lineNumber": 910,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1803,7 +1811,7 @@
               "(columnId: string) => number | null"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 918,
+            "lineNumber": 921,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1819,7 +1827,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-                "lineNumber": 923,
+                "lineNumber": 926,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1839,7 +1847,7 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 924,
+            "lineNumber": 927,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7072,24 +7080,6 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.LegendConfig.maxPixels",
-            "type": "number",
-            "tags": [],
-            "label": "maxPixels",
-            "description": [
-              "\nMaximum label width in pixels for \"list\" layout truncation"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 218,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
             "id": "def-public.LegendConfig.shouldTruncate",
             "type": "CompoundType",
             "tags": [],
@@ -7101,7 +7091,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 223,
+            "lineNumber": 218,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7126,7 +7116,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 228,
+            "lineNumber": 223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7151,7 +7141,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 233,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7174,7 +7164,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 238,
+            "lineNumber": 233,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7190,7 +7180,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 239,
+            "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7206,7 +7196,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 240,
+            "lineNumber": 235,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7538,7 +7528,7 @@
                   " | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/renderer/lens_custom_renderer_component.tsx",
-                "lineNumber": 53,
+                "lineNumber": 56,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8115,7 +8105,7 @@
         "label": "MetricVisualizationState",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-        "lineNumber": 36,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8128,7 +8118,7 @@
             "label": "layerId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8144,7 +8134,7 @@
               "\"data\" | \"annotations\" | \"referenceLine\" | \"metricTrendline\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8160,7 +8150,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8176,7 +8166,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8192,7 +8182,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 41,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8208,7 +8198,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8224,7 +8214,7 @@
               "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8240,7 +8230,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8260,7 +8250,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -8286,7 +8276,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8309,7 +8299,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8326,7 +8316,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 54,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8342,7 +8332,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8358,7 +8348,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 56,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8378,19 +8368,11 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 57,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
-              },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
@@ -8424,7 +8406,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8440,7 +8422,7 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8456,7 +8438,7 @@
               "\"right\" | \"left\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8479,7 +8461,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8488,17 +8470,22 @@
             "parentPluginId": "lens",
             "id": "def-public.MetricVisualizationState.titleWeight",
             "type": "CompoundType",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "titleWeight",
-            "description": [],
+            "description": [
+              "\nlegacy state property"
+            ],
             "signature": [
-              "TitleFontWeightString | undefined"
+              "\"bold\" | \"normal\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 64,
             "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": []
           },
           {
             "parentPluginId": "lens",
@@ -8508,10 +8495,10 @@
             "label": "primaryPosition",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\" | undefined"
+              "\"top\" | \"bottom\" | \"middle\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8527,7 +8514,7 @@
               "\"after\" | \"before\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8543,7 +8530,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8559,7 +8546,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8590,7 +8577,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8606,7 +8593,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 72,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8622,7 +8609,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8645,7 +8632,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8661,7 +8648,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8677,7 +8664,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 77,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8693,7 +8680,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 78,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8709,7 +8696,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8725,7 +8712,7 @@
               "\"value\" | \"background\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
-            "lineNumber": 81,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8741,7 +8728,7 @@
         "label": "OperationMetadata",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-        "lineNumber": 283,
+        "lineNumber": 284,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8757,7 +8744,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 284,
+            "lineNumber": 285,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8780,7 +8767,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 286,
+            "lineNumber": 287,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8793,7 +8780,7 @@
             "label": "isBucketed",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 289,
+            "lineNumber": 290,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8811,7 +8798,7 @@
               "\"interval\" | \"ratio\" | \"ordinal\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 290,
+            "lineNumber": 291,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8827,7 +8814,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 300,
+            "lineNumber": 301,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8843,7 +8830,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 302,
+            "lineNumber": 303,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9086,7 +9073,7 @@
         "label": "ReferenceLineLayerArgs",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 372,
+        "lineNumber": 367,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9102,7 +9089,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 373,
+            "lineNumber": 368,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9118,7 +9105,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 374,
+            "lineNumber": 369,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9134,7 +9121,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 375,
+            "lineNumber": 370,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9157,7 +9144,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 376,
+            "lineNumber": 371,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9180,7 +9167,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 377,
+            "lineNumber": 372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9599,7 +9586,7 @@
           "<T, V>"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-        "lineNumber": 1148,
+        "lineNumber": 1151,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9612,7 +9599,7 @@
             "label": "visualizationId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1149,
+            "lineNumber": 1152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9628,7 +9615,7 @@
               "V | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1150,
+            "lineNumber": 1153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9644,7 +9631,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1151,
+            "lineNumber": 1154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9657,7 +9644,7 @@
             "label": "columns",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1152,
+            "lineNumber": 1155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9670,7 +9657,7 @@
             "label": "score",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1153,
+            "lineNumber": 1156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9683,7 +9670,7 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1154,
+            "lineNumber": 1157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9699,7 +9686,7 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1155,
+            "lineNumber": 1158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9723,7 +9710,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1156,
+            "lineNumber": 1159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9739,7 +9726,7 @@
               "string | React.ComponentType"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1157,
+            "lineNumber": 1160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9755,7 +9742,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1158,
+            "lineNumber": 1161,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9771,7 +9758,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1160,
+            "lineNumber": 1163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9787,7 +9774,7 @@
               "\"initial\" | \"extended\" | \"layers\" | \"unchanged\" | \"reduced\" | \"reorder\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1161,
+            "lineNumber": 1164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9803,7 +9790,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1162,
+            "lineNumber": 1165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9831,7 +9818,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-        "lineNumber": 1165,
+        "lineNumber": 1168,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9855,7 +9842,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1174,
+            "lineNumber": 1177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9873,7 +9860,7 @@
               "T | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1178,
+            "lineNumber": 1181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9901,7 +9888,7 @@
               "; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1182,
+            "lineNumber": 1185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9917,7 +9904,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1188,
+            "lineNumber": 1191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9935,7 +9922,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1189,
+            "lineNumber": 1192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9953,7 +9940,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1193,
+            "lineNumber": 1196,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9977,7 +9964,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1197,
+            "lineNumber": 1200,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9993,7 +9980,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1198,
+            "lineNumber": 1201,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10009,7 +9996,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1199,
+            "lineNumber": 1202,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10034,7 +10021,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1200,
+            "lineNumber": 1203,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10329,7 +10316,7 @@
         "label": "UserMessage",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-        "lineNumber": 353,
+        "lineNumber": 354,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10342,7 +10329,7 @@
             "label": "uniqueId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 354,
+            "lineNumber": 355,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10358,7 +10345,7 @@
               "\"info\" | \"error\" | \"warning\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 355,
+            "lineNumber": 356,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10374,7 +10361,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 356,
+            "lineNumber": 357,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10387,7 +10374,7 @@
             "label": "shortMessage",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 357,
+            "lineNumber": 358,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10403,7 +10390,7 @@
               "React.ReactNode | ((closePopover?: (() => void) | undefined) => React.ReactNode)"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 358,
+            "lineNumber": 359,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10416,7 +10403,7 @@
             "label": "fixableInEditor",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 359,
+            "lineNumber": 360,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10432,7 +10419,7 @@
               "UserMessageDisplayLocation[]"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 360,
+            "lineNumber": 361,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10448,7 +10435,7 @@
         "label": "UserMessage",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-        "lineNumber": 653,
+        "lineNumber": 656,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10461,7 +10448,7 @@
             "label": "uniqueId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 654,
+            "lineNumber": 657,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10477,7 +10464,7 @@
               "\"info\" | \"error\" | \"warning\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 655,
+            "lineNumber": 658,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10493,7 +10480,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 656,
+            "lineNumber": 659,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10506,7 +10493,7 @@
             "label": "shortMessage",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 657,
+            "lineNumber": 660,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10522,7 +10509,7 @@
               "React.ReactNode | ((closePopover?: (() => void) | undefined) => React.ReactNode)"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 658,
+            "lineNumber": 661,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10535,7 +10522,7 @@
             "label": "fixableInEditor",
             "description": [],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 659,
+            "lineNumber": 662,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10551,7 +10538,7 @@
               "UserMessageDisplayLocation[]"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 660,
+            "lineNumber": 663,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14788,7 +14775,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-        "lineNumber": 1207,
+        "lineNumber": 1210,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -14803,7 +14790,7 @@
               "\nThe score of a suggestion should indicate how valuable the suggestion is. It is used\nto rank multiple suggestions of multiple visualizations. The number should be between 0 and 1"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1214,
+            "lineNumber": 1217,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14821,7 +14808,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1219,
+            "lineNumber": 1222,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14839,7 +14826,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1225,
+            "lineNumber": 1228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14854,7 +14841,7 @@
               "\nDescriptive title of the suggestion. Should be as short as possible. This title is shown if\nthe suggestion is advertised to the user and will also show either the `previewExpression` or\nthe `previewIcon`"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1229,
+            "lineNumber": 1232,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14872,7 +14859,7 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1235,
+            "lineNumber": 1238,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14890,7 +14877,7 @@
               "string | React.ComponentType"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 1239,
+            "lineNumber": 1242,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14923,7 +14910,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 244,
+        "lineNumber": 239,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -14946,7 +14933,7 @@
               " & { type: \"legendConfig\"; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 245,
+            "lineNumber": 240,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14969,7 +14956,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 246,
+            "lineNumber": 241,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -14985,7 +14972,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 247,
+            "lineNumber": 242,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15001,7 +14988,7 @@
               "\"show\" | \"hide\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 248,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15018,7 +15005,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 249,
+            "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15041,7 +15028,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 250,
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15057,7 +15044,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 251,
+            "lineNumber": 246,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15073,7 +15060,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 252,
+            "lineNumber": 247,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15089,7 +15076,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 253,
+            "lineNumber": 248,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15112,7 +15099,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 254,
+            "lineNumber": 249,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15135,7 +15122,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 255,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15151,7 +15138,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 256,
+            "lineNumber": 251,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15167,7 +15154,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 257,
+            "lineNumber": 252,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15183,7 +15170,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 258,
+            "lineNumber": 253,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15199,7 +15186,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 259,
+            "lineNumber": 254,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15223,7 +15210,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 260,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15247,7 +15234,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 261,
+            "lineNumber": 256,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15263,7 +15250,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 262,
+            "lineNumber": 257,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15279,7 +15266,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 263,
+            "lineNumber": 258,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15292,7 +15279,7 @@
             "label": "showTooltip",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 264,
+            "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -16670,7 +16657,7 @@
           " & { type: \"axisExtentConfig\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 448,
+        "lineNumber": 443,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -16825,7 +16812,7 @@
           "WithLayerId"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 422,
+        "lineNumber": 417,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -16849,7 +16836,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-        "lineNumber": 271,
+        "lineNumber": 272,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -16914,7 +16901,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/renderer/lens_custom_renderer_component.tsx",
-        "lineNumber": 178,
+        "lineNumber": 190,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -17179,25 +17166,8 @@
           " & { type: \"legendConfig\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 447,
+        "lineNumber": 442,
         "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-public.LENS_EMBEDDABLE_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "LENS_EMBEDDABLE_TYPE",
-        "description": [],
-        "signature": [
-          "\"lens\""
-        ],
-        "path": "x-pack/platform/plugins/shared/lens/common/constants.ts",
-        "lineNumber": 20,
-        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -17322,7 +17292,23 @@
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          "; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; applySerializedState: (state?: ",
+          {
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -17468,15 +17454,7 @@
           },
           "<string | undefined>; hasUnsavedChanges$: ",
           "Observable",
-          "<boolean>; resetUnsavedChanges: () => ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.MaybePromise",
-            "text": "MaybePromise"
-          },
-          "<void>; projectRoutingOverrides$: ",
+          "<boolean>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -19194,7 +19172,23 @@
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          "; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; applySerializedState: (state?: ",
+          {
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -19340,15 +19334,7 @@
           },
           "<string | undefined>; hasUnsavedChanges$: ",
           "Observable",
-          "<boolean>; resetUnsavedChanges: () => ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.MaybePromise",
-            "text": "MaybePromise"
-          },
-          "<void>; projectRoutingOverrides$: ",
+          "<boolean>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -22262,7 +22248,7 @@
           "WithLayerId"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 427,
+        "lineNumber": 422,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -23476,7 +23462,7 @@
           "\"show\" | \"hide\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-        "lineNumber": 232,
+        "lineNumber": 233,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -24229,7 +24215,7 @@
           " | Readonly<{ version?: 2 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ version?: 1 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ description?: string | null | undefined; state?: any; visualizationType?: string | null | undefined; uiStateJSON?: string | undefined; visState?: string | undefined; savedSearchRefName?: string | undefined; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>>"
         ],
         "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/create.ts",
-        "lineNumber": 35,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -24341,7 +24327,7 @@
           "<string | undefined>; }>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/create.ts",
-        "lineNumber": 42,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -25140,7 +25126,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-        "lineNumber": 226,
+        "lineNumber": 227,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25156,7 +25142,7 @@
               "PersistableFilterMeta"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
-            "lineNumber": 227,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -25178,7 +25164,7 @@
           "\"___records___\""
         ],
         "path": "x-pack/platform/plugins/shared/lens/common/constants.ts",
-        "lineNumber": 64,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

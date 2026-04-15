@@ -28,7 +28,7 @@ interface AggRowProps {
 }
 
 export function AggRow(props: AggRowProps) {
-  let iconType = 'eyeClosed';
+  let iconType = 'eyeSlash';
   let iconColor = 'subdued';
   const lastSibling = last(props.siblings) as Metric;
 

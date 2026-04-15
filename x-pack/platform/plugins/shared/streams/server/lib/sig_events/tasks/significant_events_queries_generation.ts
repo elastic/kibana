@@ -15,7 +15,7 @@ import {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorIdAndCheckAllowlist } from '../../../routes/utils/resolve_connector_id_and_check_allowlist';
+import { resolveConnectorForFeature } from '../../../routes/utils/resolve_connector_for_feature';
 import type { TaskContext } from '../../tasks/task_definitions';
 import type { TaskParams } from '../../tasks/types';
 import { PromptsConfigService } from '../saved_objects/prompts_config_service';
@@ -28,6 +28,7 @@ export interface SignificantEventsQueriesGenerationTaskParams {
   end: number;
   sampleDocsSize?: number;
   streamName: string;
+  connectorId?: string;
 }
 
 export const SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE =
@@ -47,8 +48,16 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
-              const { start, end, sampleDocsSize, streamName, _task } = runContext.taskInstance
+              const {
+                start,
+                end,
+                sampleDocsSize,
+                streamName,
+                connectorId: connectorIdOverride,
+                _task,
+              } = runContext.taskInstance
                 .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
               const {
@@ -56,24 +65,23 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 streamsClient,
                 inferenceClient,
                 soClient,
-                featureClient,
+                getFeatureClient,
                 scopedClusterClient,
-                modelSettingsClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
+              const featureClient = await getFeatureClient();
+
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
-              const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorIdAndCheckAllowlist({
-                connectorId: settings.connectorIdRuleGeneration,
-                uiSettingsClient,
-                logger: taskLogger,
-                featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                request: runContext.fakeRequest,
-              });
+              const connectorId =
+                connectorIdOverride ??
+                (await resolveConnectorForFeature({
+                  searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                  featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+                  featureName: 'query generation',
+                  request: fakeRequest,
+                }));
               taskLogger.debug(`Using connector ${connectorId} for rule generation`);
 
               try {
@@ -92,8 +100,6 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   {
                     definition: stream,
                     connectorId,
-                    start,
-                    end,
                     systemPrompt: significantEventsPromptOverride,
                   },
                   {
@@ -117,7 +123,11 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 await taskClient.complete<
                   SignificantEventsQueriesGenerationTaskParams,
                   SignificantEventsQueriesGenerationResult
-                >(_task, { start, end, sampleDocsSize, streamName }, result);
+                >(
+                  _task,
+                  { start, end, sampleDocsSize, streamName, connectorId: connectorIdOverride },
+                  result
+                );
               } catch (error) {
                 if (isDefinitionNotFoundError(error)) {
                   taskContext.logger.debug(
@@ -126,12 +136,16 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   return getDeleteTaskRunResult();
                 }
 
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
-
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : parseError(error).message;
+                // Get connector info for error enrichment, preserving the original error if lookup fails
+                let errorMessage = parseError(error).message;
+                try {
+                  const connector = await inferenceClient.getConnectorById(connectorId);
+                  if (isInferenceProviderError(error)) {
+                    errorMessage = formatInferenceProviderError(error, connector);
+                  }
+                } catch {
+                  // Connector lookup failed — use the original error message
+                }
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -146,7 +160,13 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
                   _task,
-                  { start, end, sampleDocsSize, streamName },
+                  {
+                    start,
+                    end,
+                    sampleDocsSize,
+                    streamName,
+                    connectorId: connectorIdOverride,
+                  },
                   errorMessage
                 );
 

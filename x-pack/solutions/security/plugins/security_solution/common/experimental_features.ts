@@ -117,15 +117,9 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables gap reason detection and display in the gaps table.
-   * When off, gap_reason is not calculated or passed to rule metrics/telemetry.
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
   gapReasonDetectionEnabled: false,
-
-  /**
-   * Enables the redesigned execution results table on the rule details page
-   */
-  newExecutionResultsTableEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -252,6 +246,18 @@ export const allowedExperimentalValues = Object.freeze({
    * Uses entity store v2 for entity analytics skill
    */
   entityAnalyticsEntityStoreV2: false,
+
+  /**
+   * Enables the deprecated prebuilt rules UI
+   * Release: 9.4
+   */
+  prebuiltRulesDeprecationUIEnabled: false,
+
+  /**
+   * Classic chrome only: refreshed Security side nav (Launchpad, Manage footer; unified row + panel behavior).
+   * Release: 9.4
+   */
+  securityClassicNavUpdate: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { PieStateESQL, PieStateNoESQL } from './pie';
 import { pieStateSchema } from './pie';
 
@@ -15,9 +16,9 @@ describe('Pie Schema', () => {
     describe('Non-ES|QL Schema', () => {
       const basePieConfig = {
         type: 'pie',
-        dataset: {
-          type: 'dataView',
-          id: 'test-data-view',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+          ref_id: 'test-data-view',
         },
         ignore_global_filters: false,
         sampling: 1,
@@ -37,7 +38,7 @@ describe('Pie Schema', () => {
         const validated = pieStateSchema.validate(input);
         expect(validated.type).toBe('pie');
         expect(validated.metrics).toHaveLength(1);
-        expect(validated.metrics[0].operation).toBe('count');
+        expect(validated.metrics[0]).toHaveProperty('operation', 'count');
       });
 
       it('validates configuration with metrics and group_by', () => {
@@ -701,7 +702,7 @@ describe('Pie Schema', () => {
     describe('ES|QL Schema', () => {
       const baseESQLPieConfig = {
         type: 'pie',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | STATS count() BY category',
         },
@@ -713,15 +714,14 @@ describe('Pie Schema', () => {
           ...baseESQLPieConfig,
           metrics: [
             {
-              operation: 'value',
               column: 'count',
             },
           ],
         };
 
         const validated = pieStateSchema.validate(input);
-        expect(validated.dataset.type).toBe('esql');
-        expect(validated.metrics[0].operation).toBe('value');
+        expect(validated.data_source.type).toBe('esql');
+        expect(validated.metrics[0]).toHaveProperty('column', 'count');
       });
 
       it('validates ES|QL configuration with group_by', () => {
@@ -729,13 +729,11 @@ describe('Pie Schema', () => {
           ...baseESQLPieConfig,
           metrics: [
             {
-              operation: 'value',
               column: 'count',
             },
           ],
           group_by: [
             {
-              operation: 'value',
               column: 'category',
             },
           ],
@@ -751,11 +749,9 @@ describe('Pie Schema', () => {
           ...baseESQLPieConfig,
           metrics: [
             {
-              operation: 'value',
               column: 'count',
             },
             {
-              operation: 'value',
               column: 'sum_sales',
             },
           ],
@@ -771,7 +767,6 @@ describe('Pie Schema', () => {
           title: 'Sales Chart',
           metrics: [
             {
-              operation: 'value',
               column: 'sum_sales',
               color: {
                 type: 'static',
@@ -781,7 +776,6 @@ describe('Pie Schema', () => {
           ],
           group_by: [
             {
-              operation: 'value',
               column: 'category',
               color: {
                 mode: 'categorical',

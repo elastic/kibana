@@ -28,6 +28,7 @@ export const toFormState = (response: NotificationPolicyResponse): NotificationP
   return {
     name: response.name,
     description: response.description,
+    tags: response.tags ?? [],
     matcher: response.matcher ?? '',
     groupingMode,
     groupBy: response.groupBy ?? [],
@@ -44,6 +45,7 @@ export const toCreatePayload = (
     name: state.name,
     description: state.description,
     groupingMode: state.groupingMode,
+    ...(state.tags.length > 0 ? { tags: state.tags } : {}),
     ...(state.matcher ? { matcher: state.matcher } : {}),
     ...(state.groupingMode === 'per_field' && state.groupBy.length > 0
       ? { groupBy: state.groupBy }
@@ -62,6 +64,7 @@ export const toUpdatePayload = (
     name: state.name,
     description: state.description,
     groupingMode: state.groupingMode,
+    tags: state.tags.length > 0 ? state.tags : null,
     matcher: state.matcher || null,
     groupBy: state.groupingMode === 'per_field' && state.groupBy.length > 0 ? state.groupBy : null,
     throttle: buildThrottle(state),

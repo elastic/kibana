@@ -15,6 +15,24 @@ import { DEFAULT_FORM_STATE } from './constants';
 import { NotificationPolicyForm } from './notification_policy_form';
 import type { NotificationPolicyFormState } from './types';
 
+const mockGetUrlForApp = jest.fn(
+  (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
+);
+let mockWorkflowsEnabled = true;
+
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: (token: unknown) => {
+    if (token === 'application') {
+      return { getUrlForApp: mockGetUrlForApp };
+    }
+    if (token === 'uiSettings') {
+      return { get: () => mockWorkflowsEnabled };
+    }
+    return {};
+  },
+  CoreStart: (key: string) => key,
+}));
+
 jest.mock('./components/matcher_input', () => ({
   MatcherInput: (props: {
     value: string;
@@ -31,6 +49,10 @@ jest.mock('./components/matcher_input', () => ({
 
 jest.mock('../../../hooks/use_fetch_data_fields', () => ({
   useFetchDataFields: () => ({ data: undefined, isLoading: false }),
+}));
+
+jest.mock('../../../hooks/use_fetch_tags', () => ({
+  useFetchTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
@@ -68,6 +90,16 @@ const TEST_SUBJ = {
 } as const;
 
 describe('NotificationPolicyForm', () => {
+  beforeEach(() => {
+    mockWorkflowsEnabled = true;
+    jest.clearAllMocks();
+  });
+
+  it('renders tags input', () => {
+    renderForm();
+    expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
+  });
+
   it('shows required errors for name on blur', async () => {
     const user = userEvent.setup();
     renderForm();
@@ -198,5 +230,26 @@ describe('NotificationPolicyForm', () => {
     });
 
     expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toHaveValue(5);
+  });
+
+  it('renders create workflow link when workflows are enabled', () => {
+    renderForm();
+
+    expect(screen.getByTestId('createWorkflowLink')).toBeInTheDocument();
+    expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute(
+      'href',
+      '/app/workflows/create'
+    );
+    expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders warning callout when workflows are disabled', () => {
+    mockWorkflowsEnabled = false;
+    renderForm();
+
+    expect(screen.getByTestId('workflowsDisabledCallout')).toBeInTheDocument();
+    expect(screen.getByText('Workflows are not enabled')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowsDisabledSettingsLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('destinationsInput')).not.toBeInTheDocument();
   });
 });

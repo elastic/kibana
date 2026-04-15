@@ -11,13 +11,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiSwitch,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { labels } from '../../../utils/i18n';
 
 export interface LibraryToggleRowProps {
   id: string;
@@ -27,6 +28,7 @@ export interface LibraryToggleRowProps {
   onToggle: (isActive: boolean) => void;
   isMutating: boolean;
   isDisabled?: boolean;
+  isReadOnly?: boolean; // `readonly` is currently used as a soft indicator that a skill, plugin or tool was built by Elastic.
   disabledBadgeLabel?: string;
   disabledTooltipTitle?: string;
   disabledTooltipBody?: string;
@@ -34,7 +36,7 @@ export interface LibraryToggleRowProps {
 
 const EUI_TEXT_STYLES = css`
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 `;
@@ -46,6 +48,7 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
   onToggle,
   isMutating,
   isDisabled = false,
+  isReadOnly = false,
   disabledBadgeLabel,
   disabledTooltipTitle,
   disabledTooltipBody,
@@ -53,26 +56,32 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-      <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+      <EuiFlexItem
+        css={css`
+          gap: ${euiTheme.size.xs};
+        `}
+      >
+        <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiText
-              size="s"
+            <EuiTitle
+              size="xs"
               css={css`
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}
             >
-              {name}
-            </EuiText>
+              <h4>{name}</h4>
+            </EuiTitle>
           </EuiFlexItem>
-          {isDisabled && (
+          {isReadOnly && (
             <EuiFlexItem grow={false}>
-              <EuiIcon type="logoElastic" size="m" aria-hidden={true} />
+              <EuiText size="xs" color="subdued">
+                {labels.byAuthor('Elastic')}
+              </EuiText>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        <EuiText size="xs" color="subdued" css={EUI_TEXT_STYLES}>
+        <EuiText size="s" color="subdued" css={EUI_TEXT_STYLES}>
           {description}
         </EuiText>
       </EuiFlexItem>
@@ -104,7 +113,6 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
             checked={isActive}
             onChange={(e) => onToggle(e.target.checked)}
             disabled={isMutating}
-            compressed
           />
         )}
       </EuiFlexItem>

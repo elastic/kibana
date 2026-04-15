@@ -60,6 +60,20 @@ import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
 /** The type identifier for dashboard APIs. */
 export const DASHBOARD_API_TYPE = 'dashboard';
 
+/**
+ * Interface for APIs that publish save events.
+ */
+export interface DashboardSaveEvent {
+  previousDashboardId?: string;
+  dashboardId?: string;
+  dashboardState: DashboardState;
+}
+
+export interface PublishesOnSave {
+  /** Observable that emits when a save operation completes successfully. */
+  onSave$: Observable<DashboardSaveEvent>;
+}
+
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
 export type DashboardInitializationState = Partial<
@@ -162,7 +176,8 @@ export type DashboardApi = CanExpandPanels &
   PublishesWritableViewMode &
   PublishesEditablePauseFetch &
   TrackContentfulRender &
-  TracksOverlays & {
+  TracksOverlays &
+  PublishesOnSave & {
     asyncResetToLastSavedState: () => Promise<void>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;

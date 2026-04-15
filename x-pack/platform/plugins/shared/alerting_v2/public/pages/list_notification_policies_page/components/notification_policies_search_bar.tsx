@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { EuiComboBox, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { useFetchTags } from '../../../hooks/use_fetch_tags';
 
 const SEARCH_DEBOUNCE_MS = 300;
+const TAG_SEARCH_DEBOUNCE_MS = 200;
 
 const ENABLED_OPTIONS = [
   {
@@ -37,14 +40,26 @@ interface NotificationPoliciesSearchBarProps {
   onSearchChange: (search: string) => void;
   enabled: string;
   onEnabledChange: (enabled: string) => void;
+  selectedTags: string[];
+  onTagsChange: (tags: string[]) => void;
 }
 
 export const NotificationPoliciesSearchBar = ({
   onSearchChange,
   enabled,
   onEnabledChange,
+  selectedTags,
+  onTagsChange,
 }: NotificationPoliciesSearchBarProps) => {
   const [searchInput, setSearchInput] = useState('');
+  const [tagSearchQuery, setTagSearchQuery] = useState('');
+  const debouncedTagQuery = useDebouncedValue(tagSearchQuery, TAG_SEARCH_DEBOUNCE_MS);
+
+  const { data: availableTags, isLoading: isLoadingTags } = useFetchTags({
+    search: debouncedTagQuery,
+  });
+
+  const tagOptions = (availableTags ?? []).map((tag) => ({ label: tag }));
 
   useDebounce(
     () => {
@@ -66,6 +81,28 @@ export const NotificationPoliciesSearchBar = ({
           )}
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={{ minWidth: 200 }}>
+        <EuiComboBox
+          compressed
+          async
+          isLoading={isLoadingTags}
+          data-test-subj="tagsFilter"
+          placeholder={i18n.translate(
+            'xpack.alertingV2.notificationPoliciesSearchBar.tagsPlaceholder',
+            { defaultMessage: 'Filter by tags' }
+          )}
+          aria-label={i18n.translate(
+            'xpack.alertingV2.notificationPoliciesSearchBar.tagsAriaLabel',
+            { defaultMessage: 'Filter by tags' }
+          )}
+          selectedOptions={selectedTags.map((tag) => ({ label: tag }))}
+          options={tagOptions}
+          onSearchChange={setTagSearchQuery}
+          onChange={(options) => {
+            onTagsChange(options.map((o) => o.label));
+          }}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

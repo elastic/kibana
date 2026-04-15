@@ -27,7 +27,7 @@ enum MatcherField {
   EpisodeStatus = 'episode_status',
   RuleName = 'rule.name',
   RuleDescription = 'rule.description',
-  RuleLabels = 'rule.labels',
+  RuleTags = 'rule.tags',
   RuleId = 'rule.id',
   EpisodeId = 'episode_id',
   GroupHash = 'group_hash',
@@ -93,8 +93,8 @@ export class MatcherSuggestionsService {
       case MatcherField.EpisodeStatus:
         return this.getStaticSuggestions(EPISODE_STATUS_VALUES, query);
 
-      case MatcherField.RuleLabels:
-        return this.getRuleLabelsSuggestions(query);
+      case MatcherField.RuleTags:
+        return this.getRuleTagsSuggestions(query);
 
       case MatcherField.RuleId:
         return this.getRuleIdSuggestions(query);
@@ -172,29 +172,29 @@ export class MatcherSuggestionsService {
       .filter((v): v is string => typeof v === 'string' && v.length > 0);
   }
 
-  private async getRuleLabelsSuggestions(query: string): Promise<string[]> {
+  private async getRuleTagsSuggestions(query: string): Promise<string[]> {
     const result = await this.ruleSoClient.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: 100,
-      fields: ['metadata.labels'],
+      fields: ['metadata.tags'],
       sortField: 'updatedAt',
       sortOrder: 'desc',
     });
 
-    const allLabels = new Set<string>();
+    const allTags = new Set<string>();
     for (const so of result.saved_objects) {
-      const labels = so.attributes.metadata?.labels;
-      if (Array.isArray(labels)) {
-        for (const label of labels) {
-          allLabels.add(label);
+      const tags = so.attributes.metadata?.tags;
+      if (Array.isArray(tags)) {
+        for (const tag of tags) {
+          allTags.add(tag);
         }
       }
     }
 
     const lowerQuery = query.toLowerCase();
-    return Array.from(allLabels)
-      .filter((label) => !lowerQuery || label.toLowerCase().startsWith(lowerQuery))
+    return Array.from(allTags)
+      .filter((tag) => !lowerQuery || tag.toLowerCase().startsWith(lowerQuery))
       .sort()
       .slice(0, MAX_SUGGESTIONS);
   }

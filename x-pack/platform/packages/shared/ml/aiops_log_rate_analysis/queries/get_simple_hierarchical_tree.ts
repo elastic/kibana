@@ -8,9 +8,14 @@
 import type { ItemSet, SignificantItem } from '@kbn/ml-agg-utils';
 
 import type { SimpleHierarchicalTreeNode } from '../types';
-
-import { getValueCounts } from './get_value_counts';
-import { getValuesDescending } from './get_values_descending';
+import {
+  buildSimpleHierarchicalTreeIndexes,
+  type SimpleHierarchicalTreeBuildIndexes,
+} from './build_simple_hierarchical_tree_indexes';
+import { getFieldValuePairKey } from './get_field_value_pair_key';
+import { getItemSetIndexesIntersection } from './get_item_set_indexes_intersection';
+import { getValueCountsForField } from './get_value_counts_for_field';
+import { getValuesDescendingFromValueCounts } from './get_values_descending';
 
 function NewNodeFactory(name: string): SimpleHierarchicalTreeNode {
   const children: SimpleHierarchicalTreeNode[] = [];
@@ -47,41 +52,48 @@ function NewNodeFactory(name: string): SimpleHierarchicalTreeNode {
  * @returns
  */
 function dfDepthFirstSearch(
-  significantItems: SignificantItem[],
+  itemSets: ItemSet[],
+  treeBuildIndexes: SimpleHierarchicalTreeBuildIndexes,
   fields: string[],
   displayParent: SimpleHierarchicalTreeNode,
   parentDocCount: number,
   parentLabel: string,
-  field: string,
+  fieldIndex: number,
   value: string,
-  iss: ItemSet[],
+  itemSetIndexesSubset: number[],
   collapseRedundant: boolean,
   displayOther: boolean
 ) {
-  const filteredItemSets = iss.filter((is) => {
-    for (const { fieldName: key, fieldValue: setValue } of is.set) {
-      if (key === field && setValue === value) {
-        return true;
-      }
-    }
-    return false;
-  });
-
-  if (filteredItemSets.length === 0) {
+  const field = fields[fieldIndex];
+  const pairKey = getFieldValuePairKey(field, value);
+  const itemSetIndexes = treeBuildIndexes.itemSetIndexesByPairKey.get(pairKey);
+  if (itemSetIndexes === undefined) {
     return 0;
   }
 
-  const docCount = Math.max(...filteredItemSets.map((fis) => fis.doc_count));
-  const pValue = Math.max(...filteredItemSets.map((fis) => fis.maxPValue));
-  const totalDocCount = Math.max(...filteredItemSets.map((fis) => fis.total_doc_count));
+  const filteredItemSetIndexes = getItemSetIndexesIntersection(
+    itemSetIndexesSubset,
+    itemSetIndexes
+  );
+  if (filteredItemSetIndexes.length === 0) {
+    return 0;
+  }
+
+  let docCount = 0;
+  let pValue = 0;
+  let totalDocCount = 0;
+  for (const itemSetIndex of filteredItemSetIndexes) {
+    const itemSet = itemSets[itemSetIndex];
+    docCount = Math.max(docCount, itemSet.doc_count);
+    pValue = Math.max(pValue, itemSet.maxPValue ?? 0);
+    totalDocCount = Math.max(totalDocCount, itemSet.total_doc_count);
+  }
 
   let label = `${parentLabel} ${value}`;
 
   let displayNode: SimpleHierarchicalTreeNode;
 
-  const significantItem = significantItems.find(
-    (d) => d.fieldName === field && d.fieldValue === value
-  );
+  const significantItem = treeBuildIndexes.significantItemByPairKey.get(pairKey);
   if (!significantItem) {
     return 0;
   }
@@ -118,8 +130,9 @@ function dfDepthFirstSearch(
   }
 
   let nextField: string;
+  let nextFieldValueCounts: Record<string, number> = {};
+  let nextFieldIndex = fieldIndex + 1;
   while (true) {
-    const nextFieldIndex = fields.indexOf(field) + 1;
     if (nextFieldIndex >= fields.length) {
       return docCount;
     }
@@ -127,10 +140,16 @@ function dfDepthFirstSearch(
 
     // TODO - add handling of creating * as next level of tree
 
-    if (Object.keys(getValueCounts(filteredItemSets, nextField)).length > 0) {
+    nextFieldValueCounts = getValueCountsForField(
+      itemSets,
+      filteredItemSetIndexes,
+      nextField,
+      treeBuildIndexes
+    );
+    if (Object.keys(nextFieldValueCounts).length > 0) {
       break;
     } else {
-      field = nextField;
+      nextFieldIndex += 1;
       if (collapseRedundant) {
         // add dummy node label
         displayNode.name += ` '*'`;
@@ -146,16 +165,17 @@ function dfDepthFirstSearch(
   }
 
   let subCount = 0;
-  for (const nextValue of getValuesDescending(filteredItemSets, nextField)) {
+  for (const nextValue of getValuesDescendingFromValueCounts(nextFieldValueCounts)) {
     subCount += dfDepthFirstSearch(
-      significantItems,
+      itemSets,
+      treeBuildIndexes,
       fields,
       displayNode,
       docCount,
       label,
-      nextField,
+      nextFieldIndex,
       nextValue,
-      filteredItemSets,
+      filteredItemSetIndexes,
       collapseRedundant,
       displayOther
     );
@@ -187,18 +207,29 @@ export function getSimpleHierarchicalTree(
   const totalDocCount = Math.max(...itemSets.map((d) => d.total_doc_count));
 
   const newRoot = NewNodeFactory('');
+  const treeBuildIndexes = buildSimpleHierarchicalTreeIndexes(itemSets, significantItems);
 
-  for (const field of fields) {
-    for (const value of getValuesDescending(itemSets, field)) {
+  const allItemSetIndexes = itemSets.map((_, index) => index);
+
+  for (const [fieldIndex, field] of fields.entries()) {
+    const rootFieldValueCounts = getValueCountsForField(
+      itemSets,
+      allItemSetIndexes,
+      field,
+      treeBuildIndexes
+    );
+
+    for (const value of getValuesDescendingFromValueCounts(rootFieldValueCounts)) {
       dfDepthFirstSearch(
-        significantItems,
+        itemSets,
+        treeBuildIndexes,
         fields,
         newRoot,
         totalDocCount + 1,
         '',
-        field,
+        fieldIndex,
         value,
-        itemSets,
+        allItemSetIndexes,
         collapseRedundant,
         displayOther
       );

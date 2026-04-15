@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
@@ -17,7 +18,6 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
@@ -69,11 +69,11 @@ export const ListNotificationPoliciesPage = () => {
   const [enabled, setEnabled] = useState('');
   const [sortField, setSortField] = useState<'name' | 'updatedAt' | 'updatedByUsername'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
   const [selectedPolicies, setSelectedPolicies] = useState<NotificationPolicyResponse[]>([]);
 
-  const { euiTheme } = useEuiTheme();
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
   const settings = useService(CoreStart('settings'));
@@ -120,11 +120,14 @@ export const ListNotificationPoliciesPage = () => {
   };
 
   const clonePolicy = (policy: NotificationPolicyResponse) => {
-    const { name, description, destinations, matcher, groupBy, throttle } = policy;
+    const { name, description, destinations, matcher, groupBy, throttle, tags, groupingMode } =
+      policy;
     const data: CreateNotificationPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
+      groupingMode: groupingMode ?? 'per_episode',
+      ...(tags != null && { tags }),
       ...(matcher != null && { matcher }),
       ...(groupBy != null && { groupBy }),
       ...(throttle != null && { throttle }),
@@ -136,6 +139,7 @@ export const ListNotificationPoliciesPage = () => {
     page: page + 1,
     perPage,
     search: search || undefined,
+    tags: selectedTags.length > 0 ? selectedTags : undefined,
     enabled: enabled === 'true' ? true : enabled === 'false' ? false : undefined,
     sortField,
     sortOrder: sortDirection,
@@ -148,6 +152,11 @@ export const ListNotificationPoliciesPage = () => {
 
   const handleEnabledChange = useCallback((value: string) => {
     setEnabled(value);
+    setPage(0);
+  }, []);
+
+  const handleTagsChange = useCallback((tags: string[]) => {
+    setSelectedTags(tags);
     setPage(0);
   }, []);
 
@@ -247,6 +256,27 @@ export const ListNotificationPoliciesPage = () => {
       render: (destinations: NotificationPolicyResponse['destinations']) => (
         <NotificationPolicyDestinationsSummary destinations={destinations} />
       ),
+    },
+    {
+      field: 'tags',
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.tags"
+          defaultMessage="Tags"
+        />
+      ),
+      render: (tags: string[] | null) => {
+        if (!tags || tags.length === 0) return null;
+        return (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {tags.map((tag) => (
+              <EuiFlexItem grow={false} key={tag}>
+                <EuiBadge color="hollow">{tag}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'updatedAt',
@@ -369,6 +399,8 @@ export const ListNotificationPoliciesPage = () => {
             onSearchChange={handleSearchChange}
             enabled={enabled}
             onEnabledChange={handleEnabledChange}
+            selectedTags={selectedTags}
+            onTagsChange={handleTagsChange}
           />
         </EuiFlexItem>
         {errorMessage ? (
@@ -444,8 +476,7 @@ export const ListNotificationPoliciesPage = () => {
                 display: none;
               }
               .euiTableRowCellCheckbox {
-                vertical-align: top;
-                padding-top: ${euiTheme.size.xs};
+                vertical-align: middle;
               }
             `}
             sorting={{

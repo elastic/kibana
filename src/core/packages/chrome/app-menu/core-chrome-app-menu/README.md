@@ -4,7 +4,33 @@
 
 ## Usage
 
-- Declarative (preferred):
+- Declarative, with context (preferred):
+
+This requires the component to be rendered within the Chrome context.
+
+The context is available automatically when:
+- The component is rendered via core's rendering service (`rendering.addContext`)
+- The component is inside a `KibanaRootContextProvider`
+- The component tree is wrapped with `ChromeServiceProvider` from `@kbn/core-chrome-browser-context`
+- The component tree is wrapped with `chrome.withProvider(children)`
+
+```tsx
+import React from 'react';
+import { RegisterAppMenu } from '@kbn/core-chrome-browser-hooks';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+
+
+interface Props {
+  config: AppMenuConfig;
+}
+
+
+const Example = ({ config }: Props) => {
+  return <RegisterAppMenu config={config} />;
+};
+```
+
+- Declarative:
 
 ```tsx
 import React, { useEffect } from 'react';
@@ -57,10 +83,8 @@ const Example = ({ config, core }: Props) => {
 
 3. `items` can only be `EuiHeaderLink` (a button with type `text`). For more advanced use cases, use action buttons.
 
-4. Action buttons - `AppMenu` introduces action buttons:
+4. Action button - `AppMenu` introduces action button:
 
     - `primaryActionButton` - this is meant to be used for primary actions (e.g saving), can be either an `EuiButton` or a split button, always placed as the rightmost item
-
-    - `secondaryActionButton` - this is meant for secondary actions (e.g adding a new panel), can only be an `EuiButton`, placed to the left from `primaryActionButton`
 
 5. Removal of `TopNavMenuExtensionsRegistry` - registering global items is no longer possible, add items locally to your application.

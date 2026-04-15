@@ -57,7 +57,7 @@ describe('conflict_rebase', () => {
 
     const response = await rebaseCaseMutationOnConflict({
       request: { caseId: basicCaseFixture.id, version: basicCaseFixture.version },
-      staleCases: [basicCaseFixture],
+      preRequestServerState: [basicCaseFixture],
       executeRequest,
       fetchLatestCase,
       buildRetryRequest: ({ request, latestCases }) => ({
@@ -88,7 +88,7 @@ describe('conflict_rebase', () => {
     await expect(
       rebaseCaseMutationOnConflict({
         request: { caseId: basicCaseFixture.id, version: basicCaseFixture.version },
-        staleCases: [basicCaseFixture],
+        preRequestServerState: [basicCaseFixture],
         executeRequest,
         fetchLatestCase,
         buildRetryRequest: ({ request }) => request,
@@ -106,7 +106,7 @@ describe('conflict_rebase', () => {
     await expect(
       rebaseCaseMutationOnConflict({
         request: { caseId: basicCaseFixture.id, version: basicCaseFixture.version },
-        staleCases: [basicCaseFixture],
+        preRequestServerState: [basicCaseFixture],
         executeRequest,
         fetchLatestCase,
         buildRetryRequest: ({ request }) => request,

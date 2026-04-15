@@ -41,14 +41,13 @@ describe('useCreateRule', () => {
     metadata: {
       name: 'Test Rule',
       enabled: true,
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
     evaluation: {
       query: {
         base: 'FROM logs | LIMIT 10',
-        condition: '',
       },
     },
     grouping: { fields: ['host.name'] },
@@ -58,12 +57,11 @@ describe('useCreateRule', () => {
 
   // Expected API payload after mapping FormValues to CreateRuleData
   // Note: timeField in form is mapped to time_field in API
-  // Note: empty condition field is omitted from the payload
   const expectedApiPayload = {
     kind: 'signal',
     metadata: {
       name: 'Test Rule',
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     time_field: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
@@ -347,14 +345,13 @@ describe('useCreateRule', () => {
         name: 'Complex Rule',
         enabled: false,
         description: 'A complex rule',
-        labels: ['production', 'critical'],
+        tags: ['production', 'critical'],
       },
       timeField: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },
       evaluation: {
         query: {
           base: 'FROM metrics | WHERE cpu > 90',
-          condition: '',
         },
       },
       grouping: { fields: ['host.name', 'service.name'] },
@@ -363,13 +360,12 @@ describe('useCreateRule', () => {
     };
 
     // Note: timeField in form is mapped to time_field in API
-    // Note: empty condition field is omitted from the payload
     const expectedPayload = {
       kind: 'signal',
       metadata: {
         name: 'Complex Rule',
         description: 'A complex rule',
-        labels: ['production', 'critical'],
+        tags: ['production', 'critical'],
       },
       time_field: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },
@@ -392,56 +388,7 @@ describe('useCreateRule', () => {
     });
   });
 
-  it('maps recovery_policy with condition-only mode using evaluation base query', async () => {
-    const http = httpServiceMock.createStartContract();
-    const notifications = notificationServiceMock.createStartContract();
-
-    http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Recovery Rule' } });
-
-    const { result } = renderHook(() => useCreateRule({ http, notifications }), {
-      wrapper: createQueryClientWrapper(),
-    });
-
-    const formData: FormValues = {
-      kind: 'alert',
-      metadata: { name: 'Recovery Rule', enabled: true },
-      timeField: '@timestamp',
-      schedule: { every: '5m', lookback: '1m' },
-      evaluation: {
-        query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count > 100',
-        },
-      },
-      recoveryPolicy: {
-        type: 'query',
-        query: {
-          condition: 'WHERE count <= 50',
-        },
-      },
-      stateTransitionAlertDelayMode: 'immediate',
-      stateTransitionRecoveryDelayMode: 'immediate',
-    };
-
-    await act(async () => {
-      result.current.createRule(formData);
-    });
-
-    await waitFor(() => {
-      const payload = JSON.parse(
-        (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
-      );
-      expect(payload.recovery_policy).toEqual({
-        type: 'query',
-        query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count <= 50',
-        },
-      });
-    });
-  });
-
-  it('maps recovery_policy with full base query when no condition is set', async () => {
+  it('maps recovery_policy with base query', async () => {
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
 

@@ -8,6 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { EntityType } from '@kbn/entity-store/public';
+import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './hooks/use_resolution_group';
@@ -77,7 +78,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
       try {
         // Pre-flight: check if the entity being added already has its own resolution group
         const newEntityGroup = await http.fetch<ResolutionGroup>(RESOLUTION_GROUP_ROUTE, {
-          version: '2',
+          version: API_VERSIONS.public.v1,
           method: 'GET',
           query: { entity_id: newEntityId },
         });

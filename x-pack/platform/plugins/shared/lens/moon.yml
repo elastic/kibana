@@ -151,6 +151,8 @@ dependsOn:
   - '@kbn/field-formats-common'
   - '@kbn/calculate-auto'
   - '@kbn/esql-language'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

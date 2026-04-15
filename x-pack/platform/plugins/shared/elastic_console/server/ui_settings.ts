@@ -15,12 +15,12 @@ export const registerUiSettings = (core: CoreSetup) => {
     [ELASTIC_CONSOLE_ENABLED_SETTING_ID]: {
       category: ['general'],
       name: i18n.translate('xpack.elasticConsole.enabledSettingName', {
-        defaultMessage: 'Elastic Console',
+        defaultMessage: 'Elastic Ramen',
       }),
       value: false,
       description: i18n.translate('xpack.elasticConsole.enabledSettingDescription', {
         defaultMessage:
-          'Enable the Elastic Console proxy endpoints that allow external tools to use Kibana-configured AI connectors via an OpenAI-compatible API.',
+          'Enable the Elastic Ramen proxy endpoints that allow external tools to use Kibana-configured AI connectors via an OpenAI-compatible API. This feature is experimental.',
       }),
       type: 'boolean',
       schema: schema.boolean(),

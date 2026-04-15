@@ -59,7 +59,23 @@ export const ScriptsFileDataIndexTemplate = deepFreeze<IndicesPutIndexTemplateRe
     },
     mappings: {
       dynamic: false,
-      properties: {},
+      properties: {
+        data: {
+          type: 'binary',
+          store: true,
+        },
+        bid: {
+          type: 'keyword',
+        },
+        sha2: {
+          type: 'keyword',
+          index: false,
+        },
+        last: {
+          type: 'boolean',
+          index: false,
+        },
+      },
     },
   },
 }) as IndicesPutIndexTemplateRequest;

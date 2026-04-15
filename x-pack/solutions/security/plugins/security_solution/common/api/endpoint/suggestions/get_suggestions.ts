@@ -12,7 +12,9 @@ export const EndpointSuggestionsSchema = {
   body: schema.object({
     field: schema.string(),
     query: schema.string(),
-    filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+    filters: schema.maybe(
+      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 50 })
+    ),
     fieldMeta: schema.maybe(schema.any()),
   }),
   params: schema.object({

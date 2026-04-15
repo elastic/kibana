@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { TreemapStateESQL, TreemapStateNoESQL } from './treemap';
 import { treemapStateSchema } from './treemap';
 
@@ -14,9 +15,9 @@ describe('Treemap Schema', () => {
   describe('Non-ES|QL Schema', () => {
     const baseTreemapConfig = {
       type: 'treemap',
-      dataset: {
-        type: 'dataView',
-        id: 'test-data-view',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: 'test-data-view',
       },
       ignore_global_filters: false,
       sampling: 1,
@@ -36,7 +37,7 @@ describe('Treemap Schema', () => {
       const validated = treemapStateSchema.validate(input);
       expect(validated.type).toBe('treemap');
       expect(validated.metrics).toHaveLength(1);
-      expect(validated.metrics[0].operation).toBe('count');
+      expect(validated.metrics[0]).toHaveProperty('operation', 'count');
     });
 
     it('validates configuration with metrics and group_by', () => {
@@ -535,7 +536,7 @@ describe('Treemap Schema', () => {
   describe('ES|QL Schema', () => {
     const baseESQLTreemapConfig = {
       type: 'treemap',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | STATS ...',
       },
@@ -548,15 +549,14 @@ describe('Treemap Schema', () => {
         ...baseESQLTreemapConfig,
         metrics: [
           {
-            operation: 'value',
             column: 'count',
           },
         ],
       };
 
       const validated = treemapStateSchema.validate(input);
-      expect(validated.dataset.type).toBe('esql');
-      expect(validated.metrics[0].operation).toBe('value');
+      expect(validated.data_source.type).toBe('esql');
+      expect(validated.metrics[0]).toHaveProperty('column', 'count');
     });
 
     it('validates ES|QL configuration with group_by', () => {
@@ -564,13 +564,11 @@ describe('Treemap Schema', () => {
         ...baseESQLTreemapConfig,
         metrics: [
           {
-            operation: 'value',
             column: 'count',
           },
         ],
         group_by: [
           {
-            operation: 'value',
             column: 'category',
           },
         ],
@@ -586,7 +584,6 @@ describe('Treemap Schema', () => {
         title: 'Sales Treemap',
         metrics: [
           {
-            operation: 'value',
             column: 'sum_sales',
             color: {
               type: 'static',
@@ -596,7 +593,6 @@ describe('Treemap Schema', () => {
         ],
         group_by: [
           {
-            operation: 'value',
             column: 'category',
             color: {
               mode: 'categorical',

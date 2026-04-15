@@ -18,7 +18,7 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
 import type { IdentityFields } from '../../shared/utils';
-import { PrevalenceDetails as PrevalenceDetailsContent } from '../../../../flyout_v2/prevalence/prevalence';
+import { PrevalenceDetailsView } from '../../../../flyout_v2/prevalence/components/prevalence_details_view';
 import type { PrevalenceDetailsRow } from '../../../../flyout_v2/prevalence/utils/get_columns';
 import {
   alertCountColumn,
@@ -86,7 +86,7 @@ export const PrevalenceDetails: React.FC = () => {
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   return (
-    <PrevalenceDetailsContent
+    <PrevalenceDetailsView
       hit={hit}
       investigationFields={investigationFields}
       scopeId={scopeId}

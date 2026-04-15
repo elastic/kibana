@@ -6,9 +6,20 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import { css } from '@emotion/react';
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EuiButton, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
+import type {
+  BulkErrorSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
@@ -52,6 +63,7 @@ import { BackToExternalAppButton } from '../back_to_external_app_button';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ArtifactImportFlyout } from './components/artifact_import_flyout';
 import { useIsImportFlyoutOpened } from './hooks/use_is_import_flyout_opened';
+import { ArtifactImportErrorsModal } from './components/artifact_import_errors_modal';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -117,6 +129,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const isImportFlyoutOpened =
       useIsImportFlyoutOpened(allowCardCreateAction) &&
       areEndpointExceptionsMovedUnderManagementFFEnabled;
+
+    const [importErrors, setImportErrors] = useState<BulkErrorSchema[] | undefined>(undefined);
 
     const setUrlParams = useSetUrlParams();
     const {
@@ -298,6 +312,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       refetchListData();
     }, [closeImportFlyout, refetchListData]);
 
+    const handleImportFlyoutOnShowErrors = useCallback((errors: BulkErrorSchema[]) => {
+      setImportErrors(errors);
+    }, []);
+
+    const handleCloseImportErrorsModal = useCallback(() => setImportErrors(undefined), []);
+
     const description = useMemo(() => {
       const subtitleText = labels.pageAboutInfo ? (
         <span data-test-subj="header-panel-subtitle">{labels.pageAboutInfo}</span>
@@ -309,10 +329,10 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         </>
       ) : undefined;
       return (
-        <>
+        <EuiTextColor color="subdued">
           {subtitleText}
           {detailedPageInfoElement}
-        </>
+        </EuiTextColor>
       );
     }, [labels.pageAboutInfo, secondaryPageInfo]);
 
@@ -356,33 +376,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     return (
       <AdministrationListPage
         headerBackComponent={backButtonHeaderComponent}
-        hideHeader={!doesDataExist}
+        hideHeader={true}
         title={labels.pageTitle}
-        subtitle={description}
-        actions={
-          <EuiFlexGroup alignItems="center">
-            {allowCardCreateAction && (
-              <EuiButton
-                fill
-                iconType="plusCircle"
-                isDisabled={isFlyoutOpened}
-                onClick={handleOpenCreateFlyoutClick}
-                data-test-subj={getTestId('pageAddButton')}
-              >
-                {labels.pageAddButtonTitle}
-              </EuiButton>
-            )}
-
-            {actionsToDisplay.length > 0 && (
-              <HeaderMenu
-                iconType="boxesVertical"
-                dataTestSubj={getTestId('overflowMenu')}
-                actions={actionsToDisplay}
-                disableActions={isLoading}
-              />
-            )}
-          </EuiFlexGroup>
-        }
         data-test-subj={getTestId('container')}
       >
         <AutoDownload
@@ -409,9 +404,14 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           <ArtifactImportFlyout
             onCancel={closeImportFlyout}
             onSuccess={handleImportFlyoutOnSuccess}
+            onShowErrors={handleImportFlyoutOnShowErrors}
             apiClient={apiClient}
             labels={labels}
           />
+        )}
+
+        {importErrors && (
+          <ArtifactImportErrorsModal errors={importErrors} onClose={handleCloseImportErrorsModal} />
         )}
 
         {selectedItemForDelete && (
@@ -426,31 +426,72 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         )}
 
         {!doesDataExist ? (
-          <NoDataEmptyState
-            onAdd={handleOpenCreateFlyoutClick}
-            onImport={handleImport}
-            titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
-            titleLabel={labels.emptyStateTitle}
-            aboutInfo={labels.emptyStateInfo}
-            primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
-            importButtonLabel={labels.emptyStateImportButtonLabel}
-            backComponent={backButtonEmptyComponent}
-            data-test-subj={getTestId('emptyState')}
-            secondaryAboutInfo={secondaryPageInfo}
-            canCreateItems={allowCardCreateAction}
-          />
+          <div
+            css={css`
+              > * {
+                justify-content: flex-start;
+                padding-top: calc((100vh - 140px) / 6);
+                box-sizing: border-box;
+              }
+            `}
+          >
+            <NoDataEmptyState
+              onAdd={handleOpenCreateFlyoutClick}
+              onImport={handleImport}
+              titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
+              titleLabel={labels.emptyStateTitle}
+              aboutInfo={labels.emptyStateInfo}
+              primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
+              importButtonLabel={labels.emptyStateImportButtonLabel}
+              backComponent={backButtonEmptyComponent}
+              data-test-subj={getTestId('emptyState')}
+              secondaryAboutInfo={secondaryPageInfo}
+              canCreateItems={allowCardCreateAction}
+              isAddDisabled={isFlyoutOpened || isImportFlyoutOpened}
+            />
+          </div>
         ) : (
           <>
+            {backButtonHeaderComponent}
+            {description}
+            <EuiSpacer size="m" />
             {callout}
             <EuiSpacer size="m" />
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={true}>
+                <SearchExceptions
+                  defaultValue={filter}
+                  onSearch={handleOnSearch}
+                  placeholder={labels.searchPlaceholderInfo}
+                  hasPolicyFilter
+                  defaultIncludedPolicies={includedPolicies}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  {allowCardCreateAction && (
+                    <EuiButton
+                      fill
+                      iconType="plusCircle"
+                      isDisabled={isFlyoutOpened}
+                      onClick={handleOpenCreateFlyoutClick}
+                      data-test-subj={getTestId('pageAddButton')}
+                    >
+                      {labels.pageAddButtonTitle}
+                    </EuiButton>
+                  )}
 
-            <SearchExceptions
-              defaultValue={filter}
-              onSearch={handleOnSearch}
-              placeholder={labels.searchPlaceholderInfo}
-              hasPolicyFilter
-              defaultIncludedPolicies={includedPolicies}
-            />
+                  {actionsToDisplay.length > 0 && (
+                    <HeaderMenu
+                      iconType="boxesVertical"
+                      dataTestSubj={getTestId('overflowMenu')}
+                      actions={actionsToDisplay}
+                      disableActions={isLoading}
+                    />
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
             <EuiSpacer size="m" />
 

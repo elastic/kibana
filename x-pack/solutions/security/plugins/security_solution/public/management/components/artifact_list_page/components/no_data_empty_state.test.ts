@@ -56,7 +56,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
     });
   });
 
-  it('should hide page headers', async () => {
+  it('should not show page header (headerless layout)', async () => {
     render();
 
     expect(renderResult.queryByTestId('header-page-title')).toBe(null);

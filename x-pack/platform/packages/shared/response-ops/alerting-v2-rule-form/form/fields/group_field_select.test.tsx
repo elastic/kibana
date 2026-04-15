@@ -161,6 +161,16 @@ describe('GroupFieldSelect', () => {
     });
   });
 
+  it('renders correctly in flyout layout', () => {
+    render(<GroupFieldSelect />, {
+      wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices, {
+        layout: 'flyout',
+      }),
+    });
+
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
+  });
+
   it('renders empty when no columns available', () => {
     mockUseQueryColumns.mockReturnValue({
       data: [],

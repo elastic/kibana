@@ -9,6 +9,9 @@
 
 import type { XYVisualizationState } from '@kbn/lens-common';
 import { xyStateSchema } from '../../schema/charts/xy';
+import type { XYState } from '../../schema/charts/xy';
+import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
 import type { LensAttributes } from '../../types';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
@@ -30,6 +33,11 @@ import {
   esqlChartWithBreakdownColorMapping,
   esqlXYWithCollapseByBreakdown,
 } from './esqlXY.mock';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
+import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING } from '../../transforms/charts/xy/defaults';
 
 function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 'area') {
   return {
@@ -281,7 +289,7 @@ describe('XY', () => {
             {
               ignore_global_filters: false,
               sampling: 1,
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type,
               y: [{ operation: 'count', empty_as_null: false }],
             },
@@ -298,7 +306,7 @@ describe('XY', () => {
           title: `${type} Chart`,
           layers: [
             {
-              dataset: {
+              data_source: {
                 type: 'esql',
                 query:
                   'FROM kibana_simple_logs_data | STATS count = count() BY buckets = BUCKET(3 hours, order_date), product',
@@ -306,9 +314,9 @@ describe('XY', () => {
               type,
               ignore_global_filters: false,
               sampling: 1,
-              x: { operation: 'value', column: 'order_date' },
-              y: [{ operation: 'value', column: 'count' }],
-              breakdown_by: { operation: 'value', column: 'product' },
+              x: { column: 'order_date' },
+              y: [{ column: 'count' }],
+              breakdown_by: { column: 'product' },
             },
           ],
         },
@@ -325,16 +333,16 @@ describe('XY', () => {
             title: `${type} Chart with collapse`,
             layers: [
               {
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query: 'FROM kibana_sample_data_logs',
                 },
                 type,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { operation: 'value', column: '@timestamp' },
-                y: [{ operation: 'value', column: 'bytes' }],
-                breakdown_by: { operation: 'value', column: 'agent', collapse_by: 'max' },
+                x: { column: '@timestamp' },
+                y: [{ column: 'bytes' }],
+                breakdown_by: { column: 'agent', collapse_by: 'max' },
               },
             ],
           },
@@ -352,7 +360,7 @@ describe('XY', () => {
             title: `${type} Chart with Color Mapping`,
             layers: [
               {
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query:
                     'FROM kibana_sample_data | STATS count = count() BY category, buckets = BUCKET(3 hours, order_date)',
@@ -360,10 +368,9 @@ describe('XY', () => {
                 type,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { operation: 'value', column: 'buckets' },
-                y: [{ operation: 'value', column: 'count' }],
+                x: { column: 'buckets' },
+                y: [{ column: 'count' }],
                 breakdown_by: {
-                  operation: 'value',
                   column: 'category',
                   color: {
                     mode: 'categorical',
@@ -384,7 +391,7 @@ describe('XY', () => {
       }
     );
     it.each(anyType.map((type) => anyType.map((anotherType) => [type, anotherType])).flat(1))(
-      'should handle multiple metric in multiple layers %s + %s with reference lines and annotations with mixed datasets',
+      'should handle multiple metric in multiple layers %s + %s with reference lines and annotations (DSL layers only)',
       (type1, type2) => {
         validateAPIConverter(
           {
@@ -392,7 +399,7 @@ describe('XY', () => {
             title: `Mixed Chart`,
             layers: [
               {
-                dataset: { type: 'dataView', id: 'companyAIndex' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -414,26 +421,46 @@ describe('XY', () => {
                   limit: 5,
                   rank_by: {
                     direction: 'desc',
-                    metric: 0,
-                    type: 'column',
+                    metric_index: 0,
+                    type: 'metric',
                   },
                 },
               },
               {
-                dataset: { type: 'esql', query: 'FROM company_index' },
+                data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { operation: 'value', column: 'order_date' },
+                x: {
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  include_empty_rows: false,
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  drop_partial_intervals: false,
+                },
                 y: [
-                  { operation: 'value', column: 'value' },
-                  { operation: 'value', column: 'price' },
+                  { operation: 'count', empty_as_null: false },
+                  { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'value', column: 'product' },
+                breakdown_by: {
+                  operation: 'terms',
+                  fields: ['product', 'category'],
+                  limit: 5,
+                  rank_by: {
+                    direction: 'desc',
+                    metric_index: 0,
+                    type: 'metric',
+                  },
+                },
               },
               {
-                dataset: { type: 'index', index: 'companyIndex', time_field: '@timestamp' },
-                type: 'referenceLines',
+                data_source: {
+                  type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+                  index_pattern: 'companyIndex',
+                  time_field: '@timestamp',
+                },
+                type: 'reference_lines',
                 ignore_global_filters: false,
                 sampling: 1,
                 thresholds: [
@@ -443,7 +470,7 @@ describe('XY', () => {
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
                     text: { visible: true },
-                    axis: 'left',
+                    axis_id: 'y',
                   },
                   {
                     operation: 'average',
@@ -451,16 +478,16 @@ describe('XY', () => {
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
                     text: { visible: false },
-                    axis: 'left',
+                    axis_id: 'y',
                   },
                 ],
               },
               {
                 type: 'annotations',
                 ignore_global_filters: false,
-                dataset: {
-                  type: 'dataView',
-                  id: 'metrics-*',
+                data_source: {
+                  type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+                  ref_id: 'metrics-*',
                 },
                 events: [
                   {
@@ -499,7 +526,7 @@ describe('XY', () => {
                   {
                     type: 'query',
                     label: 'Bingo!',
-                    query: { language: 'kuery', query: 'order_amount > 1000' },
+                    query: { language: 'kql', expression: 'order_amount > 1000' },
                     time_field: 'order_date',
                     text: {
                       visible: true,
@@ -523,7 +550,7 @@ describe('XY', () => {
       validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyStateSchema);
     });
 
-    it('should correctly transform top list layout with pixel truncation', () => {
+    it('should correctly transform top list layout', () => {
       validateAPIConverter(apiXYWithTopListWithTruncationLegend, xyStateSchema);
     });
 
@@ -538,7 +565,7 @@ describe('XY', () => {
           title: 'Chart with by-ref annotation',
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
               type: 'line',
               ignore_global_filters: false,
               sampling: 1,
@@ -569,14 +596,14 @@ describe('XY', () => {
               {
                 ignore_global_filters: false,
                 sampling: 1,
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query:
                     'FROM kibana_sample_data_logs | STATS count = count() BY buckets = BUCKET(@timestamp, 1 hour)',
                 },
                 type: 'bar',
-                x: { operation: 'value', column: 'buckets' },
-                y: [{ operation: 'value', column: 'count' }],
+                x: { column: 'buckets' },
+                y: [{ column: 'count' }],
               },
             ],
           },
@@ -598,13 +625,13 @@ describe('XY', () => {
               {
                 ignore_global_filters: false,
                 sampling: 1,
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
                 },
                 type: 'line',
-                x: { operation: 'value', column: 'bytes' },
-                y: [{ operation: 'value', column: 'count' }],
+                x: { column: 'bytes' },
+                y: [{ column: 'count' }],
               },
             ],
           },
@@ -621,12 +648,12 @@ describe('XY', () => {
               {
                 ignore_global_filters: false,
                 sampling: 1,
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
                 },
                 type: 'bar',
-                y: [{ operation: 'value', column: 'count' }],
+                y: [{ column: 'count' }],
               },
             ],
           },
@@ -640,7 +667,8 @@ describe('XY', () => {
             type: 'xy',
             title: 'XY Chart with Y-Axis Only',
             axis: {
-              left: {
+              y: {
+                anchor: 'start',
                 ticks: { visible: true },
                 grid: { visible: true },
               },
@@ -649,18 +677,194 @@ describe('XY', () => {
               {
                 ignore_global_filters: false,
                 sampling: 1,
-                dataset: {
+                data_source: {
                   type: 'esql',
                   query: 'FROM kibana_sample_data_logs | STATS count = count() BY bytes',
                 },
                 type: 'bar',
-                y: [{ operation: 'value', column: 'count' }],
+                y: [{ column: 'count' }],
               },
             ],
           },
           xyStateSchema
         );
       });
+    });
+  });
+
+  describe('color default application', () => {
+    it('should emit AUTO_COLOR on y-axis metrics when no breakdown is present', () => {
+      const config = {
+        type: 'xy',
+        title: 'Y-axis color default test',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+        ],
+      } satisfies XYState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].color).toEqual(AUTO_COLOR);
+    });
+
+    it('should emit default categorical color mapping on breakdown_by (bar)', () => {
+      const config = {
+        type: 'xy',
+        title: 'Breakdown color default test',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count' }],
+            breakdown_by: { column: 'product' },
+          },
+        ],
+      } satisfies XYState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
+        DEFAULT_CATEGORICAL_COLOR_MAPPING
+      );
+    });
+
+    it('should emit elastic_line_optimized palette on breakdown_by for line charts', () => {
+      const config = {
+        type: 'xy',
+        title: 'Line breakdown color default test',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'line',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count' }],
+            breakdown_by: { column: 'product' },
+          },
+        ],
+      } satisfies XYState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
+        DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+      );
+    });
+
+    it('should emit AUTO_COLOR on reference line when no color is specified', () => {
+      const config = {
+        type: 'xy',
+        title: 'Reference line color default test',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+          {
+            data_source: {
+              type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+              index_pattern: 'test-index',
+              time_field: '@timestamp',
+            },
+            type: 'reference_lines',
+            ignore_global_filters: false,
+            sampling: 1,
+            thresholds: [
+              {
+                operation: 'median',
+                field: 'bytes',
+                label: 'Median',
+                axis_id: 'y',
+              },
+            ],
+          },
+        ],
+      } satisfies XYState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+
+      const refLineLayer = apiOutput.layers.find((l) => 'thresholds' in l);
+      expect(refLineLayer).toBeDefined();
+      if (refLineLayer && 'thresholds' in refLineLayer) {
+        expect(refLineLayer.thresholds[0].color).toEqual(AUTO_COLOR);
+      }
+    });
+
+    it('should emit AUTO_COLOR on annotation events when no color is specified', () => {
+      const config = {
+        type: 'xy',
+        title: 'Annotation color default test',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+          {
+            type: 'annotations',
+            ignore_global_filters: false,
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            events: [
+              {
+                type: 'point',
+                label: 'Test Event',
+                timestamp: '2023-01-01T00:00:00Z',
+              },
+              {
+                type: 'range',
+                label: 'Test Range',
+                interval: {
+                  from: '2023-01-01T00:00:00Z',
+                  to: '2023-01-02T00:00:00Z',
+                },
+                fill: 'inside',
+              },
+            ],
+          },
+        ],
+      } satisfies XYState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+
+      const annotationLayer = apiOutput.layers.find((l) => 'events' in l);
+      expect(annotationLayer).toBeDefined();
+      if (annotationLayer && 'events' in annotationLayer) {
+        for (const event of annotationLayer.events) {
+          expect(event.color).toEqual(AUTO_COLOR);
+        }
+      }
     });
   });
 });

@@ -31,7 +31,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImportVTwo, application } = useStartServices();
+  const { automaticImport, application } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
   const euiTheme = useEuiTheme();
@@ -40,10 +40,10 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     application.capabilities as Record<string, { view?: boolean } | undefined>
   ).automatic_import;
   const canReadAutomaticImportIntegrations =
-    automaticImportCapabilities?.view ?? Boolean(automaticImportVTwo);
+    automaticImportCapabilities?.view ?? Boolean(automaticImport);
 
   const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
-    ? automaticImportVTwo?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
+    ? automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
     : useEmptyAllIntegrations;
   const {
     integrations,
@@ -117,10 +117,11 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
         onCategoryChange={onCategoryChange}
         CreateIntegrationCardButton={
           canReadAutomaticImportIntegrations
-            ? automaticImportVTwo?.components.CreateIntegrationSideCardButton
+            ? automaticImport?.components.CreateIntegrationSideCardButton
             : undefined
         }
         hasCreatedIntegrations={hasCreatedIntegrations}
+        isLoadingCreatedIntegrations={isLoadingCreatedIntegrations}
         onManageIntegrationsClick={onManageIntegrationsClick}
       />
       <EuiFlexItem grow={5}>

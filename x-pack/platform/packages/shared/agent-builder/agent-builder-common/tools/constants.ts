@@ -34,6 +34,8 @@ export const platformCoreTools = {
   // SML tools
   smlSearch: platformCoreTool('sml_search'),
   smlAttach: platformCoreTool('sml_attach'),
+  // Connector tools
+  executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
 } as const;
 
 export const platformStreamsSigEventsTools = {
@@ -82,8 +84,10 @@ export const defaultAgentToolIds = [
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.getWorkflowExecutionStatus,
+  platformCoreTools.resumeWorkflowExecution,
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
+  platformCoreTools.executeConnectorSubAction,
 ];
 
 /**

@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useFetchDataFields } from '../../../../hooks/use_fetch_data_fields';
 import {
+  AGGREGATE_STRATEGY_HELP_TEXT,
   AGGREGATE_STRATEGY_OPTIONS,
   DEFAULT_STRATEGY_FOR_MODE,
   DEFAULT_THROTTLE_INTERVAL,
   GROUPING_MODE_HELP_TEXT,
   GROUPING_MODE_OPTIONS,
+  PER_EPISODE_STRATEGY_HELP_TEXT,
   PER_EPISODE_STRATEGY_OPTIONS,
-  STRATEGY_HELP_TEXT,
   THROTTLE_INTERVAL_PATTERN,
 } from '../constants';
 import { needsInterval } from '../form_utils';
 import type { NotificationPolicyFormState } from '../types';
+import { DispatchConfigSummary } from './dispatch_config_summary';
 import { DurationInput } from './duration_input/duration_input';
 
-export const DispatchSection: React.FC = () => {
+export const DispatchSection = () => {
   const { control, setValue, getValues } = useFormContext<NotificationPolicyFormState>();
   const groupingMode = useWatch({ control, name: 'groupingMode' });
+  const groupBy = useWatch({ control, name: 'groupBy' });
   const throttleStrategy = useWatch({ control, name: 'throttleStrategy' });
+  const throttleInterval = useWatch({ control, name: 'throttleInterval' });
   const { data: dataFieldNames } = useFetchDataFields();
 
   useEffect(() => {
@@ -46,6 +50,8 @@ export const DispatchSection: React.FC = () => {
 
   const strategyOptions =
     groupingMode === 'per_episode' ? PER_EPISODE_STRATEGY_OPTIONS : AGGREGATE_STRATEGY_OPTIONS;
+  const strategyHelpText =
+    groupingMode === 'per_episode' ? PER_EPISODE_STRATEGY_HELP_TEXT : AGGREGATE_STRATEGY_HELP_TEXT;
 
   return (
     <>
@@ -53,11 +59,17 @@ export const DispatchSection: React.FC = () => {
         name="groupingMode"
         control={control}
         render={({ field }) => (
-          <EuiFormRow fullWidth helpText={GROUPING_MODE_HELP_TEXT[field.value]}>
+          <EuiFormRow
+            label={i18n.translate('xpack.alertingV2.notificationPolicy.form.dispatch.dispatchPer', {
+              defaultMessage: 'Dispatch per',
+            })}
+            fullWidth
+            helpText={GROUPING_MODE_HELP_TEXT[field.value]}
+          >
             <EuiButtonGroup
               legend={i18n.translate(
                 'xpack.alertingV2.notificationPolicy.form.dispatch.modeLegend',
-                { defaultMessage: 'Dispatch mode' }
+                { defaultMessage: 'Dispatch per' }
               )}
               options={GROUPING_MODE_OPTIONS}
               idSelected={field.value}
@@ -104,7 +116,7 @@ export const DispatchSection: React.FC = () => {
                 'xpack.alertingV2.notificationPolicy.form.groupBy.helpText',
                 {
                   defaultMessage:
-                    'Episodes that share these field values are notified as one group.',
+                    'Episodes that share these field values are grouped together for dispatch.',
                 }
               )}
             >
@@ -114,7 +126,7 @@ export const DispatchSection: React.FC = () => {
                 data-test-subj="groupByInput"
                 placeholder={i18n.translate(
                   'xpack.alertingV2.notificationPolicy.form.groupBy.placeholder',
-                  { defaultMessage: 'Select or type a field name' }
+                  { defaultMessage: 'Add field...' }
                 )}
                 selectedOptions={field.value.map((g: string) => ({ label: g }))}
                 options={groupByOptions}
@@ -139,7 +151,7 @@ export const DispatchSection: React.FC = () => {
               defaultMessage: 'Frequency',
             })}
             fullWidth
-            helpText={STRATEGY_HELP_TEXT[throttleStrategy]}
+            helpText={strategyHelpText[throttleStrategy]}
           >
             <EuiSelect
               {...field}
@@ -194,6 +206,14 @@ export const DispatchSection: React.FC = () => {
           )}
         />
       )}
+
+      <EuiSpacer size="m" />
+      <DispatchConfigSummary
+        groupingMode={groupingMode}
+        groupBy={groupBy}
+        throttleStrategy={throttleStrategy}
+        throttleInterval={throttleInterval}
+      />
     </>
   );
 };

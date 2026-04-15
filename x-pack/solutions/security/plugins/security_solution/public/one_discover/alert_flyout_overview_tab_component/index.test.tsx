@@ -33,6 +33,14 @@ jest.mock('../../common/components/discover_in_timeline/provider', () => ({
   ),
 }));
 
+jest.mock('../../cases/components/provider/provider', () => ({
+  CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../assistant/provider', () => ({
+  AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 const mockUseInitDataViewManager = jest.fn();
 jest.mock('../../data_view_manager/hooks/use_init_data_view_manager', () => ({
   useInitDataViewManager: () => mockUseInitDataViewManager(),

@@ -104,6 +104,7 @@
     "@kbn/management-settings-ids",
     "@kbn/agent-builder-plugin",
     "@kbn/cloud-plugin",
+    "@kbn/search-inference-endpoints",
     "@kbn/controls-constants",
   ],
   "exclude": [

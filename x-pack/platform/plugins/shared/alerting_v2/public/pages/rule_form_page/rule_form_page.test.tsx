@@ -265,7 +265,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Test Rule' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'WHERE true' } },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
         },
         isLoading: false,
         isError: false,
@@ -304,13 +304,12 @@ describe('RuleFormPage', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          metadata: { name: 'My Alert Rule', tags: ['prod'], owner: 'team-a' },
           time_field: '@timestamp',
           schedule: { every: '10m', lookback: '2m' },
           evaluation: {
             query: {
               base: 'FROM logs-* | STATS count() BY host.name',
-              condition: 'WHERE count > 5',
             },
           },
           grouping: { fields: ['host.name'] },
@@ -330,7 +329,7 @@ describe('RuleFormPage', () => {
       // Metadata
       const metadata = initialValues.metadata as Record<string, unknown>;
       expect(metadata.name).toBe('My Alert Rule');
-      expect(metadata.labels).toEqual(['prod']);
+      expect(metadata.tags).toEqual(['prod']);
       expect(metadata.owner).toBe('team-a');
       expect(metadata.enabled).toBe(true);
 
@@ -342,7 +341,6 @@ describe('RuleFormPage', () => {
       // Evaluation
       const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
       expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
-      expect(evaluation.query.condition).toBe('WHERE count > 5');
 
       // Grouping
       const grouping = initialValues.grouping as { fields: string[] };
@@ -458,13 +456,12 @@ describe('RuleFormPage', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          metadata: { name: 'My Alert Rule', tags: ['prod'], owner: 'team-a' },
           time_field: '@timestamp',
           schedule: { every: '10m', lookback: '2m' },
           evaluation: {
             query: {
               base: 'FROM logs-* | STATS count() BY host.name',
-              condition: 'WHERE count > 5',
             },
           },
           grouping: { fields: ['host.name'] },
@@ -491,13 +488,12 @@ describe('RuleFormPage', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          metadata: { name: 'My Alert Rule', tags: ['prod'], owner: 'team-a' },
           time_field: '@timestamp',
           schedule: { every: '10m', lookback: '2m' },
           evaluation: {
             query: {
               base: 'FROM logs-* | STATS count() BY host.name',
-              condition: 'WHERE count > 5',
             },
           },
           grouping: { fields: ['host.name'] },
@@ -513,9 +509,9 @@ describe('RuleFormPage', () => {
 
       const initialValues = capturedStandaloneProps.initialValues as Record<string, unknown>;
 
-      // Metadata (labels, owner preserved)
+      // Metadata (tags, owner preserved)
       const metadata = initialValues.metadata as Record<string, unknown>;
-      expect(metadata.labels).toEqual(['prod']);
+      expect(metadata.tags).toEqual(['prod']);
       expect(metadata.owner).toBe('team-a');
 
       // Schedule
@@ -526,7 +522,6 @@ describe('RuleFormPage', () => {
       // Evaluation
       const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
       expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
-      expect(evaluation.query.condition).toBe('WHERE count > 5');
 
       // Grouping
       const grouping = initialValues.grouping as { fields: string[] };

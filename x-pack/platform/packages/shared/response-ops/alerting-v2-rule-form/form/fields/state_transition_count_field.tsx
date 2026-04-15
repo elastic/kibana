@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { NumberInput } from './number_input';
+import { useRuleFormMeta } from '../contexts';
 
 const DEFAULT_COUNT = 2;
 
@@ -42,6 +43,7 @@ export const StateTransitionCountField = ({
   variant = 'pending',
 }: StateTransitionCountFieldProps) => {
   const { control } = useFormContext<FormValues>();
+  const { layout } = useRuleFormMeta();
   const fieldName = FIELD_NAMES[variant];
   const testSubj = TEST_SUBJS[variant];
 
@@ -77,6 +79,7 @@ export const StateTransitionCountField = ({
           isInvalid={!!error}
           data-test-subj={testSubj}
           fullWidth
+          compressed={layout === 'flyout'}
           prepend={prependLabel ? [prependLabel] : undefined}
         />
       )}

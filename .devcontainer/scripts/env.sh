@@ -12,7 +12,6 @@ setup_fips() {
     sed -i '/xpack.security.fipsMode.enabled:/ {s/.*/xpack.security.fipsMode.enabled: true/; t}; $a\xpack.security.fipsMode.enabled: true' "$KBN_CONFIG_FILE"
 
     # Patch node_modules so we can start Kibana in dev mode
-    sed -i 's/hashType = hashType || '\''md5'\'';/hashType = hashType || '\''sha1'\'';/g' "${KBN_DIR}/node_modules/file-loader/node_modules/loader-utils/lib/getHashDigest.js"
     sed -i 's/const hash = createHash("md4");/const hash = createHash("sha1");/g' "${KBN_DIR}/node_modules/webpack/lib/ModuleFilenameHelpers.js"
     sed -i 's/contentHash: createHash("md4")/contentHash: createHash("sha1")/g' "${KBN_DIR}/node_modules/webpack/lib/SourceMapDevToolPlugin.js"
 
@@ -39,9 +38,21 @@ setup_shell() {
   fi
 }
 
+setup_browser() {
+  if [ -z "$TEST_BROWSER_BINARY_PATH" ] && [ -x "/usr/bin/chromium" ]; then
+    export TEST_BROWSER_BINARY_PATH="/usr/bin/chromium"
+  fi
+  if [ -z "$TEST_CHROMEDRIVER_PATH" ] && [ -x "/usr/bin/chromedriver" ]; then
+    export TEST_CHROMEDRIVER_PATH="/usr/bin/chromedriver"
+  fi
+}
+
 if [ -f "$ENV_PATH" ]; then
+  set -a
   source "$ENV_PATH"
+  set +a
   setup_fips
+  setup_browser
   setup_shell
 else
   echo ".env file not found, using default values"
