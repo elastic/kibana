@@ -82,17 +82,17 @@ if (!BUMP_TYPE) {
       pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_release_branch.yml'));
 
-      // Step 6: Wait for branch creation, then notify Slack that branching happened but version bump is pending
+      // Step 6: Update pipeline resource definitions on main.
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/version_bump/update_pipeline_resource_definitions.yml')
+      );
+
+      // Step 7: Wait for branch creation, then notify Slack that branching happened but version bump is pending
       pipeline.push('  - wait');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/notify_branch_created.yml'));
 
       // TODO: Send email (ask tyler)
       // Missing Step: Send email
-
-      // Step 7: Update pipeline resource definitions on main.
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/version_bump/update_pipeline_resource_definitions.yml')
-      );
 
       // Step 8: Wait, then trigger DRA snapshot on main,
       pipeline.push('  - wait');
