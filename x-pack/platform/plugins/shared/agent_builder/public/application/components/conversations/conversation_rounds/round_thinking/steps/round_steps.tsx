@@ -10,6 +10,7 @@ import {
   isReasoningStep,
   isToolCallStep,
   isCompactionStep,
+  isBackgroundAgentExecutionCompleteStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -25,6 +26,7 @@ import { ToolProgressDisplay } from './tool_progress_display';
 import { ToolResultDisplay } from './tool_result_display';
 import { FlyoutResultItem } from './flyout_result_item';
 import { CompactionDisplay } from './compaction_display';
+import { BackgroundExecutionDisplay } from './background_execution_display';
 
 const labels = {
   roundThinkingSteps: i18n.translate('xpack.agentBuilder.conversation.thinking.stepsList', {
@@ -178,6 +180,33 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
               icon={icon}
               textColor={textColor}
               isInProgress={compactionInProgress}
+            />
+          ),
+        });
+      } else if (isBackgroundAgentExecutionCompleteStep(step)) {
+        itemFactories.push({
+          key: `step-bg-execution-${stepIndex}`,
+          factory: (icon, textColor) => (
+            <BackgroundExecutionDisplay
+              key={`step-bg-execution-${stepIndex}`}
+              step={step}
+              onInspect={() => {
+                openFlyout([
+                  {
+                    type: ToolResultType.other,
+                    tool_result_id: `bg-${step.execution_id}`,
+                    data: {
+                      execution_id: step.execution_id,
+                      status: step.status,
+                      ...(step.response ? { response: step.response } : {}),
+                      ...(step.error ? { error: step.error } : {}),
+                      ...(step.completed_at ? { completed_at: step.completed_at } : {}),
+                    },
+                  },
+                ]);
+              }}
+              icon={icon}
+              textColor={textColor}
             />
           ),
         });

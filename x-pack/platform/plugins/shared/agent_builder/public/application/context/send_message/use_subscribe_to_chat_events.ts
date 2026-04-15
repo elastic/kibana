@@ -19,6 +19,8 @@ import {
   isThinkingCompleteEvent,
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
+  isBackgroundAgentExecutionCompleteEvent,
+  ConversationRoundStepType,
 } from '@kbn/agent-builder-common';
 import {
   createReasoningStep,
@@ -145,6 +147,13 @@ export const useSubscribeToChatEvents = ({
       conversationActions.setCompactionStepComplete({
         tokenCountAfter: event.data.token_count_after,
         summarizedRoundCount: event.data.summarized_round_count,
+      });
+    } else if (isBackgroundAgentExecutionCompleteEvent(event)) {
+      conversationActions.addBackgroundExecutionCompleteStep({
+        step: {
+          type: ConversationRoundStepType.backgroundAgentExecutionComplete,
+          ...event.data.execution,
+        },
       });
     }
   };
