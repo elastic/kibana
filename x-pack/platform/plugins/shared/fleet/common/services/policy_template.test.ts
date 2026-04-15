@@ -276,10 +276,7 @@ describe('getNormalizedDataStreams', () => {
       {
         type: 'foo',
         dataset: 'nginx.bar',
-        elasticsearch: {
-          dynamic_dataset: true,
-          dynamic_namespace: true,
-        },
+        elasticsearch: {},
         title: expect.any(String),
         release: 'ga',
         package: 'nginx',
@@ -365,10 +362,7 @@ describe('getNormalizedDataStreams', () => {
   const expectedInputPackageDataStream: RegistryDataStream = {
     type: 'logs',
     dataset: 'log.logs',
-    elasticsearch: {
-      dynamic_dataset: true,
-      dynamic_namespace: true,
-    },
+    elasticsearch: {},
     title: expect.any(String),
     release: 'ga',
     package: 'log',

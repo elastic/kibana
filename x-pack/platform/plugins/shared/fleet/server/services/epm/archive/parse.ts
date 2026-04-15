@@ -785,6 +785,19 @@ export function parseTopLevelElasticsearchEntry(elasticsearch?: Record<string, a
       expandedElasticsearch.index_template.settings
     );
   }
+
+  // @ts-expect-error upgrade typescript v5.1.6
+  if (expandedElasticsearch?.dynamic_dataset) {
+    // @ts-expect-error upgrade typescript v5.1.6
+    parsedElasticsearchEntry.dynamic_dataset = expandedElasticsearch.dynamic_dataset;
+  }
+
+  // @ts-expect-error upgrade typescript v5.1.6
+  if (expandedElasticsearch?.dynamic_namespace) {
+    // @ts-expect-error upgrade typescript v5.1.6
+    parsedElasticsearchEntry.dynamic_namespace = expandedElasticsearch.dynamic_namespace;
+  }
+
   return parsedElasticsearchEntry;
 }
 

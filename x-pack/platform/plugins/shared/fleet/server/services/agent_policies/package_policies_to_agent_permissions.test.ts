@@ -1296,6 +1296,91 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       expect(permissions).toMatchObject({
         'package-policy-dynamic-signal': {
           indices: [
+            { names: ['logs-otel.dataset-default'], privileges: ['auto_configure', 'create_doc'] },
+            {
+              names: ['metrics-otel.dataset-default'],
+              privileges: ['auto_configure', 'create_doc'],
+            },
+            {
+              names: ['traces-otel.dataset-default'],
+              privileges: ['auto_configure', 'create_doc'],
+            },
+          ],
+        },
+      });
+    });
+
+    it('uses elasticsearch.dynamic_dataset/dynamic_namespace from the stream for dynamic_signal_types permissions', async () => {
+      const packagePolicies: PackagePolicy[] = [
+        {
+          id: 'package-policy-dynamic-wildcard',
+          name: 'otel-policy-wildcard',
+          namespace: 'default',
+          enabled: true,
+          package: { name: 'input_otel', version: '1.0.0', title: 'Input OTel' },
+          inputs: [
+            {
+              type: 'otelcol',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: {
+                    type: 'logs',
+                    dataset: 'otel.dataset',
+                    elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
+                  },
+                  vars: {},
+                } as any,
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ];
+
+      const agentInputs = [
+        {
+          id: 'otelcol-input-1',
+          type: 'otelcol',
+          streams: [
+            {
+              id: 'stream-1',
+              service: {
+                pipelines: {
+                  'logs/otlp': {
+                    receivers: ['otlp'],
+                  },
+                  'metrics/otlp': {
+                    receivers: ['otlp'],
+                  },
+                  'traces/otlp': {
+                    receivers: ['otlp'],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      ] as any;
+
+      const permissions = await storedPackagePoliciesToAgentPermissions(
+        packageInfoCache,
+        'default',
+        packagePolicies,
+        agentInputs
+      );
+      expect(permissions?.['package-policy-dynamic-wildcard']?.indices).toHaveLength(3);
+      expect(permissions).toMatchObject({
+        'package-policy-dynamic-wildcard': {
+          indices: [
             { names: ['logs-*-*'], privileges: ['auto_configure', 'create_doc'] },
             { names: ['metrics-*-*'], privileges: ['auto_configure', 'create_doc'] },
             { names: ['traces-*-*'], privileges: ['auto_configure', 'create_doc'] },
@@ -1422,8 +1507,11 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       expect(permissions).toMatchObject({
         'package-policy-partial-signals': {
           indices: [
-            { names: ['logs-*-*'], privileges: ['auto_configure', 'create_doc'] },
-            { names: ['metrics-*-*'], privileges: ['auto_configure', 'create_doc'] },
+            { names: ['logs-otel.dataset-default'], privileges: ['auto_configure', 'create_doc'] },
+            {
+              names: ['metrics-otel.dataset-default'],
+              privileges: ['auto_configure', 'create_doc'],
+            },
             // No traces pipeline - should only grant logs and metrics permissions
           ],
         },
@@ -1650,7 +1738,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       );
 
       // The logfile input is non-dynamic — should get a concrete data stream permission,
-      // NOT the wildcard logs-*-* / metrics-*-* / traces-*-* from the otelcol template.
+      // NOT the dynamic_signal_types otelcol permissions (per-signal-type entries).
       expect(permissions?.['policy-logfile']?.indices).toHaveLength(1);
       expect(permissions?.['policy-logfile']?.indices?.[0].names).toEqual([
         'logs-mixed_multi_template_pkg.app-default',

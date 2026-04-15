@@ -66,7 +66,11 @@ export interface PackageSpecManifest {
   owner: { github?: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,
-    'index_template.settings' | 'index_template.mappings' | 'index_template.data_stream'
+    | 'index_template.settings'
+    | 'index_template.mappings'
+    | 'index_template.data_stream'
+    | 'dynamic_dataset'
+    | 'dynamic_namespace'
   >;
   agent?: {
     privileges?: { root?: boolean };

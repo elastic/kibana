@@ -234,12 +234,6 @@ export function getNormalizedDataStreams(
       ],
     };
 
-    dataStream.elasticsearch = {
-      ...dataStream.elasticsearch,
-      dynamic_dataset: true,
-      dynamic_namespace: true,
-    };
-
     return dataStream;
   });
 }

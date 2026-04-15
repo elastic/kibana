@@ -158,7 +158,8 @@ export function storedPackagePoliciesToAgentPermissions(
       default:
         // - Packages with dynamic_signal_types (input-only or composable integration) produce data
         //   for signal types defined in OTel pipelines; grant index permissions per signal type
-        //   pattern (e.g., logs-*-*, metrics-*-*) derived from agentInputs pipelines.
+        //   derived from agentInputs pipelines. Dataset/namespace breadth follows each stream's
+        //   elasticsearch.dynamic_dataset / dynamic_namespace (manifest), not dynamic_signal_types.
         if (isDynamicInput) {
           const otelcolPipelines = agentInputs?.find((i) => i.type === OTEL_COLLECTOR_INPUT_TYPE)
             ?.streams?.[0]?.service?.pipelines;
@@ -172,14 +173,33 @@ export function storedPackagePoliciesToAgentPermissions(
             signalTypes = [];
           }
 
-          const baseMeta: DataStreamMeta = {
-            type: 'logs',
-            dataset: '',
-            elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
-          };
+          const enabledStreams = packagePolicy.inputs
+            .filter((input) => input.enabled)
+            .flatMap((input) => input.streams?.filter((stream) => stream.enabled) ?? []);
+
+          const firstStream = enabledStreams[0];
+          let dataset =
+            firstStream?.compiled_stream?.data_stream?.dataset ??
+            firstStream?.data_stream?.dataset ??
+            '';
+
+          if (!dataset) {
+            const dynamicInput = packagePolicy.inputs.find(
+              (input) =>
+                input.enabled && packagePolicyInputAllowsUndefinedDataStreamType(pkg, input)
+            );
+            const policyTemplateName = dynamicInput?.policy_template;
+            if (policyTemplateName) {
+              dataset = `${pkg.name}.${policyTemplateName}`;
+            }
+          }
+
+          const elasticsearch = firstStream?.data_stream?.elasticsearch;
+
           dataStreamsForPermissions = signalTypes.map((type) => ({
-            ...baseMeta,
             type,
+            dataset,
+            elasticsearch,
           }));
         } else {
           // - Normal packages store some of the `data_stream` metadata in
@@ -233,7 +253,7 @@ export function storedPackagePoliciesToAgentPermissions(
                   dataStreams_.push(ds);
 
                   if (isOtelInput && stream.data_stream.type === 'traces') {
-                    // Span events are logs-*-* using the same data_stream.dataset as OTTL routing
+                    // Span events use logs-{dataset}-{namespace} with optional dynamic_namespace; same dataset as OTTL routing
                     // (getFullInputStreams + generateOtelTypeTransforms spanevent); include stream var override.
                     const baseDataset =
                       stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset;

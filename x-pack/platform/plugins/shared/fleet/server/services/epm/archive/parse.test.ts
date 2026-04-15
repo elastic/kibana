@@ -317,6 +317,16 @@ describe('parseTopLevelElasticsearchEntry', () => {
       },
     });
   });
+  it('Should handle dynamic_dataset', () => {
+    expect(parseTopLevelElasticsearchEntry({ dynamic_dataset: true })).toEqual({
+      dynamic_dataset: true,
+    });
+  });
+  it('Should handle dynamic_namespace', () => {
+    expect(parseTopLevelElasticsearchEntry({ dynamic_namespace: true })).toEqual({
+      dynamic_namespace: true,
+    });
+  });
 });
 
 describe('parseAndVerifyArchive', () => {
