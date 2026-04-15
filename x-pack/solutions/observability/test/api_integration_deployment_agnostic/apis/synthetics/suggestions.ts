@@ -145,75 +145,77 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         { concurrency: 1 }
       );
 
-      const apiResponse = await supertest
-        .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SUGGESTIONS}`)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .expect(200);
+      await retry.tryForTime(60 * 1000, async () => {
+        const apiResponse = await supertest
+          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SUGGESTIONS}`)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .expect(200);
 
-      expect(apiResponse.body.locations).toEqual([
-        {
-          count: 22,
-          label: privateLocation.label,
-          value: privateLocation.id,
-        },
-      ]);
-      const expectedIds = [
-        ...monitors.map((monitor) => ({
-          count: 1,
-          label: monitor.name,
-          value: expect.any(String),
-        })),
-        ...projectMonitors.monitors.slice(0, 2).map((monitor) => ({
-          count: 1,
-          label: monitor.name,
-          value: expect.any(String),
-        })),
-      ];
-      expect(apiResponse.body.monitorIds).toEqual(expect.arrayContaining(expectedIds));
-      expect(apiResponse.body.monitorTypes).toEqual([
-        {
-          count: 20,
-          label: 'http',
-          value: 'http',
-        },
-        {
-          count: 2,
-          label: 'icmp',
-          value: 'icmp',
-        },
-      ]);
-      expect(apiResponse.body.projects).toEqual([
-        {
-          count: 2,
-          label: project,
-          value: project,
-        },
-      ]);
-      expect(apiResponse.body.tags).toEqual(
-        expect.arrayContaining([
+        expect(apiResponse.body.locations).toEqual([
           {
-            count: 21,
-            label: 'tag1',
-            value: 'tag1',
+            count: 22,
+            label: privateLocation.label,
+            value: privateLocation.id,
           },
-          {
-            count: 21,
-            label: 'tag2',
-            value: 'tag2',
-          },
-          {
+        ]);
+        const expectedIds = [
+          ...monitors.map((monitor) => ({
             count: 1,
-            label: 'org:google',
-            value: 'org:google',
+            label: monitor.name,
+            value: expect.any(String),
+          })),
+          ...projectMonitors.monitors.slice(0, 2).map((monitor) => ({
+            count: 1,
+            label: monitor.name,
+            value: expect.any(String),
+          })),
+        ];
+        expect(apiResponse.body.monitorIds).toEqual(expect.arrayContaining(expectedIds));
+        expect(apiResponse.body.monitorTypes).toEqual([
+          {
+            count: 20,
+            label: 'http',
+            value: 'http',
           },
           {
-            count: 1,
-            label: 'service:smtp',
-            value: 'service:smtp',
+            count: 2,
+            label: 'icmp',
+            value: 'icmp',
           },
-        ])
-      );
+        ]);
+        expect(apiResponse.body.projects).toEqual([
+          {
+            count: 2,
+            label: project,
+            value: project,
+          },
+        ]);
+        expect(apiResponse.body.tags).toEqual(
+          expect.arrayContaining([
+            {
+              count: 21,
+              label: 'tag1',
+              value: 'tag1',
+            },
+            {
+              count: 21,
+              label: 'tag2',
+              value: 'tag2',
+            },
+            {
+              count: 1,
+              label: 'org:google',
+              value: 'org:google',
+            },
+            {
+              count: 1,
+              label: 'service:smtp',
+              value: 'service:smtp',
+            },
+          ])
+        );
+      });
     });
 
     it('handles query params for projects', async () => {
