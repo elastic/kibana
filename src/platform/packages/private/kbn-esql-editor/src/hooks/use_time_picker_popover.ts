@@ -49,7 +49,12 @@ export const useTimePickerPopover = ({ editorRef, popoverRef }: UseTimePickerPop
 
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
       datePickerOpenStatusRef.current = true;
-      popoverRef.current?.focus();
+      // Focus the popover container after React renders the portal.
+      // A synchronous focus() here would be a no-op since setPopoverPosition
+      // hasn't triggered a re-render yet and the div doesn't exist in the DOM.
+      requestAnimationFrame(() => {
+        popoverRef.current?.focus();
+      });
     }
   }, [editorRef, popoverRef]);
 
