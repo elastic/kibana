@@ -29,6 +29,12 @@ jest.mock('@elastic/eui', () => {
 
 jest.mock('../../hooks/use_fetch_alert_episode_tag_suggestions');
 const mockUseFetchSuggestions = jest.mocked(useFetchAlertEpisodeTagSuggestions);
+mockUseFetchSuggestions.mockReturnValue({
+  data: ['existing-tag', 'another-tag'],
+  isLoading: false,
+  isError: false,
+  isSuccess: true,
+} as unknown as ReturnType<typeof useFetchAlertEpisodeTagSuggestions>);
 
 const mockExpressions = expressionsPluginMock.createStartContract();
 const defaultProps = {
@@ -39,29 +45,15 @@ const defaultProps = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockUseFetchSuggestions.mockReturnValue({
-    data: ['existing-tag', 'another-tag'],
-    isLoading: false,
-    isError: false,
-    isSuccess: true,
-  } as unknown as ReturnType<typeof useFetchAlertEpisodeTagSuggestions>);
 });
 
 describe('BulkTagsModal', () => {
-  it('renders the modal title', () => {
+  it('renders the modal with title, warning, and combobox', () => {
     render(<BulkTagsModal {...defaultProps} />);
     expect(screen.getByText('Set tags for selected episodes')).toBeInTheDocument();
-  });
-
-  it('renders the replace warning', () => {
-    render(<BulkTagsModal {...defaultProps} />);
     expect(
       screen.getByText(/These tags will replace any existing tags on all selected episodes/)
     ).toBeInTheDocument();
-  });
-
-  it('renders the combobox', () => {
-    render(<BulkTagsModal {...defaultProps} />);
     expect(screen.getByTestId('bulkTagsModalComboBox')).toBeInTheDocument();
   });
 
