@@ -19,11 +19,16 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import { setupCompleteTriggerDefinition } from '../common/triggers/setup_complete_trigger';
+import {
+  createThreatCoverageInitializationWorkflowService,
+  type ThreatCoverageInitializationWorkflowService,
+} from './workflows/threat_coverage_initialization_workflow';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -206,6 +211,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private usageCollection?: UsageCollectionSetup;
 
   private isServerless: boolean;
+  private threatCoverageInitializationWorkflowService?: ThreatCoverageInitializationWorkflowService;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -829,6 +835,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.workflowsExtensions.registerTriggerDefinition(setupCompleteTriggerDefinition);
     }
 
+    if (plugins.workflowsManagement) {
+      this.threatCoverageInitializationWorkflowService =
+        createThreatCoverageInitializationWorkflowService(
+          this.logger,
+          plugins.workflowsManagement.management
+        );
+    }
+
     setupAlertsCapabilitiesSwitcher({
       core,
       logger: this.logger,
@@ -858,6 +872,24 @@ export class Plugin implements ISecuritySolutionPlugin {
     ).catch(() => {});
 
     this.ruleMonitoringService.start(core, plugins);
+
+    if (this.threatCoverageInitializationWorkflowService) {
+      const fakeRequest = kibanaRequestFactory({
+        headers: {},
+        path: '/',
+        route: { settings: {} },
+        url: { href: {}, hash: '' } as URL,
+        raw: { req: { url: '/' } } as never,
+      });
+
+      this.threatCoverageInitializationWorkflowService
+        .ensureWorkflow({ enabled: true, request: fakeRequest })
+        .catch((error) => {
+          this.logger.error(
+            `Failed to ensure threat coverage initialization workflow: ${error.message}`
+          );
+        });
+    }
 
     const savedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([

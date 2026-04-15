@@ -727,3 +727,6 @@ export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
 export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
   'securitySolution.registerAlertValidationStepsEnabled' as const;
 export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = false as const;
+
+export const THREAT_COVERAGE_INITIALIZATION_WORKFLOW_ID =
+  'workflow-f9c107e9-e0e5-5038-ae51-baf24c0b851a';

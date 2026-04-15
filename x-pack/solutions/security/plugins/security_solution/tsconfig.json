@@ -284,6 +284,7 @@
     "@kbn/esql-language",
     "@kbn/workflows-ui",
     "@kbn/workflows",
+    "@kbn/workflows-management-plugin",
     "@kbn/deeplinks-workflows",
     "@kbn/core-rendering-browser",
     "@kbn/controls-constants",

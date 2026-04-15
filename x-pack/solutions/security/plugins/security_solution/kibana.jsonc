@@ -89,7 +89,8 @@
       "workflowsExtensions",
       "cps",
       "searchInferenceEndpoints",
-      "workflowsExtensions"
+      "workflowsExtensions",
+      "workflowsManagement"
     ],
     "requiredBundles": [
       "esUiShared",
