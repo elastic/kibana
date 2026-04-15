@@ -135,11 +135,14 @@ export const streamsManagementSkill = defineSkillType({
     </tool_selection>
 
     <remediation_workflows>
-    When the user asks to fix an issue, follow the appropriate workflow:
+    When the user asks to fix an issue, follow the appropriate workflow.
+
+    IMPORTANT: Failed documents and degraded documents are distinct issue categories. Failed documents indicate processing errors — fix with ${UPDATE_PROCESSORS}. Degraded documents indicate unmapped fields — which are normal and expected (see <streams_domain>). Do not treat degraded documents as errors to fix unless the user specifically asks. If the original issue is failed documents, stay on the processing failures track even if you also observe degraded documents.
 
     Processing / ingestion failures (failed documents):
     1. If not already known, call ${GET_DATA_QUALITY} to identify failed/degraded counts.
     2. If failed docs > 0, call ${GET_FAILED_DOCUMENTS} to read error types and messages.
+    If the error type and message are already known from earlier in this conversation, skip directly to step 3. Do not re-check with a different time window — a misconfigured processor exists in the pipeline regardless of whether new failures are currently appearing.
     3. If you don't already have the current processing pipeline, call ${GET_STREAM} on the affected stream.
     4. Identify which processor step is causing the error (match error message to processor action/field).
     5. If the stream's own pipeline does not contain a matching processor AND the stream is wired, the error is likely from an ancestor. Call ${GET_STREAM} on ancestors up the hierarchy until you find the offending processor.
@@ -151,8 +154,6 @@ export const streamsManagementSkill = defineSkillType({
     1. Call ${GET_SCHEMA} to identify unmapped fields.
     2. Explain that unmapped fields are often normal (dynamic mapping) and only need explicit mapping if the user wants to change the field type or use it in ES|QL.
     3. If the user wants to map them, call ${MAP_FIELDS} with appropriate types.
-
-    These are distinct issues. Failed documents → processing errors → fix with ${UPDATE_PROCESSORS}. Degraded documents → unmapped fields → fix with ${MAP_FIELDS}. Do not conflate them.
     </remediation_workflows>
 
     <efficiency>

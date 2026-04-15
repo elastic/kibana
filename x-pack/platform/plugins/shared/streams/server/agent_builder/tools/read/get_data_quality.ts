@@ -110,9 +110,15 @@ export const createGetDataQualityTool = ({
         interpretation.push(
           "Failed documents indicate processing errors in this stream's pipeline configuration."
         );
+      } else {
+        interpretation.push(
+          'No failed documents in this time range. Note: this only reflects the queried window — it does not confirm the processing pipeline is healthy.'
+        );
       }
       if (degradedCount > 0) {
-        interpretation.push("Degraded documents indicate unmapped fields in this stream's schema.");
+        interpretation.push(
+          'Degraded documents contain unmapped fields. This is often normal (dynamic mapping) and does not necessarily indicate a problem.'
+        );
       }
 
       return {
