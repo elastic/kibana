@@ -60,18 +60,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilSearchingHasFinished();
 
-        await retry.try(async () => {
-          const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-            eventTypes: ['performance_metric'],
-            withTimeoutMs: performanceMetricTimeoutMs,
-          });
-
-          expect(events.length).to.be.greaterThan(0);
-          expect(events[events.length - 1].context.discoverProfiles).to.eql([
-            'example-root-profile',
-            'default-data-source-profile',
-          ]);
+        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['performance_metric'],
+          withTimeoutMs: performanceMetricTimeoutMs,
         });
+
+        expect(events[events.length - 1].context.discoverProfiles).to.eql([
+          'example-root-profile',
+          'default-data-source-profile',
+        ]);
       });
 
       it('should set EBT context for telemetry events when example profile and reset', async () => {
@@ -83,18 +80,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilSearchingHasFinished();
 
-        await retry.try(async () => {
-          const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-            eventTypes: ['performance_metric'],
-            withTimeoutMs: performanceMetricTimeoutMs,
-          });
-
-          expect(events.length).to.be.greaterThan(0);
-          expect(events[events.length - 1].context.discoverProfiles).to.eql([
-            'example-root-profile',
-            'example-data-source-profile',
-          ]);
+        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['performance_metric'],
+          withTimeoutMs: performanceMetricTimeoutMs,
         });
+
+        expect(events[events.length - 1].context.discoverProfiles).to.eql([
+          'example-root-profile',
+          'example-data-source-profile',
+        ]);
 
         // should reset the profiles when navigating away from Discover
         await testSubjects.click('logo');
