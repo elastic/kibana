@@ -49,7 +49,9 @@ export const getSampleIndexRecordsNode = (params: TranslatePanelGraphParams): Gr
       return {
         comments: [
           generateAssistantComment(
-            `Failed to fetch sample records from index \`${state.index_pattern}\`: ${error}`
+            `${NO_DATA_WARNING} \n\n ### Reason \n
+
+                      There was some error fetching records from index pattern : \`${state.index_pattern}\`: ${error}.`
           ),
         ],
       };

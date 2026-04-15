@@ -59,7 +59,7 @@ Specific Panel description: "${state.description}"`;
 
     return {
       esql_query: replaceIndexPattern(esqlQuery),
-      comments: comments?.map((c) => ({ ...c, message: replaceIndexPattern(c.message) })),
+      comments,
     };
   };
 };
