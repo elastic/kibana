@@ -8,9 +8,10 @@
 /**
  * Reusable CPS (Cross-Project Search) helpers for Scout tests.
  *
- * Provides constants, Elasticsearch index/document helpers, and Kibana space
- * utilities. Framework-agnostic — no dependency on apiClient, browser fixtures,
- * or any specific test suite.
+ * Provides constants and Elasticsearch index/document helpers.
+ * Framework-agnostic — no dependency on apiClient, browser fixtures,
+ * or any specific test suite. Space lifecycle is handled by the
+ * `cpsSpace` Playwright fixture in ui/fixtures/.
  *
  * Servers must be started with the cps_local config set:
  *   node scripts/scout start-server --arch serverless --domain security_complete --serverConfigSet cps_local
@@ -65,48 +66,6 @@ export const createMarkerFieldIndex = async (params: {
       [markerField]: 'present',
     },
   });
-};
-
-// ---------------------------------------------------------------------------
-// Kibana space helpers
-// ---------------------------------------------------------------------------
-
-interface KbnClientLike {
-  request: (opts: {
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-    path: string;
-    body?: unknown;
-  }) => Promise<unknown>;
-}
-
-/** Creates a Kibana space with the specified CPS project routing. */
-export const createCpsSpace = async (params: {
-  kbnClient: KbnClientLike;
-  spaceId: string;
-  projectRouting: string;
-}): Promise<void> => {
-  const { kbnClient, spaceId, projectRouting } = params;
-  await kbnClient.request({
-    method: 'POST',
-    path: '/api/spaces/space',
-    body: {
-      id: spaceId,
-      name: `CPS detection test ${spaceId}`,
-      description: 'Temporary space for CPS Scout tests',
-      disabledFeatures: [],
-      projectRouting,
-    },
-  });
-};
-
-/** Deletes a Kibana space, swallowing errors (e.g. space already deleted). */
-export const deleteCpsSpace = async (params: {
-  kbnClient: KbnClientLike;
-  spaceId: string;
-}): Promise<void> => {
-  await params.kbnClient
-    .request({ method: 'DELETE', path: `/api/spaces/space/${params.spaceId}` })
-    .catch(() => {});
 };
 
 // ---------------------------------------------------------------------------

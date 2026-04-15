@@ -6,15 +6,13 @@
  */
 
 import { randomUUID } from 'crypto';
-import { test } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
+import { test } from '../../../fixtures';
 import {
   CPS_TAGS,
   SPACE_PROJECT_ROUTING_ORIGIN_ONLY,
   SPACE_PROJECT_ROUTING_ALL,
   createMarkerFieldIndex,
-  createCpsSpace,
-  deleteCpsSpace,
   deleteTestIndices,
 } from '../../../../shared/cps_helpers';
 
@@ -105,90 +103,76 @@ test.describe('CPS field dropdown scoping - threat match mapping fields', { tag:
   test('origin-only space: threat field dropdown shows origin fields but not linked fields', async ({
     page,
     kbnUrl,
-    kbnClient,
+    cpsSpace,
     browserAuth,
   }) => {
-    const spaceId = `cps-ui-tm-orig-${runId}`;
-
-    await createCpsSpace({
-      kbnClient,
-      spaceId,
+    const spaceId = await cpsSpace.create({
+      spaceId: `cps-ui-tm-orig-${runId}`,
       projectRouting: SPACE_PROJECT_ROUTING_ORIGIN_ONLY,
     });
 
-    try {
-      await browserAuth.loginAsAdmin();
-      const { fieldComboBox } = await navigateToThreatMatchForm({
+    await browserAuth.loginAsAdmin();
+    const { fieldComboBox } = await navigateToThreatMatchForm({
+      page,
+      kbnUrl,
+      spaceId,
+      testIndex,
+    });
+
+    await test.step('origin_marker field is available', async () => {
+      const option = await getFieldDropdownOption({
+        comboBox: fieldComboBox,
         page,
-        kbnUrl,
-        spaceId,
-        testIndex,
+        fieldName: ORIGIN_MARKER_FIELD,
       });
+      await expect(option).toBeVisible({ timeout: 15_000 });
+    });
 
-      await test.step('origin_marker field is available', async () => {
-        const option = await getFieldDropdownOption({
-          comboBox: fieldComboBox,
-          page,
-          fieldName: ORIGIN_MARKER_FIELD,
-        });
-        await expect(option).toBeVisible({ timeout: 15_000 });
+    await test.step('linked_marker field is NOT available', async () => {
+      const option = await getFieldDropdownOption({
+        comboBox: fieldComboBox,
+        page,
+        fieldName: LINKED_MARKER_FIELD,
       });
-
-      await test.step('linked_marker field is NOT available', async () => {
-        const option = await getFieldDropdownOption({
-          comboBox: fieldComboBox,
-          page,
-          fieldName: LINKED_MARKER_FIELD,
-        });
-        await expect(option).toHaveCount(0, { timeout: 5_000 });
-      });
-    } finally {
-      await deleteCpsSpace({ kbnClient, spaceId });
-    }
+      await expect(option).toHaveCount(0, { timeout: 5_000 });
+    });
   });
 
   test('all-projects space: threat field dropdown shows fields from both origin and linked clusters', async ({
     page,
     kbnUrl,
-    kbnClient,
+    cpsSpace,
     browserAuth,
   }) => {
-    const spaceId = `cps-ui-tm-all-${runId}`;
-
-    await createCpsSpace({
-      kbnClient,
-      spaceId,
+    const spaceId = await cpsSpace.create({
+      spaceId: `cps-ui-tm-all-${runId}`,
       projectRouting: SPACE_PROJECT_ROUTING_ALL,
     });
 
-    try {
-      await browserAuth.loginAsAdmin();
-      const { fieldComboBox } = await navigateToThreatMatchForm({
+    await browserAuth.loginAsAdmin();
+    const { fieldComboBox } = await navigateToThreatMatchForm({
+      page,
+      kbnUrl,
+      spaceId,
+      testIndex,
+    });
+
+    await test.step('origin_marker field is available', async () => {
+      const option = await getFieldDropdownOption({
+        comboBox: fieldComboBox,
         page,
-        kbnUrl,
-        spaceId,
-        testIndex,
+        fieldName: ORIGIN_MARKER_FIELD,
       });
+      await expect(option).toBeVisible({ timeout: 15_000 });
+    });
 
-      await test.step('origin_marker field is available', async () => {
-        const option = await getFieldDropdownOption({
-          comboBox: fieldComboBox,
-          page,
-          fieldName: ORIGIN_MARKER_FIELD,
-        });
-        await expect(option).toBeVisible({ timeout: 15_000 });
+    await test.step('linked_marker field is also available', async () => {
+      const option = await getFieldDropdownOption({
+        comboBox: fieldComboBox,
+        page,
+        fieldName: LINKED_MARKER_FIELD,
       });
-
-      await test.step('linked_marker field is also available', async () => {
-        const option = await getFieldDropdownOption({
-          comboBox: fieldComboBox,
-          page,
-          fieldName: LINKED_MARKER_FIELD,
-        });
-        await expect(option).toBeVisible({ timeout: 15_000 });
-      });
-    } finally {
-      await deleteCpsSpace({ kbnClient, spaceId });
-    }
+      await expect(option).toBeVisible({ timeout: 15_000 });
+    });
   });
 });
