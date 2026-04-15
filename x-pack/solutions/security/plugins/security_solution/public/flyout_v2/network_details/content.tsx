@@ -11,7 +11,7 @@ import { NetworkDetails } from './components/network_details';
 import { FlyoutBody } from '../../flyout/shared/components/flyout_body';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 
-export interface PanelContentProps {
+export interface ContentProps {
   /**
    * IP value
    */
@@ -25,7 +25,7 @@ export interface PanelContentProps {
 /**
  * Network details flyout content section.
  */
-export const PanelContent: FC<PanelContentProps> = memo(({ ip, flowTarget }: PanelContentProps) => {
+export const Content: FC<ContentProps> = memo(({ ip, flowTarget }: ContentProps) => {
   return (
     <FlyoutBody>
       <NetworkDetails ip={ip} flowTarget={flowTarget} />
@@ -33,4 +33,4 @@ export const PanelContent: FC<PanelContentProps> = memo(({ ip, flowTarget }: Pan
   );
 });
 
-PanelContent.displayName = 'PanelContent';
+Content.displayName = 'Content';

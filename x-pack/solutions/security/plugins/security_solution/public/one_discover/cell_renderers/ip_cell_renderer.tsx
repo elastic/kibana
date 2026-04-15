@@ -10,7 +10,7 @@ import { EuiLink } from '@elastic/eui';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { useHistory } from 'react-router-dom';
 import { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
-import { NetworkPanel } from '../../flyout_v2/network_details';
+import { Network } from '../../flyout_v2/network_details';
 import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
@@ -50,7 +50,7 @@ const IpCellRendererComponent: React.FC<IpCellRendererProps> = ({ services, stor
           store,
           history,
           children: (
-            <NetworkPanel ip={ip} flowTarget={flowTarget} scopeId={ONE_DISCOVER_SCOPE_ID} />
+            <Network ip={ip} flowTarget={flowTarget} scopeId={ONE_DISCOVER_SCOPE_ID} />
           ),
         }),
         {

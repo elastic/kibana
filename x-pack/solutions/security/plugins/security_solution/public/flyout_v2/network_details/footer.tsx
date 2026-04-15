@@ -14,7 +14,7 @@ import { PREVIEW_FOOTER_LINK_TEST_ID, PREVIEW_FOOTER_TEST_ID } from './test_ids'
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { NetworkPanelKey } from '.';
 
-export interface PreviewPanelFooterProps {
+export interface PreviewFooterProps {
   /**
    * IP value
    */
@@ -32,7 +32,7 @@ export interface PreviewPanelFooterProps {
 /**
  * Footer at the bottom of preview panel with a link to open network details flyout.
  */
-export const PreviewPanelFooter: FC<PreviewPanelFooterProps> = ({ ip, flowTarget, scopeId }) => {
+export const PreviewFooter: FC<PreviewFooterProps> = ({ ip, flowTarget, scopeId }) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
   const openNetworkFlyout = useCallback(() => {

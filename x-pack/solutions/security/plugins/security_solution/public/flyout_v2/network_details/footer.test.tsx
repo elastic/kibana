@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { PreviewPanelFooter } from './footer';
+import { PreviewFooter } from './footer';
 import { PREVIEW_FOOTER_LINK_TEST_ID, PREVIEW_FOOTER_TEST_ID } from './test_ids';
 import { NetworkPanelKey } from '.';
 import { FlowTargetSourceDest } from '../../../common/search_strategy';
@@ -19,14 +19,14 @@ const ip = 'ip';
 const flowTarget = FlowTargetSourceDest.destination;
 const scopeId = 'scopeId';
 
-describe('<PreviewPanelFooter />', () => {
+describe('<PreviewFooter />', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   it('should open network details flyout when clicked', () => {
     const { getByTestId } = render(
-      <PreviewPanelFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />
+      <PreviewFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />
     );
 
     expect(getByTestId(PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();

@@ -12,7 +12,7 @@ import {
   useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 import { PREVIEW_FOOTER_TEST_ID } from './test_ids';
-import { NetworkPanel } from '.';
+import { Network } from '.';
 import { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { mockFlyoutApi } from '../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { TestProviders } from '../../common/mock';
@@ -24,7 +24,7 @@ const ip = 'ip';
 const flowTarget = FlowTargetSourceDest.destination;
 const scopeId = 'scopeId';
 
-describe('<NetworkPanel />', () => {
+describe('<Network />', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     jest.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
@@ -34,7 +34,7 @@ describe('<NetworkPanel />', () => {
   it('should not show footer if non-preview mode', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <NetworkPanel ip={ip} flowTarget={flowTarget} scopeId={scopeId} isPreviewMode={false} />
+        <Network ip={ip} flowTarget={flowTarget} scopeId={scopeId} isPreviewMode={false} />
       </TestProviders>
     );
 
@@ -44,7 +44,7 @@ describe('<NetworkPanel />', () => {
   it('should show footer if preview mode', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <NetworkPanel ip={ip} flowTarget={flowTarget} scopeId={scopeId} isPreviewMode={true} />
+        <Network ip={ip} flowTarget={flowTarget} scopeId={scopeId} isPreviewMode={true} />
       </TestProviders>
     );
 

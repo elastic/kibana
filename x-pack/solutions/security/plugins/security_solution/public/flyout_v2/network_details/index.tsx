@@ -10,15 +10,15 @@ import React, { memo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { PreviewPanelFooter } from './footer';
+import { PreviewFooter } from './footer';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
-import { PanelHeader } from './header';
-import { PanelContent } from './content';
+import { Header } from './header';
+import { Content } from './content';
 import { FlyoutNavigation } from '../../flyout/shared/components/flyout_navigation';
 
 export interface NetworkExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'network-details' | 'network-preview';
-  params: NetworkPanelProps;
+  params: NetworkProps;
 }
 
 export const NetworkPanelKey: NetworkExpandableFlyoutProps['key'] = 'network-details';
@@ -32,7 +32,7 @@ export const NETWORK_PREVIEW_BANNER = {
   textColor: 'warning',
 };
 
-export interface NetworkPanelProps extends Record<string, unknown> {
+export interface NetworkProps extends Record<string, unknown> {
   /**
    * IP value
    */
@@ -58,7 +58,7 @@ export interface NetworkPanelProps extends Record<string, unknown> {
 /**
  * Panel to be displayed in the network details expandable flyout right section.
  */
-export const NetworkPanel: FC<NetworkPanelProps> = memo(
+export const Network: FC<NetworkProps> = memo(
   ({ ip, flowTarget, scopeId, isPreviewMode, isOldFlyout }) => {
     return (
       <>
@@ -69,12 +69,12 @@ export const NetworkPanel: FC<NetworkPanelProps> = memo(
             isRulePreview={scopeId === TableId.rulePreview}
           />
         )}
-        <PanelHeader ip={ip} flowTarget={flowTarget} />
-        <PanelContent ip={ip} flowTarget={flowTarget} />
-        {isPreviewMode && <PreviewPanelFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />}
+        <Header ip={ip} flowTarget={flowTarget} />
+        <Content ip={ip} flowTarget={flowTarget} />
+        {isPreviewMode && <PreviewFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />}
       </>
     );
   }
 );
 
-NetworkPanel.displayName = 'NetworkPanel';
+Network.displayName = 'Network';

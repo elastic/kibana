@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
-import { PanelHeader } from './header';
+import { Header } from './header';
 import { FlowTargetSourceDest } from '../../../common/search_strategy';
 
 const mockProps = {
@@ -24,11 +24,11 @@ jest.mock('../../common/components/links', () => {
   };
 });
 
-describe('<PanelHeader />', () => {
+describe('<Header />', () => {
   it('should check for href value of the anchor element', () => {
     const { container } = render(
       <TestProviders>
-        <PanelHeader {...mockProps} />
+        <Header {...mockProps} />
       </TestProviders>
     );
 
@@ -40,7 +40,7 @@ describe('<PanelHeader />', () => {
   it('should verify the flyout title', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <PanelHeader {...mockProps} />
+        <Header {...mockProps} />
       </TestProviders>
     );
 

@@ -16,7 +16,7 @@ import { FlyoutHeader } from '../../flyout/shared/components/flyout_header';
 import { FlyoutTitle } from '../shared/components/flyout_title';
 import { encodeIpv6 } from '../../common/lib/helpers';
 
-export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
+export interface HeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
   /**
    * IP value
    */
@@ -32,8 +32,8 @@ const urlParamOverride = { timeline: { isOpen: false } };
 /**
  * Header component for the network details flyout.
  */
-export const PanelHeader: FC<PanelHeaderProps> = memo(
-  ({ ip, flowTarget, ...flyoutHeaderProps }: PanelHeaderProps) => {
+export const Header: FC<HeaderProps> = memo(
+  ({ ip, flowTarget, ...flyoutHeaderProps }: HeaderProps) => {
     const href = useMemo(() => getNetworkDetailsUrl(encodeIpv6(ip), flowTarget), [flowTarget, ip]);
 
     return (
@@ -57,4 +57,4 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
   }
 );
 
-PanelHeader.displayName = 'PanelHeader';
+Header.displayName = 'Header';
