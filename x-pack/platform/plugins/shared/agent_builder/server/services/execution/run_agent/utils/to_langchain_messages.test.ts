@@ -13,7 +13,12 @@ import type {
   ToolCallStep,
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ExecutionStatus,
+} from '@kbn/agent-builder-common';
+import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { convertPreviousRounds, groupToolCallSteps } from './to_langchain_messages';
 import type { ToolCallResultTransformer } from './create_result_transformer';
@@ -764,6 +769,149 @@ describe('convertPreviousRounds', () => {
         _reasoning: 'reason for call-2',
         id: 42,
       });
+    });
+  });
+
+  describe('background execution notices', () => {
+    const makeBackgroundExecution = (
+      overrides: Partial<BackgroundExecutionState> = {}
+    ): BackgroundExecutionState => ({
+      execution_id: 'bg-exec-1',
+      status: ExecutionStatus.completed,
+      response: { message: 'Background result' },
+      completed_at: { round_id: 'round-1' },
+      ...overrides,
+    });
+
+    it('injects before-round system notice for background executions without tool_call_group_id', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+      });
+      const bgExecution = makeBackgroundExecution({
+        completed_at: { round_id: 'round-1' },
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+          backgroundExecutions: [bgExecution],
+        }),
+      });
+
+      // Expected order: system_notice (before round), user message (round input), assistant (response), user (next input)
+      expect(result.length).toBeGreaterThanOrEqual(4);
+      expect(isHumanMessage(result[0])).toBe(true);
+      expect((result[0] as any).content).toContain('<system_notice>');
+      expect((result[0] as any).content).toContain('bg-exec-1');
+      // Round input follows
+      expect(isHumanMessage(result[1])).toBe(true);
+      expect((result[1] as any).content).toContain('hello');
+    });
+
+    it('injects intra-round system notice for background executions with tool_call_group_id', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+      });
+      const bgExecution = makeBackgroundExecution({
+        completed_at: { round_id: 'round-1', tool_call_group_id: 'group-abc' },
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+          backgroundExecutions: [bgExecution],
+        }),
+      });
+
+      // System notice should appear AFTER the round messages (intra-round), before next input
+      const lastBeforeNextInput = result[result.length - 2];
+      expect(isHumanMessage(lastBeforeNextInput)).toBe(true);
+      expect((lastBeforeNextInput as any).content).toContain('<system_notice>');
+      expect((lastBeforeNextInput as any).content).toContain('bg-exec-1');
+    });
+
+    it('does not inject notices when backgroundExecutions is empty', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+      });
+
+      const withBg = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+          backgroundExecutions: [],
+        }),
+      });
+      const withoutBg = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      expect(withBg.length).toBe(withoutBg.length);
+    });
+
+    it('does not inject notices for a round that does not match the completed_at round_id', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+      });
+      const bgExecution = makeBackgroundExecution({
+        completed_at: { round_id: 'round-999' },
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+          backgroundExecutions: [bgExecution],
+        }),
+      });
+
+      const noticeMessages = result.filter(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessages).toHaveLength(0);
+    });
+
+    it('injects error system notice for failed background executions', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+      });
+      const bgExecution = makeBackgroundExecution({
+        execution_id: 'bg-fail-1',
+        status: ExecutionStatus.failed,
+        response: undefined,
+        error: { code: 'internalError' as any, message: 'Something broke' },
+        completed_at: { round_id: 'round-1' },
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+          backgroundExecutions: [bgExecution],
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('has failed');
+      expect((noticeMessage as any).content).toContain('Something broke');
     });
   });
 });
