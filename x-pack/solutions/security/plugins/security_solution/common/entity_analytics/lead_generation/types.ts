@@ -149,11 +149,20 @@ export const bulkUpdateLeadsResponseSchema = z.object({
 
 export type BulkUpdateLeadsResponse = z.infer<typeof bulkUpdateLeadsResponseSchema>;
 
+export const enableLeadGenerationRequestSchema = z.object({
+  connectorId: z.string(),
+});
+
+export type EnableLeadGenerationRequest = z.infer<typeof enableLeadGenerationRequestSchema>;
+
 export const leadGenerationStatusSchema = z.object({
   isEnabled: z.boolean(),
   indexExists: z.boolean(),
   totalLeads: z.number(),
   lastRun: z.string().datetime().nullable(),
+  connectorId: z.string().optional(),
+  lastExecutionUuid: z.string().optional(),
+  lastError: z.string().nullable().optional(),
 });
 
 export type LeadGenerationStatus = z.infer<typeof leadGenerationStatusSchema>;

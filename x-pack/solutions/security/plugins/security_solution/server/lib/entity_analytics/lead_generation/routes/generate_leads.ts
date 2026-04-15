@@ -24,8 +24,9 @@ import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
-import { fetchAllLeadEntities } from '../entity_conversion';
+import { fetchCandidateEntities } from '../entity_conversion';
 import { runLeadGenerationPipeline } from '../run_pipeline';
+import { upsertLeadGenerationConfig } from '../saved_object';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const generateLeadsRoute = (
@@ -59,13 +60,17 @@ export const generateLeadsRoute = (
         try {
           const secSol = await context.securitySolution;
           const spaceId = secSol.getSpaceId();
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const coreCtx = await context.core;
+          const esClient = coreCtx.elasticsearch.client.asCurrentUser;
+          const soClient = coreCtx.savedObjects.client;
           const executionUuid = uuidv4();
           const riskScoreDataClient = secSol.getRiskScoreDataClient();
 
           const [, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
           const { connectorId } = request.body;
+
+          await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
           logger.info(
             `[LeadGeneration] Resolving connector (connectorId=${connectorId}, executionUuid=${executionUuid})`
           );
@@ -77,7 +82,7 @@ export const generateLeadsRoute = (
           void (async () => {
             try {
               await runLeadGenerationPipeline({
-                listEntities: () => fetchAllLeadEntities(crudClient, logger),
+                listEntities: () => fetchCandidateEntities(crudClient, logger),
                 esClient,
                 logger,
                 spaceId,
@@ -86,12 +91,26 @@ export const generateLeadsRoute = (
                 sourceType: 'adhoc',
                 chatModel,
               });
+              await upsertLeadGenerationConfig(soClient, spaceId, {
+                connectorId,
+                lastExecutionUuid: executionUuid,
+                lastError: null,
+              });
               logger.info(
                 `[LeadGeneration] Background generation completed (connectorId=${connectorId}, executionUuid=${executionUuid})`
               );
             } catch (pipelineError) {
+              const errorMessage =
+                pipelineError instanceof Error ? pipelineError.message : String(pipelineError);
               logger.error(
-                `[LeadGeneration] Background generation failed (executionUuid=${executionUuid}): ${pipelineError}`
+                `[LeadGeneration] Background generation failed (executionUuid=${executionUuid}): ${errorMessage}`
+              );
+              await upsertLeadGenerationConfig(soClient, spaceId, {
+                connectorId,
+                lastExecutionUuid: executionUuid,
+                lastError: errorMessage,
+              }).catch((e) =>
+                logger.warn(`[LeadGeneration] Failed to persist execution error: ${e.message}`)
               );
             }
           })();

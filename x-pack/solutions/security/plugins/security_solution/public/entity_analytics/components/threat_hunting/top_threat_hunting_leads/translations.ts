@@ -123,6 +123,14 @@ export const GENERATE_ERROR = i18n.translate(
   { defaultMessage: 'Failed to generate leads' }
 );
 
+export const GENERATE_TIMEOUT = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateTimeout',
+  {
+    defaultMessage:
+      'Lead generation is taking longer than expected. Results will appear when ready.',
+  }
+);
+
 export const STALENESS_FRESH = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.staleness.fresh',
   { defaultMessage: 'Fresh' }

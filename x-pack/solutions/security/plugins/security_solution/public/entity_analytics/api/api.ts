@@ -896,10 +896,11 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
-    const enableLeadGeneration = () =>
+    const enableLeadGeneration = ({ connectorId }: { connectorId: string }) =>
       http.fetch<{ success: boolean }>(ENABLE_LEAD_GENERATION_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
+        body: JSON.stringify({ connectorId }),
       });
 
     const disableLeadGeneration = () =>

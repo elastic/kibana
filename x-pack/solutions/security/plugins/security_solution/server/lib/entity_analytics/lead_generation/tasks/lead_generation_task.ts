@@ -28,7 +28,8 @@ import {
   type LatestTaskStateSchema as LeadGenerationTaskState,
 } from './state';
 import { runLeadGenerationPipeline } from '../run_pipeline';
-import { fetchAllLeadEntities } from '../entity_conversion';
+import { fetchCandidateEntities } from '../entity_conversion';
+import { getLeadGenerationConfig } from '../saved_object';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -194,10 +195,16 @@ const runLeadGenerationTask = async ({
       );
     }
 
-    const defaultConnector = await startPlugins.inference.getDefaultConnector(fakeRequest);
+    const config = await getLeadGenerationConfig(soClient, state.namespace);
+    if (!config?.connectorId) {
+      throw new Error(
+        'No connectorId configured; skipping scheduled run. Call POST /enable with a connectorId first.'
+      );
+    }
+
     const chatModel = await startPlugins.inference.getChatModel({
       request: fakeRequest,
-      connectorId: defaultConnector.connectorId,
+      connectorId: config.connectorId,
       chatModelOptions: {
         temperature: 0,
         maxRetries: 0,
@@ -206,7 +213,7 @@ const runLeadGenerationTask = async ({
     });
 
     await runLeadGenerationPipeline({
-      listEntities: () => fetchAllLeadEntities(crudClient, logger),
+      listEntities: () => fetchCandidateEntities(crudClient, logger),
       esClient,
       logger,
       spaceId: state.namespace,
