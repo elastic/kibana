@@ -267,7 +267,7 @@ export const RunsListPage: React.FC = () => {
           rowProps={(item) => ({
             onClick: (e: React.MouseEvent) => {
               const target = e.target as HTMLElement;
-              if (target.closest('.euiCheckbox')) return;
+              if (target.closest('.euiTableRowCellCheckbox, .euiLink, a')) return;
               history.push(`/runs/${item.run_id}`);
             },
             style: { cursor: 'pointer' },

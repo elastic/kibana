@@ -345,17 +345,40 @@ export const CompareRunsPage: React.FC = () => {
     [data?.results]
   );
 
+  const sortedResults = useMemo(() => {
+    const results = [...(data?.results ?? [])];
+    results.sort((a, b) => {
+      const datasetCmp = a.datasetName.localeCompare(b.datasetName);
+      if (datasetCmp !== 0) return datasetCmp;
+      return a.evaluatorName.localeCompare(b.evaluatorName);
+    });
+    return results;
+  }, [data?.results]);
+
+  const firstRowByDataset = useMemo(() => {
+    const seen = new Set<string>();
+    const map = new Map<number, boolean>();
+    sortedResults.forEach((item, idx) => {
+      map.set(idx, !seen.has(item.datasetId));
+      seen.add(item.datasetId);
+    });
+    return map;
+  }, [sortedResults]);
+
   const columns: Array<EuiBasicTableColumn<PairedTTestResult>> = useMemo(
     () => [
       {
         field: 'datasetName',
         name: i18n.COLUMN_DATASET,
-        sortable: true,
+        render: (_val: string, item: PairedTTestResult) => {
+          const idx = sortedResults.indexOf(item);
+          if (!firstRowByDataset.get(idx)) return null;
+          return <strong>{item.datasetName}</strong>;
+        },
       },
       {
         field: 'evaluatorName',
         name: i18n.COLUMN_EVALUATOR,
-        sortable: true,
       },
       {
         field: 'sampleSize',
@@ -398,7 +421,7 @@ export const CompareRunsPage: React.FC = () => {
         ),
       },
     ],
-    []
+    [sortedResults, firstRowByDataset]
   );
 
   if (!runIdA || !runIdB) {
@@ -497,7 +520,7 @@ export const CompareRunsPage: React.FC = () => {
 
           <EuiSpacer size="l" />
 
-          {data.results.length === 0 ? (
+          {sortedResults.length === 0 ? (
             <EuiEmptyPrompt
               iconType="search"
               title={<h3>{i18n.NO_RESULTS_TITLE}</h3>}
@@ -507,21 +530,15 @@ export const CompareRunsPage: React.FC = () => {
               ]}
             />
           ) : (
-            <>
-              <EuiText size="s" color="subdued">
-                <p>{i18n.CLICK_ROW_HINT}</p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiBasicTable<PairedTTestResult>
-                tableCaption={i18n.TABLE_CAPTION}
-                items={data.results}
-                columns={columns}
-                rowProps={(item) => ({
-                  onClick: () => handleRowClick(item),
-                  className: clickableRowClass,
-                })}
-              />
-            </>
+            <EuiBasicTable<PairedTTestResult>
+              tableCaption={i18n.TABLE_CAPTION}
+              items={sortedResults}
+              columns={columns}
+              rowProps={(item) => ({
+                onClick: () => handleRowClick(item),
+                className: clickableRowClass,
+              })}
+            />
           )}
         </>
       )}
