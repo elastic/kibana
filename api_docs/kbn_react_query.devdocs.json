@@ -14509,6 +14509,10 @@
               },
               {
                 "plugin": "slo",
+                "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_fetch_composite_slo_list.ts"
+              },
+              {
+                "plugin": "slo",
                 "path": "x-pack/solutions/observability/plugins/slo/public/pages/slos/hooks/use_fetch_slos_overview.ts"
               },
               {
@@ -14673,6 +14677,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/hooks/insights/use_fetch_pending_scans.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/hooks/insights/use_fetch_insights_ab.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/management/services/policies/hooks.ts"
               },
               {
@@ -14734,6 +14746,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/logic/detection_engine_health/use_space_rules_health.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home/entities_table/grouping/use_fetch_grouped_data.ts"
               },
               {
                 "plugin": "securitySolution",

@@ -28,6 +28,14 @@ describe('SalesforceConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('should define every action (except test) as a tool for agent exposure', () => {
+    for (const actionName of Object.keys(SalesforceConnector.actions)) {
+      if (actionName !== 'test') {
+        expect(SalesforceConnector.actions[actionName].isTool).toBe(true);
+      }
+    }
+  });
+
   describe('auth', () => {
     it('supports oauth_client_credentials auth', () => {
       const types = (SalesforceConnector.auth?.types as Array<string | { type: string }>).map((t) =>

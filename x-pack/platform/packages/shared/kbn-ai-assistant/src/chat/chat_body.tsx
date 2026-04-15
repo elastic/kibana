@@ -134,7 +134,7 @@ export function ChatBody({
   refreshConversations,
   updateDisplayedConversation,
   onConversationDuplicate,
-  navigateToConnectorsManagementApp,
+  navigateToModelManagementApp,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
@@ -152,7 +152,7 @@ export function ChatBody({
   setIsUpdatingConversationList: (isUpdating: boolean) => void;
   refreshConversations: () => void;
   updateDisplayedConversation: (id?: string) => void;
-  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
+  navigateToModelManagementApp: (application: ApplicationStart) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -727,7 +727,7 @@ export function ChatBody({
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
           isConversationApp={!showLinkToConversationsApp}
-          navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
+          navigateToModelManagementApp={navigateToModelManagementApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
