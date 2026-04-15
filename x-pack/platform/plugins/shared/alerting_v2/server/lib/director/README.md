@@ -6,8 +6,6 @@ The Director is a state engine that derives episode transitions (for example `pe
 
 Configurable transition strategies encapsulate how rules move between episode statuses (including count/timeframe thresholds) without changing `DirectorService` core logic.
 
-See also: [Rule executor README](../rule_executor/README.md) and [server README](../../README.md).
-
 ## Architecture Overview
 
 ```

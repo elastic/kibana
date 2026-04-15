@@ -6,7 +6,7 @@ The Rule Executor runs v2 rules on a Task Manager schedule: load the rule saved 
 
 When a rule is scheduled to run, the Task Manager triggers the Rule Executor. The executor follows a pipeline pattern where execution flows through a series of discrete steps, each handling a specific responsibility.
 
-See also: [Director service](../director/README.md) (episode transitions) and [server README](../../README.md) (full map).
+See also: [Director service](../director/README.md) and [server README](../../README.md).
 
 ## Role in the system
 
@@ -20,11 +20,11 @@ Rule Executor                    Downstream
 
 - One Task Manager task per enabled rule.
 - The executor writes append-only documents to the `.rule-events` data stream (`StoreAlertEventsStep`).
-- The [dispatcher](../dispatcher/README.md) consumes alert-type episodes for notification gating; signal rows follow a different path.
+- The [dispatcher](../dispatcher/README.md) consumes alert-type episodes for notification gating.
 
 ## Alert vs signal rules
 
-Rules have a `kind` of `alert` or `signal` (see the rule saved object schema). Alert rules participate in episode lifecycle: the director attaches `episode.*` fields, recovery and grouping semantics apply, and the dispatcher matches only `type: alert` rule events. Signal rules are observation-focused; the director skips episode tracking, and those events are not processed by the notification pipeline described in the dispatcher README.
+Rules have a `kind` of `alert` or `signal` (see the rule saved object schema). Alert rules participate in episode lifecycle: the director attaches `episode.*` fields, recovery and grouping semantics apply, and the dispatcher matches only `type: alert` rule events. Signal rules are observation-focused. The director skips episode tracking, and those events are not processed by the notification pipeline described in the [dispatcher README](../dispatcher/README.md).
 
 ## Architecture
 
@@ -77,7 +77,7 @@ The executor uses a hybrid architecture combining:
 
 ## Rule configuration
 
-Rules are persisted as saved objects; attributes include `kind`, `metadata` (name, description, tags, …), `time_field`, `schedule` (`every`, optional `lookback`), `evaluation` (ES\|QL `base` and optional `condition`), optional `recovery_policy`, `state_transition`, `grouping`, `no_data`, optional `artifacts`, and server-managed fields such as `enabled` and audit timestamps. The persisted shape is defined in `saved_objects/schemas/rule_saved_object_attributes/`; HTTP/API schemas live in `@kbn/alerting-v2-schemas`. The executor reads the rule via `FetchRuleStep` and does not embed notification policy ids on the document.
+Rules are persisted as saved objects. Attributes include `kind`, `metadata` (name, description, tags, etc), `time_field`, `schedule`, `evaluation` , optional `recovery_policy`, `state_transition`, `grouping`, `no_data`, optional `artifacts`, and server-managed fields such as `enabled` and audit timestamps. The persisted shape is defined in `saved_objects/schemas/rule_saved_object_attributes/`. HTTP/API schemas live in `@kbn/alerting-v2-schemas`.
 
 ## Operational parameters
 
@@ -108,31 +108,22 @@ Each run is driven by Task Manager with `ruleId` and `spaceId` in the task param
 
 ## Recovery events
 
-Recovery is implemented in [`CreateRecoveryEventsStep`](steps/create_recovery_events_step.ts) after [`CreateAlertEventsStep`](steps/create_alert_events_step.ts), so `alertEventsBatch` already contains this run’s breach documents (`status: breached`, one `group_hash` per evaluated group). Recovery only applies to `kind: alert` rules; signal rules skip this step.
+Recovery is implemented in [`CreateRecoveryEventsStep`](steps/create_recovery_events_step.ts) after [`CreateAlertEventsStep`](steps/create_alert_events_step.ts), so `alertEventsBatch` already contains this run’s breach documents (`status: breached`, one `group_hash` per evaluated group). Recovery only applies to `kind: alert` rules. Signal rules skip this step. There are two strategies to produce recovery events: `no_breach` and `query` recovery.
 
-### What “active” means
+### `no_breach` recovery (default)
 
-The executor needs the set of groups that still have an open episode (not yet inactive) in `.rule-events`. [`getActiveAlertGroupHashesQuery`](queries.ts) runs against the alert events data stream for the rule id, keeps the latest `episode.status` per `group_hash`, and returns rows where that status is `pending`, `active`, or `recovering`. Those `group_hash` values are the **active** set. If that query returns nothing, no recovery events are produced for the run.
+The executor needs the set of groups that still have an open episode (not yet inactive) in `.rule-events`. A query runs against the rule events data stream for the rule id and returns the episodes where that status is `pending`, `active`, or `recovering`. Those `group_hash` values are the **active** set. The breached events produced by the ES\|QL query is the breached set. The executor emits one **recovered** rule event per active group hash that is **not** in the breached set: the breach query no longer returns a row for that group, but the episode was still non-inactive in the index, so the group is treated as recovered.
 
-### Default: `no_breach` recovery (`recovery_policy.type` omitted or `no_breach`)
+### `query` recovery
 
-[`buildRecoveryAlertEvents`](build_alert_events.ts) compares:
-
-- **Active group hashes** — from the index query above.
-- **Breached group hashes** — the set of `group_hash` values on the current run’s breach events in `alertEventsBatch`.
-
-It emits one **recovered** rule event per active group hash that is **not** in the breached set: the breach query no longer returns a row for that group, but the episode was still non-inactive in the index, so the group is treated as recovered. Empty `data` on those documents is expected for this path.
-
-### Alternative: `query` recovery (`recovery_policy.type` is `query`)
-
-When the rule defines `recovery_policy.query.base`, the step runs a **separate** ES\|QL recovery query with the same time-window plumbing as other rule queries (`getQueryPayload`, lookback from `schedule.lookback` or `schedule.every`). [`buildQueryRecoveryAlertEvents`](build_alert_events.ts) walks the result rows: for each row it computes `group_hash` using the same grouping fields as breach events. Rows whose hash appears in the **active** set (and are seen for the first time in the result) become recovered events, carrying that row as `data`. If the recovery query returns no rows or none of the rows match an active group hash, no recovery documents are added.
+When the rule defines `recovery_policy.query.base`, the step runs a **separate** ES\|QL recovery query with the same time-window plumbing as other rule queries. The executor walks the result rows: for each row it computes `group_hash` using the same grouping fields as breach events. Rows whose hash appears in the **active** set (compouted the same as above) become recovered events. If the recovery query returns no rows or none of the rows match an active group hash, no recovery documents are added.
 
 ### Summary
 
 | Mode | When recovery rows are emitted |
 | --- | --- |
 | `no_breach` | Active episode in the index, but this run’s breach batch does not include that `group_hash`. |
-| `query` | Active episode in the index, and the dedicated recovery query returns a row whose computed `group_hash` matches that group (first row wins per hash). |
+| `query` | Active episode in the index, and the dedicated recovery query returns a row whose computed `group_hash` matches that group. |
 
 Recovered documents are appended to `alertEventsBatch` before the director and store steps.
 
@@ -140,7 +131,7 @@ Recovered documents are appended to `alertEventsBatch` before the director and s
 
 1. Task Manager invokes [`RuleExecutorTaskRunner`](task_runner.ts) (`RuleExecutorTaskDefinition` in [`task_definition.ts`](task_definition.ts)).
 2. [`RuleExecutionPipeline`](execution_pipeline.ts) runs ordered `RuleExecutionStep` implementations registered on `RuleExecutionStepsToken` in `setup/bind_rule_executor.ts`.
-3. Each step consumes a `PipelineStateStream` and yields `continue` (updated state) or `halt` with a `HaltReason` — halt is control flow, not necessarily an application error (see Halt reasons below).
+3. Each step consumes a `PipelineStateStream` and yields `continue` (updated state) or `halt` with a `HaltReason`. Halt is control flow, not necessarily an application error (see Halt reasons below).
 4. Middleware on `RuleExecutionMiddlewaresToken` wraps every step (cancellation boundary, APM, error handling).
 
 ### RuleExecutorTaskRunner
@@ -169,11 +160,11 @@ Key fields (full type in `types.ts`):
 
 | Field | Set by | Purpose |
 | --- | --- | --- |
-| `input` | Pipeline / task runner | `ruleId`, `spaceId`, `scheduledAt`, `executionContext` — identity and scheduling context for the run. |
+| `input` | Pipeline / task runner | `ruleId`, `spaceId`, `scheduledAt`, `executionContext`. |
 | `rule` | Fetch rule | Rule document from saved objects (`FetchRuleStep`). |
 | `queryPayload` | Execute rule query | ES\|QL filter and params for the query (`ExecuteRuleQueryStep`). |
 | `esqlRowBatch` | Execute rule query | One batch of ES\|QL result rows (the query step may emit multiple continues as batches stream). |
-| `alertEventsBatch` | Create alert events, create recovery, director | Materialized `.rule-events` documents; recovery appends rows, director enriches episode fields for `kind: alert` before store. |
+| `alertEventsBatch` | Create alert events, create recovery, director | Materialized `.rule-events` documents. Recovery appends rows, director enriches episode fields for `kind: alert` before store. |
 
 ### Execution steps
 
@@ -181,70 +172,42 @@ Steps are self-contained units of work that implement `RuleExecutionStep`. They 
 
 | # | Step | Summary |
 | --- | --- | --- |
-| 1 | `WaitForResourcesStep` | Blocks until Elasticsearch resources for alerting v2 (data streams, templates, etc.) are ready via `ResourceManager.waitUntilReady`, so the run does not index or query before that infrastructure exists. |
-| 2 | `FetchRuleStep` | Loads the rule saved object by id through `RulesClient`, merges `rule` into state, and halts with `rule_deleted` on 404 so downstream steps always have the rule definition. |
-| 3 | `ValidateRuleStep` | Ensures `state.rule.enabled` is true and halts with `rule_disabled` otherwise, skipping work for disabled rules without mutating external state. |
-| 4 | `ExecuteRuleQueryStep` | Builds `queryPayload` from the rule (time window, condition, recovery, grouping, no-data semantics) and streams ES\|QL; each batch merges `queryPayload` and `esqlRowBatch` into state so breach rows are produced incrementally instead of holding large result sets in memory. |
-| 5 | `CreateAlertEventsStep` | Maps each `esqlRowBatch` to `alertEventsBatch` rule-event documents (`build_alert_events` / breach semantics), turning raw rows into the shape the director and indexer expect. |
-| 6 | `CreateRecoveryEventsStep` | For `kind: alert`, loads active group hashes from Elasticsearch, compares them to the current breach batch, and appends recovery events (or, when `recovery_policy.type` is `query`, runs a dedicated recovery ES\|QL and builds recovery docs). Skipped for non-alert rules—surfaces transitions when groups leave the breach set, not only ongoing breaches. |
-| 7 | `DirectorStep` | For `kind: alert`, calls `DirectorService.run` to enrich `alertEventsBatch` with episode identity and status; for `kind: signal` or an empty batch, yields state unchanged—centralizing episode lifecycle fields on alert events before persistence. |
-| 8 | `StoreAlertEventsStep` | Bulk-indexes `alertEventsBatch` to the configured `.rule-events` data stream so events are durable and visible to the dispatcher and other readers. |
-
-### Step-by-step semantics
-
-The following section explains each stage in plain language:
-
-1. Wait for resources  
-   The run waits until required Elasticsearch assets are ready so later steps do not fail on missing indices or templates.
-
-2. Fetch rule  
-   It loads the current rule document. If the rule was deleted, the pipeline halts with a domain reason instead of throwing.
-
-3. Validate rule  
-   If the rule is disabled, the pipeline halts; there is nothing further to do for this execution.
-
-4. Execute rule query  
-   It builds the ES\|QL request from the rule (including lookback and conditions) and streams result batches into state. Each batch updates `esqlRowBatch` for the next step.
-
-5. Create alert events  
-   It converts each batch of result rows into alert rule-event documents (breach side of the model).
-
-6. Create recovery events  
-   For alert rules, it discovers which group hashes are still active in the index, compares that to the current breach batch, and appends recovery events (including query-based recovery when configured). Non-alert rules skip this step.
-
-7. Director  
-   For alert rules, it runs the director to attach or update episode-related fields. Signal rules skip episode tracking and pass the batch through unchanged.
-
-8. Store alert events  
-   It writes the final batches to the rule-events data stream so the rest of the platform can consume them.
+| 1 | `WaitForResourcesStep` | The run waits until required Elasticsearch assets are ready so later steps do not fail on missing indices or templates. |
+| 2 | `FetchRuleStep` | It loads the current rule document. If the rule was deleted, the pipeline halts with a domain reason instead of throwing. |
+| 3 | `ValidateRuleStep` | If the rule is disabled, the pipeline halts. There is nothing further to do for this execution. |
+| 4 | `ExecuteRuleQueryStep` | It builds the ES\|QL request from the rule (including lookback and conditions) and streams result batches into state. Each batch updates `esqlRowBatch` for the next step. |
+| 5 | `CreateAlertEventsStep` | It converts each batch of result rows into breached rule-event documents. The results are written to the `alertEventsBatch` for the next step. |
+| 6 | `CreateRecoveryEventsStep` | For alert rules, it discovers which group hashes are still active in the index, compares that to the current breach batch, and appends recovery events (including query-based recovery when configured). Non-alert rules skip this step. |
+| 7 | `DirectorStep` | For alert rules, it runs the director to attach or update episode-related fields. Signal rules skip episode tracking and pass the batch through unchanged. |
+| 8 | `StoreAlertEventsStep` | It writes the final batches to the rule-events data stream so the rest of the platform can consume them. |
 
 ### Halt reasons
 
-A step may return `halt` (not an error — short-circuit). Reasons are defined on `HaltReason` in `types.ts`.
+A step may return `halt` to stop a the execution of the pipeline. Reasons are defined on `HaltReason` in `types.ts`.
 
 | Reason | Meaning |
 | --- | --- |
 | `rule_deleted` | The rule saved object was not found (`FetchRuleStep`). |
 | `rule_disabled` | The rule exists but is disabled (`ValidateRuleStep`). |
-| `state_not_ready` | Required pipeline state is missing (for example rule or intermediate batches not present in state when a step runs); defensive halt from stream wiring or ordering. |
+| `state_not_ready` | Required pipeline state is missing (for example rule or intermediate batches not present in state when a step runs). A defensive halt from stream wiring or ordering. |
 
 ## Guarantees and limits
 
-- Streamed ES\|QL: `ExecuteRuleQueryStep` emits multiple batches; steps must tolerate partial `esqlRowBatch` / `alertEventsBatch` updates.
-- Task timeout is `5m` per run (`task_definition.ts`); long queries or stalls should respect `executionContext` cancellation where applicable.
-- Idempotency of side effects outside Kibana (for example workflows) is the caller’s concern once events are written; the executor focuses on durable indexing of rule events.
+- Streamed ES\|QL: `ExecuteRuleQueryStep` emits multiple batches. The steps must tolerate partial `esqlRowBatch` / `alertEventsBatch` updates.
+- Task timeout is `5m` per run (`task_definition.ts`). Long queries or stalls should respect `executionContext` cancellation where applicable.
+- Idempotency of side effects outside Kibana is the caller’s concern once events are written. The executor focuses on durable indexing of rule events.
 
 ## Key design principles
 
-1. Immutable Stream State: Steps consume a `PipelineStateStream` and emit `StepStreamResult` objects. Never mutate incoming state directly; always emit a new state object when updating fields.
+1. Immutable Stream State: Steps consume a `PipelineStateStream` and emit `StepStreamResult` objects. Never mutate incoming state directly. Always emit a new state object when updating fields.
 
-2. Domain-Driven: Steps work with domain concepts only. No task manager types (`taskInstance`, `RunResult`) are exposed to steps.
+2. Domain-Driven: Steps work with domain concepts only.
 
 3. Single Responsibility: Each step handles one logical unit of work.
 
 4. Dependency Injection: Steps use Inversify for dependency injection. Dependencies are injected via constructor.
 
-5. Separation of Concerns: Global operations use middleware; step-specific operations use decorators.
+5. Separation of Concerns: Global operations use middleware and step-specific operations use decorators.
 
 ## Middleware vs decorators
 

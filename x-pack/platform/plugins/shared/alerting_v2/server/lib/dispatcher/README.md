@@ -2,11 +2,7 @@
 
 > **Prerequisites:** Read the [server-level README](../../README.md) first for an overview of system concepts (rule events, series, episodes, rules) and how the components fit together.
 
-The Dispatcher is the notification pipeline for alerting v2. It reads data from `.rule-events` and `.alert-actions`, decides what should or should not notify, sends eligible groups to destinations (for example workflows), and records final outcomes in `.alert-actions`.
-
-It runs as its own Task Manager task, separate from per-rule execution. This separation keeps rule evaluation focused on producing events, while notification gating is handled asynchronously with its own cadence and state.
-
-Policy matchers use KQL and are evaluated in-process. A policy with an empty matcher is a catch-all.
+The Dispatcher is the notification pipeline for alerting v2. It reads data from `.rule-events` and `.alert-actions`, decides what should or should not notify, sends eligible groups to destinations (for example workflows), and records final outcomes in `.alert-actions`. It runs as its own Task Manager task, separate from per-rule execution. This separation keeps rule evaluation focused on producing events, while notification gating is handled asynchronously with its own cadence and state. Policy matchers use KQL and are evaluated in-process. A policy with an empty matcher is a catch-all.
 
 ## Role in the system
 
@@ -88,10 +84,11 @@ Each policy specifies:
 - A KQL `matcher` evaluated against each candidate episode (episode fields plus `data.*` from the rule event). An empty or omitted matcher matches every episode (catch-all).
 - `groupBy` and `groupingMode` (`per_episode`, `all`, or `per_field`), which control how matched episodes are batched into notification groups before throttling and dispatch.
 - `throttle` (strategy and optional interval) to limit how often the same notification group may fire.
-- `destinations`: where to send a group (for example workflow ids). Optional `apiKey` for authenticated dispatch.
+- `destinations`: where to send a group (for example workflow ids). 
 - `tags` for organization and filtering in the UI.
+- Optional `apiKey` for authenticated dispatch.
 
-The same policy can match episodes produced by different rules when each episode satisfies that policy’s matcher; matching and grouping are still evaluated in the context of the episode’s rule and policy pair. Saved object schemas and HTTP APIs live under `saved_objects/` and `routes/`; the dispatcher-facing shape is in `lib/dispatcher/types.ts` (`NotificationPolicy`).
+The same policy can match episodes produced by different rules when each episode satisfies that policy’s matcher. Matching and grouping are still evaluated in the context of the episode’s rule and policy pair. Saved object schemas and HTTP APIs live under `saved_objects/` and `routes/`. The dispatcher-facing shape is in `lib/dispatcher/types.ts` (`NotificationPolicy`).
 
 ## Operational parameters
 
@@ -133,7 +130,7 @@ It uses those anchors plus action history to avoid replaying already-handled epi
 
 1. Task Manager invokes [`DispatcherTaskRunner`](task_runner.ts) (`DispatcherTaskDefinition` in [`task_definition.ts`](task_definition.ts)).
 2. [`DispatcherService`](dispatcher.ts) runs [`DispatcherPipeline`](execution_pipeline.ts): ordered `DispatcherStep` implementations on `DispatcherExecutionStepsToken` in `setup/bind_dispatcher_executor.ts`.
-3. Each step reads `DispatcherPipelineState` and returns `continue` (optional state merge) or `halt` with a `DispatcherHaltReason` — halt is control flow, not necessarily an application error (see Halt reasons below).
+3. Each step reads `DispatcherPipelineState` and returns `continue` (optional state merge) or `halt` with a `DispatcherHaltReason`.
 4. Feature flag: dispatcher may be disabled via Kibana advanced settings (`DispatcherEnabledProviderToken` in `setup/bind_services.ts`).
 
 ### DispatcherTaskRunner
@@ -141,7 +138,7 @@ It uses those anchors plus action history to avoid replaying already-handled epi
 Location: `task_runner.ts`
 
 The entry point for dispatcher runs. It:
-- Resolves whether the dispatcher is enabled via `DispatcherEnabledProvider`; if disabled, returns the prior task state without running the pipeline.
+- Resolves whether the dispatcher is enabled via `DispatcherEnabledProvider`. If disabled, returns the prior task state without running the pipeline.
 - Builds `DispatcherExecutionParams` from the task instance (`previousStartedAt`, `abortController`).
 - Delegates to `DispatcherService.run` and persists `previousStartedAt` in Task Manager state from the execution result.
 
@@ -155,7 +152,7 @@ Sets `startedAt`, invokes `DispatcherPipeline.execute` with `{ startedAt, previo
 
 Location: `execution_pipeline.ts`
 
-Runs injected `DispatcherStep` implementations in registration order; merges `continue` payloads into `DispatcherPipelineState`; on `halt`, stops with `haltReason` and final state. Each step runs under `withDispatcherSpan` for tracing.
+Runs injected `DispatcherStep` implementations in registration order. Merges `continue` payloads into `DispatcherPipelineState`. On `halt`, stops with `haltReason` and final state. Each step runs under `withDispatcherSpan` for tracing.
 
 ### Pipeline state (`DispatcherPipelineState`)
 
@@ -179,50 +176,16 @@ Registered on `DispatcherExecutionStepsToken` in `setup/bind_dispatcher_executor
 
 | # | Step | Summary |
 | --- | --- | --- |
-| 1 | `FetchEpisodesStep` | Loads candidate episodes that appear new or newly relevant for this execution window, defining the working set so downstream steps do not scan all historical episodes. |
-| 2 | `FetchSuppressionsStep` | Loads suppression signals (ack/deactivate/snooze related state) for the candidate set so suppression decisions use the latest action state, not only event status. |
-| 3 | `ApplySuppressionStep` | Splits candidates into `dispatchable` and `suppressed` with reasons, avoiding policy evaluation and dispatch for episodes already gated out. |
-| 4 | `FetchRulesStep` | Loads rule metadata for dispatchable episodes so matchers and payloads have rule context (rules do not store notification policy ids). |
-| 5 | `FetchPoliciesStep` | Loads all enabled notification policies for the space (decrypted where needed); every enabled policy is a candidate and matchers decide which episodes each policy applies to. |
-| 6 | `EvaluateMatchersStep` | Evaluates each policy matcher against each applicable episode and builds episode-policy matches so eligibility is explicit. |
-| 7 | `BuildGroupsStep` | Groups matches into notification groups per policy mode and keys so dispatch and throttling operate at group granularity, not on raw episodes alone. |
-| 8 | `ApplyThrottlingStep` | Splits groups into `dispatch` and `throttled` using prior notification history, enforcing delivery frequency limits while preserving episode visibility. |
-| 9 | `DispatchStep` | Sends dispatch groups to destinations with bounded concurrency and per-destination handling—side effects only after suppression, matcher, and throttle gating. |
-| 10 | `StoreActionsStep` | Persists outcomes (`fire`, `suppress`, `notified`, `unmatched`, etc.) to `.alert-actions`, producing a durable audit trail so future executions stay consistent and idempotent-like. |
-
-### Step-by-step semantics
-
-The following section explains each stage in plain language:
-
-1. Fetch episodes  
-   The dispatcher queries for episodes that should be considered now. It relies on lookback plus prior action state so old handled episodes are not repeatedly reprocessed.
-
-2. Fetch suppressions  
-   For those episodes, it gathers any active suppression facts (for example episode-level acknowledgement/deactivation or series-level snooze context).
-
-3. Apply suppressions  
-   It marks episodes as suppressed or dispatchable. Suppressed episodes are not dropped; they are carried with reason metadata so outcome recording is explicit.
-
-4. Fetch rules  
-   It loads rule metadata only for the dispatchable subset to avoid unnecessary lookups.
-
-5. Fetch notification policies  
-   It loads full definitions for every enabled notification policy in the space, not from fields on the rule documents.
-
-6. Evaluate matchers  
-   It evaluates each policy matcher against each episode context. Result is a list of concrete episode-policy matches. Empty matcher means catch-all.
-
-7. Build groups  
-   It transforms matches into notification groups according to policy grouping mode. Group identity is important because throttling and notification history are tracked by group.
-
-8. Apply throttling  
-   It compares candidate groups with recent notified history and classifies each as dispatchable now or throttled for later.
-
-9. Dispatch  
-   It sends eligible groups to configured destinations. Delivery happens only for groups that survived suppression, matcher gating, and throttling.
-
-10. Store outcomes  
-    It writes action documents that describe what happened this execution. These writes become input for subsequent executions (both correctness and observability).
+| 1 | `FetchEpisodesStep` | The dispatcher queries for episodes that should be considered now. It relies on lookback plus prior action state so old handled episodes are not repeatedly reprocessed. |
+| 2 | `FetchSuppressionsStep` | For those episodes, it gathers any active suppression facts (for example episode-level acknowledgement/deactivation or series-level snooze context). |
+| 3 | `ApplySuppressionStep` | It marks episodes as suppressed or dispatchable. Suppressed episodes are not dropped. They are carried with reason metadata so outcome recording is explicit. |
+| 4 | `FetchRulesStep` | It loads rule metadata only for the dispatchable subset to avoid unnecessary lookups. |
+| 5 | `FetchPoliciesStep` | It loads full definitions for every enabled notification policy in the space. |
+| 6 | `EvaluateMatchersStep` | It evaluates each policy matcher against each episode context. Result is a list of concrete episode-policy matches. Empty matcher means catch-all. |
+| 7 | `BuildGroupsStep` | It transforms matches into notification groups according to policy grouping mode. Group identity is important because throttling and notification history are tracked by group. |
+| 8 | `ApplyThrottlingStep` | It compares candidate groups with recent notified history and classifies each as dispatchable now or throttled for later. |
+| 9 | `DispatchStep` | It sends eligible groups to configured destinations. Delivery happens only for groups that survived suppression, matcher gating, and throttling. |
+| 10 | `StoreActionsStep` | It writes action documents that describe what happened this execution. These writes become input for subsequent executions (both correctness and observability). |
 
 ### Halt reasons
 
@@ -233,18 +196,14 @@ The following section explains each stage in plain language:
 
 ## Guarantees and limits
 
-- At-least-once delivery to workflows is possible; workflows should be idempotent (e.g. crash after dispatch but before recording actions can cause a repeat).
-- Batch cap: up to 10,000 episodes per query (`LIMIT` in [`queries.ts`](queries.ts)); with a sustained backlog, oldest events are prioritized first, remainder picked up on later executions.
+- At-least-once delivery to workflows is possible. Workflows should be idempotent (e.g. crash after dispatch but before recording actions can cause a repeat).
+- Batch cap: up to 10,000 episodes per query (`LIMIT` in [`queries.ts`](queries.ts)). With a sustained backlog, oldest events are prioritized first, remainder picked up on later executions.
 
 ## Key design principles
 
-- Pipeline state advances only through explicit `continue` merges; a `halt` short-circuits without treating control flow as an unhandled error (see Halt reasons).
-- Matchers are KQL evaluated in-process; policies are space-scoped saved objects, not fields on the rule.
+- Pipeline state advances only through explicit `continue` merges. A `halt` short-circuits without treating control flow as an unhandled error (see Halt reasons).
+- Matchers are KQL evaluated in-process and policies are space-scoped saved objects, not fields on the rule.
 - Side effects (workflow dispatch) happen only after suppression, matcher, throttle, and grouping decisions (`DispatchStep`).
-
-## Middleware vs decorators
-
-The dispatcher does not use the rule executor’s middleware/decorator stack. Cross-cutting behavior relies on `withDispatcherSpan` in `execution_pipeline.ts`, logging inside steps, and the feature-flag check in `DispatcherTaskRunner`. For middleware and decorator patterns (streams, per-step wrappers), see [`../rule_executor/README.md`](../rule_executor/README.md).
 
 ## Creating a new dispatcher step
 
