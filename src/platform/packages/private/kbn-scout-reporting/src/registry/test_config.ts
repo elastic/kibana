@@ -72,7 +72,7 @@ const resolveModuleMetadata = (
   const module: ScoutTestableModule = g.coreRoot
     ? {
         name: 'core',
-        group: 'core',
+        group: 'platform',
         type: 'package' as ScoutTestableModule['type'],
         visibility: 'shared' as ScoutTestableModule['visibility'],
         root: moduleRoot,
