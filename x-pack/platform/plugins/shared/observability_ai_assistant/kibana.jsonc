@@ -25,7 +25,8 @@
       "cloud",
       "serverless",
       "usageCollection",
-      "agentBuilder"
+      "agentBuilder",
+      "evals"
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils", "aiAssistantManagementSelection"],
     "runtimePluginDependencies": ["ml"],
