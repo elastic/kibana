@@ -26,7 +26,9 @@ export class NextHeaderService {
             (next as Record<string, unknown>)[key] = value;
           }
         }
-        this.config.set(Object.keys(next).length > 0 ? (next as ChromeNextHeaderConfig) : undefined);
+        this.config.set(
+          Object.keys(next).length > 0 ? (next as ChromeNextHeaderConfig) : undefined
+        );
       },
       reset: (...keys: Array<keyof ChromeNextHeaderConfig>) => {
         if (keys.length === 0) {
