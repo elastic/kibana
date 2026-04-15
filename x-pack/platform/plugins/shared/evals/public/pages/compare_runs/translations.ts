@@ -137,6 +137,14 @@ export const FLYOUT_COLUMN_DIFF = i18n.translate('xpack.evals.compareRuns.flyout
   defaultMessage: 'Diff',
 });
 
+export const FLYOUT_COLUMN_TRACES = i18n.translate('xpack.evals.compareRuns.flyout.columnTraces', {
+  defaultMessage: 'Traces',
+});
+
+export const FLYOUT_TRACE_TITLE = i18n.translate('xpack.evals.compareRuns.flyout.traceTitle', {
+  defaultMessage: 'Trace',
+});
+
 export const RETRY_BUTTON = i18n.translate('xpack.evals.compareRuns.retryButton', {
   defaultMessage: 'Retry',
 });
@@ -202,4 +210,28 @@ export const SWAP_RUNS_LABEL = i18n.translate('xpack.evals.compareRuns.swapRunsL
 
 export const VIEW_RUN_DETAIL = i18n.translate('xpack.evals.compareRuns.viewRunDetail', {
   defaultMessage: 'View run details',
+});
+
+export const BADGE_NEWER = i18n.translate('xpack.evals.compareRuns.badgeNewer', {
+  defaultMessage: 'Newer',
+});
+
+export const BADGE_OLDER = i18n.translate('xpack.evals.compareRuns.badgeOlder', {
+  defaultMessage: 'Older',
+});
+
+export const FLYOUT_TRACE_A = i18n.translate('xpack.evals.compareRuns.flyoutTraceA', {
+  defaultMessage: 'View trace (Run A)',
+});
+
+export const FLYOUT_TRACE_B = i18n.translate('xpack.evals.compareRuns.flyoutTraceB', {
+  defaultMessage: 'View trace (Run B)',
+});
+
+export const EXPORT_CSV = i18n.translate('xpack.evals.compareRuns.exportCsv', {
+  defaultMessage: 'Copy as CSV',
+});
+
+export const EXPORT_CSV_COPIED = i18n.translate('xpack.evals.compareRuns.exportCsvCopied', {
+  defaultMessage: 'Copied!',
 });

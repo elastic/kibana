@@ -10,6 +10,7 @@ import {
   EuiBasicTable,
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -33,6 +34,7 @@ import { css } from '@emotion/css';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { PairedTTestResult } from '@kbn/evals-common';
 import { useCompareRuns, useEvaluationRun, useRunDatasetExamples } from '../../hooks/use_evals_api';
+import { TraceWaterfall } from '../../components/trace_waterfall';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
@@ -44,6 +46,8 @@ interface ExampleScorePair {
   repetitionIndex: number;
   scoreA: number | null | undefined;
   scoreB: number | null | undefined;
+  traceIdA: string | null;
+  traceIdB: string | null;
 }
 
 const formatScore = (value: number | null | undefined): string => {
@@ -113,7 +117,8 @@ const DiffValue: React.FC<{ diff: number; evaluatorName: string }> = ({ diff, ev
 const RunHeader: React.FC<{
   label: string;
   runId: string;
-}> = ({ label, runId }) => {
+  isNewer?: boolean;
+}> = ({ label, runId, isNewer }) => {
   const history = useHistory();
   const { data: runData, isLoading } = useEvaluationRun(runId);
 
@@ -124,15 +129,31 @@ const RunHeader: React.FC<{
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>{label}</h3>
           </EuiTitle>
         </EuiFlexItem>
+        {isNewer !== undefined && (
+          <EuiFlexItem grow>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={isNewer ? 'success' : 'default'}>
+                  {isNewer ? i18n.BADGE_NEWER : i18n.BADGE_OLDER}
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={i18n.VIEW_RUN_DETAIL}>
-            <EuiLink onClick={() => history.push(`/runs/${runId}`)}>{runId}</EuiLink>
+            <EuiLink onClick={() => history.push(`/runs/${encodeURIComponent(runId)}`)}>
+              {runId}
+            </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
         {branch && (
@@ -200,18 +221,26 @@ const ExampleDrilldownFlyout: React.FC<{
   onClose: () => void;
 }> = ({ runIdA, runIdB, datasetId, datasetName, evaluatorName, onClose }) => {
   const { euiTheme } = useEuiTheme();
+  const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
   const { data: examplesA, isLoading: loadingA } = useRunDatasetExamples(runIdA, datasetId);
   const { data: examplesB, isLoading: loadingB } = useRunDatasetExamples(runIdB, datasetId);
 
   const pairs: ExampleScorePair[] = useMemo(() => {
     if (!examplesA?.examples || !examplesB?.examples) return [];
 
-    const mapB = new Map<string, Map<string, number | null | undefined>>();
+    interface BScoreEntry {
+      score: number | null | undefined;
+      traceId: string | null;
+    }
+    const mapB = new Map<string, Map<string, BScoreEntry>>();
     for (const ex of examplesB.examples) {
-      const scoresByKey = new Map<string, number | null | undefined>();
+      const scoresByKey = new Map<string, BScoreEntry>();
       for (const score of ex.scores) {
         const key = `${score.evaluator.name}|${score.task.repetition_index}`;
-        scoresByKey.set(key, score.evaluator.score);
+        scoresByKey.set(key, {
+          score: score.evaluator.score,
+          traceId: score.task.trace_id ?? null,
+        });
       }
       mapB.set(ex.example_id, scoresByKey);
     }
@@ -225,13 +254,16 @@ const ExampleDrilldownFlyout: React.FC<{
         if (score.evaluator.name !== evaluatorName) continue;
         coveredBExamples.add(ex.example_id);
         const key = `${score.evaluator.name}|${score.task.repetition_index}`;
+        const bEntry = bScores?.get(key);
         result.push({
           exampleId: ex.example_id,
           exampleIndex: ex.example_index,
           evaluatorName: score.evaluator.name,
           repetitionIndex: score.task.repetition_index,
           scoreA: score.evaluator.score,
-          scoreB: bScores?.get(key) ?? null,
+          scoreB: bEntry?.score ?? null,
+          traceIdA: score.task.trace_id ?? null,
+          traceIdB: bEntry?.traceId ?? null,
         });
       }
     }
@@ -247,6 +279,8 @@ const ExampleDrilldownFlyout: React.FC<{
           repetitionIndex: score.task.repetition_index,
           scoreA: null,
           scoreB: score.evaluator.score,
+          traceIdA: null,
+          traceIdB: score.task.trace_id ?? null,
         });
       }
     }
@@ -315,66 +349,120 @@ const ExampleDrilldownFlyout: React.FC<{
           return <DiffValue diff={diff} evaluatorName={item.evaluatorName} />;
         },
       },
+      {
+        name: i18n.FLYOUT_COLUMN_TRACES,
+        width: '80px',
+        align: 'center' as const,
+        render: (item: ExampleScorePair) => (
+          <EuiFlexGroup gutterSize="xs" responsive={false} justifyContent="center">
+            {item.traceIdA && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.FLYOUT_TRACE_A} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    size="xs"
+                    iconType="apmTrace"
+                    color="primary"
+                    aria-label={i18n.FLYOUT_TRACE_A}
+                    onClick={() => setSelectedTraceId(item.traceIdA)}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {item.traceIdB && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.FLYOUT_TRACE_B} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    size="xs"
+                    iconType="apmTrace"
+                    color="accent"
+                    aria-label={i18n.FLYOUT_TRACE_B}
+                    onClick={() => setSelectedTraceId(item.traceIdB)}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ),
+      },
     ],
     [hasRepetitions]
   );
 
   return (
-    <EuiFlyout onClose={onClose} size="m" ownFocus aria-label={i18n.FLYOUT_TITLE}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{i18n.FLYOUT_TITLE}</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiBadge>{datasetName}</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{evaluatorName}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {!isLoading && pairs.length === 0 ? (
-          <EuiEmptyPrompt
-            iconType="search"
-            title={<h3>{i18n.FLYOUT_NO_EXAMPLES_TITLE}</h3>}
-            body={<p>{i18n.FLYOUT_NO_EXAMPLES_BODY}</p>}
-          />
-        ) : (
-          <EuiBasicTable<ExampleScorePair>
-            tableCaption={i18n.FLYOUT_TABLE_CAPTION}
-            items={pairs}
-            columns={flyoutColumns}
-            loading={isLoading}
-            tableLayout="auto"
-            rowProps={(item) => {
-              const isPaired =
-                item.scoreA != null &&
-                item.scoreB != null &&
-                Number.isFinite(item.scoreA) &&
-                Number.isFinite(item.scoreB);
+    <>
+      <EuiFlyout onClose={onClose} size="m" ownFocus aria-label={i18n.FLYOUT_TITLE}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>{i18n.FLYOUT_TITLE}</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiBadge>{datasetName}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{evaluatorName}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {!isLoading && pairs.length === 0 ? (
+            <EuiEmptyPrompt
+              iconType="search"
+              title={<h3>{i18n.FLYOUT_NO_EXAMPLES_TITLE}</h3>}
+              body={<p>{i18n.FLYOUT_NO_EXAMPLES_BODY}</p>}
+            />
+          ) : (
+            <EuiBasicTable<ExampleScorePair>
+              tableCaption={i18n.FLYOUT_TABLE_CAPTION}
+              items={pairs}
+              columns={flyoutColumns}
+              loading={isLoading}
+              tableLayout="auto"
+              rowProps={(item) => {
+                const isPaired =
+                  item.scoreA != null &&
+                  item.scoreB != null &&
+                  Number.isFinite(item.scoreA) &&
+                  Number.isFinite(item.scoreB);
 
-              if (!isPaired) {
-                return { style: { opacity: 0.55 } };
-              }
+                if (!isPaired) {
+                  return { style: { opacity: 0.55 } };
+                }
 
-              const diff = item.scoreA! - item.scoreB!;
-              if (diff === 0) return {};
-              if (isImproved(diff, item.evaluatorName)) {
+                const diff = item.scoreA! - item.scoreB!;
+                if (diff === 0) return {};
+                if (isImproved(diff, item.evaluatorName)) {
+                  return {
+                    style: { backgroundColor: `${euiTheme.colors.backgroundFilledSuccess}15` },
+                  };
+                }
                 return {
-                  style: { backgroundColor: `${euiTheme.colors.backgroundFilledSuccess}15` },
+                  style: { backgroundColor: `${euiTheme.colors.backgroundFilledDanger}15` },
                 };
-              }
-              return {
-                style: { backgroundColor: `${euiTheme.colors.backgroundFilledDanger}15` },
-              };
-            }}
-          />
-        )}
-      </EuiFlyoutBody>
-    </EuiFlyout>
+              }}
+            />
+          )}
+        </EuiFlyoutBody>
+      </EuiFlyout>
+      {selectedTraceId && (
+        <EuiFlyout
+          onClose={() => setSelectedTraceId(null)}
+          size="l"
+          ownFocus
+          aria-label={i18n.FLYOUT_TRACE_TITLE}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>{i18n.FLYOUT_TRACE_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <TraceWaterfall traceId={selectedTraceId} />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
+    </>
   );
 };
 
@@ -396,6 +484,13 @@ export const CompareRunsPage: React.FC = () => {
   const runIdB = params.get('runB') ?? '';
 
   const { data, isLoading, error, refetch } = useCompareRuns(runIdA, runIdB);
+  const { data: runDataA } = useEvaluationRun(runIdA);
+  const { data: runDataB } = useEvaluationRun(runIdB);
+
+  const isNewerA = useMemo(() => {
+    if (!runDataA?.timestamp || !runDataB?.timestamp) return undefined;
+    return new Date(runDataA.timestamp) >= new Date(runDataB.timestamp);
+  }, [runDataA?.timestamp, runDataB?.timestamp]);
 
   const [flyoutState, setFlyoutState] = useState<{
     datasetId: string;
@@ -420,6 +515,8 @@ export const CompareRunsPage: React.FC = () => {
         .length,
     [data?.results]
   );
+
+  const [csvCopied, setCsvCopied] = useState(false);
 
   const sortedResults = useMemo(() => {
     const results = [...(data?.results ?? [])];
@@ -449,6 +546,38 @@ export const CompareRunsPage: React.FC = () => {
     });
     return results;
   }, [data?.results, sortField, sortDirection]);
+
+  const handleCsvExport = useCallback(() => {
+    if (!sortedResults.length) return;
+    const header = [
+      'Dataset',
+      'Evaluator',
+      'N',
+      'Mean A',
+      'Mean B',
+      'Diff',
+      'p-value',
+      'Significant',
+    ];
+    const rows = sortedResults.map((r) => {
+      const diff = r.meanA - r.meanB;
+      return [
+        `"${r.datasetName.replace(/"/g, '""')}"`,
+        `"${r.evaluatorName.replace(/"/g, '""')}"`,
+        r.sampleSize,
+        r.meanA.toFixed(4),
+        r.meanB.toFixed(4),
+        diff.toFixed(4),
+        r.pValue?.toFixed(6) ?? '',
+        r.pValue !== null && r.pValue < SIGNIFICANCE_THRESHOLD ? 'Yes' : 'No',
+      ];
+    });
+    const csv = [header.join(','), ...rows.map((row) => row.join(','))].join('\n');
+    navigator.clipboard.writeText(csv).then(() => {
+      setCsvCopied(true);
+      setTimeout(() => setCsvCopied(false), 2000);
+    });
+  }, [sortedResults]);
 
   const firstRowByDataset = useMemo(() => {
     const seen = new Set<string>();
@@ -551,7 +680,7 @@ export const CompareRunsPage: React.FC = () => {
 
       <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
         <EuiFlexItem>
-          <RunHeader label={i18n.RUN_A_LABEL} runId={runIdA} />
+          <RunHeader label={i18n.RUN_A_LABEL} runId={runIdA} isNewer={isNewerA} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={i18n.SWAP_RUNS_LABEL} disableScreenReaderOutput>
@@ -570,7 +699,11 @@ export const CompareRunsPage: React.FC = () => {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <RunHeader label={i18n.RUN_B_LABEL} runId={runIdB} />
+          <RunHeader
+            label={i18n.RUN_B_LABEL}
+            runId={runIdB}
+            isNewer={isNewerA !== undefined ? !isNewerA : undefined}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -640,6 +773,21 @@ export const CompareRunsPage: React.FC = () => {
           )}
 
           <EuiSpacer size="l" />
+
+          {sortedResults.length > 0 && (
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  iconType={csvCopied ? 'check' : 'exportAction'}
+                  onClick={handleCsvExport}
+                  disabled={csvCopied}
+                >
+                  {csvCopied ? i18n.EXPORT_CSV_COPIED : i18n.EXPORT_CSV}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
 
           {sortedResults.length === 0 ? (
             <EuiEmptyPrompt
