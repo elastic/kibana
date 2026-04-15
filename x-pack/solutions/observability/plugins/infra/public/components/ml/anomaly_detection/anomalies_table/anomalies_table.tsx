@@ -289,7 +289,7 @@ const DEFAULT_DATE_RANGE: TimeRange = {
   to: 'now',
 };
 
-export const JOB_OPTIONS = [
+const JOB_OPTIONS = [
   {
     id: `hosts` as JobType,
     label: i18n.translate('xpack.infra.ml.anomalyFlyout.hostBtn', {

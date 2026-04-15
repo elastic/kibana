@@ -16,7 +16,7 @@ const KIBANA_VERSION_QUERY_PARAM = 'version';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'deployment_type';
 const SANITIZED_PATH_PARAM = 'path';
 
-const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
+const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string => {
   if (isServerlessEnv) {
     return 'Serverless';
   }
