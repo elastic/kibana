@@ -195,3 +195,11 @@ export const FLYOUT_NO_EXAMPLES_BODY = i18n.translate(
   'xpack.evals.compareRuns.flyoutNoExamplesBody',
   { defaultMessage: 'No matching examples were found for this dataset and evaluator combination.' }
 );
+
+export const SWAP_RUNS_LABEL = i18n.translate('xpack.evals.compareRuns.swapRunsLabel', {
+  defaultMessage: 'Swap run A and run B',
+});
+
+export const VIEW_RUN_DETAIL = i18n.translate('xpack.evals.compareRuns.viewRunDetail', {
+  defaultMessage: 'View run details',
+});

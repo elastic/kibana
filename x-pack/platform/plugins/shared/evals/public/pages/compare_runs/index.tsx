@@ -10,12 +10,14 @@ import {
   EuiBasicTable,
   EuiBadge,
   EuiButton,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPageSection,
   EuiPanel,
@@ -112,6 +114,7 @@ const RunHeader: React.FC<{
   label: string;
   runId: string;
 }> = ({ label, runId }) => {
+  const history = useHistory();
   const { data: runData, isLoading } = useEvaluationRun(runId);
 
   const branch = runData?.git_branch;
@@ -123,10 +126,13 @@ const RunHeader: React.FC<{
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={runId}>
-            <EuiTitle size="xs">
-              <h3 tabIndex={0}>{label}</h3>
-            </EuiTitle>
+          <EuiTitle size="xs">
+            <h3>{label}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={i18n.VIEW_RUN_DETAIL}>
+            <EuiLink onClick={() => history.push(`/runs/${runId}`)}>{runId}</EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
         {branch && (
@@ -543,9 +549,25 @@ export const CompareRunsPage: React.FC = () => {
       </EuiTitle>
       <EuiSpacer size="l" />
 
-      <EuiFlexGroup gutterSize="m" responsive={false}>
+      <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
         <EuiFlexItem>
           <RunHeader label={i18n.RUN_A_LABEL} runId={runIdA} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={i18n.SWAP_RUNS_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="merge"
+              aria-label={i18n.SWAP_RUNS_LABEL}
+              onClick={() =>
+                history.replace({
+                  search: new URLSearchParams({
+                    runA: runIdB,
+                    runB: runIdA,
+                  }).toString(),
+                })
+              }
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
           <RunHeader label={i18n.RUN_B_LABEL} runId={runIdB} />
