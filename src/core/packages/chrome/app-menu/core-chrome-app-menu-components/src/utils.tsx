@@ -34,7 +34,9 @@ import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
  */
 export const getDisplayedItemsAllowedAmount = (config: AppMenuConfig) => {
   const totalItems = config.items?.length ?? 0;
-  if (totalItems <= APP_MENU_ITEM_LIMIT) {
+  const hasForcedOverflowItems = config.items?.some((item) => item.overflow) ?? false;
+
+  if (!hasForcedOverflowItems && totalItems <= APP_MENU_ITEM_LIMIT) {
     return APP_MENU_ITEM_LIMIT;
   }
   // Reserve one slot for the overflow button
@@ -53,6 +55,10 @@ export const getShouldOverflow = ({
 }) => {
   if (!config.items) {
     return false;
+  }
+
+  if (config.items.some((item) => item.overflow)) {
+    return true;
   }
 
   return config.items.length > displayedItemsAllowedAmount;
@@ -74,6 +80,7 @@ export const getAppMenuItems = ({ config }: { config: AppMenuConfig }) => {
   const shouldOverflow = getShouldOverflow({ config, displayedItemsAllowedAmount });
 
   const sortedItems = [...config.items].sort((a, b) => a.order - b.order);
+  const nonOverflowItems = sortedItems.filter((item) => !item.overflow);
 
   if (!shouldOverflow) {
     return {
@@ -83,10 +90,12 @@ export const getAppMenuItems = ({ config }: { config: AppMenuConfig }) => {
     };
   }
 
-  const overflowItems = sortedItems.slice(displayedItemsAllowedAmount);
+  const displayedItems = nonOverflowItems.slice(0, displayedItemsAllowedAmount);
+  const displayedItemsIdSet = new Set(displayedItems.map((item) => item.id));
+  const overflowItems = sortedItems.filter((item) => !displayedItemsIdSet.has(item.id));
 
   return {
-    displayedItems: sortedItems.slice(0, displayedItemsAllowedAmount),
+    displayedItems,
     overflowItems,
     shouldOverflow: overflowItems.length > 0,
   };
