@@ -26,7 +26,6 @@ spaceTest.describe('Saved search panels (dashboard)', { tag: tags.deploymentAgno
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
 
     // add saved search from library

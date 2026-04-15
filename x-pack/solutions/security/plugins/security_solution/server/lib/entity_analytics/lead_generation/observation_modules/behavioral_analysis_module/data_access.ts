@@ -7,13 +7,14 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { LeadEntity } from '../../types';
+import { parseAlertBuckets } from '../types';
 import { ALERT_ENTITY_TYPES, ALERT_LOOKBACK, MODULE_ID, type AlertSummary } from './config';
 
 const alertSubAggs = () => ({
   severity_breakdown: { terms: { field: 'kibana.alert.severity', size: 10 } },
   distinct_rules: { terms: { field: 'kibana.alert.rule.name', size: 50 } },
   max_risk_score: { max: { field: 'kibana.alert.risk_score' } },
-  top_5_alerts: {
+  top_alerts: {
     top_hits: {
       size: 5,
       sort: [{ 'kibana.alert.risk_score': { order: 'desc' as const } }],
@@ -28,24 +29,15 @@ const alertSubAggs = () => ({
   },
 });
 
-interface AlertBucket {
-  key: string;
-  doc_count: number;
-  severity_breakdown: { buckets: Array<{ key: string; doc_count: number }> };
-  distinct_rules: { buckets: Array<{ key: string; doc_count: number }> };
-  max_risk_score: { value: number | null };
-  top_5_alerts: { hits: { hits: Array<{ _id: string; fields?: Record<string, unknown[]> }> } };
-}
-
 const parseEntityBuckets = (
   agg: unknown,
   entityType: string,
   target: Map<string, AlertSummary>
 ): void => {
-  const buckets = ((agg as Record<string, unknown>)?.buckets ?? []) as AlertBucket[];
+  const buckets = parseAlertBuckets(agg);
 
   for (const bucket of buckets) {
-    const topAlerts = bucket.top_5_alerts.hits.hits.map(({ _id, fields = {} }) => ({
+    const topAlerts = bucket.top_alerts.hits.hits.map(({ _id, fields = {} }) => ({
       id: _id,
       severity: String(fields['kibana.alert.severity']?.[0] ?? 'unknown'),
       ruleName: String(fields['kibana.alert.rule.name']?.[0] ?? 'unknown'),
@@ -59,7 +51,7 @@ const parseEntityBuckets = (
         bucket.severity_breakdown.buckets.map((b) => [b.key, b.doc_count])
       ),
       distinctRuleNames: bucket.distinct_rules.buckets.map((r) => r.key),
-      maxRiskScore: bucket.max_risk_score.value ?? 0,
+      maxRiskScore: bucket.max_risk_score?.value ?? 0,
       topAlerts,
     });
   }

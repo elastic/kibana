@@ -71,6 +71,7 @@ export const getLazyWithContextProviders =
         <PluginContext.Provider
           value={{
             isDev,
+            isServerless,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
             experimentalFeatures,

@@ -15,7 +15,7 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { TestProvidersComponent } from '../../../../common/mock';
 import {
-  HEADER_EVENT_TITLE_TEST_ID,
+  EVENT_TITLE_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
 
@@ -35,7 +35,7 @@ const renderHeader = (contextValue: DocumentDetailsContext) =>
     </TestProvidersComponent>
   );
 
-const EVENT_HEADER_TEXT_TEST_ID = `${HEADER_EVENT_TITLE_TEST_ID}Text`;
+const EVENT_HEADER_TEXT_TEST_ID = `${EVENT_TITLE_TEST_ID}Text`;
 const createSearchHit = (fields: Record<string, unknown[]>) => ({
   ...mockSearchHit,
   fields: {

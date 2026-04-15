@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
@@ -16,11 +16,15 @@ import type {
   ScheduleStepRule,
 } from '../../../common/types';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
-import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../../../common/constants';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface AddRuleAttachmentFromFormProps {
   defineStepData: DefineStepRule;
@@ -52,6 +56,9 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   ...props
 }) => {
   const {
+    services: { aiRuleCreation },
+  } = useKibana();
+  const {
     defineStepData,
     aboutStepData,
     scheduleStepData,
@@ -82,6 +89,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     const attachmentData = JSON.stringify(formattedRule);
 
     return {
+      attachmentId: SECURITY_RULE_ATTACHMENT_ID,
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
         text: attachmentData,
@@ -101,9 +109,14 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
+  const handleClick = useCallback(() => {
+    aiRuleCreation.activateFormSync();
+    openAgentBuilderFlyout();
+  }, [aiRuleCreation, openAgentBuilderFlyout]);
+
   return (
     <NewAgentBuilderAttachment
-      onClick={openAgentBuilderFlyout}
+      onClick={handleClick}
       telemetry={{
         pathway,
         attachments: ['rule'],

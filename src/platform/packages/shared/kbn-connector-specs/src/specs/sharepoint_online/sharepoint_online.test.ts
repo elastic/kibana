@@ -778,7 +778,7 @@ describe('SharepointOnline', () => {
         'https://graph.microsoft.com/v1.0/drives/drive-123/root/children',
         {
           params: {
-            select:
+            $select:
               'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         }
@@ -801,7 +801,7 @@ describe('SharepointOnline', () => {
         'https://graph.microsoft.com/v1.0/drives/drive-123/root:/Folder/Subfolder:/children',
         {
           params: {
-            select:
+            $select:
               'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         }

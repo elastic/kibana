@@ -266,4 +266,9 @@ export enum AttackDiscoverySubFeatureId {
 /** Sub-features IDs for Security Rules */
 export enum RulesSubFeatureId {
   exceptions = 'exceptionsSubFeature',
+  investigationGuide = 'investigationGuideSubFeature',
+  customHighlightedFields = 'customHighlightedFieldsSubFeature',
+  enableDisableRules = 'enableDisableRulesSubFeature',
+  manualRunRules = 'manualRunRulesSubFeature',
+  rulesManagementSettings = 'rulesManagementSettingsSubFeature',
 }

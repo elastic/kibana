@@ -83,14 +83,19 @@ export class SearchSessionsService extends FtrService {
   }
 
   public async openFlyout() {
-    // The button is not visible because it's in the overflow menu
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT))) {
+      // 1. The background search button is already visible so we are ready to go
+      if (await this.testSubjects.exists(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT)) return;
+      // 2. The button is not visible but the overflow menu is, so we can try to open it.
+      if (await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON)) {
         await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
+        await this.testSubjects.existOrFail(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
+        return;
       }
+      // 3. Neither is visible so we fail to try again
+      throw new Error('Background search button not found');
     });
 
-    await this.testSubjects.existOrFail(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
     await this.testSubjects.click(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
     await this.expectManagementTable();
   }

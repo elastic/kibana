@@ -11,19 +11,16 @@ import { schema } from '@kbn/config-schema';
 
 export const filterSchema = schema.object(
   {
-    language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')], {
-      defaultValue: 'kuery',
+    language: schema.oneOf([schema.literal('kql'), schema.literal('lucene')], {
+      defaultValue: 'kql',
     }),
-    /**
-     * Filter query
-     */
-    query: schema.string({
+    expression: schema.string({
       meta: {
-        description: 'Filter query',
+        description: 'A query expression in KQL or Lucene syntax',
       },
     }),
   },
-  { meta: { id: 'filterSimple', title: 'Simple Filter' } }
+  { meta: { id: 'filterSimple', title: 'Filter' } }
 );
 
 export const filterWithLabelSchema = schema.object(

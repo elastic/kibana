@@ -222,6 +222,77 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(secondUpdate.status).to.be(409);
     });
 
+    it('should update groupingMode and throttle strategy', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'mode-update-policy',
+          description: 'will update grouping mode',
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+          groupingMode: 'per_episode',
+          throttle: { strategy: 'on_status_change' },
+        });
+
+      expect(createResponse.status).to.be(200);
+      expect(createResponse.body.groupingMode).to.be('per_episode');
+
+      const createdPolicyId = createResponse.body.id as string;
+      const currentVersion = createResponse.body.version as string;
+
+      const response = await supertestWithoutAuth
+        .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          groupingMode: 'all',
+          throttle: { strategy: 'time_interval', interval: '10m' },
+          version: currentVersion,
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.groupingMode).to.be('all');
+      expect(response.body.throttle).to.eql({ strategy: 'time_interval', interval: '10m' });
+      expect(response.body.name).to.be('mode-update-policy');
+    });
+
+    it('should clear groupingMode when set to null', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'clear-mode-policy',
+          description: 'will clear grouping mode',
+          destinations: [{ type: 'workflow', id: 'wf-1' }],
+          groupingMode: 'per_field',
+          groupBy: ['host.name'],
+          throttle: { strategy: 'time_interval', interval: '5m' },
+        });
+
+      expect(createResponse.status).to.be(200);
+
+      const createdPolicyId = createResponse.body.id as string;
+      const currentVersion = createResponse.body.version as string;
+
+      const response = await supertestWithoutAuth
+        .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          groupingMode: null,
+          groupBy: null,
+          throttle: null,
+          version: currentVersion,
+        });
+
+      expect(response.status).to.be(200);
+      expect(response.body.groupingMode).to.be(null);
+      expect(response.body.groupBy).to.be(null);
+      expect(response.body.throttle).to.be(null);
+    });
+
     it('should clear nullable fields when set to null', async () => {
       const createResponse = await supertestWithoutAuth
         .post(NOTIFICATION_POLICY_API_PATH)

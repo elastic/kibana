@@ -39,10 +39,6 @@ import type {
   SearchRepositoriesInput,
   SearchUsersInput,
 } from './types';
-import getWorkflow from './workflows/get.yaml';
-import listWorkflow from './workflows/list.yaml';
-import searchWorkflow from './workflows/search.yaml';
-import whoAmIWorkflow from './workflows/who_am_i.yaml';
 import {
   GetMeInputSchema,
   ListToolsInputSchema,
@@ -111,9 +107,7 @@ export const GithubConnector: ConnectorSpec = {
   actions: {
     getMe: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getMe.description', {
-        defaultMessage: 'Get the authenticated GitHub user profile.',
-      }),
+      description: 'Get the authenticated GitHub user profile.',
       input: GetMeInputSchema,
       handler: async (ctx) => {
         return callToolJson(ctx, 'get_me');
@@ -122,9 +116,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchCode: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.searchCode.description', {
-        defaultMessage: 'Search for code across GitHub repositories.',
-      }),
+      description: 'Search for code across GitHub repositories.',
       input: SearchCodeInputSchema,
       handler: async (ctx, input: SearchCodeInput) => {
         return callToolJson(ctx, 'search_code', {
@@ -137,9 +129,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchRepositories: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.searchRepositories.description', {
-        defaultMessage: 'Search for GitHub repositories.',
-      }),
+      description: 'Search for GitHub repositories.',
       input: SearchRepositoriesInputSchema,
       handler: async (ctx, input: SearchRepositoriesInput) => {
         return callToolJson(ctx, 'search_repositories', {
@@ -152,9 +142,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchIssues: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.searchIssues.description', {
-        defaultMessage: 'Search for issues across GitHub repositories.',
-      }),
+      description: 'Search for issues across GitHub repositories.',
       input: SearchIssuesInputSchema,
       handler: async (ctx, input: SearchIssuesInput) => {
         return callToolJson(ctx, 'search_issues', {
@@ -169,9 +157,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchPullRequests: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.searchPullRequests.description', {
-        defaultMessage: 'Search for pull requests across GitHub repositories.',
-      }),
+      description: 'Search for pull requests across GitHub repositories.',
       input: SearchPullRequestsInputSchema,
       handler: async (ctx, input: SearchPullRequestsInput) => {
         return callToolJson(ctx, 'search_pull_requests', {
@@ -186,9 +172,7 @@ export const GithubConnector: ConnectorSpec = {
 
     searchUsers: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.searchUsers.description', {
-        defaultMessage: 'Search for GitHub users.',
-      }),
+      description: 'Search for GitHub users.',
       input: SearchUsersInputSchema,
       handler: async (ctx, input: SearchUsersInput) => {
         return callToolJson(ctx, 'search_users', {
@@ -201,9 +185,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listIssues: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listIssues.description', {
-        defaultMessage: 'List issues in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      description: 'List issues in a GitHub repository. Uses cursor-based pagination.',
       input: ListIssuesInputSchema,
       handler: async (ctx, input: ListIssuesInput) => {
         return callToolJson(ctx, 'list_issues', {
@@ -218,9 +200,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listPullRequests: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listPullRequests.description', {
-        defaultMessage: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      description: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
       input: ListPullRequestsInputSchema,
       handler: async (ctx, input: ListPullRequestsInput) => {
         return callToolJson(ctx, 'list_pull_requests', {
@@ -235,9 +215,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listCommits: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listCommits.description', {
-        defaultMessage: 'List commits in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      description: 'List commits in a GitHub repository. Uses cursor-based pagination.',
       input: ListCommitsInputSchema,
       handler: async (ctx, input: ListCommitsInput) => {
         return callToolJson(ctx, 'list_commits', {
@@ -252,9 +230,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listBranches: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listBranches.description', {
-        defaultMessage: 'List branches in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      description: 'List branches in a GitHub repository. Uses cursor-based pagination.',
       input: ListBranchesInputSchema,
       handler: async (ctx, input: ListBranchesInput) => {
         return callToolJson(ctx, 'list_branches', {
@@ -268,9 +244,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listReleases: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listReleases.description', {
-        defaultMessage: 'List releases in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      description: 'List releases in a GitHub repository. Uses cursor-based pagination.',
       input: ListReleasesInputSchema,
       handler: async (ctx, input: ListReleasesInput) => {
         return callToolJson(ctx, 'list_releases', {
@@ -284,9 +258,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listTags: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listTags.description', {
-        defaultMessage: 'List tags in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      description: 'List tags in a GitHub repository. Uses cursor-based pagination.',
       input: ListTagsInputSchema,
       handler: async (ctx, input: ListTagsInput) => {
         return callToolJson(ctx, 'list_tags', {
@@ -300,9 +272,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getCommit: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getCommit.description', {
-        defaultMessage: 'Get details of a specific commit.',
-      }),
+      description: 'Get details of a specific commit.',
       input: GetCommitInputSchema,
       handler: async (ctx, input: GetCommitInput) => {
         return callToolJson(ctx, 'get_commit', {
@@ -315,9 +285,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getLatestRelease: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getLatestRelease.description', {
-        defaultMessage: 'Get the latest release of a GitHub repository.',
-      }),
+      description: 'Get the latest release of a GitHub repository.',
       input: GetLatestReleaseInputSchema,
       handler: async (ctx, input: GetLatestReleaseInput) => {
         return callToolJson(ctx, 'get_latest_release', { owner: input.owner, repo: input.repo });
@@ -326,9 +294,7 @@ export const GithubConnector: ConnectorSpec = {
 
     pullRequestRead: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.pullRequestRead.description', {
-        defaultMessage: 'Read the full details of a specific pull request.',
-      }),
+      description: 'Read the full details of a specific pull request.',
       input: PullRequestReadInputSchema,
       handler: async (ctx, input: PullRequestReadInput) => {
         return callToolJson(ctx, 'pull_request_read', {
@@ -342,9 +308,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getFileContents: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getFileContents.description', {
-        defaultMessage: 'Get the contents of a file or directory from a GitHub repository.',
-      }),
+      description: 'Get the contents of a file or directory from a GitHub repository.',
       input: GetFileContentsInputSchema,
       handler: async (ctx, input: GetFileContentsInput) => {
         return callToolContent(ctx, 'get_file_contents', {
@@ -358,9 +322,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getIssue: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getIssue.description', {
-        defaultMessage: 'Get details of a specific issue in a GitHub repository.',
-      }),
+      description: 'Get details of a specific issue in a GitHub repository.',
       input: GetIssueInputSchema,
       handler: async (ctx, input: GetIssueInput) => {
         return callToolJson(ctx, 'issue_read', {
@@ -374,9 +336,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getIssueComments: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getIssueComments.description', {
-        defaultMessage: 'Get comments for a specific issue in a GitHub repository.',
-      }),
+      description: 'Get comments for a specific issue in a GitHub repository.',
       input: GetIssueCommentsInputSchema,
       handler: async (ctx, input: GetIssueCommentsInput) => {
         return callToolJson(ctx, 'issue_read', {
@@ -390,10 +350,8 @@ export const GithubConnector: ConnectorSpec = {
 
     listTools: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listTools.description', {
-        defaultMessage:
-          'List all tools available on the GitHub MCP server. Use this to discover available capabilities or refresh tool context for the LLM.',
-      }),
+      description:
+        'List all tools available on the GitHub MCP server. Use this to discover available capabilities or refresh tool context for the LLM.',
       input: ListToolsInputSchema,
       handler: async (ctx) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -405,10 +363,8 @@ export const GithubConnector: ConnectorSpec = {
 
     callTool: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.callTool.description', {
-        defaultMessage:
-          'Call any tool on the GitHub MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
-      }),
+      description:
+        'Call any tool on the GitHub MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
       input: CallToolInputSchema,
       handler: async (ctx, input: CallToolInput) => {
         return callToolContent(ctx, input.name, input.arguments);
@@ -432,5 +388,12 @@ export const GithubConnector: ConnectorSpec = {
     },
   },
 
-  agentBuilderWorkflows: [getWorkflow, listWorkflow, searchWorkflow, whoAmIWorkflow],
+  skill: [
+    'Action strategy guide:',
+    '- Start with getMe to identify the authenticated user.',
+    '- For broad discovery: use search* actions (searchCode, searchRepositories, searchIssues, searchPullRequests, searchUsers).',
+    '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after".',
+    '- For specific details: use get* actions (getIssue, getIssueComments, pullRequestRead, getCommit, getLatestRelease, getFileContents).',
+    '- For capabilities not yet exposed as named actions: listTools to discover, callTool to invoke.',
+  ].join('\n'),
 };

@@ -9,32 +9,41 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getEsqlDataView } from '@kbn/discover-utils';
-import { ALERTING_EPISODES_PAGINATED_QUERY } from '../constants';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 jest.mock('@kbn/discover-utils');
 
-const getEsqlDataViewMock = getEsqlDataView as jest.MockedFunction<typeof getEsqlDataView>;
+const mockGetEsqlDataView = jest.mocked(getEsqlDataView);
+
+const http = httpServiceMock.createSetupContract();
+const { dataViews } = dataPluginMock.createStartContract();
+
+const mockDefaultQuery = 'FROM .rule-events | WHERE type == "alert"';
+
+jest.mock('../queries/episodes_query', () => ({
+  buildEpisodesBaseQuery: jest.fn().mockReturnValue({
+    print: jest.fn().mockReturnValue('FROM .rule-events | WHERE type == "alert"'),
+  }),
+}));
+
+const mockDataView = {
+  fields: [
+    { name: 'rule.id' },
+    { name: 'episode.status' },
+    { name: '@timestamp' },
+    { name: 'other.field' },
+  ],
+  setFieldCustomLabel: jest.fn(),
+  setFieldFormat: jest.fn(),
+  addRuntimeField: jest.fn(),
+} as unknown as DataView;
+
+mockGetEsqlDataView.mockResolvedValue(mockDataView);
 
 describe('useAlertingEpisodesDataView', () => {
-  const http = httpServiceMock.createSetupContract();
-  const { dataViews } = dataPluginMock.createStartContract();
-
-  const mockDataView = {
-    fields: [
-      { name: 'rule.id' },
-      { name: 'episode.status' },
-      { name: '@timestamp' },
-      { name: 'other.field' },
-    ],
-    setFieldCustomLabel: jest.fn(),
-    setFieldFormat: jest.fn(),
-    addRuntimeField: jest.fn(),
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
-    getEsqlDataViewMock.mockResolvedValue(mockDataView as any);
   });
 
   it('should call getEsqlDataView with correct parameters using default query', async () => {
@@ -43,11 +52,11 @@ describe('useAlertingEpisodesDataView', () => {
     renderHook(() => useAlertingEpisodesDataView({ services }));
 
     await waitFor(() => {
-      expect(getEsqlDataViewMock).toHaveBeenCalledTimes(1);
+      expect(mockGetEsqlDataView).toHaveBeenCalledTimes(1);
     });
 
-    expect(getEsqlDataViewMock).toHaveBeenCalledWith(
-      { esql: ALERTING_EPISODES_PAGINATED_QUERY },
+    expect(mockGetEsqlDataView).toHaveBeenCalledWith(
+      { esql: mockDefaultQuery },
       undefined,
       services
     );
@@ -60,10 +69,10 @@ describe('useAlertingEpisodesDataView', () => {
     renderHook(() => useAlertingEpisodesDataView({ query: customQuery, services }));
 
     await waitFor(() => {
-      expect(getEsqlDataViewMock).toHaveBeenCalledTimes(1);
+      expect(mockGetEsqlDataView).toHaveBeenCalledTimes(1);
     });
 
-    expect(getEsqlDataViewMock).toHaveBeenCalledWith({ esql: customQuery }, undefined, services);
+    expect(mockGetEsqlDataView).toHaveBeenCalledWith({ esql: customQuery }, undefined, services);
   });
 
   it('should set custom labels for known fields', async () => {
@@ -96,9 +105,9 @@ describe('useAlertingEpisodesDataView', () => {
         id: 'duration',
         params: {
           includeSpaceWithSuffix: true,
-          inputFormat: 'seconds',
+          inputFormat: 'milliseconds',
           outputFormat: 'humanizePrecise',
-          outputPrecision: 2,
+          outputPrecision: 0,
           useShortSuffix: true,
         },
       },
@@ -107,7 +116,7 @@ describe('useAlertingEpisodesDataView', () => {
   });
 
   it('should return undefined when data view is not loaded yet', () => {
-    getEsqlDataViewMock.mockReturnValue(new Promise(() => {}));
+    mockGetEsqlDataView.mockReturnValueOnce(new Promise(() => {}));
     const services = { dataViews, http };
 
     const { result } = renderHook(() => useAlertingEpisodesDataView({ services }));

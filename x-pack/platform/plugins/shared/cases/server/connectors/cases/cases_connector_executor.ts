@@ -23,7 +23,6 @@ import {
   MAX_TITLE_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_SUFFIX_LENGTH,
-  MAX_OPEN_CASES,
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
@@ -292,11 +291,9 @@ export class CasesConnectorExecutor {
     groupedAlerts: CasesGroupedAlerts[]
   ): CasesGroupedAlerts[] {
     const groupSize = groupedAlerts.length;
-    if (groupSize > params.maximumCasesToOpen || groupSize > MAX_OPEN_CASES) {
-      const maxCasesCircuitBreaker = Math.min(params.maximumCasesToOpen, MAX_OPEN_CASES);
-
+    if (groupSize > params.maximumCasesToOpen) {
       this.logger.warn(
-        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (${groupSize}) than the maximum number of allowed cases (${maxCasesCircuitBreaker}). Falling back to one case.`,
+        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (${groupSize}) than the maximum number of allowed cases (${params.maximumCasesToOpen}). Falling back to one case.`,
         this.getLogMetadata(params)
       );
 

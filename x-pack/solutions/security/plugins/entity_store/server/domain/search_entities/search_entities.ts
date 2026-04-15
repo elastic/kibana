@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
-import { getLatestEntitiesIndexName, type Entity, type EntityType } from '../../../common';
+import { getEntitiesAlias, ENTITY_LATEST, type Entity, type EntityType } from '../../../common';
 
 const MAX_SEARCH_RESPONSE_SIZE = 10_000;
 
@@ -79,7 +79,7 @@ export async function searchEntitiesV2(
   const { esClient, namespace, entityTypes, filterQuery, page, perPage, sortField, sortOrder } =
     options;
 
-  const index = [getLatestEntitiesIndexName(namespace)];
+  const index = [getEntitiesAlias(ENTITY_LATEST, namespace)];
   const from = (page - 1) * perPage;
   const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
 

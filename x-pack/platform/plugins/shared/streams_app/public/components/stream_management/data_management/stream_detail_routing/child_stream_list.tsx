@@ -24,10 +24,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
+import { MAX_NESTING_LEVEL, getSegments, Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 import type { DraggableProvided } from '@hello-pangea/dnd';
+import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { NestedView } from '../../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
@@ -38,7 +39,11 @@ import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { IdleQueryStreamEntry, CreatingQueryStreamEntry } from './query_stream_entry';
+import {
+  IdleQueryStreamEntry,
+  CreatingQueryStreamEntry,
+  EditingQueryStreamEntry,
+} from './query_stream_entry';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
 import { AdditionalChargesCallout } from '../shared/additional_charges_callout';
@@ -48,11 +53,15 @@ import { BulkCreateStreamsConfirmationModal } from './review_suggestions_form/bu
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { NoDataEmptyPrompt } from './empty_prompt';
+import { QueryModeEmptyPrompt } from './query_mode_empty_prompt';
 import { SuggestionLoadingPrompt } from '../shared/suggestion_loading_prompt';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
-function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
-  if (maxNestingLevel) {
+function getReasonDisabledCreateButton(
+  canManageRoutingRules: boolean,
+  isAtMaxNestingLevel: boolean
+) {
+  if (isAtMaxNestingLevel) {
     return maxNestingLevelText;
   }
   if (!canManageRoutingRules) {
@@ -91,7 +100,7 @@ const IdleRoutingStreamEntryWithPermissions = ({
   );
 };
 
-export function ChildStreamList({ availableStreams }: { availableStreams: string[] }) {
+export function ChildStreamList({ availableStreams = [] }: { availableStreams?: string[] }) {
   const { euiTheme } = useEuiTheme();
 
   const { features } = useStreamsPrivileges();
@@ -101,12 +110,24 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const { changeChildStreamsMode } = useStreamRoutingEvents();
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
-  const idSelected = useStreamsRoutingSelector((snapshot) => {
+  const isWiredStream = Streams.WiredStream.Definition.is(definition.stream);
+  const selectedChildStreamMode = useStreamsRoutingSelector((snapshot) => {
     if (!canUseQueryMode) {
       return 'ingestMode';
     }
     return snapshot.matches({ ready: 'ingestMode' }) ? 'ingestMode' : 'queryMode';
   });
+
+  const hasActiveQueryModeForm = useStreamsRoutingSelector(
+    (state) =>
+      state.matches({ ready: { queryMode: 'editing' } }) ||
+      state.matches({ ready: { queryMode: 'creating' } })
+  );
+
+  const handleModeChange = useDiscardConfirm(
+    (mode: string) => changeChildStreamsMode(mode as ChildStreamMode),
+    { enabled: hasActiveQueryModeForm }
+  );
 
   return (
     <EuiFlexGroup
@@ -119,7 +140,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
       <CurrentStreamEntry definition={definition} />
 
       {canUseQueryMode && (
-        <EuiButtonGroup
+        <div
           className={css`
             display: flex;
             position: relative;
@@ -134,30 +155,60 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
               height: ${euiTheme.size.s};
             }
           `}
-          legend={i18n.translate('xpack.streams.streamDetailRouting.childStreamList.legend', {
-            defaultMessage: 'Child streams type selector',
-          })}
-          options={[
-            {
-              id: 'ingestMode',
-              label: 'Index',
-            },
-            {
-              id: 'queryMode',
-              label: 'Query',
-            },
-          ]}
-          idSelected={idSelected}
-          onChange={(mode) => changeChildStreamsMode(mode as ChildStreamMode)}
-          buttonSize="compressed"
-          color="primary"
-          data-test-subj="streamsAppChildStreamTypeSelector"
-        />
+        >
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.streams.streamDetailRouting.childStreamList.legend', {
+              defaultMessage: 'Child streams type selector',
+            })}
+            options={
+              isWiredStream
+                ? [
+                    {
+                      id: 'ingestMode',
+                      label: i18n.translate(
+                        'xpack.streams.streamDetailRouting.childStreamList.ingestModeLabel',
+                        { defaultMessage: 'Index' }
+                      ),
+                    },
+                    {
+                      id: 'queryMode',
+                      label: i18n.translate(
+                        'xpack.streams.streamDetailRouting.childStreamList.queryModeLabel',
+                        { defaultMessage: 'Query' }
+                      ),
+                    },
+                  ]
+                : [
+                    {
+                      id: 'queryMode',
+                      label: i18n.translate(
+                        'xpack.streams.streamDetailRouting.childStreamList.queryModeLabel',
+                        { defaultMessage: 'Query' }
+                      ),
+                    },
+                  ]
+            }
+            idSelected={selectedChildStreamMode}
+            onChange={handleModeChange}
+            buttonSize="compressed"
+            color="primary"
+            data-test-subj="streamsAppChildStreamTypeSelector"
+          />
+        </div>
       )}
-      {idSelected === 'ingestMode' && (
+      {isWiredStream && selectedChildStreamMode === 'ingestMode' && (
         <IngestModeChildrenList availableStreams={availableStreams} />
       )}
-      {canUseQueryMode && idSelected === 'queryMode' && <QueryModeChildrenList />}
+      {canUseQueryMode && selectedChildStreamMode === 'queryMode' && <QueryModeChildrenList />}
+      {canUseQueryMode && !isWiredStream && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued" textAlign="center">
+            {i18n.translate('xpack.streams.streamDetailRouting.childStreamList.classicNotice', {
+              defaultMessage: 'Ingest-time partitioning is not available for classic streams.',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }
@@ -172,6 +223,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     isLoadingSuggestions,
     suggestions,
     suggestionReason,
+    refinementHistory,
     resetForm,
     previewSuggestion,
     acceptSuggestion,
@@ -208,7 +260,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     snapshot.can({ type: 'routingRule.reorder', routing: snapshot.context.routing })
   );
   const canManageRoutingRules = definition.privileges.manage;
-  const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
+  const isAtMaxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
   const scrollToSuggestions = useScrollToActive(!!suggestions);
@@ -233,14 +285,39 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     }
   };
 
-  const getSuggestionsForStream = (connectorId: string) => {
-    fetchSuggestions({
-      streamName: definition.stream.name,
-      connectorId,
-      start: timeState.start,
-      end: timeState.end,
-    });
-  };
+  const getSuggestionsForStream = useCallback(
+    (connectorId: string) => {
+      fetchSuggestions({
+        streamName: definition.stream.name,
+        connectorId,
+        start: timeState.start,
+        end: timeState.end,
+      });
+    },
+    [fetchSuggestions, definition.stream.name, timeState.start, timeState.end]
+  );
+
+  const refineSuggestionsForStream = useCallback(
+    (connectorId: string, userPrompt?: string) => {
+      fetchSuggestions({
+        streamName: definition.stream.name,
+        connectorId,
+        start: timeState.start,
+        end: timeState.end,
+        userPrompt,
+        existingPartitions: suggestions ?? undefined,
+        refinementHistory: refinementHistory.length > 0 ? refinementHistory : undefined,
+      });
+    },
+    [
+      fetchSuggestions,
+      definition.stream.name,
+      timeState.start,
+      timeState.end,
+      suggestions,
+      refinementHistory,
+    ]
+  );
 
   const renderCreateButton = () => {
     return (
@@ -266,7 +343,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   isDisabled={isEditingOrReorderingStreams}
                   aiFeatures={aiFeatures}
                 >
-                  {suggestPartitionsWithAIText}
+                  {suggestPartitionsText}
                 </GenerateSuggestionButton>
               </EuiFlexItem>
               {showAdditionalChargesCallout && (
@@ -279,15 +356,15 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="bottom"
-              content={getReasonDisabledCreateButton(canManageRoutingRules, maxNestingLevel)}
+              content={getReasonDisabledCreateButton(canManageRoutingRules, isAtMaxNestingLevel)}
             >
               <CreateButtonComponent
                 size="s"
                 data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
                 onClick={createNewRule}
-                disabled={!canCreateRoutingRules || maxNestingLevel}
+                disabled={!canCreateRoutingRules || isAtMaxNestingLevel}
               >
-                {createPartitionManuallyText}
+                {createPartitionText}
               </CreateButtonComponent>
             </EuiToolTip>
           </EuiFlexItem>
@@ -333,7 +410,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
             isDisabled={isEditingOrReorderingStreams}
             aiFeatures={aiFeatures}
           >
-            {suggestPartitionsWithAIText}
+            {suggestPartitionsText}
           </GenerateSuggestionButton>
           {showAdditionalChargesCallout && (
             <>
@@ -426,7 +503,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   aiFeatures={aiFeatures}
                   isLoadingSuggestions={isLoadingSuggestions}
                   onDismiss={resetForm}
-                  onRegenerate={getSuggestionsForStream}
+                  onRetry={getSuggestionsForStream}
                   isDisabled={isEditingOrReorderingStreams}
                   reason={suggestionReason}
                 />
@@ -434,9 +511,9 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                 <ReviewSuggestionsForm
                   acceptSuggestion={acceptSuggestion}
                   aiFeatures={aiFeatures}
-                  definition={definition}
+                  definition={definition as Streams.WiredStream.GetResponse}
                   isLoadingSuggestions={isLoadingSuggestions}
-                  onRegenerate={getSuggestionsForStream}
+                  onRegenerate={refineSuggestionsForStream}
                   previewSuggestion={previewSuggestion}
                   rejectSuggestion={rejectSuggestion}
                   resetForm={resetForm}
@@ -467,7 +544,13 @@ function QueryModeChildrenList() {
   const isCreating = useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: 'creating' } })
   );
-  const { createQueryStream } = useStreamRoutingEvents();
+  const isEditing = useStreamsRoutingSelector((state) =>
+    state.matches({ ready: { queryMode: 'editing' } })
+  );
+  const editingStreamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.editingQueryStreamName
+  );
+  const { createQueryStream, editQueryStream } = useStreamRoutingEvents();
   const canManage = definition.privileges.manage;
 
   // Get child query stream names from the definition
@@ -475,6 +558,12 @@ function QueryModeChildrenList() {
     const queryStreams = definition.stream.query_streams ?? [];
     return queryStreams.map((ref) => ref.name);
   }, [definition.stream.query_streams]);
+
+  const showEmptyPrompt = childQueryStreamNames.length === 0 && !isCreating;
+
+  if (showEmptyPrompt) {
+    return <QueryModeEmptyPrompt />;
+  }
 
   return (
     <EuiFlexGroup
@@ -513,7 +602,17 @@ function QueryModeChildrenList() {
                 last={pos === childQueryStreamNames.length - 1 && !isCreating}
                 first={pos === 0}
               >
-                <IdleQueryStreamEntry streamName={streamName} />
+                {isEditing && editingStreamName === streamName ? (
+                  <EditingQueryStreamEntry
+                    streamName={streamName}
+                    parentStreamName={definition.stream.name}
+                  />
+                ) : (
+                  <IdleQueryStreamEntry
+                    streamName={streamName}
+                    onEdit={canManage && !isCreating && !isEditing ? editQueryStream : undefined}
+                  />
+                )}
               </NestedView>
             </EuiFlexItem>
           ))}
@@ -528,7 +627,7 @@ function QueryModeChildrenList() {
         </EuiFlexGroup>
       </EuiFlexItem>
       {/* Create button */}
-      {!isCreating && (
+      {!isCreating && !isEditing && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             justifyContent="center"
@@ -563,7 +662,7 @@ function QueryModeChildrenList() {
                   disabled={!canManage}
                 >
                   {i18n.translate('xpack.streams.queryModeChildrenList.createQueryStream', {
-                    defaultMessage: 'Create query stream',
+                    defaultMessage: 'Create query sub-stream',
                   })}
                 </EuiButton>
               </EuiToolTip>
@@ -590,13 +689,16 @@ const cannotManageRoutingRulesText = i18n.translate(
   }
 );
 
-const suggestPartitionsWithAIText = i18n.translate(
+const suggestPartitionsText = i18n.translate(
   'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
   {
-    defaultMessage: 'Suggest partitions with AI',
+    defaultMessage: 'Get partitions suggestions',
   }
 );
 
-const createPartitionManuallyText = i18n.translate('xpack.streams.streamDetailRouting.addRule', {
-  defaultMessage: 'Create partition manually',
-});
+const createPartitionText = i18n.translate(
+  'xpack.streams.streamDetailRouting.childStreamList.createPartition',
+  {
+    defaultMessage: 'Create partition',
+  }
+);

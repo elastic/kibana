@@ -714,14 +714,6 @@
                 "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/provisioning/uiam_api_key_provisioning_task.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
               },
@@ -748,6 +740,14 @@
               {
                 "plugin": "@kbn/esql-editor",
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/provisioning/uiam_api_key_provisioning_task.ts"
               },
               {
                 "plugin": "unifiedDocViewer",
@@ -812,6 +812,14 @@
               {
                 "plugin": "@kbn/elastic-assistant",
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/settings_context_menu/settings_context_menu.tsx"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/components/announcement/agent_builder_announcement_modal_controller.tsx"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/components/announcement/agent_builder_announcement_modal_controller.tsx"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -974,32 +982,28 @@
                 "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/ebt/client.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/services/telemetry/service.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
-              },
-              {
                 "plugin": "automaticImport",
                 "path": "x-pack/platform/plugins/shared/automatic_import/public/services/telemetry/service.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "cloudConnect",
@@ -1098,16 +1102,12 @@
                 "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/services/task_manager/task_manager_service.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_service.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/request_context_factory.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/lib/telemetry/sender.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/request_context_factory.ts"
               },
               {
                 "plugin": "osquery",
@@ -1120,6 +1120,14 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
               },
               {
                 "plugin": "streamsApp",
@@ -1302,6 +1310,10 @@
                 "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_client.ts"
               },
@@ -1411,11 +1423,23 @@
               },
               {
                 "plugin": "observabilityOnboarding",
+                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/kubernetes/data_ingest_status.tsx"
+              },
+              {
+                "plugin": "observabilityOnboarding",
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/kubernetes/use_kubernetes_flow.ts"
               },
               {
                 "plugin": "observabilityOnboarding",
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/shared/use_window_blur_data_monitoring_trigger.ts"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/shared/use_time_window_data_detection.ts"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/shared/use_time_window_data_detection.ts"
               },
               {
                 "plugin": "observabilityOnboarding",
@@ -1575,19 +1599,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/field_retention_enrichment/field_retention_enrichment_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/snapshot/snapshot.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/snapshot/snapshot.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/health/health.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1652,6 +1668,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/async_sender.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/maintainer/telemetry_reporter.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2562,8 +2582,12 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
               },
               {
-                "plugin": "@kbn/esql-editor",
-                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.test.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
               },
               {
                 "plugin": "@kbn/esql-editor",
@@ -2610,8 +2634,8 @@
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.test.ts"
               },
               {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+                "plugin": "@kbn/esql-editor",
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -2678,24 +2702,40 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/services/telemetry/service.test.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/services/task_manager/task_manager_telemetry.test.ts"
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.test.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/services/task_manager/task_manager_telemetry.test.ts"
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.test.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/services/task_manager/task_manager_telemetry.test.ts"
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.test.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/services/task_manager/task_manager_telemetry.test.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/public/services/telemetry/service.test.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -3352,6 +3392,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.test.ts"
               },
               {
                 "plugin": "discover",

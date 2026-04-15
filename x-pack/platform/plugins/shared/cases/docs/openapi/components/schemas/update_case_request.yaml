@@ -60,6 +60,8 @@ properties:
           $ref: 'case_tags.yaml'
         title:
           $ref: 'case_title.yaml'
+        closeReason:
+          $ref: 'case_close_sync_reason.yaml'
         version:
           description: >
             The current version of the case.

@@ -13,7 +13,7 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import { useContentListConfig } from '@kbn/content-list-provider';
 import { ContentListClientProvider } from './provider';
 import type { ContentListClientProviderProps } from './provider';
-import type { TableListViewFindItemsFn } from './types';
+import type { TableListViewFindItemsFn, ContentListClientServices } from './types';
 
 describe('ContentListClientProvider', () => {
   const createMockItem = (id: string): UserContentCommonSchema => ({
@@ -33,12 +33,17 @@ describe('ContentListClientProvider', () => {
     return jest.fn().mockResolvedValue({ hits: items, total: items.length });
   };
 
+  const createMockServices = (pageSize = 20): ContentListClientServices => ({
+    uiSettings: { get: jest.fn(() => pageSize) as ContentListClientServices['uiSettings']['get'] },
+  });
+
   const createWrapper = (props?: Partial<ContentListClientProviderProps>) => {
     const defaultFindItems = createMockFindItems([createMockItem('1')]);
     const defaultProps: ContentListClientProviderProps = {
       id: 'test-client-list',
       labels: { entity: 'dashboard', entityPlural: 'dashboards' },
       findItems: defaultFindItems,
+      services: createMockServices(),
       children: null,
     };
 
@@ -114,15 +119,17 @@ describe('ContentListClientProvider', () => {
   });
 
   describe('features pass-through', () => {
-    it('provides empty features by default', () => {
+    it('merges uiSettings page size into features by default', () => {
       const { result } = renderHook(() => useContentListConfig(), {
-        wrapper: createWrapper(),
+        wrapper: createWrapper({ services: createMockServices(25) }),
       });
 
-      expect(result.current.features).toEqual({});
+      expect(result.current.features).toEqual({
+        pagination: { initialPageSize: 25 },
+      });
     });
 
-    it('provides features from props', () => {
+    it('provides features from props with uiSettings page size merged', () => {
       const features = {
         sorting: { initialSort: { field: 'updatedAt', direction: 'desc' as const } },
       };
@@ -131,7 +138,33 @@ describe('ContentListClientProvider', () => {
         wrapper: createWrapper({ features }),
       });
 
+      expect(result.current.features).toEqual({
+        ...features,
+        pagination: { initialPageSize: 20 },
+      });
+    });
+
+    it('preserves explicit initialPageSize over uiSettings value', () => {
+      const features = {
+        pagination: { initialPageSize: 50 },
+      };
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ features, services: createMockServices(25) }),
+      });
+
       expect(result.current.features).toEqual(features);
+    });
+
+    it('preserves pagination: false without re-enabling pagination', () => {
+      const features = { pagination: false as const };
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ features, services: createMockServices(25) }),
+      });
+
+      expect(result.current.features.pagination).toBe(false);
+      expect(result.current.supports.pagination).toBe(false);
     });
   });
 
@@ -176,6 +209,32 @@ describe('ContentListClientProvider', () => {
       const secondFindItems = result.current.dataSource.findItems;
 
       expect(firstFindItems).toBe(secondFindItems);
+    });
+  });
+
+  describe('services', () => {
+    it('passes services to the base provider', () => {
+      const services = createMockServices(30);
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ services }),
+      });
+
+      expect(result.current.services).toBe(services);
+    });
+
+    it('reads uiSettings once at mount', () => {
+      const services = createMockServices(15);
+
+      const { rerender } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ services }),
+      });
+
+      rerender();
+      rerender();
+
+      // uiSettings.get should only be called once (at mount).
+      expect(services.uiSettings.get).toHaveBeenCalledTimes(1);
     });
   });
 

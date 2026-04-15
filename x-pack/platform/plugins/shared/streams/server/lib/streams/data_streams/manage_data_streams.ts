@@ -15,6 +15,7 @@ import type {
 import type { Streams } from '@kbn/streams-schema';
 import type {
   IndicesDataStreamFailureStore,
+  IndicesDataStreamOptionsTemplate,
   IndicesPutDataLifecycleRequest,
   IndicesSimulateTemplateTemplate,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -22,6 +23,7 @@ import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
+  isDisabledFailureStore,
   isDisabledLifecycleFailureStore,
   isEnabledLifecycleFailureStore,
   isInheritFailureStore,
@@ -303,6 +305,59 @@ export async function putDataStreamsSettings({
   }
 }
 
+/**
+ * Maps a non-inherit stream failure_store definition to Elasticsearch failure_store options
+ * (put data stream API and index template data_stream_options).
+ */
+export function failureStoreDefinitionToElasticsearchOptions(
+  failureStore: FailureStore,
+  isServerless: boolean
+): IndicesDataStreamFailureStore {
+  if (isInheritFailureStore(failureStore)) {
+    throw new Error('Expected a resolved failure store, not { inherit: {} }');
+  }
+
+  if (isEnabledLifecycleFailureStore(failureStore)) {
+    const dataRetention = failureStore.lifecycle.enabled?.data_retention;
+    return {
+      enabled: true,
+      ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
+    };
+  }
+
+  if (isDisabledLifecycleFailureStore(failureStore)) {
+    return {
+      enabled: true,
+      ...(isServerless ? {} : { lifecycle: { enabled: false } }),
+    };
+  }
+
+  if (isDisabledFailureStore(failureStore)) {
+    return {
+      enabled: false,
+    };
+  }
+
+  throw new Error('Invalid failure store configuration');
+}
+
+/**
+ * Template-layer failure store options for wired stream index templates so new or restored
+ * data streams materialize with the correct failure store when deferral skips putDataStreamOptions.
+ */
+export function failureStoreToIndexTemplateDataStreamOptions(
+  failureStore: FailureStore,
+  isServerless: boolean
+): IndicesDataStreamOptionsTemplate | undefined {
+  if (isInheritFailureStore(failureStore)) {
+    return undefined;
+  }
+
+  return {
+    failure_store: failureStoreDefinitionToElasticsearchOptions(failureStore, isServerless),
+  };
+}
+
 export async function updateDataStreamsFailureStore({
   esClient,
   logger,
@@ -330,25 +385,8 @@ export async function updateDataStreamsFailureStore({
       failureStoreConfig = response.template?.data_stream_options?.failure_store ?? {
         enabled: false,
       };
-    } else if (isEnabledLifecycleFailureStore(failureStore)) {
-      // Handle { lifecycle: { enabled: { data_retention?: string } } }
-      const dataRetention = failureStore.lifecycle.enabled?.data_retention;
-      failureStoreConfig = {
-        enabled: true,
-        ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
-      };
-    } else if (isDisabledLifecycleFailureStore(failureStore)) {
-      // Handle { lifecycle: { disabled: {} } }
-      // lifecycle cannot be disabled in serverless
-      failureStoreConfig = {
-        enabled: true,
-        ...(isServerless ? {} : { lifecycle: { enabled: false } }),
-      };
     } else {
-      // Handle { disabled: {} }
-      failureStoreConfig = {
-        enabled: false,
-      };
+      failureStoreConfig = failureStoreDefinitionToElasticsearchOptions(failureStore, isServerless);
     }
 
     await retryTransientEsErrors(

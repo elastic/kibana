@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
+import {
+  EvaluationScoreRepository,
+  computeScoreDocumentId,
+  type EvaluationScoreDocument,
+} from './score_repository';
 import type { Model } from '@kbn/inference-common';
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
@@ -563,6 +567,94 @@ describe('EvaluationScoreRepository', () => {
         'Failed to retrieve scores for run ID run-123:',
         error
       );
+    });
+  });
+
+  describe('indexSingleScore', () => {
+    it('creates a single document with deterministic id and refresh: false', async () => {
+      const doc = createMockScoreDocument();
+      await repository.indexSingleScore(doc);
+
+      expect(mockEsClient.create).toHaveBeenCalledWith({
+        index: 'kibana-evaluations',
+        id: 'run-123-unknown-suite-gpt-4-dataset-1-example-1-Correctness-0',
+        document: doc,
+        refresh: false,
+      });
+    });
+
+    it('enriches the document with suite and buildkite metadata from options', async () => {
+      const doc = createMockScoreDocument();
+      await repository.indexSingleScore(doc, {
+        suiteId: 'my-suite',
+        buildkite: { build_id: 'bk-1', job_id: 'bk-j1' },
+      });
+
+      expect(mockEsClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'run-123-my-suite-gpt-4-dataset-1-example-1-Correctness-0',
+          document: expect.objectContaining({
+            suite: { id: 'my-suite' },
+            ci: { buildkite: { build_id: 'bk-1', job_id: 'bk-j1' } },
+          }),
+        })
+      );
+    });
+
+    it('treats 409 conflict as success', async () => {
+      mockEsClient.create.mockRejectedValueOnce({ statusCode: 409 });
+
+      await expect(repository.indexSingleScore(createMockScoreDocument())).resolves.toBeUndefined();
+    });
+
+    it('throws on non-409 errors', async () => {
+      const error = Object.assign(new Error('forbidden'), { statusCode: 403 });
+      mockEsClient.create.mockRejectedValueOnce(error);
+
+      await expect(repository.indexSingleScore(createMockScoreDocument())).rejects.toThrow(
+        'forbidden'
+      );
+    });
+  });
+
+  describe('computeScoreDocumentId', () => {
+    it('builds a deterministic id from document key fields', () => {
+      const doc = createMockScoreDocument();
+      expect(computeScoreDocumentId(doc)).toBe(
+        'run-123-unknown-suite-gpt-4-dataset-1-example-1-Correctness-0'
+      );
+    });
+
+    it('uses suite id when present', () => {
+      const doc = createMockScoreDocument({ suite: { id: 'attack-discovery' } });
+      expect(computeScoreDocumentId(doc)).toBe(
+        'run-123-attack-discovery-gpt-4-dataset-1-example-1-Correctness-0'
+      );
+    });
+
+    it('produces different ids for different evaluators on the same example', () => {
+      const docA = createMockScoreDocument();
+      const docB = createMockScoreDocument({
+        evaluator: { ...createMockScoreDocument().evaluator, name: 'Groundedness' },
+      });
+      expect(computeScoreDocumentId(docA)).not.toBe(computeScoreDocumentId(docB));
+    });
+
+    it('matches the id used by exportScores bulk onDocument', async () => {
+      const doc = createMockScoreDocument();
+
+      mockEsClient.helpers.bulk.mockResolvedValue({
+        total: 1,
+        failed: 0,
+        successful: 1,
+      } as any);
+
+      await repository.exportScores([doc]);
+
+      const bulkCall = mockEsClient.helpers.bulk.mock.calls[0][0];
+      const bulkDocId = bulkCall.onDocument(doc).create._id;
+
+      expect(bulkDocId).toBe(computeScoreDocumentId(doc));
     });
   });
 });

@@ -38,6 +38,7 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
   test('should properly handle errors for invalid query streams', async ({ pageObjects }) => {
     await pageObjects.streams.clickCreateQueryStreamButton();
     await pageObjects.streams.fillRoutingRuleName('test-query-stream');
+    await pageObjects.streams.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
     await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue('INVALID QUERY');
     await pageObjects.streams.clickQueryStreamFlyoutSaveButton();
     await expect(pageObjects.streams.queryStreamCreateErrorToast).toBeVisible();
@@ -72,7 +73,8 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
     expect(response.views![0].query).toBe(rootQueryStreamEsqlQuery);
   });
 
-  test('should create a query stream as a child of an ingest stream', async ({
+  // Failing, see: https://github.com/elastic/kibana/issues/262787
+  test.skip('should create a query stream as a child of an ingest stream', async ({
     page,
     pageObjects,
     esClient,

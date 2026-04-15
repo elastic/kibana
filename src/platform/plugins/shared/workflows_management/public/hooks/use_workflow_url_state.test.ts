@@ -167,4 +167,18 @@ describe('useWorkflowUrlState', () => {
     expect(result.current.activeTab).toBe('executions');
     expect(result.current.selectedExecutionId).toBe('exec-99');
   });
+
+  it('should apply sequential URL updates in one tick without stale search', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?tab=executions&executionId=exec-1']),
+    });
+
+    act(() => {
+      result.current.setActiveTab('workflow');
+      result.current.setSelectedExecution(null);
+    });
+
+    expect(result.current.activeTab).toBe('workflow');
+    expect(result.current.selectedExecutionId).toBeUndefined();
+  });
 });

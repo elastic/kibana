@@ -148,7 +148,7 @@ describe('lens suggestions api helpers', () => {
       );
     });
 
-    it('should return the suggestion as it is when some columns exist in context but others do not', async () => {
+    it('should return the suggestion as it is when some columns exist in context but others do not for different visualization types', async () => {
       const suggestion = mockAllSuggestions[0];
       const visAttributes = {
         visualizationType: 'lnsHeatmap',
@@ -190,6 +190,88 @@ describe('lens suggestions api helpers', () => {
       expect(mergeSuggestionWithVisContext({ suggestion, visAttributes, context })).toStrictEqual(
         suggestion
       );
+    });
+
+    it('should return the suggestion as it is when columns change (no merge on column mismatch)', async () => {
+      const newContext = {
+        ...context,
+        textBasedColumns: [
+          {
+            id: 'newField1',
+            name: 'newField1',
+            meta: { type: 'number' },
+          },
+          {
+            id: 'newField2',
+            name: 'newField2',
+            meta: { type: 'string' },
+          },
+        ] as DatatableColumn[],
+        query: {
+          esql: 'FROM index1 | STATS MAX(bytes) BY timestamp',
+        },
+      };
+
+      const suggestion = {
+        ...mockAllSuggestions[0],
+        visualizationId: 'lnsXY',
+        visualizationState: {
+          preferredSeriesType: 'bar_stacked',
+          legend: { isVisible: true, position: 'right' },
+          layers: [
+            {
+              layerId: 'layer1',
+              layerType: 'data',
+              seriesType: 'bar_stacked',
+              accessors: ['newField1'],
+              xAccessor: 'newField2',
+            },
+          ],
+        },
+        datasourceId: 'textBased',
+      };
+
+      const visAttributes = {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: {
+            preferredSeriesType: 'line',
+            legend: { isVisible: false, position: 'left' },
+            layers: [
+              {
+                layerId: 'layer1',
+                layerType: 'data',
+                seriesType: 'line',
+                accessors: ['oldField1'],
+                xAccessor: 'oldField2',
+              },
+            ],
+          },
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  index: 'layer1',
+                  query: { esql: 'FROM index1 | STATS AVG(bytes) BY timestamp' },
+                  columns: [
+                    { columnId: 'oldField1', fieldName: 'oldField1', meta: { type: 'number' } },
+                    { columnId: 'oldField2', fieldName: 'oldField2', meta: { type: 'string' } },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      } as unknown as TypedLensByValueInput['attributes'];
+
+      const result = mergeSuggestionWithVisContext({
+        suggestion,
+        visAttributes,
+        context: newContext,
+      });
+
+      // Column mismatch: returns suggestion unchanged (preservation is handled by visualization layer)
+      expect(result).toStrictEqual(suggestion);
     });
 
     it('should return the suggestion updated with the attributes if the visualization types and the context columns match', async () => {

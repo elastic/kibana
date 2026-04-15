@@ -95,6 +95,22 @@ export function defineActionTypes(
   actions.registerType(getExcludedActionType());
   actions.registerType(getHookedActionType());
 
+  const oauthTestConnector: ActionType = {
+    id: 'test.oauth-connector',
+    name: 'Test: OAuth Connector',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: z.any() },
+      secrets: { schema: z.any() },
+      params: { schema: z.any() },
+    },
+    async executor() {
+      return { status: 'ok', actionId: '' };
+    },
+  };
+  actions.registerType(oauthTestConnector);
+
   /**
    * System actions
    */

@@ -69,30 +69,35 @@ const loadedPods: PodNodeMetricsRow[] = [
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg1',
     averageCpuUsagePercent: 99,
     averageMemoryUsagePercent: 34,
+    memoryUnit: '%',
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c1',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg2',
     averageCpuUsagePercent: 72,
     averageMemoryUsagePercent: 68,
+    memoryUnit: '%',
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg3',
     averageCpuUsagePercent: 54,
     averageMemoryUsagePercent: 132,
+    memoryUnit: '%',
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg4',
     averageCpuUsagePercent: 34,
     averageMemoryUsagePercent: 264,
+    memoryUnit: '%',
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg5',
     averageCpuUsagePercent: 13,
     averageMemoryUsagePercent: 512,
+    memoryUnit: '%',
   },
 ];
 

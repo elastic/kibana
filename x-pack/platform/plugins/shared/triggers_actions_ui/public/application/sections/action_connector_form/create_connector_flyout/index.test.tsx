@@ -18,6 +18,7 @@ import { TECH_PREVIEW_LABEL } from '../../translations';
 jest.mock('../../../lib/action_connector_api', () => ({
   ...(jest.requireActual('../../../lib/action_connector_api') as any),
   loadActionTypes: jest.fn(),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
 }));
 
 const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
@@ -66,6 +67,7 @@ describe('CreateConnectorFlyout', () => {
       actions: { save: true, show: true },
     };
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(createConnectorResponse);
+    appMockRenderer.coreStart.http.head = jest.fn().mockResolvedValue({});
   });
 
   it('renders', async () => {
@@ -521,9 +523,12 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
 
       await waitFor(() => {
-        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith('/api/actions/connector', {
-          body: `{"name":"My test","config":{"testTextField":"My text field"},"secrets":{},"connector_type_id":"${actionTypeModel.id}"}`,
-        });
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+          '/api/actions/connector/my-test',
+          {
+            body: `{"name":"My test","config":{"testTextField":"My text field"},"secrets":{},"connector_type_id":"${actionTypeModel.id}"}`,
+          }
+        );
       });
 
       expect(onClose).toHaveBeenCalled();
@@ -590,10 +595,18 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(await screen.findByTestId('nameInput'));
       await userEvent.paste('My test');
 
+      // Wait for the connector ID field to be auto-populated and validated
+      await waitFor(() => {
+        expect(screen.getByTestId('connectorIdInput')).toHaveValue('my-test');
+      });
+
       await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
-      expect(onClose).toHaveBeenCalled();
-      expect(onConnectorCreated).toHaveBeenCalled();
-      expect(screen.queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(onClose).toHaveBeenCalled();
+        expect(onConnectorCreated).toHaveBeenCalled();
+        expect(screen.queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
+      });
     });
 
     it('runs pre submit validator correctly', async () => {
@@ -667,9 +680,12 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(screen.getByTestId('create-connector-flyout-save-test-btn'));
 
       await waitFor(() => {
-        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith('/api/actions/connector', {
-          body: `{"name":"My test","config":{"testTextField":"My text field"},"secrets":{},"connector_type_id":"${actionTypeModel.id}"}`,
-        });
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+          '/api/actions/connector/my-test',
+          {
+            body: `{"name":"My test","config":{"testTextField":"My text field"},"secrets":{},"connector_type_id":"${actionTypeModel.id}"}`,
+          }
+        );
       });
 
       expect(onClose).toHaveBeenCalled();
@@ -738,7 +754,7 @@ describe('CreateConnectorFlyout', () => {
   describe('initial connector', () => {
     const initialConnector = {
       actionTypeId: 'initial-connector',
-      name: 'Initial connector',
+      name: 'My test connector',
       isDeprecated: false,
       config: {
         testTextField: 'Prefilled initial value',
@@ -781,7 +797,7 @@ describe('CreateConnectorFlyout', () => {
       );
 
       expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
-      expect(await screen.findByTestId('nameInput')).toHaveValue('Initial connector');
+      expect(await screen.findByTestId('nameInput')).toHaveValue('My test connector');
 
       expect(await screen.findByTestId('test-connector-text-field')).toHaveValue(
         'Prefilled initial value'
@@ -810,14 +826,17 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
 
       await waitFor(() => {
-        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith('/api/actions/connector', {
-          body: JSON.stringify({
-            name: 'Initial connector',
-            config: { testTextField: 'Updated value' },
-            secrets: {},
-            connector_type_id: 'initial-connector',
-          }),
-        });
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+          '/api/actions/connector/my-test-connector',
+          {
+            body: JSON.stringify({
+              name: 'My test connector',
+              config: { testTextField: 'Updated value' },
+              secrets: {},
+              connector_type_id: 'initial-connector',
+            }),
+          }
+        );
       });
 
       expect(onConnectorCreated).toHaveBeenCalled();

@@ -18,7 +18,7 @@ const typeToIconMap: { [type: string]: string | IconType } = {
   values: 'number',
   list: 'list',
   visualOptions: 'brush',
-  titlesAndText: 'visText',
+  titlesAndText: 'text',
 };
 
 export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {

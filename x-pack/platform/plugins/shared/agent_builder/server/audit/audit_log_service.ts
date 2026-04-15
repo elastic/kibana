@@ -203,6 +203,31 @@ export class AuditLogService {
   }
 
   /**
+   * Bulk helper used by internal bulk skill delete.
+   */
+  logBulkSkillDeleteResults(
+    request: KibanaRequest,
+    params: { ids: string[]; deleteResults: Array<PromiseSettledResult<boolean>> }
+  ): void {
+    const { ids, deleteResults } = params;
+    for (let index = 0; index < deleteResults.length; index++) {
+      const settled = deleteResults[index];
+      const skillId = ids[index];
+      if (settled.status === 'fulfilled' && settled.value) {
+        this.logSkillDeleted(request, { skillId });
+      } else {
+        this.logSkillDeleted(request, {
+          skillId,
+          error:
+            settled.status === 'rejected'
+              ? asError(settled.reason)
+              : new Error('Skill delete returned false'),
+        });
+      }
+    }
+  }
+
+  /**
    * Bulk helper used by internal MCP import endpoints.
    */
   logBulkCreateMcpToolResults(

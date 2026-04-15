@@ -7,12 +7,14 @@
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
   TaskStatus,
+  deriveQueryType,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { searchModeSchema } from '../../../utils/search_mode';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
@@ -35,8 +37,17 @@ const dateFromString = z.string().transform((input) => new Date(input));
 const sanitizeTaskResult = (
   result: SignificantEventsQueriesGenerationTaskResult
 ): SignificantEventsQueriesGenerationTaskResult => {
-  if ('queries' in result && result.queries.some((q) => q.esql.query === undefined)) {
+  if ('queries' in result && result.queries.some((q) => q.esql?.query === undefined)) {
     return { status: TaskStatus.Failed, error: 'Stale task result from a previous version.' };
+  }
+  if ('queries' in result) {
+    return {
+      ...result,
+      queries: result.queries.map((q) => ({
+        ...q,
+        type: deriveQueryType(q.esql.query),
+      })),
+    };
   }
   return result;
 };
@@ -159,6 +170,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         .union([z.string().transform((val) => [val]), z.array(z.string())])
         .optional()
         .describe('Stream names to filter significant events'),
+      searchMode: searchModeSchema,
     }),
   }),
   options: {
@@ -177,14 +189,15 @@ const readAllSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames } = params.query;
+    const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
 
+    const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
         from,
@@ -192,6 +205,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         streamNames,
+        searchMode,
       },
       { queryClient, scopedClusterClient }
     );
