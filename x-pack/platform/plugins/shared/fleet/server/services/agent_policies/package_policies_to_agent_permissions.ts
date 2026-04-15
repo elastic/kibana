@@ -11,7 +11,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import {
-  DATASET_VAR_NAME,
   FLEET_APM_PACKAGE,
   FLEET_CONNECTORS_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
@@ -30,16 +29,12 @@ import type {
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 import { PackagePolicyRequestError, PackagePolicyValidationError } from '../../errors';
 
-import type {
-  FullAgentPolicyInput,
-  PackagePolicy,
-  PackagePolicyInputStream,
-  TemplateAgentPolicyInput,
-} from '../../types';
+import type { FullAgentPolicyInput, PackagePolicy, TemplateAgentPolicyInput } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
 import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 
 import { extractSignalTypesFromPipelines } from './otel_collector';
+import { getEffectiveOtelStreamDataset } from './get_effective_otel_stream_dataset';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
@@ -228,7 +223,7 @@ export function storedPackagePoliciesToAgentPermissions(
                   const ds: DataStreamMeta = {
                     type: stream.data_stream.type,
                     dataset: isOtelInput
-                      ? getEffectiveOtelDatasetForPermissions(stream)
+                      ? getEffectiveOtelStreamDataset(stream)
                       : stream.compiled_stream?.data_stream?.dataset ??
                         stream.data_stream.dataset,
                   };
@@ -249,7 +244,7 @@ export function storedPackagePoliciesToAgentPermissions(
                     );
                     dataStreams_.push({
                       type: 'logs',
-                      dataset: getEffectiveOtelDatasetForPermissions(stream),
+                      dataset: getEffectiveOtelStreamDataset(stream),
                       ...(spanEventElasticsearch
                         ? { elasticsearch: spanEventElasticsearch }
                         : {}),
@@ -360,43 +355,6 @@ export function getDataStreamPrivileges(
     names: [index],
     privileges,
   };
-}
-
-/** Resolves `data_stream.dataset` stream var for OTel span-event index permissions; invalid shapes fall back via undefined. */
-const extractOtelDatasetVarOverride = (raw: unknown): string | undefined => {
-  if (raw === undefined || raw === null || raw === '') {
-    return undefined;
-  }
-  if (typeof raw === 'string') {
-    const trimmed = raw.trim();
-    return trimmed !== '' ? trimmed : undefined;
-  }
-  if (typeof raw === 'object' && raw !== null && 'dataset' in raw) {
-    const d = (raw as { dataset: unknown }).dataset;
-    if (typeof d === 'string') {
-      const trimmed = d.trim();
-      return trimmed !== '' ? trimmed : undefined;
-    }
-    return undefined;
-  }
-  return undefined;
-};
-
-/**
- * Resolves the dataset string used for OTel index permissions to match {@link getFullInputStreams}:
- * merge `stream.data_stream` with `compiled_stream.data_stream`, then apply `data_stream.dataset`
- * when set (same order as full agent policy generation and OTTL routing).
- */
-function getEffectiveOtelDatasetForPermissions(stream: PackagePolicyInputStream): string {
-  const fromVar = extractOtelDatasetVarOverride(stream.vars?.[DATASET_VAR_NAME]?.value);
-  if (fromVar !== undefined) {
-    return fromVar;
-  }
-  const merged = {
-    ...stream.data_stream,
-    ...stream.compiled_stream?.data_stream,
-  };
-  return merged.dataset ?? stream.data_stream.dataset ?? '';
 }
 
 function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
