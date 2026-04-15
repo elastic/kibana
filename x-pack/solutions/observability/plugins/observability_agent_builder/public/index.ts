@@ -26,6 +26,7 @@ export type {
   ObservabilityAgentBuilderPluginPublicStart,
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStartDependencies,
+  ServiceMapRendererProps,
 } from './types';
 
 export type { AlertAiInsightProps, ErrorSampleAiInsightProps } from './components/insights';
