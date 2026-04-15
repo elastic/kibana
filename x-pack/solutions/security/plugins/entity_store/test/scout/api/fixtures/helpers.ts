@@ -309,6 +309,41 @@ export const getStatus = (
     }
   );
 
+/**
+ * Polls until the scheduled history snapshot task has completed its first run
+ * by checking for `lastExecutionTimestamp` in the global state saved object.
+ * Unlike checking for history index existence (which only proves the task started),
+ * this confirms the task finished, preventing a race with a forced snapshot.
+ */
+export const waitForScheduledHistorySnapshot = async (
+  esClient: EsClient,
+  timeoutMs = 60_000
+): Promise<void> => {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const result = await esClient.search({
+        index: '.kibana*',
+        query: { term: { type: 'entity-store-global-state' } },
+        size: 1,
+        _source: ['entity-store-global-state.historySnapshot.lastExecutionTimestamp'],
+      });
+      const source = result.hits.hits[0]?._source as Record<string, unknown> | undefined;
+      const gs = source?.['entity-store-global-state'] as Record<string, unknown> | undefined;
+      const hs = gs?.historySnapshot as Record<string, unknown> | undefined;
+      if (hs?.lastExecutionTimestamp) {
+        return;
+      }
+    } catch {
+      // index may not exist yet
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error(
+    `Timed out waiting for scheduled history snapshot task to complete after ${timeoutMs}ms`
+  );
+};
+
 export const startEntityTypes = (
   apiClient: ApiClientFixture,
   headers: Record<string, string>,

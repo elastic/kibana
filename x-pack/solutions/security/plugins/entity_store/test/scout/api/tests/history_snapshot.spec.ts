@@ -19,13 +19,14 @@ import {
   clearEntityStoreIndices,
   forceLogExtraction,
   normalizeKeywordList,
+  waitForScheduledHistorySnapshot,
 } from '../fixtures/helpers';
 
 apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, esClient, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -46,6 +47,8 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       body: { historySnapshot: { frequency: '24h' } },
     });
     expect(installResponse.statusCode).toBe(201);
+
+    await waitForScheduledHistorySnapshot(esClient);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'
