@@ -8,7 +8,7 @@
 import dedent from 'dedent';
 
 /**
- * Entity Linking instructions for the Observability Agent.
+ * Entity Linking instructions for Observability AI Insights.
  * Instructs the LLM to format entities as clickable links using Kibana's relative URL paths.
  */
 export function getEntityLinkingInstructions({ urlPrefix }: { urlPrefix: string }): string {
