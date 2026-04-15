@@ -23,6 +23,15 @@ import type { RouteDependencies } from '../register_routes';
 
 const MAX_SCORES_PER_RUN = 10_000;
 
+const COMPARE_SOURCE_FIELDS = [
+  'example.dataset.id',
+  'example.dataset.name',
+  'example.id',
+  'evaluator.name',
+  'evaluator.score',
+  'task.repetition_index',
+];
+
 export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
     .get({
@@ -54,12 +63,14 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
               query: buildRunFilterQuery(runIdA),
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_RUN,
+              _source: COMPARE_SOURCE_FIELDS,
             }),
             esClient.search<EvaluationScoreDocument>({
               index: EVALUATIONS_INDEX_PATTERN,
               query: buildRunFilterQuery(runIdB),
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_RUN,
+              _source: COMPARE_SOURCE_FIELDS,
             }),
           ]);
 

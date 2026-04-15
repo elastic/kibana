@@ -211,8 +211,11 @@ const ExampleDrilldownFlyout: React.FC<{
     }
 
     const result: ExampleScorePair[] = [];
+    const seenBExamples = new Set<string>();
+
     for (const ex of examplesA.examples) {
       const bScores = mapB.get(ex.example_id);
+      if (bScores) seenBExamples.add(ex.example_id);
       for (const score of ex.scores) {
         if (score.evaluator.name !== evaluatorName) continue;
         const key = `${score.evaluator.name}|${score.task.repetition_index}`;
@@ -223,6 +226,21 @@ const ExampleDrilldownFlyout: React.FC<{
           repetitionIndex: score.task.repetition_index,
           scoreA: score.evaluator.score,
           scoreB: bScores?.get(key) ?? null,
+        });
+      }
+    }
+
+    for (const ex of examplesB.examples) {
+      if (seenBExamples.has(ex.example_id)) continue;
+      for (const score of ex.scores) {
+        if (score.evaluator.name !== evaluatorName) continue;
+        result.push({
+          exampleId: ex.example_id,
+          exampleIndex: ex.example_index,
+          evaluatorName: score.evaluator.name,
+          repetitionIndex: score.task.repetition_index,
+          scoreA: null,
+          scoreB: score.evaluator.score,
         });
       }
     }
@@ -379,6 +397,9 @@ export const CompareRunsPage: React.FC = () => {
     evaluatorName: string;
   } | null>(null);
 
+  const [sortField, setSortField] = useState<keyof PairedTTestResult>('datasetName');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
   const handleRowClick = useCallback((result: PairedTTestResult) => {
     setFlyoutState({
       datasetId: result.datasetId,
@@ -396,13 +417,32 @@ export const CompareRunsPage: React.FC = () => {
 
   const sortedResults = useMemo(() => {
     const results = [...(data?.results ?? [])];
+    const dir = sortDirection === 'asc' ? 1 : -1;
+
     results.sort((a, b) => {
-      const datasetCmp = a.datasetName.localeCompare(b.datasetName);
-      if (datasetCmp !== 0) return datasetCmp;
-      return a.evaluatorName.localeCompare(b.evaluatorName);
+      const valA = a[sortField];
+      const valB = b[sortField];
+
+      if (valA == null && valB == null) return 0;
+      if (valA == null) return 1;
+      if (valB == null) return -1;
+
+      let cmp: number;
+      if (typeof valA === 'string' && typeof valB === 'string') {
+        cmp = valA.localeCompare(valB);
+      } else {
+        cmp = (valA as number) - (valB as number);
+      }
+
+      if (cmp !== 0) return cmp * dir;
+
+      if (sortField === 'datasetName') {
+        return a.evaluatorName.localeCompare(b.evaluatorName);
+      }
+      return 0;
     });
     return results;
-  }, [data?.results]);
+  }, [data?.results, sortField, sortDirection]);
 
   const firstRowByDataset = useMemo(() => {
     const seen = new Set<string>();
@@ -416,19 +456,23 @@ export const CompareRunsPage: React.FC = () => {
     return firstRows;
   }, [sortedResults]);
 
+  const isGroupedByDataset = sortField === 'datasetName';
+
   const columns: Array<EuiBasicTableColumn<PairedTTestResult>> = useMemo(
     () => [
       {
         field: 'datasetName',
         name: i18n.COLUMN_DATASET,
+        sortable: true,
         render: (_val: string, item: PairedTTestResult) => {
-          if (!firstRowByDataset.has(item)) return null;
+          if (isGroupedByDataset && !firstRowByDataset.has(item)) return null;
           return <strong>{item.datasetName}</strong>;
         },
       },
       {
         field: 'evaluatorName',
         name: i18n.COLUMN_EVALUATOR,
+        sortable: true,
       },
       {
         field: 'sampleSize',
@@ -453,7 +497,6 @@ export const CompareRunsPage: React.FC = () => {
       },
       {
         name: i18n.COLUMN_DIFF,
-        sortable: (item: PairedTTestResult) => item.meanA - item.meanB,
         render: (item: PairedTTestResult) => (
           <DiffValue diff={item.meanA - item.meanB} evaluatorName={item.evaluatorName} />
         ),
@@ -477,7 +520,7 @@ export const CompareRunsPage: React.FC = () => {
         ),
       },
     ],
-    [firstRowByDataset]
+    [firstRowByDataset, isGroupedByDataset]
   );
 
   if (!runIdA || !runIdB) {
@@ -590,6 +633,15 @@ export const CompareRunsPage: React.FC = () => {
               tableCaption={i18n.TABLE_CAPTION}
               items={sortedResults}
               columns={columns}
+              sorting={{
+                sort: { field: sortField, direction: sortDirection },
+              }}
+              onChange={({ sort }) => {
+                if (sort) {
+                  setSortField(sort.field as keyof PairedTTestResult);
+                  setSortDirection(sort.direction);
+                }
+              }}
               rowProps={(item) => ({
                 onClick: () => handleRowClick(item),
                 className: clickableRowClass,

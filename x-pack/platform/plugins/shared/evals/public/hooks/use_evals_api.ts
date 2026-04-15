@@ -95,13 +95,17 @@ interface UpdateExampleVariables extends ExampleWithDatasetId {
   updates: UpdateEvaluationDatasetExampleRequestBodyInput;
 }
 
-const getDatasetUrl = (datasetId: string) => EVALS_DATASET_URL.replace('{datasetId}', datasetId);
+const getDatasetUrl = (datasetId: string) =>
+  EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId));
 
 const getDatasetExamplesUrl = (datasetId: string) =>
-  EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId);
+  EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', encodeURIComponent(datasetId));
 
 const getDatasetExampleUrl = (datasetId: string, exampleId: string) =>
-  EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', datasetId).replace('{exampleId}', exampleId);
+  EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', encodeURIComponent(datasetId)).replace(
+    '{exampleId}',
+    encodeURIComponent(exampleId)
+  );
 
 export const useDatasets = (filters: DatasetsListFilters = {}) => {
   const { services } = useKibana();
@@ -405,7 +409,7 @@ export const useEvaluationRun = (runId: string) => {
   return useQuery({
     queryKey: queryKeys.runs.detail(runId),
     queryFn: async (): Promise<GetEvaluationRunResponse> => {
-      const url = EVALS_RUN_URL.replace('{runId}', runId);
+      const url = EVALS_RUN_URL.replace('{runId}', encodeURIComponent(runId));
       return services.http!.get<GetEvaluationRunResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
@@ -426,7 +430,7 @@ export const useEvaluationRunScores = (runId: string) => {
   return useQuery({
     queryKey: queryKeys.runs.scores(runId),
     queryFn: async (): Promise<GetEvaluationRunScoresResponse> => {
-      const url = EVALS_RUN_SCORES_URL.replace('{runId}', runId);
+      const url = EVALS_RUN_SCORES_URL.replace('{runId}', encodeURIComponent(runId));
       return services.http!.get<GetEvaluationRunScoresResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
@@ -462,10 +466,10 @@ export const useRunDatasetExamples = (runId: string, datasetId: string) => {
   return useQuery({
     queryKey: queryKeys.runs.datasetExamples(runId, datasetId),
     queryFn: async (): Promise<GetEvaluationRunDatasetExamplesResponse> => {
-      const url = EVALS_RUN_DATASET_EXAMPLES_URL.replace('{runId}', runId).replace(
-        '{datasetId}',
-        datasetId
-      );
+      const url = EVALS_RUN_DATASET_EXAMPLES_URL.replace(
+        '{runId}',
+        encodeURIComponent(runId)
+      ).replace('{datasetId}', encodeURIComponent(datasetId));
       return services.http!.get<GetEvaluationRunDatasetExamplesResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
@@ -480,7 +484,7 @@ export const useExampleScores = (exampleId: string) => {
   return useQuery({
     queryKey: queryKeys.examples.scores(exampleId),
     queryFn: async (): Promise<GetExampleScoresResponse> => {
-      const url = EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', exampleId);
+      const url = EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', encodeURIComponent(exampleId));
       return services.http!.get<GetExampleScoresResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
@@ -496,7 +500,7 @@ export const useTrace = (traceId: string | null) => {
     queryKey: queryKeys.traces.detail(traceId ?? ''),
     queryFn: async (): Promise<GetTraceResponse> => {
       if (!traceId) throw new Error('traceId is required');
-      const url = EVALS_TRACE_URL.replace('{traceId}', traceId);
+      const url = EVALS_TRACE_URL.replace('{traceId}', encodeURIComponent(traceId));
       return services.http!.get<GetTraceResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
