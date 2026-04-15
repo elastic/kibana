@@ -9,11 +9,17 @@
  * Integration tests for OTel routing behaviour in Fleet-generated agent policies.
  *
  * These tests cover the acceptance criteria from elastic/ingest-dev#7132:
- * - Packages with dynamic_signal_types: true (OTLP, Kafka-style) must NOT set
- *   data_stream.dataset in routing transforms — routing is deferred to the ES exporter
- *   (scope.name, explicit data_stream.* attrs, or generic.otel default).
+ * - Packages with dynamic_signal_types: true (OTLP-style) emit routing transforms
+ *   that set `data_stream.dataset` from the package default (e.g. `generic`) unless
+ *   the user overrides the `data_stream.dataset` stream var (see "custom dataset var").
  * - Receiver-specific packages (e.g. mysql_input_otel) without dynamic_signal_types
- *   must still set data_stream.dataset in routing transforms.
+ *   set `data_stream.dataset` in routing transforms from the stream definition.
+ * Further routing inside the Elasticsearch exporter at runtime is out of scope here.
+ *
+ * Dataset override via stream var `data_stream.dataset` (package-spec / ingest parity):
+ * - Dynamic OTLP-style package: see "custom dataset var" test below.
+ * - Receiver-specific input package: see "receiver-specific" override test below.
+ * For non-OTel logfile full-policy dataset assertions, see agent_policy_input_logfile_dataset.ts.
  */
 
 import expect from '@kbn/expect';
@@ -48,6 +54,11 @@ function getRoutingProcessors(
   return Object.entries(processors).filter(
     ([key]) => key.endsWith('-routing') && key.includes('otelcol-')
   );
+}
+
+/** Exact OTTL emitted by Fleet for data_stream.dataset (see otel_collector buildDataStreamStatements). */
+function expectedDatasetOttlStatement(dataset: string): string {
+  return `set(attributes["data_stream.dataset"], "${dataset}")`;
 }
 
 export default function (providerContext: FtrProviderContext) {
@@ -126,15 +137,15 @@ export default function (providerContext: FtrProviderContext) {
     }
 
     // -------------------------------------------------------------------------
-    // Test 1 (OTLP scenario): dynamic_signal_types: true → NO dataset override
+    // Test 1 (OTLP scenario): dynamic_signal_types: true → dataset set from package default
     // -------------------------------------------------------------------------
-    it('does not set data_stream.dataset in routing transforms for dynamic_signal_types packages (OTLP scenario)', async () => {
+    it('sets data_stream.dataset to the package default (generic) in routing transforms for dynamic_signal_types packages (OTLP scenario)', async () => {
       const agentPolicyId = await createAgentPolicy();
 
       try {
         // Create a package policy using the dynamic OTel package.
         // Input key: {policyTemplateName}-{inputType} = otlpreceiver-otelcol
-        // Stream key: dataset = generic.otel (set by Fleet for dynamic_signal_types packages)
+        // Stream key: dataset = generic (declared as default in the package manifest var)
         await supertest
           .post('/api/fleet/package_policies')
           .set('kbn-xsrf', 'xxxx')
@@ -147,7 +158,7 @@ export default function (providerContext: FtrProviderContext) {
               'otlpreceiver-otelcol': {
                 enabled: true,
                 streams: {
-                  'generic.otel': { enabled: true, vars: {} },
+                  'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} },
                 },
               },
             },
@@ -163,15 +174,11 @@ export default function (providerContext: FtrProviderContext) {
         for (const [_, processor] of routingProcessors) {
           const statements = collectStatements(processor);
 
-          // Must set signal type so the ES exporter can route to the correct index type.
+          // Must set signal type, dataset, and namespace in routing transforms.
           expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
-          // Must set namespace so data lands in the correct namespace.
           expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
-
-          // Must NOT set data_stream.dataset — routing is deferred to the ES exporter so that:
-          //   a) data with no explicit attrs lands in {signal}-generic.otel-default
-          //   b) data with explicit data_stream.* attrs is routed per those attrs
-          expect(statements.some((s) => s.includes('data_stream.dataset'))).to.be(false);
+          // dataset is now set from the package manifest default (generic).
+          expect(statements.some((s) => s === expectedDatasetOttlStatement('generic'))).to.be(true);
         }
       } finally {
         await deleteAgentPolicy(agentPolicyId);
@@ -179,13 +186,13 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     // -------------------------------------------------------------------------
-    // Test 2: explicit data_stream.dataset var on dynamic package → still no override
+    // Test 2: explicit data_stream.dataset var on dynamic package → dataset IS set
     //
-    // Even if the user overrides data_stream.dataset via the package policy variable,
-    // Fleet must not hard-code that value in the OTTL routing transform. The ES exporter
-    // handles dataset routing for dynamic_signal_types packages.
+    // When the user overrides data_stream.dataset via the package policy variable,
+    // Fleet must embed that value in the OTTL routing transform so data is routed
+    // to the user-specified dataset instead of the package default.
     // -------------------------------------------------------------------------
-    it('does not set data_stream.dataset in routing transforms even when the user provides a custom dataset var', async () => {
+    it('sets data_stream.dataset in routing transforms when the user provides a custom dataset var', async () => {
       const agentPolicyId = await createAgentPolicy();
 
       try {
@@ -201,7 +208,7 @@ export default function (providerContext: FtrProviderContext) {
               'otlpreceiver-otelcol': {
                 enabled: true,
                 streams: {
-                  'generic.otel': {
+                  'test_otel_dynamic.otlpreceiver': {
                     enabled: true,
                     vars: { 'data_stream.dataset': 'custom.dataset' },
                   },
@@ -218,7 +225,9 @@ export default function (providerContext: FtrProviderContext) {
 
         for (const [, processor] of routingProcessors) {
           const statements = collectStatements(processor);
-          expect(statements.some((s) => s.includes('data_stream.dataset'))).to.be(false);
+          expect(
+            statements.some((s) => s === expectedDatasetOttlStatement('custom.dataset'))
+          ).to.be(true);
         }
       } finally {
         await deleteAgentPolicy(agentPolicyId);
@@ -266,8 +275,61 @@ export default function (providerContext: FtrProviderContext) {
           expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
           expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
           // Receiver-specific packages must retain the policy_template-based dataset.
-          expect(statements.some((s) => s.includes('data_stream.dataset'))).to.be(true);
-          expect(statements.some((s) => s.includes('"mysqld_exporter"'))).to.be(true);
+          expect(
+            statements.some((s) => s === expectedDatasetOttlStatement('mysqld_exporter'))
+          ).to.be(true);
+        }
+      } finally {
+        await deleteAgentPolicy(agentPolicyId);
+      }
+    });
+
+    // -------------------------------------------------------------------------
+    // Test 4: receiver-specific package + explicit data_stream.dataset override
+    //
+    // Same code path as Test 3, but the user-supplied dataset var must appear in OTTL
+    // (mirrors package-spec input OTel override for non-dynamic packages).
+    // -------------------------------------------------------------------------
+    it('sets overridden data_stream.dataset in routing transforms for receiver-specific OTel packages', async () => {
+      const agentPolicyId = await createAgentPolicy();
+      const overrideDataset = 'custom.receiver_dataset';
+
+      try {
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `receiver-custom-dataset-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            package: { name: RECEIVER_PKG, version: RECEIVER_PKG_VERSION },
+            inputs: {
+              'mysqld_exporter-otelcol': {
+                enabled: true,
+                streams: {
+                  'test_otel_receiver.mysqld_exporter': {
+                    enabled: true,
+                    vars: { 'data_stream.dataset': overrideDataset },
+                  },
+                },
+              },
+            },
+          })
+          .expect(200);
+
+        const fullPolicy = await getFullAgentPolicy(agentPolicyId);
+        const routingProcessors = getRoutingProcessors(fullPolicy.processors);
+
+        expect(routingProcessors.length).to.be.greaterThan(0);
+
+        for (const [, processor] of routingProcessors) {
+          const statements = collectStatements(processor);
+
+          expect(statements.some((s) => s.includes('data_stream.type'))).to.be(true);
+          expect(statements.some((s) => s.includes('data_stream.namespace'))).to.be(true);
+          expect(statements.some((s) => s === expectedDatasetOttlStatement(overrideDataset))).to.be(
+            true
+          );
         }
       } finally {
         await deleteAgentPolicy(agentPolicyId);

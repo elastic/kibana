@@ -88,7 +88,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await title.getVisibleText()).toEqual(caseTitle);
 
         await retry.waitFor('wait for the visualization to exist', async () => {
-          return testSubjects.exists('comment-persistableState-.lens');
+          return testSubjects.exists('comment-lens-lens');
         });
       });
 
@@ -127,7 +127,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);
 
-        await testSubjects.existOrFail('comment-persistableState-.lens');
+        await testSubjects.existOrFail('comment-lens-lens');
       });
     });
   });

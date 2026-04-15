@@ -13,7 +13,9 @@ import { getDefaultConfigs } from '../../configurations/default_configs';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
-describe('SelectedFilters', function () {
+// Failing: See https://github.com/elastic/kibana/issues/253605
+// Failing: See https://github.com/elastic/kibana/issues/253605
+describe.skip('SelectedFilters', function () {
   mockAppDataView();
 
   const dataViewSeries = getDefaultConfigs({

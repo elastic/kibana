@@ -56,6 +56,8 @@ import type { StaticColorType } from '../../schema/color';
 import type { CollapseBySchema } from '../../schema/shared';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import {
+  AUTO_COLOR,
+  DEFAULT_CATEGORICAL_COLOR_MAPPING,
   fromColorMappingAPIToLensState,
   fromColorMappingLensStateToAPI,
   fromStaticColorLensStateToAPI,
@@ -514,6 +516,7 @@ function fromLensStateToAPIMetrics(
   layer: DataSourceStateLayer
 ): PartitionMetricItem[] {
   const vizLayer = visualization.layers[0];
+  const hasActiveGroupBy = getGroups(vizLayer).some((id) => !vizLayer.collapseFns?.[id]);
   const staticColouring = vizLayer.colorsByDimension;
 
   if (isTextBasedLayer(layer)) {
@@ -521,7 +524,9 @@ function fromLensStateToAPIMetrics(
       (id) =>
         stripUndefined({
           ...getValueApiColumn(id, layer),
-          color: staticColouring ? fromStaticColorLensStateToAPI(staticColouring[id]) : undefined,
+          color: hasActiveGroupBy
+            ? undefined
+            : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR,
         }) as PartitionMetricItem
     );
   }
@@ -533,7 +538,9 @@ function fromLensStateToAPIMetrics(
     (id) =>
       stripUndefined({
         ...operationFromColumn(id, layer),
-        color: staticColouring ? fromStaticColorLensStateToAPI(staticColouring[id]) : undefined,
+        color: hasActiveGroupBy
+          ? undefined
+          : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR,
       }) as PartitionMetricItem
   );
 }
@@ -566,7 +573,9 @@ function convertLensStateToAPIGrouping(
   groupIndexForColorMapping: number,
   legacyPalette?: PaletteOutput
 ) {
-  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette);
+  const colorMapping =
+    fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette) ??
+    DEFAULT_CATEGORICAL_COLOR_MAPPING;
   if (isTextBasedLayer(layer)) {
     return groupByAccessors.map(
       (id, index) =>

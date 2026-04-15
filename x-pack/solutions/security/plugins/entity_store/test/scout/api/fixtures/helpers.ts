@@ -6,8 +6,11 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
+import type { apiTest } from '@kbn/scout-security';
+import type { GetStatusResult } from '../../../../server/domain/types';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
+import type { EntityStoreGlobalState } from '../../../../server/domain/saved_objects';
 
 import {
   ENTITY_STORE_ROUTES,
@@ -16,6 +19,20 @@ import {
   LATEST_INDEX,
   UPDATES_INDEX,
 } from './constants';
+
+type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
+type ApiClientFixture = ApiWorkerFixtures['apiClient'];
+type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>; // ApiClientResponse is the same for all methods
+/**
+ * Normalizes values that may be stored as a single keyword or as keyword[] after
+ * log extraction (e.g. `entity.relationships.*` bags).
+ */
+export const normalizeKeywordList = (value: unknown): string[] => {
+  if (value == null) {
+    return [];
+  }
+  return Array.isArray(value) ? value.map((v) => String(v)) : [String(value)];
+};
 
 /**
  * Deletes all Entity Store data indices: latest, updates, and history snapshots.
@@ -254,4 +271,109 @@ export const forceLogExtraction = async (
     headers,
     responseType: 'json',
     body: { fromDateISO, toDateISO },
+  });
+
+export const installAllEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+) =>
+  apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+    headers,
+    responseType: 'json',
+    body: {},
+  });
+
+export const uninstallAllEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+) =>
+  apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+    headers,
+    responseType: 'json',
+    body: {},
+  });
+
+export const getStatus = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  { includeComponents = false } = {}
+): Promise<
+  Omit<ApiClientResponse, 'body'> & { body: Pick<GetStatusResult, 'engines' | 'status'> }
+> =>
+  apiClient.get(
+    includeComponents
+      ? `${ENTITY_STORE_ROUTES.public.STATUS}?include_components=true`
+      : ENTITY_STORE_ROUTES.public.STATUS,
+    {
+      headers,
+      responseType: 'json',
+    }
+  );
+
+/**
+ * Polls until the scheduled history snapshot task has completed its first run
+ * by checking for `lastExecutionTimestamp` in the global state saved object.
+ * Unlike checking for history index existence (which only proves the task started),
+ * this confirms the task finished, preventing a race with a forced snapshot.
+ */
+export const waitForScheduledHistorySnapshot = async (
+  kbnClient: ApiWorkerFixtures['kbnClient'],
+  timeoutMs = 60_000
+): Promise<void> => {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const result = await kbnClient.savedObjects.find<EntityStoreGlobalState>({
+        type: 'entity-store-global-state',
+      });
+      if (result.saved_objects[0]?.attributes.historySnapshot.lastExecutionTimestamp) {
+        return;
+      }
+    } catch (e: unknown) {
+      const status = (e as { response?: { status?: number } })?.response?.status;
+      if (status !== 404) {
+        throw e;
+      }
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error(
+    `Timed out waiting for scheduled history snapshot task to complete after ${timeoutMs}ms`
+  );
+};
+
+export const startEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  entityTypes: EntityType[]
+) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.START, {
+    headers,
+    responseType: 'json',
+    body: { entityTypes },
+  });
+
+export const stopEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  entityTypes: EntityType[]
+) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
+    headers,
+    responseType: 'json',
+    body: { entityTypes },
+  });
+
+export const startAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.START, {
+    headers,
+    responseType: 'json',
+    body: {},
+  });
+
+export const stopAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
+    headers,
+    responseType: 'json',
+    body: {},
   });
