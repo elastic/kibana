@@ -28,6 +28,7 @@ import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 import { RulesListTableContainer } from './rules_list_table_container';
+import { RulesListEmptyState } from '../../rule_builders/rules_list_empty_state';
 import type { RulesListTableSortField } from './rules_list_table';
 import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_popover';
 import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
@@ -110,6 +111,9 @@ export const RulesListPage = () => {
 
   const hasActiveFilters = Boolean(filter);
 
+  const showEmptyTenantState =
+    !isError && !isLoading && data?.total === 0 && !debouncedSearch && !hasActiveFilters;
+
   return (
     <div>
       <EuiPageHeader
@@ -133,7 +137,7 @@ export const RulesListPage = () => {
           </EuiButton>,
         ]}
       />
-      <EuiSpacer size="m" />
+      {(!showEmptyTenantState || isError) && <EuiSpacer size="m" />}
       {isError ? (
         <>
           <EuiCallOut
@@ -152,7 +156,8 @@ export const RulesListPage = () => {
           <EuiSpacer />
         </>
       ) : null}
-      {!isError ? (
+      {!isError && showEmptyTenantState ? <RulesListEmptyState /> : null}
+      {!isError && !showEmptyTenantState ? (
         <>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>

@@ -21,7 +21,6 @@ jest.mock('./recovery_results_preview', () => ({
     <div data-test-subj="recoveryResultsPreview">Recovery Preview Mock</div>
   ),
 }));
-
 const mockUseRulePreview = jest.mocked(useRulePreviewModule.useRulePreview);
 
 const mockPreviewResult: RulePreviewResult = {
@@ -64,9 +63,37 @@ describe('RulePreviewPanel', () => {
         wrapper: createFormWrapper(defaultFormValues, undefined, { layout: 'page' }),
       });
 
+      expect(screen.getByTestId('ruleSummaryPreviewPanel')).toBeInTheDocument();
+      expect(
+        screen.getByText('Updates as you edit the Rule configuration section.')
+      ).toBeInTheDocument();
+      expect(screen.getByText('Rule Summary')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryDetailsGrid')).toBeInTheDocument();
+      expect(screen.getByText('Data source')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleSummaryEsqlQueryShell')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleSummaryBuilderEsqlCodeBlock')).not.toBeInTheDocument();
       expect(screen.getByText('Rule results preview')).toBeInTheDocument();
       expect(screen.getByTestId('ruleResultsPreviewGrid')).toBeInTheDocument();
       expect(screen.queryByTestId('rulePreviewTriggerButton')).not.toBeInTheDocument();
+    });
+
+    it('renders ES|QL code block summary for the Threshold Alert builder', () => {
+      render(<RulePreviewPanel />, {
+        wrapper: createFormWrapper(
+          {
+            ...defaultFormValues,
+            evaluation: { query: { base: 'FROM metrics-*\n| STATS COUNT(*) AS c' } },
+          },
+          undefined,
+          { layout: 'page', ruleBuilderId: 'threshold_alert', includeQueryEditor: false }
+        ),
+      });
+
+      expect(screen.getByTestId('ruleSummaryBuilderEsqlCodeBlock')).toBeInTheDocument();
+      expect(screen.getByText('ES|QL query')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleSummaryBuilderEsqlCodeBlock')).toHaveTextContent(
+        'FROM metrics-*'
+      );
     });
 
     it('does not render recovery preview when recovery type is no_breach', () => {

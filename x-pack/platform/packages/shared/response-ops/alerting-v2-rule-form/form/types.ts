@@ -49,6 +49,38 @@ export interface RuleArtifact {
   value: string;
 }
 
+/** Aggregation options for the threshold alert builder stats UI. */
+export type ThresholdAggregation =
+  | 'avg'
+  | 'max'
+  | 'min'
+  | 'sum'
+  | 'p95'
+  | 'p99'
+  | 'count'
+  | 'cardinality';
+
+/** One computed statistic row in the threshold alert builder. */
+export interface ThresholdStatRow {
+  label: string;
+  aggregation: ThresholdAggregation;
+  field: string;
+}
+
+/** Comparison operators for threshold alert rule conditions (maps to ES|QL). */
+export type ThresholdConditionOperator = 'gt' | 'lt' | 'gte' | 'lte' | 'eq' | 'neq';
+
+/** One row in the threshold alert “Alert condition” UI. */
+export interface ThresholdConditionRow {
+  /** Matches a stat row label; the STATS column alias is derived the same way as in the query. */
+  statLabel: string;
+  operator: ThresholdConditionOperator;
+  value: string;
+}
+
+/** How multiple threshold conditions are combined in the generated `WHERE` clause. */
+export type ThresholdConditionCombinator = 'and' | 'or';
+
 /**
  * State transition configuration for alert-type rules.
  */
@@ -76,4 +108,24 @@ export interface FormValues {
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
+  /**
+   * Threshold alert builder only: stat definitions used to generate the evaluation ES|QL query.
+   * Not sent to the API — persisted via `evaluation.query.base`.
+   */
+  thresholdStats?: ThresholdStatRow[];
+  /**
+   * Threshold alert builder only: ES|QL `FROM` source (index pattern or data stream name).
+   * Not sent to the API — persisted via `evaluation.query.base`.
+   */
+  thresholdDataSource?: string;
+  /**
+   * Threshold alert builder only: combine multiple conditions with AND or OR in `WHERE`.
+   * Not sent to the API — persisted via `evaluation.query.base`.
+   */
+  thresholdConditionCombinator?: ThresholdConditionCombinator;
+  /**
+   * Threshold alert builder only: alert conditions referencing STATS column labels.
+   * Not sent to the API — persisted via `evaluation.query.base`.
+   */
+  thresholdConditions?: ThresholdConditionRow[];
 }

@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { createFormWrapper } from '../../test_utils';
 import { RuleDetailsFieldGroup } from './rule_details_field_group';
 
 describe('RuleDetailsFieldGroup', () => {
-  it('renders without a field group wrapper', () => {
+  it('renders Rule details in a split panel field group', () => {
     const Wrapper = createFormWrapper();
 
     const { container } = render(
@@ -21,13 +20,11 @@ describe('RuleDetailsFieldGroup', () => {
       </Wrapper>
     );
 
-    // Should not render the FieldGroup panel
-    expect(container.querySelector('.euiSplitPanel')).not.toBeInTheDocument();
-    // Should not render a "Rule details" title
-    expect(screen.queryByText('Rule details')).not.toBeInTheDocument();
+    expect(container.querySelector('.euiSplitPanel')).toBeInTheDocument();
+    expect(screen.getByText('Rule details')).toBeInTheDocument();
   });
 
-  it('renders the tags field with optional label', () => {
+  it('renders name, description, and tags fields', () => {
     const Wrapper = createFormWrapper();
 
     render(
@@ -36,34 +33,9 @@ describe('RuleDetailsFieldGroup', () => {
       </Wrapper>
     );
 
-    expect(screen.getByText('Tags')).toBeInTheDocument();
-    expect(screen.getByText('optional')).toBeInTheDocument();
-  });
-
-  it('renders the add description button initially', () => {
-    const Wrapper = createFormWrapper();
-
-    render(
-      <Wrapper>
-        <RuleDetailsFieldGroup />
-      </Wrapper>
-    );
-
-    expect(screen.getByText('Add description')).toBeInTheDocument();
-  });
-
-  it('renders the description field when add description is clicked', async () => {
-    const Wrapper = createFormWrapper();
-
-    render(
-      <Wrapper>
-        <RuleDetailsFieldGroup />
-      </Wrapper>
-    );
-
-    await userEvent.click(screen.getByText('Add description'));
-
+    expect(screen.getByText('Rule name')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getByText('Tags')).toBeInTheDocument();
   });
 
   it('does not render enabled or kind fields', () => {
@@ -78,7 +50,5 @@ describe('RuleDetailsFieldGroup', () => {
     expect(screen.queryByText('Enabled')).not.toBeInTheDocument();
     expect(screen.queryByRole('switch')).not.toBeInTheDocument();
     expect(screen.queryByText('Rule kind')).not.toBeInTheDocument();
-    expect(screen.queryByText('Alert')).not.toBeInTheDocument();
-    expect(screen.queryByText('Monitor')).not.toBeInTheDocument();
   });
 });

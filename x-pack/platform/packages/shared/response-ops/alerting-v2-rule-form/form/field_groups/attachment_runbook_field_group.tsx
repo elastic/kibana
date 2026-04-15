@@ -71,8 +71,8 @@ export const AttachmentRunbookFieldGroup: React.FC = () => {
   return (
     <>
       <FieldGroup
-        title={i18n.translate('xpack.alertingV2.ruleForm.attachmentsGroupTitle', {
-          defaultMessage: 'Attachments',
+        title={i18n.translate('xpack.alertingV2.ruleForm.artifactsGroupTitle', {
+          defaultMessage: 'Artifacts',
         })}
         defaultOpen={false}
       >

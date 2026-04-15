@@ -74,9 +74,9 @@ const createQueryClient = () =>
 const renderCreatePage = () => {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={['/create']}>
+      <MemoryRouter initialEntries={['/create/form']}>
         <I18nProvider>
-          <Route path="/create">
+          <Route path="/create/form">
             <RuleFormPage />
           </Route>
         </I18nProvider>
@@ -102,9 +102,9 @@ const renderEditPage = (ruleId: string = 'rule-1') => {
 const renderClonePage = (sourceRuleId: string = 'rule-1') => {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={[`/create?cloneFrom=${sourceRuleId}`]}>
+      <MemoryRouter initialEntries={[`/create/form?cloneFrom=${sourceRuleId}`]}>
         <I18nProvider>
-          <Route path="/create">
+          <Route path="/create/form">
             <RuleFormPage />
           </Route>
         </I18nProvider>

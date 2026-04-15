@@ -8,6 +8,7 @@
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { RuleFormPage } from '../pages/rule_form_page/rule_form_page';
+import { RuleCreateHubPage } from '../pages/rule_create_hub_page/rule_create_hub_page';
 import { RulesListPage } from '../pages/rules_list_page/rules_list_page';
 import { RuleDetailsRoute } from '../routes/rule_details_route';
 
@@ -17,8 +18,11 @@ export const RulesApp = () => {
       <Route path="/edit/:id">
         <RuleFormPage />
       </Route>
-      <Route path="/create">
+      <Route path="/create/form">
         <RuleFormPage />
+      </Route>
+      <Route path="/create">
+        <RuleCreateHubPage />
       </Route>
       <Route exact path="/:ruleId">
         <RuleDetailsRoute />

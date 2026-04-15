@@ -99,6 +99,43 @@ describe('ShowRequestModal', () => {
     expect(screen.getByTestId('showRequestModalCodeBlock')).toBeInTheDocument();
   });
 
+  it('renders request and YAML view toggle', () => {
+    render(<ShowRequestModal onClose={onClose} />, { wrapper: createFormWrapper() });
+
+    expect(screen.getByTestId('showRequestViewFormatToggle')).toBeInTheDocument();
+    expect(screen.getByTestId('showRequestViewRequestButton')).toBeInTheDocument();
+    expect(screen.getByTestId('showRequestViewYamlButton')).toBeInTheDocument();
+  });
+
+  it('switches to YAML title and subtitle when YAML is selected', async () => {
+    const user = userEvent.setup();
+
+    render(<ShowRequestModal onClose={onClose} />, { wrapper: createFormWrapper() });
+
+    await user.click(screen.getByTestId('showRequestViewYamlButton'));
+
+    expect(screen.getByTestId('showRequestModalTitle')).toHaveTextContent(
+      'Rule YAML configuration'
+    );
+    expect(screen.getByTestId('showRequestModalSubtitle')).toHaveTextContent(
+      'YAML representation of the current rule configuration.'
+    );
+  });
+
+  it('hides create/update tabs when YAML view is selected', async () => {
+    const user = userEvent.setup();
+
+    render(<ShowRequestModal ruleId="rule-123" onClose={onClose} />, {
+      wrapper: createFormWrapper(),
+    });
+
+    expect(screen.getByTestId('showRequestCreateTab')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('showRequestViewYamlButton'));
+
+    expect(screen.queryByTestId('showRequestCreateTab')).not.toBeInTheDocument();
+  });
+
   it('calls onClose when modal close button is clicked', () => {
     render(<ShowRequestModal onClose={onClose} />, { wrapper: createFormWrapper() });
 

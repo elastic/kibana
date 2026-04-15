@@ -47,6 +47,19 @@ describe('useBreadcrumbs', () => {
     expect(breadcrumbs[1]).toMatchObject({ text: 'Rules' });
   });
 
+  it('should set breadcrumbs for the create hub page with root and list link', () => {
+    renderHook(() => useBreadcrumbs('create_hub'));
+
+    const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
+    expect(breadcrumbs).toHaveLength(3);
+    expect(breadcrumbs[0]).toMatchObject({ text: 'Alerting V2' });
+    expect(breadcrumbs[1]).toMatchObject({
+      text: 'Rules',
+      href: '/',
+    });
+    expect(breadcrumbs[2]).toMatchObject({ text: 'Create rule' });
+  });
+
   it('should set breadcrumbs for the create page with root and list link', () => {
     renderHook(() => useBreadcrumbs('create'));
 

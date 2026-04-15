@@ -40,7 +40,7 @@ describe('GroupFieldSelect', () => {
       wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices),
     });
 
-    expect(screen.getByText('Group Fields')).toBeInTheDocument();
+    expect(screen.getByText('Group fields')).toBeInTheDocument();
   });
 
   it('displays columns as options', async () => {

@@ -57,7 +57,7 @@ export const GroupFieldSelect = () => {
           <EuiFormRow
             id={groupByRowId}
             label={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
-              defaultMessage: 'Group Fields',
+              defaultMessage: 'Group fields',
             })}
             labelAppend={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyOptional', {
               defaultMessage: 'optional',

@@ -6,16 +6,22 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { NameField } from '../fields/name_field';
 import { TagsField } from '../fields/tags_field';
 import { DescriptionField } from '../fields/description_field';
+import { FieldGroup } from './field_group';
 
 export const RuleDetailsFieldGroup = () => {
   return (
-    <>
+    <FieldGroup
+      title={i18n.translate('xpack.alertingV2.ruleForm.ruleDetailsSectionTitle', {
+        defaultMessage: 'Rule details',
+      })}
+    >
       <NameField />
-      <TagsField />
       <DescriptionField />
-    </>
+      <TagsField />
+    </FieldGroup>
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -18,22 +18,55 @@ import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
-import { StandaloneRuleForm, mapRuleResponseToFormValues } from '@kbn/alerting-v2-rule-form';
+import {
+  StandaloneRuleForm,
+  mapRuleResponseToFormValues,
+  DEFAULT_THRESHOLD_DATA_SOURCE,
+} from '@kbn/alerting-v2-rule-form';
 import type { FormValues } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { ruleKeys } from '../../hooks/query_key_factory';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
+import {
+  RuleEvaluationEsqlHeaderActions,
+  RULE_EVALUATION_DEFAULT_BUILDER_ID,
+  RULE_EVALUATION_LAST_BUILDER_SESSION_KEY,
+} from '../../components/rule_evaluation_esql_header_actions';
+import { RULE_BUILDERS } from '../../rule_builders/rule_builder_definitions';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
 
 const CLONE_NAME_SUFFIX = i18n.translate('xpack.alertingV2.ruleFormPage.cloneNameSuffix', {
   defaultMessage: ' (clone)',
 });
+
+type EvaluationPanelState = {
+  mode: 'esql' | 'builder';
+  /** Active / last builder id for guided UI and for ES|QL summary when mode is esql */
+  builderId: string | undefined;
+};
+
+const readInitialEvaluationPanel = (): EvaluationPanelState => {
+  const sp = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const builder = sp.get('builder');
+  if (builder) {
+    return { mode: 'builder', builderId: builder };
+  }
+  if (sp.get('mode') === 'esql') {
+    const fromSession =
+      typeof window !== 'undefined'
+        ? window.sessionStorage.getItem(RULE_EVALUATION_LAST_BUILDER_SESSION_KEY) ?? undefined
+        : undefined;
+    return { mode: 'esql', builderId: fromSession };
+  }
+  return { mode: 'esql', builderId: undefined };
+};
 
 export const RuleFormPage = () => {
   const { id: ruleId } = useParams<{ id?: string }>();
@@ -128,6 +161,8 @@ interface RuleFormPageContentProps {
 
 const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPageContentProps) => {
   const isEditing = Boolean(ruleId);
+  const [evaluationPanel, setEvaluationPanel] = useState<EvaluationPanelState>(readInitialEvaluationPanel);
+
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
@@ -136,7 +171,14 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
+  const agentBuilder = useService(PluginStart('agentBuilder'), {
+    optional: true,
+  }) as AgentBuilderPluginStart | undefined;
   const queryClient = useQueryClient();
+
+  const showAskAiAgentButton = Boolean(
+    agentBuilder && application.capabilities.agentBuilder?.show === true
+  );
 
   useBreadcrumbs(isEditing ? 'edit' : 'create');
 
@@ -176,21 +218,151 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
     <FormattedMessage id="xpack.alertingV2.createRule.submitLabel" defaultMessage="Create rule" />
   );
 
+  /** Create/clone: ES|QL vs builder is local state only (no history.replace) so the rest of the page stays stable. */
+  const includeQueryEditor = isEditing || evaluationPanel.mode === 'esql';
+
+  const ruleBuilderIdForForm = isEditing ? undefined : evaluationPanel.builderId;
+
+  const resolveBuilderIdForToggle = useCallback(() => {
+    if (evaluationPanel.builderId) {
+      return evaluationPanel.builderId;
+    }
+    if (typeof window !== 'undefined') {
+      return (
+        window.sessionStorage.getItem(RULE_EVALUATION_LAST_BUILDER_SESSION_KEY) ??
+        RULE_EVALUATION_DEFAULT_BUILDER_ID
+      );
+    }
+    return RULE_EVALUATION_DEFAULT_BUILDER_ID;
+  }, [evaluationPanel.builderId]);
+
+  const selectEsqlMode = useCallback(() => {
+    setEvaluationPanel((prev) => {
+      if (prev.mode === 'builder' && prev.builderId && typeof window !== 'undefined') {
+        window.sessionStorage.setItem(RULE_EVALUATION_LAST_BUILDER_SESSION_KEY, prev.builderId);
+      }
+      const nextBuilderId =
+        prev.builderId ??
+        (typeof window !== 'undefined'
+          ? window.sessionStorage.getItem(RULE_EVALUATION_LAST_BUILDER_SESSION_KEY) ?? undefined
+          : undefined);
+      return { mode: 'esql', builderId: nextBuilderId };
+    });
+  }, []);
+
+  const selectBuilderMode = useCallback(() => {
+    const id = resolveBuilderIdForToggle();
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem(RULE_EVALUATION_LAST_BUILDER_SESSION_KEY, id);
+    }
+    setEvaluationPanel({ mode: 'builder', builderId: id });
+  }, [resolveBuilderIdForToggle]);
+
+  const onPickBuilder = useCallback((id: string) => {
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem(RULE_EVALUATION_LAST_BUILDER_SESSION_KEY, id);
+    }
+    setEvaluationPanel({ mode: 'builder', builderId: id });
+  }, []);
+
+  const builderIconType = useMemo(() => {
+    const id =
+      evaluationPanel.builderId ??
+      (typeof window !== 'undefined'
+        ? window.sessionStorage.getItem(RULE_EVALUATION_LAST_BUILDER_SESSION_KEY) ??
+          RULE_EVALUATION_DEFAULT_BUILDER_ID
+        : RULE_EVALUATION_DEFAULT_BUILDER_ID);
+    return RULE_BUILDERS.find((b) => b.id === id)?.iconType ?? 'aggregate';
+  }, [evaluationPanel.builderId]);
+
+  const ruleEvaluationHeaderActions = useMemo(() => {
+    if (isEditing) {
+      return undefined;
+    }
+    return (
+      <RuleEvaluationEsqlHeaderActions
+        selectedMode={evaluationPanel.mode === 'esql' ? 'esql' : 'builder'}
+        onChange={(next) => {
+          if (next === 'esql') {
+            selectEsqlMode();
+          } else {
+            selectBuilderMode();
+          }
+        }}
+        onPickBuilder={onPickBuilder}
+        builderIconType={builderIconType}
+        basePath={basePath}
+        showAgentBuilderButton={showAskAiAgentButton}
+        onOpenAgentBuilder={agentBuilder ? () => agentBuilder.toggleChat() : undefined}
+      />
+    );
+  }, [
+    isEditing,
+    evaluationPanel.mode,
+    selectEsqlMode,
+    selectBuilderMode,
+    onPickBuilder,
+    builderIconType,
+    basePath,
+    showAskAiAgentButton,
+    agentBuilder,
+  ]);
+
+  const needsThresholdDefaults =
+    !ruleId &&
+    evaluationPanel.mode === 'builder' &&
+    evaluationPanel.builderId === 'threshold_alert';
+
+  const mergedInitialValues = useMemo(() => {
+    if (!needsThresholdDefaults) {
+      return initialValues;
+    }
+    return {
+      ...initialValues,
+      thresholdDataSource: initialValues?.thresholdDataSource ?? DEFAULT_THRESHOLD_DATA_SOURCE,
+      thresholdStats: initialValues?.thresholdStats ?? [
+        { label: '', aggregation: 'avg' as const, field: '' },
+      ],
+      thresholdConditionCombinator: initialValues?.thresholdConditionCombinator ?? 'and',
+      thresholdConditions: initialValues?.thresholdConditions ?? [
+        { statLabel: '', operator: 'gt' as const, value: '' },
+      ],
+    };
+  }, [needsThresholdDefaults, initialValues]);
+
+  const ruleEvaluationModeLabel = useMemo(() => {
+    if (evaluationPanel.mode === 'esql') {
+      return i18n.translate('xpack.alertingV2.ruleFormPage.evaluationModeEsql', {
+        defaultMessage: 'ES|QL',
+      });
+    }
+    if (evaluationPanel.builderId) {
+      const def = RULE_BUILDERS.find((b) => b.id === evaluationPanel.builderId);
+      return def?.title ?? evaluationPanel.builderId;
+    }
+    return undefined;
+  }, [evaluationPanel.mode, evaluationPanel.builderId]);
+
+  const standaloneFormKey = ruleId ? `rule-form-edit-${ruleId}` : 'rule-form-create';
+
   return (
     <>
       <EuiPageHeader pageTitle={pageTitle} />
       <EuiSpacer size="m" />
       <StandaloneRuleForm
+        key={standaloneFormKey}
         query={initialQuery ?? DEFAULT_QUERY}
         services={ruleFormServices}
-        includeYaml
-        isDisabled={false}
         includeSubmission
         onSuccess={onSuccess}
         onCancel={onCancel}
         ruleId={ruleId}
-        initialValues={initialValues}
+        initialValues={mergedInitialValues}
         submitLabel={submitLabel}
+        ruleEvaluationHeaderActions={ruleEvaluationHeaderActions}
+        includeQueryEditor={includeQueryEditor}
+        ruleBuilderId={ruleBuilderIdForForm}
+        ruleEvaluationModeLabel={ruleEvaluationModeLabel}
       />
     </>
   );

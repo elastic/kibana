@@ -84,7 +84,10 @@ export const TimeFieldSelect = () => {
         return (
           <EuiFormRow
             label={i18n.translate('xpack.alertingV2.ruleForm.timeFieldLabel', {
-              defaultMessage: 'Time Field',
+              defaultMessage: 'Time field',
+            })}
+            helpText={i18n.translate('xpack.alertingV2.ruleForm.timeFieldHelpText', {
+              defaultMessage: 'Select the timestamp field to use for time-based queries',
             })}
             isInvalid={!!error}
             error={error?.message}

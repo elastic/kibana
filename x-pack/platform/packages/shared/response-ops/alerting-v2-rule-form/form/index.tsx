@@ -48,11 +48,23 @@ export const RuleResultsPreview = () => (
   </Suspense>
 );
 
-export type { FormValues, StateTransitionDelayMode } from './types';
+export type {
+  FormValues,
+  StateTransitionDelayMode,
+  ThresholdAggregation,
+  ThresholdStatRow,
+  ThresholdConditionCombinator,
+  ThresholdConditionOperator,
+  ThresholdConditionRow,
+} from './types';
 export type { DynamicRuleFormProps } from './dynamic_rule_form';
 export type { StandaloneRuleFormProps } from './standalone_rule_form';
 export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
 export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';
+export {
+  DEFAULT_THRESHOLD_DATA_SOURCE,
+  THRESHOLD_DATA_SOURCE_CHOICES,
+} from './threshold_builder_constants';
 export {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,

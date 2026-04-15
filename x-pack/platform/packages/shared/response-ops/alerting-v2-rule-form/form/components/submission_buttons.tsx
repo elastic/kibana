@@ -53,7 +53,7 @@ export const SubmissionButtons = ({
   return (
     <>
       <EuiHorizontalRule />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" style={{ width: '100%' }}>
         {onCancel && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

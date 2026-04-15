@@ -18,10 +18,10 @@ describe('KindField', () => {
     expect(screen.getByText('Track active and recovered state over time')).toBeInTheDocument();
   });
 
-  it('renders the description text', () => {
+  it('renders an info tooltip for the kind field', () => {
     render(<KindField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByText(/Enables lifecycle management/)).toBeInTheDocument();
+    expect(screen.getByTestId('kindFieldTooltip')).toBeInTheDocument();
   });
 
   it('is checked when kind is alert (default)', () => {

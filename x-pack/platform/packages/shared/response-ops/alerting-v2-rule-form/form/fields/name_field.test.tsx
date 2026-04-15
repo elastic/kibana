@@ -21,10 +21,10 @@ import type { FormValues } from '../types';
 import { RuleFormProvider } from '../contexts';
 
 describe('NameField', () => {
-  it('renders with a Name label', () => {
+  it('renders with a Rule name label', () => {
     render(<NameField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByLabelText('Name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Rule name')).toBeInTheDocument();
   });
 
   it('renders a text input with placeholder', () => {
@@ -32,7 +32,7 @@ describe('NameField', () => {
 
     const input = screen.getByTestId('ruleNameInput');
     expect(input).toBeInTheDocument();
-    expect(input).toHaveAttribute('placeholder', 'Untitled rule');
+    expect(input).toHaveAttribute('placeholder', 'Add a rule name');
   });
 
   it('displays initial value from form context', () => {

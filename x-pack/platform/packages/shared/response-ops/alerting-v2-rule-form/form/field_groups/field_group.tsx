@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, type ReactNode } from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiTitle,
   EuiSplitPanel,
   useGeneratedHtmlId,
@@ -22,6 +24,14 @@ import { useRuleFormMeta } from '../contexts';
 
 interface BaseFieldGroupProps {
   title: string;
+  /** Optional content aligned to the right of the title row (page layout only). */
+  titleRight?: ReactNode;
+  /** Optional badge next to the title (e.g. builder / ES|QL mode). */
+  titleBadge?: ReactNode;
+  /** Sets `id` on the section root for in-page anchors. */
+  sectionDomId?: string;
+  /** Optional icon before the title (page and flyout layouts). */
+  titleLeadingIconType?: IconType;
   children: React.ReactNode;
 }
 
@@ -61,7 +71,7 @@ const isUncontrolledFieldGroup = (
 };
 
 export const FieldGroup = (props: FieldGroupProps) => {
-  const { title, children } = props;
+  const { title, titleRight, titleBadge, sectionDomId, titleLeadingIconType, children } = props;
   const { layout } = useRuleFormMeta();
   const id = useGeneratedHtmlId({ prefix: 'fieldGroup' });
   const isControlled = isControlledFieldGroup(props);
@@ -98,13 +108,35 @@ export const FieldGroup = (props: FieldGroupProps) => {
     return (
       <>
         <EuiAccordion
-          id={id}
+          id={sectionDomId ?? id}
           buttonContent={
-            <EuiTitle size="xxs">
-              <h3>
-                <strong>{title}</strong>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="spaceBetween"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+                  {titleLeadingIconType ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={titleLeadingIconType} size="m" aria-hidden={true} />
+                    </EuiFlexItem>
+                  ) : null}
+                  <EuiTitle size="xxs">
+                    <h3>
+                      <strong>{title}</strong>
+                    </h3>
+                  </EuiTitle>
+                  {titleBadge ?? null}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {titleRight ? (
+                <EuiFlexItem grow={false}>
+                  <div style={{ marginInlineEnd: 8 }}>{titleRight}</div>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           }
           paddingSize="s"
           {...accordionProps}
@@ -118,32 +150,54 @@ export const FieldGroup = (props: FieldGroupProps) => {
   }
 
   return (
-    <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
+    <EuiSplitPanel.Outer hasShadow={false} hasBorder={true} id={sectionDomId}>
       <EuiSplitPanel.Inner color="subdued" paddingSize="s">
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {isCollapsible ? (
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          responsive={true}
+          justifyContent="spaceBetween"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+              {isCollapsible ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+                    onClick={onToggle}
+                    aria-label={i18n.translate(
+                      'xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel',
+                      {
+                        defaultMessage: 'Toggle {title}',
+                        values: { title },
+                      }
+                    )}
+                    color="text"
+                  />
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+                  {titleLeadingIconType ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={titleLeadingIconType} size="m" aria-hidden={true} />
+                    </EuiFlexItem>
+                  ) : null}
+                  <EuiTitle size="xxs">
+                    <h3>
+                      <strong>{title}</strong>
+                    </h3>
+                  </EuiTitle>
+                  {titleBadge ?? null}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {titleRight ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-                onClick={onToggle}
-                aria-label={i18n.translate(
-                  'xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel',
-                  {
-                    defaultMessage: 'Toggle {title}',
-                    values: { title },
-                  }
-                )}
-                color="text"
-              />
+              <div style={{ flexShrink: 0 }}>{titleRight}</div>
             </EuiFlexItem>
           ) : null}
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h3>
-                <strong>{title}</strong>
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       {isOpen ? <EuiSplitPanel.Inner>{children}</EuiSplitPanel.Inner> : null}

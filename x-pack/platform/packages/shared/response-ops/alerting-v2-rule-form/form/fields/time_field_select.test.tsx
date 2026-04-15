@@ -41,7 +41,15 @@ describe('TimeFieldSelect', () => {
   it('renders the time field label', () => {
     render(<TimeFieldSelect />, { wrapper: createFormWrapper({}, mockServices) });
 
-    expect(screen.getByText('Time Field')).toBeInTheDocument();
+    expect(screen.getByText('Time field')).toBeInTheDocument();
+  });
+
+  it('renders help text under the time field', () => {
+    render(<TimeFieldSelect />, { wrapper: createFormWrapper({}, mockServices) });
+
+    expect(
+      screen.getByText('Select the timestamp field to use for time-based queries')
+    ).toBeInTheDocument();
   });
 
   it('renders a select input', () => {

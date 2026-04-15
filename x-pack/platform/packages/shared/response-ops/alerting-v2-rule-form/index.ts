@@ -17,6 +17,7 @@ export {
 
 // Constants
 export { RULE_FORM_ID, DEFAULT_RULE_NAME } from './form/constants';
+export { DEFAULT_THRESHOLD_DATA_SOURCE, THRESHOLD_DATA_SOURCE_CHOICES } from './form';
 
 // Form components (lazy loaded) - for embedding in custom forms
 export { DynamicRuleForm, StandaloneRuleForm } from './form';
@@ -41,6 +42,11 @@ export {
 export type {
   FormValues,
   StateTransitionDelayMode,
+  ThresholdAggregation,
+  ThresholdStatRow,
+  ThresholdConditionCombinator,
+  ThresholdConditionOperator,
+  ThresholdConditionRow,
   DynamicRuleFormProps,
   StandaloneRuleFormProps,
   RuleFormServices,

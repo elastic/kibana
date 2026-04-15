@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -26,6 +26,25 @@ export type RuleFormLayout = 'page' | 'flyout';
 export interface RuleFormMeta {
   /** Whether the form is rendered on a full page or inside a flyout. */
   layout: RuleFormLayout;
+  /**
+   * When true, the main evaluation UI is the ES|QL editor; when false, guided builder (or read-only
+   * query) mode. The Rule Summary preview shows the generated ES|QL code block only when this is false.
+   */
+  includeQueryEditor?: boolean;
+  /**
+   * Optional actions rendered in the Rule evaluation section header (e.g. ES|QL entry affordances).
+   */
+  ruleEvaluationHeaderActions?: ReactNode;
+  /**
+   * When set (e.g. `threshold_alert` from the create-rule URL), the form can show builder-specific
+   * evaluation controls instead of the default ES|QL editor.
+   */
+  ruleBuilderId?: string;
+  /**
+   * Short label for the current rule configuration mode (builder name or ES|QL), shown next to the
+   * Rule configuration section title.
+   */
+  ruleEvaluationModeLabel?: string;
 }
 
 interface RuleFormContextValue {

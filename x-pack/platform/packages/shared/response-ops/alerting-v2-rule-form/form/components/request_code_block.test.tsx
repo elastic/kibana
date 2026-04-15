@@ -20,7 +20,7 @@ describe('RequestCodeBlock', () => {
   };
 
   it('renders create request with POST method and correct path', () => {
-    render(<RequestCodeBlock activeTab="create" data-test-subj="codeBlock" />, {
+    render(<RequestCodeBlock activeTab="create" viewMode="request" data-test-subj="codeBlock" />, {
       wrapper: createFormWrapper(formValues),
     });
 
@@ -30,7 +30,12 @@ describe('RequestCodeBlock', () => {
 
   it('renders update request with PATCH method and rule ID in path', () => {
     render(
-      <RequestCodeBlock activeTab="update" ruleId="rule-abc-123" data-test-subj="codeBlock" />,
+      <RequestCodeBlock
+        activeTab="update"
+        viewMode="request"
+        ruleId="rule-abc-123"
+        data-test-subj="codeBlock"
+      />,
       { wrapper: createFormWrapper(formValues) }
     );
 
@@ -39,7 +44,7 @@ describe('RequestCodeBlock', () => {
   });
 
   it('renders pretty-printed JSON body for create', () => {
-    render(<RequestCodeBlock activeTab="create" data-test-subj="codeBlock" />, {
+    render(<RequestCodeBlock activeTab="create" viewMode="request" data-test-subj="codeBlock" />, {
       wrapper: createFormWrapper(formValues),
     });
 
@@ -52,7 +57,12 @@ describe('RequestCodeBlock', () => {
 
   it('renders update body without kind field', () => {
     render(
-      <RequestCodeBlock activeTab="update" ruleId="rule-abc-123" data-test-subj="codeBlock" />,
+      <RequestCodeBlock
+        activeTab="update"
+        viewMode="request"
+        ruleId="rule-abc-123"
+        data-test-subj="codeBlock"
+      />,
       { wrapper: createFormWrapper(formValues) }
     );
 
@@ -62,7 +72,7 @@ describe('RequestCodeBlock', () => {
   });
 
   it('renders copyable code block', () => {
-    render(<RequestCodeBlock activeTab="create" data-test-subj="codeBlock" />, {
+    render(<RequestCodeBlock activeTab="create" viewMode="request" data-test-subj="codeBlock" />, {
       wrapper: createFormWrapper(formValues),
     });
 
@@ -77,7 +87,7 @@ describe('RequestCodeBlock', () => {
         throw new Error('serialization error');
       });
 
-    render(<RequestCodeBlock activeTab="create" data-test-subj="codeBlock" />, {
+    render(<RequestCodeBlock activeTab="create" viewMode="request" data-test-subj="codeBlock" />, {
       wrapper: createFormWrapper(formValues),
     });
 
@@ -85,5 +95,15 @@ describe('RequestCodeBlock', () => {
     expect(content).toContain('Error serializing rule request');
 
     createMapperSpy.mockRestore();
+  });
+
+  it('renders YAML when viewMode is yaml', () => {
+    render(<RequestCodeBlock activeTab="create" viewMode="yaml" data-test-subj="codeBlock" />, {
+      wrapper: createFormWrapper(formValues),
+    });
+
+    const content = screen.getByTestId('codeBlock').textContent!;
+    expect(content).toContain('kind:');
+    expect(content).not.toContain('POST kbn:');
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import type { FormValues } from './types';
 import { RuleForm } from './rule_form';
@@ -26,10 +26,6 @@ export interface StandaloneRuleFormProps {
   /** Callback invoked after a successful internal submission (useCreateRule). */
   onSuccess?: () => void;
   onCancel?: () => void;
-  /** Whether to include YAML editor toggle (default: false). Requires services.application. */
-  includeYaml?: boolean;
-  /** Whether the form is in a loading/disabled state */
-  isDisabled?: boolean;
   /** Whether the form is currently submitting (controls button loading state) */
   isSubmitting?: boolean;
   /** Whether to show submit/cancel buttons (default: false) */
@@ -43,6 +39,14 @@ export interface StandaloneRuleFormProps {
   initialValues?: Partial<FormValues>;
   /** When provided, the form operates in edit mode and uses PATCH instead of POST on submission. */
   ruleId?: string;
+  /** Optional controls for the Rule evaluation section header (e.g. switch from ES|QL entry to a builder). */
+  ruleEvaluationHeaderActions?: ReactNode;
+  /** When false, hides the ES|QL editor (for example threshold builder mode). Default: true. */
+  includeQueryEditor?: boolean;
+  /** Create-rule URL builder deep link (for example `threshold_alert`). */
+  ruleBuilderId?: string;
+  /** Badge text for the Rule evaluation section (builder name or ES|QL). */
+  ruleEvaluationModeLabel?: string;
 }
 
 /**
@@ -65,8 +69,6 @@ export const StandaloneRuleForm = ({
   layout,
   onSubmit,
   onSuccess,
-  includeYaml = false,
-  isDisabled = false,
   isSubmitting = false,
   includeSubmission = false,
   onCancel,
@@ -74,6 +76,10 @@ export const StandaloneRuleForm = ({
   cancelLabel,
   initialValues,
   ruleId,
+  ruleEvaluationHeaderActions,
+  includeQueryEditor = true,
+  ruleBuilderId,
+  ruleEvaluationModeLabel,
 }: StandaloneRuleFormProps) => {
   const queryDefaults = useFormDefaults({ query });
 
@@ -108,8 +114,22 @@ export const StandaloneRuleForm = ({
       stateTransitionRecoveryDelayMode:
         initialValues?.stateTransitionRecoveryDelayMode ??
         queryDefaults.stateTransitionRecoveryDelayMode,
+      ...(initialValues?.thresholdStats !== undefined
+        ? { thresholdStats: initialValues.thresholdStats }
+        : {}),
+      ...(initialValues?.thresholdDataSource !== undefined
+        ? { thresholdDataSource: initialValues.thresholdDataSource }
+        : {}),
+      ...(ruleBuilderId === 'threshold_alert'
+        ? {
+            thresholdConditionCombinator: initialValues?.thresholdConditionCombinator ?? 'and',
+            thresholdConditions: initialValues?.thresholdConditions ?? [
+              { statLabel: '', operator: 'gt', value: '' },
+            ],
+          }
+        : {}),
     }),
-    [queryDefaults, initialValues]
+    [queryDefaults, initialValues, ruleBuilderId]
   );
 
   const methods = useForm<FormValues>({
@@ -124,14 +144,16 @@ export const StandaloneRuleForm = ({
         layout={layout}
         onSubmit={onSubmit}
         onSuccess={onSuccess}
-        includeYaml={includeYaml}
-        isDisabled={isDisabled}
         isSubmitting={isSubmitting}
         includeSubmission={includeSubmission}
         onCancel={onCancel}
         submitLabel={submitLabel}
         cancelLabel={cancelLabel}
         ruleId={ruleId}
+        ruleEvaluationHeaderActions={ruleEvaluationHeaderActions}
+        includeQueryEditor={includeQueryEditor}
+        ruleBuilderId={ruleBuilderId}
+        ruleEvaluationModeLabel={ruleEvaluationModeLabel}
       />
     </FormProvider>
   );

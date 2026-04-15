@@ -7,13 +7,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiFormRow, EuiCodeBlock } from '@elastic/eui';
+import { EuiBadge, EuiSpacer, EuiFormRow, EuiCodeBlock } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
+import { useRuleFormMeta } from '../contexts';
 import { FieldGroup } from './field_group';
 import { EvaluationQueryField } from '../fields/evaluation_query_field';
 import { GroupFieldSelect } from '../fields/group_field_select';
 import { TimeFieldSelect } from '../fields/time_field_select';
+import { ThresholdDataSourceField } from '../fields/threshold_data_source_field';
+import { ThresholdStatsField } from '../fields/threshold_stats_field';
+import { ThresholdAlertConditionsField } from '../fields/threshold_alert_conditions_field';
+import { useSyncThresholdEvaluationQuery } from '../hooks/use_sync_threshold_evaluation_query';
+import { useEnsureThresholdBuilderDefaults } from '../hooks/use_ensure_threshold_builder_defaults';
 
 interface ConditionFieldGroupProps {
   /**
@@ -35,43 +41,81 @@ interface ConditionFieldGroupProps {
  */
 export const ConditionFieldGroup = ({ includeBase = false }: ConditionFieldGroupProps) => {
   const { control } = useFormContext<FormValues>();
+  const { ruleEvaluationHeaderActions, ruleBuilderId, ruleEvaluationModeLabel } = useRuleFormMeta();
 
   // Read the base query from form state (initialized via useFormDefaults)
   const baseQuery = useWatch({ control, name: 'evaluation.query.base' });
 
+  const isThresholdBuilderUi = ruleBuilderId === 'threshold_alert' && !includeBase;
+
+  useSyncThresholdEvaluationQuery(isThresholdBuilderUi);
+  useEnsureThresholdBuilderDefaults(isThresholdBuilderUi);
+
+  const titleRight =
+    ruleEvaluationHeaderActions && (includeBase || isThresholdBuilderUi)
+      ? ruleEvaluationHeaderActions
+      : undefined;
+
+  const titleBadge = ruleEvaluationModeLabel ? (
+    <EuiBadge color="hollow">{ruleEvaluationModeLabel}</EuiBadge>
+  ) : undefined;
+
+  const fieldGroupTitle = isThresholdBuilderUi
+    ? i18n.translate('xpack.alertingV2.ruleForm.thresholdRuleConditionSectionTitle', {
+        defaultMessage: 'Rule condition',
+      })
+    : i18n.translate('xpack.alertingV2.ruleForm.conditionSectionTitle', {
+        defaultMessage: 'Rule configuration',
+      });
+
   return (
     <FieldGroup
-      title={i18n.translate('xpack.alertingV2.ruleForm.condition', {
-        defaultMessage: 'Rule evaluation',
-      })}
+      title={fieldGroupTitle}
+      titleBadge={titleBadge}
+      sectionDomId="ruleEvaluationSection"
+      titleRight={titleRight}
     >
-      {includeBase ? (
+      {isThresholdBuilderUi ? (
+        <>
+          <ThresholdDataSourceField />
+          <EuiSpacer size="m" />
+          <GroupFieldSelect />
+          <TimeFieldSelect />
+          <EuiSpacer size="m" />
+          <ThresholdStatsField />
+          <EuiSpacer size="m" />
+          <ThresholdAlertConditionsField />
+        </>
+      ) : includeBase ? (
         // Editable base query
         <>
           <EvaluationQueryField />
           <EuiSpacer size="m" />
+          <GroupFieldSelect />
+          <TimeFieldSelect />
         </>
       ) : (
         // Read-only base query (only show if there's a query to display)
-        baseQuery && (
-          <>
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.ruleForm.baseQueryLabel', {
-                defaultMessage: 'Base query',
-              })}
-              fullWidth
-            >
-              <EuiCodeBlock language="esql" fontSize="m" paddingSize="m" isCopyable>
-                {baseQuery}
-              </EuiCodeBlock>
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-          </>
-        )
+        <>
+          {baseQuery && (
+            <>
+              <EuiFormRow
+                label={i18n.translate('xpack.alertingV2.ruleForm.baseQueryLabel', {
+                  defaultMessage: 'Base query',
+                })}
+                fullWidth
+              >
+                <EuiCodeBlock language="esql" fontSize="m" paddingSize="m" isCopyable>
+                  {baseQuery}
+                </EuiCodeBlock>
+              </EuiFormRow>
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <GroupFieldSelect />
+          <TimeFieldSelect />
+        </>
       )}
-
-      <GroupFieldSelect />
-      <TimeFieldSelect />
     </FieldGroup>
   );
 };

@@ -25,7 +25,12 @@ export {
 } from '@kbn/alerting-v2-constants';
 
 export const paths = {
+  /** Choose rule builder (hub); then user continues to {@link ruleCreateForm}. */
   ruleCreate: `${ALERTING_V2_RULES_BASE_PATH}/create`,
+  /** Alerting V2 rule form (create, clone, or builder deep link). Edit uses {@link ruleEdit}. */
+  ruleCreateForm: `${ALERTING_V2_RULES_BASE_PATH}/create/form`,
+  /** Create-rule form with ES|QL-focused deep link (skips builder presets). */
+  ruleCreateFormEsqlAdvanced: `${ALERTING_V2_RULES_BASE_PATH}/create/form?mode=esql`,
   ruleEdit: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
@@ -37,3 +42,7 @@ export const paths = {
   alertEpisodeDetails: (episodeId: string) =>
     `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`,
 };
+
+/** Stack alerting overview (create and manage rules). Mirrors DocLinks.links.alerting.guide. */
+export const ALERTING_RULES_GUIDE_DOC_URL =
+  'https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/create-manage-rules';

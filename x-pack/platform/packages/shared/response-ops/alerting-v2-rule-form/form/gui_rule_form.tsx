@@ -27,7 +27,7 @@ export interface GuiRuleFormProps {
  * GUI-based rule form with standard form fields.
  *
  * This component renders the visual form interface with field groups for:
- * - Rule details (name, tags, description — no wrapper panel)
+ * - Rule details (name, description, tags in a Rule details panel)
  * - Rule evaluation (full ES|QL query)
  * - Rule execution settings (schedule, lookback)
  * - Rule kind (alert vs monitor)

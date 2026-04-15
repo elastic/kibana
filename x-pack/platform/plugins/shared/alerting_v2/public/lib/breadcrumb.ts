@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 export type AlertingV2BreadcrumbPage =
   | 'root'
   | 'rules_list'
+  | 'create_hub'
   | 'create'
   | 'edit'
   | 'rule_details'
@@ -34,6 +35,12 @@ export const getAlertingV2Breadcrumb = (
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.rulesListTitle', {
           defaultMessage: 'Rules',
+        }),
+      };
+    case 'create_hub':
+      return {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.createHubTitle', {
+          defaultMessage: 'Create rule',
         }),
       };
     case 'create':

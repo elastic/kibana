@@ -13,12 +13,12 @@ import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
 import { RuleResultsPreview } from './rule_results_preview';
 import { RecoveryResultsPreview } from './recovery_results_preview';
+import { RuleSummaryPreview } from './rule_summary_preview';
 
 /**
  * Layout-aware wrapper for the rule and recovery results previews.
  *
- * - **Page layout**: Renders both previews inline (for side-by-side placement).
- *   The recovery preview is only shown when the recovery policy type is `'query'`.
+ * - **Page layout**: Renders a Rule Summary prototype (ES|QL code or descriptive list), then rule (and optionally recovery) results.
  * - **Flyout layout**: Renders a trigger button that opens a nested flyout
  *   containing both previews.
  */
@@ -31,6 +31,16 @@ export const RulePreviewPanel = () => {
   if (layout === 'page') {
     return (
       <>
+        <RuleSummaryPreview />
+        <EuiSpacer size="m" />
+        <EuiTitle size="xxs">
+          <h3>
+            {i18n.translate('xpack.alertingV2.ruleForm.ruleEvaluationPreviewRail.resultsHeading', {
+              defaultMessage: 'Results preview',
+            })}
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <RuleResultsPreview />
         {showRecoveryPreview && (
           <>

@@ -17,7 +17,7 @@ export class RuleFormPage {
   }
 
   async gotoCreate() {
-    await this.page.gotoApp('management/alertingV2/rules/create');
+    await this.page.gotoApp('management/alertingV2/rules/create/form');
   }
 
   async gotoRulesList() {

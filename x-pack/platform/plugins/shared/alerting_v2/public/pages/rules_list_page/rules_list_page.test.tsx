@@ -18,26 +18,40 @@ const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) =>
   return `/app/${appId}${path}`;
 });
 const mockDocTitleChange = jest.fn();
+const mockAgentBuilderToggleChat = jest.fn();
 
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
 }));
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
-    }
-    if (token === 'chrome') {
-      return { docTitle: { change: mockDocTitleChange } };
-    }
-    if (token === 'http') {
-      return { basePath: { prepend: (p: string) => p } };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+jest.mock('@kbn/core-di-browser', () => {
+  const actual = jest.requireActual('@kbn/core-di-browser');
+  const { PluginStart } = jest.requireActual('@kbn/core-di');
+  return {
+    ...actual,
+    useService: (token: unknown, options?: { optional?: boolean }) => {
+      if (token === actual.CoreStart('http')) {
+        return { basePath: { prepend: (p: string) => p } };
+      }
+      if (token === actual.CoreStart('chrome')) {
+        return { docTitle: { change: mockDocTitleChange } };
+      }
+      if (token === actual.CoreStart('application')) {
+        return {
+          navigateToUrl: mockNavigateToUrl,
+          getUrlForApp: mockGetUrlForApp,
+          capabilities: { agentBuilder: { show: true } },
+        };
+      }
+      if (token === PluginStart('agentBuilder')) {
+        return options?.optional === true
+          ? { toggleChat: mockAgentBuilderToggleChat }
+          : { toggleChat: mockAgentBuilderToggleChat };
+      }
+      return {};
+    },
+  };
+});
 
 const mockUseFetchRules = jest.fn();
 jest.mock('../../hooks/use_fetch_rules', () => ({
@@ -771,7 +785,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
     expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
+      '/app/management/alertingV2/rules/create/form?cloneFrom=rule-1'
     );
   });
 

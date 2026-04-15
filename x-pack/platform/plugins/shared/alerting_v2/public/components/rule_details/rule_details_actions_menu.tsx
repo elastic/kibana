@@ -37,7 +37,9 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
 
   const handleClone = () => {
     setIsPopoverOpen(false);
-    navigateToUrl(basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(rule.id)}`));
+    navigateToUrl(
+      basePath.prepend(`${paths.ruleCreateForm}?cloneFrom=${encodeURIComponent(rule.id)}`)
+    );
   };
 
   const handleDelete = () => {

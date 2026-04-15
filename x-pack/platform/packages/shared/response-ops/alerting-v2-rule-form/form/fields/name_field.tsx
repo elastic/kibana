@@ -42,7 +42,7 @@ export const NameField = () => {
         <EuiFormRow
           id={NAME_ROW_ID}
           label={i18n.translate('xpack.alertingV2.ruleForm.nameLabel', {
-            defaultMessage: 'Name',
+            defaultMessage: 'Rule name',
           })}
           fullWidth
           isInvalid={!!error}
@@ -56,7 +56,7 @@ export const NameField = () => {
             isInvalid={!!error}
             compressed={layout === 'flyout'}
             placeholder={i18n.translate('xpack.alertingV2.ruleForm.namePlaceholder', {
-              defaultMessage: 'Untitled rule',
+              defaultMessage: 'Add a rule name',
             })}
             aria-label={i18n.translate('xpack.alertingV2.ruleForm.nameAriaLabel', {
               defaultMessage: 'Rule name',

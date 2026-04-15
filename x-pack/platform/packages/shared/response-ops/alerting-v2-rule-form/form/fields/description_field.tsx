@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiTextArea, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
@@ -15,43 +15,8 @@ import { useRuleFormMeta } from '../contexts';
 const DESCRIPTION_ROW_ID = 'ruleV2FormDescriptionField';
 
 export const DescriptionField = () => {
-  const { control, watch } = useFormContext<FormValues>();
+  const { control } = useFormContext<FormValues>();
   const { layout } = useRuleFormMeta();
-  const descriptionValue = watch('metadata.description');
-
-  // Show the input if there's already a description value
-  const [isInputVisible, setIsInputVisible] = useState(() => Boolean(descriptionValue));
-
-  // Update visibility if description value changes externally (e.g., form reset)
-  useEffect(() => {
-    if (descriptionValue && !isInputVisible) {
-      setIsInputVisible(true);
-    }
-  }, [descriptionValue, isInputVisible]);
-
-  const handleAddDescription = useCallback(() => {
-    setIsInputVisible(true);
-  }, []);
-
-  if (!isInputVisible) {
-    return (
-      <>
-        <EuiSpacer size="s" />
-        <EuiButtonEmpty
-          iconType="plusInCircle"
-          onClick={handleAddDescription}
-          size="xs"
-          data-test-subj="addDescriptionButton"
-          color="text"
-        >
-          {i18n.translate('xpack.alertingV2.ruleForm.addDescriptionButton', {
-            defaultMessage: 'Add description',
-          })}
-        </EuiButtonEmpty>
-        <EuiSpacer size="s" />
-      </>
-    );
-  }
 
   return (
     <Controller
@@ -63,19 +28,23 @@ export const DescriptionField = () => {
           label={i18n.translate('xpack.alertingV2.ruleForm.descriptionLabel', {
             defaultMessage: 'Description',
           })}
+          labelAppend={i18n.translate('xpack.alertingV2.ruleForm.descriptionOptional', {
+            defaultMessage: 'optional',
+          })}
           fullWidth
           isInvalid={!!error}
           error={error?.message}
         >
           <EuiTextArea
             {...field}
+            value={field.value ?? ''}
             inputRef={ref}
-            rows={2}
+            rows={4}
             fullWidth
             isInvalid={!!error}
             compressed={layout === 'flyout'}
             placeholder={i18n.translate('xpack.alertingV2.ruleForm.descriptionPlaceholder', {
-              defaultMessage: 'Add an optional description for this rule...',
+              defaultMessage: 'Add rule description',
             })}
             data-test-subj="ruleDescriptionInput"
           />

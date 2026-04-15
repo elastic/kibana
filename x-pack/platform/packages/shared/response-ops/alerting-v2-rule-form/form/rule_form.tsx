@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
+import React, { useCallback, useRef, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
-import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
 import { SubmissionButtons } from './components/submission_buttons';
 import {
   RuleFormProvider,
@@ -20,7 +17,6 @@ import {
   type RuleFormServices,
   type RuleFormLayout,
 } from './contexts';
-import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
 import { RulePreviewPanel } from './fields/rule_preview_panel';
 import { ErrorCallOut } from './error_callout';
@@ -33,6 +29,14 @@ export interface RuleFormProps {
   services: RuleFormServices;
   /** Layout mode: 'page' renders the preview side-by-side; 'flyout' uses a nested flyout. Default: 'page'. */
   layout?: RuleFormLayout;
+  /** Rendered in the Rule evaluation panel header (see {@link RuleFormMeta.ruleEvaluationHeaderActions}). */
+  ruleEvaluationHeaderActions?: React.ReactNode;
+  /**
+   * Deep-linked rule builder id (for example `threshold_alert`). Passed through to {@link RuleFormMeta}.
+   */
+  ruleBuilderId?: string;
+  /** Shown as a badge on the Rule evaluation section (builder name or ES|QL). */
+  ruleEvaluationModeLabel?: string;
   /**
    * External submit handler. When provided, form submission delegates to this callback.
    * When omitted and `includeSubmission` is true, the form uses `useCreateRule` internally.
@@ -43,9 +47,6 @@ export interface RuleFormProps {
   onCancel?: () => void;
   /** Whether to include the ES|QL query editor (default: true) */
   includeQueryEditor?: boolean;
-  /** Whether to include YAML editor toggle (default: false) */
-  includeYaml?: boolean;
-  isDisabled?: boolean;
   /** Whether the form is currently submitting (controls button loading state) */
   isSubmitting?: boolean;
   /** Whether to show submit/cancel buttons (default: false) */
@@ -57,7 +58,7 @@ export interface RuleFormProps {
 }
 
 /**
- * Inner content component that renders the appropriate form based on edit mode.
+ * Inner content component that renders the GUI rule form.
  *
  * When an external `onSubmit` is provided, form submission delegates to it.
  * Otherwise, the component uses `useCreateRule` or `useUpdateRule` internally
@@ -68,8 +69,6 @@ const RuleFormContent = ({
   onSubmit: externalOnSubmit,
   onSuccess,
   includeQueryEditor = true,
-  includeYaml = false,
-  isDisabled = false,
   isSubmitting: externalIsSubmitting = false,
   includeSubmission = false,
   onCancel,
@@ -77,14 +76,10 @@ const RuleFormContent = ({
   cancelLabel,
   ruleId,
 }: RuleFormProps) => {
-  const { reset } = useFormContext<FormValues>();
   const services = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { http, notifications } = services;
-  const [editMode, setEditMode] = useState<EditMode>('form');
 
-  // Internal submission hooks — always initialised so hooks are stable,
-  // but only the appropriate one is used when no external onSubmit is provided.
   const { createRule, isLoading: isCreating } = useCreateRule({
     http,
     notifications,
@@ -96,12 +91,9 @@ const RuleFormContent = ({
     ruleId: ruleId ?? '',
   });
 
-  // Keep a stable ref so the internalSubmit callback doesn't re-create on every render
   const onSuccessRef = useRef(onSuccess);
   onSuccessRef.current = onSuccess;
 
-  // Resolve the effective submit handler: external callback takes precedence,
-  // otherwise use updateRule for edits (ruleId present) or createRule for new rules.
   const internalSubmit = useCallback(
     (values: FormValues) => {
       const mutate = ruleId ? updateRule : createRule;
@@ -112,96 +104,60 @@ const RuleFormContent = ({
   const onSubmit = externalOnSubmit ?? internalSubmit;
   const isSubmitting = externalIsSubmitting || isCreating || isUpdating;
 
-  const handleModeChange = useCallback(
-    (newMode: EditMode) => {
-      if (newMode === editMode) return;
-      setEditMode(newMode);
-    },
-    [editMode]
-  );
-
-  // Wrapper that syncs YAML changes back to form state before submitting
-  const handleYamlSubmit = useCallback(
-    (values: FormValues) => {
-      reset(values);
-      onSubmit(values);
-    },
-    [reset, onSubmit]
-  );
-
-  const isYamlMode = editMode === 'yaml';
-
-  const formContent = (
+  const mainFormFields = (
     <>
       <ErrorCallOut />
-      {includeYaml && (
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          responsive={false}
-          gutterSize="m"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.alertingV2.ruleForm.ruleConfigurationHeading"
-                  defaultMessage="Rule configuration"
-                />
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EditModeToggle
-              editMode={editMode}
-              onChange={handleModeChange}
-              disabled={isDisabled || isSubmitting}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      <EuiSpacer size="m" />
-
-      {isYamlMode && includeYaml ? (
-        <YamlRuleForm
-          services={services}
-          onSubmit={handleYamlSubmit}
-          isDisabled={isDisabled}
-          isSubmitting={isSubmitting}
-        />
-      ) : (
-        <GuiRuleForm onSubmit={onSubmit} includeQueryEditor={includeQueryEditor} />
-      )}
-
-      {includeSubmission && (
-        <SubmissionButtons
-          isSubmitting={isSubmitting}
-          onCancel={onCancel}
-          submitLabel={submitLabel}
-          cancelLabel={cancelLabel}
-          ruleId={ruleId}
-        />
-      )}
+      <GuiRuleForm onSubmit={onSubmit} includeQueryEditor={includeQueryEditor} />
     </>
   );
 
+  const submissionFooter = includeSubmission ? (
+    <SubmissionButtons
+      isSubmitting={isSubmitting}
+      onCancel={onCancel}
+      submitLabel={submitLabel}
+      cancelLabel={cancelLabel}
+      ruleId={ruleId}
+    />
+  ) : null;
+
   if (layout === 'page') {
     return (
-      <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-        <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
-          {formContent}
+      <EuiFlexGroup direction="column" gutterSize="l" alignItems="stretch">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+            <EuiFlexItem grow={3} style={{ minWidth: 0 }}>
+              {mainFormFields}
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={2}
+              style={{
+                minWidth: 0,
+                position: 'sticky',
+                top: 24,
+                alignSelf: 'flex-start',
+                maxHeight: 'calc(100vh - 96px)',
+                overflowY: 'auto',
+              }}
+              data-test-subj="ruleEvaluationPreviewRail"
+            >
+              <RulePreviewPanel />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
-          <RulePreviewPanel />
-        </EuiFlexItem>
+        {submissionFooter !== null ? (
+          <EuiFlexItem grow={false} style={{ width: '100%' }}>
+            {submissionFooter}
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   }
 
-  // Flyout layout: form with nested flyout preview
   return (
     <>
-      {formContent}
+      {mainFormFields}
+      {submissionFooter}
       <RulePreviewPanel />
     </>
   );
@@ -221,7 +177,14 @@ const RuleFormContent = ({
  * Includes its own QueryClientProvider for react-query hooks used by field components.
  * Services and layout metadata are provided via RuleFormProvider context, eliminating prop drilling.
  */
-export const RuleForm = ({ layout = 'page', ...props }: RuleFormProps) => {
+export const RuleForm = ({
+  layout = 'page',
+  ruleEvaluationHeaderActions,
+  ruleBuilderId,
+  ruleEvaluationModeLabel,
+  includeQueryEditor = true,
+  ...props
+}: RuleFormProps) => {
   const queryClient = useMemo(
     () =>
       new QueryClient({
@@ -235,12 +198,21 @@ export const RuleForm = ({ layout = 'page', ...props }: RuleFormProps) => {
     []
   );
 
-  const meta = useMemo(() => ({ layout }), [layout]);
+  const meta = useMemo(
+    () => ({
+      layout,
+      includeQueryEditor,
+      ruleEvaluationHeaderActions,
+      ruleBuilderId,
+      ruleEvaluationModeLabel,
+    }),
+    [layout, includeQueryEditor, ruleEvaluationHeaderActions, ruleBuilderId, ruleEvaluationModeLabel]
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
       <RuleFormProvider services={props.services} meta={meta}>
-        <RuleFormContent {...props} />
+        <RuleFormContent {...props} layout={layout} includeQueryEditor={includeQueryEditor} />
       </RuleFormProvider>
     </QueryClientProvider>
   );

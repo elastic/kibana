@@ -138,7 +138,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
+        '/app/management/alertingV2/rules/create/form?cloneFrom=rule-1'
       );
     });
   });

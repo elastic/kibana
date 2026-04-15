@@ -135,7 +135,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
         onClone={(r) =>
           navigateToUrl(
-            basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
+            basePath.prepend(`${paths.ruleCreateForm}?cloneFrom=${encodeURIComponent(r.id)}`)
           )
         }
         onDelete={(r) => setRuleToDelete(r)}

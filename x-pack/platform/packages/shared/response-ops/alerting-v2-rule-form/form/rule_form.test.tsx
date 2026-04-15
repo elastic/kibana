@@ -63,23 +63,6 @@ jest.mock('./gui_rule_form', () => ({
   ),
 }));
 
-// Mock YamlRuleForm to avoid monaco editor setup
-jest.mock('./yaml_rule_form', () => ({
-  YamlRuleForm: ({ onSubmit, isDisabled }: { onSubmit: () => void; isDisabled?: boolean }) => (
-    <form
-      id="ruleV2Form"
-      data-test-subj="mockYamlRuleForm"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit();
-      }}
-    >
-      <div>YAML Form</div>
-      <textarea data-test-subj="ruleV2FormYamlEditor" disabled={isDisabled} />
-    </form>
-  ),
-}));
-
 describe('RuleForm', () => {
   const mockServices = createMockServices();
 
@@ -124,76 +107,6 @@ describe('RuleForm', () => {
       render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 
       expect(screen.getByText('Query Editor')).toBeInTheDocument();
-    });
-  });
-
-  describe('YAML mode toggle', () => {
-    it('does not show edit mode toggle when includeYaml is false', () => {
-      render(<RuleForm {...defaultProps} includeYaml={false} />, { wrapper: createFormWrapper() });
-
-      expect(screen.queryByTestId('ruleV2FormEditModeToggle')).not.toBeInTheDocument();
-    });
-
-    it('shows edit mode toggle when includeYaml is true', () => {
-      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
-
-      expect(screen.getByTestId('ruleV2FormEditModeToggle')).toBeInTheDocument();
-      expect(screen.getByTestId('ruleV2FormEditModeFormButton')).toBeInTheDocument();
-      expect(screen.getByTestId('ruleV2FormEditModeYamlButton')).toBeInTheDocument();
-    });
-
-    it('shows Rule configuration heading when includeYaml is true', () => {
-      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
-
-      expect(screen.getByText('Rule configuration')).toBeInTheDocument();
-    });
-
-    it('does not show Rule configuration heading when includeYaml is false', () => {
-      render(<RuleForm {...defaultProps} includeYaml={false} />, { wrapper: createFormWrapper() });
-
-      expect(screen.queryByText('Rule configuration')).not.toBeInTheDocument();
-    });
-
-    it('starts in form mode by default', () => {
-      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
-
-      expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
-      expect(screen.queryByTestId('mockYamlRuleForm')).not.toBeInTheDocument();
-    });
-
-    it('switches to YAML mode when YAML toggle is clicked', async () => {
-      const user = userEvent.setup();
-
-      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
-
-      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
-
-      expect(screen.getByTestId('mockYamlRuleForm')).toBeInTheDocument();
-      expect(screen.queryByTestId('mockGuiRuleForm')).not.toBeInTheDocument();
-    });
-
-    it('switches back to form mode when Form toggle is clicked', async () => {
-      const user = userEvent.setup();
-
-      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
-
-      // Switch to YAML
-      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
-      expect(screen.getByTestId('mockYamlRuleForm')).toBeInTheDocument();
-
-      // Switch back to Form
-      await user.click(screen.getByTestId('ruleV2FormEditModeFormButton'));
-      expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
-      expect(screen.queryByTestId('mockYamlRuleForm')).not.toBeInTheDocument();
-    });
-
-    it('disables toggle when isDisabled is true', () => {
-      render(<RuleForm {...defaultProps} includeYaml isDisabled />, {
-        wrapper: createFormWrapper(),
-      });
-
-      expect(screen.getByTestId('ruleV2FormEditModeFormButton')).toBeDisabled();
-      expect(screen.getByTestId('ruleV2FormEditModeYamlButton')).toBeDisabled();
     });
   });
 
@@ -271,18 +184,13 @@ describe('RuleForm', () => {
       expect(onCancel).toHaveBeenCalledTimes(1);
     });
 
-    it('shows submission buttons in YAML mode', async () => {
-      const user = userEvent.setup();
-
-      render(<RuleForm {...defaultProps} includeSubmission includeYaml />, {
+    it('shows submission buttons with the GUI form', () => {
+      render(<RuleForm {...defaultProps} includeSubmission />, {
         wrapper: createFormWrapper(),
       });
 
-      // Switch to YAML mode
-      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
-
-      // Submission buttons should still be visible
       expect(screen.getByTestId('ruleV2FormSubmitButton')).toBeInTheDocument();
+      expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
     });
   });
 

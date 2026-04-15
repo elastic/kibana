@@ -28,10 +28,6 @@ export interface DynamicRuleFormProps {
   /** Callback invoked after a successful internal submission (useCreateRule). */
   onSuccess?: () => void;
   onCancel?: () => void;
-  /** Whether to include YAML editor toggle (default: false) */
-  includeYaml?: boolean;
-  /** Whether the form is in a loading/disabled state */
-  isDisabled?: boolean;
   /** Whether the form is currently submitting (controls button loading state) */
   isSubmitting?: boolean;
   /** Whether to show submit/cancel buttons (default: false) */
@@ -58,8 +54,6 @@ export const DynamicRuleForm = ({
   layout,
   onSubmit,
   onSuccess,
-  includeYaml = false,
-  isDisabled = false,
   isSubmitting = false,
   includeSubmission = false,
   onCancel,
@@ -97,8 +91,6 @@ export const DynamicRuleForm = ({
         onSubmit={onSubmit}
         onSuccess={onSuccess}
         includeQueryEditor={false}
-        includeYaml={includeYaml}
-        isDisabled={isDisabled}
         isSubmitting={isSubmitting}
         includeSubmission={includeSubmission}
         onCancel={onCancel}

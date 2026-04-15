@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
@@ -19,7 +20,11 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RequestCodeBlock, type ShowRequestActivePage } from './request_code_block';
+import {
+  RequestCodeBlock,
+  type ShowRequestActivePage,
+  type ShowRequestViewMode,
+} from './request_code_block';
 
 const TITLE_CREATE = i18n.translate('xpack.alertingV2.ruleForm.showRequest.titleCreate', {
   defaultMessage: 'Create alerting rule request',
@@ -45,6 +50,46 @@ const TAB_UPDATE = i18n.translate('xpack.alertingV2.ruleForm.showRequest.tabUpda
   defaultMessage: 'Update',
 });
 
+const TITLE_YAML = i18n.translate('xpack.alertingV2.ruleForm.showRequest.titleYaml', {
+  defaultMessage: 'Rule YAML configuration',
+});
+
+const SUBTITLE_YAML = i18n.translate('xpack.alertingV2.ruleForm.showRequest.subtitleYaml', {
+  defaultMessage: 'YAML representation of the current rule configuration.',
+});
+
+const VIEW_REQUEST = i18n.translate('xpack.alertingV2.ruleForm.showRequest.viewRequest', {
+  defaultMessage: 'Request',
+});
+
+const VIEW_YAML = i18n.translate('xpack.alertingV2.ruleForm.showRequest.viewYaml', {
+  defaultMessage: 'YAML',
+});
+
+const VIEW_FORMAT_LEGEND = i18n.translate(
+  'xpack.alertingV2.ruleForm.showRequest.viewFormatLegend',
+  {
+    defaultMessage: 'Show request or YAML',
+  }
+);
+
+const viewFormatButtons: Array<{
+  id: ShowRequestViewMode;
+  label: string;
+  'data-test-subj': string;
+}> = [
+  {
+    id: 'request',
+    label: VIEW_REQUEST,
+    'data-test-subj': 'showRequestViewRequestButton',
+  },
+  {
+    id: 'yaml',
+    label: VIEW_YAML,
+    'data-test-subj': 'showRequestViewYamlButton',
+  },
+];
+
 interface ShowRequestModalProps {
   ruleId?: string;
   onClose: () => void;
@@ -52,9 +97,16 @@ interface ShowRequestModalProps {
 
 export const ShowRequestModal = ({ ruleId, onClose }: ShowRequestModalProps) => {
   const [activeTab, setActiveTab] = useState<ShowRequestActivePage>(ruleId ? 'update' : 'create');
+  const [viewMode, setViewMode] = useState<ShowRequestViewMode>('request');
 
-  const title = activeTab === 'update' ? TITLE_UPDATE : TITLE_CREATE;
-  const subtitle = activeTab === 'update' ? SUBTITLE_UPDATE : SUBTITLE_CREATE;
+  const title =
+    viewMode === 'yaml' ? TITLE_YAML : activeTab === 'update' ? TITLE_UPDATE : TITLE_CREATE;
+  const subtitle =
+    viewMode === 'yaml'
+      ? SUBTITLE_YAML
+      : activeTab === 'update'
+      ? SUBTITLE_UPDATE
+      : SUBTITLE_CREATE;
 
   return (
     <EuiModal
@@ -76,7 +128,17 @@ export const ShowRequestModal = ({ ruleId, onClose }: ShowRequestModalProps) => 
               </p>
             </EuiText>
           </EuiFlexItem>
-          {ruleId && (
+          <EuiFlexItem grow={false} style={{ alignSelf: 'flex-start' }}>
+            <EuiButtonGroup
+              legend={VIEW_FORMAT_LEGEND}
+              options={viewFormatButtons}
+              idSelected={viewMode}
+              onChange={(id) => setViewMode(id as ShowRequestViewMode)}
+              buttonSize="compressed"
+              data-test-subj="showRequestViewFormatToggle"
+            />
+          </EuiFlexItem>
+          {ruleId && viewMode === 'request' && (
             <EuiTabs>
               <EuiTab
                 isSelected={activeTab === 'create'}
@@ -99,6 +161,7 @@ export const ShowRequestModal = ({ ruleId, onClose }: ShowRequestModalProps) => 
       <EuiModalBody>
         <RequestCodeBlock
           activeTab={activeTab}
+          viewMode={viewMode}
           ruleId={ruleId}
           data-test-subj="showRequestModalCodeBlock"
         />
