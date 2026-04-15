@@ -57,8 +57,9 @@ export const fetchRuleById = jest.fn(
 export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>
   Promise.resolve(rulesMock);
 
-export const fetchRulesWithFacets = async (_: FetchRulesWithFacetsProps): Promise<FetchRulesResponse> =>
-  Promise.resolve(rulesMock);
+export const fetchRulesWithFacets = async (
+  _: FetchRulesWithFacetsProps
+): Promise<FetchRulesResponse> => Promise.resolve(rulesMock);
 
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
   Promise.resolve(['elastic', 'love', 'quality', 'code']);
