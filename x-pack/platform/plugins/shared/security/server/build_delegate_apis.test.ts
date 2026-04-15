@@ -57,17 +57,6 @@ describe('buildSecurityApi', () => {
     });
   });
 
-  describe('authc.enrichRequestWithUserProfile', () => {
-    it('properly delegates to the service', () => {
-      const request = httpServerMock.createKibanaRequest();
-      const profileId = 'u_profile123';
-      api.authc.enrichRequestWithUserProfile(request, profileId);
-
-      expect(authc.enrichRequestWithUserProfile).toHaveBeenCalledTimes(1);
-      expect(authc.enrichRequestWithUserProfile).toHaveBeenCalledWith(request, profileId);
-    });
-  });
-
   describe('audit.asScoped', () => {
     let auditLogger: AuditLogger;
     it('properly delegates to the service', () => {

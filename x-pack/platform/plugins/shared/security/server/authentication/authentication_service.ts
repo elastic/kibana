@@ -430,33 +430,8 @@ export class AuthenticationService {
       return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
     };
 
-    const fakeRequestUsers = new WeakMap<KibanaRequest, AuthenticatedUser>();
-
     const getCurrentUser = (request: KibanaRequest) => {
-      const override = fakeRequestUsers.get(request);
-      if (override) return override;
       return http.auth.get<AuthenticatedUser>(request).state ?? null;
-    };
-
-    const setCurrentUser = (request: KibanaRequest, user: AuthenticatedUser) => {
-      fakeRequestUsers.set(request, user);
-    };
-
-    const enrichRequestWithUserProfile = (request: KibanaRequest, userProfileId: string) => {
-      this.logger.debug(`Enriching request with user profile ID "${userProfileId}".`);
-      const minimalUser: AuthenticatedUser = {
-        username: '',
-        roles: [],
-        enabled: true,
-        metadata: { _reserved: false },
-        authentication_realm: { name: 'background_task', type: 'background_task' },
-        lookup_realm: { name: 'background_task', type: 'background_task' },
-        authentication_type: '',
-        authentication_provider: { type: 'background_task', name: 'background_task' },
-        elastic_cloud_user: false,
-        profile_uid: userProfileId,
-      };
-      setCurrentUser(request, minimalUser);
     };
 
     this.session = session;
@@ -560,8 +535,6 @@ export class AuthenticationService {
        * @param request
        */
       getCurrentUser,
-
-      enrichRequestWithUserProfile,
     };
   }
 }

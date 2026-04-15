@@ -25,7 +25,6 @@ export const authenticationServiceMock = {
     login: jest.fn(),
     logout: jest.fn(),
     getCurrentUser: jest.fn(),
-    enrichRequestWithUserProfile: jest.fn(),
     acknowledgeAccessAgreement: jest.fn(),
   }),
 };

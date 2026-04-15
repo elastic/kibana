@@ -418,12 +418,7 @@ export class SecurityPlugin
     this.userProfileStart = this.userProfileService.start({
       clusterClient,
       session,
-      getCurrentUser: (request) => {
-        if (!this.authenticationStart) {
-          throw new Error('Authentication service is not started yet.');
-        }
-        return this.authenticationStart.getCurrentUser(request);
-      },
+      getCurrentUser: core.security.authc.getCurrentUser,
     });
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
@@ -482,7 +477,6 @@ export class SecurityPlugin
     return Object.freeze<SecurityPluginStart>({
       authc: {
         getCurrentUser: this.authenticationStart.getCurrentUser,
-        enrichRequestWithUserProfile: this.authenticationStart.enrichRequestWithUserProfile,
         apiKeys: publicApiKeys,
       },
       authz: {

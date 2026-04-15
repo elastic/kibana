@@ -22,8 +22,15 @@ export interface CoreSecurityDelegateContract {
 }
 
 /**
+ * The subset of {@link CoreAuthenticationService} that the security provider
+ * must implement.  Core owns enrichment (`enrichRequestWithUserProfile`) and
+ * wraps the delegate's `getCurrentUser` to layer it on top.
+ *
  * @public
  */
-export type AuthenticationServiceContract = CoreAuthenticationService;
+export type AuthenticationServiceContract = Omit<
+  CoreAuthenticationService,
+  'enrichRequestWithUserProfile'
+>;
 
 export type AuditServiceContract = CoreAuditService;

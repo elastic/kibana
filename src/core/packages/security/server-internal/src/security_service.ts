@@ -73,7 +73,7 @@ export class SecurityService
       this.log.warn('Security API was not registered, using default implementation');
     }
     const apiContract = this.securityApi ?? getDefaultSecurityImplementation();
-    return convertSecurityApi(apiContract);
+    return convertSecurityApi(apiContract, this.log);
   }
 
   public stop() {

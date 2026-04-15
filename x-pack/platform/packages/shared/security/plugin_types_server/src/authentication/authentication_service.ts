@@ -15,5 +15,4 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 export interface AuthenticationServiceStart {
   apiKeys: NativeAPIKeysType;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  enrichRequestWithUserProfile: (request: KibanaRequest, userProfileId: string) => void;
 }

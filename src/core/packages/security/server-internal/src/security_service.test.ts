@@ -131,7 +131,7 @@ describe('SecurityService', function () {
       `);
     });
 
-    it('calls convertSecurityApi with the registered API', () => {
+    it('calls convertSecurityApi with the registered API and the logger', () => {
       const { registerSecurityDelegate } = service.setup();
 
       const contract = createStubInternalContract();
@@ -140,7 +140,7 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract);
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract, expect.anything());
     });
 
     it('calls convertSecurityApi with the default implementation when no API was registered', () => {
@@ -151,7 +151,7 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract);
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract, expect.anything());
     });
 
     it('returns the result of convertSecurityApi as contract', () => {

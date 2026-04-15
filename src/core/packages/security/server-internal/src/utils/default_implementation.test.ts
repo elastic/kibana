@@ -24,14 +24,6 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
-  describe('authc.enrichRequestWithUserProfile', () => {
-    it('is a no-op', () => {
-      expect(() =>
-        implementation.authc.enrichRequestWithUserProfile({} as any, 'u_profile123')
-      ).not.toThrow();
-    });
-  });
-
   describe('authc.getRedactedSessionId', () => {
     it('returns undefined', async () => {
       const sessionId = await implementation.authc.getRedactedSessionId({} as any);
