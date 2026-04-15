@@ -6,6 +6,10 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+# All functional/integration test steps run Kibana from the distributable,
+# so dev-mode webpack bundles built during bootstrap are never used.
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 # Bootstrap and artifact download are independent — run them in parallel.
 # Bootstrap installs node_modules; the download fetches the pre-built Kibana distributable.
 .buildkite/scripts/bootstrap.sh &
@@ -29,7 +33,6 @@ if [[ $download_exit -ne 0 ]]; then
   echo "Artifact download failed with exit code $download_exit"
   exit $download_exit
 fi
-
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
 is_test_execution_step
