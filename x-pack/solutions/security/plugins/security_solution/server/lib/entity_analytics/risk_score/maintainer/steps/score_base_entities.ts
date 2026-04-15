@@ -318,6 +318,20 @@ const enrichWithModifiers = async ({
   return { entityIds: euidValues, scores: finalScores, entities: entityMap };
 };
 
+/**
+ * Temporary phase-1 backfill for lookup self-rows.
+ *
+ * Why this exists:
+ * - Some scored entities are resolution targets and do not have
+ *   `entity.relationships.resolution.resolved_to` on their own document.
+ * - Without explicitly detecting those targets, lookup sync can miss the
+ *   target self-row and phase 2 cannot discover/score the group when only the
+ *   target has alerts.
+ *
+ * Fixes behavior reported in https://github.com/elastic/security-team/issues/16838
+ *
+ * Remove this helper once https://github.com/elastic/security-team/issues/16839 implmented
+ */
 const findResolutionTargetIdsForPage = async ({
   page,
   crudClient,
