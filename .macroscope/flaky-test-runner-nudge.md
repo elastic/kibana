@@ -20,9 +20,11 @@ conclusion: neutral
 
 Decide whether this PR needs a Flaky Test Runner nudge. If not, post nothing.
 
+IMPORTANT: Ensure we never post the same flaky test runner comment twice on the same PR. We should only post the comment once.
+
 ## Step 1: Are any in-scope files changed?
 
-- **Scout:** `**/test/scout*/**` or `**/kbn-scout*/**`
+- **Scout:** `**/test/scout*/**`
 - **FTR:** `src/platform/test/**`, `x-pack/platform/test/**`, `x-pack/solutions/*/test/**`
 
 If nothing matches, stop.
@@ -45,8 +47,6 @@ Example: `x-pack/platform/test/serverless/functional/configs/search/config.group
 
 Example: `x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts`
 
-**Scout — changed file is under `**/kbn-scout*/**`:** Search the repo for imports of the changed module, prioritising hits under `\*\*/test/scout*/\*\*`. From each hit, walk up to the nearest Playwright config as above. If no config can be linked after tracing imports, tell the author to pick a suite manually using the UI.
-
 ## Output
 
 Post one comment on the PR. Include only the `/flaky` line(s) for the runner(s) that qualify:
@@ -63,7 +63,9 @@ Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigge
 ```
 ````
 
-Replace the example paths with the resolved paths from Step 3. Drop whichever line doesn't apply. If Scout config could not be resolved (shared `kbn-scout*` package with no traceable imports), replace the `scoutConfig` line with a note asking the author to pick a suite manually in the UI. Sample commands:
+Replace the example paths with the resolved paths from Step 3. Drop whichever line doesn't apply.
+
+Sample commands:
 
 Scout:
 
