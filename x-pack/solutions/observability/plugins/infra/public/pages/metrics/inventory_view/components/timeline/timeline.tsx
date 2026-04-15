@@ -101,8 +101,10 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     metric: anomalyMetricName,
   };
 
+  const effectiveSchema = preferredSchema ?? DEFAULT_SCHEMA;
+
   const { metricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
-    { ...anomalyParams, schema: preferredSchema ?? DEFAULT_SCHEMA },
+    { ...anomalyParams, schema: effectiveSchema },
     {
       active: nodeType === 'host',
     }
@@ -112,7 +114,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   });
 
   const anomalies = useMemo(() => {
-    if (preferredSchema === 'semconv') {
+    if (effectiveSchema === 'semconv') {
       return;
     }
 
@@ -121,7 +123,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     } else if (nodeType === 'pod') {
       return metricsK8sAnomalies;
     }
-  }, [preferredSchema, nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
+  }, [effectiveSchema, nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
 
   const metricLabel = toMetricOpt(metric.type, nodeType)?.textLC;
   const metricPopoverLabel = toMetricOpt(metric.type, nodeType)?.text;
@@ -244,7 +246,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {preferredSchema !== 'semconv' ? (
+            {effectiveSchema !== 'semconv' ? (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                   <EuiFlexItem
