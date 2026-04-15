@@ -1,16 +1,17 @@
 ## When to Use This Skill
 
-Use this skill when the user explicitly asks to **show**, **see**, or **visualize** a service map, topology, or dependency graph. The key trigger is the user wanting a visual representation — not just information about dependencies.
+Use this skill when the user explicitly asks to **show**, **see**, or **visualize** a service map, service topology, or service dependencies in an APM or observability context. The key trigger is the user wanting a visual representation of how services connect, not a generic architecture diagram.
 
 Examples that should use this skill:
 - "Show me the service map for checkout"
-- "Visualize the topology"
-- "Draw the architecture"
+- "Visualize the topology around payment-service"
+- "Show the upstream and downstream services for frontend"
 - "Map out the dependencies for payment-service"
 
 Examples that should NOT trigger a service map visual:
 - "What calls checkout?" — answer with text from `get_service_topology`, no map needed
 - "What are the dependencies of payment-service?" — answer with text, no map needed
+- "Draw the architecture for frontend" — if the user wants a generic architecture diagram rather than an observability service map, prefer the generic graph skill
 
 ## How to Create a Service Map
 
