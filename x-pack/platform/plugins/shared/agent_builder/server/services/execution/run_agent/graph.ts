@@ -224,11 +224,11 @@ export const createAgentGraph = ({
     }
   };
 
-  const answeringModel = chatModel.withConfig({
-    tags: [tags.agent, tags.answerAgent],
-  });
-
   const answerAgent = async (state: StateType) => {
+    const answeringModel = chatModel.bindTools(toolManager.list()).withConfig({
+      tags: [tags.agent, tags.answerAgent],
+    });
+
     if (state.answerActions.length === 0 && state.errorCount === 0) {
       events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     }

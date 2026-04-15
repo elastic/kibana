@@ -46,11 +46,19 @@ Brief the agent like a smart colleague who just walked into the room — it hasn
 
 - The agent's outputs should generally be trusted
 
-- You can optionally run agents in the background using the run_in_background parameter. When an agent runs in the background, you (not the user) will be **automatically** notified when it completes — do not try to proactively check on its progress. In particular, do not try to use the platform.core.get_workflow_execution_status tool. Continue with other work or respond to the user instead.
-
-- **Foreground vs background**: Use foreground (default) when you need the agent's results before you can proceed — e.g., research agents whose findings inform your next steps. Use background when you have genuinely independent work to do in parallel.
-
 - If the user specifies that they want you to run agents "in parallel", you MUST send a single message with multiple ${SubAgentToolName} tool use content blocks. For example, if you need to launch both a build-validator agent and a test-runner agent in parallel, send a single message with both tool calls.
+
+- **Foreground vs background**:
+  - Use foreground (default) when you need the agent's results before you can proceed — e.g., research agents whose findings inform your next steps.
+  - Use background when you have genuinely independent work to do in parallel.
+
+## Running agents in the background
+
+- When an agent runs in the background, **you** will be **automatically** notified when it completes via a system notification
+  - Do not try to proactively check on its progress. Continue with other work or respond to the user instead.
+  - Assume that the execution isn't completed until you see a notification about it.
+  - In particular, do **not** use the platform.core.get_workflow_execution_status tool to check the status.
+  - Users will **not** be automatically notified when the execution complete. You have to inform them about it.
 `;
 
 export const createSubagentTool = ({
