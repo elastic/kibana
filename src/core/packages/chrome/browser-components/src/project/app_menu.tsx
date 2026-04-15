@@ -14,6 +14,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -53,6 +54,27 @@ const getAccessibleTitleFromBreadcrumb = (
     return breadcrumb.text;
   }
   return undefined;
+};
+
+/**
+ * Plain-text trail from the root crumb through the parent of the current page (excludes the
+ * current title crumb). Matches how breadcrumbs read in the UI (e.g. "Stack Management › Indices").
+ */
+const getBackNavigationBreadcrumbTrailText = (
+  crumbs: ChromeBreadcrumb[],
+  separator: string
+): string | undefined => {
+  if (crumbs.length < 2) {
+    return undefined;
+  }
+  const labels = crumbs
+    .slice(0, -1)
+    .map(getAccessibleTitleFromBreadcrumb)
+    .filter((label): label is string => label.trim().length > 0);
+  if (labels.length === 0) {
+    return undefined;
+  }
+  return labels.join(separator);
 };
 
 const noop = () => {};
@@ -364,6 +386,21 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
         defaultMessage: 'Back',
       });
 
+  const backTooltipBreadcrumbSeparator = useMemo(
+    () =>
+      i18n.translate('core.ui.chrome.appMenu.backTooltipBreadcrumbSeparator', {
+        defaultMessage: ' › ',
+        description:
+          'Separator between breadcrumb levels in the project header back button tooltip (visual parity with breadcrumbs).',
+      }),
+    []
+  );
+
+  const backTooltipContent = useMemo(
+    () => getBackNavigationBreadcrumbTrailText(breadcrumbs, backTooltipBreadcrumbSeparator),
+    [breadcrumbs, backTooltipBreadcrumbSeparator]
+  );
+
   const onBackClick = (event: React.MouseEvent) => {
     if (!parentBreadcrumb) {
       return;
@@ -384,6 +421,20 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
       }
     }
   };
+
+  const projectHeaderBackButton = (
+    <EuiButtonIcon
+      aria-label={backAriaLabel}
+      color="text"
+      css={styles.iconButtonSubdued}
+      data-test-subj="kibanaProjectHeaderAppMenuBack"
+      display="empty"
+      iconType="sortLeft"
+      onClick={onBackClick}
+      size="xs"
+      type="button"
+    />
+  );
 
   return (
     <>
@@ -412,17 +463,25 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
         <div css={styles.topRow}>
           <div css={styles.leftCluster}>
             {showBackToParent ? (
-              <EuiButtonIcon
-                aria-label={backAriaLabel}
-                color="text"
-                css={styles.iconButtonSubdued}
-                data-test-subj="kibanaProjectHeaderAppMenuBack"
-                display="empty"
-                iconType="sortLeft"
-                onClick={onBackClick}
-                size="xs"
-                type="button"
-              />
+              backTooltipContent ? (
+                <EuiToolTip
+                  anchorProps={{
+                    'data-test-subj': 'kibanaProjectHeaderAppMenuBackTooltipAnchor',
+                  }}
+                  content={
+                    <span data-test-subj="kibanaProjectHeaderAppMenuBackTooltipContent">
+                      {backTooltipContent}
+                    </span>
+                  }
+                  delay="regular"
+                  position="bottom"
+                  repositionOnScroll
+                >
+                  {projectHeaderBackButton}
+                </EuiToolTip>
+              ) : (
+                projectHeaderBackButton
+              )
             ) : null}
             <div css={styles.titleSection}>
               {hasTitle ? (

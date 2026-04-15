@@ -318,8 +318,8 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
           `}
         >
           <EuiText size="s" component="span" css={{ fontWeight: euiTheme.font.weight.regular }}>
-            {i18n.translate('xpack.spaces.navControl.spacesMenu.addSpaceLabel', {
-              defaultMessage: 'Add space',
+            {i18n.translate('xpack.spaces.navControl.spacesMenu.createSpaceLabel', {
+              defaultMessage: 'Create space',
             })}
           </EuiText>
         </EuiContextMenuItem>
