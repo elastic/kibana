@@ -30,11 +30,8 @@ import { SessionViewPanelProvider } from './document_details/session_view/contex
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
 import type { NetworkExpandableFlyoutProps } from '../flyout_v2/network_details';
-import {
-  Network,
-  NetworkPanelKey,
-  NetworkPreviewPanelKey,
-} from '../flyout_v2/network_details';
+import { NetworkPanelKey, NetworkPreviewPanelKey } from '../flyout_v2/network_details';
+import { NetworkPanel } from './network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
   DocumentDetailsAlertReasonPanelKey,
@@ -274,14 +271,14 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
   {
     key: NetworkPanelKey,
     component: (props) => (
-      <Network {...(props as NetworkExpandableFlyoutProps).params} isOldFlyout />
+      <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />
     ),
     'aria-label': NETWORK_PANEL_ARIA_LABEL,
   },
   {
     key: NetworkPreviewPanelKey,
     component: (props) => (
-      <Network {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode isOldFlyout />
+      <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode />
     ),
     'aria-label': NETWORK_PREVIEW_PANEL_ARIA_LABEL,
   },

@@ -9,13 +9,15 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { Network } from '../../flyout_v2/network_details';
+import { PreviewPanelFooter } from './footer';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
-import { Header } from './header';
-import { Content } from './content';
+import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 
 export interface NetworkExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'network-details' | 'network-preview';
-  params: NetworkProps;
+  params: NetworkPanelProps;
 }
 
 export const NetworkPanelKey: NetworkExpandableFlyoutProps['key'] = 'network-details';
@@ -29,7 +31,7 @@ export const NETWORK_PREVIEW_BANNER = {
   textColor: 'warning',
 };
 
-export interface NetworkProps extends Record<string, unknown> {
+export interface NetworkPanelProps extends Record<string, unknown> {
   /**
    * IP value
    */
@@ -42,18 +44,29 @@ export interface NetworkProps extends Record<string, unknown> {
    * Scope ID
    */
   scopeId: string;
+  /**
+   * If in preview mode, show preview banner and hide navigation
+   */
+  isPreviewMode?: boolean;
 }
 
 /**
- * Network details flyout content.
+ * Panel to be displayed in the network details expandable flyout right section
  */
-export const Network: FC<NetworkProps> = memo(({ ip, flowTarget }) => {
-  return (
-    <>
-      <Header ip={ip} flowTarget={flowTarget} />
-      <Content ip={ip} flowTarget={flowTarget} />
-    </>
-  );
-});
+export const NetworkPanel: FC<NetworkPanelProps> = memo(
+  ({ ip, flowTarget, scopeId, isPreviewMode }) => {
+    return (
+      <>
+        <FlyoutNavigation
+          flyoutIsExpandable={false}
+          isPreviewMode={isPreviewMode}
+          isRulePreview={scopeId === TableId.rulePreview}
+        />
+        <Network ip={ip} flowTarget={flowTarget} />
+        {isPreviewMode && <PreviewPanelFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />}
+      </>
+    );
+  }
+);
 
-Network.displayName = 'Network';
+NetworkPanel.displayName = 'NetworkPanel';

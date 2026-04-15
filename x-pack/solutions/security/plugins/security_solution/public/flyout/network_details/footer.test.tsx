@@ -7,11 +7,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { PreviewFooter } from './footer';
+import { PreviewPanelFooter } from './footer';
 import { PREVIEW_FOOTER_LINK_TEST_ID, PREVIEW_FOOTER_TEST_ID } from './test_ids';
 import { NetworkPanelKey } from '.';
 import { FlowTargetSourceDest } from '../../../common/search_strategy';
-import { mockFlyoutApi } from '../../flyout/document_details/shared/mocks/mock_flyout_context';
+import { mockFlyoutApi } from '../document_details/shared/mocks/mock_flyout_context';
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -19,14 +19,14 @@ const ip = 'ip';
 const flowTarget = FlowTargetSourceDest.destination;
 const scopeId = 'scopeId';
 
-describe('<PreviewFooter />', () => {
+describe('<PreviewPanelFooter />', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   it('should open network details flyout when clicked', () => {
     const { getByTestId } = render(
-      <PreviewFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />
+      <PreviewPanelFooter ip={ip} flowTarget={flowTarget} scopeId={scopeId} />
     );
 
     expect(getByTestId(PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();

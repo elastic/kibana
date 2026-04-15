@@ -6,48 +6,22 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import {
-  useExpandableFlyoutApi,
-  useExpandableFlyoutHistory,
-  useExpandableFlyoutState,
-} from '@kbn/expandable-flyout';
-import { PREVIEW_FOOTER_TEST_ID } from './test_ids';
 import { Network } from '.';
 import { FlowTargetSourceDest } from '../../../common/search_strategy';
-import { mockFlyoutApi } from '../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../common/hooks/use_experimental_features');
-
-const ip = 'ip';
+const ip = '192.168.1.1';
 const flowTarget = FlowTargetSourceDest.destination;
 const scopeId = 'scopeId';
 
 describe('<Network />', () => {
-  beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    jest.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
-    (useExpandableFlyoutState as jest.Mock).mockReturnValue({});
-  });
-
-  it('should not show footer if non-preview mode', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <Network ip={ip} flowTarget={flowTarget} scopeId={scopeId} isPreviewMode={false} />
-      </TestProviders>
-    );
-
-    expect(queryByTestId(PREVIEW_FOOTER_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should show footer if preview mode', () => {
+  it('should render header and content', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <Network ip={ip} flowTarget={flowTarget} scopeId={scopeId} isPreviewMode={true} />
+        <Network ip={ip} flowTarget={flowTarget} scopeId={scopeId} />
       </TestProviders>
     );
 
-    expect(getByTestId(PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId('network-details-flyout-headerText')).toHaveTextContent(ip);
   });
 });
