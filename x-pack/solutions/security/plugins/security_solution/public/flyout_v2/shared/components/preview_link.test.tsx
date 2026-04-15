@@ -61,12 +61,24 @@ describe('<PreviewLink />', () => {
       buildFlyoutContentMock.mockReturnValue(<div data-test-subj="mockFlyoutContent" />);
     });
 
-    it('should render a link with the value as text', () => {
-      const { getByTestId } = renderPreviewLink();
+    it('should render a link with the value as text when no children are provided', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <PreviewLink field="source.ip" value="10.0.0.1" scopeId={SCOPE_ID} />
+        </TestProviders>
+      );
 
       const link = getByTestId(PREVIEW_LINK_TEST_ID);
       expect(link).toBeInTheDocument();
       expect(link).toHaveTextContent('10.0.0.1');
+    });
+
+    it('should render children inside the link when children are provided', () => {
+      const { getByTestId } = renderPreviewLink();
+
+      const link = getByTestId(PREVIEW_LINK_TEST_ID);
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveTextContent('fallback');
     });
 
     it('should call openSystemFlyout when clicked', () => {

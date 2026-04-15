@@ -59,10 +59,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   const store = useStore();
   const history = useHistory();
 
-  const flyoutContent = useMemo(
-    () => buildFlyoutContent(field, value, scopeId),
-    [field, value, scopeId]
-  );
+  const flyoutContent = useMemo(() => buildFlyoutContent(field, value), [field, value]);
 
   const onClick = useCallback(() => {
     if (flyoutContent) {

@@ -20,10 +20,6 @@ export interface NetworkProps extends Record<string, unknown> {
    * Destination or source information
    */
   flowTarget: FlowTargetSourceDest;
-  /**
-   * Scope ID
-   */
-  scopeId: string;
 }
 
 /**

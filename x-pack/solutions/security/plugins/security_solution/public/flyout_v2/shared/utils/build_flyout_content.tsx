@@ -18,11 +18,7 @@ import { Network } from '../../network_details';
  * Currently supports:
  * - IP fields → Network details flyout
  */
-export const buildFlyoutContent = (
-  field: string,
-  value: string,
-  scopeId: string
-): React.ReactElement | null => {
+export const buildFlyoutContent = (field: string, value: string): React.ReactElement | null => {
   const ecsField = getEcsField(field);
 
   if (ecsField?.type === IP_FIELD_TYPE) {
@@ -30,7 +26,7 @@ export const buildFlyoutContent = (
       ? FlowTargetSourceDest.destination
       : FlowTargetSourceDest.source;
 
-    return <Network ip={value} flowTarget={flowTarget} scopeId={scopeId} />;
+    return <Network ip={value} flowTarget={flowTarget} />;
   }
 
   return null;

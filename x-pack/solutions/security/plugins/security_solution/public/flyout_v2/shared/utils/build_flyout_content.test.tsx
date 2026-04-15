@@ -22,44 +22,44 @@ jest.mock('../../../flyout/document_details/right/components/table_field_name_ce
 }));
 
 jest.mock('../../network_details', () => ({
-  Network: ({ ip, flowTarget, scopeId }: { ip: string; flowTarget: string; scopeId: string }) => (
+  Network: ({ ip, flowTarget }: { ip: string; flowTarget: string }) => (
     <div data-test-subj="mockNetwork">
-      {ip}-{flowTarget}-{scopeId}
+      {ip}-{flowTarget}
     </div>
   ),
 }));
 
 describe('buildFlyoutContent', () => {
   it('should return a Network element for a source IP field', () => {
-    const result = buildFlyoutContent('source.ip', '10.0.0.1', 'scope-1');
+    const result = buildFlyoutContent('source.ip', '10.0.0.1');
 
     expect(result).not.toBeNull();
 
     const { getByTestId } = render(result!);
     expect(getByTestId('mockNetwork')).toHaveTextContent(
-      `10.0.0.1-${FlowTargetSourceDest.source}-scope-1`
+      `10.0.0.1-${FlowTargetSourceDest.source}`
     );
   });
 
   it('should return a Network element for a destination IP field', () => {
-    const result = buildFlyoutContent('destination.ip', '192.168.1.1', 'scope-2');
+    const result = buildFlyoutContent('destination.ip', '192.168.1.1');
 
     expect(result).not.toBeNull();
 
     const { getByTestId } = render(result!);
     expect(getByTestId('mockNetwork')).toHaveTextContent(
-      `192.168.1.1-${FlowTargetSourceDest.destination}-scope-2`
+      `192.168.1.1-${FlowTargetSourceDest.destination}`
     );
   });
 
   it('should return null for a non-IP field', () => {
-    const result = buildFlyoutContent('host.name', 'my-host', 'scope-3');
+    const result = buildFlyoutContent('host.name', 'my-host');
 
     expect(result).toBeNull();
   });
 
   it('should return null for an unknown field', () => {
-    const result = buildFlyoutContent('unknown.field', 'value', 'scope-4');
+    const result = buildFlyoutContent('unknown.field', 'value');
 
     expect(result).toBeNull();
   });

@@ -13,6 +13,7 @@ import type { ColumnHeaderType } from '../../../common/types';
 import type { Maybe } from '../../../common/search_strategy';
 import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { IP_FIELD_TYPE } from '../../timelines/components/timeline/body/renderers/constants';
+import { getEcsField } from '../../flyout/document_details/right/components/table_field_name_cell';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { IpCellRenderer } from './ip_cell_renderer';
@@ -83,16 +84,13 @@ export const getCellRendererForGivenRecord = (
       };
     }
 
-    return function IpFieldRenderer(props: DataGridCellValueElementProps) {
-      const fieldType =
-        props.columnsMeta?.[props.columnId]?.type ??
-        props.dataView.getFieldByName(props.columnId)?.type;
-
-      if (fieldType === IP_FIELD_TYPE) {
+    const ecsField = getEcsField(fieldName);
+    if (ecsField?.type === IP_FIELD_TYPE) {
+      return function IpFieldRenderer(props: DataGridCellValueElementProps) {
         return <IpCellRenderer {...props} services={services} store={store} />;
-      }
+      };
+    }
 
-      return null;
-    };
+    return undefined;
   };
 };

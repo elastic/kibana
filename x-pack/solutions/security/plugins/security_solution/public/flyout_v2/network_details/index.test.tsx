@@ -12,13 +12,12 @@ import { TestProviders } from '../../common/mock';
 
 const ip = '192.168.1.1';
 const flowTarget = FlowTargetSourceDest.destination;
-const scopeId = 'scopeId';
 
 describe('<Network />', () => {
   it('should render header and content', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <Network ip={ip} flowTarget={flowTarget} scopeId={scopeId} />
+        <Network ip={ip} flowTarget={flowTarget} />
       </TestProviders>
     );
 

@@ -106,25 +106,8 @@ describe('getCellRendererForGivenRecord', () => {
       {}
     );
   });
-  it('should render null for a non-allowed field with a non-allowed type', () => {
+  it('should return undefined for a non-allowed, non-IP field', () => {
     const cellRenderer = getCellRenderer('some.unknown.field');
-    expect(cellRenderer).toBeDefined();
-    const props: DataGridCellValueElementProps = {
-      columnId: 'some.unknown.field',
-      isDetails: false,
-      isExpanded: false,
-      row: { id: '1', raw: {}, flattened: { 'some.unknown.field': 'value' } },
-      dataView: mockDataView,
-      setCellProps: jest.fn(),
-      isExpandable: false,
-      rowIndex: 0,
-      colIndex: 0,
-      fieldFormats: fieldFormatsMock,
-      closePopover: jest.fn(),
-      columnsMeta: undefined,
-    };
-    const CellRenderer = cellRenderer as React.FC<DataGridCellValueElementProps>;
-    const { container } = render(<CellRenderer {...props} />);
-    expect(container.innerHTML).toBe('');
+    expect(cellRenderer).toBeUndefined();
   });
 });

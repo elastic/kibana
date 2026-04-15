@@ -15,7 +15,6 @@ import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_d
 import { buildFlyoutContent } from '../../flyout_v2/shared/utils/build_flyout_content';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
-import { ONE_DISCOVER_SCOPE_ID } from '../constants';
 
 export interface IpCellRendererProps extends DataGridCellValueElementProps {
   services: StartServices;
@@ -35,7 +34,7 @@ const IpCellRendererComponent: React.FC<IpCellRendererProps> = ({ services, stor
 
   const handleClick = useCallback(
     (ip: string) => {
-      const flyoutContent = buildFlyoutContent(props.columnId, ip, ONE_DISCOVER_SCOPE_ID);
+      const flyoutContent = buildFlyoutContent(props.columnId, ip);
       if (flyoutContent) {
         overlays.openSystemFlyout(
           flyoutProviders({
@@ -62,13 +61,12 @@ const IpCellRendererComponent: React.FC<IpCellRendererProps> = ({ services, stor
   return (
     <>
       {addresses.map((ip, idx) => (
-        <EuiLink
-          key={`${ip}-${idx}`}
-          onClick={() => handleClick(ip)}
-          data-test-subj="one-discover-ip-link"
-        >
-          {ip}
-        </EuiLink>
+        <React.Fragment key={`${ip}-${idx}`}>
+          {idx > 0 && ', '}
+          <EuiLink onClick={() => handleClick(ip)} data-test-subj="one-discover-ip-link">
+            {ip}
+          </EuiLink>
+        </React.Fragment>
       ))}
     </>
   );
