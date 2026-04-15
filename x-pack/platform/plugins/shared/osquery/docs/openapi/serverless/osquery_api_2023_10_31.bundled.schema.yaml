@@ -2,14 +2,14 @@ openapi: 3.0.3
 info:
   description: Run live queries, manage packs and saved queries.
   title: Security Osquery API (Elastic Cloud Serverless)
-  version: '2023-10-31'
+  version: 2023-10-31
 servers:
   - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
       port:
-        default: '5601'
+        default: "5601"
 paths:
   /api/osquery/live_queries:
     get:
@@ -21,37 +21,37 @@ paths:
           name: kuery
           required: false
           schema:
-            $ref: '#/components/schemas/KueryOrUndefined'
+            $ref: "#/components/schemas/KueryOrUndefined"
         - description: The page number to return.
           in: query
           name: page
           required: false
           schema:
-            $ref: '#/components/schemas/PageOrUndefined'
+            $ref: "#/components/schemas/PageOrUndefined"
         - description: The number of results to return per page.
           in: query
           name: pageSize
           required: false
           schema:
-            $ref: '#/components/schemas/PageSizeOrUndefined'
+            $ref: "#/components/schemas/PageSizeOrUndefined"
         - description: The field to sort results by.
           in: query
           name: sort
           required: false
           schema:
-            $ref: '#/components/schemas/SortOrUndefined'
+            $ref: "#/components/schemas/SortOrUndefined"
         - description: The sort order.
           in: query
           name: sortOrder
           required: false
           schema:
-            $ref: '#/components/schemas/SortOrderOrUndefined'
+            $ref: "#/components/schemas/SortOrderOrUndefined"
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FindLiveQueryResponse'
+                $ref: "#/components/schemas/FindLiveQueryResponse"
           description: Indicates a successful call.
       summary: Get live queries
       tags:
@@ -63,14 +63,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateLiveQueryRequestBody'
+              $ref: "#/components/schemas/CreateLiveQueryRequestBody"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateLiveQueryResponse'
+                $ref: "#/components/schemas/CreateLiveQueryResponse"
           description: Indicates a successful call.
       summary: Create a live query
       tags:
@@ -89,11 +89,11 @@ paths:
             example: 3c42c847-eb30-4452-80e0-728584042334
             type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FindLiveQueryDetailsResponse'
+                $ref: "#/components/schemas/FindLiveQueryDetailsResponse"
           description: Indicates a successful call.
       summary: Get live query details
       tags:
@@ -124,37 +124,37 @@ paths:
           name: kuery
           required: false
           schema:
-            $ref: '#/components/schemas/KueryOrUndefined'
+            $ref: "#/components/schemas/KueryOrUndefined"
         - description: The page number to return.
           in: query
           name: page
           required: false
           schema:
-            $ref: '#/components/schemas/PageOrUndefined'
+            $ref: "#/components/schemas/PageOrUndefined"
         - description: The number of results to return per page.
           in: query
           name: pageSize
           required: false
           schema:
-            $ref: '#/components/schemas/PageSizeOrUndefined'
+            $ref: "#/components/schemas/PageSizeOrUndefined"
         - description: The field to sort results by.
           in: query
           name: sort
           required: false
           schema:
-            $ref: '#/components/schemas/SortOrUndefined'
+            $ref: "#/components/schemas/SortOrUndefined"
         - description: The sort order.
           in: query
           name: sortOrder
           required: false
           schema:
-            $ref: '#/components/schemas/SortOrderOrUndefined'
+            $ref: "#/components/schemas/SortOrderOrUndefined"
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetLiveQueryResultsResponse'
+                $ref: "#/components/schemas/GetLiveQueryResultsResponse"
           description: Indicates a successful call.
       summary: Get live query results
       tags:
@@ -169,31 +169,31 @@ paths:
           name: page
           required: false
           schema:
-            $ref: '#/components/schemas/PageOrUndefined'
+            $ref: "#/components/schemas/PageOrUndefined"
         - description: The number of results to return per page.
           in: query
           name: pageSize
           required: false
           schema:
-            $ref: '#/components/schemas/PageSizeOrUndefined'
+            $ref: "#/components/schemas/PageSizeOrUndefined"
         - description: The field to sort results by.
           in: query
           name: sort
           required: false
           schema:
-            $ref: '#/components/schemas/SortOrUndefined'
+            $ref: "#/components/schemas/SortOrUndefined"
         - description: The sort order.
           in: query
           name: sortOrder
           required: false
           schema:
-            $ref: '#/components/schemas/SortOrderOrUndefined'
+            $ref: "#/components/schemas/SortOrderOrUndefined"
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FindPacksResponse'
+                $ref: "#/components/schemas/FindPacksResponse"
           description: Indicates a successful call.
       summary: Get packs
       tags:
@@ -205,14 +205,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreatePacksRequestBody'
+              $ref: "#/components/schemas/CreatePacksRequestBody"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreatePacksResponse'
+                $ref: "#/components/schemas/CreatePacksResponse"
           description: Indicates a successful call.
       summary: Create a pack
       tags:
@@ -227,9 +227,9 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/PackId'
+            $ref: "#/components/schemas/PackId"
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
@@ -249,13 +249,13 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/PackId'
+            $ref: "#/components/schemas/PackId"
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FindPackResponse'
+                $ref: "#/components/schemas/FindPackResponse"
           description: Indicates a successful call.
       summary: Get pack details
       tags:
@@ -272,19 +272,19 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/PackId'
+            $ref: "#/components/schemas/PackId"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdatePacksRequestBody'
+              $ref: "#/components/schemas/UpdatePacksRequestBody"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpdatePacksResponse'
+                $ref: "#/components/schemas/UpdatePacksResponse"
           description: Indicates a successful call.
       summary: Update a pack
       tags:
@@ -299,31 +299,31 @@ paths:
           name: page
           required: false
           schema:
-            $ref: '#/components/schemas/PageOrUndefined'
+            $ref: "#/components/schemas/PageOrUndefined"
         - description: The number of results to return per page.
           in: query
           name: pageSize
           required: false
           schema:
-            $ref: '#/components/schemas/PageSizeOrUndefined'
+            $ref: "#/components/schemas/PageSizeOrUndefined"
         - description: The field to sort results by.
           in: query
           name: sort
           required: false
           schema:
-            $ref: '#/components/schemas/SortOrUndefined'
+            $ref: "#/components/schemas/SortOrUndefined"
         - description: The sort order.
           in: query
           name: sortOrder
           required: false
           schema:
-            $ref: '#/components/schemas/SortOrderOrUndefined'
+            $ref: "#/components/schemas/SortOrderOrUndefined"
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FindSavedQueryResponse'
+                $ref: "#/components/schemas/FindSavedQueryResponse"
           description: Indicates a successful call.
       summary: Get saved queries
       tags:
@@ -335,14 +335,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSavedQueryRequestBody'
+              $ref: "#/components/schemas/CreateSavedQueryRequestBody"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateSavedQueryResponse'
+                $ref: "#/components/schemas/CreateSavedQueryResponse"
           description: Indicates a successful call.
       summary: Create a saved query
       tags:
@@ -357,13 +357,13 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/SavedQueryId'
+            $ref: "#/components/schemas/SavedQueryId"
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DefaultSuccessResponse'
+                $ref: "#/components/schemas/DefaultSuccessResponse"
           description: Indicates a successful call.
       summary: Delete a saved query
       tags:
@@ -377,13 +377,13 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/SavedQueryId'
+            $ref: "#/components/schemas/SavedQueryId"
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FindSavedQueryDetailResponse'
+                $ref: "#/components/schemas/FindSavedQueryDetailResponse"
           description: Indicates a successful call.
       summary: Get saved query details
       tags:
@@ -400,19 +400,19 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/SavedQueryId'
+            $ref: "#/components/schemas/SavedQueryId"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateSavedQueryRequestBody'
+              $ref: "#/components/schemas/UpdateSavedQueryRequestBody"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpdateSavedQueryResponse'
+                $ref: "#/components/schemas/UpdateSavedQueryResponse"
           description: Indicates a successful call.
       summary: Update a saved query
       tags:
@@ -422,25 +422,25 @@ components:
     ArrayQueries:
       description: An array of queries to run.
       items:
-        $ref: '#/components/schemas/ArrayQueriesItem'
+        $ref: "#/components/schemas/ArrayQueriesItem"
       type: array
     ArrayQueriesItem:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/ECSMappingOrUndefined'
+          $ref: "#/components/schemas/ECSMappingOrUndefined"
         id:
-          $ref: '#/components/schemas/QueryId'
+          $ref: "#/components/schemas/QueryId"
         platform:
-          $ref: '#/components/schemas/PlatformOrUndefined'
+          $ref: "#/components/schemas/PlatformOrUndefined"
         query:
-          $ref: '#/components/schemas/Query'
+          $ref: "#/components/schemas/Query"
         removed:
-          $ref: '#/components/schemas/RemovedOrUndefined'
+          $ref: "#/components/schemas/RemovedOrUndefined"
         snapshot:
-          $ref: '#/components/schemas/SnapshotOrUndefined'
+          $ref: "#/components/schemas/SnapshotOrUndefined"
         version:
-          $ref: '#/components/schemas/VersionOrUndefined'
+          $ref: "#/components/schemas/VersionOrUndefined"
     CreateLiveQueryRequestBody:
       example:
         agent_all: true
@@ -479,7 +479,7 @@ components:
             type: string
           type: array
         ecs_mapping:
-          $ref: '#/components/schemas/ECSMappingOrUndefined'
+          $ref: "#/components/schemas/ECSMappingOrUndefined"
         event_ids:
           description: A list of event IDs associated with the live query.
           items:
@@ -490,18 +490,18 @@ components:
           nullable: true
           type: object
         pack_id:
-          $ref: '#/components/schemas/PackIdOrUndefined'
+          $ref: "#/components/schemas/PackIdOrUndefined"
         queries:
-          $ref: '#/components/schemas/ArrayQueries'
+          $ref: "#/components/schemas/ArrayQueries"
         query:
-          $ref: '#/components/schemas/QueryOrUndefined'
+          $ref: "#/components/schemas/QueryOrUndefined"
         saved_query_id:
-          $ref: '#/components/schemas/SavedQueryIdOrUndefined'
+          $ref: "#/components/schemas/SavedQueryIdOrUndefined"
     CreateLiveQueryResponse:
       description: The response for creating a live query.
       example:
         data:
-          '@timestamp': '2022-07-26T09:59:32.220Z'
+          "@timestamp": 2022-07-26T09:59:32.220Z
           action_id: 3c42c847-eb30-4452-80e0-728584042334
           agent_all: true
           agent_ids: []
@@ -509,7 +509,7 @@ components:
           agent_policy_ids: []
           agents:
             - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-          expiration: '2022-07-26T10:04:32.220Z'
+          expiration: 2022-07-26T10:04:32.220Z
           input_type: osquery
           metadata:
             execution_context:
@@ -584,22 +584,22 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/PackDescriptionOrUndefined'
+          $ref: "#/components/schemas/PackDescriptionOrUndefined"
         enabled:
-          $ref: '#/components/schemas/EnabledOrUndefined'
+          $ref: "#/components/schemas/EnabledOrUndefined"
         name:
-          $ref: '#/components/schemas/PackName'
+          $ref: "#/components/schemas/PackName"
         policy_ids:
-          $ref: '#/components/schemas/PolicyIdsOrUndefined'
+          $ref: "#/components/schemas/PolicyIdsOrUndefined"
         queries:
-          $ref: '#/components/schemas/ObjectQueries'
+          $ref: "#/components/schemas/ObjectQueries"
         shards:
-          $ref: '#/components/schemas/Shards'
+          $ref: "#/components/schemas/Shards"
     CreatePacksResponse:
       description: The response for creating a pack.
       example:
         data:
-          created_at: '2025-02-26T13:37:30.452Z'
+          created_at: 2025-02-26T13:37:30.452Z
           created_by: elastic
           description: My pack
           enabled: true
@@ -620,7 +620,7 @@ components:
           shards:
             47638692-7c4c-4053-aa3e-7186f28df349: 35
             5e267651-fe50-443e-8d3f-3bbc9171b618: 58
-          updated_at: '2025-02-26T13:37:30.452Z'
+          updated_at: 2025-02-26T13:37:30.452Z
           updated_by: elastic
           version: 1
       type: object
@@ -674,7 +674,7 @@ components:
           host.uptime:
             field: total_seconds
         id: saved_query_id
-        interval: '60'
+        interval: "60"
         platform: linux,darwin
         query: select * from uptime;
         timeout: 120
@@ -682,42 +682,42 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
+          $ref: "#/components/schemas/SavedQueryDescriptionOrUndefined"
         ecs_mapping:
-          $ref: '#/components/schemas/ECSMappingOrUndefined'
+          $ref: "#/components/schemas/ECSMappingOrUndefined"
         id:
-          $ref: '#/components/schemas/SavedQueryId'
+          $ref: "#/components/schemas/SavedQueryId"
         interval:
-          $ref: '#/components/schemas/Interval'
+          $ref: "#/components/schemas/Interval"
         platform:
-          $ref: '#/components/schemas/PlatformOrUndefined'
+          $ref: "#/components/schemas/PlatformOrUndefined"
         query:
-          $ref: '#/components/schemas/QueryOrUndefined'
+          $ref: "#/components/schemas/QueryOrUndefined"
         removed:
-          $ref: '#/components/schemas/RemovedOrUndefined'
+          $ref: "#/components/schemas/RemovedOrUndefined"
         snapshot:
-          $ref: '#/components/schemas/SnapshotOrUndefined'
+          $ref: "#/components/schemas/SnapshotOrUndefined"
         version:
-          $ref: '#/components/schemas/VersionOrUndefined'
+          $ref: "#/components/schemas/VersionOrUndefined"
     CreateSavedQueryResponse:
       description: The response for creating a saved query.
       example:
         data:
-          created_at: '2022-07-26T09:28:08.597Z'
+          created_at: 2022-07-26T09:28:08.597Z
           created_by: elastic
           description: Saved query description
           ecs_mapping:
             host.uptime:
               field: total_seconds
           id: saved_query_id
-          interval: '60'
+          interval: "60"
           platform: linux,darwin
           query: select * from uptime;
           removed: false
           saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
           snapshot: true
           timeout: 120
-          updated_at: '2022-07-26T09:28:08.597Z'
+          updated_at: 2022-07-26T09:28:08.597Z
           updated_by: elastic
           version: 2.8.0
       type: object
@@ -777,10 +777,9 @@ components:
       properties: {}
     ECSMapping:
       additionalProperties:
-        $ref: '#/components/schemas/ECSMappingItem'
-      description: >-
-        Map osquery results columns or static values to Elastic Common Schema
-        (ECS) fields
+        $ref: "#/components/schemas/ECSMappingItem"
+      description: Map osquery results columns or static values to Elastic Common
+        Schema (ECS) fields
       example:
         host.uptime:
           field: total_seconds
@@ -801,24 +800,24 @@ components:
                 type: string
               type: array
     ECSMappingOrUndefined:
-      $ref: '#/components/schemas/ECSMapping'
+      $ref: "#/components/schemas/ECSMapping"
       nullable: true
     Enabled:
       description: Enables the pack.
       example: true
       type: boolean
     EnabledOrUndefined:
-      $ref: '#/components/schemas/Enabled'
+      $ref: "#/components/schemas/Enabled"
       nullable: true
     FindLiveQueryDetailsResponse:
       description: The details of a live query.
       example:
         data:
-          '@timestamp': '2022-07-26T09:59:32.220Z'
+          "@timestamp": 2022-07-26T09:59:32.220Z
           action_id: 3c42c847-eb30-4452-80e0-728584042334
           agents:
             - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-          expiration: '2022-07-26T10:04:32.220Z'
+          expiration: 2022-07-26T10:04:32.220Z
           queries:
             - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
               agents:
@@ -843,7 +842,7 @@ components:
           description: The live query details.
           type: object
           properties:
-            '@timestamp':
+            "@timestamp":
               description: The timestamp when the live query was created.
               type: string
             action_id:
@@ -867,9 +866,8 @@ components:
               description: The pack name, if the live query was run from a pack.
               type: string
             queries:
-              description: >-
-                The list of queries in the live query action, each with
-                aggregated result counts.
+              description: The list of queries in the live query action, each with aggregated
+                result counts.
               items:
                 type: object
               type: array
@@ -888,11 +886,11 @@ components:
         data:
           items:
             - fields:
-                '@timestamp': '2023-10-31T00:00:00Z'
+                "@timestamp": 2023-10-31T00:00:00Z
                 action_id: 3c42c847-eb30-4452-80e0-728584042334
                 agents:
                   - 16d7caf5-efd2-4212-9b62-73dafc91fa13
-                expiration: '2023-10-31T00:00:00Z'
+                expiration: 2023-10-31T00:00:00Z
                 queries:
                   - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
                     agents:
@@ -924,9 +922,9 @@ components:
       description: The details of a single query pack.
       example:
         data:
-          created_at: '2022-07-25T19:41:10.263Z'
+          created_at: 2022-07-25T19:41:10.263Z
           created_by: elastic
-          description: ''
+          description: ""
           enabled: true
           name: test_pack
           policy_ids: []
@@ -940,7 +938,7 @@ components:
           read_only: false
           saved_object_id: 3c42c847-eb30-4452-80e0-728584042334
           shards: {}
-          updated_at: '2022-07-25T20:12:01.455Z'
+          updated_at: 2022-07-25T20:12:01.455Z
           updated_by: elastic
           version: 1
       type: object
@@ -979,8 +977,7 @@ components:
               description: The saved object ID of the pack.
               type: string
             shards:
-              description: >-
-                Shard configuration for policies, as a map of policy ID to
+              description: Shard configuration for policies, as a map of policy ID to
                 percentage.
               type: object
             updated_at:
@@ -996,7 +993,7 @@ components:
       description: A paginated list of query packs.
       example:
         data:
-          - created_at: '2023-10-31T00:00:00Z'
+          - created_at: 2023-10-31T00:00:00Z
             created_by: elastic
             description: My pack description
             enabled: true
@@ -1012,7 +1009,7 @@ components:
                 query: select * from uptime;
             read_only: false
             saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-            updated_at: '2023-10-31T00:00:00Z'
+            updated_at: 2023-10-31T00:00:00Z
             updated_by: elastic
             version: 1
         page: 1
@@ -1038,14 +1035,14 @@ components:
       description: The details of a single saved query.
       example:
         data:
-          created_at: '2022-07-26T09:28:08.597Z'
+          created_at: 2022-07-26T09:28:08.597Z
           created_by: elastic
           description: Saved query description
           ecs_mapping:
             host.uptime:
               field: total_seconds
           id: saved_query_id
-          interval: '60'
+          interval: "60"
           platform: linux,darwin
           prebuilt: false
           query: select * from uptime;
@@ -1053,7 +1050,7 @@ components:
           saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
           snapshot: true
           timeout: 120
-          updated_at: '2022-07-26T09:28:08.597Z'
+          updated_at: 2022-07-26T09:28:08.597Z
           updated_by: elastic
           version: 2.8.0
       type: object
@@ -1114,14 +1111,14 @@ components:
       description: A paginated list of saved queries.
       example:
         data:
-          - created_at: '2022-07-26T09:28:08.597Z'
+          - created_at: 2022-07-26T09:28:08.597Z
             created_by: elastic
             description: Saved query description
             ecs_mapping:
               host.uptime:
                 field: total_seconds
             id: saved_query_id
-            interval: '60'
+            interval: "60"
             platform: linux,darwin
             prebuilt: false
             query: select * from uptime;
@@ -1129,7 +1126,7 @@ components:
             saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             snapshot: true
             timeout: 120
-            updated_at: '2022-07-26T09:28:08.597Z'
+            updated_at: 2022-07-26T09:28:08.597Z
             updated_by: elastic
             version: 2.8.0
         page: 1
@@ -1159,11 +1156,11 @@ components:
             - _id: result-1
               fields:
                 host.uptime:
-                  - '12345'
+                  - "12345"
             - _id: result-2
               fields:
                 host.uptime:
-                  - '67890'
+                  - "67890"
           total: 2
       type: object
       properties:
@@ -1181,53 +1178,53 @@ components:
               type: integer
     Interval:
       description: An interval, in seconds, on which to run the query.
-      example: '60'
+      example: "60"
       type: string
     IntervalOrUndefined:
-      $ref: '#/components/schemas/Interval'
+      $ref: "#/components/schemas/Interval"
       nullable: true
     KueryOrUndefined:
       description: The kuery to filter the results by.
-      example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
+      example: "agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13"
       nullable: true
       type: string
     ObjectQueries:
       additionalProperties:
-        $ref: '#/components/schemas/ObjectQueriesItem'
+        $ref: "#/components/schemas/ObjectQueriesItem"
       description: An object of queries.
       type: object
     ObjectQueriesItem:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/ECSMappingOrUndefined'
+          $ref: "#/components/schemas/ECSMappingOrUndefined"
         id:
-          $ref: '#/components/schemas/QueryId'
+          $ref: "#/components/schemas/QueryId"
         platform:
-          $ref: '#/components/schemas/PlatformOrUndefined'
+          $ref: "#/components/schemas/PlatformOrUndefined"
         query:
-          $ref: '#/components/schemas/Query'
+          $ref: "#/components/schemas/Query"
         removed:
-          $ref: '#/components/schemas/RemovedOrUndefined'
+          $ref: "#/components/schemas/RemovedOrUndefined"
         saved_query_id:
-          $ref: '#/components/schemas/SavedQueryIdOrUndefined'
+          $ref: "#/components/schemas/SavedQueryIdOrUndefined"
         snapshot:
-          $ref: '#/components/schemas/SnapshotOrUndefined'
+          $ref: "#/components/schemas/SnapshotOrUndefined"
         version:
-          $ref: '#/components/schemas/VersionOrUndefined'
+          $ref: "#/components/schemas/VersionOrUndefined"
     PackDescription:
       description: The pack description.
       example: Pack description
       type: string
     PackDescriptionOrUndefined:
-      $ref: '#/components/schemas/PackDescription'
+      $ref: "#/components/schemas/PackDescription"
       nullable: true
     PackId:
       description: The ID of the pack you want to run, retrieve, update, or delete.
       example: 3c42c847-eb30-4452-80e0-728584042334
       type: string
     PackIdOrUndefined:
-      $ref: '#/components/schemas/PackId'
+      $ref: "#/components/schemas/PackId"
       nullable: true
     PackName:
       description: The pack name.
@@ -1244,14 +1241,13 @@ components:
       nullable: true
       type: integer
     Platform:
-      description: >-
-        Restricts the query to a specified platform. The default is all
+      description: Restricts the query to a specified platform. The default is all
         platforms. To specify multiple platforms, use commas. For example,
         `linux,darwin`.
       example: linux,darwin
       type: string
     PlatformOrUndefined:
-      $ref: '#/components/schemas/Platform'
+      $ref: "#/components/schemas/Platform"
       nullable: true
     PolicyIds:
       description: A list of agents policy IDs.
@@ -1262,7 +1258,7 @@ components:
         type: string
       type: array
     PolicyIdsOrUndefined:
-      $ref: '#/components/schemas/PolicyIds'
+      $ref: "#/components/schemas/PolicyIds"
       nullable: true
     Query:
       description: The SQL query you want to run.
@@ -1273,36 +1269,35 @@ components:
       example: 3c42c847-eb30-4452-80e0-728584042334
       type: string
     QueryOrUndefined:
-      $ref: '#/components/schemas/Query'
+      $ref: "#/components/schemas/Query"
       nullable: true
     Removed:
       description: Indicates whether the query is removed.
       example: false
       type: boolean
     RemovedOrUndefined:
-      $ref: '#/components/schemas/Removed'
+      $ref: "#/components/schemas/Removed"
       nullable: true
     SavedQueryDescription:
       description: The saved query description.
       example: Saved query description
       type: string
     SavedQueryDescriptionOrUndefined:
-      $ref: '#/components/schemas/SavedQueryDescription'
+      $ref: "#/components/schemas/SavedQueryDescription"
       nullable: true
     SavedQueryId:
       description: The ID of a saved query.
       example: 3c42c847-eb30-4452-80e0-728584042334
       type: string
     SavedQueryIdOrUndefined:
-      $ref: '#/components/schemas/SavedQueryId'
+      $ref: "#/components/schemas/SavedQueryId"
       nullable: true
     Shards:
       additionalProperties:
         type: number
-      description: >-
-        An object with shard configuration for policies included in the pack.
-        For each policy, set the shard configuration to a percentage (1–100) of
-        target hosts.
+      description: An object with shard configuration for policies included in the
+        pack. For each policy, set the shard configuration to a percentage
+        (1–100) of target hosts.
       example:
         policy_id: 50
       type: object
@@ -1311,7 +1306,7 @@ components:
       example: true
       type: boolean
     SnapshotOrUndefined:
-      $ref: '#/components/schemas/Snapshot'
+      $ref: "#/components/schemas/Snapshot"
       nullable: true
     SortOrderOrUndefined:
       description: Specifies the sort order.
@@ -1332,22 +1327,22 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/PackDescriptionOrUndefined'
+          $ref: "#/components/schemas/PackDescriptionOrUndefined"
         enabled:
-          $ref: '#/components/schemas/EnabledOrUndefined'
+          $ref: "#/components/schemas/EnabledOrUndefined"
         name:
-          $ref: '#/components/schemas/PackName'
+          $ref: "#/components/schemas/PackName"
         policy_ids:
-          $ref: '#/components/schemas/PolicyIdsOrUndefined'
+          $ref: "#/components/schemas/PolicyIdsOrUndefined"
         queries:
-          $ref: '#/components/schemas/ObjectQueries'
+          $ref: "#/components/schemas/ObjectQueries"
         shards:
-          $ref: '#/components/schemas/Shards'
+          $ref: "#/components/schemas/Shards"
     UpdatePacksResponse:
       description: The response for updating a pack.
       example:
         data:
-          created_at: '2025-02-26T13:37:30.452Z'
+          created_at: 2025-02-26T13:37:30.452Z
           created_by: elastic
           description: My pack
           enabled: true
@@ -1368,7 +1363,7 @@ components:
           shards:
             47638692-7c4c-4053-aa3e-7186f28df349: 35
             5e267651-fe50-443e-8d3f-3bbc9171b618: 58
-          updated_at: '2025-02-26T13:40:16.297Z'
+          updated_at: 2025-02-26T13:40:16.297Z
           updated_by: elastic
           version: 1
       type: object
@@ -1421,23 +1416,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
+          $ref: "#/components/schemas/SavedQueryDescriptionOrUndefined"
         ecs_mapping:
-          $ref: '#/components/schemas/ECSMappingOrUndefined'
+          $ref: "#/components/schemas/ECSMappingOrUndefined"
         id:
-          $ref: '#/components/schemas/SavedQueryId'
+          $ref: "#/components/schemas/SavedQueryId"
         interval:
-          $ref: '#/components/schemas/IntervalOrUndefined'
+          $ref: "#/components/schemas/IntervalOrUndefined"
         platform:
-          $ref: '#/components/schemas/PlatformOrUndefined'
+          $ref: "#/components/schemas/PlatformOrUndefined"
         query:
-          $ref: '#/components/schemas/QueryOrUndefined'
+          $ref: "#/components/schemas/QueryOrUndefined"
         removed:
-          $ref: '#/components/schemas/RemovedOrUndefined'
+          $ref: "#/components/schemas/RemovedOrUndefined"
         snapshot:
-          $ref: '#/components/schemas/SnapshotOrUndefined'
+          $ref: "#/components/schemas/SnapshotOrUndefined"
         version:
-          $ref: '#/components/schemas/VersionOrUndefined'
+          $ref: "#/components/schemas/VersionOrUndefined"
     UpdateSavedQueryResponse:
       description: The response for updating a saved query.
       example:
@@ -1447,14 +1442,14 @@ components:
             host.uptime:
               field: total_seconds
           id: updated_my_saved_query_name
-          interval: '60'
+          interval: "60"
           platform: linux,darwin
           query: select * from uptime;
           removed: false
           saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
           snapshot: true
           timeout: 120
-          updated_at: '2022-07-26T10:15:00.000Z'
+          updated_at: 2022-07-26T10:15:00.000Z
           updated_by: elastic
           version: 2.8.0
       type: object
@@ -1503,13 +1498,12 @@ components:
               description: The minimum osquery version.
               type: string
     Version:
-      description: >-
-        Uses the Osquery versions greater than or equal to the specified version
-        string.
+      description: Uses the Osquery versions greater than or equal to the specified
+        version string.
       example: 1.0.0
       type: string
     VersionOrUndefined:
-      $ref: '#/components/schemas/Version'
+      $ref: "#/components/schemas/Version"
       nullable: true
   securitySchemes:
     BasicAuth:
