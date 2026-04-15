@@ -13,28 +13,19 @@ import { apiTest, testData } from '../fixtures';
 apiTest.describe('POST /api/logstash/pipelines/delete', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     credentials = await requestAuth.getApiKeyForCustomRole(testData.LOGSTASH_MANAGER_ROLE);
-
-    for (const id of [testData.PIPELINE_IDS.BULK_DELETE_1, testData.PIPELINE_IDS.BULK_DELETE_2]) {
-      await apiClient.put(testData.API_PATHS.PIPELINE(id), {
-        headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-        body: { description: 'pipeline for bulk-delete test', pipeline: '# empty' },
-        responseType: 'json',
-      });
-    }
+    await apiServices.logstash.createPipelines(
+      testData.PIPELINE_IDS.BULK_DELETE_1,
+      testData.PIPELINE_IDS.BULK_DELETE_2
+    );
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
-    // Guard: if beforeAll threw before credentials was assigned, there is nothing to clean up
-    if (!credentials) return;
-    for (const id of [testData.PIPELINE_IDS.BULK_DELETE_1, testData.PIPELINE_IDS.BULK_DELETE_2]) {
-      await apiClient
-        .delete(testData.API_PATHS.PIPELINE(id), {
-          headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-        })
-        .catch(() => {});
-    }
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.logstash.deletePipelines(
+      testData.PIPELINE_IDS.BULK_DELETE_1,
+      testData.PIPELINE_IDS.BULK_DELETE_2
+    );
   });
 
   apiTest('should delete the specified pipelines', async ({ apiClient }) => {

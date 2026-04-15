@@ -31,15 +31,11 @@ apiTest.describe('/api/logstash/pipeline/{id}', { tag: tags.stateful.classic }, 
     });
   });
 
-  apiTest.afterAll(async ({ esClient }) => {
-    // Both deletions are best-effort: if beforeAll threw before creating TWEETS_AND_BEATS,
-    // or if a test left FAST_GENERATOR behind, we don't want teardown to mask the original error
-    await esClient.logstash
-      .deletePipeline({ id: testData.PIPELINE_IDS.TWEETS_AND_BEATS })
-      .catch(() => {});
-    await esClient.logstash
-      .deletePipeline({ id: testData.PIPELINE_IDS.FAST_GENERATOR })
-      .catch(() => {});
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.logstash.deletePipelines(
+      testData.PIPELINE_IDS.TWEETS_AND_BEATS,
+      testData.PIPELINE_IDS.FAST_GENERATOR
+    );
   });
 
   apiTest('GET should return the specified pipeline', async ({ apiClient }) => {
