@@ -25,7 +25,7 @@ export const useTimePickerPopover = ({ editorRef, popoverRef }: UseTimePickerPop
 
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editorRef.current?.getPosition();
-    const editorCoords = editorRef.current?.getDomNode()!.getBoundingClientRect();
+    const editorCoords = editorRef.current?.getDomNode()?.getBoundingClientRect();
     if (currentCursorPosition && editorCoords) {
       const editorPosition = editorRef.current!.getScrolledVisiblePosition(currentCursorPosition);
       const editorTop = editorCoords.top;
@@ -34,7 +34,7 @@ export const useTimePickerPopover = ({ editorRef, popoverRef }: UseTimePickerPop
       // Calculate the absolute position of the popover
       const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 25;
       let absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
-      if (absoluteLeft > editorCoords.width) {
+      if (absoluteLeft + DATEPICKER_WIDTH > editorCoords.right) {
         // date picker is out of the editor
         absoluteLeft = absoluteLeft - DATEPICKER_WIDTH;
       }
