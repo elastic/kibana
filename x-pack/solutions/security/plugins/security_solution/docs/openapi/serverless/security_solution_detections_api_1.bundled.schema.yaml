@@ -18,15 +18,9 @@ servers:
 paths:
   /api/detection_engine/rules/_find_with_facets:
     post:
-      description: >
-        Paginated listing of installed detection rules using a JSON body: KQL
-        `filter`, optional `search` (`term` + `mode`), 
-
-        `aggregations.counts` for facet buckets, and optional `search_after` for
-        deep pagination (same `sort_field` /
-
-        `sort_order` on each request. `Page` is ignored when `search_after` is
-        set).
+      description: >-
+        Retrieve a paginated list of detection rules with KQL filter, facet
+        counts, and search_after pagination.
       operationId: FindRulesWithFacets
       requestBody:
         content:
@@ -696,7 +690,7 @@ components:
     FindRulesWithFacetsAggregations:
       additionalProperties: false
       description: |
-        Aggregation-related options on `_find_with_facets`.
+        Aggregation options on `_find_with_facets`.
       type: object
       properties:
         counts:
@@ -710,9 +704,6 @@ components:
       description: >
         A rule attribute that can be requested via the `fields` parameter on
         `_find_with_facets`.
-
-        When provided, only the listed attributes are returned in each rule
-        object.
       enum:
         - id
         - name
@@ -754,10 +745,6 @@ components:
         - error
       type: string
     GranularRulesFacetCategory:
-      description: |
-        Facet dimension for facet **counts** in the response when requested via
-        `aggregations.counts` on `_find_with_facets`.
-        The server maps friendly names to underlying rule fields.
       enum:
         - tags
         - type
@@ -771,16 +758,8 @@ components:
     GranularRulesSearch:
       additionalProperties: false
       description: >
-        Optional free-text search combined with the KQL `filter` on
-        `_find_with_facets`.
-
-        When `mode` is `legacy`, the server ANDs the filter KQL with a KQL
-        fragment derived from
-
-        `term` (same semantics as legacy rule management search). An empty
-        string means no
-
-        free-text constraint.
+        Free-text search combined with the KQL `filter`. Interpreted according
+        to search mode.
       type: object
       properties:
         mode:
@@ -793,7 +772,6 @@ components:
       default: legacy
       description: |
         Search mode for free-text search combined with the KQL `filter`.
-        Only `legacy` is supported; additional modes may be added later.
       enum:
         - legacy
       type: string
