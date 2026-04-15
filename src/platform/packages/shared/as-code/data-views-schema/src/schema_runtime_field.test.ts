@@ -109,7 +109,7 @@ describe('schema_runtime_fields', () => {
       it('should throw an error', () => {
         // Given
         const runtimeField = buildCompositeRuntimeField({
-          fields: Array.from({ length: 101 }, (_, i) => ({
+          fields: Array.from({ length: 1001 }, (_, i) => ({
             name: `subfield_${i}`,
             type: 'keyword',
           })),
@@ -359,12 +359,12 @@ describe('schema_runtime_fields', () => {
 
       describe('when the format is a string', () => {
         describe('when the params are not present', () => {
-          it('should throw an error', () => {
+          it('should be valid', () => {
             // Given
             const runtimeField = buildWithFields({ format: { type: 'number', params: undefined } });
 
             // When/Then
-            expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/params/);
+            expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
           });
         });
       });
