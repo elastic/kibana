@@ -153,6 +153,36 @@ export const snoozeScheduleSchema = schema.object({
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
+export const snoozedInstanceConditionSchema = schema.oneOf([
+  schema.object({
+    type: schema.literal('field_change'),
+    field: schema.string(),
+  }),
+  schema.object({
+    type: schema.literal('severity_change'),
+  }),
+  schema.object({
+    type: schema.literal('severity_equals'),
+    value: schema.oneOf([
+      schema.literal('critical'),
+      schema.literal('high'),
+      schema.literal('medium'),
+      schema.literal('low'),
+      schema.literal('info'),
+    ]),
+  }),
+]);
+
+export const snoozedInstanceSchema = schema.object({
+  instanceId: schema.string(),
+  expiresAt: schema.maybe(schema.string()),
+  conditions: schema.maybe(schema.arrayOf(snoozedInstanceConditionSchema)),
+  conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
+  snoozeSnapshot: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  snoozedAt: schema.string(),
+  snoozedBy: schema.string(),
+});
+
 export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
@@ -185,6 +215,7 @@ export const ruleDomainSchema = schema.object({
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   mutedInstanceIds: schema.arrayOf(schema.string()),
+  snoozedInstances: schema.maybe(schema.arrayOf(snoozedInstanceSchema)),
   executionStatus: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
@@ -228,6 +259,7 @@ export const ruleSchema = schema.object({
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   mutedInstanceIds: schema.arrayOf(schema.string()),
+  snoozedInstances: schema.maybe(schema.arrayOf(snoozedInstanceSchema)),
   executionStatus: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
