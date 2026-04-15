@@ -151,8 +151,10 @@ export class UiSettingsService
     const { version, buildNum } = this.coreContext.env.packageInfo;
     return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
       const isNamespaceScope = scope === 'namespace';
-      const namespace =
-        savedObjectsClient.getCurrentNamespace() || (isNamespaceScope ? 'default' : '__global__');
+      const namespace = isNamespaceScope
+        ? savedObjectsClient.getCurrentNamespace() || 'default'
+        : '__global__';
+
       const options = {
         type: (isNamespaceScope ? 'config' : 'config-global') as 'config' | 'config-global',
         id: stripVersionQualifier(version),
