@@ -126,8 +126,7 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
     }
 
     // set global defaults
-    axiosInstance.defaults.headers.common.Authorization =
-      normalizeAuthorizationHeaderValue(token);
+    axiosInstance.defaults.headers.common.Authorization = normalizeAuthorizationHeaderValue(token);
 
     return axiosInstance;
   },
