@@ -13,9 +13,7 @@ import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 
 export const markdownByValueStateSchema = schema.object({
-  content: schema.string({
-    minLength: 1,
-  }),
+  content: schema.string(),
   settings: schema.object({
     open_links_in_new_tab: schema.boolean({ defaultValue: true }),
   }),

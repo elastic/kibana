@@ -125,11 +125,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         // by reference 'content' or 'settings' since they are saved on apply.
         if (!isByReference) {
           content$.next((initialState as MarkdownByValueState).content);
-          settings$.next(
-            (initialState as MarkdownByValueState).settings ?? {
-              open_links_in_new_tab: true,
-            }
-          );
+          settings$.next((initialState as MarkdownByValueState).settings);
         }
       },
     });
