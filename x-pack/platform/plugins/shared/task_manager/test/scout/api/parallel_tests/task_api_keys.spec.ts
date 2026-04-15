@@ -7,7 +7,7 @@
 
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, TEST_TASK_TYPE } from '../fixtures/constants';
 
 apiTest.describe('Task Manager API Keys', { tag: tags.serverless.observability.complete }, () => {
   let createdTaskId: string;
@@ -19,9 +19,11 @@ apiTest.describe('Task Manager API Keys', { tag: tags.serverless.observability.c
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: {
         task: {
-          taskType: 'task_manager:noop',
+          taskType: TEST_TASK_TYPE,
           params: {},
           state: {},
+          // enabled: false so the task is never claimed or executed by the poller
+          enabled: false,
         },
       },
       responseType: 'json',

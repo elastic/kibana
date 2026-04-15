@@ -12,7 +12,7 @@ import type {
   KibanaResponseFactory,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import { ReservedPrivilegesSet } from '@kbn/core/server';
+import { ReservedPrivilegesSet, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '../plugin';
 
 export const deleteRoute = (
@@ -43,7 +43,15 @@ export const deleteRoute = (
       }
 
       const { taskId } = req.params as { taskId: string };
-      await startContract.remove(taskId);
+
+      try {
+        await startContract.remove(taskId);
+      } catch (err) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          return res.notFound({ body: { message: `Task ${taskId} not found` } });
+        }
+        throw err;
+      }
 
       return res.ok({ body: { deleted: true } });
     }

@@ -875,7 +875,7 @@ export class TaskStore {
   private async _remove(id: string): Promise<void> {
     const taskInstance = await this._get(id);
 
-    if (taskInstance.apiKey && taskInstance.userScope) {
+    if ((taskInstance.apiKey || taskInstance.uiamApiKey) && taskInstance.userScope) {
       const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(taskInstance);
       if (targets.length > 0) {
         await this.apiKeyStrategy.markForInvalidation(

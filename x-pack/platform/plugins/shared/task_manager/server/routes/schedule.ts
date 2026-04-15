@@ -17,10 +17,6 @@ import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduli
 import type { InstanceTaskCost } from '../task';
 import type { TaskManagerStartContract } from '../plugin';
 
-const NOOP_TASK_TYPE = 'task_manager:noop';
-
-export { NOOP_TASK_TYPE };
-
 const taskSchema = schema.object({
   task: schema.object({
     taskType: schema.string({ minLength: 1, maxLength: 200 }),

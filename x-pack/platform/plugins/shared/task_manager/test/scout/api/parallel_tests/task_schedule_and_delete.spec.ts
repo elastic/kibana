@@ -7,7 +7,7 @@
 
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, TEST_TASK_TYPE } from '../fixtures/constants';
 
 apiTest.describe(
   'Task Manager Schedule and Delete Routes',
@@ -27,31 +27,30 @@ apiTest.describe(
       await kbnClient.savedObjects.clean({ types: ['api_key_to_invalidate'] });
     });
 
-    apiTest(
-      'schedule: creates a noop task and returns the created task',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+    apiTest('schedule: creates a task and returns it', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-        const response = await apiClient.post('internal/task_manager/schedule', {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: {
-            task: {
-              taskType: 'task_manager:noop',
-              params: {},
-              state: {},
-            },
+      const response = await apiClient.post('internal/task_manager/schedule', {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        body: {
+          task: {
+            taskType: TEST_TASK_TYPE,
+            params: {},
+            state: {},
+            // enabled: false so the task is never claimed or executed by the poller
+            enabled: false,
           },
-          responseType: 'json',
-        });
+        },
+        responseType: 'json',
+      });
 
-        expect(response).toHaveStatusCode(200);
-        const body = response.body as Record<string, unknown>;
-        expect(body.id).toBeDefined();
-        expect(body.taskType).toBe('task_manager:noop');
-        expect(body.enabled).toBe(true);
-        taskIdsToCleanup.push(body.id as string);
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      const body = response.body as Record<string, unknown>;
+      expect(body.id).toBeDefined();
+      expect(body.taskType).toBe(TEST_TASK_TYPE);
+      expect(body.enabled).toBe(false);
+      taskIdsToCleanup.push(body.id as string);
+    });
 
     apiTest(
       'schedule: creates a task with an interval schedule',
@@ -62,10 +61,12 @@ apiTest.describe(
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           body: {
             task: {
-              taskType: 'task_manager:noop',
-              params: { foo: 'bar' },
+              taskType: TEST_TASK_TYPE,
+              params: {},
               state: {},
               schedule: { interval: '1h' },
+              // enabled: false so the task is never claimed or executed by the poller
+              enabled: false,
             },
           },
           responseType: 'json',
@@ -102,7 +103,7 @@ apiTest.describe(
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: {
           task: {
-            taskType: 'task_manager:noop',
+            taskType: TEST_TASK_TYPE,
             params: {},
             state: {},
           },
@@ -119,9 +120,11 @@ apiTest.describe(
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: {
           task: {
-            taskType: 'task_manager:noop',
+            taskType: TEST_TASK_TYPE,
             params: {},
             state: {},
+            // enabled: false so the task is never claimed or executed by the poller
+            enabled: false,
           },
         },
         responseType: 'json',

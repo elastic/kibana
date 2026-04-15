@@ -53,7 +53,6 @@ import {
   healthRoute,
   metricsRoute,
   scheduleRoute,
-  NOOP_TASK_TYPE,
 } from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
@@ -267,14 +266,6 @@ export class TaskManagerPlugin
       taskManagerId: this.taskManagerId,
     });
 
-    this.definitions.registerTaskDefinitions({
-      [NOOP_TASK_TYPE]: {
-        title: 'Noop task for API key lifecycle verification',
-        createTaskRunner: () => ({
-          run: async () => ({ state: {} }),
-        }),
-      },
-    });
     scheduleRoute(router, () => this.startContract);
     deleteRoute(router, () => this.startContract);
 
