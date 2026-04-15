@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
+
 /**
  * Maps user-facing friendly field names to the full saved-object attribute
  * paths expected by the KQL filter layer. Callers can use either form;
@@ -34,28 +37,59 @@ export const KQL_FRIENDLY_FIELD_MAP: Readonly<Record<string, string>> = {
   subtechniqueName: 'alert.attributes.params.threat.technique.subtechnique.name',
 };
 
-// Sort entries longest-first so that e.g. "subtechniqueName" is matched before
-// "techniqueName" and "ruleType" before "type".
-const sortedEntries = Object.entries(KQL_FRIENDLY_FIELD_MAP).sort(
-  ([a], [b]) => b.length - a.length
-);
+/**
+ * Recursively walks a KueryNode AST and rewrites any field literal whose value
+ * is a known friendly name to its full saved-object path. Unknown field names
+ * and unknown function types are passed through unchanged.
+ */
+const rewriteNode = (node: KueryNode): KueryNode => {
+  if (node.type !== 'function') {
+    return node;
+  }
 
-// Build a single regex that matches any friendly name at a KQL field position:
-// start of string, after `(`, or after whitespace.  The name must be followed
-// by optional whitespace then `:` (the KQL field-value separator), and must NOT
-// be preceded by a `.` (which would indicate it is a sub-path of an already
-// expanded field like `alert.attributes.name`).
-const friendlyNamesPattern = sortedEntries.map(([name]) => name).join('|');
-const FIELD_POSITION_RE = new RegExp(`(^|[\\s(])(?<!\\.)(${friendlyNamesPattern})(\\s*:)`, 'g');
+  switch (node.function) {
+    case 'and':
+    case 'or':
+      return { ...node, arguments: node.arguments.map(rewriteNode) };
+
+    case 'not':
+      return { ...node, arguments: [rewriteNode(node.arguments[0])] };
+
+    // Nested: first arg is the nested path (not a filterable field),
+    // second arg is the sub-expression to recurse into.
+    case 'nested':
+      return { ...node, arguments: [node.arguments[0], rewriteNode(node.arguments[1])] };
+
+    // Field-referencing nodes: rewrite the first argument if it is a known friendly name.
+    case 'is':
+    case 'range':
+    case 'exists': {
+      const fieldArg = node.arguments[0];
+      if (fieldArg?.type === 'literal' && typeof fieldArg.value === 'string') {
+        const expanded = KQL_FRIENDLY_FIELD_MAP[fieldArg.value];
+        if (expanded) {
+          return {
+            ...node,
+            arguments: [{ ...fieldArg, value: expanded }, ...node.arguments.slice(1)],
+          };
+        }
+      }
+      return node;
+    }
+
+    default:
+      return node;
+  }
+};
 
 /**
  * Expands friendly field names in a KQL filter string to their full
- * `alert.attributes.*` paths.  Fields that are already fully qualified
- * are left untouched.
+ * `alert.attributes.*` paths. Fields that are already fully qualified
+ * are left untouched. Quoted string values are never modified.
  */
 export const expandFriendlyKqlFields = (filter: string): string => {
-  return filter.replace(FIELD_POSITION_RE, (_match, prefix, fieldName, colon) => {
-    const expanded = KQL_FRIENDLY_FIELD_MAP[fieldName];
-    return expanded ? `${prefix}${expanded}${colon}` : _match;
-  });
+  if (!filter) {
+    return filter;
+  }
+  return toKqlExpression(rewriteNode(fromKueryExpression(filter)));
 };

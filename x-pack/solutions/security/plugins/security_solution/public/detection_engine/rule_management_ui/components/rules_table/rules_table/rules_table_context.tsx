@@ -46,6 +46,7 @@ import {
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 import { defaultRangeValue } from '../../../../rule_gaps/constants';
+import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
 
 interface RulesSnoozeSettings {
   /**
@@ -253,6 +254,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const findRulesQueryArgs = useMemo(() => {
     const searchTerm = filterOptions.filter?.trim();
     const structuredKql = convertRulesFilterToKQL({ ...filterOptions, filter: '' });
+
+    const shouldApplyGaps = Boolean(filterOptions.gapFillStatuses?.length);
+    const gapRange = shouldApplyGaps ? getGapRange(defaultRangeValue) : undefined;
+
     return {
       filter: structuredKql,
       sort_field: sortingOptions.field,
@@ -262,8 +267,11 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         counts: ['tags', 'enabled'] as GranularRulesFacetCategory[],
       },
       ...(searchTerm !== '' ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
+      ...(shouldApplyGaps ? { gap_fill_statuses: filterOptions.gapFillStatuses } : {}),
+      ...(gapRange ? { gaps_range_start: gapRange.start, gaps_range_end: gapRange.end } : {}),
+      ...(activeSchedulerId ? { gap_auto_fill_scheduler_id: activeSchedulerId } : {}),
     };
-  }, [filterOptions, sortingOptions, pagination]);
+  }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
 
   const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
     setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));

@@ -56,9 +56,28 @@ paths:
                   minItems: 1
                   description: |
                     Elasticsearch-style `search_after` tiebreaker values. Requires `sort_field` and
-                    `sort_order`. When set, `page` is ignored.
+                    `sort_order`. When set, `page` is ignored. `search_after` cannot be used together with gap filter parameters
+                    (`gap_fill_statuses`, `gaps_range_start`, `gaps_range_end`). Use `page` and `per_page`
+                    to paginate gap-filtered results instead.
                   items:
                     $ref: '#/components/schemas/FindRulesWithFacetsSearchAfterItem'
+                gap_fill_statuses:
+                  type: array
+                  description: |
+                    Filter rules to only those with gaps matching these fill statuses in the given range.
+                    When active, the result set is capped and `search_after` is not supported. Use
+                    offset pagination (`page` / `per_page`) instead.
+                  items:
+                    $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/GapFillStatus'
+                gaps_range_start:
+                  type: string
+                  description: Start of the gap range (ISO 8601). Required when gap_fill_statuses is set.
+                gaps_range_end:
+                  type: string
+                  description: End of the gap range (ISO 8601). Required when gap_fill_statuses is set.
+                gap_auto_fill_scheduler_id:
+                  type: string
+                  description: Optional scheduler ID for scoping the "error" gap fill status (exhausted retries).
       responses:
         '200':
           description: Successful response

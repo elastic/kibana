@@ -41,7 +41,6 @@ components:
         - tags
         - type
         - enabled
-        - gapFillStatuses
         - updatedBy
         - createdBy
         - lastRunOutcome

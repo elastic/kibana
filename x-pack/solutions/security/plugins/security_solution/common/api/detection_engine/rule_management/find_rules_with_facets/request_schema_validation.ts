@@ -14,9 +14,6 @@ export const MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH = 1000;
 
 export const MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH = 10_000;
 
-/**
- * Validates KQL syntax only (not field allow-lists). Empty or whitespace-only strings are accepted.
- */
 export const validateFindRulesWithFacetsKqlFilter = (filter: string | undefined): string[] => {
   if (filter == null || filter.trim() === '') {
     return [];
@@ -78,6 +75,24 @@ export const validateFindRulesWithFacetsRequestBody = (
   const searchMode = body.search?.mode;
   if (searchMode != null && searchMode !== 'legacy') {
     errors.push(`unsupported search.mode "${searchMode}"`);
+  }
+
+  const hasGapFilters = Array.isArray(body.gap_fill_statuses) && body.gap_fill_statuses.length > 0;
+  const hasGapRangeStart = Boolean(body.gaps_range_start);
+  const hasGapRangeEnd = Boolean(body.gaps_range_end);
+
+  const gapParamsSet = new Set([hasGapFilters, hasGapRangeStart, hasGapRangeEnd]);
+  if (gapParamsSet.size > 1) {
+    errors.push(
+      '"gap_fill_statuses", "gaps_range_start" and "gaps_range_end" must be specified together'
+    );
+  }
+
+  const hasSearchAfter = body.search_after != null && body.search_after.length > 0;
+  if (hasSearchAfter && hasGapFilters && hasGapRangeStart && hasGapRangeEnd) {
+    errors.push(
+      '"search_after" is not supported when gap filtering is active. Use "page" and "per_page" to paginate gap-filtered results.'
+    );
   }
 
   return errors;

@@ -24,6 +24,7 @@ import {
 } from '../granular_rules_contract.gen';
 import { FindRulesSortField } from '../find_rules/find_rules_route.gen';
 import { SortOrder } from '../../model/sorting.gen';
+import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
@@ -74,6 +75,22 @@ export const FindRulesWithFacetsRequestBody = z
 
       */
     search_after: z.array(FindRulesWithFacetsSearchAfterItem).min(1).optional(),
+    /**
+     * Filter rules to only those with gaps matching these fill statuses in the given range.
+     */
+    gap_fill_statuses: z.array(GapFillStatus).optional(),
+    /**
+     * Start of the gap range (ISO 8601). Required when gap_fill_statuses is set.
+     */
+    gaps_range_start: z.string().optional(),
+    /**
+     * End of the gap range (ISO 8601). Required when gap_fill_statuses is set.
+     */
+    gaps_range_end: z.string().optional(),
+    /**
+     * Optional scheduler ID for scoping the "error" gap fill status (exhausted retries).
+     */
+    gap_auto_fill_scheduler_id: z.string().optional(),
   })
   .strict();
 export type FindRulesWithFacetsRequestBodyInput = z.input<typeof FindRulesWithFacetsRequestBody>;

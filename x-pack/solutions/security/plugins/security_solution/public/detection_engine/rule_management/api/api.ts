@@ -260,6 +260,10 @@ export const fetchRulesWithFacets = async ({
   signal,
   aggregations,
   search_after,
+  gap_fill_statuses,
+  gaps_range_start,
+  gaps_range_end,
+  gap_auto_fill_scheduler_id,
 }: FetchRulesWithFacetsProps): Promise<FetchRulesWithFacetsResponse> => {
   const body = {
     page: pagination.page,
@@ -271,6 +275,10 @@ export const fetchRulesWithFacets = async ({
     search,
     aggregations,
     search_after,
+    ...(gap_fill_statuses?.length ? { gap_fill_statuses } : {}),
+    ...(gaps_range_start ? { gaps_range_start } : {}),
+    ...(gaps_range_end ? { gaps_range_end } : {}),
+    ...(gap_auto_fill_scheduler_id ? { gap_auto_fill_scheduler_id } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesWithFacetsResponse>(

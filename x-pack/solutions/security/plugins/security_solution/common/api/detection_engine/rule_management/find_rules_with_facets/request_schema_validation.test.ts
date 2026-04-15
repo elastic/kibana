@@ -25,11 +25,6 @@ describe('validateFindRulesWithFacetsKqlFilter', () => {
     expect(validateFindRulesWithFacetsKqlFilter('alert.attributes.name: "My rule"')).toEqual([]);
   });
 
-  it('accepts valid KQL with supported friendly names', () => {
-    expect(validateFindRulesWithFacetsKqlFilter('enabled: true')).toEqual([]);
-    expect(validateFindRulesWithFacetsKqlFilter('name: "My rule"')).toEqual([]);
-  });
-
   it('returns an error for syntactically invalid KQL', () => {
     const errors = validateFindRulesWithFacetsKqlFilter('alert.attributes.name: (');
     expect(errors).toHaveLength(1);
@@ -136,6 +131,98 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
       validateFindRulesWithFacetsRequestBody({
         ...defaultInput,
         aggregations: { counts: ['tags'] },
+      })
+    ).toEqual([]);
+  });
+
+  it('accepts gap_fill_statuses with both gaps_range_start and gaps_range_end', () => {
+    expect(
+      validateFindRulesWithFacetsRequestBody({
+        ...defaultInput,
+        gap_fill_statuses: ['unfilled'],
+        gaps_range_start: '2024-01-01T00:00:00Z',
+        gaps_range_end: '2024-01-02T00:00:00Z',
+      })
+    ).toEqual([]);
+  });
+
+  it('accepts gap params with optional gap_auto_fill_scheduler_id', () => {
+    expect(
+      validateFindRulesWithFacetsRequestBody({
+        ...defaultInput,
+        gap_fill_statuses: ['unfilled', 'error'],
+        gaps_range_start: '2024-01-01T00:00:00Z',
+        gaps_range_end: '2024-01-02T00:00:00Z',
+        gap_auto_fill_scheduler_id: 'scheduler-1',
+      })
+    ).toEqual([]);
+  });
+
+  it('rejects gap_fill_statuses without gaps_range_start and gaps_range_end', () => {
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...defaultInput,
+      gap_fill_statuses: ['unfilled'],
+    });
+    expect(errors).toContain(
+      '"gap_fill_statuses", "gaps_range_start" and "gaps_range_end" must be specified together'
+    );
+  });
+
+  it('rejects gaps_range_start and gaps_range_end without gap_fill_statuses', () => {
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...defaultInput,
+      gaps_range_start: '2024-01-01T00:00:00Z',
+      gaps_range_end: '2024-01-02T00:00:00Z',
+    });
+    expect(errors).toContain(
+      '"gap_fill_statuses", "gaps_range_start" and "gaps_range_end" must be specified together'
+    );
+  });
+
+  it('rejects gap_fill_statuses with only gaps_range_start', () => {
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...defaultInput,
+      gap_fill_statuses: ['filled'],
+      gaps_range_start: '2024-01-01T00:00:00Z',
+    });
+    expect(errors).toContain(
+      '"gap_fill_statuses", "gaps_range_start" and "gaps_range_end" must be specified together'
+    );
+  });
+
+  it('rejects search_after when gap filtering is active', () => {
+    const errors = validateFindRulesWithFacetsRequestBody({
+      ...defaultInput,
+      sort_field: 'name',
+      sort_order: 'asc',
+      search_after: [12345, 'cursor'],
+      gap_fill_statuses: ['unfilled'],
+      gaps_range_start: '2024-01-01T00:00:00Z',
+      gaps_range_end: '2024-01-02T00:00:00Z',
+    });
+    expect(errors).toContain(
+      '"search_after" is not supported when gap filtering is active. Use "page" and "per_page" to paginate gap-filtered results.'
+    );
+  });
+
+  it('accepts search_after when gap filtering is not active', () => {
+    expect(
+      validateFindRulesWithFacetsRequestBody({
+        ...defaultInput,
+        sort_field: 'name',
+        sort_order: 'asc',
+        search_after: [12345, 'cursor'],
+      })
+    ).toEqual([]);
+  });
+
+  it('accepts gap filtering without search_after', () => {
+    expect(
+      validateFindRulesWithFacetsRequestBody({
+        ...defaultInput,
+        gap_fill_statuses: ['unfilled'],
+        gaps_range_start: '2024-01-01T00:00:00Z',
+        gaps_range_end: '2024-01-02T00:00:00Z',
       })
     ).toEqual([]);
   });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RuleExecutionStatus } from '../../api/detection_engine';
 import { RuleCustomizationStatus, RuleExecutionStatusEnum } from '../../api/detection_engine';
@@ -39,7 +38,6 @@ interface RulesFilterOptions {
   customizationStatus: RuleCustomizationStatus;
   ruleIds: string[];
   includeRuleTypes?: Type[];
-  gapFillStatuses?: GapFillStatus[];
 }
 
 /**
@@ -59,7 +57,6 @@ export function convertRulesFilterToKQL({
   ruleExecutionStatus,
   customizationStatus,
   includeRuleTypes = [],
-  gapFillStatuses,
 }: Partial<RulesFilterOptions>): string {
   const kql: string[] = [];
 
@@ -103,12 +100,6 @@ export function convertRulesFilterToKQL({
     kql.push(KQL_FILTER_CUSTOMIZED_RULES);
   } else if (customizationStatus === RuleCustomizationStatus.NOT_CUSTOMIZED) {
     kql.push(KQL_FILTER_NOT_CUSTOMIZED_RULES);
-  }
-
-  if (gapFillStatuses?.length) {
-    kql.push(
-      `(${gapFillStatuses.map((status) => `kibana.alert.rule.gap.status: ${status}`).join(' OR ')})`
-    );
   }
 
   return kql.join(' AND ');

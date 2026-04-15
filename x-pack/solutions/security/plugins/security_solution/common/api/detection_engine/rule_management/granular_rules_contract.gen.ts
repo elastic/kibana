@@ -50,7 +50,6 @@ export const GranularRulesFacetCategory = z.enum([
   'tags',
   'type',
   'enabled',
-  'gapFillStatuses',
   'updatedBy',
   'createdBy',
   'lastRunOutcome',

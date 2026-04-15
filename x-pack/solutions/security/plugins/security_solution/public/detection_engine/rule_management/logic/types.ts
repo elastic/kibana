@@ -122,15 +122,17 @@ export interface FetchRulesResponse {
 
 export interface FetchRulesWithFacetsProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
-  /** Subset of rule attributes to return. When omitted, all attributes are returned. */
   fields?: FindRulesWithFacetsField[];
   filter?: string;
   search?: GranularRulesSearch;
   sort_field?: z.infer<typeof FindRulesSortField>;
   sort_order?: z.infer<typeof SortOrder>;
   aggregations?: FindRulesWithFacetsAggregations;
-  /** Elasticsearch-style `search_after` (same `sort_field` / `sort_order` on each request). */
   search_after?: FindRulesWithFacetsSearchAfterItem[];
+  gap_fill_statuses?: GapFillStatus[];
+  gaps_range_start?: string;
+  gaps_range_end?: string;
+  gap_auto_fill_scheduler_id?: string;
   signal?: AbortSignal;
 }
 

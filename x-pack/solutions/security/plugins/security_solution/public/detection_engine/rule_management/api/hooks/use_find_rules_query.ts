@@ -8,6 +8,7 @@
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { RuleResponse, WarningSchema } from '../../../../../common/api/detection_engine';
 import type { SortOrder } from '../../../../../common/api/detection_engine/model/sorting.gen';
 import type {
@@ -31,6 +32,10 @@ export interface FindRulesQueryArgs {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   aggregations?: FindRulesWithFacetsAggregations;
   search_after?: FindRulesWithFacetsSearchAfterItem[];
+  gap_fill_statuses?: GapFillStatus[];
+  gaps_range_start?: string;
+  gaps_range_end?: string;
+  gap_auto_fill_scheduler_id?: string;
 }
 
 const FIND_RULES_QUERY_KEY = ['POST', DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS];

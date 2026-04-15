@@ -13,14 +13,14 @@ describe('convertRuleIdsToKQL', () => {
     expect(result).toBe('alert.id: ("alert:123")');
   });
 
-  it('should convert multiple rule ids to KQL with OR', () => {
+  it('should convert multiple rule ids into a single-field multi-value expression', () => {
     const result = convertRuleIdsToKQL(['123', '456']);
-    expect(result).toBe('alert.id: ("alert:123") OR alert.id: ("alert:456")');
+    expect(result).toBe('alert.id: ("alert:123" OR "alert:456")');
   });
 
   it('should handle empty array', () => {
     const result = convertRuleIdsToKQL([]);
-    expect(result).toBe('');
+    expect(result).toBe('alert.id: ()');
   });
 });
 
@@ -57,9 +57,7 @@ describe('enrichFilterWithRuleIds', () => {
 
   it('should handle multiple rule ids', () => {
     const result = enrichFilterWithRuleIds('host.name: "test"', ['123', '456']);
-    expect(result).toBe(
-      '(host.name: "test") AND (alert.id: ("alert:123") OR alert.id: ("alert:456"))'
-    );
+    expect(result).toBe('(host.name: "test") AND (alert.id: ("alert:123" OR "alert:456"))');
   });
 
   it('should handle undefined original filter', () => {
