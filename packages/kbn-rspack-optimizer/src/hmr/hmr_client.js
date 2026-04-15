@@ -34,6 +34,7 @@ var hostObserver = null;
 
 function ensureShadowRoot() {
   if (shadowRootRef) return shadowRootRef;
+  if (!document.body) return null;
 
   shadowHost = document.createElement('div');
   shadowHost.id = SHADOW_HOST_ID;
@@ -71,8 +72,8 @@ function ensureShadowRoot() {
 }
 
 function getShadowContainer() {
-  ensureShadowRoot();
-  return fenceElement;
+  var root = ensureShadowRoot();
+  return root ? fenceElement : null;
 }
 
 function observeShadowHost() {
@@ -110,6 +111,7 @@ var STATE_CONFIG = {
 
 function injectIndicatorStyles() {
   var root = ensureShadowRoot();
+  if (!root) return;
   if (root.getElementById && root.getElementById(INDICATOR_ID + '_styles')) return;
   // Shadow roots may not have getElementById; check by querying
   if (root.querySelector && root.querySelector('#' + INDICATOR_ID + '_styles')) return;
@@ -217,7 +219,10 @@ function createIndicator() {
 
   container.appendChild(dot);
   container.appendChild(label);
-  getShadowContainer().appendChild(container);
+
+  var shadowContainer = getShadowContainer();
+  if (!shadowContainer) return;
+  shadowContainer.appendChild(container);
 
   indicatorElement = container;
   indicatorDot = dot;
@@ -272,10 +277,24 @@ function setIndicatorState(state) {
 // --- Error overlay --------------------------------------------------------
 
 var OVERLAY_ID = '__kbn_hmr_error_overlay__';
+var deferredOverlayPending = false;
 
 function showOverlay(errors) {
   lastErrors = errors;
   hideOverlay();
+
+  var container = getShadowContainer();
+  if (!container) {
+    if (!deferredOverlayPending) {
+      deferredOverlayPending = true;
+      document.addEventListener('DOMContentLoaded', function onReady() {
+        document.removeEventListener('DOMContentLoaded', onReady);
+        deferredOverlayPending = false;
+        if (lastErrors) showOverlay(lastErrors);
+      });
+    }
+    return;
+  }
 
   var backdrop = document.createElement('div');
   backdrop.id = OVERLAY_ID;
@@ -356,7 +375,7 @@ function showOverlay(errors) {
 
   backdrop.appendChild(header);
   backdrop.appendChild(body);
-  getShadowContainer().appendChild(backdrop);
+  container.appendChild(backdrop);
 
   // Enable pointer-events on the host so the full-screen overlay receives clicks
   if (shadowHost) {
