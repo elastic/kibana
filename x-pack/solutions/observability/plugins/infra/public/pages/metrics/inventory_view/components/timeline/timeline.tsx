@@ -45,6 +45,7 @@ import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_me
 import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
 import type { InfraFormatter } from '../../../../../common/inventory/types';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
 
 interface Props {
@@ -101,7 +102,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   };
 
   const { metricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
-    { ...anomalyParams, schema: preferredSchema ?? 'ecs' },
+    { ...anomalyParams, schema: preferredSchema ?? DEFAULT_SCHEMA },
     {
       active: nodeType === 'host',
     }

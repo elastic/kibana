@@ -19,7 +19,6 @@ export const ProcessesEmptyMessage: React.FC<ProcessesEmptyMessageProps> = ({
   schema,
   clearSearchBar,
 }) => {
-  const isEcsSchema = schema === 'ecs' || schema === null;
 
   return (
     <EuiEmptyPrompt
@@ -35,7 +34,7 @@ export const ProcessesEmptyMessage: React.FC<ProcessesEmptyMessageProps> = ({
       }
       body={
         <EuiText size="s">
-          {isEcsSchema ? (
+          {schema === 'ecs' ? (
             <FormattedMessage
               id="xpack.infra.metrics.nodeDetails.noProcessesBody.ecs"
               defaultMessage="Try modifying your filter. Only processes that are within the configured {metricbeatDocsLink} will display here."
