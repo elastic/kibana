@@ -4,8 +4,11 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+# Free disk space in the background — the build takes minutes, so cleanup
+# finishes well before archive/copy steps that might need the space.
 echo "--- Clean up cached images to free up space"
-clean_cached_images
+clean_cached_images &
+cleanup_pid=$!
 
 export KBN_NP_PLUGINS_BUILT=true
 
@@ -20,6 +23,9 @@ is_pr_with_label "ci:build-cdn-assets" || BUILD_ARGS+=("--skip-cdn-assets")
 
 echo "> node scripts/build" "${BUILD_ARGS[@]}"
 node scripts/build "${BUILD_ARGS[@]}"
+
+# Ensure docker cleanup finished before archiving
+wait $cleanup_pid || true
 
 echo "--- Archive Kibana Distribution"
 version="$(jq -r '.version' package.json)"

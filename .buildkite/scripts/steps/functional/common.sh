@@ -6,8 +6,30 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-.buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
+# Bootstrap and artifact download are independent — run them in parallel.
+# Bootstrap installs node_modules; the download fetches the pre-built Kibana distributable.
+.buildkite/scripts/bootstrap.sh &
+bootstrap_pid=$!
+
+.buildkite/scripts/download_build_artifacts.sh &
+download_pid=$!
+
+bootstrap_exit=0
+wait $bootstrap_pid || bootstrap_exit=$?
+
+download_exit=0
+wait $download_pid || download_exit=$?
+
+if [[ $bootstrap_exit -ne 0 ]]; then
+  echo "Bootstrap failed with exit code $bootstrap_exit"
+  exit $bootstrap_exit
+fi
+
+if [[ $download_exit -ne 0 ]]; then
+  echo "Artifact download failed with exit code $download_exit"
+  exit $download_exit
+fi
+
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
 is_test_execution_step
