@@ -185,8 +185,8 @@ jobs:
           - You are running in CI. Do NOT attempt interactive git operations.
           - All commits will be pushed by the workflow after you finish.
           - Focus on implementing the instruction above. Update files directly.
-          - To type-check your changes, use the fast observability type checker with --with-archive (required on first run to restore cached tsc artifacts from GCS):
-            node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --with-archive --project path/to/tsconfig.json
+          - To type-check your changes, use the fast observability type checker:
+            node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --project path/to/tsconfig.json
           - If the fast type checker is unavailable, fall back to: yarn test:type_check --project path/to/tsconfig.json
           - If validation fails, fix the issues and try again.
           TASK_FOOTER
@@ -250,10 +250,10 @@ jobs:
             git checkout -b "$BRANCH_NAME"
             git push origin "$BRANCH_NAME"
 
-            FORK_REPO="${{ github.repository }}"
+            FORK_OWNER="${{ github.repository_owner }}"
             gh pr create \
               --repo elastic/kibana \
-              --head "${FORK_REPO}:${BRANCH_NAME}" \
+              --head "${FORK_OWNER}:${BRANCH_NAME}" \
               --base main \
               --title "Ralph: ${INSTRUCTION}" \
               --body "Drafted by Ralph Engine.
