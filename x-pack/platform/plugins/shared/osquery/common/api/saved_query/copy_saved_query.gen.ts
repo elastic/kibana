@@ -16,5 +16,72 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * The response for copying a saved query.
+ */
 export type CopySavedQueryResponse = z.infer<typeof CopySavedQueryResponse>;
-export const CopySavedQueryResponse = z.object({});
+export const CopySavedQueryResponse = z.object({
+  /**
+   * The copied saved query.
+   */
+  data: z
+    .object({
+      /**
+       * The saved object ID of the copied saved query.
+       */
+      saved_object_id: z.string().optional(),
+      /**
+       * The saved query ID.
+       */
+      id: z.string().optional(),
+      /**
+       * The saved query description.
+       */
+      description: z.string().optional(),
+      /**
+       * The SQL query.
+       */
+      query: z.string().optional(),
+      /**
+       * The query interval in seconds.
+       */
+      interval: z.string().optional(),
+      /**
+       * The query timeout in seconds.
+       */
+      timeout: z.number().int().optional(),
+      /**
+       * Whether the query is a snapshot query.
+       */
+      snapshot: z.boolean().optional(),
+      /**
+       * Whether to include results for removed processes.
+       */
+      removed: z.boolean().optional(),
+      /**
+       * The target platform(s).
+       */
+      platform: z.string().optional(),
+      /**
+       * The ECS mapping configuration.
+       */
+      ecs_mapping: z.object({}).optional(),
+      /**
+       * The creation timestamp.
+       */
+      created_at: z.string().optional(),
+      /**
+       * The user who created the copy.
+       */
+      created_by: z.string().optional(),
+      /**
+       * The last update timestamp.
+       */
+      updated_at: z.string().optional(),
+      /**
+       * The user who last updated the saved query.
+       */
+      updated_by: z.string().optional(),
+    })
+    .optional(),
+});
