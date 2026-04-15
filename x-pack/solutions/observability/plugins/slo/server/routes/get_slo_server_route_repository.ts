@@ -14,6 +14,7 @@ import type { findCompositeSLORoute } from './slo/composite_slo/find_composite_s
 import type { updateCompositeSLORoute } from './slo/composite_slo/update_composite_slo';
 import type { deleteCompositeSLORoute } from './slo/composite_slo/delete_composite_slo';
 import type { fetchCompositeHistoricalSummaryRoute } from './slo/composite_slo/fetch_composite_historical_summary';
+import type { postCompositeSloSummaryRefreshRoute } from './slo/composite_slo/post_composite_slo_summary_refresh';
 
 interface RouteRepositoryOptions {
   isServerless?: boolean;
@@ -34,6 +35,7 @@ type CompositeRoutes = typeof batchGetCompositeSLORoute &
   typeof findCompositeSLORoute &
   typeof updateCompositeSLORoute &
   typeof deleteCompositeSLORoute &
-  typeof fetchCompositeHistoricalSummaryRoute;
+  typeof fetchCompositeHistoricalSummaryRoute &
+  typeof postCompositeSloSummaryRefreshRoute;
 
 export type SLORouteRepository = ReturnType<typeof getSloServerRouteRepository> & CompositeRoutes;
