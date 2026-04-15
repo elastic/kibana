@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { Document } from 'yaml';
 import YAML from 'yaml';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
@@ -290,6 +288,7 @@ export function getStepTypeAtPath(path: PropertyKey[], yamlDocument?: Document):
  */
 function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document): string | null {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let current: any = yamlDocument.contents;
 
     for (let i = 0; i < pathToStep.length; i++) {
@@ -298,6 +297,7 @@ function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document
       if (YAML.isMap(current)) {
         // Find the key in the map
         const item = current.items.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (pair: any) => YAML.isScalar(pair.key) && pair.key.value === segment
         );
         if (!item) return null;
@@ -315,6 +315,7 @@ function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document
     // Now 'current' should be a step node - find its 'type' field
     if (YAML.isMap(current)) {
       const typeItem = current.items.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (pair: any) => YAML.isScalar(pair.key) && pair.key.value === 'type'
       );
       if (typeItem && YAML.isScalar(typeItem.value)) {
@@ -338,6 +339,7 @@ function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document
 function getConnectorParamsSchema(stepType: string): z.ZodType | null {
   try {
     const allConnectors = getAllConnectors();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const connector = allConnectors.find((c: any) => c.type === stepType);
     return connector?.paramsSchema ?? null;
   } catch {
@@ -352,7 +354,9 @@ function getConnectorParamsSchema(stepType: string): z.ZodType | null {
 /**
  * Analyzes a union schema to extract user-friendly option descriptions
  */
+
 function analyzeUnionSchema(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   unionSchema: z.ZodUnion<any>
 ): Array<{ name: string; description: string }> {
   const options: Array<{ name: string; description: string }> = [];
@@ -386,10 +390,27 @@ function analyzeUnionOption(option: z.ZodType): { name: string; description: str
       .filter((key) => !isOptionalSchema(shape[key]))
       .sort();
 
-    return {
-      name: `object_with_${requiredProps.join('_')}`,
-      description: `props: ${requiredProps.join(', ')}`,
-    };
+    if (requiredProps.length > 0) {
+      return {
+        name: `object_with_${requiredProps.join('_')}`,
+        description: `object with: ${requiredProps.join(', ')}`,
+      };
+    }
+
+    // All properties are optional — show them so the user knows what's available
+    const allProps = Object.keys(shape).sort();
+    if (allProps.length > 0) {
+      return {
+        name: 'object',
+        description: `object (optional: ${allProps.join(', ')})`,
+      };
+    }
+
+    return { name: 'object', description: 'an object' };
+  }
+
+  if (option instanceof z.ZodRecord) {
+    return { name: 'record', description: 'a key-value mapping' };
   }
 
   if (option instanceof z.ZodLiteral) {
@@ -399,16 +420,17 @@ function analyzeUnionOption(option: z.ZodType): { name: string; description: str
     };
   }
 
-  if (option instanceof z.ZodString) return { name: 'string', description: 'string value' };
-  if (option instanceof z.ZodNumber) return { name: 'number', description: 'number value' };
-  if (option instanceof z.ZodBoolean) return { name: 'boolean', description: 'boolean value' };
+  if (option instanceof z.ZodString) return { name: 'string', description: 'a string' };
+  if (option instanceof z.ZodNumber) return { name: 'number', description: 'a number' };
+  if (option instanceof z.ZodBoolean) return { name: 'boolean', description: 'a boolean' };
 
   const typeName = getTypeDescriptionForError(option);
-  return { name: typeName, description: `${typeName} type` };
+  return { name: typeName, description: typeName };
 }
 
 function findDiscriminatorInShape(
   shape: Record<string, z.ZodType>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): { key: string; value: any } | null {
   for (const [key, schema] of Object.entries(shape)) {
     if (schema instanceof z.ZodLiteral) {
@@ -448,7 +470,7 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
 
     // Handle objects with property list
     if (unwrappedSchema instanceof z.ZodObject) {
-      return `${fieldName} should be ${getObjectPropertiesDescription(unwrappedSchema)}`;
+      return `${fieldName} expects ${getObjectPropertiesDescription(unwrappedSchema)}`;
     }
 
     // Handle arrays — peek at the element schema for a richer hint
@@ -458,7 +480,7 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
 
     // For all other types, use the type description
     const expectedType = getTypeDescriptionForError(unwrappedSchema);
-    return `${fieldName} should be ${expectedType}`;
+    return `${fieldName} expects ${expectedType}`;
   } catch {
     return null;
   }
@@ -467,34 +489,36 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
 /**
  * Generates error message for union types with "oneOf" format.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<any>): string | null {
   const unionOptions = analyzeUnionSchema(unionSchema);
   if (unionOptions.length === 0) return null;
 
   const optionsList = unionOptions.map((opt) => `  - ${opt.description}`).join('\n');
-  return `${fieldName} should be oneOf:\n${optionsList}`;
+  return `${fieldName} must be one of:\n${optionsList}`;
 }
 
 /**
  * Generates error message for array types by peeking at the element schema.
- * e.g. "fields should be a list of objects with properties: type, name, description"
+ * e.g. "fields expects a list of objects with: type, name, description"
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<any>): string {
   const elementSchema = unwrapSchema(arraySchema.element);
 
   if (elementSchema instanceof z.ZodObject) {
-    return `${fieldName} should be a list of ${getObjectPropertiesDescription(elementSchema)}`;
+    return `${fieldName} expects a list of ${getObjectPropertiesDescription(elementSchema)}`;
   }
 
   if (elementSchema instanceof z.ZodUnion) {
     const unionMsg = generateUnionErrorMessage('each item', elementSchema);
     if (unionMsg) {
-      return `${fieldName} should be a list where ${unionMsg}`;
+      return `${fieldName} expects a list, ${unionMsg}`;
     }
   }
 
   const elementType = getTypeDescriptionForError(elementSchema);
-  return `${fieldName} should be an array of ${elementType}`;
+  return `${fieldName} expects a list of ${elementType}`;
 }
 
 /**
@@ -522,10 +546,17 @@ function getObjectPropertiesDescription(
   fieldSchema: z.ZodObject,
   maxProperties: number = 5
 ): string {
-  const allProperties = Object.keys(fieldSchema.def.shape);
-  const propsText = allProperties.slice(0, maxProperties).join(', ');
-  const suffix = allProperties.length > maxProperties ? '...' : '';
-  return `an object with properties: ${propsText}${suffix}`;
+  const requiredProperties = Object.entries(fieldSchema.def.shape)
+    .filter(([, schema]) => !isOptionalSchema(schema as z.ZodType))
+    .map(([propertyName]) => propertyName);
+
+  if (requiredProperties.length === 0) {
+    return 'an object';
+  }
+
+  const propsText = requiredProperties.slice(0, maxProperties).join(', ');
+  const suffix = requiredProperties.length > maxProperties ? '...' : '';
+  return `an object with: ${propsText}${suffix}`;
 }
 
 export function getTypeDescriptionForError(schema: z.ZodType): string {

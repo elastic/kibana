@@ -98,7 +98,7 @@ describe('formatZodError', () => {
     const result = formatZodError(mockError as any, casesConnectorSchema);
 
     // Should generate dynamic message with union options
-    expect(result.message).toContain('connector should be oneOf:');
+    expect(result.message).toContain('connector must be one of:');
     expect(result.message).toContain('type: ".none"');
     expect(result.message).toContain('type: ".jira"');
     expect(result.message).toContain('type: ".cases-webhook"');
@@ -374,7 +374,7 @@ describe('formatZodError', () => {
       expect(parseResult.success).toBe(false);
       if (!parseResult.success) {
         const result = formatZodError(parseResult.error, schema);
-        expect(result.message).toContain('mode should be oneOf:');
+        expect(result.message).toContain('mode must be one of:');
       }
     });
 
@@ -387,7 +387,7 @@ describe('formatZodError', () => {
       expect(parseResult.success).toBe(false);
       if (!parseResult.success) {
         const result = formatZodError(parseResult.error, schema);
-        expect(result.message).toContain('mode should be oneOf:');
+        expect(result.message).toContain('mode must be one of:');
       }
     });
 
@@ -400,7 +400,7 @@ describe('formatZodError', () => {
       expect(parseResult.success).toBe(false);
       if (!parseResult.success) {
         const result = formatZodError(parseResult.error, schema);
-        expect(result.message).toContain('mode should be oneOf:');
+        expect(result.message).toContain('mode must be one of:');
       }
     });
 
@@ -413,7 +413,7 @@ describe('formatZodError', () => {
       expect(parseResult.success).toBe(false);
       if (!parseResult.success) {
         const result = formatZodError(parseResult.error, schema);
-        expect(result.message).toContain('mode should be oneOf:');
+        expect(result.message).toContain('mode must be one of:');
       }
     });
   });
@@ -435,9 +435,9 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError, schema);
-      expect(result.message).toContain('value should be oneOf:');
-      expect(result.message).toContain('string value');
-      expect(result.message).toContain('number value');
+      expect(result.message).toContain('value must be one of:');
+      expect(result.message).toContain('a string');
+      expect(result.message).toContain('a number');
     });
 
     it('should describe boolean option in union', () => {
@@ -456,7 +456,7 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError, schema);
-      expect(result.message).toContain('boolean value');
+      expect(result.message).toContain('a boolean');
     });
 
     it('should describe object with discriminator in union', () => {
@@ -501,9 +501,10 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError, schema);
-      expect(result.message).toContain('item should be oneOf:');
-      // Should list required props
-      expect(result.message).toContain('props:');
+      expect(result.message).toContain('item must be one of:');
+      // The union has objects with discriminators (type: "a", type: "b")
+      expect(result.message).toContain('type: "a"');
+      expect(result.message).toContain('type: "b"');
     });
   });
 
@@ -530,7 +531,7 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError, schema);
-      expect(result.message).toContain('fields should be a list of');
+      expect(result.message).toContain('fields expects a list of');
       expect(result.message).toContain('type');
       expect(result.message).toContain('name');
       expect(result.message).toContain('description');
@@ -552,7 +553,7 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError, schema);
-      expect(result.message).toContain('tags should be an array of');
+      expect(result.message).toContain('tags expects a list of');
     });
 
     it('should describe array of union elements', () => {
@@ -576,9 +577,49 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError, schema);
-      expect(result.message).toContain('items should be a list where');
+      expect(result.message).toContain('items expects a list');
       expect(result.message).toContain('type: "text"');
       expect(result.message).toContain('type: "image"');
+    });
+
+    it('should describe array of complex union elements (3+ options) with useful descriptions', () => {
+      // Simulates elasticsearch.bulk operations: array of union with all-optional objects and records
+      const schema = z.object({
+        operations: z.array(
+          z.union([
+            z.object({
+              index: z.optional(z.object({ _index: z.string().optional() })),
+              create: z.optional(z.object({ _index: z.string().optional() })),
+              update: z.optional(z.object({ _index: z.string().optional() })),
+              delete: z.optional(z.object({ _index: z.string().optional() })),
+            }),
+            z.object({
+              doc: z.optional(z.object({})),
+              script: z.optional(z.string()),
+            }),
+            z.record(z.string(), z.unknown()),
+          ])
+        ),
+      });
+
+      const mockError = {
+        issues: [
+          {
+            code: 'invalid_type' as const,
+            path: ['operations'],
+            message: 'Expected array',
+          },
+        ],
+      };
+
+      const result = formatLoose(mockError, schema);
+      // Should show element type details, not just "expects a list"
+      expect(result.message).toContain('operations expects a list');
+      expect(result.message).toContain('must be one of');
+      // All-optional object should show optional properties
+      expect(result.message).toContain('optional:');
+      // Record type should show human-friendly description
+      expect(result.message).toContain('a key-value mapping');
     });
   });
 
@@ -636,7 +677,7 @@ describe('formatZodError', () => {
 
       const result = formatLoose(mockError, schema);
       // Schema-aware enrichment resolves the path and describes the expected type
-      expect(result.message).toContain('field should be');
+      expect(result.message).toContain('field expects');
     });
   });
 
@@ -751,9 +792,7 @@ describe('Dynamic validation system behavior', () => {
 
       // In test environment, falls back to basic message
       // In real environment, would show enhanced object structure
-      expect(result.message).toMatch(
-        /Expected object, received number|settings should be an object/
-      );
+      expect(result.message).toMatch(/Expected object, received number|settings expects an object/);
     });
   });
 
@@ -807,7 +846,7 @@ describe('Dynamic validation system behavior', () => {
       const result = formatZodError(mockZodError as any, undefined, yamlDocument);
 
       // Should enhance the basic type error
-      expect(result.message).toMatch(/config should be an object|Expected object, received number/);
+      expect(result.message).toMatch(/config expects an object|Expected object, received number/);
     });
 
     it('should provide enhanced messages for array types', () => {
@@ -833,7 +872,7 @@ describe('Dynamic validation system behavior', () => {
       const result = formatZodError(mockZodError as any, undefined, yamlDocument);
 
       // Should enhance the basic type error
-      expect(result.message).toMatch(/items should be an array|Expected array, received number/);
+      expect(result.message).toMatch(/items expects a list|Expected array, received number/);
     });
 
     it('should handle enum errors with available options', () => {
@@ -860,7 +899,7 @@ describe('Dynamic validation system behavior', () => {
       const result = formatZodError(mockZodError as any, undefined, yamlDocument);
 
       // Should show available options or fall back to basic message
-      expect(result.message).toMatch(/level should be one of:|Invalid enum value/);
+      expect(result.message).toMatch(/level must be one of:|Invalid enum value/);
     });
 
     it('should handle CreateAssetCriticalityRecord validation errors', () => {
@@ -888,7 +927,7 @@ describe('Dynamic validation system behavior', () => {
       };
 
       const result1 = formatZodError(missingFieldsError as any, undefined, incompleteYamlDocument);
-      expect(result1.message).toMatch(/Required fields missing|with should be an object/);
+      expect(result1.message).toMatch(/Required fields missing|with expects an object/);
 
       // Scenario 2: Type error (number instead of string for criticality_level)
       const typeError = {
@@ -905,7 +944,7 @@ describe('Dynamic validation system behavior', () => {
 
       const result2 = formatZodError(typeError as any, undefined, incompleteYamlDocument);
       expect(result2.message).toMatch(
-        /Expected string, received number|criticality_level should be a string/
+        /Expected string, received number|criticality_level expects a string/
       );
 
       // Scenario 3: Enum validation error
@@ -922,10 +961,10 @@ describe('Dynamic validation system behavior', () => {
       };
 
       const result3 = formatZodError(enumError as any, undefined, incompleteYamlDocument);
-      expect(result3.message).toMatch(/criticality_level should be one of:|Invalid enum value/);
+      expect(result3.message).toMatch(/criticality_level must be one of:|Invalid enum value/);
 
       // If it shows enum options, verify they're the correct ones
-      if (result3.message.includes('should be one of')) {
+      if (result3.message.includes('must be one of')) {
         expect(result3.message).toContain('low_impact');
         expect(result3.message).toContain('medium_impact');
         expect(result3.message).toContain('high_impact');
@@ -963,7 +1002,7 @@ describe('Dynamic validation system behavior', () => {
       const result = formatZodError(invalidEnumError as any, undefined, correctYamlDocument);
 
       // Should provide helpful enum validation
-      expect(result.message).toMatch(/criticality_level should be one of:|Invalid enum value/);
+      expect(result.message).toMatch(/criticality_level must be one of:|Invalid enum value/);
     });
   });
 });
@@ -1006,7 +1045,7 @@ steps:
     };
     const dummySchema = z.object({ steps: z.array(z.any()) });
     const result = formatZodError(mockError as any, dummySchema, yamlDocument);
-    expect(result.message).toContain('should be an object with properties: index, document');
+    expect(result.message).toContain('expects an object with: index, document');
   });
 
   it('should enrich errors for steps in if-else branches', () => {
@@ -1046,7 +1085,7 @@ steps:
     };
     const dummySchema = z.object({ steps: z.array(z.any()) });
     const result = formatZodError(mockError as any, dummySchema, yamlDocument);
-    expect(result.message).toContain('should be an object with properties: channel, message');
+    expect(result.message).toContain('expects an object with: channel, message');
   });
 
   it('should enrich errors for steps in parallel branches', () => {
@@ -1082,7 +1121,7 @@ steps:
     };
     const dummySchema = z.object({ steps: z.array(z.any()) });
     const result = formatZodError(mockError as any, dummySchema, yamlDocument);
-    expect(result.message).toContain('should be an object with properties: url');
+    expect(result.message).toContain('expects an object with: url');
   });
 
   it('should enrich errors for deeply nested steps', () => {
@@ -1120,6 +1159,6 @@ steps:
     };
     const dummySchema = z.object({ steps: z.array(z.any()) });
     const result = formatZodError(mockError as any, dummySchema, yamlDocument);
-    expect(result.message).toContain('should be an object with properties: message');
+    expect(result.message).toContain('expects an object with: message');
   });
 });

@@ -75,6 +75,7 @@ export function formatMonacoYamlMarker(
       return {
         ...newMarker,
         message: enrichedMessage,
+        relatedInformation: [],
       };
     }
   } catch {
