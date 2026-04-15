@@ -24,35 +24,18 @@ export type ServerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> =
 
 export type { EventChainContext };
 
+/**
+ * Emit an event for the given trigger. Subscribed workflows in the current request's space will run.
+ * @param triggerId - Must match a trigger registered via registerTriggerDefinition
+ * @param payload - Event payload; available in workflows as context.event
+ * @throws Error if triggerId is not registered
+ */
 export type EventEmitter = (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
 
 export type GetEventEmitter = (
   request: KibanaRequest,
   triggerEventHandler: TriggerEventHandler
 ) => EventEmitter;
-/**
- * Request-scoped client for emitting workflow trigger events.
- * Use from route handlers via ctx.workflows.getWorkflowsClient().
- */
-export interface WorkflowsClient {
-  /**
-   * Emit an event for the given trigger. Subscribed workflows in the current request's space will run.
-   * @param triggerId - Must match a trigger registered via registerTriggerDefinition
-   * @param payload - Event payload; available in workflows as context.event
-   * @throws Error if triggerId is not registered
-   */
-  emitEvent(triggerId: string, payload: Record<string, unknown>): Promise<void>;
-}
-
-/**
- * Workflows route handler context. Available as ctx.workflows for plugins that depend on workflows_extensions.
- */
-export interface WorkflowsRouteHandlerContext {
-  /**
-   * Returns a request-scoped client bound to the current request and space.
-   */
-  getWorkflowsClient(): WorkflowsClient;
-}
 
 /**
  * Server-side plugin setup contract.
