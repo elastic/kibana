@@ -142,7 +142,7 @@ export const getActionResultsRoute = (
           // Return only real responses - placeholders will be generated client-side
           const processedEdges = res.edges;
 
-          const totalPages = Math.ceil(totalAgentCount / pageSize);
+          const totalPages = pageSize > 0 ? Math.ceil(totalAgentCount / pageSize) : 0;
 
           return response.ok({
             body: {
