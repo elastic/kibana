@@ -9,6 +9,7 @@
 
 export * as cli from './src/cli';
 export { createPlaywrightConfig, visualTest } from './src/playwright';
+export { buildDriftikReviewSite } from './src/review_site/driftik_adapter';
 export type {
   VisualCheckpointRecord,
   VisualRegressionManifest,

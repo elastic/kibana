@@ -1,7 +1,7 @@
 {
-  "version": "0.1.0",
-  "repo": "elastic/driftik",
-  "tag": "v0.1.0",
-  "tarballPattern": "driftik-*.tar.gz",
-  "checksumPattern": "driftik-*.tar.gz.sha256"
+  "version": "0.1.1",
+  "gcsBucket": "ci-artifacts.kibana.dev",
+  "gcsPath": "driftik/releases/v0.1.1",
+  "tarball": "driftik-0.1.1.tar.gz",
+  "checksum": "driftik-0.1.1.tar.gz.sha256"
 }

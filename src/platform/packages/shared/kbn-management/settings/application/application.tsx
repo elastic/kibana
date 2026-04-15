@@ -128,6 +128,17 @@ export const SettingsApplication = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      <EuiCallOut
+        title="Visual Regression Testing is now active for this page"
+        iconType="eye"
+        color="primary"
+      >
+        <p>
+          Screenshots captured here are compared against baselines to detect unintended visual
+          changes. This banner is an intentional visual change for demo purposes.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
       {globalTabEnabled && (
         <>
           <EuiTabs>

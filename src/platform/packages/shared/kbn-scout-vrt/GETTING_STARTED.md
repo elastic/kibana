@@ -174,7 +174,7 @@ See [CI_INTEGRATION.md](CI_INTEGRATION.md) for:
 
 PR comparison is also handled by CI. A labeled PR run hydrates the latest published `main` baseline bundle, runs compare mode, and publishes a static review site.
 
-See [CI_INTEGRATION.md](/Users/clint/Projects/kibana.worktrees/scout-vrt/src/platform/packages/shared/kbn-scout-vrt/CI_INTEGRATION.md) for:
+See [CI_INTEGRATION.md](CI_INTEGRATION.md) for:
 
 - the `ci:vrt` PR trigger
 - archive-first baseline hydration

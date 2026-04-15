@@ -13,10 +13,10 @@ import path from 'node:path';
 
 interface DriftikBuildDescriptor {
   version: string;
-  repo: string;
-  tag: string;
-  tarballPattern: string;
-  checksumPattern: string;
+  gcsBucket: string;
+  gcsPath: string;
+  tarball: string;
+  checksum: string;
 }
 
 const readBuildDescriptor = (): DriftikBuildDescriptor => {
@@ -30,45 +30,45 @@ export interface DownloadDriftikOptions {
 }
 
 /**
- * Downloads and extracts the pinned Driftik static build from a GitHub release.
+ * Downloads and extracts the pinned Driftik static build from GCS.
  *
- * Requires `gh` CLI to be authenticated with access to elastic/driftik.
+ * Uses the same GCS auth as the baseline downloader (service account
+ * activated by the Buildkite pipeline, or local gcloud auth).
  * Returns the path to the extracted directory containing index.html.
  */
 export const downloadPinnedDriftikBuild = (options: DownloadDriftikOptions): string => {
   const { outputDir } = options;
-  const { repo, tag, tarballPattern, checksumPattern } = readBuildDescriptor();
+  const { version, gcsBucket, gcsPath, tarball } = readBuildDescriptor();
 
   const downloadDir = path.join(outputDir, '.driftik-download');
   fs.mkdirSync(downloadDir, { recursive: true });
 
-  process.stdout.write(`--- Downloading Driftik ${tag} from ${repo}\n`);
+  const gcsUrl = `gs://${gcsBucket}/${gcsPath}/${tarball}`;
+  const localTarball = path.join(downloadDir, tarball);
 
-  execFileSync('gh', ['release', 'download', tag, '--repo', repo, '--pattern', tarballPattern, '--pattern', checksumPattern, '--dir', downloadDir], {
-    stdio: 'inherit',
-  });
+  process.stdout.write(`--- Downloading Driftik v${version} from ${gcsUrl}\n`);
 
-  const tarballFile = fs.readdirSync(downloadDir).find((f) => f.endsWith('.tar.gz') && !f.endsWith('.sha256'));
+  execFileSync(
+    'gcloud',
+    [
+      'storage',
+      'cp',
+      '--cache-control=no-cache, max-age=0, no-transform',
+      gcsUrl,
+      localTarball,
+    ],
+    { stdio: 'inherit' }
+  );
 
-  if (!tarballFile) {
-    throw new Error(`No tarball found after downloading release ${tag} from ${repo}`);
-  }
-
-  const checksumFile = fs.readdirSync(downloadDir).find((f) => f.endsWith('.sha256'));
-
-  if (checksumFile) {
-    process.stdout.write('--- Verifying Driftik checksum\n');
-    execFileSync('sha256sum', ['--check', checksumFile], {
-      cwd: downloadDir,
-      stdio: 'inherit',
-    });
+  if (!fs.existsSync(localTarball)) {
+    throw new Error(`Driftik tarball not found after download: ${localTarball}`);
   }
 
   const extractDir = path.join(outputDir, 'driftik-dist');
   fs.mkdirSync(extractDir, { recursive: true });
 
   process.stdout.write(`--- Extracting Driftik to ${extractDir}\n`);
-  execFileSync('tar', ['-xzf', path.join(downloadDir, tarballFile), '-C', extractDir], {
+  execFileSync('tar', ['-xzf', localTarball, '-C', extractDir], {
     stdio: 'inherit',
   });
 
@@ -76,7 +76,6 @@ export const downloadPinnedDriftikBuild = (options: DownloadDriftikOptions): str
     throw new Error(`Extracted Driftik build at ${extractDir} does not contain index.html`);
   }
 
-  // Clean up download artifacts
   fs.rmSync(downloadDir, { recursive: true });
 
   return extractDir;

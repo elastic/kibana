@@ -16,6 +16,7 @@ import {
   cli,
   type VisualRegressionManifest,
   type VisualRegressionRunManifest,
+  buildDriftikReviewSite,
 } from '@kbn/scout-vrt';
 import {
   buildMainBaselineRunPlan,
@@ -36,6 +37,8 @@ import { getKibanaDir } from '#pipeline-utils';
 
 const MAIN_BASELINES_BUCKET = 'ci-artifacts.kibana.dev/vrt/baselines/main';
 const PR_REPORTS_BUCKET = 'ci-artifacts.kibana.dev/vrt/pr';
+const DRIFTIK_GCS_TARBALL =
+  'gs://ci-artifacts.kibana.dev/driftik/releases/v0.1.1/driftik-0.1.1.tar.gz';
 const CONFIG_DISCOVERY_PATH = path.join(
   REPO_ROOT,
   '.scout',
@@ -280,26 +283,12 @@ const runTargetCompareGroup = (
   };
 };
 
-const escapeHtml = (value: string): string =>
-  value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
-
-const copyFileIfPresent = (sourcePath: string, destinationPath: string): string | undefined => {
-  if (!fs.existsSync(sourcePath)) {
-    return undefined;
-  }
-
-  fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
-  fs.copyFileSync(sourcePath, destinationPath);
-  return destinationPath;
-};
-
-const writeReviewSite = (runReports: PrVrtRunReport[], reportUrl: string): string => {
+const writeReviewSite = (
+  runReports: PrVrtRunReport[],
+  reportUrl: string,
+  driftikDistDir: string
+): string => {
   const siteRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kibana-vrt-pr-site-'));
-  const sections: string[] = [];
   const summary = summarizePrVrtRuns(runReports);
 
   for (const runReport of runReports) {
@@ -308,7 +297,7 @@ const writeReviewSite = (runReports: PrVrtRunReport[], reportUrl: string): strin
     fs.mkdirSync(runJsonDir, { recursive: true });
     fs.writeFileSync(path.join(runJsonDir, 'manifest.json'), JSON.stringify(runManifest, null, 2));
 
-    const packageSections = runManifest.packages.map((pkg) => {
+    const packageManifests: VisualRegressionManifest[] = runManifest.packages.map((pkg) => {
       const packageManifest = readJsonFile<VisualRegressionManifest>(
         getPackageManifestPath(runManifest.runId, pkg.packageId)
       );
@@ -318,108 +307,16 @@ const writeReviewSite = (runReports: PrVrtRunReport[], reportUrl: string): strin
         path.join(packageJsonDir, 'manifest.json'),
         JSON.stringify(packageManifest, null, 2)
       );
-
-      const checkpointRows = packageManifest.results
-        .map((result) => {
-          const baselineRelativePath = path.join('assets', 'baseline', result.imagePath);
-          const actualRelativePath = path.join(
-            'assets',
-            'actual',
-            runManifest.runId,
-            result.imagePath
-          );
-          const diffRelativePath = result.diffPath
-            ? path.join('assets', 'diff', runManifest.runId, result.diffPath)
-            : undefined;
-
-          copyFileIfPresent(
-            path.join(LOCAL_BASELINES_ROOT, result.imagePath),
-            path.join(siteRoot, baselineRelativePath)
-          );
-          copyFileIfPresent(
-            path.join(LOCAL_VRT_RUNS_ROOT, runManifest.runId, 'test-artifacts', result.imagePath),
-            path.join(siteRoot, actualRelativePath)
-          );
-          const copiedDiffPath = diffRelativePath
-            ? copyFileIfPresent(
-                path.join(
-                  LOCAL_VRT_RUNS_ROOT,
-                  runManifest.runId,
-                  'test-artifacts',
-                  result.diffPath!
-                ),
-                path.join(siteRoot, diffRelativePath)
-              )
-            : undefined;
-
-          const mismatchText =
-            result.mismatchPercent === undefined ? '' : `${result.mismatchPercent.toFixed(2)}%`;
-
-          return `
-            <tr>
-              <td><code>${escapeHtml(result.testTitle)}</code><br /><small>${escapeHtml(
-            result.stepTitle
-          )}</small></td>
-              <td><strong>${escapeHtml(result.status)}</strong><br /><small>${escapeHtml(
-            mismatchText
-          )}</small></td>
-              <td>${
-                fs.existsSync(path.join(siteRoot, baselineRelativePath))
-                  ? `<img src="${baselineRelativePath}" alt="baseline" loading="lazy" />`
-                  : '<span>missing</span>'
-              }</td>
-              <td><img src="${actualRelativePath}" alt="actual" loading="lazy" /></td>
-              <td>${
-                copiedDiffPath
-                  ? `<img src="${diffRelativePath}" alt="diff" loading="lazy" />`
-                  : '<span>-</span>'
-              }</td>
-            </tr>
-          `;
-        })
-        .join('\n');
-
-      return `
-        <section class="package">
-          <h3>${escapeHtml(pkg.packageId)}</h3>
-          <p>
-            Status: <strong>${escapeHtml(pkg.status)}</strong> · Browser: <code>${escapeHtml(
-        pkg.browser
-      )}</code> ·
-            <a href="./json/${runManifest.runId}/${
-        pkg.packageId
-      }/manifest.json">package manifest</a>
-          </p>
-          <table>
-            <thead>
-              <tr>
-                <th>Checkpoint</th>
-                <th>Status</th>
-                <th>Baseline</th>
-                <th>Actual</th>
-                <th>Diff</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${checkpointRows}
-            </tbody>
-          </table>
-        </section>
-      `;
+      return packageManifest;
     });
 
-    sections.push(`
-      <section class="run">
-        <h2>${escapeHtml(
-          `${runManifest.target.location}/${runManifest.target.arch}/${runManifest.target.domain}`
-        )}</h2>
-        <p>
-          Status: <strong>${escapeHtml(runReport.status)}</strong> ·
-          <a href="./json/${runManifest.runId}/manifest.json">run manifest</a>
-        </p>
-        ${packageSections.join('\n')}
-      </section>
-    `);
+    buildDriftikReviewSite(packageManifests, {
+      siteRoot,
+      driftikDistDir,
+      baselinesRoot: LOCAL_BASELINES_ROOT,
+      artifactsRoot: path.join(LOCAL_VRT_RUNS_ROOT, runManifest.runId, 'test-artifacts'),
+      runId: runManifest.runId,
+    });
   }
 
   fs.writeFileSync(
@@ -442,81 +339,6 @@ const writeReviewSite = (runReports: PrVrtRunReport[], reportUrl: string): strin
       null,
       2
     )
-  );
-  fs.writeFileSync(
-    path.join(siteRoot, 'index.html'),
-    `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kibana VRT Review</title>
-    <style>
-      :root {
-        color-scheme: light;
-        --bg: #f6f2e8;
-        --panel: #fffdfa;
-        --ink: #1e1b16;
-        --muted: #5c5448;
-        --accent: #005f73;
-        --border: #d8cfc0;
-      }
-      body {
-        margin: 0;
-        padding: 32px;
-        font: 16px/1.5 Georgia, 'Times New Roman', serif;
-        color: var(--ink);
-        background: radial-gradient(circle at top left, #fff8ea, var(--bg));
-      }
-      a { color: var(--accent); }
-      .shell {
-        max-width: 1440px;
-        margin: 0 auto;
-        padding: 24px;
-        background: var(--panel);
-        border: 1px solid var(--border);
-        box-shadow: 0 12px 40px rgba(30, 27, 22, 0.08);
-      }
-      .run, .package {
-        margin-top: 32px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 16px;
-      }
-      th, td {
-        padding: 12px;
-        vertical-align: top;
-        border-top: 1px solid var(--border);
-      }
-      img {
-        max-width: 320px;
-        width: 100%;
-        border: 1px solid var(--border);
-        background: white;
-      }
-      code, small {
-        color: var(--muted);
-      }
-    </style>
-  </head>
-    <body>
-    <main class="shell">
-      <h1>Kibana Visual Regression Review</h1>
-      <p><a href="${reportUrl}">${reportUrl}</a></p>
-      <p>
-        Runs: <strong>${summary.runs}</strong> ·
-        Packages: <strong>${summary.packages}</strong> ·
-        Tests: <strong>${summary.tests}</strong> ·
-        Checkpoints: <strong>${summary.checkpoints}</strong> ·
-        Failed: <strong>${summary.failed}</strong> ·
-        Missing baselines: <strong>${summary.missingBaselines}</strong>
-      </p>
-      ${sections.join('\n')}
-    </main>
-  </body>
-</html>`
   );
 
   return siteRoot;
@@ -579,6 +401,15 @@ const main = async () => {
 
   hydrateLatestBaselinesForPlan(plan, downloadLatestCatalog(tempRoot), tempRoot);
 
+  console.log('--- Downloading pinned Driftik build');
+  const driftikTarball = path.join(tempRoot, 'driftik.tar.gz');
+  const driftikDistDir = path.join(tempRoot, 'driftik-dist');
+  fs.mkdirSync(driftikDistDir, { recursive: true });
+  runGcloudCommands([
+    `gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" '${DRIFTIK_GCS_TARBALL}' '${driftikTarball}'`,
+  ]);
+  extractBundleArchive(driftikTarball, driftikDistDir);
+
   const completedRuns = plan.map((group) =>
     runTargetCompareGroup(group, buildId, kibanaInstallDir)
   );
@@ -601,7 +432,8 @@ const main = async () => {
 
   const siteRoot = writeReviewSite(
     runReports,
-    `https://${PR_REPORTS_BUCKET}/${prNumber}/${buildId}/index.html`
+    `https://${PR_REPORTS_BUCKET}/${prNumber}/${buildId}/index.html`,
+    driftikDistDir
   );
   const reportUrl = uploadReviewSite(siteRoot, prNumber, buildId);
   annotateAndComment(runReports, reportUrl);
