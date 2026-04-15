@@ -76,8 +76,7 @@ describe('Version Compatibility', () => {
     await expect(startServers({})).resolves.toBeUndefined();
   });
 
-  // skipping this as it fails when a migration is added
-  it.skip('should start when ES is next minor', async () => {
+  it('should start when ES is next minor', async () => {
     await expect(startServers({ customKibanaVersion: 'previousMinor' })).resolves.toBeUndefined();
   });
 
