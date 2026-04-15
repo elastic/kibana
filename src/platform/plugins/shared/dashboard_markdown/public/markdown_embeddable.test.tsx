@@ -29,7 +29,7 @@ jest.mock('./markdown_client/markdown_client', () => {
             content: 'Loaded **markdown** content.',
             settings: {
               open_links_in_new_tab: true,
-            }
+            },
           },
         });
       }),
