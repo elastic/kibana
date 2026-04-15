@@ -23,6 +23,8 @@ const agents = [
   { id: 'test_agent_2', name: 'Test Agent 2', labels: ['second'] as const },
 ] as const;
 
+type Agent = (typeof agents)[number];
+
 test.describe(
   'Agent Builder — edit agent',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
@@ -62,7 +64,7 @@ test.describe(
     });
 
     test('edit and clone agent journeys', async ({ page, pageObjects }) => {
-      let agent = agents[0];
+      let agent: Agent = agents[0];
 
       await test.step('navigates to agent edit form', async () => {
         await pageObjects.agentBuilder.navigateToApp('manage/agents');
