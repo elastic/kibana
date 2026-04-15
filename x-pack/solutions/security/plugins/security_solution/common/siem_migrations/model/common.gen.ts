@@ -19,7 +19,6 @@ import { z } from '@kbn/zod/v4';
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { SplunkResourceType } from './vendor/common/splunk.gen';
 import { QradarResourceType } from './vendor/common/qradar.gen';
-import { SentinelResourceType } from './vendor/common/sentinel.gen';
 
 /**
  * The GenAI connector id to use.
@@ -270,11 +269,7 @@ export const MigrationTaskStats = z.object({
 });
 
 export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceType>;
-export const SiemMigrationResourceType = z.union([
-  SplunkResourceType,
-  QradarResourceType,
-  SentinelResourceType,
-]);
+export const SiemMigrationResourceType = z.union([SplunkResourceType, QradarResourceType]);
 
 /**
  * A resource of a migration

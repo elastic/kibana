@@ -20,6 +20,4 @@ import { z } from '@kbn/zod/v4';
  * The type of the resource
  */
 export type SentinelResourceType = z.infer<typeof SentinelResourceType>;
-export const SentinelResourceType = z.enum(['watchlist']);
-export type SentinelResourceTypeEnum = typeof SentinelResourceType.enum;
-export const SentinelResourceTypeEnum = SentinelResourceType.enum;
+export const SentinelResourceType = z.literal('watchlist');
