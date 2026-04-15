@@ -29,9 +29,12 @@ export const useGridNavigation = ({
   });
 
   useLayoutEffect(() => {
-    if (totalRows > 0) {
-      setFocusedCell({ rowIndex: 0, colIndex: 0 });
+    if (totalRows <= 0) {
+      return;
     }
+    setFocusedCell((prev) =>
+      prev.rowIndex === 0 && prev.colIndex === 0 ? prev : { rowIndex: 0, colIndex: 0 }
+    );
   }, [totalRows, gridColumns]);
 
   const getRowColFromIndex = useCallback(
