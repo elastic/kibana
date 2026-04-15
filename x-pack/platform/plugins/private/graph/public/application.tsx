@@ -18,18 +18,14 @@ import type {
   Capabilities,
   ScopedHistory,
 } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
-import React from 'react';
+import { createRoot } from 'react-dom/client';
 import type { DataPlugin } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { FormattedRelative } from '@kbn/i18n-react';
 import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type {
   ContentClient,
@@ -118,23 +114,12 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
-  const app = (
-    <KibanaRenderContextProvider {...core}>
-      <TableListViewKibanaProvider
-        {...{
-          core,
-          FormattedRelative,
-        }}
-      >
-        {graphRouter(deps)}
-      </TableListViewKibanaProvider>
-    </KibanaRenderContextProvider>
-  );
-  ReactDOM.render(app, element);
+  const root = createRoot(element);
+  root.render(core.rendering.addContext(graphRouter(deps)));
 
   return () => {
     licenseSubscription.unsubscribe();
     unlistenParentHistory();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

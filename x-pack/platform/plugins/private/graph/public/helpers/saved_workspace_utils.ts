@@ -72,8 +72,7 @@ interface SavedWorkspaceServices {
 
 export function findSavedWorkspace(
   { contentClient, basePath }: SavedWorkspaceServices,
-  searchString: string,
-  size: number = 100
+  searchString: string
 ) {
   return contentClient
     .search<GraphSearchIn, GraphSearchOut>({
