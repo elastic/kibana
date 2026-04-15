@@ -10,10 +10,11 @@
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { waitFor } from '@testing-library/react';
+
 import { dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
-import { waitFor } from '@testing-library/react';
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';

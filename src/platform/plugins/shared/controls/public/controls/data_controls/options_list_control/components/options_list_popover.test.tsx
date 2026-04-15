@@ -20,14 +20,13 @@ import type { RenderResult } from '@testing-library/react';
 import { render as rtlRender, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { OptionsListComponentApi } from '../../../types';
-import { getOptionsListContextMock } from '../../mocks/api_mocks';
-import * as ControlContextModule from '../options_list_context_provider';
-import { OptionsListControlContext } from '../options_list_context_provider';
-
 import { coreServices, dataViewsService } from '../../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../../mocks/control_mocks';
+import type { OptionsListComponentApi } from '../../../types';
+import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { getOptionsListControlFactory } from '../get_options_list_control_factory';
+import * as ControlContextModule from '../options_list_context_provider';
+import { OptionsListControlContext } from '../options_list_context_provider';
 import type { DSLOptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
 
