@@ -30,6 +30,13 @@ export interface BulkCreateResult {
   failed: Array<{ index: number; error: string }>;
 }
 
+export interface KibanaHeapMetrics {
+  totalBytes: number;
+  usedBytes: number;
+  sizeLimitBytes: number;
+  usageRatio: number;
+}
+
 interface GetWorkflowExecutionOptions {
   includeInput?: boolean;
   includeOutput?: boolean;
@@ -185,6 +192,51 @@ export class WorkflowsApiService {
       body: { yaml },
     });
     return response.data;
+  }
+
+  /** GET /api/status — fetch current Kibana heap metrics for memory budget assertions. */
+  async getHeapMetrics(): Promise<KibanaHeapMetrics> {
+    const response = await this.kbnClient.request<{
+      metrics: {
+        process: {
+          memory: {
+            heap: {
+              total_in_bytes: number;
+              used_in_bytes: number;
+              size_limit: number;
+            };
+          };
+        };
+      };
+    }>({
+      method: 'GET',
+      path: '/api/status',
+    });
+
+    const {
+      total_in_bytes: totalBytes,
+      used_in_bytes: usedBytes,
+      size_limit: sizeLimitBytes,
+    } = response.data.metrics.process.memory.heap;
+
+    return {
+      totalBytes,
+      usedBytes,
+      sizeLimitBytes,
+      usageRatio: usedBytes / sizeLimitBytes,
+    };
+  }
+
+  async waitForHeapUsageBelow(maxUsageRatio: number, timeout = 15_000): Promise<KibanaHeapMetrics> {
+    return waitForConditionOrThrow({
+      action: () => this.getHeapMetrics(),
+      condition: (metrics) => metrics.usageRatio < maxUsageRatio,
+      interval: 1000,
+      timeout,
+      errorMessage: `Kibana heap usage did not settle below ${(maxUsageRatio * 100).toFixed(
+        0
+      )}% within ${timeout}ms`,
+    });
   }
 
   async waitForTermination({

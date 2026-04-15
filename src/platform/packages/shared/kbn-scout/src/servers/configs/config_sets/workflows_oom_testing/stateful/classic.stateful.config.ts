@@ -20,6 +20,10 @@ import { servers as workflowsUiConfig } from '../../workflows_ui/stateful/classi
  */
 export const servers: ScoutServerConfig = {
   ...workflowsUiConfig,
+  esTestCluster: {
+    ...workflowsUiConfig.esTestCluster,
+    serverArgs: [...workflowsUiConfig.esTestCluster.serverArgs, 'xpack.ml.enabled=false'],
+  },
   kbnTestServer: {
     ...workflowsUiConfig.kbnTestServer,
     env: {

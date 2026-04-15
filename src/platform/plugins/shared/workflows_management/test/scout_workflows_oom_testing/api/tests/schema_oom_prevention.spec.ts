@@ -12,6 +12,10 @@ import { expect } from '@kbn/scout/api';
 import type { WorkflowsApiService } from '../fixtures';
 import { spaceTest } from '../fixtures';
 
+const GIB = 1024 * 1024 * 1024;
+const MAX_HEAP_SIZE_LIMIT_BYTES = Math.floor(1.2 * GIB);
+const MAX_SETTLED_HEAP_USAGE_RATIO = 0.85;
+
 const WORKFLOW_YAML = `
 name: OOM Prevention Test Workflow
 description: Exercises schema materialisation paths under memory-constrained Kibana
@@ -60,8 +64,16 @@ steps:
 spaceTest.describe('Workflow schema OOM prevention', { tag: tags.deploymentAgnostic }, () => {
   let workflowsApi: WorkflowsApiService;
 
+  const expectHeapUsageWithinBudget = async () => {
+    const settledMetrics = await workflowsApi.waitForHeapUsageBelow(MAX_SETTLED_HEAP_USAGE_RATIO);
+
+    // Guard against accidentally running the suite on the default larger heap.
+    expect(settledMetrics.sizeLimitBytes).toBeLessThan(MAX_HEAP_SIZE_LIMIT_BYTES);
+  };
+
   spaceTest.beforeAll(async ({ apiServices }) => {
     workflowsApi = apiServices.workflowsApi;
+    await expectHeapUsageWithinBudget();
   });
 
   spaceTest.afterAll(async () => {
@@ -79,11 +91,15 @@ spaceTest.describe('Workflow schema OOM prevention', { tag: tags.deploymentAgnos
     });
     expect(updated.id).toBe(created.id);
     expect(updated.valid).toBe(true);
+
+    await expectHeapUsageWithinBudget();
   });
 
   spaceTest('validate workflow succeeds under 1 GB heap', async () => {
     const result = await workflowsApi.validate(WORKFLOW_YAML);
     expect(result.valid).toBe(true);
+
+    await expectHeapUsageWithinBudget();
   });
 
   spaceTest('validate invalid workflow returns errors under 1 GB heap', async () => {
@@ -98,6 +114,8 @@ steps:
     const result = await workflowsApi.validate(invalidYaml);
     expect(result.valid).toBe(false);
     expect(result.diagnostics.length).toBeGreaterThan(0);
+
+    await expectHeapUsageWithinBudget();
   });
 
   spaceTest('create multi-step workflow succeeds under 1 GB heap', async () => {
@@ -105,11 +123,15 @@ steps:
     expect(created.id).toBeDefined();
     expect(created.valid).toBe(true);
     expect(created.name).toBe('OOM Multi-Step Workflow');
+
+    await expectHeapUsageWithinBudget();
   });
 
   spaceTest('bulk create workflows succeeds under 1 GB heap', async () => {
     const result = await workflowsApi.bulkCreate([WORKFLOW_YAML, MULTI_STEP_WORKFLOW_YAML]);
     expect(result.created).toHaveLength(2);
     expect(result.failed).toHaveLength(0);
+
+    await expectHeapUsageWithinBudget();
   });
 });
