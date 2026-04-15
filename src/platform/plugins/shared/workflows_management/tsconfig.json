@@ -95,6 +95,9 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/management-settings-ids",
     "@kbn/std",
+    "@kbn/use-observable",
+    "@kbn/cloud-plugin",
+    "@kbn/kbn-client",
     "@kbn/rule-data-utils"
   ],
   "exclude": ["target/**/*"]
