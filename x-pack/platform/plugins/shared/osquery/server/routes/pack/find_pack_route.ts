@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, map, omit } from 'lodash';
+import { filter, map } from 'lodash';
 
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
@@ -117,7 +117,9 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
 
         return response.ok({
           body: {
-            ...omit(soClientResponse, 'saved_objects'),
+            page: soClientResponse.page,
+            per_page: soClientResponse.per_page,
+            total: soClientResponse.total,
             data: packSavedObjects,
           },
         });

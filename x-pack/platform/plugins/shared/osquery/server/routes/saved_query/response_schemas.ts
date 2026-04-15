@@ -54,21 +54,19 @@ export const readSavedQueryResponseSchema = schema.object({
   data: savedQueryDataSchema,
 });
 
-export const findSavedQueryResponseSchema = schema.object(
-  {
-    page: schema.number(),
-    per_page: schema.number(),
-    total: schema.number(),
-    data: schema.arrayOf(savedQueryDataSchema),
-  },
-  { unknowns: 'allow' }
-);
+export const findSavedQueryResponseSchema = schema.object({
+  page: schema.number(),
+  per_page: schema.number(),
+  total: schema.number(),
+  data: schema.arrayOf(savedQueryDataSchema),
+});
 
 export const updateSavedQueryResponseSchema = schema.object({
   data: savedQueryDataSchema,
 });
 
-export const deleteSavedQueryResponseSchema = schema.object({}, { unknowns: 'allow' });
+// Delete returns an empty body `{}` — no unknowns expected
+export const deleteSavedQueryResponseSchema = schema.object({});
 
 export const copySavedQueryResponseSchema = schema.object({
   data: savedQueryDataSchema,

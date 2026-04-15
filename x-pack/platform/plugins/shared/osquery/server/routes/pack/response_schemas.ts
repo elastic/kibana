@@ -109,24 +109,43 @@ export const readPackResponseSchema = schema.object({
   ),
 });
 
-export const findPackResponseSchema = schema.object(
-  {
-    page: schema.number(),
-    per_page: schema.number(),
-    total: schema.number(),
-    data: schema.arrayOf(packDataSchema),
-  },
-  { unknowns: 'allow' }
-);
+export const findPackResponseSchema = schema.object({
+  page: schema.number(),
+  per_page: schema.number(),
+  total: schema.number(),
+  data: schema.arrayOf(packDataSchema),
+});
 
-export const updatePackResponseSchema = schema.object(
-  {
-    data: schema.any(),
-  },
-  { unknowns: 'allow' }
-);
+/**
+ * The update pack route has two return paths:
+ * 1. Normal path: returns { data: PackResponseData } (same shape as create/copy)
+ * 2. Early return path (line 262): returns { data: SavedObject } when enabled is
+ *    unchanged and pack is disabled — this is a raw SavedObject with `id`, `type`,
+ *    `attributes`, `references` etc.
+ */
+export const updatePackResponseSchema = schema.object({
+  data: schema.oneOf([
+    packDataSchema,
+    // Raw SavedObject shape from the early return path
+    schema.object(
+      {
+        id: schema.string(),
+        type: schema.maybe(schema.string()),
+        attributes: schema.object(
+          {
+            name: schema.maybe(schema.string()),
+            queries: schema.maybe(schema.any()),
+          },
+          { unknowns: 'allow' }
+        ),
+      },
+      { unknowns: 'allow' }
+    ),
+  ]),
+});
 
-export const deletePackResponseSchema = schema.object({}, { unknowns: 'allow' });
+// Delete returns an empty body `{}` — no unknowns expected
+export const deletePackResponseSchema = schema.object({});
 
 export const copyPackResponseSchema = schema.object({
   data: packDataSchema,

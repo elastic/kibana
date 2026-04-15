@@ -64,4 +64,8 @@ export const getLiveQueryResultsResponseSchema = schema.object({
   ),
 });
 
-export const updateActionTagsResponseSchema = schema.object({}, { unknowns: 'allow' });
+export const updateActionTagsResponseSchema = schema.object({
+  data: schema.object({
+    tags: schema.arrayOf(schema.string()),
+  }),
+});

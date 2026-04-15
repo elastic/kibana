@@ -7,7 +7,6 @@
 
 import type { IRouter } from '@kbn/core/server';
 
-import { omit } from 'lodash';
 import { escapeQuotes, escapeKuery } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -164,7 +163,9 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
 
           return response.ok({
             body: {
-              ...omit(savedQueries, 'saved_objects'),
+              page: savedQueries.page,
+              per_page: savedQueries.per_page,
+              total: savedQueries.total,
               data: savedObjects,
             },
           });

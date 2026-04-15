@@ -14,16 +14,13 @@ export const actionResultsResponseSchema = schema.object(
     currentPage: schema.number(),
     pageSize: schema.number(),
     totalPages: schema.number(),
-    aggregations: schema.object(
-      {
-        totalRowCount: schema.number(),
-        totalResponded: schema.number(),
-        successful: schema.number(),
-        failed: schema.number(),
-        pending: schema.number(),
-      },
-      { unknowns: 'allow' }
-    ),
+    aggregations: schema.object({
+      totalRowCount: schema.number(),
+      totalResponded: schema.number(),
+      successful: schema.number(),
+      failed: schema.number(),
+      pending: schema.number(),
+    }),
     inspect: schema.maybe(schema.any()),
   },
   { unknowns: 'allow' }
