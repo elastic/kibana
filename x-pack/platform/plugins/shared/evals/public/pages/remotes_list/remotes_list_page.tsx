@@ -32,6 +32,7 @@ import {
   EuiTitle,
   type EuiBasicTableColumn,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { goldenClusterPrivileges } from '@kbn/evals-common';
 import {
@@ -91,6 +92,7 @@ const getUrlValidationError = (value: string): string | null => {
 
 export const RemotesListPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const deleteModalTitleId = useGeneratedHtmlId();
   const { data, isLoading, error } = useRemotes();
   const createRemote = useCreateRemote();
   const updateRemote = useUpdateRemote();
@@ -493,6 +495,8 @@ export const RemotesListPage: React.FC = () => {
       {confirmDelete ? (
         <EuiConfirmModal
           title={i18n.DELETE_CONFIRM_TITLE}
+          aria-labelledby={deleteModalTitleId}
+          titleProps={{ id: deleteModalTitleId }}
           onCancel={() => {
             setConfirmDelete(null);
           }}

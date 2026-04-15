@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -18,9 +18,11 @@ import {
   EuiPageSection,
   EuiSelect,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
+  type EuiTableSelectionType,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import type { EvaluationRunSummary } from '@kbn/evals-common';
@@ -35,6 +37,7 @@ export const RunsListPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
   const [suiteIdFilter, setSuiteIdFilter] = useState('');
+  const [selectedRuns, setSelectedRuns] = useState<EvaluationRunSummary[]>([]);
 
   const { data, isLoading, error, refetch } = useEvaluationRuns({
     page: pageIndex + 1,
@@ -167,6 +170,31 @@ export const RunsListPage: React.FC = () => {
     }
   };
 
+  const lockedSuiteId = selectedRuns.length > 0 ? selectedRuns[0].suite_id : undefined;
+
+  const selection: EuiTableSelectionType<EvaluationRunSummary> = useMemo(
+    () => ({
+      onSelectionChange: (items: EvaluationRunSummary[]) => setSelectedRuns(items),
+      selectable: (run: EvaluationRunSummary) =>
+        lockedSuiteId === undefined || run.suite_id === lockedSuiteId,
+      selectableMessage: (selectable: boolean) =>
+        selectable ? '' : i18n.COMPARE_DIFFERENT_SUITE_HINT,
+    }),
+    [lockedSuiteId]
+  );
+
+  const totalRuns = data?.total ?? 0;
+  const showCompareControls = totalRuns >= 2;
+  const canCompare = selectedRuns.length === 2;
+
+  const handleCompare = useCallback(() => {
+    if (!canCompare) return;
+    const [runA, runB] = selectedRuns;
+    history.push(
+      `/compare?runA=${encodeURIComponent(runA.run_id)}&runB=${encodeURIComponent(runB.run_id)}`
+    );
+  }, [canCompare, selectedRuns, history]);
+
   return (
     <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
       <EuiFlexGroup>
@@ -192,6 +220,18 @@ export const RunsListPage: React.FC = () => {
             }}
           />
         </EuiFlexItem>
+        {showCompareControls && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={canCompare ? undefined : i18n.COMPARE_SELECTION_HINT}
+              position="top"
+            >
+              <EuiButton iconType="diff" onClick={handleCompare} isDisabled={!canCompare} size="m">
+                {i18n.COMPARE_SELECTED_BUTTON}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {error ? (
@@ -210,12 +250,18 @@ export const RunsListPage: React.FC = () => {
         <EuiBasicTable<EvaluationRunSummary>
           tableCaption={i18n.TABLE_CAPTION}
           items={data?.runs ?? []}
+          itemId="run_id"
           columns={columns}
           loading={isLoading}
           pagination={pagination}
           onChange={onTableChange}
+          selection={showCompareControls ? selection : undefined}
           rowProps={(item) => ({
-            onClick: () => history.push(`/runs/${item.run_id}`),
+            onClick: (e: React.MouseEvent) => {
+              const target = e.target as HTMLElement;
+              if (target.closest('.euiCheckbox')) return;
+              history.push(`/runs/${item.run_id}`);
+            },
             style: { cursor: 'pointer' },
           })}
         />

@@ -13,6 +13,7 @@ import {
   EVALS_RUN_URL,
   EVALS_RUN_SCORES_URL,
   EVALS_RUN_DATASET_EXAMPLES_URL,
+  EVALS_RUNS_COMPARE_URL,
   EVALS_EXAMPLE_SCORES_URL,
   EVALS_TRACE_URL,
   EVALS_TRACING_PROJECTS_URL,
@@ -42,6 +43,7 @@ import {
   type GetTraceResponse,
   type GetTracingProjectsResponse,
   type GetProjectTracesResponse,
+  type CompareRunsResponse,
 } from '@kbn/evals-common';
 import { queryKeys } from '../query_keys';
 
@@ -429,6 +431,28 @@ export const useEvaluationRunScores = (runId: string) => {
         version: API_VERSIONS.internal.v1,
       });
     },
+  });
+};
+
+export const useCompareRuns = (runIdA: string, runIdB: string) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.runs.compare(runIdA, runIdB),
+    queryFn: async (): Promise<CompareRunsResponse> => {
+      return services.http!.get<CompareRunsResponse>(EVALS_RUNS_COMPARE_URL, {
+        query: { run_id_a: runIdA, run_id_b: runIdB },
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    enabled: runIdA.length > 0 && runIdB.length > 0,
+    retry: (_failureCount, error) => {
+      if (isHttpFetchError(error)) {
+        return !error.response?.status || error.response.status >= 500;
+      }
+      return true;
+    },
+    refetchOnWindowFocus: false,
   });
 };
 

@@ -22,3 +22,4 @@ export {
   buildModelDisplayId,
 } from './impl/query_builders';
 export type { RunsListingResult, RunDetailEvaluatorStat } from './impl/query_builders';
+export { pairScores, computePairedTTestResults } from './impl/statistical_analysis';

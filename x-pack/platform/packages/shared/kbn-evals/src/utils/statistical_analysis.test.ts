@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { ModelFamily, ModelProvider } from '@kbn/inference-common';
-import type { EvaluationScoreDocument } from './score_repository';
+import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { computePairedTTestResults, pairScores } from './statistical_analysis';
 
 const baseTaskModel = {
   id: 'gpt-4',
-  family: ModelFamily.GPT,
-  provider: ModelProvider.OpenAI,
+  family: 'gpt',
+  provider: 'openai',
 };
 
 const baseEvaluatorModel = {
   id: 'claude-3',
-  family: ModelFamily.Claude,
-  provider: ModelProvider.Anthropic,
+  family: 'claude',
+  provider: 'anthropic',
 };
 
 const createMockScore = ({
