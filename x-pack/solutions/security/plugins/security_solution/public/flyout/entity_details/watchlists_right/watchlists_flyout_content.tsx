@@ -18,6 +18,8 @@ export interface WatchlistsFlyoutContentProps {
   watchlist: CreateWatchlistRequestBodyInput;
   watchlistId?: string;
   isEditMode: boolean;
+  isNameTooLong: boolean;
+  isDescriptionTooLong: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
@@ -32,6 +34,8 @@ export const WatchlistsFlyoutContent = ({
   watchlist,
   watchlistId,
   isEditMode,
+  isNameTooLong,
+  isDescriptionTooLong,
   onFieldChange,
   onSave,
   isLoading,
@@ -47,6 +51,8 @@ export const WatchlistsFlyoutContent = ({
           watchlistId={watchlistId}
           isEditMode={isEditMode}
           onFieldChange={onFieldChange}
+          isNameTooLong={isNameTooLong}
+          isDescriptionTooLong={isDescriptionTooLong}
         />
       </FlyoutBody>
       <WatchlistsFlyoutFooter onSave={onSave} isLoading={isLoading} isDisabled={isDisabled} />

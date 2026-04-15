@@ -23,6 +23,8 @@ export interface WatchlistFormState {
   ruleBasedSourceIds: Partial<Record<SourceType, string>>;
   isEditMode: boolean;
   isDisabled: boolean;
+  isNameTooLong: boolean;
+  isDescriptionTooLong: boolean;
   setWatchlistField: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]

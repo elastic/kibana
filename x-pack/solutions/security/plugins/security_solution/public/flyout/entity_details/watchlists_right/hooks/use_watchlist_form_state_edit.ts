@@ -9,7 +9,11 @@ import { useEffect, useMemo, useState } from 'react';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { useGetWatchlistFormData } from './use_get_watchlist_form_data';
 import type { WatchlistFormState } from './use_watchlist_form_state';
-import { getDefaultWatchlist, useResetEditsOnFlyoutOpen } from './use_watchlist_form_state_shared';
+import {
+  getDefaultWatchlist,
+  getWatchlistFieldLengthValidation,
+  useResetEditsOnFlyoutOpen,
+} from './use_watchlist_form_state_shared';
 
 export interface UseEditWatchlistFormStateParams {
   watchlistId?: string;
@@ -68,7 +72,9 @@ export const useEditWatchlistFormState = ({
     watchlist.description?.trim() !== initialWatchlist.description?.trim() ||
     watchlist.riskModifier !== initialWatchlist.riskModifier ||
     JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
-  const isDisabled = isMissingId || !watchlist.name.trim() || !hasChanges;
+  const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
+  const isDisabled =
+    isMissingId || !watchlist.name.trim() || !hasChanges || isNameTooLong || isDescriptionTooLong;
 
   return {
     watchlist,
@@ -76,6 +82,8 @@ export const useEditWatchlistFormState = ({
     ruleBasedSourceIds: ruleBasedSourceIds ?? {},
     isEditMode: true,
     isDisabled,
+    isNameTooLong,
+    isDescriptionTooLong,
     setWatchlistField,
   };
 };
