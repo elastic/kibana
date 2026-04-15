@@ -115,9 +115,7 @@ describe('PackagePolicyInputConfig', () => {
             section: 'auth_section',
           },
         ]}
-        sections={[
-          { name: 'auth_section', title: 'Authentication', description: 'Auth settings' },
-        ]}
+        sections={[{ name: 'auth_section', title: 'Authentication', description: 'Auth settings' }]}
       />
     );
 
