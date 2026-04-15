@@ -39,6 +39,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { CloudDefendPluginStart } from '@kbn/cloud-defend-plugin/public';
 import type { CspClientPluginStart } from '@kbn/cloud-security-posture-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
