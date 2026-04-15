@@ -73,7 +73,8 @@ apiTest.describe(
       }
       for (const id of toolIdsToDelete) {
         const removeIdx = createdToolIds.indexOf(id);
-        expect(removeIdx).toBeGreaterThanOrEqual(0);
+        // eslint-disable-next-line playwright/prefer-comparison-matcher
+        expect(removeIdx >= 0).toBe(true);
         createdToolIds.splice(removeIdx, 1);
       }
     });
@@ -98,7 +99,8 @@ apiTest.describe(
       expect(String(failure?.reason?.error?.message)).toContain('not found');
       for (const id of toolIdsToDelete) {
         const removeIdx = createdToolIds.indexOf(id);
-        expect(removeIdx).toBeGreaterThanOrEqual(0);
+        // eslint-disable-next-line playwright/prefer-comparison-matcher
+        expect(removeIdx >= 0).toBe(true);
         createdToolIds.splice(removeIdx, 1);
       }
     });
