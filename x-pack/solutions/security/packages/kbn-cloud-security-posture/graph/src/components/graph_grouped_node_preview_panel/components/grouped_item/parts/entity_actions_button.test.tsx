@@ -14,7 +14,11 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
 } from '../../../../test_ids';
-import { emitFilterToggle, isFilterActiveForScope } from '../../../../filters/filter_store';
+import {
+  emitFilterToggle,
+  emitIsOneOfFilterToggle,
+  isFilterActiveForScope,
+} from '../../../../filters/filter_store';
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../../../common/constants';
 
 jest.mock('../../../../filters/filter_store', () => {
@@ -24,12 +28,16 @@ jest.mock('../../../../filters/filter_store', () => {
     isFilterActiveForScope: jest.fn(() => false),
     isEntityRelationshipExpandedForScope: jest.fn(() => false),
     emitFilterToggle: jest.fn(),
+    emitIsOneOfFilterToggle: jest.fn(),
     emitEntityRelationshipToggle: jest.fn(),
     emitPinnedEuidToggle: jest.fn(),
   };
 });
 
 const mockEmitFilterToggle = emitFilterToggle as jest.MockedFunction<typeof emitFilterToggle>;
+const mockEmitIsOneOfFilterToggle = emitIsOneOfFilterToggle as jest.MockedFunction<
+  typeof emitIsOneOfFilterToggle
+>;
 const mockIsFilterActiveForScope = isFilterActiveForScope as jest.MockedFunction<
   typeof isFilterActiveForScope
 >;
@@ -48,7 +56,10 @@ describe('EntityActionsButton', () => {
     itemType: 'entity',
     icon: 'user',
     label: 'Test Entity',
-    entity: { availableInEntityStore: true },
+    entity: {
+      availableInEntityStore: true,
+      sourceFields: { 'entity.id': 'entity-abc' },
+    },
   };
 
   const scopeId = 'test-scope-id';
@@ -135,7 +146,7 @@ describe('EntityActionsButton', () => {
   });
 
   describe('related events toggle', () => {
-    it('should emit RELATED_USER with user.* source field values when engine_type is user', () => {
+    it('should emit RELATED_USER via isOneOf with user.* source field values when engine_type is user', () => {
       const userItem: EntityItem = {
         ...mockEntityItem,
         entity: {
@@ -151,11 +162,11 @@ describe('EntityActionsButton', () => {
       const relatedButton = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID);
       fireEvent.click(relatedButton);
 
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_USER, 'alice', 'show');
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
+      // Multiple values → emitIsOneOfFilterToggle with the full array
+      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
         scopeId,
         RELATED_USER,
-        'alice@example.com',
+        ['alice', 'alice@example.com'],
         'show'
       );
       expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
@@ -166,7 +177,7 @@ describe('EntityActionsButton', () => {
       );
     });
 
-    it('should emit RELATED_HOST with host.* source field values when engine_type is host', () => {
+    it('should emit RELATED_HOST via isOneOf with host.* source field values when engine_type is host', () => {
       const hostItem: EntityItem = {
         ...mockEntityItem,
         entity: {
@@ -182,8 +193,12 @@ describe('EntityActionsButton', () => {
       const relatedButton = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID);
       fireEvent.click(relatedButton);
 
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_HOST, 'server-1', 'show');
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_HOST, '10.0.0.1', 'show');
+      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
+        scopeId,
+        RELATED_HOST,
+        ['server-1', '10.0.0.1'],
+        'show'
+      );
       expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
         scopeId,
         RELATED_ENTITY,
@@ -192,19 +207,21 @@ describe('EntityActionsButton', () => {
       );
     });
 
-    it('should fall back to RELATED_ENTITY with item.id when engine_type is not user or host', () => {
+    it('should fall back to RELATED_ENTITY with entity.* source field values when engine_type is not user or host', () => {
       render(<EntityActionsButton item={mockEntityItem} scopeId={scopeId} />);
       fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
 
       const relatedButton = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID);
       fireEvent.click(relatedButton);
 
+      // Single entity.* value → emitFilterToggle (not isOneOf)
       expect(mockEmitFilterToggle).toHaveBeenCalledWith(
         scopeId,
         RELATED_ENTITY,
-        mockEntityItem.id,
+        'entity-abc',
         'show'
       );
+      expect(mockEmitIsOneOfFilterToggle).not.toHaveBeenCalled();
     });
 
     it('should show "Hide related events" label when RELATED_USER filter is active', () => {
@@ -217,7 +234,8 @@ describe('EntityActionsButton', () => {
         },
       };
       mockIsFilterActiveForScope.mockImplementation(
-        (_, field, value) => field === RELATED_USER && value === 'alice'
+        (_, field, value) =>
+          field === RELATED_USER && Array.isArray(value) && value.includes('alice')
       );
 
       render(<EntityActionsButton item={userItem} scopeId={scopeId} />);

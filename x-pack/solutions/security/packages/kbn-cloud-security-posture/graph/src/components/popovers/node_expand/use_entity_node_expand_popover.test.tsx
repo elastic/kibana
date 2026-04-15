@@ -22,6 +22,7 @@ import {
 } from '../../test_ids';
 import {
   emitFilterToggle,
+  emitIsOneOfFilterToggle,
   isFilterActiveForScope,
   isEntityRelationshipExpandedForScope,
   emitEntityRelationshipToggle,
@@ -37,6 +38,7 @@ jest.mock('../../filters/filter_store', () => {
     isFilterActiveForScope: jest.fn(() => false),
     isEntityRelationshipExpandedForScope: jest.fn(() => false),
     emitFilterToggle: jest.fn(),
+    emitIsOneOfFilterToggle: jest.fn(),
     emitEntityRelationshipToggle: jest.fn(),
     emitPinnedEuidToggle: jest.fn(),
   };
@@ -50,6 +52,9 @@ const mockIsEntityRelationshipExpandedForScope =
     typeof isEntityRelationshipExpandedForScope
   >;
 const mockEmitFilterToggle = emitFilterToggle as jest.MockedFunction<typeof emitFilterToggle>;
+const mockEmitIsOneOfFilterToggle = emitIsOneOfFilterToggle as jest.MockedFunction<
+  typeof emitIsOneOfFilterToggle
+>;
 const mockEmitEntityRelationshipToggle = emitEntityRelationshipToggle as jest.MockedFunction<
   typeof emitEntityRelationshipToggle
 >;
@@ -110,7 +115,11 @@ const createMockNode = (
       entity: {
         availableInEntityStore: hasEntityEnrichment,
         engine_type: engineType,
-        sourceFields: { 'user.id': 'test-user', 'user.email': 'test@example.com' },
+        sourceFields: {
+          'user.id': 'test-user',
+          'user.email': 'test@example.com',
+          'entity.id': 'entity-abc',
+        },
       },
     };
 
@@ -171,6 +180,7 @@ describe('useEntityNodeExpandPopover', () => {
     jest.clearAllMocks();
     capturedItemsFn = null;
     mockEmitFilterToggle.mockClear();
+    mockEmitIsOneOfFilterToggle.mockClear();
     mockEmitEntityRelationshipToggle.mockClear();
     mockEmitPinnedEuidToggle.mockClear();
     mockIsFilterActiveForScope.mockReturnValue(false);
@@ -527,12 +537,11 @@ describe('useEntityNodeExpandPopover', () => {
         relatedItem.onClick();
       }
 
-      // Should emit for each user.* source field value
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_USER, 'test-user', 'show');
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
+      // Multiple values → emitIsOneOfFilterToggle with the full array
+      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
         scopeId,
         RELATED_USER,
-        'test@example.com',
+        ['test-user', 'test@example.com'],
         'show'
       );
       expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
@@ -545,7 +554,8 @@ describe('useEntityNodeExpandPopover', () => {
 
     it('should check RELATED_USER with user.* source field values for isRelatedEventsActive when engine_type is user', () => {
       mockIsFilterActiveForScope.mockImplementation(
-        (_, field, value) => field === RELATED_USER && value === 'test-user'
+        (_, field, value) =>
+          field === RELATED_USER && Array.isArray(value) && value.includes('test-user')
       );
 
       const node = createMockNode('single-entity', true, 'user');
@@ -565,18 +575,25 @@ describe('useEntityNodeExpandPopover', () => {
       }
     });
 
-    it('should emit RELATED_HOST with host.* source field values when engine_type is host', () => {
-      // Use grouped-entities mock which has host.* source fields
-      const node = createMockNode('grouped-entities', true, 'host');
-      // Override documentsData engine_type since grouped creates host.* fields
-      renderHook(() => useEntityNodeExpandPopover(scopeId));
-
-      expect(capturedItemsFn).not.toBeNull();
-      // Single-entity mode is needed for related events to show; create a custom node
+    it('should emit RELATED_HOST via isOneOf with host.* source field values when engine_type is host', () => {
       const customNode: NodeProps = {
-        ...node,
+        id: 'test-node-id',
+        type: 'entity',
+        position: { x: 0, y: 0 },
+        dragging: false,
+        zIndex: 0,
+        selectable: true,
+        deletable: true,
+        selected: false,
+        draggable: true,
+        isConnectable: true,
+        positionAbsoluteX: 0,
+        positionAbsoluteY: 0,
         data: {
-          ...node.data,
+          id: 'entity-123',
+          color: 'primary' as const,
+          shape: 'ellipse' as const,
+          label: 'Test Entity',
           documentsData: [
             {
               id: 'entity-123',
@@ -588,14 +605,15 @@ describe('useEntityNodeExpandPopover', () => {
               },
             },
           ],
-          count: undefined,
         },
       } as unknown as NodeProps;
 
       renderHook(() => useEntityNodeExpandPopover(scopeId));
-      const singleHostItems = capturedItemsFn!(customNode);
 
-      const relatedItem = singleHostItems.find(
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(customNode);
+
+      const relatedItem = items.find(
         (item) =>
           item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
       );
@@ -604,8 +622,12 @@ describe('useEntityNodeExpandPopover', () => {
         relatedItem.onClick();
       }
 
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_HOST, 'server-1', 'show');
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_HOST, 'host-abc', 'show');
+      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
+        scopeId,
+        RELATED_HOST,
+        ['server-1', 'host-abc'],
+        'show'
+      );
       expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
         scopeId,
         RELATED_ENTITY,
@@ -614,7 +636,7 @@ describe('useEntityNodeExpandPopover', () => {
       );
     });
 
-    it('should fall back to RELATED_ENTITY with node.id when engine_type is not user or host', () => {
+    it('should fall back to RELATED_ENTITY with entity.* source field values when engine_type is not user or host', () => {
       const node = createMockNode('single-entity', true);
       renderHook(() => useEntityNodeExpandPopover(scopeId));
 
@@ -630,7 +652,14 @@ describe('useEntityNodeExpandPopover', () => {
         relatedItem.onClick();
       }
 
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(scopeId, RELATED_ENTITY, node.id, 'show');
+      // Single entity.* value → emitFilterToggle (not isOneOf)
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
+        scopeId,
+        RELATED_ENTITY,
+        'entity-abc',
+        'show'
+      );
+      expect(mockEmitIsOneOfFilterToggle).not.toHaveBeenCalled();
     });
 
     it('should call onOpenEventPreview callback when entity details item is clicked', () => {

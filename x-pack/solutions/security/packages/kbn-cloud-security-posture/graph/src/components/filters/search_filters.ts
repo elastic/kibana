@@ -60,7 +60,9 @@ const buildMultiPhrasesFilter = (
     ...base,
     meta: {
       ...base.meta,
+      key: field,
       field,
+      index: dataViewId,
       negate: false,
       disabled: false,
       controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
@@ -182,7 +184,7 @@ export const addFilter = (
           controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
           params: [
             ...(Array.isArray(firstFilter.meta.params) ? firstFilter.meta.params : []),
-            buildPhraseFilter(key, value),
+            buildPhraseFilter(key, value, dataViewId),
           ],
         },
       },

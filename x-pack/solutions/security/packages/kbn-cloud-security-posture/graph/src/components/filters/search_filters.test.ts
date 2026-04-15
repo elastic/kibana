@@ -507,6 +507,35 @@ describe('search_filters', () => {
 
         expect(newFilters).toHaveLength(0);
       });
+
+      it('should preserve dataViewId (index) when removing the first of 3 sequentially added filters', () => {
+        // Add 3 filters in sequence using addFilter, simulating real usage
+        const value1 = 'value-1';
+        const value2 = 'value-2';
+        const value3 = 'value-3';
+
+        const after1 = addFilter(dataViewId, [], key, value1);
+        const after2 = addFilter(dataViewId, after1, key, value2);
+        const after3 = addFilter(dataViewId, after2, key, value3);
+
+        // after3[0] is a CombinedFilter with 3 nested phrase filters
+        expect(after3).toHaveLength(1);
+        expect(isCombinedFilter(after3[0])).toBe(true);
+        expect(after3[0].meta.params).toHaveLength(3);
+
+        // Remove the first filter — the CombinedFilter unwraps to the remaining 2
+        const afterRemove = removeFilter(after3, key, value1);
+
+        // Should still be a CombinedFilter with 2 entries, both preserving the dataViewId index
+        expect(afterRemove).toHaveLength(1);
+        expect(isCombinedFilter(afterRemove[0])).toBe(true);
+
+        const params = afterRemove[0].meta.params as Filter[];
+        expect(params).toHaveLength(2);
+        params.forEach((param) => {
+          expect(param.meta.index).toBe(dataViewId);
+        });
+      });
     });
 
     describe('multiple values', () => {

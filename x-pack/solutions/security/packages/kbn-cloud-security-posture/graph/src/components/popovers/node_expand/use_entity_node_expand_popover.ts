@@ -18,6 +18,7 @@ import type { EntityFilterActions } from './get_entity_expand_items';
 import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
 import {
   emitFilterToggle,
+  emitIsOneOfFilterToggle,
   isFilterActiveForScope,
   emitEntityRelationshipToggle,
   isEntityRelationshipExpandedForScope,
@@ -83,7 +84,10 @@ export const useEntityNodeExpandPopover = (
             .flatMap(([, value]) => ([] as string[]).concat(value));
           return { field: RELATED_HOST, values };
         }
-        return { field: RELATED_ENTITY, values: [node.id] };
+        const values = Object.entries(sourceFields ?? {})
+          .filter(([field]) => field.startsWith('entity.'))
+          .flatMap(([, value]) => ([] as string[]).concat(value));
+        return { field: RELATED_ENTITY, values };
       };
 
       const entityFilterActions: EntityFilterActions = {
@@ -119,14 +123,16 @@ export const useEntityNodeExpandPopover = (
         toggleRelatedEvents: (action) => {
           const related = getRelatedFieldAndValues();
           if (!related) return;
-          for (const v of related.values) {
-            emitFilterToggle(scopeId, related.field, v, action);
+          if (related.values.length === 1) {
+            emitFilterToggle(scopeId, related.field, related.values[0], action);
+          } else if (related.values.length > 1) {
+            emitIsOneOfFilterToggle(scopeId, related.field, related.values, action);
           }
         },
         isRelatedEventsActive: () => {
           const related = getRelatedFieldAndValues();
           if (!related) return false;
-          return related.values.some((v) => isFilterActiveForScope(scopeId, related.field, v));
+          return isFilterActiveForScope(scopeId, related.field, related.values);
         },
       };
 
