@@ -119,7 +119,6 @@ describe('IndexThresholdRuleTypeExpression', () => {
     setup(getAlertParams());
     expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
 
-    // Expression items are lazy-loaded; wait for them to render
     await screen.findByTestId('whenExpression');
     expect(screen.getByTestId('groupByExpression')).toBeInTheDocument();
     expect(screen.queryByTestId('ofExpressionPopover')).not.toBeInTheDocument();
@@ -134,7 +133,6 @@ describe('IndexThresholdRuleTypeExpression', () => {
     setup(getAlertParams({ aggType: 'avg' }));
     expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
 
-    // Expression items are lazy-loaded; wait for them to render
     await screen.findByTestId('whenExpression');
     expect(screen.getByTestId('ofExpressionPopover')).toBeInTheDocument();
     expect(screen.getByTestId('groupByExpression')).toBeInTheDocument();
@@ -147,9 +145,9 @@ describe('IndexThresholdRuleTypeExpression', () => {
 
   test(`should render IndexThresholdRuleTypeExpression with visualization when there are no expression errors`, async () => {
     setup(getAlertParams({ timeField: '@timestamp' }));
-    // Wait for lazy-loaded expression items to resolve (avoid act() warnings)
+
     await screen.findByTestId('whenExpression');
-    // With a valid timeField, there are no expression errors, so visualizationPlaceholder is absent
+
     expect(screen.queryByTestId('visualizationPlaceholder')).not.toBeInTheDocument();
   });
 

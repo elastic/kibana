@@ -44,15 +44,11 @@ describe('ruleActionsAlertsFilterTimeframe', () => {
       hours: { start: '10:00', end: '20:00' },
     });
 
-    // Toggle should be checked
     const toggle = screen.getByTestId('alertsFilterTimeframeToggle');
     expect(toggle).toBeChecked();
 
-    // Weekday buttons container should be present
     const weekdayButtons = screen.getByTestId('alertsFilterTimeframeWeekdayButtons');
 
-    // Days 1-5 (Mon-Fri) should not be selected; days 6-7 (Sat-Sun) should be selected
-    // EuiButtonGroup renders multi-select buttons with aria-pressed reflecting selection
     expect(within(weekdayButtons).getByTestId('1')).toHaveAttribute('aria-pressed', 'false');
     expect(within(weekdayButtons).getByTestId('2')).toHaveAttribute('aria-pressed', 'false');
     expect(within(weekdayButtons).getByTestId('3')).toHaveAttribute('aria-pressed', 'false');
@@ -61,17 +57,14 @@ describe('ruleActionsAlertsFilterTimeframe', () => {
     expect(within(weekdayButtons).getByTestId('6')).toHaveAttribute('aria-pressed', 'true');
     expect(within(weekdayButtons).getByTestId('7')).toHaveAttribute('aria-pressed', 'true');
 
-    // Date range container should be present
     const dateRange = screen.getByTestId('alertsFilterTimeframe');
 
-    // Time inputs are inside the date range container
     const startInput = within(dateRange).getAllByRole('textbox')[0];
     expect((startInput as HTMLInputElement).value).toMatch(/10:00/);
 
     const endInput = within(dateRange).getAllByRole('textbox')[1];
     expect((endInput as HTMLInputElement).value).toMatch(/20:00/);
 
-    // Timezone combobox should show America/Chicago as selected
     const timezoneComboBox = screen.getByTestId('alertsFilterTimeframeTimezone');
     expect(within(timezoneComboBox).getByRole('combobox')).toHaveValue('America/Chicago');
   });

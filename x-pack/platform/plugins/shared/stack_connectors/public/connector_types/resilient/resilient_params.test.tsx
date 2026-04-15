@@ -98,7 +98,6 @@ describe('ResilientParamsFields renders', () => {
       isLoading: true,
     });
     render(<ResilientParamsFields {...defaultProps} />);
-    // EUI SuperSelect is disabled when loading
     expect(screen.getByTestId('severitySelect')).toBeDisabled();
   });
 

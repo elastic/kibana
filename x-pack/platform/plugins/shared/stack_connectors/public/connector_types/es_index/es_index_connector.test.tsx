@@ -6,11 +6,28 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { screen, waitFor, render, within } from '@testing-library/react';
+import type { EuiComboBoxProps } from '@elastic/eui';
 import IndexActionConnectorFields from './es_index_connector';
 import type { AppMockRenderer } from '../lib/test_utils';
 import { ConnectorFormTestProvider, createAppMockRenderer } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
+
+// Capture the EuiComboBox onChange so tests can simulate index selection
+let latestComboBoxOnChange: EuiComboBoxProps<string>['onChange'] | undefined;
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiComboBox: (props: EuiComboBoxProps<string>) => {
+      if (props['data-test-subj'] === 'connectorIndexesComboBox') {
+        latestComboBoxOnChange = props.onChange;
+      }
+      return <actual.EuiComboBox {...props} />;
+    },
+  };
+});
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
@@ -85,7 +102,6 @@ describe('IndexActionConnectorFields', () => {
 
     expect(screen.getByTestId('connectorIndexesComboBox')).toBeInTheDocument();
 
-    // time field switch shouldn't show up initially (no index configured)
     expect(screen.queryByTestId('hasTimeFieldCheckbox')).not.toBeInTheDocument();
     expect(screen.queryByTestId('executionTimeFieldSelect')).not.toBeInTheDocument();
   });
@@ -116,11 +132,9 @@ describe('IndexActionConnectorFields', () => {
 
     await screen.findByTestId('connectorIndexesComboBox');
 
-    // time related fields shouldn't show up
     expect(screen.queryByTestId('hasTimeFieldCheckbox')).not.toBeInTheDocument();
     expect(screen.queryByTestId('executionTimeFieldSelect')).not.toBeInTheDocument();
 
-    // The selected index should appear in the combobox input
     const comboInput = within(screen.getByTestId('connectorIndexesComboBox')).getByRole('combobox');
     expect(comboInput).toHaveValue(indexName);
   });
@@ -184,7 +198,6 @@ describe('IndexActionConnectorFields', () => {
       expect(screen.queryByTestId('executionTimeFieldSelect')).not.toBeInTheDocument();
     });
 
-    // time field switch should be unchecked
     expect(screen.getByTestId('hasTimeFieldCheckbox')).not.toBeChecked();
   });
 
@@ -219,11 +232,63 @@ describe('IndexActionConnectorFields', () => {
       expect(screen.getByTestId('executionTimeFieldSelect')).toBeInTheDocument();
     });
 
-    // time field switch should be checked
     const switchEl = screen.getByTestId('hasTimeFieldCheckbox');
     expect(switchEl).toBeChecked();
 
     expect(screen.getByTestId('executionTimeFieldSelect')).toHaveValue('test1');
+  });
+
+  test('time field checkbox appears and disappears based on index date field mapping', async () => {
+    const connector = {
+      actionTypeId: '.index',
+      isDeprecated: false,
+      config: {},
+      secrets: {},
+    };
+
+    render(
+      <ConnectorFormTestProvider connector={connector}>
+        <IndexActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await screen.findByTestId('connectorIndexesComboBox');
+
+    expect(screen.queryByTestId('hasTimeFieldCheckbox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('executionTimeFieldSelect')).not.toBeInTheDocument();
+
+    setupGetFieldsResponse(true);
+    await act(async () => {
+      latestComboBoxOnChange!([{ label: 'selection', value: 'selection' }]);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hasTimeFieldCheckbox')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('executionTimeFieldSelect')).not.toBeInTheDocument();
+
+    setupGetFieldsResponse(false);
+    await act(async () => {
+      latestComboBoxOnChange!([{ label: 'selection', value: 'selection' }]);
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('hasTimeFieldCheckbox')).not.toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('executionTimeFieldSelect')).not.toBeInTheDocument();
+
+    setupGetFieldsResponse(true);
+    await act(async () => {
+      latestComboBoxOnChange!([{ label: 'selection', value: 'selection' }]);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hasTimeFieldCheckbox')).toBeInTheDocument();
+    });
   });
 
   test('fetches index names on index combobox input change', async () => {
@@ -258,7 +323,6 @@ describe('IndexActionConnectorFields', () => {
 
     const indexComboBox = await screen.findByTestId('connectorIndexesComboBox');
 
-    // time field switch should show up if index has date type field mapping
     setupGetFieldsResponse(true);
 
     const searchInput = within(indexComboBox).getByRole('combobox');

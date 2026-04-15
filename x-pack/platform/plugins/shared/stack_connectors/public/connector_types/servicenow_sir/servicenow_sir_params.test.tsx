@@ -171,7 +171,6 @@ describe('ServiceNowSIRParamsFields renders', () => {
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
     renderWithI18n(<ServiceNowSIRParamsFields {...newProps} />);
-    // EuiFieldText with isInvalid renders aria-invalid on the input
     const titleInput = screen.getByTestId('short_descriptionInput');
     expect(titleInput).toHaveAttribute('aria-invalid', 'true');
   });

@@ -35,7 +35,6 @@ describe('event_log_list_status_filter', () => {
 
     // No filter select items shown before popover is opened
     expect(screen.queryByRole('option')).not.toBeInTheDocument();
-    // The filter button is rendered
     expect(screen.getByRole('button')).toBeInTheDocument();
 
     const badge = container.querySelector('.euiNotificationBadge');

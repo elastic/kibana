@@ -507,9 +507,7 @@ describe('action_form', () => {
       await screen.findByTestId('addNewActionConnectorActionGroup-0');
       // Open the EuiSuperSelect to see options in the popover
       await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-0'));
-      // Default action group option is rendered
       await screen.findByTestId('addNewActionConnectorActionGroup-0-option-default');
-      // Recovered action group option is rendered
       expect(
         screen.getByTestId('addNewActionConnectorActionGroup-0-option-recovered')
       ).toBeInTheDocument();
@@ -531,7 +529,6 @@ describe('action_form', () => {
       await screen.findByTestId('addNewActionConnectorActionGroup-1');
       // Open the EuiSuperSelect to see options in the popover
       await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-1'));
-      // Default action group option is enabled
       await screen.findByTestId('addNewActionConnectorActionGroup-1-option-default');
       // Recovered action group option is disabled (not currently supported)
       expect(

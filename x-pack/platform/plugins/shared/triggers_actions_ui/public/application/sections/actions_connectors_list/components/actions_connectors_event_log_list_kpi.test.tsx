@@ -57,7 +57,6 @@ describe('actions_connectors_event_log_list_kpi', () => {
     const warningOutcome = screen.getByTestId('connectorEventLogKpi-warningOutcome');
     const failureOutcome = screen.getByTestId('connectorEventLogKpi-failureOutcome');
 
-    // Initially shows placeholder values
     expect(within(successOutcome).getByText('--')).toBeInTheDocument();
     expect(within(warningOutcome).getByText('--')).toBeInTheDocument();
     expect(within(failureOutcome).getByText('--')).toBeInTheDocument();
@@ -72,7 +71,6 @@ describe('actions_connectors_event_log_list_kpi', () => {
       );
     });
 
-    // After load, shows actual values
     await waitFor(() => {
       expect(within(successOutcome).getByText(`${mockKpiResponse.success}`)).toBeInTheDocument();
     });

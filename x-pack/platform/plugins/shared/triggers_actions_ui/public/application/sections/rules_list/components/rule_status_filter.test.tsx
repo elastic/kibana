@@ -26,10 +26,8 @@ describe('RuleStatusFilter', () => {
 
     // Popover not open — selectable list items not visible
     expect(screen.queryByTestId('ruleStatusFilterSelect')).not.toBeInTheDocument();
-    // Filter button is rendered
     expect(screen.getByTestId('ruleStatusFilterButton')).toBeInTheDocument();
 
-    // Badge shows 0 active filters
     const badge = container.querySelector('.euiNotificationBadge');
     expect(badge).toHaveTextContent('0');
   });
@@ -41,7 +39,6 @@ describe('RuleStatusFilter', () => {
 
     await userEvent.click(screen.getByTestId('ruleStatusFilterButton'));
 
-    // 3 options should now be visible
     const selectContainer = screen.getByTestId('ruleStatusFilterSelect');
     const statusItems = within(selectContainer).getAllByRole('option');
     expect(statusItems.length).toEqual(3);

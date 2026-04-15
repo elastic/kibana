@@ -28,9 +28,7 @@ describe('BaseSnoozePanel', () => {
     );
     expect(screen.getByTestId('snoozePanel')).toBeInTheDocument();
     expect(screen.getByTestId('snoozePanelTitle')).toBeInTheDocument();
-    // ruleSnoozeIntervalValue is rendered as an input with value 5
     expect(screen.getByTestId('ruleSnoozeIntervalValue')).toHaveValue(5);
-    // ruleSnoozeIntervalUnit is rendered as a select with value 'd'
     expect(screen.getByTestId('ruleSnoozeIntervalUnit')).toHaveValue('d');
     expect(screen.queryByTestId('ruleSnoozeCancel')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleAddSchedule')).toBeInTheDocument();
@@ -110,7 +108,6 @@ describe('BaseSnoozePanel', () => {
     expect(ruleSchedulesListAddButton).toBeInTheDocument();
     expect(ruleSchedulesListAddButton).not.toBeDisabled();
 
-    // The schedules list should contain 2 child items
     expect(screen.getByTestId('ruleSchedulesList').children.length).toEqual(2);
   });
 
