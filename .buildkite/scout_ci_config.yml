@@ -54,6 +54,7 @@ plugins:
 
 packages:
   enabled:
+    - core
     - kbn-streamlang-tests
   disabled:
     # Scout's own tests are executed first to validate the Scout framework
