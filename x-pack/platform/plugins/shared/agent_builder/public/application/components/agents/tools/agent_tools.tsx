@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   EuiBadge,
@@ -173,19 +173,25 @@ export const AgentTools: React.FC = () => {
     );
   }, [activeTools, searchQuery]);
 
-  const handleToggleTool = (tool: ToolDefinition, isActive: boolean) => {
-    if (enableElasticCapabilities && defaultToolIdSet.has(tool.id)) return;
-    if (isActive) {
-      handleAddTool(tool);
-    } else {
-      handleRemoveTool(tool);
-    }
-  };
+  const handleToggleTool = useCallback(
+    (tool: ToolDefinition, isActive: boolean) => {
+      if (enableElasticCapabilities && defaultToolIdSet.has(tool.id)) return;
+      if (isActive) {
+        handleAddTool(tool);
+      } else {
+        handleRemoveTool(tool);
+      }
+    },
+    [handleAddTool, handleRemoveTool, enableElasticCapabilities, defaultToolIdSet]
+  );
 
-  const handleRemoveToolWithDeselect = (tool: ToolDefinition) => {
-    handleRemoveTool(tool);
-    setSelectedToolId(null);
-  };
+  const handleRemoveToolWithDeselect = useCallback(
+    (tool: ToolDefinition) => {
+      handleRemoveTool(tool);
+      setSelectedToolId(null);
+    },
+    [handleRemoveTool, setSelectedToolId]
+  );
 
   /** Guarded removal: only prevents removing auto-included tools from the agent. */
   const handleRemoveSelectedTool = () => {
