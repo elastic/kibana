@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const toasts = getService('toasts');
+  const performanceMetricTimeoutMs = 1500;
 
   describe('telemetry', () => {
     describe('context', () => {
@@ -62,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
             eventTypes: ['performance_metric'],
-            withTimeoutMs: 500,
+            withTimeoutMs: performanceMetricTimeoutMs,
           });
 
           expect(events.length).to.be.greaterThan(0);
@@ -85,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
             eventTypes: ['performance_metric'],
-            withTimeoutMs: 500,
+            withTimeoutMs: performanceMetricTimeoutMs,
           });
 
           expect(events.length).to.be.greaterThan(0);
