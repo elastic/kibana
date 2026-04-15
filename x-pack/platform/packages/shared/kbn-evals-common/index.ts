@@ -20,5 +20,7 @@ export {
   buildRunsListingAggregation,
   parseRunsListingResponse,
   buildModelDisplayId,
+  buildLatestBaselineRunQuery,
+  parseLatestBaselineRunId,
 } from './impl/query_builders';
 export type { RunsListingResult, RunDetailEvaluatorStat } from './impl/query_builders';

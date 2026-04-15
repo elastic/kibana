@@ -16,6 +16,8 @@ import {
   buildRunsListingAggregation,
   parseRunsListingResponse,
   buildModelDisplayId,
+  buildLatestBaselineRunQuery,
+  parseLatestBaselineRunId,
 } from './query_builders';
 
 describe('query_builders', () => {
@@ -440,6 +442,66 @@ describe('query_builders', () => {
         max: 0,
         count: 0,
       });
+    });
+  });
+
+  describe('buildLatestBaselineRunQuery', () => {
+    it('builds a query filtering by suite and branch', () => {
+      const { query, aggs } = buildLatestBaselineRunQuery('my-suite', 'main');
+
+      expect(query).toEqual({
+        bool: {
+          filter: [
+            { term: { 'suite.id': 'my-suite' } },
+            { term: { 'run_metadata.git_branch': 'main' } },
+          ],
+          must_not: [{ term: { run_id: 'kbn-evals-preflight' } }],
+        },
+      });
+
+      expect(aggs).toEqual({
+        latest_run: {
+          terms: { field: 'run_id', size: 1, order: { latest_timestamp: 'desc' } },
+          aggs: {
+            latest_timestamp: { max: { field: '@timestamp' } },
+          },
+        },
+      });
+    });
+
+    it('excludes a specific run ID when provided', () => {
+      const { query } = buildLatestBaselineRunQuery('my-suite', 'main', 'bk-12345');
+
+      expect(query).toEqual({
+        bool: {
+          filter: [
+            { term: { 'suite.id': 'my-suite' } },
+            { term: { 'run_metadata.git_branch': 'main' } },
+          ],
+          must_not: [{ term: { run_id: 'kbn-evals-preflight' } }, { term: { run_id: 'bk-12345' } }],
+        },
+      });
+    });
+  });
+
+  describe('parseLatestBaselineRunId', () => {
+    it('extracts the run ID from the aggregation response', () => {
+      const aggregations = {
+        latest_run: {
+          buckets: [{ key: 'bk-baseline-run', doc_count: 50 }],
+        },
+      };
+
+      expect(parseLatestBaselineRunId(aggregations)).toBe('bk-baseline-run');
+    });
+
+    it('returns undefined when there are no buckets', () => {
+      const aggregations = { latest_run: { buckets: [] } };
+      expect(parseLatestBaselineRunId(aggregations)).toBeUndefined();
+    });
+
+    it('returns undefined when aggregations are undefined', () => {
+      expect(parseLatestBaselineRunId(undefined)).toBeUndefined();
     });
   });
 });

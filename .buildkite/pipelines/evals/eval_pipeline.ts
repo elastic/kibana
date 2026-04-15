@@ -114,15 +114,19 @@ function buildEvalsYaml({
   resolveModelGroups,
   evaluationConnectorId,
   hasEisJudge,
+  isPrBuild,
 }: {
   selectedSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
   evaluationConnectorId: string | undefined;
   hasEisJudge: boolean;
+  isPrBuild: boolean;
 }): string {
+  const suiteStepKeys: string[] = [];
   const suiteSteps = selectedSuites
     .map((suite) => {
       const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
+      suiteStepKeys.push(key);
       const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
       const suiteModelGroups = resolveModelGroups(suite);
       const modelGroupsEnv =
@@ -170,6 +174,31 @@ function buildEvalsYaml({
     })
     .join('\n');
 
+  const suiteIds = selectedSuites.map((s) => s.id).join(',');
+
+  const postCompareStep = isPrBuild
+    ? [
+        '',
+        [
+          `      - label: ':bar_chart: Post eval comparison'`,
+          `        key: kbn-evals-post-comparison`,
+          `        command: bash .buildkite/scripts/steps/evals/post_eval_comment.sh`,
+          `        env:`,
+          `          EVAL_SUITE_IDS: '${suiteIds}'`,
+          `        depends_on:`,
+          ...suiteStepKeys.map((k) => `          - '${k}'`),
+          `        allow_dependency_failure: true`,
+          `        timeout_in_minutes: 10`,
+          `        agents:`,
+          `          image: family/kibana-ubuntu-2404`,
+          `          imageProject: elastic-images-prod`,
+          `          provider: gcp`,
+          `          machineType: n2-standard-2`,
+          `          preemptible: true`,
+        ].join('\n'),
+      ]
+    : [];
+
   return [
     // NOTE: `getPipeline()` strips `steps:` from YAML fragments so they can be concatenated
     // under the single top-level `steps:` key. This must follow that convention.
@@ -179,6 +208,7 @@ function buildEvalsYaml({
     `      - build`,
     `    steps:`,
     suiteSteps,
+    ...postCompareStep,
   ].join('\n');
 }
 
@@ -246,10 +276,13 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
     return null;
   }
 
+  const isPrBuild = !!process.env.GITHUB_PR_NUMBER;
+
   return buildEvalsYaml({
     selectedSuites: selectedEvalSuites,
     resolveModelGroups,
     evaluationConnectorId,
     hasEisJudge,
+    isPrBuild,
   });
 }

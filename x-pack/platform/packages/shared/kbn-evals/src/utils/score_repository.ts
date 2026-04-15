@@ -8,7 +8,13 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
-import { buildRunFilterQuery, buildStatsAggregation, SCORES_SORT_ORDER } from '@kbn/evals-common';
+import {
+  buildRunFilterQuery,
+  buildStatsAggregation,
+  SCORES_SORT_ORDER,
+  buildLatestBaselineRunQuery,
+  parseLatestBaselineRunId,
+} from '@kbn/evals-common';
 import { getEvalDoc } from '../evaluations_export/eval_doc';
 
 interface BulkDroppedDocument<TDocument> {
@@ -710,6 +716,29 @@ export class EvaluationScoreRepository {
     } catch (error) {
       this.log.error(`Failed to retrieve stats for run ID ${runId}:`, error);
       return null;
+    }
+  }
+
+  async findLatestBaselineRunId(
+    suiteId: string,
+    branch: string,
+    excludeRunId?: string
+  ): Promise<string | undefined> {
+    const { query, aggs } = buildLatestBaselineRunQuery(suiteId, branch, excludeRunId);
+    try {
+      const response = await this.esClient.search({
+        index: EVALUATIONS_DATA_STREAM_ALIAS,
+        size: 0,
+        query,
+        aggs,
+      });
+      return parseLatestBaselineRunId(response.aggregations as Record<string, unknown> | undefined);
+    } catch (error) {
+      this.log.error(
+        `Failed to find baseline run for suite ${suiteId} on branch ${branch}:`,
+        error
+      );
+      return undefined;
     }
   }
 

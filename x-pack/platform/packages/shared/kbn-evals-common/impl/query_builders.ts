@@ -379,6 +379,57 @@ export const buildModelDisplayId = (id?: string, family?: string, provider?: str
 };
 
 // ---------------------------------------------------------------------------
+// Baseline run lookup
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds an ES query + aggregation that finds the most recent run ID
+ * for a given suite on a given branch. Used by the CLI to auto-discover
+ * a baseline run for comparison.
+ */
+export const buildLatestBaselineRunQuery = (
+  suiteId: string,
+  branch: string,
+  excludeRunId?: string
+) => {
+  const mustNot: Array<Record<string, unknown>> = [{ term: { run_id: PREFLIGHT_RUN_ID } }];
+  if (excludeRunId) {
+    mustNot.push({ term: { run_id: excludeRunId } });
+  }
+
+  return {
+    query: {
+      bool: {
+        filter: [
+          { term: { 'suite.id': suiteId } },
+          { term: { 'run_metadata.git_branch': branch } },
+        ],
+        must_not: mustNot,
+      },
+    },
+    aggs: {
+      latest_run: {
+        terms: { field: 'run_id', size: 1, order: { latest_timestamp: 'desc' as const } },
+        aggs: {
+          latest_timestamp: { max: { field: '@timestamp' } },
+        },
+      },
+    },
+  };
+};
+
+/**
+ * Extracts the run ID from the aggregation response returned by
+ * {@link buildLatestBaselineRunQuery}.
+ */
+export const parseLatestBaselineRunId = (
+  aggregations: Record<string, unknown> | undefined
+): string | undefined => {
+  const agg = aggregations as { latest_run?: { buckets?: Array<{ key: string }> } } | undefined;
+  return agg?.latest_run?.buckets?.[0]?.key;
+};
+
+// ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
