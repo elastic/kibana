@@ -186,6 +186,8 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(mockApi.testStep).toHaveBeenCalledWith(
         VALID_WORKFLOW_YAML,
         'log_step',
+        'wf-1',
+        undefined,
         {},
         'default',
         context.request
@@ -233,6 +235,8 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(mockApi.testStep).toHaveBeenCalledWith(
         VALID_WORKFLOW_YAML,
         'log_step',
+        'wf-1',
+        undefined,
         override,
         'default',
         context.request
@@ -279,6 +283,8 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(mockApi.testStep).toHaveBeenCalledWith(
         VALID_WORKFLOW_YAML,
         'nested_log',
+        'wf-1',
+        undefined,
         {},
         'default',
         context.request

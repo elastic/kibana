@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LineCounter, parseDocument } from 'yaml';
+import YAML, { LineCounter, parseDocument } from 'yaml';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../common/agent_builder/constants';
 import type { StepInfo, WorkflowLookup } from '../../../common/lib/yaml';
 import { buildWorkflowLookup } from '../../../common/lib/yaml';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
@@ -110,6 +110,71 @@ const findUnsafeStep = (stepId: string, allSteps: Record<string, StepInfo>): Ste
   return null;
 };
 
+/**
+ * Ensures inline YAML has the minimum fields required for workflow validation
+ * (version, name, triggers). Adds defaults for any missing required fields.
+ */
+const ensureMinimalWorkflow = (yamlStr: string): string => {
+  const doc = parseDocument(yamlStr);
+  if (!YAML.isMap(doc.contents)) return yamlStr;
+
+  const contents = doc.contents as YAML.YAMLMap;
+  if (!contents.get('version')) {
+    contents.set(doc.createNode('version'), doc.createNode('1'));
+  }
+  if (!contents.get('name')) {
+    contents.set(doc.createNode('name'), doc.createNode('_execute_step_test'));
+  }
+  if (!contents.get('triggers')) {
+    contents.set(doc.createNode('triggers'), doc.createNode([{ type: 'manual' }]));
+  }
+  return doc.toString();
+};
+
+/**
+ * Replaces all child steps of a container step (if/while) with safe console stubs
+ * so the condition can be tested without executing unsafe children.
+ */
+const stubUnsafeChildren = (yamlStr: string, stepName: string): string => {
+  const doc = parseDocument(yamlStr);
+  const stepsNode = (doc.contents as YAML.YAMLMap)?.get('steps');
+  if (!YAML.isSeq(stepsNode)) return yamlStr;
+
+  const stubStep = (branch: string) =>
+    doc.createNode({
+      name: `__stub_${branch}`,
+      type: 'console',
+      with: { message: `condition_test: ${branch} branch taken` },
+    });
+
+  const replaceChildren = (node: YAML.YAMLMap) => {
+    for (const key of ['steps', 'else']) {
+      const child = node.get(key);
+      if (child) {
+        const stubSeq = doc.createNode([]);
+        (stubSeq as YAML.YAMLSeq).add(stubStep(key === 'steps' ? 'then' : 'else'));
+        node.set(key, stubSeq);
+      }
+    }
+  };
+
+  const findAndReplace = (seq: YAML.YAMLSeq) => {
+    for (const item of seq.items) {
+      if (YAML.isMap(item)) {
+        const name = (item as YAML.YAMLMap).get('name');
+        if (name === stepName) {
+          replaceChildren(item as YAML.YAMLMap);
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  findAndReplace(stepsNode);
+  return doc.toString();
+};
+
 const pollExecution = async (
   api: WorkflowsManagementApi,
   executionId: string,
@@ -161,13 +226,20 @@ export function registerWorkflowExecuteStepTool(
   agentBuilder.tools.register({
     id: WORKFLOW_EXECUTE_STEP_TOOL_ID,
     type: ToolType.builtin,
-    description: `Execute a single workflow step to verify it works correctly.
-Safe steps (data transforms, read-only ES queries, console, conditionals) are executed automatically and their output is returned.
-Unsafe steps (HTTP calls, index writes, connector actions, AI prompts) are blocked — a preview with the step config and validation result is returned instead.
-Use this tool AFTER editing a step to verify your changes produce the expected result.
-Provide contextOverride with mock data when the step references outputs from previous steps.`,
+    description: `Execute a single workflow step to verify it works correctly against the real environment.
+- ES queries and data steps: executed and output returned.
+- if/while steps with unsafe children: children are auto-replaced with safe stubs so the condition can be tested — returns which branch was taken.
+- Other unsafe steps: returns a preview with validation.
+Provide contextOverride with mock data when the step references outputs from previous steps.
+Provide yaml to execute a step without needing a workflow.yaml attachment (useful for field discovery before creating the full workflow).`,
     schema: z.object({
       stepName: z.string().describe('Name of the step to execute'),
+      yaml: z
+        .string()
+        .optional()
+        .describe(
+          'Optional inline workflow YAML to execute from. If omitted, reads from the workflow.yaml attachment.'
+        ),
       contextOverride: z
         .record(z.string(), z.unknown())
         .optional()
@@ -178,30 +250,41 @@ Provide contextOverride with mock data when the step references outputs from pre
     tags: ['workflows', 'yaml', 'execution', 'testing'],
     availability: {
       handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
+        const isEnabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return isEnabled
           ? { status: 'available' }
           : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
       },
       cacheMode: 'space',
     },
-    handler: async ({ stepName, contextOverride }, context) => {
-      const attachment = findWorkflowYamlAttachment(context);
-      if (!attachment) {
-        return {
-          results: [
-            {
-              type: 'other' as const,
-              data: {
-                success: false,
-                error: 'No workflow YAML attachment found in the conversation',
-              },
-            },
-          ],
-        };
-      }
+    handler: async ({ stepName, yaml: inlineYaml, contextOverride }, context) => {
+      let yaml: string;
+      let workflowId: string | undefined;
 
-      const { yaml } = attachment;
+      if (inlineYaml) {
+        // Ensure inline YAML has minimum required fields for validation
+        yaml = ensureMinimalWorkflow(inlineYaml);
+      } else {
+        const attachment = findWorkflowYamlAttachment(context);
+        if (!attachment) {
+          return {
+            results: [
+              {
+                type: 'other' as const,
+                data: {
+                  success: false,
+                  error:
+                    'No workflow YAML attachment found. Provide the `yaml` parameter with inline YAML, or create a workflow first.',
+                },
+              },
+            ],
+          };
+        }
+        yaml = attachment.yaml;
+        workflowId = attachment.workflowId;
+      }
 
       const lookup = buildLookup(yaml);
       const stepInfo = lookup.steps[stepName];
@@ -220,6 +303,58 @@ Provide contextOverride with mock data when the step references outputs from pre
       }
 
       const unsafeStep = findUnsafeStep(stepName, lookup.steps);
+
+      // For container steps (if/while/foreach) with unsafe children, auto-stub
+      // the children with safe console steps so the condition can be tested.
+      const CONDITION_STEP_TYPES = new Set(['if', 'while']);
+      if (unsafeStep && CONDITION_STEP_TYPES.has(stepInfo.stepType)) {
+        const isChildUnsafe = unsafeStep.stepId !== stepName;
+        if (isChildUnsafe) {
+          yaml = stubUnsafeChildren(yaml, stepName);
+          // Re-execute with stubbed YAML — children are now safe console steps
+          try {
+            const executionId = await api.testStep(
+              yaml,
+              stepName,
+              workflowId,
+              undefined,
+              contextOverride ?? {},
+              context.spaceId,
+              context.request
+            );
+
+            const result = await pollExecution(api, executionId, stepName, context.spaceId);
+
+            return {
+              results: [
+                {
+                  type: 'other' as const,
+                  data: {
+                    conditionTest: true,
+                    success: result.status === ExecutionStatus.COMPLETED,
+                    executionId,
+                    status: result.status,
+                    ...(result.output !== undefined ? { output: result.output } : {}),
+                    ...(result.error !== undefined ? { error: result.error } : {}),
+                    ...(result.duration != null ? { duration: result.duration } : {}),
+                    hint: 'Unsafe child steps were replaced with safe stubs to test the condition. Check the output to see which branch was taken.',
+                  },
+                },
+              ],
+            };
+          } catch (e) {
+            const message = e instanceof Error ? e.message : String(e);
+            return {
+              results: [
+                {
+                  type: 'other' as const,
+                  data: { success: false, error: message },
+                },
+              ],
+            };
+          }
+        }
+      }
 
       if (unsafeStep) {
         let validation: { valid: boolean; errors?: string[] } | undefined;
@@ -264,6 +399,8 @@ Provide contextOverride with mock data when the step references outputs from pre
         const executionId = await api.testStep(
           yaml,
           stepName,
+          workflowId,
+          undefined,
           contextOverride ?? {},
           context.spaceId,
           context.request
