@@ -9,14 +9,13 @@
 
 import { WORKFLOW_ID_MAX_LENGTH } from '@kbn/workflows';
 
-import { WorkflowValidationError } from '../../common/lib/errors';
-
 import {
   buildCandidateIds,
   generateWorkflowId,
   resolveUniqueWorkflowIds,
   validateWorkflowId,
 } from './workflow_id_resolver';
+import { WorkflowValidationError } from '../../common/lib/errors';
 
 describe('generateWorkflowId', () => {
   it('should derive a slug from the workflow name', () => {
@@ -103,11 +102,7 @@ describe('resolveUniqueWorkflowIds', () => {
 
   it('should skip to baseId-3 when first three candidates are taken', async () => {
     const taken = new Set(['foo', 'foo-1', 'foo-2']);
-    const result = await resolveUniqueWorkflowIds(
-      ['foo'],
-      new Set(),
-      () => Promise.resolve(taken)
-    );
+    const result = await resolveUniqueWorkflowIds(['foo'], new Set(), () => Promise.resolve(taken));
     expect(result).toEqual(['foo-3']);
   });
 
@@ -116,10 +111,8 @@ describe('resolveUniqueWorkflowIds', () => {
     for (let i = 1; i <= 100; i++) {
       allTaken.add(`my-workflow-${i}`);
     }
-    const result = await resolveUniqueWorkflowIds(
-      ['my-workflow'],
-      new Set(),
-      () => Promise.resolve(allTaken)
+    const result = await resolveUniqueWorkflowIds(['my-workflow'], new Set(), () =>
+      Promise.resolve(allTaken)
     );
     expect(result[0]).toMatch(/^workflow-[0-9a-f-]+$/);
   });
@@ -149,10 +142,8 @@ describe('resolveUniqueWorkflowIds', () => {
   it('should deduplicate between seenIds and database results', async () => {
     const seenIds = new Set(['foo']);
     const dbExisting = new Set(['foo-1']);
-    const result = await resolveUniqueWorkflowIds(
-      ['foo'],
-      seenIds,
-      () => Promise.resolve(dbExisting)
+    const result = await resolveUniqueWorkflowIds(['foo'], seenIds, () =>
+      Promise.resolve(dbExisting)
     );
     expect(result).toEqual(['foo-2']);
   });
