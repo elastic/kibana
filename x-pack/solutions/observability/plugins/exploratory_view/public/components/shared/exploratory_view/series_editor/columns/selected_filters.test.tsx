@@ -23,31 +23,28 @@ describe('SelectedFilters', function () {
     reportConfigMap: obsvReportConfigMap,
   });
 
-  it(
-    'should render properly',
-    async function () {
-      const filters = [{ field: USER_AGENT_NAME, values: ['Chrome'] }];
-      const initSeries = { filters };
+  it('should render properly', async function () {
+    const filters = [{ field: USER_AGENT_NAME, values: ['Chrome'] }];
+    const initSeries = { filters };
 
-      render(
-        <SelectedFilters
-          seriesId={0}
-          seriesConfig={dataViewSeries}
-          series={{ ...mockUxSeries, filters }}
-        />,
-        {
-          initSeries,
-        }
-      );
+    render(
+      <SelectedFilters
+        seriesId={0}
+        seriesConfig={dataViewSeries}
+        series={{ ...mockUxSeries, filters }}
+      />,
+      {
+        initSeries,
+      }
+    );
 
-      await waitFor(
-        () => {
-          screen.getByText('Chrome');
-          screen.getByTitle('Filter: Browser family: Chrome. Select for more filter actions.');
-        },
-        { timeout: 15_000 }
-      );
+    await waitFor(() => {
+      screen.getByText('Chrome');
+      screen.getByTitle('Filter: Browser family: Chrome. Select for more filter actions.');
     },
+      { timeout: 15_000 }
+    );
+  },
     30_000
   );
 });
