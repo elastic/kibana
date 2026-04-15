@@ -8,7 +8,6 @@
 import React, { memo, useMemo } from 'react';
 import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
 import type {
   ActionDetails,
@@ -20,7 +19,8 @@ import { CrowdstrikeRunscriptOutput } from './crowdstrike_runscript_output';
 
 export interface RunscriptActionResultProps {
   action: MaybeImmutable<ActionDetails<ResponseActionRunScriptOutputContent>>;
-  agentType?: ResponseActionAgentType;
+  /** Defaults to the first agent on the list if left undefined */
+  agentId?: string;
   'data-test-subj'?: string;
   textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
 }
@@ -40,14 +40,9 @@ export interface RunscriptActionResultProps {
  * @returns {React.Element} A React component that renders a text block with a file download link.
  */
 export const RunscriptActionResult = memo<RunscriptActionResultProps>(
-  ({ action, 'data-test-subj': dataTestSubj, textSize = 's' }) => {
+  ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 's' }) => {
     const { canWriteExecuteOperations } = useUserPrivileges().endpointPrivileges;
-    const agentId = action.agents[0];
     const showFile = action.agentType !== 'crowdstrike';
-    const shouldShowOutput = useMemo(
-      () => action.agentType === 'microsoft_defender_endpoint',
-      [action.agentType]
-    );
     const executionOutput = useMemo(() => {
       if (action.agentType === 'microsoft_defender_endpoint') {
         return (
@@ -67,18 +62,6 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
             agentId={agentId}
             data-test-subj={`${dataTestSubj}-output`}
             textSize={textSize}
-          />
-        );
-      }
-
-      if (action.agentType === 'endpoint' && action.outputs?.[agentId]?.content) {
-        return (
-          <EndpointHostExecutionResponseOutput
-            outputContent={
-              action.outputs[agentId].content as ResponseActionEndpointRunScriptOutputContent
-            }
-            textSize="s"
-            data-test-subj={`${dataTestSubj}-output`}
           />
         );
       }
@@ -104,15 +87,10 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
             />
           </EuiFlexItem>
         )}
-        {shouldShowOutput && (
+        {executionOutput && (
           <>
             <EuiSpacer size="l" />
-            <RunscriptOutput
-              action={action}
-              agentId={agentId}
-              data-test-subj={`${dataTestSubj}-output`}
-              textSize={textSize}
-            />
+            {executionOutput}
           </>
         )}
       </>

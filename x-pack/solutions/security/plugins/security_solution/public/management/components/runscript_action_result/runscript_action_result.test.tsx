@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import React from 'react';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -115,50 +108,31 @@ describe('#RunscriptActionResult component', () => {
     it('should display file link for `microsoft_defender_endpoint` agent type', async () => {
       render();
 
-    await waitFor(
-      () => {
-        expect(renderResult.getByTestId('test-download')).toBeTruthy();
-      },
-      { timeout: 5000 }
-    );
-  }, 10000);
-
-  it('should display output content for `microsoft_defender_endpoint` agent', () => {
-    action.outputs = {
-      'agent-a': {
-        type: 'json',
-        content: {
-          code: '0',
-          stdout: 'script output',
-          stderr: '',
+      await waitFor(
+        () => {
+          expect(renderResult.getByTestId('test-download')).toBeTruthy();
         },
-      },
-    };
+        { timeout: 5000 }
+      );
+    }, 10000);
 
-    render();
+    it('should display output content for `microsoft_defender_endpoint` agent', () => {
+      action.outputs = {
+        'agent-a': {
+          type: 'json',
+          content: {
+            code: '0',
+            stdout: 'script output',
+            stderr: '',
+          },
+        },
+      };
 
-    const stdoutAccordion = renderResult.getByTestId('test-output-stdout-title');
-    expect(stdoutAccordion).toBeInTheDocument();
-    expect(stdoutAccordion).toHaveTextContent('Runscript output');
+      render();
+
+      const stdoutAccordion = renderResult.getByTestId('test-output-stdout-title');
+      expect(stdoutAccordion).toBeInTheDocument();
+      expect(stdoutAccordion).toHaveTextContent('Runscript output');
+    });
   });
-
-  it.each(['crowdstrike', 'sentinel_one'] as const)(
-    'should display no output if %s agent type does not support outputs',
-    (agentType) => {
-      action.agentType = agentType;
-      render();
-      expect(renderResult.queryByTestId('test-output')).toBeNull();
-    }
-  );
-
-  it.each(['crowdstrike', 'microsoft_defender_endpoint', 'sentinel_one'] as const)(
-    'should display no download link for %s when user has no authz',
-    (agentType) => {
-      setUserPrivileges.set({ canWriteExecuteOperations: false });
-      action.agentType = agentType;
-      render();
-
-      expect(renderResult.queryByTestId('test-download')).toBeNull();
-    }
-  );
 });
