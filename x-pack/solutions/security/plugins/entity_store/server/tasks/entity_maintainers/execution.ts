@@ -72,12 +72,9 @@ export function createMaintainerStatus({
   namespace?: string;
   initialState: EntityMaintainerState;
 }): EntityMaintainerStatus {
-const topLevelNamespace =
-    typeof status?.namespace === 'string' ? status.namespace : undefined;
+  const topLevelNamespace = typeof status?.namespace === 'string' ? status.namespace : undefined;
   const metadataNamespace =
-    typeof status?.metadata?.namespace === 'string'
-      ? status.metadata.namespace
-      : undefined;
+    typeof status?.metadata?.namespace === 'string' ? status.metadata.namespace : undefined;
   const resolvedNamespace = namespace || topLevelNamespace || metadataNamespace;
 
   if (!resolvedNamespace) {
