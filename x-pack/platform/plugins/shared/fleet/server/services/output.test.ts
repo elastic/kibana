@@ -1999,6 +1999,8 @@ describe('Output Service', () => {
         client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
+        otel_disable_beatsauth: null,
+        otel_exporter_config_yaml: null,
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',

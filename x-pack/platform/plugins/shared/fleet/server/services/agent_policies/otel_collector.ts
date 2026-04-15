@@ -447,7 +447,7 @@ function buildBeatsauthConfig(
 ): Record<string, unknown> {
   // Start with any ssl/proxy/transport params from the Advanced YAML config_yaml field.
   // Structured output fields (set via the form UI) take precedence over YAML values.
-  const yamlConfig = parseOutputConfigYaml(output.config_yaml, logger);
+  const yamlConfig = parseOutputConfigYaml(output.config_yaml);
 
   const config: Record<string, unknown> = {};
 
@@ -495,10 +495,7 @@ function buildBeatsauthConfig(
   return config;
 }
 
-function parseOutputConfigYaml(
-  yaml: string | null | undefined,
-  logger?: Logger
-): Record<string, unknown> {
+function parseOutputConfigYaml(yaml: string | null | undefined): Record<string, unknown> {
   if (!yaml) return {};
   try {
     const parsed = load(yaml);
@@ -507,8 +504,7 @@ function parseOutputConfigYaml(
     }
     return {};
   } catch (e) {
-    logger?.warn(`Failed to parse output config_yaml for beatsauth: ${e.message}`);
-    return {};
+    throw new FleetError(`Failed to parse output config_yaml for beatsauth: ${e.message}`);
   }
 }
 

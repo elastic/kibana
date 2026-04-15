@@ -32,8 +32,7 @@ import {
   EuiCode,
   useGeneratedHtmlId,
   EuiPanel,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -617,26 +616,24 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   <EuiFormRow fullWidth>
                     <EuiSwitch
                       label={
-                        <EuiToolTip
-                          content={
-                            <FormattedMessage
-                              id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthTooltip"
-                              defaultMessage="When enabled, the exporter will only include the host and any advanced exporter parameters specified below, giving you complete control over the exporter configuration."
-                            />
-                          }
-                        >
-                          <span>
-                            <FormattedMessage
-                              id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthLabel"
-                              defaultMessage="Do not use beatsauth extension to translate output parameters"
-                            />{' '}
-                            <EuiIcon type="question" color="subdued" aria-hidden={true} />
-                          </span>
-                        </EuiToolTip>
+                        <>
+                          <FormattedMessage
+                            id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthLabel"
+                            defaultMessage="Do not use beatsauth extension to translate output parameters"
+                          />{' '}
+                          <EuiIconTip
+                            type="question"
+                            color="subdued"
+                            content={
+                              <FormattedMessage
+                                id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthTooltip"
+                                defaultMessage="When enabled, the exporter will only include the host and any advanced exporter parameters specified below, giving you complete control over the exporter configuration."
+                              />
+                            }
+                          />
+                        </>
                       }
-                      checked={inputs.otelDisableBeatsauthInput.value}
-                      onChange={(e) => inputs.otelDisableBeatsauthInput.setValue(e.target.checked)}
-                      disabled={inputs.otelDisableBeatsauthInput.props.disabled}
+                      {...inputs.otelDisableBeatsauthInput.props}
                       data-test-subj="settingsOutputsFlyout.otelDisableBeatsauthToggle"
                     />
                   </EuiFormRow>

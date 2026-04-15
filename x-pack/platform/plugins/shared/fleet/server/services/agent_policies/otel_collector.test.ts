@@ -2229,13 +2229,13 @@ describe('generateOtelcolConfig', () => {
       expect(result.extensions?.['beatsauth/default']).toBeUndefined();
     });
 
-    it('should not crash when config_yaml contains malformed YAML', () => {
+    it('should throw when config_yaml contains malformed YAML', () => {
       const outputWithBadYaml: Output = {
         ...defaultOutput,
         config_yaml: ': invalid yaml',
       };
 
-      expect(() => generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml })).not.toThrow();
+      expect(() => generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml })).toThrow();
     });
   });
 
