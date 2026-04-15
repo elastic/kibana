@@ -28,8 +28,9 @@ export const createThreatCoverageInitializationWorkflowService = (
         DEFAULT_SPACE_ID
       );
       const currentlyEnabled = existing?.enabled ?? false;
+      const yamlChanged = existing != null && existing.yaml !== WORKFLOW_YAML;
 
-      if (enabled === currentlyEnabled) {
+      if (enabled === currentlyEnabled && !yamlChanged) {
         log.debug(() => `Workflow already ${enabled ? 'enabled' : 'disabled'}, no-op`);
         return;
       }
