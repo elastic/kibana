@@ -65,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             withTimeoutMs: 500,
           });
 
+          expect(events.length).to.be.greaterThan(0);
           expect(events[events.length - 1].context.discoverProfiles).to.eql([
             'example-root-profile',
             'default-data-source-profile',
@@ -87,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             withTimeoutMs: 500,
           });
 
+          expect(events.length).to.be.greaterThan(0);
           expect(events[events.length - 1].context.discoverProfiles).to.eql([
             'example-root-profile',
             'example-data-source-profile',
