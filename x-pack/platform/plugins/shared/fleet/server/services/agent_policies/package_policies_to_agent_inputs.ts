@@ -35,7 +35,10 @@ import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '..
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
 import { FleetError, PackagePolicyValidationError } from '../../errors';
-import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
+import {
+  packagePolicyInputAllowsUndefinedDataStreamType,
+  getInputEffectiveName,
+} from '../../../common/services';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -52,7 +55,7 @@ export function getInputId(
 
   return useSimplifiedId
     ? packagePolicyId || 'default'
-    : `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
+    : `${getInputEffectiveName(input)}${input.policy_template ? `-${input.policy_template}` : ''}${
         packagePolicyId ? `-${packagePolicyId}` : ''
       }`;
 }
