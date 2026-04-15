@@ -14,7 +14,7 @@ import {
   ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
   ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
 } from '../../../../server/domain/constants';
-import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
 import {
   PUBLIC_HEADERS,
@@ -28,7 +28,7 @@ import { clearEntityStoreIndices } from '../fixtures/helpers';
 // Init/stop/start/run behavior with registered maintainers is covered by Jest
 // (entity_maintainers_client.test.ts) with a mocked registry.
 
-const TARGET_INDEX_LATEST = getLatestEntitiesIndexName('default');
+const TARGET_INDEX_LATEST = getEntitiesAlias(ENTITY_LATEST, 'default');
 const TARGET_INDEX_UPDATES = getUpdatesEntitiesDataStreamName('default');
 const SAVED_OBJECT_PRIVILEGE = 'saved_object:entity-engine-descriptor-v2/create';
 

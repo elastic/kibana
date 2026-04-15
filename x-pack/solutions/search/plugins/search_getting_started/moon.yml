@@ -40,7 +40,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/doc-links'
   - '@kbn/cloud'
-  - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-plugin'
   - '@kbn/deeplinks-search'
   - '@kbn/scout-search'

@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -20,7 +19,6 @@ import {
 import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HuntingLead } from './types';
-import { VIEW_LEAD_DETAILS } from './translations';
 import { getEntityIcon } from './utils';
 
 const MAX_VISIBLE_TAGS = 3;
@@ -38,28 +36,14 @@ const getCardStyles = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
-const infoIconStyles = css`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-`;
-
 interface LeadCardProps {
   lead: HuntingLead;
   onClick: (lead: HuntingLead) => void;
-  onInfoClick?: (lead: HuntingLead) => void;
 }
 
-export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }) => {
+export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
   const { euiTheme } = useEuiTheme();
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
-  const handleInfoClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onInfoClick?.(lead);
-    },
-    [onInfoClick, lead]
-  );
 
   return (
     <EuiPanel
@@ -69,16 +53,6 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }
       onClick={handleClick}
       data-test-subj={`leadCard-${lead.id}`}
     >
-      {onInfoClick && (
-        <EuiButtonIcon
-          iconType="iInCircle"
-          aria-label={VIEW_LEAD_DETAILS}
-          onClick={handleInfoClick}
-          data-test-subj={`leadInfoButton-${lead.id}`}
-          css={infoIconStyles}
-        />
-      )}
-
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText

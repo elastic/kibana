@@ -23,6 +23,8 @@ jest.mock('../../../../common', () => ({
       variables: undefined,
     },
   })),
+  isValidNameFormat: jest.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
+  startsWithLetter: jest.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
 }));
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 
@@ -248,6 +250,19 @@ describe('DataStreams', () => {
     it('disables add data stream when description is empty', () => {
       mockUseIntegrationForm.mockReturnValue({
         formData: { title: 'Has title', description: '   ' },
+      });
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: undefined,
+        isLoading: false,
+      });
+
+      const { getByTestId } = renderDataStreams();
+      expect(getByTestId('addDataStreamButton')).toBeDisabled();
+    });
+
+    it('disables add data stream when integration name has only one character', () => {
+      mockUseIntegrationForm.mockReturnValue({
+        formData: { title: 'A', description: 'Valid description' },
       });
       mockUseGetIntegrationById.mockReturnValue({
         integration: undefined,

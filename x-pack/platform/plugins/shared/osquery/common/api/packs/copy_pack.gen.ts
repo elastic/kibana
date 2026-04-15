@@ -16,5 +16,64 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * The response for copying a pack.
+ */
 export type CopyPacksResponse = z.infer<typeof CopyPacksResponse>;
-export const CopyPacksResponse = z.object({});
+export const CopyPacksResponse = z.object({
+  /**
+   * The copied pack.
+   */
+  data: z
+    .object({
+      /**
+       * The saved object ID of the copied pack.
+       */
+      saved_object_id: z.string().optional(),
+      /**
+       * The name of the copied pack.
+       */
+      name: z.string().optional(),
+      /**
+       * The pack description.
+       */
+      description: z.string().optional(),
+      /**
+       * The queries in the copied pack.
+       */
+      queries: z.object({}).optional(),
+      /**
+       * The pack version.
+       */
+      version: z.number().int().optional(),
+      /**
+       * Whether the pack is enabled. Always false for copies.
+       */
+      enabled: z.boolean().optional(),
+      /**
+       * The creation timestamp.
+       */
+      created_at: z.string().optional(),
+      /**
+       * The user who created the copy.
+       */
+      created_by: z.string().optional(),
+      /**
+       * The last update timestamp.
+       */
+      updated_at: z.string().optional(),
+      /**
+       * The user who last updated the pack.
+       */
+      updated_by: z.string().optional(),
+      /**
+       * A list of agent policy IDs associated with the pack. Always empty for copies.
+       */
+      policy_ids: z.array(z.string()).optional(),
+      /**
+       * Shard configuration for the pack.
+       */
+      shards: z.object({}).optional(),
+    })
+    .optional(),
+});

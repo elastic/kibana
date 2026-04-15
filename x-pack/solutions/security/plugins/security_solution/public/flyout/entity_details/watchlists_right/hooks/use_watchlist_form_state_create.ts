@@ -49,6 +49,7 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
   return {
     watchlist,
     normalizedWatchlistId: undefined,
+    ruleBasedSourceIds: {},
     isEditMode: false,
     isDisabled,
     isNameInvalid,

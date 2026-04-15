@@ -15,7 +15,7 @@ import type {
 } from '@kbn/lens-common';
 
 import { ACCESSOR } from './constants';
-import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
+import type { AutoColorType, ColorByValueType, ColorMappingType } from '../../../schema/color';
 import { isColorByValueColor, isColorMappingColor } from '../../coloring';
 import { getReversibleMappings } from '../utils';
 
@@ -83,7 +83,7 @@ export function getAccessorName(
  * - No color → uses the provided default
  */
 export function inferDatatypeFromColor(
-  color: ColorByValueType | ColorMappingType | undefined,
+  color: ColorByValueType | ColorMappingType | AutoColorType | undefined,
   defaultType: Extract<DataType, 'number' | 'string'>
 ): Extract<DataType, 'number' | 'string'> {
   if (isColorByValueColor(color)) {

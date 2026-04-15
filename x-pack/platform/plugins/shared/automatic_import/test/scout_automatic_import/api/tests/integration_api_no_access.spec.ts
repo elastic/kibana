@@ -52,7 +52,7 @@ apiTest.describe(
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
           connectorId: 'test-connector-placeholder',
-          integrationId: 'scout-noaccess-create-attempt',
+          integrationId: 'scout_noaccess_create_attempt',
           title: 'No Access Create Attempt',
           description: 'Should be denied',
         },

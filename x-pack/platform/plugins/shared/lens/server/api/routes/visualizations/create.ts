@@ -33,7 +33,6 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   const createRoute = router.post({
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
-    enableQueryVersion: true,
     summary: 'Create visualization',
     description: 'Create a new visualization.',
     options: {

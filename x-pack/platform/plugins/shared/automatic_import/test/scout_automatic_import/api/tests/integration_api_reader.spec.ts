@@ -56,7 +56,7 @@ apiTest.describe('automatic_import Integration API (reader)', { tag: tags.statef
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
       body: {
         connectorId: 'test-connector-placeholder',
-        integrationId: 'scout-reader-create-attempt',
+        integrationId: 'scout_reader_create_attempt',
         title: 'Reader Create Attempt',
         description: 'Should be denied',
       },
@@ -80,7 +80,7 @@ apiTest.describe('automatic_import Integration API (reader)', { tag: tags.statef
   apiTest(
     'DELETE /integrations/{id}: returns 403 for reader user',
     async ({ apiClient, apiServices }) => {
-      const integrationId = 'scout-delete-reader-test';
+      const integrationId = 'scout_delete_reader_test';
       await apiServices.autoImport.createIntegration(integrationId, 'Scout Delete Reader Test');
 
       try {

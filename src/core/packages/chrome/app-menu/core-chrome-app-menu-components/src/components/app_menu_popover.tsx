@@ -9,23 +9,18 @@
 
 import React, { useMemo, type ReactElement } from 'react';
 import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { getPopoverPanels, getTooltip } from '../utils';
-import type {
-  AppMenuPopoverItem,
-  AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
-} from '../types';
+import type { AppMenuPopoverItem, AppMenuPrimaryActionItem } from '../types';
 
 interface AppMenuContextMenuProps {
   tooltipContent?: string | (() => string | undefined);
   tooltipTitle?: string | (() => string | undefined);
   anchorElement: ReactElement;
+  anchorDomElement?: HTMLElement;
   items: AppMenuPopoverItem[];
   isOpen: boolean;
   popoverWidth?: number;
   primaryActionItem?: AppMenuPrimaryActionItem;
-  secondaryActionItem?: AppMenuSecondaryActionItem;
   popoverTestId?: string;
   onClose: () => void;
   onCloseOverflowButton?: () => void;
@@ -34,12 +29,12 @@ interface AppMenuContextMenuProps {
 export const AppMenuPopover = ({
   items,
   anchorElement,
+  anchorDomElement,
   tooltipContent,
   tooltipTitle,
   isOpen,
   popoverWidth,
   primaryActionItem,
-  secondaryActionItem,
   popoverTestId = 'app-menu-popover',
   onClose,
   onCloseOverflowButton,
@@ -49,20 +44,20 @@ export const AppMenuPopover = ({
       getPopoverPanels({
         items,
         primaryActionItem,
-        secondaryActionItem,
         rootPanelWidth: popoverWidth,
         rootPopoverTestId: popoverTestId,
         onClose,
         onCloseOverflowButton,
+        anchorDomElement,
       }),
     [
       items,
       primaryActionItem,
-      secondaryActionItem,
       popoverWidth,
       popoverTestId,
       onClose,
       onCloseOverflowButton,
+      anchorDomElement,
     ]
   );
 
@@ -89,9 +84,7 @@ export const AppMenuPopover = ({
       panelPaddingSize="none"
       hasArrow={false}
       anchorPosition="downLeft"
-      aria-label={i18n.translate('core.chrome.appMenu.popoverAriaLabel', {
-        defaultMessage: 'App menu',
-      })}
+      aria-label={title || content}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
