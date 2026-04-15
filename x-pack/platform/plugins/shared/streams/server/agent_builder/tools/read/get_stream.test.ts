@@ -49,11 +49,65 @@ describe('createGetStreamTool handler', () => {
     if ('results' in result) {
       const data = result.results[0].data as Record<string, unknown>;
       expect(data.type).toBe('wired');
+      expect(data.stream_hierarchy).toBe('wired');
       expect(data.name).toBe('logs.wired');
       expect(data.fields).toBeDefined();
       expect(data.routing).toBeDefined();
       expect(data.lifecycle).toBeDefined();
       expect(data.ancestors).toBeDefined();
+    }
+  });
+
+  it('returns processing_format for wired stream with processing steps', async () => {
+    const { tool, context, streamsClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue({
+      name: 'logs.wired',
+      description: 'Stream with processing',
+      ingest: {
+        wired: { fields: {}, routing: [] },
+        processing: {
+          steps: [{ action: 'grok', from: 'message', patterns: ['%{COMBINEDAPACHELOG}'] }],
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+        lifecycle: { inherit: {} },
+        failure_store: { inherit: {} },
+      },
+    } as unknown as Streams.all.Definition);
+
+    streamsClient.getAncestors.mockResolvedValue([]);
+    streamsClient.getDescendants.mockResolvedValue([]);
+
+    const result = await tool.handler({ name: 'logs.wired' }, context);
+
+    if ('results' in result) {
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.processing_format).toBe('streamlang');
+    }
+  });
+
+  it('omits processing_format when wired stream has no processing steps', async () => {
+    const { tool, context, streamsClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue({
+      name: 'logs.wired',
+      description: 'No processing',
+      ingest: {
+        wired: { fields: {}, routing: [] },
+        processing: { steps: [], updated_at: '2024-01-01T00:00:00Z' },
+        lifecycle: { inherit: {} },
+        failure_store: { inherit: {} },
+      },
+    } as unknown as Streams.all.Definition);
+
+    streamsClient.getAncestors.mockResolvedValue([]);
+    streamsClient.getDescendants.mockResolvedValue([]);
+
+    const result = await tool.handler({ name: 'logs.wired' }, context);
+
+    if ('results' in result) {
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.processing_format).toBeUndefined();
     }
   });
 
@@ -76,6 +130,7 @@ describe('createGetStreamTool handler', () => {
     if ('results' in result) {
       const data = result.results[0].data as Record<string, unknown>;
       expect(data.type).toBe('classic');
+      expect(data.stream_hierarchy).toBe('standalone');
       expect(data.field_overrides).toBeDefined();
     }
   });

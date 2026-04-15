@@ -62,6 +62,42 @@ describe('createGetDataQualityTool handler', () => {
       expect(data.recent_failed_time_range).toEqual({ start: 'now-24h', end: 'now' });
       expect(data.quality).toBeDefined();
       expect(data.failure_store_status).toBe('inherited');
+      expect(data.interpretation).toBeDefined();
+      expect(Array.isArray(data.interpretation)).toBe(true);
+    }
+  });
+
+  it('returns interpretation mentioning processing errors when failed docs > 0', async () => {
+    const { tool, context, streamsClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(mockIngestDefinition);
+    getDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 1000 }]);
+    getDegradedDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 0 }]);
+    getFailedDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 5 }]);
+
+    const result = await tool.handler({ name: 'logs', start: 'now-24h', end: 'now' }, context);
+
+    if ('results' in result) {
+      const data = result.results[0].data as Record<string, unknown>;
+      const interpretation = data.interpretation as string[];
+      expect(interpretation.some((s) => s.includes('processing errors'))).toBe(true);
+    }
+  });
+
+  it('returns interpretation mentioning unmapped fields when degraded docs > 0', async () => {
+    const { tool, context, streamsClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(mockIngestDefinition);
+    getDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 1000 }]);
+    getDegradedDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 10 }]);
+    getFailedDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 0 }]);
+
+    const result = await tool.handler({ name: 'logs', start: 'now-24h', end: 'now' }, context);
+
+    if ('results' in result) {
+      const data = result.results[0].data as Record<string, unknown>;
+      const interpretation = data.interpretation as string[];
+      expect(interpretation.some((s) => s.includes('unmapped fields'))).toBe(true);
     }
   });
 

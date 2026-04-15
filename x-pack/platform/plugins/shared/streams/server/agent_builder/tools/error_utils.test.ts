@@ -38,6 +38,17 @@ describe('classifyError', () => {
     expect(result).toContain('inference connector');
   });
 
+  it('returns lock contention message for 409 statusCode', () => {
+    const err = Object.assign(new Error('conflict'), { statusCode: 409 });
+    expect(classifyError(err)).toContain('Another stream operation is in progress');
+  });
+
+  it('returns lock contention message for "Could not acquire lock" in message', () => {
+    expect(classifyError(new Error('Could not acquire lock on streams/apply_changes'))).toContain(
+      'Another stream operation is in progress'
+    );
+  });
+
   it('returns message with truncated details for unknown errors', () => {
     expect(classifyError(new Error('something random'))).toBe('Unexpected error: something random');
   });
