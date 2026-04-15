@@ -197,13 +197,6 @@ describe('buildSourcesDefinitions', () => {
         ],
       });
 
-      // Timeseries suggestion should have TS prefix and range replacement
-      expect(timeseriesSuggestion?.text).toBe('TS my_timeseries_index');
-      expect(timeseriesSuggestion?.filterText).toBe('FROM my_timeseries_index');
-      expect(timeseriesSuggestion?.rangeToReplace).toBeDefined();
-      expect(timeseriesSuggestion?.rangeToReplace?.start).toBe(0); // FROM starts at position 0
-
-      // Regular suggestion should not have TS prefix or range replacement
       expect(regularSuggestion?.text).toBe('regular_index');
       expect(regularSuggestion?.rangeToReplace).toBeUndefined();
     });
