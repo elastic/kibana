@@ -13,3 +13,14 @@ export const PAYMENT_SERVICE_GCS: GcsConfig = {
   bucket: GCS_BUCKET,
   basePath: 'otel-demo/payment-service-failures',
 };
+
+export const PAYMENT_UNREACHABLE_GCS: GcsConfig = {
+  bucket: GCS_BUCKET,
+  basePath: 'otel-demo/payment-unreachable',
+};
+
+export const PRODUCT_CATALOG_GCS: GcsConfig = {
+  bucket: GCS_BUCKET,
+  basePath: 'otel-demo/product-catalog',
+};
+
