@@ -85,6 +85,22 @@ describe('buildCandidateIds', () => {
     const unique = new Set(candidates);
     expect(unique.size).toBe(candidates.length);
   });
+
+  it('should strip trailing hyphens from truncated base before appending suffix', () => {
+    // Build a base that ends with a hyphen right at the truncation boundary.
+    // e.g., 253 "a"s + "-a" = 255 chars. Truncating to 253 chars yields "aaa...a-"
+    // which, without the fix, would produce "aaa...a--1" (double hyphen = invalid ID).
+    const base = 'a'.repeat(WORKFLOW_ID_MAX_LENGTH - 2) + '-a';
+    expect(base.length).toBe(WORKFLOW_ID_MAX_LENGTH);
+
+    const candidates = buildCandidateIds(base);
+
+    // Every suffixed candidate must not contain consecutive hyphens
+    for (let i = 1; i < candidates.length; i++) {
+      expect(candidates[i]).not.toMatch(/--/);
+      expect(candidates[i]).toMatch(/-\d+$/);
+    }
+  });
 });
 
 describe('resolveUniqueWorkflowIds', () => {
@@ -155,5 +171,20 @@ describe('resolveUniqueWorkflowIds', () => {
       () => Promise.resolve(dbExisting)
     );
     expect(result).toEqual(['foo-2']);
+  });
+
+  it('should handle overlapping candidate sets across base IDs', async () => {
+    // "foo" candidates include "foo-1", which is also the base ID for the
+    // second entry. The resolver must not assign "foo-1" to the first entry
+    // when the second entry already claims it.
+    const result = await resolveUniqueWorkflowIds(
+      ['foo', 'foo-1'],
+      new Set(),
+      () => Promise.resolve(new Set(['foo']))
+    );
+    // "foo" is taken in DB → first entry gets "foo-1", but "foo-1" is the
+    // second base → second entry should get "foo-1-1" to avoid collision.
+    expect(result[0]).toBe('foo-1');
+    expect(result[1]).toBe('foo-1-1');
   });
 });

@@ -12,7 +12,7 @@ import { deduplicateUserIds, partitionByIdSource, removeConflictingIds } from '.
 
 const makeEntry = (overrides: Partial<BulkWorkflowEntry> & { id: string }): BulkWorkflowEntry => ({
   idx: 0,
-  hasCustomId: false,
+  idSource: 'server-generated' as const,
   workflowData: {} as BulkWorkflowEntry['workflowData'],
   ...overrides,
 });
@@ -20,9 +20,9 @@ const makeEntry = (overrides: Partial<BulkWorkflowEntry> & { id: string }): Bulk
 describe('partitionByIdSource', () => {
   it('should partition a mixed batch into serverGenerated and userSupplied', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'server-gen', hasCustomId: false }),
-      makeEntry({ idx: 1, id: 'user-id', hasCustomId: true }),
-      makeEntry({ idx: 2, id: 'another-server', hasCustomId: false }),
+      makeEntry({ idx: 0, id: 'server-gen', idSource: 'server-generated' as const }),
+      makeEntry({ idx: 1, id: 'user-id', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 2, id: 'another-server', idSource: 'server-generated' as const }),
     ];
 
     const { serverGenerated, userSupplied } = partitionByIdSource(workflows);
@@ -36,8 +36,8 @@ describe('partitionByIdSource', () => {
 
   it('should return all entries as serverGenerated when none have custom IDs', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'a', hasCustomId: false }),
-      makeEntry({ idx: 1, id: 'b', hasCustomId: false }),
+      makeEntry({ idx: 0, id: 'a', idSource: 'server-generated' as const }),
+      makeEntry({ idx: 1, id: 'b', idSource: 'server-generated' as const }),
     ];
 
     const { serverGenerated, userSupplied } = partitionByIdSource(workflows);
@@ -48,8 +48,8 @@ describe('partitionByIdSource', () => {
 
   it('should return all entries as userSupplied when all have custom IDs', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'a', hasCustomId: true }),
-      makeEntry({ idx: 1, id: 'b', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'a', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 1, id: 'b', idSource: 'user-supplied' as const }),
     ];
 
     const { serverGenerated, userSupplied } = partitionByIdSource(workflows);
@@ -66,7 +66,7 @@ describe('partitionByIdSource', () => {
   });
 
   it('should not mutate the input array', () => {
-    const workflows = [makeEntry({ idx: 0, id: 'a', hasCustomId: true })];
+    const workflows = [makeEntry({ idx: 0, id: 'a', idSource: 'user-supplied' as const })];
     const original = [...workflows];
 
     partitionByIdSource(workflows);
@@ -78,8 +78,8 @@ describe('partitionByIdSource', () => {
 describe('removeConflictingIds', () => {
   it('should remove entries whose user-supplied ID exists in the set', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'existing', hasCustomId: true }),
-      makeEntry({ idx: 1, id: 'new-one', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'existing', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 1, id: 'new-one', idSource: 'user-supplied' as const }),
     ];
     const existingIds = new Set(['existing']);
 
@@ -97,8 +97,8 @@ describe('removeConflictingIds', () => {
 
   it('should keep all entries when none conflict', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'a', hasCustomId: true }),
-      makeEntry({ idx: 1, id: 'b', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'a', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 1, id: 'b', idSource: 'user-supplied' as const }),
     ];
 
     const { kept, removed } = removeConflictingIds(workflows, new Set());
@@ -109,8 +109,8 @@ describe('removeConflictingIds', () => {
 
   it('should remove all entries when all conflict', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'a', hasCustomId: true }),
-      makeEntry({ idx: 1, id: 'b', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'a', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 1, id: 'b', idSource: 'user-supplied' as const }),
     ];
 
     const { kept, removed } = removeConflictingIds(workflows, new Set(['a', 'b']));
@@ -121,8 +121,8 @@ describe('removeConflictingIds', () => {
 
   it('should pass through server-generated entries unconditionally', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'server-gen', hasCustomId: false }),
-      makeEntry({ idx: 1, id: 'user-conflict', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'server-gen', idSource: 'server-generated' as const }),
+      makeEntry({ idx: 1, id: 'user-conflict', idSource: 'user-supplied' as const }),
     ];
     const existingIds = new Set(['server-gen', 'user-conflict']);
 
@@ -136,8 +136,8 @@ describe('removeConflictingIds', () => {
 
   it('should remove all duplicates of a conflicting ID', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'dup', hasCustomId: true }),
-      makeEntry({ idx: 1, id: 'dup', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'dup', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 1, id: 'dup', idSource: 'user-supplied' as const }),
     ];
     const existingIds = new Set(['dup']);
 
@@ -148,7 +148,7 @@ describe('removeConflictingIds', () => {
   });
 
   it('should not mutate the input array', () => {
-    const workflows = [makeEntry({ idx: 0, id: 'existing', hasCustomId: true })];
+    const workflows = [makeEntry({ idx: 0, id: 'existing', idSource: 'user-supplied' as const })];
     const original = [...workflows];
 
     removeConflictingIds(workflows, new Set(['existing']));
@@ -160,8 +160,8 @@ describe('removeConflictingIds', () => {
 describe('deduplicateUserIds', () => {
   it('should keep all entries when there are no duplicates', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'a', hasCustomId: true }),
-      makeEntry({ idx: 1, id: 'b', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'a', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 1, id: 'b', idSource: 'user-supplied' as const }),
     ];
 
     const { kept, removed } = deduplicateUserIds(workflows);
@@ -172,8 +172,8 @@ describe('deduplicateUserIds', () => {
 
   it('should keep the first occurrence and remove later duplicates', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'same', hasCustomId: true }),
-      makeEntry({ idx: 1, id: 'same', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'same', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 1, id: 'same', idSource: 'user-supplied' as const }),
     ];
 
     const { kept, removed } = deduplicateUserIds(workflows);
@@ -190,9 +190,9 @@ describe('deduplicateUserIds', () => {
 
   it('should keep only the first of three duplicates', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'triple', hasCustomId: true }),
-      makeEntry({ idx: 1, id: 'triple', hasCustomId: true }),
-      makeEntry({ idx: 2, id: 'triple', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'triple', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 1, id: 'triple', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 2, id: 'triple', idSource: 'user-supplied' as const }),
     ];
 
     const { kept, removed } = deduplicateUserIds(workflows);
@@ -206,8 +206,8 @@ describe('deduplicateUserIds', () => {
 
   it('should never flag server-generated entries as duplicates', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'same-slug', hasCustomId: false }),
-      makeEntry({ idx: 1, id: 'same-slug', hasCustomId: false }),
+      makeEntry({ idx: 0, id: 'same-slug', idSource: 'server-generated' as const }),
+      makeEntry({ idx: 1, id: 'same-slug', idSource: 'server-generated' as const }),
     ];
 
     const { kept, removed } = deduplicateUserIds(workflows);
@@ -218,9 +218,9 @@ describe('deduplicateUserIds', () => {
 
   it('should handle mixed user-supplied and server-generated entries', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'my-id', hasCustomId: true }),
-      makeEntry({ idx: 1, id: 'server-gen', hasCustomId: false }),
-      makeEntry({ idx: 2, id: 'my-id', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'my-id', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 1, id: 'server-gen', idSource: 'server-generated' as const }),
+      makeEntry({ idx: 2, id: 'my-id', idSource: 'user-supplied' as const }),
     ];
 
     const { kept, removed } = deduplicateUserIds(workflows);
@@ -234,8 +234,8 @@ describe('deduplicateUserIds', () => {
 
   it('should not mutate the input array', () => {
     const workflows = [
-      makeEntry({ idx: 0, id: 'a', hasCustomId: true }),
-      makeEntry({ idx: 1, id: 'a', hasCustomId: true }),
+      makeEntry({ idx: 0, id: 'a', idSource: 'user-supplied' as const }),
+      makeEntry({ idx: 1, id: 'a', idSource: 'user-supplied' as const }),
     ];
     const original = [...workflows];
 

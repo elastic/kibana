@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as generateUuid } from 'uuid';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { WORKFLOW_ID_MAX_LENGTH } from '@kbn/workflows';
 import type {
   RunStepCommand,
   RunWorkflowResponseDto,
@@ -19,6 +19,7 @@ import type {
 } from '@kbn/workflows';
 import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
+import { resolveCollisionId } from '../../../../common/lib/import';
 import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
 import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
@@ -397,13 +398,7 @@ export function useWorkflowActions() {
         const conflictIdMapping = new Set(conflictIds.map((c) => c.id));
         const idMapping = new Map<string, string>();
         for (const w of workflows) {
-          let id = w.id;
-          let counter = 0;
-          // add a numeric postfix to avoid collisions with existing workflows or other workflows in the same import batch
-          while (conflictIdMapping.has(id)) {
-            const suffix = `-${++counter}`;
-            id = `${w.id.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`;
-          }
+          const id = resolveCollisionId(w.id, conflictIdMapping, `workflow-${generateUuid()}`);
           // register the resolved ID so the next workflow in the batch cannot collide with it
           conflictIdMapping.add(id);
           idMapping.set(w.originalId, id);

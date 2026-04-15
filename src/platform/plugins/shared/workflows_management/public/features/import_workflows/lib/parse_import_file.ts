@@ -12,6 +12,7 @@ import YAML from 'yaml';
 import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import {
   detectFileFormat,
+  isReservedWorkflowId,
   isUnsafeWorkflowId,
   isValidWorkflowId,
   MAX_AGGREGATE_IMPORT_BYTES,
@@ -57,7 +58,12 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
   const workflowIds: string[] = [];
   const rawWorkflows: Array<{ id: string; originalId: string; yaml: string }> = [];
   const parseErrors: string[] = [];
+  // JSZip decompresses the full archive during loadAsync, so per-entry
+  // compression-ratio checks would not prevent memory allocation. The
+  // MAX_AGGREGATE_IMPORT_BYTES (50MB) and MAX_WORKFLOW_YAML_LENGTH (1MB)
+  // caps are the effective guards against decompression bombs.
   let totalBytes = 0;
+  const encoder = new TextEncoder();
 
   const entries = Object.entries(zip.files).filter(
     ([name, entry]) => !entry.dir && name !== 'manifest.yml'
@@ -96,6 +102,13 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
       // eslint-disable-next-line no-continue
       continue;
     }
+    if (isReservedWorkflowId(originalId)) {
+      parseErrors.push(
+        `Entry [${name}] has a reserved workflow ID: must not start with reserved prefixes`
+      );
+      // eslint-disable-next-line no-continue
+      continue;
+    }
 
     let yaml: string;
     try {
@@ -106,7 +119,7 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
       continue;
     }
 
-    totalBytes += new TextEncoder().encode(yaml).byteLength;
+    totalBytes += encoder.encode(yaml).byteLength;
 
     if (totalBytes > MAX_AGGREGATE_IMPORT_BYTES) {
       throw new Error(

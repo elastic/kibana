@@ -2104,6 +2104,51 @@ steps:
       expect(result.failed).toHaveLength(1);
       expect(result.failed[0].error).toContain('document already exists');
     });
+
+    it('should block user-supplied ID that matches a soft-deleted workflow', async () => {
+      // checkExistingIds intentionally includes soft-deleted workflows
+      // (no deleted_at filter) so their IDs cannot be reassigned.
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'soft-deleted-id',
+              _source: {
+                name: 'Deleted',
+                spaceId: 'default',
+                yaml: '',
+                valid: true,
+                deleted_at: '2024-01-01T00:00:00.000Z',
+              },
+            },
+          ],
+          total: { value: 1 },
+        },
+      } as any);
+
+      const workflows = [
+        {
+          id: 'soft-deleted-id',
+          yaml: `
+name: reuse attempt
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(0);
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0].id).toBe('soft-deleted-id');
+      expect(result.failed[0].error).toContain('already exists');
+    });
   });
 
   describe('updateWorkflow', () => {

@@ -8,11 +8,12 @@
  */
 
 import { v4 as generateUuid } from 'uuid';
-import { toSlugIdentifier } from '@kbn/std';
 import { WORKFLOW_ID_MAX_LENGTH } from '@kbn/workflows';
 
 import { WorkflowValidationError } from '../../common/lib/errors';
-import { isValidWorkflowId } from '../../common/lib/import';
+import { generateWorkflowId, isValidWorkflowId } from '../../common/lib/import';
+
+export { generateWorkflowId };
 
 const MAX_COLLISION_RETRIES = 100;
 const ES_MAX_IDS_PER_QUERY = 10_000;
@@ -22,19 +23,6 @@ const ES_MAX_IDS_PER_QUERY = 10_000;
  * Returns the set of IDs that are taken.
  */
 export type CheckExistingIds = (candidateIds: string[]) => Promise<Set<string>>;
-
-/**
- * Generates a slug-based workflow ID from a name, or falls back to a UUID-based ID.
- */
-export const generateWorkflowId = (name?: string): string => {
-  if (name) {
-    const slug = toSlugIdentifier(name);
-    if (isValidWorkflowId(slug)) {
-      return slug;
-    }
-  }
-  return `workflow-${generateUuid()}`;
-};
 
 /**
  * Validates a user-supplied workflow ID format.
@@ -57,7 +45,8 @@ export const buildCandidateIds = (baseId: string): string[] => {
   const candidates = [baseId];
   for (let i = 1; i <= MAX_COLLISION_RETRIES; i++) {
     const suffix = `-${i}`;
-    candidates.push(`${baseId.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`);
+    const truncated = baseId.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length).replace(/-+$/, '');
+    candidates.push(`${truncated}${suffix}`);
   }
   return candidates;
 };
@@ -70,12 +59,26 @@ export const buildCandidateIds = (baseId: string): string[] => {
  * set to avoid collisions within the same batch.
  *
  * Chunked to stay within ES default max_result_window (10,000).
+ *
+ * @mutates seenIds — each resolved ID is added to the set so that callers
+ *   sharing the same instance across multiple invocations get cross-batch
+ *   deduplication for free.
  */
 export const resolveUniqueWorkflowIds = async (
   baseIds: string[],
   seenIds: Set<string>,
   checkExisting: CheckExistingIds
 ): Promise<string[]> => {
+  // Fast path: single ID avoids the Set/chunking overhead on every createWorkflow call.
+  if (baseIds.length === 1) {
+    const candidates = buildCandidateIds(baseIds[0]);
+    const existingIds = await checkExisting(candidates);
+    const available = candidates.find((c) => !existingIds.has(c) && !seenIds.has(c));
+    const resolvedId = available ?? `workflow-${generateUuid()}`;
+    seenIds.add(resolvedId);
+    return [resolvedId];
+  }
+
   const candidatesByIndex: string[][] = [];
   const allCandidates = new Set<string>();
 

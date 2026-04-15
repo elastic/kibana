@@ -80,7 +80,7 @@ import { WorkflowConflictError } from '../../common/lib/errors';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
-import type { BulkWorkflowEntry } from '../lib/bulk_id_helpers';
+import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
 import {
   deduplicateUserIds,
   partitionByIdSource,
@@ -419,7 +419,7 @@ export class WorkflowsService {
     options?: { overwrite?: boolean }
   ): Promise<{
     created: WorkflowDetailDto[];
-    failed: Array<{ index: number; id: string; error: string }>;
+    failed: BulkFailureEntry[];
   }> {
     await this.ensureInitialized();
 
@@ -429,7 +429,7 @@ export class WorkflowsService {
     const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
     const created: WorkflowDetailDto[] = [];
-    const failed: Array<{ index: number; id: string; error: string }> = [];
+    const failed: BulkFailureEntry[] = [];
     const validWorkflows: BulkWorkflowEntry[] = [];
 
     // Phase 1: Validate all workflows
@@ -451,7 +451,7 @@ export class WorkflowsService {
         validWorkflows.push({
           idx: i,
           id: prepared.id,
-          hasCustomId: !!workflows[i].id,
+          idSource: workflows[i].id ? 'user-supplied' : 'server-generated',
           workflowData: prepared.workflowData,
           definition: prepared.definition,
         });
@@ -488,7 +488,8 @@ export class WorkflowsService {
       });
 
       // Process bulk response
-      bulkResponse.items.forEach((item, itemIndex) => {
+      for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
+        const item = bulkResponse.items[itemIndex];
         const operation = item.index ?? item.create;
         const resolvedWorkflow = resolvedWorkflows[itemIndex];
 
@@ -509,7 +510,7 @@ export class WorkflowsService {
             )
           );
         }
-      });
+      }
     }
 
     // Phase 3: Schedule triggers for successfully created workflows (in parallel)
@@ -1856,9 +1857,9 @@ export class WorkflowsService {
     spaceId: string
   ): Promise<{
     resolvedWorkflows: BulkWorkflowEntry[];
-    failures: Array<{ index: number; id: string; error: string }>;
+    failures: BulkFailureEntry[];
   }> {
-    const failures: Array<{ index: number; id: string; error: string }> = [];
+    const failures: BulkFailureEntry[] = [];
 
     // Separate server-generated IDs (need collision resolution) from user-supplied IDs.
     // User-supplied IDs are reserved in seenIds first so that server-generated resolution

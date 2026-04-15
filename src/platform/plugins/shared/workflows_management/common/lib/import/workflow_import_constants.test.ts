@@ -12,6 +12,7 @@ import {
   isDynamicWorkflowReference,
   isUnsafeWorkflowId,
   isValidWorkflowId,
+  resolveCollisionId,
 } from '.';
 
 describe('isValidWorkflowId', () => {
@@ -146,5 +147,38 @@ describe('detectFileFormat', () => {
 
   it('should return zip for minimal PK header (exactly 2 bytes)', () => {
     expect(detectFileFormat(new Uint8Array([0x50, 0x4b]))).toBe('zip');
+  });
+});
+
+describe('resolveCollisionId', () => {
+  it('should return baseId when it does not conflict', () => {
+    expect(resolveCollisionId('my-workflow', new Set(), 'fallback')).toBe('my-workflow');
+  });
+
+  it('should append -1 when baseId conflicts', () => {
+    expect(resolveCollisionId('my-workflow', new Set(['my-workflow']), 'fallback')).toBe(
+      'my-workflow-1'
+    );
+  });
+
+  it('should skip taken suffixes and find the first available', () => {
+    const conflicts = new Set(['wf', 'wf-1', 'wf-2']);
+    expect(resolveCollisionId('wf', conflicts, 'fallback')).toBe('wf-3');
+  });
+
+  it('should return fallbackId when all 100 suffixed candidates are taken', () => {
+    const conflicts = new Set(['wf']);
+    for (let i = 1; i <= 100; i++) {
+      conflicts.add(`wf-${i}`);
+    }
+    expect(resolveCollisionId('wf', conflicts, 'my-fallback')).toBe('my-fallback');
+  });
+
+  it('should strip trailing hyphens from truncated base before appending suffix', () => {
+    // A base ending in "-" at the truncation boundary should not produce "--1"
+    const base = `${'a'.repeat(253)}-a`; // 255 chars
+    const result = resolveCollisionId(base, new Set([base]), 'fallback');
+    expect(result).not.toMatch(/--/);
+    expect(result).toMatch(/-1$/);
   });
 });

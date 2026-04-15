@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as generateUuid } from 'uuid';
-import { toSlugIdentifier } from '@kbn/std';
+import { generateWorkflowId } from '../../../../common/lib/import';
 import { isRecord } from '../../../../common/lib/type_guards';
 import { parseYamlToJSONWithoutValidation } from '../../../../common/lib/yaml';
 
@@ -44,14 +43,6 @@ function countInputs(raw: unknown): number {
   return 0;
 }
 
-export function generatePreviewId(name: string | null): string {
-  const slug = name != null ? toSlugIdentifier(name) : '';
-  if (slug.length >= 3) {
-    return slug;
-  }
-  return `workflow-${generateUuid()}`;
-}
-
 /**
  * Extracts lightweight preview metadata from a raw workflow YAML string.
  * Uses unvalidated parsing so that even partially-valid YAML produces
@@ -62,7 +53,7 @@ export function extractWorkflowPreview(yaml: string): WorkflowPreview {
 
   if (!result.success || result.json == null || typeof result.json !== 'object') {
     return {
-      id: generatePreviewId(null),
+      id: generateWorkflowId(null),
       name: null,
       description: null,
       triggers: [],
@@ -81,7 +72,7 @@ export function extractWorkflowPreview(yaml: string): WorkflowPreview {
   const stepCount = Array.isArray(json.steps) ? json.steps.length : 0;
 
   return {
-    id: generatePreviewId(nameForId),
+    id: generateWorkflowId(nameForId),
     name,
     description,
     triggers,
