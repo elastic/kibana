@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@redocly/cli": "2.21.1",
-    "bump-cli": "2.8.4"
+    "bump-cli": "2.10.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
