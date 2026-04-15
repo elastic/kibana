@@ -16,12 +16,12 @@ servers:
       port:
         default: '5601'
 paths:
-  /api/detection_engine/rules/_find_with_facets:
+  /api/detection_engine/rules/_search:
     post:
       description: >-
         Retrieve a paginated list of detection rules with KQL filter, facet
         counts, and search_after pagination.
-      operationId: FindRulesWithFacets
+      operationId: SearchRules
       requestBody:
         content:
           application/json:
@@ -30,13 +30,13 @@ paths:
               type: object
               properties:
                 aggregations:
-                  $ref: '#/components/schemas/FindRulesWithFacetsAggregations'
+                  $ref: '#/components/schemas/SearchRulesAggregations'
                 fields:
                   description: >-
                     Subset of rule attributes to return. When omitted, all
                     attributes are returned.
                   items:
-                    $ref: '#/components/schemas/FindRulesWithFacetsField'
+                    $ref: '#/components/schemas/SearchRulesField'
                   type: array
                 filter:
                   description: |
@@ -97,7 +97,7 @@ paths:
 
                     to paginate gap-filtered results instead.
                   items:
-                    $ref: '#/components/schemas/FindRulesWithFacetsSearchAfterItem'
+                    $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                   minItems: 1
                   type: array
                 sort_field:
@@ -134,7 +134,7 @@ paths:
                       at or past the default 10,000-result window) or the
                       request used `search_after`.
                     items:
-                      $ref: '#/components/schemas/FindRulesWithFacetsSearchAfterItem'
+                      $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                     type: array
                   total:
                     type: integer
@@ -149,7 +149,7 @@ paths:
                   - data
           description: Successful response
       summary: >-
-        List detection rules with KQL filter, facet counts, and search_after
+        Search detection rules with KQL filter, facet counts, and search_after
         pagination (internal)
       tags:
         - Security Detections API
@@ -690,57 +690,6 @@ components:
     FindRulesWithFacetsAggregations:
       additionalProperties: false
       description: |
-        Aggregation options on `_find_with_facets`.
-      type: object
-      properties:
-        counts:
-          description: >-
-            Facet categories for which to compute counts over the filtered +
-            searched set.
-          items:
-            $ref: '#/components/schemas/GranularRulesFacetCategory'
-          type: array
-    FindRulesWithFacetsField:
-      description: >
-        A rule attribute that can be requested via the `fields` parameter on
-        `_find_with_facets`.
-      enum:
-        - id
-        - name
-        - tags
-        - enabled
-        - alertTypeId
-        - params
-        - schedule
-        - actions
-        - createdBy
-        - updatedBy
-        - createdAt
-        - updatedAt
-        - revision
-        - executionStatus
-        - lastRun
-        - monitoring
-        - snoozeSchedule
-        - muteAll
-        - running
-        - nextRun
-      type: string
-    FindRulesWithFacetsSearchAfterItem:
-      description: |
-        One value in a `search_after` array. Elasticsearch sort values may be a
-        string, number, boolean, or null.
-      oneOf:
-        - nullable: true
-          type: string
-        - nullable: true
-          type: number
-        - nullable: true
-          type: boolean
-    GapFillStatus:
-      enum:
-        - unfilled
-        - in_progress
         - filled
         - error
       type: string
@@ -2395,6 +2344,56 @@ components:
               $ref: '#/components/schemas/KqlQueryLanguage'
           required:
             - language
+    SearchRulesAggregations:
+      additionalProperties: false
+      description: |
+        Aggregation options on `_search`.
+      type: object
+      properties:
+        counts:
+          description: >-
+            Facet categories for which to compute counts over the filtered +
+            searched set.
+          items:
+            $ref: '#/components/schemas/GranularRulesFacetCategory'
+          type: array
+    SearchRulesField:
+      description: >
+        A rule attribute that can be requested via the `fields` parameter on
+        `_search`.
+      enum:
+        - id
+        - name
+        - tags
+        - enabled
+        - alertTypeId
+        - params
+        - schedule
+        - actions
+        - createdBy
+        - updatedBy
+        - createdAt
+        - updatedAt
+        - revision
+        - executionStatus
+        - lastRun
+        - monitoring
+        - snoozeSchedule
+        - muteAll
+        - running
+        - nextRun
+      type: string
+    SearchRulesSearchAfterItem:
+      description: |
+        One value in a `search_after` array. Elasticsearch sort values may be a
+        string, number, boolean, or null.
+      oneOf:
+        - nullable: true
+          type: string
+        - nullable: true
+          type: number
+        - nullable: true
+          type: boolean
     SetupGuide:
       description: >-
         Populates the rule’s setup guide with instructions on rule prerequisites

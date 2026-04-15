@@ -50,11 +50,11 @@ export type GranularRulesFacetCategoryEnum = typeof GranularRulesFacetCategory.e
 export const GranularRulesFacetCategoryEnum = GranularRulesFacetCategory.enum;
 
 /**
-  * A rule attribute that can be requested via the `fields` parameter on `_find_with_facets`.
+  * A rule attribute that can be requested via the `fields` parameter on `_search`.
 
   */
-export type FindRulesWithFacetsField = z.infer<typeof FindRulesWithFacetsField>;
-export const FindRulesWithFacetsField = z.enum([
+export type SearchRulesField = z.infer<typeof SearchRulesField>;
+export const SearchRulesField = z.enum([
   'id',
   'name',
   'tags',
@@ -76,15 +76,15 @@ export const FindRulesWithFacetsField = z.enum([
   'running',
   'nextRun',
 ]);
-export type FindRulesWithFacetsFieldEnum = typeof FindRulesWithFacetsField.enum;
-export const FindRulesWithFacetsFieldEnum = FindRulesWithFacetsField.enum;
+export type SearchRulesFieldEnum = typeof SearchRulesField.enum;
+export const SearchRulesFieldEnum = SearchRulesField.enum;
 
 /**
-  * Aggregation options on `_find_with_facets`.
+  * Aggregation options on `_search`.
 
   */
-export type FindRulesWithFacetsAggregations = z.infer<typeof FindRulesWithFacetsAggregations>;
-export const FindRulesWithFacetsAggregations = z
+export type SearchRulesAggregations = z.infer<typeof SearchRulesAggregations>;
+export const SearchRulesAggregations = z
   .object({
     /**
      * Facet categories for which to compute counts over the filtered + searched set.

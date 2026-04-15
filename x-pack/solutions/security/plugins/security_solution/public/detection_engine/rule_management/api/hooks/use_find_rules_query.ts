@@ -13,32 +13,32 @@ import type { RuleResponse, WarningSchema } from '../../../../../common/api/dete
 import type { SortOrder } from '../../../../../common/api/detection_engine/model/sorting.gen';
 import type {
   FindRulesSortField,
-  FindRulesWithFacetsAggregations,
-  FindRulesWithFacetsField,
-  FindRulesWithFacetsSearchAfterItem,
+  SearchRulesAggregations,
+  SearchRulesField,
+  SearchRulesSearchAfterItem,
   GranularRulesSearch,
 } from '../../../../../common/api/detection_engine/rule_management';
-import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_URL_SEARCH } from '../../../../../common/constants';
 import type { PaginationOptions } from '../../logic';
-import { fetchRulesWithFacets } from '../api';
+import { fetchSearchRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 export interface FindRulesQueryArgs {
-  fields?: FindRulesWithFacetsField[];
+  fields?: SearchRulesField[];
   filter?: string;
   search?: GranularRulesSearch;
   sort_field?: FindRulesSortField;
   sort_order?: SortOrder;
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
-  aggregations?: FindRulesWithFacetsAggregations;
-  search_after?: FindRulesWithFacetsSearchAfterItem[];
+  aggregations?: SearchRulesAggregations;
+  search_after?: SearchRulesSearchAfterItem[];
   gap_fill_statuses?: GapFillStatus[];
   gaps_range_start?: string;
   gaps_range_end?: string;
   gap_auto_fill_scheduler_id?: string;
 }
 
-const FIND_RULES_QUERY_KEY = ['POST', DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS];
+const FIND_RULES_QUERY_KEY = ['POST', DETECTION_ENGINE_RULES_URL_SEARCH];
 
 export interface RulesQueryResponse {
   rules: RuleResponse[];
@@ -68,7 +68,7 @@ export const useFindRulesQuery = (
   return useQuery(
     [...FIND_RULES_QUERY_KEY, queryArgs],
     async ({ signal }) => {
-      const response = await fetchRulesWithFacets({
+      const response = await fetchSearchRules({
         signal,
         ...queryArgs,
       });

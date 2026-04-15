@@ -62,10 +62,6 @@ import type {
   ExportRulesRequestBodyInput,
 } from './detection_engine/rule_management/export_rules/export_rules_route.gen';
 import type {
-  FindRulesWithFacetsRequestBodyInput,
-  FindRulesWithFacetsResponse,
-} from './detection_engine/rule_management/find_rules_with_facets/find_rules_with_facets_route.gen';
-import type {
   FindRulesRequestQueryInput,
   FindRulesResponse,
 } from './detection_engine/rule_management/find_rules/find_rules_route.gen';
@@ -74,6 +70,10 @@ import type {
   ImportRulesResponse,
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
+import type {
+  SearchRulesRequestBodyInput,
+  SearchRulesResponse,
+} from './detection_engine/rule_management/search_rules/search_rules_route.gen';
 import type {
   ReadRuleExecutionResultsRequestParamsInput,
   ReadRuleExecutionResultsRequestBodyInput,
@@ -1659,22 +1659,6 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
-   */
-  async findRulesWithFacets(props: FindRulesWithFacetsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API FindRulesWithFacets`);
-    return this.kbnClient
-      .request<FindRulesWithFacetsResponse>({
-        path: '/api/detection_engine/rules/_find_with_facets',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Retrieves the dashboard migrations stats for all migrations stored in the system
    */
   async getAllDashboardMigrationsStats() {
@@ -3016,6 +3000,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
+   */
+  async searchRules(props: SearchRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchRules`);
+    return this.kbnClient
+      .request<SearchRulesResponse>({
+        path: '/api/detection_engine/rules/_search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Find and/or aggregate detection and attack alerts that match the given query.
    */
   async searchUnifiedAlerts(props: SearchUnifiedAlertsProps) {
@@ -3713,9 +3713,6 @@ export interface FindAssetCriticalityRecordsProps {
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
-export interface FindRulesWithFacetsProps {
-  body: FindRulesWithFacetsRequestBodyInput;
-}
 export interface GetAllTranslationStatsDashboardMigrationProps {
   params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;
 }
@@ -3900,6 +3897,9 @@ export interface SearchAlertsProps {
 }
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;
+}
+export interface SearchRulesProps {
+  body: SearchRulesRequestBodyInput;
 }
 export interface SearchUnifiedAlertsProps {
   body: SearchUnifiedAlertsRequestBodyInput;

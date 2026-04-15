@@ -1,14 +1,14 @@
 openapi: 3.0.0
 info:
-  title: Find Rules With Facets API endpoint
+  title: Search Rules API endpoint
   version: '1'
 paths:
-  /api/detection_engine/rules/_find_with_facets:
+  /api/detection_engine/rules/_search:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      operationId: FindRulesWithFacets
-      summary: List detection rules with KQL filter, facet counts, and search_after pagination (internal)
+      operationId: SearchRules
+      summary: Search detection rules with KQL filter, facet counts, and search_after pagination (internal)
       description: Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
       tags:
         - Rules API
@@ -24,13 +24,13 @@ paths:
                   type: array
                   description: Subset of rule attributes to return. When omitted, all attributes are returned.
                   items:
-                    $ref: '../granular_rules_contract.schema.yaml#/components/schemas/FindRulesWithFacetsField'
+                    $ref: '../granular_rules_contract.schema.yaml#/components/schemas/SearchRulesField'
                 filter:
                   type: string
                   description: |
                     KQL filter string.
                 aggregations:
-                  $ref: '../granular_rules_contract.schema.yaml#/components/schemas/FindRulesWithFacetsAggregations'
+                  $ref: '../granular_rules_contract.schema.yaml#/components/schemas/SearchRulesAggregations'
                 search:
                   $ref: '../granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
                 sort_field:
@@ -57,7 +57,7 @@ paths:
                     (`gap_fill_statuses`, `gaps_range_start`, `gaps_range_end`). Use `page` and `per_page`
                     to paginate gap-filtered results instead.
                   items:
-                    $ref: '#/components/schemas/FindRulesWithFacetsSearchAfterItem'
+                    $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                 gap_fill_statuses:
                   type: array
                   description: |
@@ -105,7 +105,7 @@ paths:
                       request. Only included when deep pagination applies (offset
                       at or past the default 10,000-result window) or the request used `search_after`.
                     items:
-                      $ref: '#/components/schemas/FindRulesWithFacetsSearchAfterItem'
+                      $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                   counts:
                     $ref: '../granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
                 required:
@@ -115,7 +115,7 @@ paths:
                   - data
 components:
   schemas:
-    FindRulesWithFacetsSearchAfterItem:
+    SearchRulesSearchAfterItem:
       description: |
         One value in a `search_after` array. Elasticsearch sort values may be a
         string, number, boolean, or null.
@@ -126,4 +126,3 @@ components:
           nullable: true
         - type: boolean
           nullable: true
-

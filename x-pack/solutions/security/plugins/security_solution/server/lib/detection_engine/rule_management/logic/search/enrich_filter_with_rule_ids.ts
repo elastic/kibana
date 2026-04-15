@@ -6,8 +6,7 @@
  */
 
 export function convertRuleIdsToKQL(ruleIds: string[]): string {
-  const values = ruleIds.map((ruleId) => `"alert:${ruleId}"`).join(' OR ');
-  return `alert.id: (${values})`;
+  return `${ruleIds.map((ruleId) => `alert.id: ("alert:${ruleId}")`).join(' OR ')}`;
 }
 
 /**

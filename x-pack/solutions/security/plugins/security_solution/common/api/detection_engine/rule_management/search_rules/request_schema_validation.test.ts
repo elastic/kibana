@@ -5,54 +5,54 @@
  * 2.0.
  */
 
-import type { FindRulesWithFacetsRequestBodyInput } from './find_rules_with_facets_route.gen';
+import type { SearchRulesRequestBodyInput } from './search_rules_route.gen';
 import {
-  MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH,
-  MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH,
-  validateFindRulesWithFacetsKqlFilter,
-  validateFindRulesWithFacetsRequestBody,
+  MAX_SEARCH_RULES_FILTER_KQL_LENGTH,
+  MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
+  validateSearchRulesKqlFilter,
+  validateSearchRulesRequestBody,
 } from './request_schema_validation';
 
-describe('validateFindRulesWithFacetsKqlFilter', () => {
+describe('validateSearchRulesKqlFilter', () => {
   it('accepts empty and whitespace filter', () => {
-    expect(validateFindRulesWithFacetsKqlFilter(undefined)).toEqual([]);
-    expect(validateFindRulesWithFacetsKqlFilter('')).toEqual([]);
-    expect(validateFindRulesWithFacetsKqlFilter('   ')).toEqual([]);
+    expect(validateSearchRulesKqlFilter(undefined)).toEqual([]);
+    expect(validateSearchRulesKqlFilter('')).toEqual([]);
+    expect(validateSearchRulesKqlFilter('   ')).toEqual([]);
   });
 
   it('accepts valid KQL with alert.attributes prefix', () => {
-    expect(validateFindRulesWithFacetsKqlFilter('alert.attributes.enabled: true')).toEqual([]);
-    expect(validateFindRulesWithFacetsKqlFilter('alert.attributes.name: "My rule"')).toEqual([]);
+    expect(validateSearchRulesKqlFilter('alert.attributes.enabled: true')).toEqual([]);
+    expect(validateSearchRulesKqlFilter('alert.attributes.name: "My rule"')).toEqual([]);
   });
 
   it('returns an error for syntactically invalid KQL', () => {
-    const errors = validateFindRulesWithFacetsKqlFilter('alert.attributes.name: (');
+    const errors = validateSearchRulesKqlFilter('alert.attributes.name: (');
     expect(errors).toHaveLength(1);
     expect(errors[0]).toContain('invalid KQL filter');
   });
 
   it('returns an error when filter exceeds max length', () => {
-    const filler = 'a'.repeat(MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH);
-    const errors = validateFindRulesWithFacetsKqlFilter(`${filler}x`);
+    const filler = 'a'.repeat(MAX_SEARCH_RULES_FILTER_KQL_LENGTH);
+    const errors = validateSearchRulesKqlFilter(`${filler}x`);
     expect(errors).toEqual([
-      `filter exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH}`,
+      `filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`,
     ]);
   });
 });
 
-describe('validateFindRulesWithFacetsRequestBody', () => {
-  const defaultInput: FindRulesWithFacetsRequestBodyInput = {
+describe('validateSearchRulesRequestBody', () => {
+  const defaultInput: SearchRulesRequestBodyInput = {
     page: 1,
     per_page: 20,
   };
 
   it('accepts body without search or filter', () => {
-    expect(validateFindRulesWithFacetsRequestBody(defaultInput)).toEqual([]);
+    expect(validateSearchRulesRequestBody(defaultInput)).toEqual([]);
   });
 
   it('accepts search with term and legacy mode', () => {
     expect(
-      validateFindRulesWithFacetsRequestBody({
+      validateSearchRulesRequestBody({
         ...defaultInput,
         search: { term: 'hello', mode: 'legacy' },
       })
@@ -61,7 +61,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
 
   it('accepts search with term only', () => {
     expect(
-      validateFindRulesWithFacetsRequestBody({
+      validateSearchRulesRequestBody({
         ...defaultInput,
         search: { term: 'abc' },
       })
@@ -69,9 +69,9 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
   });
 
   it('accepts search.term at max length', () => {
-    const term = 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH);
+    const term = 'x'.repeat(MAX_SEARCH_RULES_SEARCH_TERM_LENGTH);
     expect(
-      validateFindRulesWithFacetsRequestBody({
+      validateSearchRulesRequestBody({
         ...defaultInput,
         search: { term, mode: 'legacy' },
       })
@@ -79,19 +79,19 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
   });
 
   it('rejects search.term over max length', () => {
-    const errors = validateFindRulesWithFacetsRequestBody({
+    const errors = validateSearchRulesRequestBody({
       ...defaultInput,
       search: {
-        term: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1),
+        term: 'x'.repeat(MAX_SEARCH_RULES_SEARCH_TERM_LENGTH + 1),
       },
     });
     expect(errors).toContain(
-      `search.term exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
+      `search.term exceeds maximum length of ${MAX_SEARCH_RULES_SEARCH_TERM_LENGTH}`
     );
   });
 
   it('rejects invalid filter KQL', () => {
-    const errors = validateFindRulesWithFacetsRequestBody({
+    const errors = validateSearchRulesRequestBody({
       ...defaultInput,
       filter: 'not kql :',
     });
@@ -100,7 +100,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
 
   it('rejects search_after without sort_field and sort_order', () => {
     expect(
-      validateFindRulesWithFacetsRequestBody({
+      validateSearchRulesRequestBody({
         ...defaultInput,
         search_after: [100000, 'abcde'],
       })
@@ -108,18 +108,18 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
   });
 
   it('rejects unsupported search.mode', () => {
-    const errors = validateFindRulesWithFacetsRequestBody({
+    const errors = validateSearchRulesRequestBody({
       ...defaultInput,
       search: {
         term: 'x',
         mode: 'vector',
-      } as unknown as FindRulesWithFacetsRequestBodyInput['search'],
+      } as unknown as SearchRulesRequestBodyInput['search'],
     });
     expect(errors).toContain('unsupported search.mode "vector"');
   });
 
   it('rejects duplicate entries in aggregations.counts', () => {
-    const errors = validateFindRulesWithFacetsRequestBody({
+    const errors = validateSearchRulesRequestBody({
       ...defaultInput,
       aggregations: { counts: ['tags', 'tags'] },
     });
@@ -128,7 +128,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
 
   it('accepts aggregations.counts with distinct categories', () => {
     expect(
-      validateFindRulesWithFacetsRequestBody({
+      validateSearchRulesRequestBody({
         ...defaultInput,
         aggregations: { counts: ['tags'] },
       })
@@ -137,7 +137,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
 
   it('accepts gap_fill_statuses with both gaps_range_start and gaps_range_end', () => {
     expect(
-      validateFindRulesWithFacetsRequestBody({
+      validateSearchRulesRequestBody({
         ...defaultInput,
         gap_fill_statuses: ['unfilled'],
         gaps_range_start: '2024-01-01T00:00:00Z',
@@ -148,7 +148,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
 
   it('accepts gap params with optional gap_auto_fill_scheduler_id', () => {
     expect(
-      validateFindRulesWithFacetsRequestBody({
+      validateSearchRulesRequestBody({
         ...defaultInput,
         gap_fill_statuses: ['unfilled', 'error'],
         gaps_range_start: '2024-01-01T00:00:00Z',
@@ -159,7 +159,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
   });
 
   it('rejects gap_fill_statuses without gaps_range_start and gaps_range_end', () => {
-    const errors = validateFindRulesWithFacetsRequestBody({
+    const errors = validateSearchRulesRequestBody({
       ...defaultInput,
       gap_fill_statuses: ['unfilled'],
     });
@@ -169,7 +169,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
   });
 
   it('rejects gaps_range_start and gaps_range_end without gap_fill_statuses', () => {
-    const errors = validateFindRulesWithFacetsRequestBody({
+    const errors = validateSearchRulesRequestBody({
       ...defaultInput,
       gaps_range_start: '2024-01-01T00:00:00Z',
       gaps_range_end: '2024-01-02T00:00:00Z',
@@ -180,7 +180,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
   });
 
   it('rejects gap_fill_statuses with only gaps_range_start', () => {
-    const errors = validateFindRulesWithFacetsRequestBody({
+    const errors = validateSearchRulesRequestBody({
       ...defaultInput,
       gap_fill_statuses: ['filled'],
       gaps_range_start: '2024-01-01T00:00:00Z',
@@ -191,7 +191,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
   });
 
   it('rejects search_after when gap filtering is active', () => {
-    const errors = validateFindRulesWithFacetsRequestBody({
+    const errors = validateSearchRulesRequestBody({
       ...defaultInput,
       sort_field: 'name',
       sort_order: 'asc',
@@ -207,7 +207,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
 
   it('accepts search_after when gap filtering is not active', () => {
     expect(
-      validateFindRulesWithFacetsRequestBody({
+      validateSearchRulesRequestBody({
         ...defaultInput,
         sort_field: 'name',
         sort_order: 'asc',
@@ -218,7 +218,7 @@ describe('validateFindRulesWithFacetsRequestBody', () => {
 
   it('accepts gap filtering without search_after', () => {
     expect(
-      validateFindRulesWithFacetsRequestBody({
+      validateSearchRulesRequestBody({
         ...defaultInput,
         gap_fill_statuses: ['unfilled'],
         gaps_range_start: '2024-01-01T00:00:00Z',

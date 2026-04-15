@@ -25,10 +25,10 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type {
   CoverageOverviewFilter,
-  FindRulesWithFacetsAggregations,
-  FindRulesWithFacetsField,
-  FindRulesWithFacetsResponse,
-  FindRulesWithFacetsSearchAfterItem,
+  SearchRulesAggregations,
+  SearchRulesField,
+  SearchRulesResponse,
+  SearchRulesSearchAfterItem,
   GranularRulesSearch,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
@@ -120,15 +120,15 @@ export interface FetchRulesResponse {
   warnings?: WarningSchema[];
 }
 
-export interface FetchRulesWithFacetsProps {
+export interface FetchSearchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
-  fields?: FindRulesWithFacetsField[];
+  fields?: SearchRulesField[];
   filter?: string;
   search?: GranularRulesSearch;
   sort_field?: z.infer<typeof FindRulesSortField>;
   sort_order?: z.infer<typeof SortOrder>;
-  aggregations?: FindRulesWithFacetsAggregations;
-  search_after?: FindRulesWithFacetsSearchAfterItem[];
+  aggregations?: SearchRulesAggregations;
+  search_after?: SearchRulesSearchAfterItem[];
   gap_fill_statuses?: GapFillStatus[];
   gaps_range_start?: string;
   gaps_range_end?: string;
@@ -136,7 +136,7 @@ export interface FetchRulesWithFacetsProps {
   signal?: AbortSignal;
 }
 
-export type FetchRulesWithFacetsResponse = FindRulesWithFacetsResponse;
+export type FetchSearchRulesResponse = SearchRulesResponse;
 
 export interface FetchRuleProps {
   id: string;

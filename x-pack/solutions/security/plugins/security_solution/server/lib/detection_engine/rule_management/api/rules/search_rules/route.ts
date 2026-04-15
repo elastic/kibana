@@ -10,20 +10,22 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
 import { MAX_RESULTS_WINDOW } from '../../../../../../usage/constants';
 import {
-  DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
+  DETECTION_ENGINE_RULES_URL_SEARCH,
   MAX_RULES_WITH_GAPS_TO_FETCH,
   MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+  EXCLUDED_GAP_REASONS_KEY,
 } from '../../../../../../../common/constants';
 import type {
-  FindRulesWithFacetsField,
-  FindRulesWithFacetsResponse,
+  SearchRulesField,
+  SearchRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import {
-  FindRulesWithFacetsRequestBody,
-  validateFindRulesWithFacetsRequestBody,
+  SearchRulesRequestBody,
+  validateSearchRulesRequestBody,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
@@ -36,7 +38,7 @@ import {
 import { buildSiemResponse } from '../../../../routes/utils';
 import { transformFindAlerts } from '../../../utils/utils';
 
-const REQUIRED_TRANSFORM_FIELDS: readonly FindRulesWithFacetsField[] = [
+const REQUIRED_TRANSFORM_FIELDS: readonly SearchRulesField[] = [
   'schedule',
   'params',
   'updatedAt',
@@ -46,7 +48,7 @@ const REQUIRED_TRANSFORM_FIELDS: readonly FindRulesWithFacetsField[] = [
 interface GapPreFilterResult {
   ruleIds?: string[];
   warnings?: WarningSchema[];
-  emptyResult?: FindRulesWithFacetsResponse;
+  emptyResult?: SearchRulesResponse;
 }
 
 const resolveGapPreFilter = async ({
@@ -57,23 +59,25 @@ const resolveGapPreFilter = async ({
   gapFillStatuses,
   gapsRangeStart,
   gapsRangeEnd,
+  excludedReasons,
   schedulerId,
   page,
   perPage,
 }: {
-  body: FindRulesWithFacetsRequestBody;
+  body: SearchRulesRequestBody;
   rulesClient: Parameters<typeof getGapFilteredRuleIds>[0]['rulesClient'];
   filter: string | undefined;
-  sortField: FindRulesWithFacetsRequestBody['sort_field'];
-  sortOrder: FindRulesWithFacetsRequestBody['sort_order'];
+  sortField: SearchRulesRequestBody['sort_field'];
+  sortOrder: SearchRulesRequestBody['sort_order'];
   gapFillStatuses?: GapFillStatus[];
   gapsRangeStart?: string;
   gapsRangeEnd?: string;
+  excludedReasons?: GapReasonType[];
   schedulerId?: string;
   page: number;
   perPage: number;
 }): Promise<GapPreFilterResult> => {
-  if (!gapFillStatuses || !gapsRangeStart || !gapsRangeEnd || !schedulerId) {
+  if (!gapFillStatuses || !gapsRangeStart || !gapsRangeEnd) {
     return {};
   }
 
@@ -85,6 +89,7 @@ const resolveGapPreFilter = async ({
     filter,
     sortField,
     sortOrder,
+    excludedReasons,
     schedulerId,
   });
 
@@ -115,18 +120,18 @@ const resolveGapPreFilter = async ({
 };
 
 const resolveEffectiveFields = (
-  fields: FindRulesWithFacetsField[] | undefined
+  fields: SearchRulesField[] | undefined
 ): string[] | undefined =>
   fields?.length ? Array.from(new Set([...fields, ...REQUIRED_TRANSFORM_FIELDS])) : undefined;
 
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
  */
-export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       access: 'internal',
-      path: DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
+      path: DETECTION_ENGINE_RULES_URL_SEARCH,
       security: {
         authz: {
           requiredPrivileges: [RULES_API_READ],
@@ -138,14 +143,14 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(FindRulesWithFacetsRequestBody),
+            body: buildRouteValidationWithZod(SearchRulesRequestBody),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<FindRulesWithFacetsResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<SearchRulesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        const validationErrors = validateFindRulesWithFacetsRequestBody(request.body);
+        const validationErrors = validateSearchRulesRequestBody(request.body);
         if (validationErrors.length) {
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
@@ -183,6 +188,11 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
             !hasGapFilters &&
             (page * perPage >= MAX_RESULTS_WINDOW || searchAfterParam);
 
+          const uiSettingsClient = ctx.core.uiSettings.client;
+          const excludedReasons = hasGapFilters
+            ? await uiSettingsClient.get<GapReasonType[]>(EXCLUDED_GAP_REASONS_KEY)
+            : undefined;
+
           const gapPreFilter = await resolveGapPreFilter({
             body: request.body,
             rulesClient,
@@ -192,6 +202,7 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
             gapFillStatuses,
             gapsRangeStart,
             gapsRangeEnd,
+            excludedReasons,
             schedulerId,
             page,
             perPage,
@@ -231,7 +242,7 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
 
           const transformedRules = transformFindAlerts(rules, warnings);
 
-          const responseBody: FindRulesWithFacetsResponse = {
+          const responseBody: SearchRulesResponse = {
             ...transformedRules,
             ...(counts ? { counts } : {}),
             ...(shouldUseSearchAfter ? { search_after: rules.searchAfter } : {}),

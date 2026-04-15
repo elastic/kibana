@@ -8,18 +8,18 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import type { FindRulesRequestQueryInput } from '../find_rules/find_rules_route.gen';
 import { validateFindRulesRequestQuery } from '../find_rules/request_schema_validation';
-import type { FindRulesWithFacetsRequestBodyInput } from './find_rules_with_facets_route.gen';
+import type { SearchRulesRequestBodyInput } from './search_rules_route.gen';
 
-export const MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH = 1000;
+export const MAX_SEARCH_RULES_SEARCH_TERM_LENGTH = 1000;
 
-export const MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH = 10_000;
+export const MAX_SEARCH_RULES_FILTER_KQL_LENGTH = 10_000;
 
-export const validateFindRulesWithFacetsKqlFilter = (filter: string | undefined): string[] => {
+export const validateSearchRulesKqlFilter = (filter: string | undefined): string[] => {
   if (filter == null || filter.trim() === '') {
     return [];
   }
-  if (filter.length > MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH) {
-    return [`filter exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_FILTER_KQL_LENGTH}`];
+  if (filter.length > MAX_SEARCH_RULES_FILTER_KQL_LENGTH) {
+    return [`filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`];
   }
   try {
     fromKueryExpression(filter);
@@ -30,7 +30,7 @@ export const validateFindRulesWithFacetsKqlFilter = (filter: string | undefined)
   }
 };
 
-const validateSearchAfterRequiresSort = (body: FindRulesWithFacetsRequestBodyInput): string[] => {
+const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInput): string[] => {
   const searchAfter = body.search_after;
   if (searchAfter == null || searchAfter.length === 0) {
     return [];
@@ -42,7 +42,7 @@ const validateSearchAfterRequiresSort = (body: FindRulesWithFacetsRequestBodyInp
 };
 
 const validateAggregationsCountsUnique = (
-  aggregations: FindRulesWithFacetsRequestBodyInput['aggregations']
+  aggregations: SearchRulesRequestBodyInput['aggregations']
 ): string[] => {
   const counts = aggregations?.counts;
   if (counts == null || counts.length === 0) {
@@ -54,21 +54,14 @@ const validateAggregationsCountsUnique = (
   return [];
 };
 
-export const validateFindRulesWithFacetsRequestBody = (
-  body: FindRulesWithFacetsRequestBodyInput
-): string[] => {
+export const validateSearchRulesRequestBody = (body: SearchRulesRequestBodyInput): string[] => {
   const errors = [...validateFindRulesRequestQuery(body as FindRulesRequestQueryInput)];
 
-  if (
-    body.search != null &&
-    body.search.term.length > MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH
-  ) {
-    errors.push(
-      `search.term exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
-    );
+  if (body.search != null && body.search.term.length > MAX_SEARCH_RULES_SEARCH_TERM_LENGTH) {
+    errors.push(`search.term exceeds maximum length of ${MAX_SEARCH_RULES_SEARCH_TERM_LENGTH}`);
   }
 
-  errors.push(...validateFindRulesWithFacetsKqlFilter(body.filter));
+  errors.push(...validateSearchRulesKqlFilter(body.filter));
   errors.push(...validateSearchAfterRequiresSort(body));
   errors.push(...validateAggregationsCountsUnique(body.aggregations));
 

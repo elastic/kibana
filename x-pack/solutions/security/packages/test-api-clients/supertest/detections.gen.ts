@@ -33,7 +33,6 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/export_rules/export_rules_route.gen';
 import type { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
 import type { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
-import type { FindRulesWithFacetsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules_with_facets/find_rules_with_facets_route.gen';
 import type { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import type {
@@ -51,6 +50,7 @@ import type {
   RulePreviewRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
+import type { SearchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/search_rules/search_rules_route.gen';
 import type { SearchUnifiedAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/unified_alerts/search/search_route.gen';
 import type { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
@@ -259,17 +259,6 @@ finalize it.
       .query(props.query);
   },
   /**
-   * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
-   */
-  findRulesWithFacets(props: FindRulesWithFacetsProps, kibanaSpace: string = 'default') {
-    return supertest
-      .post(getRouteUrlForSpace('/api/detection_engine/rules/_find_with_facets', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body as object);
-  },
-  /**
       * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
@@ -469,6 +458,17 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .send(props.body as object);
   },
   /**
+   * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
+   */
+  searchRules(props: SearchRulesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/rules/_search', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
    * Find and/or aggregate detection and attack alerts that match the given query.
    */
   searchUnifiedAlerts(props: SearchUnifiedAlertsProps, kibanaSpace: string = 'default') {
@@ -637,9 +637,6 @@ export interface FinalizeAlertsMigrationProps {
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
-export interface FindRulesWithFacetsProps {
-  body: FindRulesWithFacetsRequestBodyInput;
-}
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
 }
@@ -666,6 +663,9 @@ export interface RulePreviewProps {
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchRulesProps {
+  body: SearchRulesRequestBodyInput;
 }
 export interface SearchUnifiedAlertsProps {
   body: SearchUnifiedAlertsRequestBodyInput;

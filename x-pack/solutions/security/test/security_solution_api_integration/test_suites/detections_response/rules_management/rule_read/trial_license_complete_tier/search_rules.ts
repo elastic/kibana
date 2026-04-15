@@ -11,8 +11,8 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
-import { DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS } from '@kbn/security-solution-plugin/common/constants';
-import { MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import { DETECTION_ENGINE_RULES_URL_SEARCH } from '@kbn/security-solution-plugin/common/constants';
+import { MAX_SEARCH_RULES_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { getSimpleRule } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -20,21 +20,21 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  const findRulesWithFacets = (requestBody: Record<string, unknown>) =>
+  const searchRules = (requestBody: Record<string, unknown>) =>
     supertest
-      .post(DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS)
+      .post(DETECTION_ENGINE_RULES_URL_SEARCH)
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(requestBody);
 
-  describe('@ess @serverless @skipInServerlessMKI find_rules_with_facets', () => {
+  describe('@ess @serverless @skipInServerlessMKI search_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
 
     it('returns an empty page when no rules exist', async () => {
-      const { body } = await findRulesWithFacets({}).expect(200);
+      const { body } = await searchRules({}).expect(200);
       expect(body).to.eql({
         data: [],
         page: 1,
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
         tags: ['match'],
       });
 
-      const { body } = await findRulesWithFacets({
+      const { body } = await searchRules({
         filter: 'tags: match',
         search: { term: 'Simple', mode: 'legacy' },
       }).expect(200);
@@ -75,13 +75,13 @@ export default ({ getService }: FtrProviderContext): void => {
         name: 'Friendly Field Test',
       });
 
-      const friendly = await findRulesWithFacets({
+      const friendly = await searchRules({
         filter: 'enabled: true',
       }).expect(200);
       expect(friendly.body.total).to.be(1);
       expect(friendly.body.data[0].name).to.be('Friendly Field Test');
 
-      const fullPath = await findRulesWithFacets({
+      const fullPath = await searchRules({
         filter: 'alert.attributes.enabled: true',
       }).expect(200);
       expect(fullPath.body.total).to.be(1);
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, { ...getSimpleRule('enabled-rule'), enabled: true });
       await createRule(supertest, log, { ...getSimpleRule('enabled-rule-2'), enabled: true });
       await createRule(supertest, log, { ...getSimpleRule('disabled-rule'), enabled: false });
-      const { body } = await findRulesWithFacets({
+      const { body } = await searchRules({
         aggregations: { counts: ['enabled'] },
       }).expect(200);
       expect(body.total).to.be(3);
@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(bucketValues['0']).to.be(1);
       expect(bucketValues['1']).to.be(2);
 
-      const { body: filteredBody } = await findRulesWithFacets({
+      const { body: filteredBody } = await searchRules({
         filter: 'enabled: true',
         aggregations: { counts: ['enabled'] },
       }).expect(200);
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
         tags: ['field-test-tag'],
       });
 
-      const { body } = await findRulesWithFacets({
+      const { body } = await searchRules({
         fields: ['name', 'tags', 'enabled'],
       }).expect(200);
 
@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('returns all fields when fields parameter is omitted', async () => {
       await createRule(supertest, log, getSimpleRule('all-fields-test', true));
 
-      const { body } = await findRulesWithFacets({}).expect(200);
+      const { body } = await searchRules({}).expect(200);
 
       expect(body.total).to.be(1);
       const rule = body.data[0] as Record<string, unknown>;
@@ -153,7 +153,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns 400 for invalid KQL filter', async () => {
-      const { body } = await findRulesWithFacets({
+      const { body } = await searchRules({
         filter: 'alert.attributes.name: (',
       }).expect(400);
       expect(body.status_code).to.be(400);
@@ -162,14 +162,14 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns 400 for unsupported sort_field', async () => {
-      await findRulesWithFacets({
+      await searchRules({
         sort_field: 'not_a_supported_field',
         sort_order: 'asc',
       }).expect(400);
     });
 
     it('returns 400 when search_after is provided without sort_field and sort_order', async () => {
-      const { body } = await findRulesWithFacets({
+      const { body } = await searchRules({
         search_after: ['nonsense-sort-token'],
       }).expect(400);
       expect(body.status_code).to.be(400);
@@ -191,7 +191,7 @@ export default ({ getService }: FtrProviderContext): void => {
         name: 'Zzz facets cursor rule',
       });
 
-      const first = await findRulesWithFacets({
+      const first = await searchRules({
         per_page: 1,
         page: 1,
         sort_field: 'name',
@@ -203,7 +203,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(first.body.data[0].name).to.be('Aaa facets cursor rule');
       expect(first.body.search_after).to.be(undefined);
 
-      const second = await findRulesWithFacets({
+      const second = await searchRules({
         per_page: 1,
         page: 2,
         sort_field: 'name',
@@ -217,15 +217,15 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns 400 when search.term exceeds max length', async () => {
-      const { body } = await findRulesWithFacets({
-        search: { term: 'x'.repeat(MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH + 1) },
+      const { body } = await searchRules({
+        search: { term: 'x'.repeat(MAX_SEARCH_RULES_SEARCH_TERM_LENGTH + 1) },
       }).expect(400);
       expect(body.status_code).to.be(400);
       expect(body.message).to.be.an('array');
       expect(
         (body.message as string[]).some((m) =>
           m.includes(
-            `search.term exceeds maximum length of ${MAX_FIND_RULES_WITH_FACETS_SEARCH_TERM_LENGTH}`
+            `search.term exceeds maximum length of ${MAX_SEARCH_RULES_SEARCH_TERM_LENGTH}`
           )
         )
       ).to.be(true);

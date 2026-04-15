@@ -17,7 +17,7 @@ import type {
   BasicFetchProps,
   FetchRuleProps,
   FetchRulesResponse,
-  FetchRulesWithFacetsProps,
+  FetchSearchRulesProps,
   FetchRulesProps,
 } from '../../logic/types';
 
@@ -57,8 +57,8 @@ export const fetchRuleById = jest.fn(
 export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>
   Promise.resolve(rulesMock);
 
-export const fetchRulesWithFacets = async (
-  _: FetchRulesWithFacetsProps
+export const fetchSearchRules = async (
+  _: FetchSearchRulesProps
 ): Promise<FetchRulesResponse> => Promise.resolve(rulesMock);
 
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>

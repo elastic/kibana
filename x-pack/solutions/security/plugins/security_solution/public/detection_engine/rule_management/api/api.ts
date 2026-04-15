@@ -66,7 +66,7 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
-  DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
+  DETECTION_ENGINE_RULES_URL_SEARCH,
 } from '../../../../common/constants';
 
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
@@ -83,8 +83,8 @@ import type {
   FetchCoverageOverviewProps,
   FetchRuleProps,
   FetchRuleSnoozingProps,
-  FetchRulesWithFacetsProps,
-  FetchRulesWithFacetsResponse,
+  FetchSearchRulesProps,
+  FetchSearchRulesResponse,
   FetchRulesProps,
   FetchRulesResponse,
   FindRulesReferencedByExceptionsProps,
@@ -250,7 +250,7 @@ export const fetchRules = async ({
  *
  * @throws An error if response is not OK
  */
-export const fetchRulesWithFacets = async ({
+export const fetchSearchRules = async ({
   fields,
   filter = '',
   search,
@@ -267,7 +267,7 @@ export const fetchRulesWithFacets = async ({
   gaps_range_start,
   gaps_range_end,
   gap_auto_fill_scheduler_id,
-}: FetchRulesWithFacetsProps): Promise<FetchRulesWithFacetsResponse> => {
+}: FetchSearchRulesProps): Promise<FetchSearchRulesResponse> => {
   const body = {
     page: pagination.page,
     per_page: pagination.perPage,
@@ -284,8 +284,8 @@ export const fetchRulesWithFacets = async ({
     ...(gap_auto_fill_scheduler_id ? { gap_auto_fill_scheduler_id } : {}),
   };
 
-  return KibanaServices.get().http.fetch<FetchRulesWithFacetsResponse>(
-    DETECTION_ENGINE_RULES_URL_FIND_WITH_FACETS,
+  return KibanaServices.get().http.fetch<FetchSearchRulesResponse>(
+    DETECTION_ENGINE_RULES_URL_SEARCH,
     {
       method: 'POST',
       version: '1',

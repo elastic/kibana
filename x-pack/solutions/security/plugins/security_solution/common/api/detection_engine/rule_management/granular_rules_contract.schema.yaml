@@ -39,10 +39,10 @@ components:
         - lastRunStatus
         - lastRunStatusReasonType
 
-    FindRulesWithFacetsField:
+    SearchRulesField:
       type: string
       description: |
-        A rule attribute that can be requested via the `fields` parameter on `_find_with_facets`.
+        A rule attribute that can be requested via the `fields` parameter on `_search`.
       enum:
         - id
         - name
@@ -65,11 +65,11 @@ components:
         - running
         - nextRun
 
-    FindRulesWithFacetsAggregations:
+    SearchRulesAggregations:
       type: object
       additionalProperties: false
       description: |
-        Aggregation options on `_find_with_facets`.
+        Aggregation options on `_search`.
       properties:
         counts:
           type: array
