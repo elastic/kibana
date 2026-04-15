@@ -14,6 +14,7 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { createPrebuiltRuleAssetsClient } from '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { PrebuiltRuleAsset } from '../../lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset';
+import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
 
 const findPrebuiltRulesSchema = z.object({
   search: z
@@ -144,7 +145,21 @@ export const findPrebuiltRulesTool = (
         );
 
         const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
-        const allRules = await ruleAssetsClient.fetchLatestAssets();
+        let allRules = await ruleAssetsClient.fetchLatestAssets();
+
+        if (allRules.length === 0) {
+          logger.debug(
+            `${SECURITY_FIND_PREBUILT_RULES_TOOL_ID} tool: No prebuilt rule assets found. Installing ${PREBUILT_RULES_PACKAGE_NAME} Fleet package.`
+          );
+
+          const [, startPlugins] = await core.getStartServices();
+
+          await startPlugins.fleet?.packageService.asInternalUser.ensureInstalledPackage({
+            pkgName: PREBUILT_RULES_PACKAGE_NAME,
+          });
+
+          allRules = await ruleAssetsClient.fetchLatestAssets();
+        }
 
         let filtered = allRules;
 

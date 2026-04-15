@@ -30,12 +30,42 @@ import { createPrebuiltRuleAssetsClient } from '../../lib/detection_engine/prebu
 import { fetchRulesByQueryOrIds } from '../../lib/detection_engine/rule_management/api/rules/bulk_actions/fetch_rules_by_query_or_ids';
 import { bulkEnableDisableRules } from '../../lib/detection_engine/rule_management/api/rules/bulk_actions/bulk_enable_disable_rules';
 import { bulkEditRules } from '../../lib/detection_engine/rule_management/logic/bulk_actions/bulk_edit_rules';
+import { findRules } from '../../lib/detection_engine/rule_management/logic/search/find_rules';
 import type { ProductFeaturesService } from '../../lib/product_features_service';
 import type { RuleAlertType } from '../../lib/detection_engine/rule_schema';
 
-const MAX_RULES_PER_BULK_ACTION = 50;
+const MAX_RULES_PER_BULK_ACTION = 1000;
 
-type BulkAction = 'enable' | 'disable' | 'delete' | 'add_tags' | 'delete_tags' | 'set_tags';
+const bulkActionsSchema = z.object({
+  action: z
+    .enum(['enable', 'disable', 'delete', 'add_tags', 'delete_tags', 'set_tags'])
+    .describe(
+      'The bulk action to perform. "enable" enables rules, "disable" disables rules, "delete" deletes rules, "add_tags" adds tags to rules, "delete_tags" removes tags from rules, "set_tags" overwrites all tags on rules.'
+    ),
+  ids: z
+    .array(z.string())
+    .min(1)
+    .max(MAX_RULES_PER_BULK_ACTION)
+    .optional()
+    .describe(
+      'Array of rule saved object IDs (the alerting framework "id") to apply the action to. At least one of "rule_ids" or "rule_signature_ids" must be provided.'
+    ),
+  rule_ids: z
+    .array(z.string())
+    .min(1)
+    .max(MAX_RULES_PER_BULK_ACTION)
+    .optional()
+    .describe(
+      'Array of rule signature IDs ("rule_id") to apply the action to. At least one of "rule_ids" or "rule_signature_ids" must be provided.'
+    ),
+  tags: z
+    .array(z.string())
+    .min(1)
+    .optional()
+    .describe(
+      'Tags to add, remove, or set. Required for add_tags, delete_tags, and set_tags actions. Ignored for enable, disable, and delete actions.'
+    ),
+});
 
 interface ActionDependencies {
   rulesClient: RulesClient;
@@ -47,29 +77,210 @@ interface ActionDependencies {
   productFeaturesService: ProductFeaturesService;
 }
 
-const bulkActionsSchema = z.object({
-  action: z
-    .enum(['enable', 'disable', 'delete', 'add_tags', 'delete_tags', 'set_tags'])
-    .describe(
-      'The bulk action to perform. "enable" enables rules, "disable" disables rules, "delete" deletes rules, "add_tags" adds tags to rules, "delete_tags" removes tags from rules, "set_tags" overwrites all tags on rules.'
-    ),
-  rule_ids: z
-    .array(z.string())
-    .min(1)
-    .max(MAX_RULES_PER_BULK_ACTION)
-    .describe(
-      'Array of rule IDs (the alerting framework "id", not "rule_id") to apply the action to. Use the alerts tool or find_prebuilt_rules tool to discover rule IDs first.'
-    ),
-  tags: z
-    .array(z.string())
-    .min(1)
-    .optional()
-    .describe(
-      'Tags to add, remove, or set. Required for add_tags, delete_tags, and set_tags actions. Ignored for enable, disable, and delete actions.'
-    ),
-});
-
 export const SECURITY_BULK_ACTIONS_TOOL_ID = securityTool('bulk_actions');
+
+export const bulkActionsTool = (
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger,
+  plugins: SecuritySolutionPluginSetupDependencies,
+  productFeaturesService: ProductFeaturesService
+): BuiltinToolDefinition<typeof bulkActionsSchema> => {
+  return {
+    id: SECURITY_BULK_ACTIONS_TOOL_ID,
+    type: ToolType.builtin,
+    description: `Apply bulk actions to security detection rules. Supports enabling, disabling, deleting, and managing tags on multiple rules at once. Rules can be identified by their saved object IDs ("rule_ids") or rule signature IDs ("rule_signature_ids"). Use the alerts tool or find_prebuilt_rules tool first to discover rule IDs, then use this tool to perform actions on them.`,
+    schema: bulkActionsSchema,
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
+    handler: async (params, { request, savedObjectsClient }) => {
+      const { action, rule_ids: ids, rule_ids: ruleIds, tags } = params;
+
+      const totalRequested = (ids?.length ?? 0) + (ruleIds?.length ?? 0);
+
+      try {
+        logger.debug(
+          `${SECURITY_BULK_ACTIONS_TOOL_ID} tool called with action="${action}" for ${totalRequested} rules`
+        );
+
+        if (totalRequested === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: 'At least one of "ids" or "rule_ids" must be provided.',
+                },
+              },
+            ],
+          };
+        }
+
+        if (totalRequested > MAX_RULES_PER_BULK_ACTION) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: `The total number of rules across "ids" and "rule_ids" must not exceed ${MAX_RULES_PER_BULK_ACTION}.`,
+                },
+              },
+            ],
+          };
+        }
+
+        const isTagAction =
+          action === 'add_tags' || action === 'delete_tags' || action === 'set_tags';
+
+        if (isTagAction && (!tags || tags.length === 0)) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: `The "tags" parameter is required for the "${action}" action.`,
+                },
+              },
+            ],
+          };
+        }
+
+        const [coreStart, startPlugins] = await core.getStartServices();
+
+        const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+        const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
+        const license = await firstValueFrom(startPlugins.licensing.license$);
+
+        const mlAuthz = buildMlAuthz({
+          license,
+          ml: plugins.ml,
+          request,
+          savedObjectsClient,
+        });
+
+        const rulesAuthz = await calculateRulesAuthz({ coreStart, request });
+
+        const deps: ActionDependencies = {
+          rulesClient,
+          actionsClient,
+          savedObjectsClient,
+          mlAuthz,
+          rulesAuthz,
+          license,
+          productFeaturesService,
+        };
+
+        const rules: RuleAlertType[] = [];
+        const fetchErrors: string[] = [];
+
+        // Fetch rules by saved object IDs
+        if (ids && ids.length > 0) {
+          const fetchOutcome = await fetchRulesByQueryOrIds({
+            rulesClient,
+            query: undefined,
+            ids: ids,
+            maxRules: MAX_RULES_PER_BULK_ACTION,
+          });
+
+          rules.push(...fetchOutcome.results.map(({ result }) => result));
+          fetchErrors.push(
+            ...fetchOutcome.errors.map(
+              ({ item, error }) =>
+                `Rule ${item}: ${error instanceof Error ? error.message : String(error)}`
+            )
+          );
+        }
+
+        // Fetch rules by signature IDs (rule_id)
+        if (ruleIds && ruleIds.length > 0) {
+          const resolvedIds = new Set(rules.map((rule) => rule.id));
+
+          for (const signatureId of ruleIds) {
+            try {
+              const { data } = await findRules({
+                rulesClient,
+                filter: `alert.attributes.params.ruleId: "${signatureId}"`,
+                page: 1,
+                perPage: 1,
+                fields: undefined,
+                sortField: undefined,
+                sortOrder: undefined,
+              });
+
+              if (data.length > 0 && !resolvedIds.has(data[0].id)) {
+                rules.push(data[0]);
+                resolvedIds.add(data[0].id);
+              } else if (data.length === 0) {
+                fetchErrors.push(`Rule with rule_id "${signatureId}": Rule not found`);
+              }
+            } catch (error) {
+              fetchErrors.push(
+                `Rule with rule_id "${signatureId}": ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            }
+          }
+        }
+
+        if (rules.length === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: `No rules found for the provided IDs.`,
+                  ...(fetchErrors.length > 0 && { errors: fetchErrors }),
+                },
+              },
+            ],
+          };
+        }
+
+        const result = await executeAction(action, rules, tags, deps);
+
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                summary: {
+                  action,
+                  ...(isTagAction && { tags }),
+                  total: totalRequested,
+                  succeeded: result.succeeded,
+                  ...('skipped' in result && { skipped: result.skipped }),
+                  failed: result.errors.length,
+                  not_found: fetchErrors.length,
+                },
+                ...result.data,
+                ...(result.errors.length > 0 && { errors: result.errors }),
+                ...(fetchErrors.length > 0 && { fetch_errors: fetchErrors }),
+              },
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`Error in ${SECURITY_BULK_ACTIONS_TOOL_ID} tool: ${errorMessage}`);
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Error performing bulk action "${action}": ${errorMessage}`,
+              },
+            },
+          ],
+        };
+      }
+    },
+    tags: ['security', 'detection', 'rules', 'bulk-actions'],
+  };
+};
 
 const handleEnableDisable = async (
   action: 'enable' | 'disable',
@@ -185,6 +396,8 @@ const handleTagEdit = async (
   };
 };
 
+type BulkAction = 'enable' | 'disable' | 'delete' | 'add_tags' | 'delete_tags' | 'set_tags';
+
 const executeAction = async (
   action: BulkAction,
   rules: RuleAlertType[],
@@ -202,140 +415,4 @@ const executeAction = async (
     case 'set_tags':
       return handleTagEdit(action, rules, tags as string[], deps);
   }
-};
-
-export const bulkActionsTool = (
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger,
-  plugins: SecuritySolutionPluginSetupDependencies,
-  productFeaturesService: ProductFeaturesService
-): BuiltinToolDefinition<typeof bulkActionsSchema> => {
-  return {
-    id: SECURITY_BULK_ACTIONS_TOOL_ID,
-    type: ToolType.builtin,
-    description: `Apply bulk actions to security detection rules. Supports enabling, disabling, deleting, and managing tags on multiple rules at once. Use the alerts tool or find_prebuilt_rules tool first to discover rule IDs, then use this tool to perform actions on them.`,
-    schema: bulkActionsSchema,
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) => {
-        return getAgentBuilderResourceAvailability({ core, request, logger });
-      },
-    },
-    handler: async (params, { request, savedObjectsClient }) => {
-      const { action, rule_ids: ruleIds, tags } = params;
-
-      try {
-        logger.debug(
-          `${SECURITY_BULK_ACTIONS_TOOL_ID} tool called with action="${action}" for ${ruleIds.length} rules`
-        );
-
-        const isTagAction =
-          action === 'add_tags' || action === 'delete_tags' || action === 'set_tags';
-
-        if (isTagAction && (!tags || tags.length === 0)) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message: `The "tags" parameter is required for the "${action}" action.`,
-                },
-              },
-            ],
-          };
-        }
-
-        const [coreStart, startPlugins] = await core.getStartServices();
-
-        const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
-        const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
-        const license = await firstValueFrom(startPlugins.licensing.license$);
-
-        const mlAuthz = buildMlAuthz({
-          license,
-          ml: plugins.ml,
-          request,
-          savedObjectsClient,
-        });
-
-        const rulesAuthz = await calculateRulesAuthz({ coreStart, request });
-
-        const deps: ActionDependencies = {
-          rulesClient,
-          actionsClient,
-          savedObjectsClient,
-          mlAuthz,
-          rulesAuthz,
-          license,
-          productFeaturesService,
-        };
-
-        // Fetch the rules by their IDs
-        const fetchOutcome = await fetchRulesByQueryOrIds({
-          rulesClient,
-          query: undefined,
-          ids: ruleIds,
-          maxRules: MAX_RULES_PER_BULK_ACTION,
-        });
-
-        const rules = fetchOutcome.results.map(({ result }) => result);
-        const fetchErrors = fetchOutcome.errors.map(
-          ({ item, error }) =>
-            `Rule ${item}: ${error instanceof Error ? error.message : String(error)}`
-        );
-
-        if (rules.length === 0) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message: `No rules found for the provided IDs.`,
-                  ...(fetchErrors.length > 0 && { errors: fetchErrors }),
-                },
-              },
-            ],
-          };
-        }
-
-        const result = await executeAction(action, rules, tags, deps);
-
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                summary: {
-                  action,
-                  ...(isTagAction && { tags }),
-                  total: ruleIds.length,
-                  succeeded: result.succeeded,
-                  ...('skipped' in result && { skipped: result.skipped }),
-                  failed: result.errors.length,
-                  not_found: fetchErrors.length,
-                },
-                ...result.data,
-                ...(result.errors.length > 0 && { errors: result.errors }),
-                ...(fetchErrors.length > 0 && { fetch_errors: fetchErrors }),
-              },
-            },
-          ],
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error(`Error in ${SECURITY_BULK_ACTIONS_TOOL_ID} tool: ${errorMessage}`);
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                message: `Error performing bulk action "${action}": ${errorMessage}`,
-              },
-            },
-          ],
-        };
-      }
-    },
-    tags: ['security', 'detection', 'rules', 'bulk-actions'],
-  };
 };
