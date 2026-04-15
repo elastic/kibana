@@ -8,9 +8,15 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../common/environment_filter_values';
 import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
-import { getServiceMapEmbeddableFactory } from './react_embeddable_factory';
+import {
+  getServiceMapEmbeddableFactory,
+  type ServiceMapEmbeddableApi,
+} from './react_embeddable_factory';
 import type { EmbeddableDeps } from '../types';
 
 const mockApiPublishesUnifiedSearch = jest.fn();
@@ -238,5 +244,97 @@ describe('getServiceMapEmbeddableFactory', () => {
         serviceGroupId: undefined,
       })
     );
+  });
+
+  describe('filter notification api', () => {
+    async function buildEmbeddableWithApi(initialState = {}) {
+      const finalizeApi = jest.fn((api) => api);
+      const parentApi = { query$: new BehaviorSubject({ query: '' }) };
+      const factory = getServiceMapEmbeddableFactory({
+        coreStart: {},
+      } as unknown as EmbeddableDeps);
+
+      const embeddable = await factory.buildEmbeddable({
+        initialState,
+        finalizeApi,
+        uuid: 'panel-1',
+        parentApi,
+      } as never);
+
+      return embeddable.api as ServiceMapEmbeddableApi;
+    }
+
+    it('exposes query$ with panel kuery', async () => {
+      const api = await buildEmbeddableWithApi({ kuery: 'service.name: my-service' });
+
+      expect(api.query$).toBeDefined();
+      expect(api.query$.getValue()).toEqual({
+        query: 'service.name: my-service',
+        language: 'kuery',
+      });
+    });
+
+    it('exposes empty query$ when no kuery is set', async () => {
+      const api = await buildEmbeddableWithApi({});
+
+      expect(api.query$.getValue()).toBeUndefined();
+    });
+
+    it('exposes filters$ with service name filter', async () => {
+      const api = await buildEmbeddableWithApi({ serviceName: 'checkout-service' });
+
+      expect(api.filters$).toBeDefined();
+      const filters = api.filters$.getValue();
+      expect(filters).toHaveLength(1);
+      expect(filters![0]).toMatchObject({
+        meta: { key: 'service.name', type: 'phrase' },
+        query: { match_phrase: { 'service.name': 'checkout-service' } },
+      });
+    });
+
+    it('exposes filters$ with environment filter when not default', async () => {
+      const api = await buildEmbeddableWithApi({ environment: 'production' });
+
+      const filters = api.filters$.getValue();
+      expect(filters).toHaveLength(1);
+      expect(filters![0]).toMatchObject({
+        meta: { key: 'service.environment', type: 'phrase' },
+        query: { match_phrase: { 'service.environment': 'production' } },
+      });
+    });
+
+    it('excludes environment filter for ENVIRONMENT_ALL', async () => {
+      const api = await buildEmbeddableWithApi({ environment: ENVIRONMENT_ALL.value });
+
+      const filters = api.filters$.getValue();
+      expect(filters).toHaveLength(0);
+    });
+
+    it('handles ENVIRONMENT_NOT_DEFINED with missing field filter', async () => {
+      const api = await buildEmbeddableWithApi({ environment: ENVIRONMENT_NOT_DEFINED.value });
+
+      const filters = api.filters$.getValue();
+      expect(filters).toHaveLength(1);
+      expect(filters![0]).toMatchObject({
+        meta: { key: 'service.environment', type: 'exists', negate: true },
+        query: { exists: { field: 'service.environment' } },
+      });
+    });
+
+    it('combines service name and environment filters', async () => {
+      const api = await buildEmbeddableWithApi({
+        serviceName: 'api-gateway',
+        environment: 'staging',
+      });
+
+      const filters = api.filters$.getValue();
+      expect(filters).toHaveLength(2);
+    });
+
+    it('exposes empty filters$ when no filters are configured', async () => {
+      const api = await buildEmbeddableWithApi({});
+
+      expect(api.filters$.getValue()).toHaveLength(0);
+    });
   });
 });

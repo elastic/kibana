@@ -5,26 +5,24 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID, APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 import type { ServiceMapEmbeddableState } from './types';
+import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
 
-const DEFAULT_SERIALIZED_STATE: ServiceMapEmbeddableState = {
-  rangeFrom: 'now-15m',
-  rangeTo: 'now',
-  environment: ENVIRONMENT_ALL.value,
-  kuery: '',
-};
-
-export function createAddServiceMapPanelAction(): UiActionsActionDefinition<EmbeddableApiContext> {
+export function createAddServiceMapPanelAction(
+  coreStart: CoreStart
+): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_APM_SERVICE_MAP_PANEL_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
@@ -37,13 +35,29 @@ export function createAddServiceMapPanelAction(): UiActionsActionDefinition<Embe
       if (!apiIsPresentationContainer(embeddable)) {
         throw new IncompatibleActionError();
       }
-      embeddable.addNewPanel(
-        {
-          panelType: APM_SERVICE_MAP_EMBEDDABLE,
-          serializedState: DEFAULT_SERIALIZED_STATE,
+
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: embeddable,
+        loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+          return (
+            <ServiceMapEditorFlyout
+              ariaLabelledBy={ariaLabelledBy}
+              onCancel={closeFlyout}
+              onSave={(state: ServiceMapEmbeddableState) => {
+                embeddable.addNewPanel(
+                  {
+                    panelType: APM_SERVICE_MAP_EMBEDDABLE,
+                    serializedState: state,
+                  },
+                  { displaySuccessMessage: true }
+                );
+                closeFlyout();
+              }}
+            />
+          );
         },
-        { displaySuccessMessage: true }
-      );
+      });
     },
     getDisplayName: () =>
       i18n.translate('xpack.apm.embeddable.serviceMap.addPanelTitle', {

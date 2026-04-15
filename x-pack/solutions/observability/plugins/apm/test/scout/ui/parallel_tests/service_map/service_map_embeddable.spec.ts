@@ -58,8 +58,10 @@ test.describe(
         await serviceMapMenuItem.click();
 
         await expect(
-          page.getByRole('heading', { name: 'Service map configuration', level: 2 })
+          page.getByRole('heading', { name: 'Add service map panel', level: 2 })
         ).toBeVisible();
+
+        await page.testSubj.locator('apmServiceMapEditorSaveButton').click();
       });
 
       await test.step('verify embeddable panel is rendered', async () => {

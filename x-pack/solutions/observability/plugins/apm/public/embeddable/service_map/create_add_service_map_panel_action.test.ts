@@ -5,16 +5,25 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID, APM_SERVICE_MAP_EMBEDDABLE } from './constants';
+import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID } from './constants';
 import { createAddServiceMapPanelAction } from './create_add_service_map_panel_action';
 
 const mockApiIsPresentationContainer = jest.fn();
+const mockOpenLazyFlyout = jest.fn();
 
 jest.mock('@kbn/presentation-publishing', () => ({
   apiIsPresentationContainer: (...args: unknown[]) => mockApiIsPresentationContainer(...args),
 }));
+
+jest.mock('@kbn/presentation-util', () => ({
+  openLazyFlyout: (...args: unknown[]) => mockOpenLazyFlyout(...args),
+}));
+
+const mockCoreStart = {
+  overlays: { openFlyout: jest.fn() },
+} as unknown as CoreStart;
 
 describe('createAddServiceMapPanelAction', () => {
   beforeEach(() => {
@@ -22,55 +31,49 @@ describe('createAddServiceMapPanelAction', () => {
   });
 
   it('returns expected static action metadata', () => {
-    const action = createAddServiceMapPanelAction();
+    const action = createAddServiceMapPanelAction(mockCoreStart);
 
     expect(action.id).toBe(ADD_APM_SERVICE_MAP_PANEL_ACTION_ID);
     expect(action.order).toBe(25);
-    expect(action.getIconType()).toBe('apps');
-    expect(action.getDisplayName()).toBe('Service map');
+    expect(action.getIconType!({} as never)).toBe('apps');
+    expect(action.getDisplayName!({} as never)).toBe('Service map');
   });
 
   it('is compatible when embeddable is a presentation container', async () => {
     const embeddable = {};
     mockApiIsPresentationContainer.mockReturnValue(true);
-    const action = createAddServiceMapPanelAction();
+    const action = createAddServiceMapPanelAction(mockCoreStart);
 
-    await expect(action.isCompatible({ embeddable })).resolves.toBe(true);
+    await expect(action.isCompatible!({ embeddable })).resolves.toBe(true);
     expect(mockApiIsPresentationContainer).toHaveBeenCalledWith(embeddable);
   });
 
   it('is not compatible when embeddable is not a presentation container', async () => {
     mockApiIsPresentationContainer.mockReturnValue(false);
-    const action = createAddServiceMapPanelAction();
+    const action = createAddServiceMapPanelAction(mockCoreStart);
 
-    await expect(action.isCompatible({ embeddable: {} })).resolves.toBe(false);
+    await expect(action.isCompatible!({ embeddable: {} })).resolves.toBe(false);
   });
 
-  it('adds a new panel with the default serialized state', async () => {
-    const addNewPanel = jest.fn();
-    const embeddable = { addNewPanel };
+  it('opens configuration flyout when executed', async () => {
+    const embeddable = { addNewPanel: jest.fn() };
     mockApiIsPresentationContainer.mockReturnValue(true);
-    const action = createAddServiceMapPanelAction();
+    const action = createAddServiceMapPanelAction(mockCoreStart);
 
     await action.execute({ embeddable } as never);
 
-    expect(addNewPanel).toHaveBeenCalledWith(
-      {
-        panelType: APM_SERVICE_MAP_EMBEDDABLE,
-        serializedState: {
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-          environment: ENVIRONMENT_ALL.value,
-          kuery: '',
-        },
-      },
-      { displaySuccessMessage: true }
+    expect(mockOpenLazyFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        core: mockCoreStart,
+        parentApi: embeddable,
+        loadContent: expect.any(Function),
+      })
     );
   });
 
   it('throws IncompatibleActionError when executing against non-container embeddable', async () => {
     mockApiIsPresentationContainer.mockReturnValue(false);
-    const action = createAddServiceMapPanelAction();
+    const action = createAddServiceMapPanelAction(mockCoreStart);
 
     await expect(action.execute({ embeddable: {} } as never)).rejects.toBeInstanceOf(
       IncompatibleActionError
