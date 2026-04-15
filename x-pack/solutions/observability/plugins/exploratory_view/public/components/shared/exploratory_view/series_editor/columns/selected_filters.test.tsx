@@ -13,6 +13,7 @@ import { getDefaultConfigs } from '../../configurations/default_configs';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
+// Failing: See https://github.com/elastic/kibana/issues/253605
 describe('SelectedFilters', function () {
   mockAppDataView();
 

@@ -4763,6 +4763,10 @@
                 "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
+              },
+              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
