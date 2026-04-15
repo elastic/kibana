@@ -207,21 +207,26 @@ describe('EntityActionsButton', () => {
       );
     });
 
-    it('should fall back to RELATED_ENTITY with entity.* source field values when engine_type is not user or host', () => {
+    it('should fall back to RELATED_ENTITY with entity.* source field values + item.id when engine_type is not user or host', () => {
       render(<EntityActionsButton item={mockEntityItem} scopeId={scopeId} />);
       fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
 
       const relatedButton = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID);
       fireEvent.click(relatedButton);
 
-      // Single entity.* value → emitFilterToggle (not isOneOf)
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
+      // entity.* value ('entity-abc') + item.id ('entity-123') → emitIsOneOfFilterToggle
+      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
         scopeId,
         RELATED_ENTITY,
-        'entity-abc',
+        ['entity-abc', 'entity-123'],
         'show'
       );
-      expect(mockEmitIsOneOfFilterToggle).not.toHaveBeenCalled();
+      expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
+        scopeId,
+        RELATED_ENTITY,
+        expect.anything(),
+        expect.anything()
+      );
     });
 
     it('should show "Hide related events" label when RELATED_USER filter is active', () => {

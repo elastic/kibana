@@ -443,11 +443,11 @@ describe('useEntityNodeExpandPopover', () => {
         relatedItem.onClick();
       }
 
-      // Verify event was emitted
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
+      // Verify a filter event was emitted (entity.* + node.id → isOneOf with multiple values)
+      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
         scopeId,
         expect.any(String),
-        expect.any(String),
+        expect.any(Array),
         'show'
       );
     });
@@ -636,7 +636,7 @@ describe('useEntityNodeExpandPopover', () => {
       );
     });
 
-    it('should fall back to RELATED_ENTITY with entity.* source field values when engine_type is not user or host', () => {
+    it('should fall back to RELATED_ENTITY with entity.* source field values + node.id when engine_type is not user or host', () => {
       const node = createMockNode('single-entity', true);
       renderHook(() => useEntityNodeExpandPopover(scopeId));
 
@@ -652,14 +652,19 @@ describe('useEntityNodeExpandPopover', () => {
         relatedItem.onClick();
       }
 
-      // Single entity.* value → emitFilterToggle (not isOneOf)
-      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
+      // entity.* value ('entity-abc') + node.id ('test-node-id') → emitIsOneOfFilterToggle
+      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
         scopeId,
         RELATED_ENTITY,
-        'entity-abc',
+        ['entity-abc', 'test-node-id'],
         'show'
       );
-      expect(mockEmitIsOneOfFilterToggle).not.toHaveBeenCalled();
+      expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
+        scopeId,
+        RELATED_ENTITY,
+        expect.anything(),
+        expect.anything()
+      );
     });
 
     it('should call onOpenEventPreview callback when entity details item is clicked', () => {
