@@ -206,11 +206,12 @@ const ExampleDrilldownFlyout: React.FC<{
   const flyoutColumns: Array<EuiBasicTableColumn<ExampleScorePair>> = useMemo(
     () => [
       {
-        field: 'exampleIndex',
+        field: 'exampleId',
         name: i18n.FLYOUT_COLUMN_EXAMPLE,
-        width: '100px',
-        render: (idx: number | null, item: ExampleScorePair) =>
-          idx !== null ? `#${idx}` : item.exampleId.slice(0, 8),
+        render: (_id: string, item: ExampleScorePair) => {
+          const isNumericFallback = /^\d+$/.test(item.exampleId);
+          return isNumericFallback ? `#${item.exampleId}` : item.exampleId;
+        },
       },
       {
         field: 'scoreA',

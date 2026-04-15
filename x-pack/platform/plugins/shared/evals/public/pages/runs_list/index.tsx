@@ -171,16 +171,24 @@ export const RunsListPage: React.FC = () => {
   };
 
   const lockedSuiteId = selectedRuns.length > 0 ? selectedRuns[0].suite_id : undefined;
+  const selectedRunIds = useMemo(() => new Set(selectedRuns.map((r) => r.run_id)), [selectedRuns]);
+  const selectionFull = selectedRuns.length >= 2;
 
   const selection: EuiTableSelectionType<EvaluationRunSummary> = useMemo(
     () => ({
       onSelectionChange: (items: EvaluationRunSummary[]) => setSelectedRuns(items),
-      selectable: (run: EvaluationRunSummary) =>
-        lockedSuiteId === undefined || run.suite_id === lockedSuiteId,
-      selectableMessage: (selectable: boolean) =>
-        selectable ? '' : i18n.COMPARE_DIFFERENT_SUITE_HINT,
+      selectable: (run: EvaluationRunSummary) => {
+        if (selectedRunIds.has(run.run_id)) return true;
+        if (selectionFull) return false;
+        return lockedSuiteId === undefined || run.suite_id === lockedSuiteId;
+      },
+      selectableMessage: (selectable: boolean, run: EvaluationRunSummary) => {
+        if (selectable) return '';
+        if (selectionFull && !selectedRunIds.has(run.run_id)) return i18n.COMPARE_MAX_SELECTED_HINT;
+        return i18n.COMPARE_DIFFERENT_SUITE_HINT;
+      },
     }),
-    [lockedSuiteId]
+    [lockedSuiteId, selectedRunIds, selectionFull]
   );
 
   const totalRuns = data?.total ?? 0;
