@@ -84,9 +84,13 @@ export const useEntityNodeExpandPopover = (
             .flatMap(([, value]) => ([] as string[]).concat(value));
           return { field: RELATED_HOST, values };
         }
-        const values = Object.entries(sourceFields ?? {})
+        const entityFieldValues = Object.entries(sourceFields ?? {})
           .filter(([field]) => field.startsWith('entity.'))
           .flatMap(([, value]) => ([] as string[]).concat(value));
+        // Include node.id for backward compatibility with older data that may not have entity.* fields
+        const values = entityFieldValues.includes(node.id)
+          ? entityFieldValues
+          : [...entityFieldValues, node.id];
         return { field: RELATED_ENTITY, values };
       };
 

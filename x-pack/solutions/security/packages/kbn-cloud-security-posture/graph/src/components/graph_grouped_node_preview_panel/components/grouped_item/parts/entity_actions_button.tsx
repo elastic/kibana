@@ -75,9 +75,13 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
         .flatMap(([, value]) => ([] as string[]).concat(value));
       return { field: RELATED_HOST, values };
     }
-    const values = Object.entries(sourceFields)
+    const entityFieldValues = Object.entries(sourceFields)
       .filter(([field]) => field.startsWith('entity.'))
       .flatMap(([, value]) => ([] as string[]).concat(value));
+    // Include item.id for backward compatibility with older data that may not have entity.* fields
+    const values = entityFieldValues.includes(item.id)
+      ? entityFieldValues
+      : [...entityFieldValues, item.id];
     return { field: RELATED_ENTITY, values };
   };
 
