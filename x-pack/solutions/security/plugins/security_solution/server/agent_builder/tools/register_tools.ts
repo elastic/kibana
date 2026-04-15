@@ -15,6 +15,7 @@ import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
 import { findPrebuiltRulesTool } from './find_prebuilt_rules_tool';
 import { installPrebuiltRulesTool } from './install_prebuilt_rules_tool';
+import { bulkActionsTool } from './bulk_actions_tool';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginSetupDependencies,
@@ -43,4 +44,5 @@ export const registerTools = async (
   agentBuilder.tools.register(
     installPrebuiltRulesTool(core, logger, plugins, productFeaturesService)
   );
+  agentBuilder.tools.register(bulkActionsTool(core, logger, plugins, productFeaturesService));
 };

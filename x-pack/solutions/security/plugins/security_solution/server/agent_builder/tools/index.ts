@@ -31,3 +31,4 @@ export {
   installPrebuiltRulesTool,
   SECURITY_INSTALL_PREBUILT_RULES_TOOL_ID,
 } from './install_prebuilt_rules_tool';
+export { bulkActionsTool, SECURITY_BULK_ACTIONS_TOOL_ID } from './bulk_actions_tool';
