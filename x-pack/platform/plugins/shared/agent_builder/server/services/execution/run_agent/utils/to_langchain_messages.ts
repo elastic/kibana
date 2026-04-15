@@ -7,7 +7,6 @@
 
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
-import { formatSystemNotice } from '../prompts/utils/actions';
 import type {
   AssistantResponse,
   ConversationRoundStep,
@@ -19,6 +18,7 @@ import {
   ConversationRoundStatus,
   isReasoningStep,
   isToolCallStep,
+  isBackgroundAgentExecutionCompleteStep,
 } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
@@ -28,6 +28,7 @@ import {
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
+import { formatSystemNotice } from '../prompts/utils/actions';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import { serializeCompactionSummary } from './conversation_compactor';
@@ -84,28 +85,8 @@ export const convertPreviousRounds = async ({
     messages.push(createAIMessage(summaryText));
   }
 
-  const backgroundExecutions = conversation.backgroundExecutions ?? [];
-
   for (const round of rounds) {
-    // Inject notices completed at this round WITHOUT a tool_call_group_id (between-round completions)
-    const beforeRoundNotices = backgroundExecutions.filter(
-      (exec) => exec.completed_at?.round_id === round.id && !exec.completed_at?.tool_call_group_id
-    );
-    for (const notice of beforeRoundNotices) {
-      messages.push(createUserMessage(formatSystemNotice(notice)));
-    }
-
-    const roundMessages = await roundToLangchain(round, { resultTransformer, ignoreSteps });
-
-    // Inject notices completed INSIDE this round (with tool_call_group_id) after the round messages
-    const intraRoundNotices = backgroundExecutions.filter(
-      (exec) => exec.completed_at?.round_id === round.id && exec.completed_at?.tool_call_group_id
-    );
-    for (const notice of intraRoundNotices) {
-      roundMessages.push(createUserMessage(formatSystemNotice(notice)));
-    }
-
-    messages.push(...roundMessages);
+    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
   }
 
   messages.push(formatRoundInput({ input }));
@@ -129,10 +110,23 @@ export const roundToLangchain = async (
   if (!ignoreSteps) {
     const groups = groupToolCallSteps(round.steps);
     const reasoningSteps = round.steps.filter(isReasoningStep);
-    for (const group of groups) {
-      messages.push(
-        ...(await createGroupedToolCallMessages(group, { resultTransformer, reasoningSteps }))
-      );
+
+    let groupIndex = 0;
+    for (const step of round.steps) {
+      if (isBackgroundAgentExecutionCompleteStep(step)) {
+        messages.push(createUserMessage(formatSystemNotice(step)));
+      } else if (isToolCallStep(step)) {
+        // Only process when we hit the first tool call of a group
+        const group = groups[groupIndex];
+        if (group && group[0] === step) {
+          messages.push(
+            ...(await createGroupedToolCallMessages(group, { resultTransformer, reasoningSteps }))
+          );
+          groupIndex++;
+        }
+        // Other tool calls in the same group are handled by createGroupedToolCallMessages
+      }
+      // Reasoning steps are handled inside createGroupedToolCallMessages via reasoningSteps param
     }
   }
 

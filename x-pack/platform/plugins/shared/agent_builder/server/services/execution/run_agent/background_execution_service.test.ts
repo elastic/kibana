@@ -170,4 +170,40 @@ describe('BackgroundExecutionService', () => {
       expect(service.hasPending()).toBe(false);
     });
   });
+
+  describe('getPendingState', () => {
+    it('returns only non-terminal executions', () => {
+      const service = new BackgroundExecutionService({
+        subAgentExecutor: createMockExecutor(),
+        initialState: {
+          'exec-1': { execution_id: 'exec-1', status: ExecutionStatus.running },
+          'exec-2': {
+            execution_id: 'exec-2',
+            status: ExecutionStatus.completed,
+            completed_at: { round_id: 'r1' },
+          },
+          'exec-3': { execution_id: 'exec-3', status: ExecutionStatus.running },
+        },
+      });
+
+      const pending = service.getPendingState();
+      expect(Object.keys(pending)).toEqual(['exec-1', 'exec-3']);
+    });
+
+    it('returns empty object when all executions are terminal', () => {
+      const service = new BackgroundExecutionService({
+        subAgentExecutor: createMockExecutor(),
+        initialState: {
+          'exec-1': {
+            execution_id: 'exec-1',
+            status: ExecutionStatus.completed,
+            completed_at: { round_id: 'r1' },
+          },
+        },
+      });
+
+      const pending = service.getPendingState();
+      expect(Object.keys(pending)).toHaveLength(0);
+    });
+  });
 });

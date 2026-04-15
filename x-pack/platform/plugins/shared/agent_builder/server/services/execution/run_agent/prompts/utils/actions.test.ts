@@ -130,7 +130,7 @@ describe('formatResearcherActionHistory', () => {
 
     // Tool call (AI) + tool result + background notice (user message)
     const lastMessage = messages[messages.length - 1];
-    expect(isHumanMessage(lastMessage)).toBe(true);
+    expect(isHumanMessage(lastMessage as any)).toBe(true);
     expect((lastMessage as any).content).toContain('<system_notice>');
     expect((lastMessage as any).content).toContain('exec-123');
   });
@@ -143,7 +143,7 @@ describe('formatResearcherActionHistory', () => {
     const messages = formatResearcherActionHistory({ actions });
 
     expect(messages).toHaveLength(1);
-    expect(isHumanMessage(messages[0])).toBe(true);
+    expect(isHumanMessage(messages[0] as any)).toBe(true);
     expect((messages[0] as any).content).toContain('has failed');
     expect((messages[0] as any).content).toContain('LLM timeout');
   });

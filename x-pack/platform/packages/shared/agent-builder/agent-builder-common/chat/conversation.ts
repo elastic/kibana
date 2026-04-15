@@ -76,6 +76,7 @@ export enum ConversationRoundStepType {
   toolCall = 'tool_call',
   reasoning = 'reasoning',
   compaction = 'compaction',
+  backgroundAgentExecutionComplete = 'background_agent_execution_complete',
 }
 
 // tool call step
@@ -190,7 +191,22 @@ export const isCompactionStep = (step: ConversationRoundStep): step is Compactio
   return step.type === ConversationRoundStepType.compaction;
 };
 
-export type ConversationRoundStep = ToolCallStep | ReasoningStep | CompactionStep;
+export type BackgroundAgentExecutionCompleteStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.backgroundAgentExecutionComplete,
+  BackgroundExecutionState
+>;
+
+export const isBackgroundAgentExecutionCompleteStep = (
+  step: ConversationRoundStep
+): step is BackgroundAgentExecutionCompleteStep => {
+  return step.type === ConversationRoundStepType.backgroundAgentExecutionComplete;
+};
+
+export type ConversationRoundStep =
+  | ToolCallStep
+  | ReasoningStep
+  | CompactionStep
+  | BackgroundAgentExecutionCompleteStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */

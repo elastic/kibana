@@ -7,7 +7,11 @@
 
 import type { AgentBuilderEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
-import type { ConversationInternalState, ConversationRound } from './conversation';
+import type {
+  ConversationInternalState,
+  ConversationRound,
+  BackgroundExecutionState,
+} from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
 
@@ -28,6 +32,7 @@ export enum ChatEventType {
   conversationIdSet = 'conversation_id_set',
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
+  backgroundAgentExecutionComplete = 'background_agent_execution_complete',
 }
 
 export type ChatEventBase<
@@ -329,6 +334,21 @@ export const isCompactionCompletedEvent = (
   return event.type === ChatEventType.compactionCompleted;
 };
 
+export interface BackgroundAgentExecutionCompleteEventData {
+  execution: BackgroundExecutionState;
+}
+
+export type BackgroundAgentExecutionCompleteEvent = ChatEventBase<
+  ChatEventType.backgroundAgentExecutionComplete,
+  BackgroundAgentExecutionCompleteEventData
+>;
+
+export const isBackgroundAgentExecutionCompleteEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is BackgroundAgentExecutionCompleteEvent => {
+  return event.type === ChatEventType.backgroundAgentExecutionComplete;
+};
+
 /**
  * All types of events that can be emitted from an agent execution.
  */
@@ -345,7 +365,8 @@ export type ChatAgentEvent =
   | ThinkingCompleteEvent
   | RoundCompleteEvent
   | CompactionStartedEvent
-  | CompactionCompletedEvent;
+  | CompactionCompletedEvent
+  | BackgroundAgentExecutionCompleteEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

@@ -21,6 +21,7 @@ import type {
   ToolResultEvent,
   RuntimeAgentConfigurationOverrides,
   CompactionStep,
+  BackgroundAgentExecutionCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -37,6 +38,7 @@ import {
   isPromptRequestEvent,
   isReasoningEvent,
   isToolCallStep,
+  isBackgroundAgentExecutionCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -55,10 +57,14 @@ import type { CompactedConversation } from './conversation_compactor';
 
 type SourceEvents = ConvertedEvents;
 
-type StepEvents = ReasoningEvent | ToolCallEvent;
+type StepEvents = ReasoningEvent | ToolCallEvent | BackgroundAgentExecutionCompleteEvent;
 
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
-  return isReasoningEvent(event) || isToolCallEvent(event);
+  return (
+    isReasoningEvent(event) ||
+    isToolCallEvent(event) ||
+    isBackgroundAgentExecutionCompleteEvent(event)
+  );
 };
 
 export const addRoundCompleteEvent = ({
@@ -301,6 +307,14 @@ const createRound = ({
       } else {
         return [];
       }
+    }
+    if (isBackgroundAgentExecutionCompleteEvent(event)) {
+      return [
+        {
+          type: ConversationRoundStepType.backgroundAgentExecutionComplete,
+          ...event.data.execution,
+        },
+      ];
     }
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };

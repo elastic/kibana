@@ -145,16 +145,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
 
   // Pass action so regenerate uses the last round's original input instead of request input
-  const completedBackgroundExecutions = Object.values(
-    conversation?.state?.background_executions ?? {}
-  ).filter((exec) => exec.completed_at !== undefined);
-
   let processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
     action,
-    backgroundExecutions: completedBackgroundExecutions,
   });
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
@@ -377,12 +372,12 @@ const getConversationState = ({
   compactionSummary?: CompactionSummary;
   backgroundExecutionService?: BackgroundExecutionService;
 }): ConversationInternalState => {
-  const bgState = backgroundExecutionService?.getState();
+  const bgState = backgroundExecutionService?.getPendingState();
   return {
     prompt: promptManager.dump(),
     dynamic_tool_ids: toolManager.getDynamicToolIds(),
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
-    ...(bgState ? { background_executions: bgState } : {}),
+    ...(bgState && Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
   };
 };
 

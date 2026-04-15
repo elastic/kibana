@@ -87,6 +87,13 @@ export class BackgroundExecutionService {
     return { ...this.state };
   }
 
+  /** Get only pending (non-terminal) executions for persistence. */
+  getPendingState(): Record<string, BackgroundExecutionState> {
+    return Object.fromEntries(
+      Object.entries(this.state).filter(([_, exec]) => !TERMINAL_STATUSES.has(exec.status))
+    );
+  }
+
   /** Whether there are any pending (non-terminal) executions. */
   hasPending(): boolean {
     return Object.values(this.state).some((exec) => !TERMINAL_STATUSES.has(exec.status));

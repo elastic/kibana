@@ -180,8 +180,9 @@ describe('createSubagentTool', () => {
 
     expect(result.results).toHaveLength(1);
     expect(result.results[0].data).toEqual({
-      execution_id: 'bg-exec-id',
+      agent_execution_id: 'bg-exec-id',
       mode: 'background',
+      status: 'queued',
     });
     expect(registerExecution).toHaveBeenCalledWith('bg-exec-id');
 

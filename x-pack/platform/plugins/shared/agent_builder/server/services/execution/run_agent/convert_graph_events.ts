@@ -19,6 +19,7 @@ import {
   createPromptRequestEvent,
   createReasoningEvent,
   createTextChunkEvent,
+  createBackgroundAgentExecutionCompleteEvent,
   createThinkingCompleteEvent,
   createToolCallEvent,
   createToolResultEvent,
@@ -39,6 +40,7 @@ import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
 import type { ToolCallResult } from './actions';
 import {
   isAnswerAction,
+  isBackgroundExecutionCompleteAction,
   isExecuteToolAction,
   isStructuredAnswerAction,
   isToolCallAction,
@@ -211,6 +213,22 @@ export const convertGraphEvents = ({
 
           if (resultEvents.length > 0) {
             return of(...resultEvents);
+          }
+        }
+
+        // emit background execution complete events
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.checkBackgroundWork)) {
+          const addedActions = (event.data.output as Partial<StateType>).mainActions ?? [];
+          const bgEvents: ConvertedEvents[] = [];
+
+          for (const action of addedActions) {
+            if (isBackgroundExecutionCompleteAction(action)) {
+              bgEvents.push(createBackgroundAgentExecutionCompleteEvent(action.execution));
+            }
+          }
+
+          if (bgEvents.length > 0) {
+            return of(...bgEvents);
           }
         }
 
