@@ -16,6 +16,7 @@ export { createFindItemsFn } from './src/strategy';
 
 // Types.
 export type {
+  ContentListClientServices,
   TableListViewFindItemsFn,
   TableListViewFindItemsResult,
   SavedObjectReference,

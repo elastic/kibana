@@ -9,14 +9,19 @@ components:
       type: object
       properties:
         kuery:
+          description: 'A KQL search string to filter live queries.'
           type: string
         page:
+          description: 'The page number to return. The default is 1.'
           type: integer
         pageSize:
+          description: 'The number of results to return per page. The default is 20.'
           type: integer
         sort:
+          description: 'The field to sort results by.'
           type: string
         sortOrder:
+          description: 'The sort order.'
           type: string
           enum: [asc, desc]
         withResultCounts:
@@ -25,6 +30,7 @@ components:
             When true, the response includes result_counts on each item with
             aggregated result statistics from the action responses index.
     FindLiveQueryResponse:
+      description: 'A list of live queries.'
       example:
         data:
           items:
@@ -49,8 +55,18 @@ components:
                   successful_agents: 1
                   error_agents: 0
       type: object
-      properties: { }
+      properties:
+        data:
+          description: 'The response data wrapper.'
+          type: object
+          properties:
+            items:
+              description: 'The list of live queries.'
+              type: array
+              items:
+                type: object
     FindLiveQueryDetailsResponse:
+      description: 'The details of a live query.'
       example:
         data:
           action_id: "3c42c847-eb30-4452-80e0-728584042334"
@@ -68,12 +84,51 @@ components:
                   field: "total_seconds"
               agents:
                 - "16d7caf5-efd2-4212-9b62-73dafc91fa13"
-              docs: 0  # results count
-              failed: 1  # failed queries
-              pending: 0  # pending agents
-              responded: 1  # total responded agents
-              successful: 0  # successful agents
-              status: "completed"  # single query status
-          status: "completed"  # global status of the live query (completed, pending)
+              docs: 0
+              failed: 1
+              pending: 0
+              responded: 1
+              successful: 0
+              status: "completed"
+          status: "completed"
       type: object
-      properties: { }
+      properties:
+        data:
+          description: 'The live query details.'
+          type: object
+          properties:
+            action_id:
+              description: 'The ID of the live query action.'
+              type: string
+            expiration:
+              description: 'The expiration date and time of the live query.'
+              type: string
+            '@timestamp':
+              description: 'The timestamp when the live query was created.'
+              type: string
+            agent_selection:
+              description: 'The original agent selection criteria.'
+              type: object
+            agents:
+              description: 'A list of agent IDs targeted by the live query.'
+              type: array
+              items:
+                type: string
+            user_id:
+              description: 'The ID of the user who ran the live query.'
+              type: string
+            pack_id:
+              description: 'The pack ID, if the live query was run from a pack.'
+              type: string
+            pack_name:
+              description: 'The pack name, if the live query was run from a pack.'
+              type: string
+            queries:
+              description: 'The list of queries in the live query action, each with aggregated result counts.'
+              type: array
+              items:
+                type: object
+            status:
+              description: 'The overall status of the live query.'
+              type: string
+              enum: [completed, running]
