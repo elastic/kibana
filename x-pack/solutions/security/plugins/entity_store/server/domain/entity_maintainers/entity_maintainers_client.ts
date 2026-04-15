@@ -6,12 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  SavedObjectsErrorHelpers,
-  type CoreStart,
-  type ElasticsearchClient,
-  type KibanaRequest,
-} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type CoreStart, type KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -30,12 +25,13 @@ import {
 } from '../../tasks/entity_maintainers/execution';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import type {
+  EntityMaintainerTaskMethodContext,
   EntityMaintainerState,
   EntityMaintainerStatus,
 } from '../../tasks/entity_maintainers/types';
 import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
 import type { TelemetryReporter } from '../../telemetry/events';
-import { CRUDClient, type EntityUpdateClient } from '../crud';
+import { CRUDClient } from '../crud';
 
 interface TaskSnapshot {
   runs: number;
@@ -63,14 +59,9 @@ interface EntityMaintainersClientDeps {
   licensing: LicensingPluginStart;
 }
 
-interface SyncExecutionContext {
+interface SyncExecutionContext extends EntityMaintainerTaskMethodContext {
   taskId: string;
   currentStatus: EntityMaintainerStatus;
-  fakeRequest: KibanaRequest;
-  logger: Logger;
-  abortController: AbortController;
-  esClient: ElasticsearchClient;
-  crudClient: EntityUpdateClient;
 }
 
 export class EntityMaintainersClient {

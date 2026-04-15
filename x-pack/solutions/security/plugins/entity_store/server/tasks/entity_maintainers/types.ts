@@ -77,7 +77,7 @@ export interface EntityMaintainerStatus extends Record<string, unknown> {
   taskStatus: EntityMaintainerTaskStatus;
 }
 
-interface EntityMaintainerTaskMethodContext {
+export interface EntityMaintainerTaskMethodContext {
   status: EntityMaintainerStatus;
   abortController: AbortController;
   logger: Logger;
