@@ -46,8 +46,8 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
               context.getSecuritySolutionCellRenderer?.(fieldName) ?? entries[fieldName];
           });
 
-          for (const field of params.dataView.fields) {
-            if (field.type === 'ip' && !entries[field.name]) {
+          for (const field of params.dataView.fields.getByType('ip')) {
+            if (!entries[field.name]) {
               const renderer = context.getSecuritySolutionCellRenderer?.(field.name);
               if (renderer) {
                 entries[field.name] = renderer;
