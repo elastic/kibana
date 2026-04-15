@@ -23,10 +23,10 @@ import type {
   MarkdownUpdateResponseBody,
 } from '../../server';
 import { coreServices } from '../services/kibana_services';
-import type { MarkdownAttributes } from '../../server/markdown_saved_object';
+import type { MarkdownCreateRequestBody } from '../../server';
 
 export const markdownClient = {
-  create: async (markdownState: MarkdownAttributes) => {
+  create: async (markdownState: MarkdownCreateRequestBody) => {
     return coreServices.http.post<MarkdownCreateResponseBody>(MARKDOWN_API_PATH, {
       version: MARKDOWN_API_VERSION,
       body: JSON.stringify(markdownState),
@@ -38,7 +38,7 @@ export const markdownClient = {
     });
   },
   get: async (id: string): Promise<MarkdownReadResponseBody> => {
-    const result = await coreServices.http
+    return await coreServices.http
       .get<MarkdownReadResponseBody>(buildPath(`${MARKDOWN_API_PATH}/{id}`, { id }), {
         version: MARKDOWN_API_VERSION,
       })
@@ -49,7 +49,6 @@ export const markdownClient = {
         const message = (e.body as { message?: string })?.message ?? e.message;
         throw new Error(message);
       });
-    return result;
   },
   search: async (searchQuery: MarkdownSearchRequestQuery) => {
     const { query, ...params } = searchQuery;
@@ -61,7 +60,7 @@ export const markdownClient = {
       },
     });
   },
-  update: async (id: string, markdownState: MarkdownAttributes) => {
+  update: async (id: string, markdownState: MarkdownUpdateResponseBody) => {
     const updateResponse = await coreServices.http.put<MarkdownUpdateResponseBody>(
       buildPath(`${MARKDOWN_API_PATH}/{id}`, { id }),
       {
