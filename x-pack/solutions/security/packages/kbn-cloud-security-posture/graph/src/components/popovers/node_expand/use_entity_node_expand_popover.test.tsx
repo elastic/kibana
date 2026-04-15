@@ -25,6 +25,7 @@ import {
   isFilterActiveForScope,
   isEntityRelationshipExpandedForScope,
   emitEntityRelationshipToggle,
+  emitPinnedEuidToggle,
 } from '../../filters/filter_store';
 
 // Mock filter_store module
@@ -36,6 +37,7 @@ jest.mock('../../filters/filter_store', () => {
     isEntityRelationshipExpandedForScope: jest.fn(() => false),
     emitFilterToggle: jest.fn(),
     emitEntityRelationshipToggle: jest.fn(),
+    emitPinnedEuidToggle: jest.fn(),
   };
 });
 
@@ -49,6 +51,9 @@ const mockIsEntityRelationshipExpandedForScope =
 const mockEmitFilterToggle = emitFilterToggle as jest.MockedFunction<typeof emitFilterToggle>;
 const mockEmitEntityRelationshipToggle = emitEntityRelationshipToggle as jest.MockedFunction<
   typeof emitEntityRelationshipToggle
+>;
+const mockEmitPinnedEuidToggle = emitPinnedEuidToggle as jest.MockedFunction<
+  typeof emitPinnedEuidToggle
 >;
 
 // Mock useNodeExpandGraphPopover to capture and expose itemsFn
@@ -163,6 +168,7 @@ describe('useEntityNodeExpandPopover', () => {
     capturedItemsFn = null;
     mockEmitFilterToggle.mockClear();
     mockEmitEntityRelationshipToggle.mockClear();
+    mockEmitPinnedEuidToggle.mockClear();
     mockIsFilterActiveForScope.mockReturnValue(false);
     mockIsEntityRelationshipExpandedForScope.mockReturnValue(false);
   });
@@ -430,6 +436,75 @@ describe('useEntityNodeExpandPopover', () => {
         expect.any(String),
         'show'
       );
+    });
+
+    it('should emit pinned EUID toggle when "actions by" filter item is clicked', () => {
+      const node = createMockNode('single-entity');
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const actionsByItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
+      );
+
+      if (actionsByItem?.type === 'item' && actionsByItem.onClick) {
+        actionsByItem.onClick();
+      }
+
+      expect(mockEmitPinnedEuidToggle).toHaveBeenCalledWith(scopeId, node.id, 'show');
+    });
+
+    it('should emit pinned EUID hide when hiding the last entity filter', () => {
+      // Before toggle: return true so button says "Hide"
+      // After emitFilterToggle calls: return false (no remaining filters)
+      let afterToggle = false;
+      mockEmitFilterToggle.mockImplementation(() => {
+        afterToggle = true;
+      });
+      mockIsFilterActiveForScope.mockImplementation(() => !afterToggle);
+
+      const node = createMockNode('single-entity');
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const actionsByItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
+      );
+
+      if (actionsByItem?.type === 'item' && actionsByItem.onClick) {
+        actionsByItem.onClick();
+      }
+
+      expect(mockEmitPinnedEuidToggle).toHaveBeenCalledWith(scopeId, node.id, 'hide');
+    });
+
+    it('should not emit pinned EUID hide when other entity filters remain active', () => {
+      // All filter checks return true (both roles have active filters)
+      mockIsFilterActiveForScope.mockReturnValue(true);
+
+      const node = createMockNode('single-entity');
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const actionsByItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
+      );
+
+      if (actionsByItem?.type === 'item' && actionsByItem.onClick) {
+        actionsByItem.onClick();
+      }
+
+      // Should NOT unpin because other role filters are still active
+      expect(mockEmitPinnedEuidToggle).not.toHaveBeenCalledWith(scopeId, node.id, 'hide');
     });
 
     it('should call onOpenEventPreview callback when entity details item is clicked', () => {
