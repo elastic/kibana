@@ -135,12 +135,14 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
     .optional(),
 });
 
+export const UserPickerDefaultSchema = z.array(z.object({ uid: z.string(), name: z.string() }));
+
 export const UserPickerFieldSchema = BaseFieldSchema.extend({
   control: z.literal(FieldType.USER_PICKER),
   metadata: z
     .object({
       multiple: z.boolean().optional(),
-      default: z.array(z.object({ uid: z.string(), name: z.string() })).optional(),
+      default: UserPickerDefaultSchema.optional(),
     })
     .catchall(z.unknown())
     .optional(),

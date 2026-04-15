@@ -9,7 +9,14 @@ import type { Document } from 'yaml';
 import { parseDocument, isMap, isSeq, isScalar } from 'yaml';
 import { load as parseYaml } from 'js-yaml';
 
-export type FieldDefaultValue = string | number | string[];
+import type { z } from '@kbn/zod/v4';
+import type { UserPickerDefaultSchema } from '../../../../common/types/domain/template/fields';
+
+export type FieldDefaultValue =
+  | string
+  | number
+  | string[]
+  | z.infer<typeof UserPickerDefaultSchema>;
 
 interface FieldDefinition {
   name: string;

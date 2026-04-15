@@ -27,7 +27,10 @@ import {
   updateYamlFieldDefault,
   removeYamlFieldDefault,
 } from '../utils/update_yaml_field_default';
-import { FieldType } from '../../../../common/types/domain/template/fields';
+import {
+  FieldType,
+  UserPickerDefaultSchema,
+} from '../../../../common/types/domain/template/fields';
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
@@ -91,7 +94,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       const trimmedValue = value.trim();
 
       const isEmptyNumeric = control === FieldType.INPUT_NUMBER && trimmedValue === '';
-      const isEmptyUserPicker = control === FieldType.USER_PICKER && value === '';
+      const isEmptyUserPicker =
+        control === FieldType.USER_PICKER && (value === '' || value === '[]');
 
       if (isEmptyNumeric || isEmptyUserPicker) {
         const updatedYaml = removeYamlFieldDefault(yamlValueRef.current, fieldName);
@@ -112,7 +116,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         }
       } else if (control === FieldType.USER_PICKER) {
         try {
-          parsedValue = JSON.parse(value) as string[];
+          const result = UserPickerDefaultSchema.safeParse(JSON.parse(value));
+          parsedValue = result.success ? result.data : [];
         } catch {
           parsedValue = [];
         }
