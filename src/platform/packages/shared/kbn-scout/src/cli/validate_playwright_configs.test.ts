@@ -92,7 +92,9 @@ describe('runValidatePlaywrightConfigs', () => {
     await runValidatePlaywrightConfigs(5, log);
 
     expect(execPromiseMock).toHaveBeenCalledTimes(2);
-    expect(log.info).toHaveBeenCalledWith('All 2 Playwright config(s) have tests');
+    expect(log.info).toHaveBeenCalledWith(
+      expect.stringContaining('2 passed, 0 no tests, 0 errors')
+    );
   });
 
   it('throws when a config reports no tests', async () => {

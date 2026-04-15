@@ -30,6 +30,7 @@ const getUniqueConfigPaths = (modules: ModuleDiscoveryInfo[]): string[] => {
 interface ValidationResult {
   configPath: string;
   status: 'passed' | 'no_tests' | 'error';
+  durationMs: number;
   message?: string;
 }
 
@@ -43,17 +44,20 @@ const validateConfig = async (configPath: string, pwBinPath: string): Promise<Va
     '--project=local',
   ].join(' ');
 
+  const start = Date.now();
+
   try {
     await execPromise(cmd);
-    return { configPath, status: 'passed' };
+    return { configPath, status: 'passed', durationMs: Date.now() - start };
   } catch (err) {
+    const durationMs = Date.now() - start;
     const errorMessage = (err as Error).message || String(err);
 
     if (errorMessage.includes('No tests found')) {
-      return { configPath, status: 'no_tests' };
+      return { configPath, status: 'no_tests', durationMs };
     }
 
-    return { configPath, status: 'error', message: errorMessage };
+    return { configPath, status: 'error', durationMs, message: errorMessage };
   }
 };
 
@@ -80,12 +84,14 @@ export const runValidatePlaywrightConfigs = async (
   }
 
   log.info(
-    `Validating ${configPaths.length} Playwright config(s) with live 'playwright test --list'`
+    `Validating ${configPaths.length} Playwright config(s) with live 'playwright test --list' (concurrency: ${concurrencyLimit})`
   );
 
+  const totalStart = Date.now();
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const results: ValidationResult[] = [];
   const ongoing = new Set<Promise<void>>();
+  let completed = 0;
 
   for (const configPath of configPaths) {
     if (ongoing.size >= concurrencyLimit) {
@@ -95,9 +101,13 @@ export const runValidatePlaywrightConfigs = async (
     const task = validateConfig(configPath, pwBinPath)
       .then((result) => {
         results.push(result);
-        if (result.status === 'passed') {
-          log.debug(`  OK: ${configPath}`);
-        }
+        completed++;
+        const duration = (result.durationMs / 1000).toFixed(1);
+        const statusLabel =
+          result.status === 'passed' ? 'OK' : result.status === 'no_tests' ? 'NO TESTS' : 'ERROR';
+        log.info(
+          `  [${completed}/${configPaths.length}] ${statusLabel} (${duration}s): ${configPath}`
+        );
       })
       .finally(() => {
         ongoing.delete(task);
@@ -108,8 +118,14 @@ export const runValidatePlaywrightConfigs = async (
 
   await Promise.all(ongoing);
 
+  const totalDuration = ((Date.now() - totalStart) / 1000).toFixed(1);
+  const passed = results.filter((r) => r.status === 'passed');
   const noTests = results.filter((r) => r.status === 'no_tests');
   const errors = results.filter((r) => r.status === 'error');
+
+  log.info(
+    `Validation complete in ${totalDuration}s: ${passed.length} passed, ${noTests.length} no tests, ${errors.length} errors`
+  );
 
   if (errors.length > 0) {
     for (const { configPath, message } of errors) {
@@ -126,8 +142,6 @@ export const runValidatePlaywrightConfigs = async (
         `Run 'npx playwright test --list --config <config>' to see Playwright errors for a specific config.`
     );
   }
-
-  log.info(`All ${configPaths.length} Playwright config(s) have tests`);
 };
 
 export const validatePlaywrightConfigsCmd: Command<void> = {
