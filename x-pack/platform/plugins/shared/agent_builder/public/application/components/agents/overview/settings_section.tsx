@@ -27,6 +27,13 @@ const { agentOverview: overviewLabels } = labels;
 const settingRowStyles = css`
   width: 100%;
 `;
+const instructionsContainerStyles = css`
+  max-block-size: 275px;
+  overflow: auto;
+`;
+const instructionsTextStyles = css`
+  white-space: pre-wrap;
+`;
 
 export interface SettingsSectionProps {
   enableElasticCapabilities: boolean;
@@ -61,7 +68,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup gutterSize="m" alignItems="stretch">
+      <EuiFlexGroup gutterSize="m" alignItems="flexStart">
         {/* Custom Instructions Card */}
         <EuiFlexItem grow={1}>
           <EuiCard
@@ -71,7 +78,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             title={overviewLabels.customInstructionsTitle}
             titleElement="h3"
             titleSize="xs"
-            description={currentInstructions || overviewLabels.customInstructionsOnboardingText}
+            description={overviewLabels.customInstructionsSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
             footer={
@@ -91,7 +98,18 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                 color: ${euiTheme.colors.textSubdued};
               }
             `}
-          />
+          >
+            {currentInstructions && (
+              <>
+                <EuiSpacer size="s" />
+                <div css={instructionsContainerStyles}>
+                  <EuiText size="s" color="subdued">
+                    <p css={instructionsTextStyles}>{currentInstructions}</p>
+                  </EuiText>
+                </div>
+              </>
+            )}
+          </EuiCard>
         </EuiFlexItem>
 
         {/* Agent Settings Card */}
