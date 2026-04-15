@@ -17,20 +17,20 @@ export const timeRangeSchema = schema.object(
     from: schema.string({
       meta: {
         description:
-          'The start of the time range. Accepts Elasticsearch date math expressions (e.g. `now-7d`) or ISO 8601 timestamps.',
+          'The start of the time range. Accepts Elasticsearch date math expressions (for example, `now-7d`) or ISO 8601 timestamps.',
       },
     }),
     to: schema.string({
       meta: {
         description:
-          'The end of the time range. Accepts Elasticsearch date math expressions (e.g. `now`) or ISO 8601 timestamps.',
+          'The end of the time range. Accepts Elasticsearch date math expressions (for example, `now`) or ISO 8601 timestamps.',
       },
     }),
     mode: schema.maybe(
       schema.oneOf([absoluteTimeRangeMode, relativeTimeRangeMode], {
         meta: {
           description:
-            'The time range mode. Use `absolute` for fixed start and end timestamps. Use `relative` for expressions that are re-evaluated at query time (e.g. `now-7d` to `now`).',
+            'The time range mode. Use `absolute` for fixed start and end timestamps. Use `relative` for date math expressions that are re-evaluated at query time (for example, `now-7d`).',
         },
       })
     ),

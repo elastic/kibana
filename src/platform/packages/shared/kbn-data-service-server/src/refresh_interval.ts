@@ -13,7 +13,7 @@ export const refreshIntervalSchema = schema.object(
   {
     pause: schema.boolean({
       meta: {
-        description: 'When `true`, auto-refresh is paused. Defaults to `false`.',
+        description: 'When `true`, auto-refresh is paused.',
       },
     }),
     value: schema.number({
