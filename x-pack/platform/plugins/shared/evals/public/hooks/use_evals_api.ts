@@ -414,6 +414,7 @@ export const useEvaluationRun = (runId: string) => {
         version: API_VERSIONS.internal.v1,
       });
     },
+    enabled: runId.length > 0,
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;
