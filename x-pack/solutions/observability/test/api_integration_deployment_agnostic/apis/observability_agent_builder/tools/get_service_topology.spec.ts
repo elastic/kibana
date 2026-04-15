@@ -51,9 +51,9 @@ const END = 'now';
  * (e.g., "checkout-proxy:5050" instead of "checkout-service") to prevent heuristic matching.
  */
 interface ServiceTopologyConnection {
-  source: { 'service.name': string };
+  source: { 'service.name': string; 'agent.name'?: string };
   target:
-    | { 'service.name': string }
+    | { 'service.name': string; 'agent.name'?: string }
     | {
         'span.destination.service.resource': string;
         'span.type': string;
@@ -186,12 +186,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(metricsBasedConnections.map((c) => ({ source: c.source, target: c.target }))).to.eql(
           [
             {
-              source: { 'service.name': FRONTEND_SERVICE.serviceName },
-              target: { 'service.name': CHECKOUT_SERVICE.serviceName },
+              source: { 'service.name': FRONTEND_SERVICE.serviceName, 'agent.name': 'nodejs' },
+              target: { 'service.name': CHECKOUT_SERVICE.serviceName, 'agent.name': 'java' },
             },
             {
-              source: { 'service.name': FRONTEND_SERVICE.serviceName },
-              target: { 'service.name': RECOMMENDATION_SERVICE.serviceName },
+              source: { 'service.name': FRONTEND_SERVICE.serviceName, 'agent.name': 'nodejs' },
+              target: {
+                'service.name': RECOMMENDATION_SERVICE.serviceName,
+                'agent.name': 'python',
+              },
             },
           ]
         );
