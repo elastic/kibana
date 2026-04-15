@@ -224,8 +224,7 @@ export function storedPackagePoliciesToAgentPermissions(
                     type: stream.data_stream.type,
                     dataset: isOtelInput
                       ? getEffectiveOtelStreamDataset(stream)
-                      : stream.compiled_stream?.data_stream?.dataset ??
-                        stream.data_stream.dataset,
+                      : stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
                   };
 
                   if (stream.data_stream.elasticsearch) {
@@ -246,8 +245,7 @@ export function storedPackagePoliciesToAgentPermissions(
                       type: 'logs',
                       dataset: getEffectiveOtelStreamDataset(stream),
                       ...(spanEventElasticsearch
-                        ? { elasticsearch: spanEventElasticsearch }
-                        : {}),
+                        ? { elasticsearch: spanEventElasticsearch } : {}),
                     });
 
                     if (stream.vars?.[USE_APM_VAR_NAME]?.value === true) {
@@ -308,10 +306,9 @@ export interface DataStreamMeta {
 /** Span-event logs inherit only dynamic_dataset/dynamic_namespace from the traces stream; omit when unset. */
 function getOtelSpanEventElasticsearchFromTracesStream(
   traceElasticsearch: DataStreamMeta['elasticsearch'] | undefined
-): Pick<
-  NonNullable<DataStreamMeta['elasticsearch']>,
-  'dynamic_dataset' | 'dynamic_namespace'
-> | undefined {
+):
+  | Pick<NonNullable<DataStreamMeta['elasticsearch']>, 'dynamic_dataset' | 'dynamic_namespace'>
+  | undefined {
   if (!traceElasticsearch) {
     return undefined;
   }
