@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
-import type { Health } from '../../../common/types';
+import type { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
 interface Props {
-  health: Health;
+  health: HealthStatus;
 }
 
-const healthToColor = (health: Health) => {
+const healthToColor = (health: HealthStatus) => {
   switch (health) {
     case 'green':
       return 'success';

@@ -35,6 +35,7 @@ export type { ReviewIntegrationDetails } from './review_approve_modal';
 export const ManageIntegrationActions: React.FC<{
   integration: CreatedIntegrationRow;
   isPackageReady: boolean;
+  installedVersion?: string;
   inlineActionType?: 'reviewApprove' | 'editIntegration';
   showMenuButton?: boolean;
   onEdit: (integrationId: string) => void;
@@ -51,6 +52,7 @@ export const ManageIntegrationActions: React.FC<{
 }> = ({
   integration,
   isPackageReady,
+  installedVersion,
   inlineActionType,
   showMenuButton = true,
   onEdit,
@@ -124,6 +126,23 @@ export const ManageIntegrationActions: React.FC<{
   const closeReviewModal = useCallback(() => {
     setShowReviewModal(false);
   }, []);
+
+  const isSameVersionInstalled =
+    installedVersion !== undefined && installedVersion === integration.version;
+
+  const getInstallToClusterTooltip = () => {
+    if (isSameVersionInstalled) {
+      return i18n.translate(
+        'xpack.fleet.epmList.manageIntegrations.actions.installAlreadyInstalledHelp',
+        { defaultMessage: 'This integration is already installed.' }
+      );
+    }
+    if (!isApproved) {
+      return i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.installDisabledHelp', {
+        defaultMessage: 'Install is available only for approved integrations.',
+      });
+    }
+  };
 
   const reviewApproveDisabled = !isPackageReady || isApproved;
   const reviewApproveTooltip = isApproved
@@ -218,18 +237,9 @@ export const ManageIntegrationActions: React.FC<{
               <EuiContextMenuItem
                 key="installToCluster"
                 icon="exportAction"
-                disabled={!isApproved || isInstalling}
+                disabled={!isApproved || isInstalling || isSameVersionInstalled}
                 data-test-subj="manageIntegrationInstallMenuItem"
-                toolTipContent={
-                  isApproved
-                    ? undefined
-                    : i18n.translate(
-                        'xpack.fleet.epmList.manageIntegrations.actions.installDisabledHelp',
-                        {
-                          defaultMessage: 'Install is available only for approved integrations.',
-                        }
-                      )
-                }
+                toolTipContent={getInstallToClusterTooltip()}
                 onClick={handleInstallToCluster}
               >
                 <FormattedMessage

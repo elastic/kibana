@@ -57,8 +57,6 @@ const mockEsClient = {} as any;
 
 const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60 * 1000).toISOString();
 
-const hoursAgo = (hours: number) => new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
-
 const makePackagePolicySO = (
   id: string,
   connectorId: string,
@@ -115,7 +113,7 @@ describe('verify_permissions_task', () => {
         expect.objectContaining({
           'fleet:verify_permissions': expect.objectContaining({
             title: 'OTel Verify Permission Task',
-            timeout: '5m',
+            timeout: '1d',
           }),
         })
       );
@@ -129,7 +127,7 @@ describe('verify_permissions_task', () => {
       expect(taskManager.ensureScheduled).toHaveBeenCalledWith({
         id: 'fleet:verify_permissions:1.0.0',
         taskType: 'fleet:verify_permissions',
-        schedule: { interval: '5m' },
+        schedule: { interval: '12h' },
         state: {},
         params: {},
       });
@@ -736,7 +734,7 @@ describe('verify_permissions_task', () => {
       it('should verify recently created connector', async () => {
         setupEligibilityTest({
           created_at: minutesAgo(2),
-          verification_started_at: minutesAgo(10),
+          verification_started_at: minutesAgo(6),
           verification_status: 'success',
         });
 
@@ -747,9 +745,9 @@ describe('verify_permissions_task', () => {
 
       it('should verify recently updated connector', async () => {
         setupEligibilityTest({
-          created_at: hoursAgo(1),
+          created_at: minutesAgo(10),
           updated_at: minutesAgo(2),
-          verification_started_at: minutesAgo(10),
+          verification_started_at: minutesAgo(6),
           verification_status: 'success',
         });
 
@@ -760,8 +758,8 @@ describe('verify_permissions_task', () => {
 
       it('should re-verify connector whose verification_started_at expired and status is not failed', async () => {
         setupEligibilityTest({
-          created_at: hoursAgo(1),
-          updated_at: hoursAgo(1),
+          created_at: minutesAgo(10),
+          updated_at: minutesAgo(10),
           verification_started_at: minutesAgo(6),
           verification_status: 'pending',
         });
@@ -773,8 +771,8 @@ describe('verify_permissions_task', () => {
 
       it('should not re-verify connector whose verification_started_at is recent and status is success', async () => {
         setupEligibilityTest({
-          created_at: hoursAgo(1),
-          updated_at: hoursAgo(1),
+          created_at: minutesAgo(10),
+          updated_at: minutesAgo(10),
           verification_started_at: minutesAgo(2),
           verification_status: 'success',
         });
@@ -786,9 +784,9 @@ describe('verify_permissions_task', () => {
 
       it('should verify connector with no verification_status set (backwards compat)', async () => {
         setupEligibilityTest({
-          created_at: hoursAgo(1),
-          updated_at: hoursAgo(1),
-          verification_started_at: minutesAgo(10),
+          created_at: minutesAgo(10),
+          updated_at: minutesAgo(10),
+          verification_started_at: minutesAgo(6),
         });
 
         await taskRunner.run();

@@ -98,7 +98,7 @@ jest.mock('../../common/components/connector_selector', () => ({
 
 jest.mock('./forms/integration_form', () => ({
   IntegrationFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useIntegrationForm: () => ({ formData: {}, form: {}, submit: mockSubmit }),
+  useIntegrationForm: () => ({ formData: {}, form: {}, submit: mockSubmit, isFormModified: true }),
 }));
 
 jest.mock('../../common/components/button_footer', () => ({
@@ -148,12 +148,15 @@ describe('IntegrationManagement telemetry', () => {
     });
   });
 
-  it('calls reportCancelButtonClicked when cancel is clicked', () => {
+  it('calls reportCancelButtonClicked and navigates to manage integrations when cancel is clicked', () => {
     renderComponent();
 
     fireEvent.click(screen.getByTestId('cancelButton'));
 
     expect(mockReportCancelButtonClicked).toHaveBeenCalledTimes(1);
+    expect(mockNavigateToApp).toHaveBeenCalledWith('integrations', {
+      path: '/browse?view=manage',
+    });
   });
 
   it('calls reportDoneButtonClicked when done is clicked', () => {
@@ -210,6 +213,37 @@ describe('IntegrationManagement telemetry', () => {
     fireEvent.click(screen.getByTestId('doneButton'));
 
     expect(mockSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it('navigates to manage integrations when cancel is clicked on edit route with data streams', () => {
+    mockUseGetIntegrationById.mockReturnValue({
+      integration: {
+        integrationId: 'int-1',
+        title: 'With streams',
+        description: 'd',
+        status: 'completed',
+        dataStreams: [
+          {
+            dataStreamId: 'ds-1',
+            title: 'Logs',
+            description: 'L',
+            inputTypes: [{ name: 'filestream' }],
+            status: 'completed',
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderComponent('/edit/int-1');
+
+    fireEvent.click(screen.getByTestId('cancelButton'));
+
+    expect(mockReportCancelButtonClicked).toHaveBeenCalledTimes(1);
+    expect(mockNavigateToApp).toHaveBeenCalledWith('integrations', {
+      path: '/browse?view=manage',
+    });
   });
 
   it('opens delete integration modal when cancel is clicked and integration has no data streams', async () => {
