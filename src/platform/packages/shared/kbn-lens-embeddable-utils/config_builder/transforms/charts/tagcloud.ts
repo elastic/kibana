@@ -40,7 +40,11 @@ import {
   operationFromColumn,
 } from '../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import { fromColorMappingAPIToLensState, fromColorMappingLensStateToAPI } from '../coloring';
+import {
+  DEFAULT_CATEGORICAL_COLOR_MAPPING,
+  fromColorMappingAPIToLensState,
+  fromColorMappingLensStateToAPI,
+} from '../coloring';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import {
@@ -124,13 +128,15 @@ function getTagcloudTagBy(
     throw new Error('Tag accessor is missing in the visualization state');
   }
 
-  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
+  const color =
+    fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette) ??
+    DEFAULT_CATEGORICAL_COLOR_MAPPING;
 
   return {
     ...(isTextBasedLayer(layer)
       ? getValueApiColumn(visualization.tagAccessor, layer)
       : (operationFromColumn(visualization.tagAccessor, layer) as LensApiBucketOperations)),
-    ...(color && { color }),
+    color,
   };
 }
 

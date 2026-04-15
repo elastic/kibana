@@ -63,12 +63,8 @@ export async function createMockIdpMetadata(kibanaUrl: string) {
           </ds:X509Data>
         </ds:KeyInfo>
       </md:KeyDescriptor>
-      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGOUT_PATH}" />
       <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
         Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGOUT_PATH}" />
-      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGIN_PATH}" />
       <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
         Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGIN_PATH}" />
     </md:IDPSSODescriptor>
@@ -104,6 +100,8 @@ export async function createSAMLResponse(options: {
   kibanaUrl: string;
   /** ID from SAML authentication request */
   authnRequestId?: string;
+  /** SP entity ID for AudienceRestriction (required by UIAM, optional for ES) */
+  spEntityId?: string;
   username: string;
   full_name?: string;
   email?: string;
@@ -134,6 +132,15 @@ export async function createSAMLResponse(options: {
       })
     : undefined;
 
+  const conditionsXml = `
+      <saml:Conditions NotBefore="${issueInstant}" NotOnOrAfter="${notOnOrAfter}">
+        ${
+          options.spEntityId
+            ? `<saml:AudienceRestriction><saml:Audience>${options.spEntityId}</saml:Audience></saml:AudienceRestriction>`
+            : ''
+        }
+      </saml:Conditions>`;
+
   const samlAssertionTemplateXML = `
     <saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0" ID="_RPs1WfOkul8lZ72DtJtes0BKyPgaCamg" IssueInstant="${issueInstant}">
       <saml:Issuer>${MOCK_IDP_ENTITY_ID}</saml:Issuer>
@@ -144,7 +151,7 @@ export async function createSAMLResponse(options: {
     options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
   } Recipient="${options.kibanaUrl}" />
         </saml:SubjectConfirmation>
-      </saml:Subject>
+      </saml:Subject>${conditionsXml}
       <saml:AuthnStatement AuthnInstant="${issueInstant}" SessionIndex="4464894646681600">
         <saml:AuthnContext>
           <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified</saml:AuthnContextClassRef>
@@ -537,23 +544,47 @@ function wrapSignedJwt(signedJwt: string): string {
 const inflateRawAsync = promisify(zlib.inflateRaw);
 const parseStringAsync = promisify(parseString);
 
-export async function getSAMLRequestId(requestUrl: string): Promise<string | undefined> {
-  const samlRequest = Url.parse(requestUrl, true /* parseQueryString */).query.SAMLRequest;
+export interface SAMLRequestInfo {
+  requestId: string;
+  acsUrl?: string;
+  issuer?: string;
+}
 
-  let requestId: string | undefined;
+/**
+ * Parses a SAML AuthnRequest from the redirect URL and extracts the request ID
+ * and optional AssertionConsumerServiceURL. The ACS URL tells us where to POST
+ * the SAMLResponse (e.g. UIAM vs Kibana/ES).
+ */
+export async function parseSAMLRequest(requestUrl: string): Promise<SAMLRequestInfo | undefined> {
+  const parsed = Url.parse(requestUrl, true);
+  const samlRequest = parsed.query.SAMLRequest;
 
-  if (samlRequest) {
-    try {
-      const inflatedSAMLRequest = (await inflateRawAsync(
-        Buffer.from(samlRequest as string, 'base64')
-      )) as Buffer;
-
-      const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
-      requestId = parsedSAMLRequest['saml2p:AuthnRequest'].$.ID as string;
-    } catch (e) {
-      return undefined;
-    }
+  if (!samlRequest) {
+    return undefined;
   }
 
-  return requestId;
+  try {
+    const inflatedSAMLRequest = (await inflateRawAsync(
+      Buffer.from(samlRequest as string, 'base64')
+    )) as Buffer;
+
+    const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
+    const authnRequest = parsedSAMLRequest['saml2p:AuthnRequest'];
+    const attrs = authnRequest.$;
+    const issuerElement = authnRequest['saml2:Issuer']?.[0];
+    const issuer =
+      typeof issuerElement === 'string' ? issuerElement : issuerElement?._ ?? undefined;
+    return {
+      requestId: attrs.ID as string,
+      acsUrl: attrs.AssertionConsumerServiceURL as string | undefined,
+      issuer,
+    };
+  } catch (e) {
+    return undefined;
+  }
+}
+
+export async function getSAMLRequestId(requestUrl: string): Promise<string | undefined> {
+  const info = await parseSAMLRequest(requestUrl);
+  return info?.requestId;
 }
