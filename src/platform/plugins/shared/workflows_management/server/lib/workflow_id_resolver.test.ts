@@ -89,7 +89,7 @@ describe('buildCandidateIds', () => {
     // Build a base that ends with a hyphen right at the truncation boundary.
     // e.g., 253 "a"s + "-a" = 255 chars. Truncating to 253 chars yields "aaa...a-"
     // which, without the fix, would produce "aaa...a--1" (double hyphen = invalid ID).
-    const base = 'a'.repeat(WORKFLOW_ID_MAX_LENGTH - 2) + '-a';
+    const base = `${'a'.repeat(WORKFLOW_ID_MAX_LENGTH - 2)}-a`;
     expect(base.length).toBe(WORKFLOW_ID_MAX_LENGTH);
 
     const candidates = buildCandidateIds(base);
@@ -168,10 +168,8 @@ describe('resolveUniqueWorkflowIds', () => {
     // "foo" candidates include "foo-1", which is also the base ID for the
     // second entry. The resolver must not assign "foo-1" to the first entry
     // when the second entry already claims it.
-    const result = await resolveUniqueWorkflowIds(
-      ['foo', 'foo-1'],
-      new Set(),
-      () => Promise.resolve(new Set(['foo']))
+    const result = await resolveUniqueWorkflowIds(['foo', 'foo-1'], new Set(), () =>
+      Promise.resolve(new Set(['foo']))
     );
     // "foo" is taken in DB → first entry gets "foo-1", but "foo-1" is the
     // second base → second entry should get "foo-1-1" to avoid collision.
