@@ -88,7 +88,7 @@ export const bulkActionsTool = (
   return {
     id: SECURITY_BULK_ACTIONS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Apply bulk actions to security detection rules. Supports enabling, disabling, deleting, and managing tags on multiple rules at once. Rules can be identified by their saved object IDs ("rule_ids") or rule signature IDs ("rule_signature_ids"). Use the alerts tool or find_prebuilt_rules tool first to discover rule IDs, then use this tool to perform actions on them.`,
+    description: `Apply bulk actions to security detection rules. Supports enabling, disabling, deleting, and managing tags on multiple rules at once. Rules can be identified by their saved object IDs ("ids") or rule signature IDs ("rule_ids"). Use the alerts tool or find_prebuilt_rules tool first to discover rule IDs, then use this tool to perform actions on them.`,
     schema: bulkActionsSchema,
     availability: {
       cacheMode: 'space',
