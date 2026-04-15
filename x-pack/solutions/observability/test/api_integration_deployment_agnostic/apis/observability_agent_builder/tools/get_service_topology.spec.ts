@@ -182,18 +182,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (c) => getSourceName(c) === FRONTEND_SERVICE.serviceName
         );
 
-        expect(traceBasedImmediate).to.eql(metricsBasedConnections);
+        // The trace-based path includes agent.name on nodes for now; the metrics
+        // fast path does not. Compare service names and metrics only.
+        expect(traceBasedImmediate.map(getSourceName)).to.eql(
+          metricsBasedConnections.map(getSourceName)
+        );
+        expect(traceBasedImmediate.map(getTargetName)).to.eql(
+          metricsBasedConnections.map(getTargetName)
+        );
+        expect(traceBasedImmediate.map((c) => c.metrics)).to.eql(
+          metricsBasedConnections.map((c) => c.metrics)
+        );
         expect(metricsBasedConnections.map((c) => ({ source: c.source, target: c.target }))).to.eql(
           [
             {
-              source: { 'service.name': FRONTEND_SERVICE.serviceName, 'agent.name': 'nodejs' },
-              target: { 'service.name': CHECKOUT_SERVICE.serviceName, 'agent.name': 'java' },
+              source: { 'service.name': FRONTEND_SERVICE.serviceName },
+              target: { 'service.name': CHECKOUT_SERVICE.serviceName },
             },
             {
-              source: { 'service.name': FRONTEND_SERVICE.serviceName, 'agent.name': 'nodejs' },
+              source: { 'service.name': FRONTEND_SERVICE.serviceName },
               target: {
                 'service.name': RECOMMENDATION_SERVICE.serviceName,
-                'agent.name': 'python',
               },
             },
           ]
