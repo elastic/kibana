@@ -355,7 +355,6 @@ describe('rule_details', () => {
     });
 
     describe('links', () => {
-
       it('links to the Edit flyout', async () => {
         const rule = mockRule();
         render(
