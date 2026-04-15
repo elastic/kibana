@@ -7,9 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
+import type { EventChainContext } from './event_chain_context';
 import { getEventChainContext } from './event_chain_context';
 import type { TriggerRegistry } from './trigger_registry/trigger_registry';
-import type { EmitEventParams, TriggerEventHandler } from './types';
+
+/**
+ * Parameters passed to the trigger event handler when an event is emitted.
+ */
+export interface TriggerEventHandlerParams {
+  timestamp: string;
+  triggerId: string;
+  spaceId: string;
+  payload: Record<string, unknown>;
+  request: KibanaRequest;
+  eventChainContext?: EventChainContext;
+}
+
+/**
+ * Handler invoked by the extensions plugin when emitEvent is called.
+ * Registered during setup to resolve subscriptions and run workflows.
+ */
+export type TriggerEventHandler = (params: TriggerEventHandlerParams) => Promise<void>;
+
+/**
+ * Parameters for emitEvent.
+ */
+export interface EmitEventParams {
+  triggerId: string;
+  spaceId: string;
+  payload: Record<string, unknown>;
+  request: KibanaRequest;
+}
 
 export interface EmitEventDeps {
   triggerRegistry: TriggerRegistry;

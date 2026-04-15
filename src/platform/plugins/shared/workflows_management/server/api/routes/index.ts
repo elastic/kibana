@@ -8,9 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { registerExecutionRoutes } from './executions';
 import { registerInternalRoutes } from './internal';
 import type { RouteDependencies } from './types';
@@ -18,16 +16,16 @@ import { WorkflowManagementAuditLog } from './utils/workflow_audit_logging';
 import { registerWorkflowRoutes } from './workflows';
 import type { WorkflowsRouter } from '../../types';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
+import type { WorkflowsService } from '../workflows_management_service';
 
 export function defineRoutes(
   router: WorkflowsRouter,
   api: WorkflowsManagementApi,
   logger: Logger,
   spaces: SpacesServiceStart,
-  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>,
-  getSecurityServiceStart: () => SecurityServiceStart | undefined
+  services: WorkflowsService
 ) {
-  const audit = new WorkflowManagementAuditLog({ getSecurityServiceStart });
+  const audit = new WorkflowManagementAuditLog({ services });
 
   const deps: RouteDependencies = {
     router,
@@ -35,9 +33,10 @@ export function defineRoutes(
     logger,
     spaces,
     audit,
+    services,
   };
 
   registerWorkflowRoutes(deps);
   registerExecutionRoutes(deps);
-  registerInternalRoutes(deps, getWorkflowExecutionEngine);
+  registerInternalRoutes(deps);
 }

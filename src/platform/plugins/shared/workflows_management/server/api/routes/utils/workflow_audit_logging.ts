@@ -10,6 +10,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
+import type { WorkflowsService } from '../../workflows_management_service';
 
 /**
  * Stable action names for xpack.security.audit.ignore_filters.
@@ -66,7 +67,7 @@ function createEvent(
 }
 
 interface WorkflowManagementAuditLogDeps {
-  getSecurityServiceStart: () => SecurityServiceStart | undefined;
+  services: WorkflowsService;
 }
 
 /**
@@ -75,15 +76,20 @@ interface WorkflowManagementAuditLogDeps {
  * Best-effort: sync throws are caught; audit never affects HTTP responses.
  */
 export class WorkflowManagementAuditLog {
-  constructor(private readonly deps: WorkflowManagementAuditLogDeps) {}
+  private security?: SecurityServiceStart;
+
+  constructor(private readonly deps: WorkflowManagementAuditLogDeps) {
+    this.deps.services.getCoreStart().then((coreStart) => {
+      this.security = coreStart.security; // security service is initialized
+    });
+  }
 
   private log(request: KibanaRequest, event: AuditEvent): void {
     try {
-      const security = this.deps.getSecurityServiceStart();
-      if (!security) {
+      if (!this.security) {
         return;
       }
-      security.audit.asScoped(request).log(event);
+      this.security.audit.asScoped(request).log(event);
     } catch {
       // Best-effort only: never let audit affect the HTTP response.
     }

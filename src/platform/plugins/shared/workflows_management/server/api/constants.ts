@@ -7,11 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registerDisableAllWorkflowsRoute } from './disable_all_workflows';
-import { registerGetConfigRoute } from './get_config';
-import type { RouteDependencies } from '../types';
+import type { LicenseType } from '@kbn/licensing-types';
 
-export function registerInternalRoutes(deps: RouteDependencies) {
-  registerGetConfigRoute(deps);
-  registerDisableAllWorkflowsRoute(deps);
-}
+export const REQUIRED_LICENSE_TYPE: LicenseType = 'enterprise';

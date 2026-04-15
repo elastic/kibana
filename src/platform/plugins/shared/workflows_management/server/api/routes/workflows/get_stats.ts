@@ -13,7 +13,7 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -37,7 +37,7 @@ export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies
         },
         validate: false,
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           if (request.authzResult?.[WorkflowsManagementApiActions.read] !== true) {
             return response.forbidden();

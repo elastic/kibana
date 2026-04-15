@@ -12,18 +12,25 @@ import {
   type TriggerEventDispatchedTelemetryEvent,
   WORKFLOWS_TRIGGER_EVENT_DISPATCHED,
 } from './events';
+import type { WorkflowsService } from '../api/workflows_management_service';
 
 interface WorkflowsManagementTelemetryClientDeps {
   logger: Logger;
-  getAnalytics?: () => AnalyticsServiceStart | undefined;
+  workflowsService: WorkflowsService;
 }
 
 export class WorkflowsManagementTelemetryClient {
-  constructor(private readonly deps: WorkflowsManagementTelemetryClientDeps) {}
+  private analytics: AnalyticsServiceStart | undefined;
+
+  constructor(private readonly deps: WorkflowsManagementTelemetryClientDeps) {
+    this.deps.workflowsService.getCoreStart().then(({ analytics }) => {
+      this.analytics = analytics;
+    });
+  }
 
   reportTriggerEventDispatched(event: TriggerEventDispatchedTelemetryEvent): void {
     try {
-      this.deps.getAnalytics?.()?.reportEvent(WORKFLOWS_TRIGGER_EVENT_DISPATCHED, event);
+      this.analytics?.reportEvent(WORKFLOWS_TRIGGER_EVENT_DISPATCHED, event);
     } catch (error) {
       this.deps.logger.warn(
         `Failed to report ${WORKFLOWS_TRIGGER_EVENT_DISPATCHED} telemetry: ${

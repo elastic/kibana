@@ -37,6 +37,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { EventEmitter } from '@kbn/workflows-extensions/server/types';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { SmlTypeDefinition } from './agent_builder/sml_types/types';
 import type { WorkflowsManagementApi } from './api/workflows_management_api';
@@ -92,7 +93,20 @@ export interface WorkflowsServerPluginStartDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
+export interface WorkflowsClient {
+  emitEvent: EventEmitter;
+}
+export interface WorkflowsApiRequestHandlerContext {
+  isWorkflowsAvailable: boolean;
+  getWorkflowsClient: () => WorkflowsClient;
+}
+
+export type WorkflowsRouteHandlerContext = CustomRequestHandlerContext<{
+  workflows: WorkflowsApiRequestHandlerContext;
+}>;
+
 export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{
+  workflows: WorkflowsApiRequestHandlerContext;
   actions: ActionsApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;

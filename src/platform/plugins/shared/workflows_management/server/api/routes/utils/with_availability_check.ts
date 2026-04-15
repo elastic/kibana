@@ -10,10 +10,8 @@
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { type CheckLicense, wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
-import type { LicenseType } from '@kbn/licensing-types';
 import type { WorkflowsRequestHandlerContext } from '../../../types';
-
-const RequiredLicenseType: LicenseType = 'enterprise';
+import { REQUIRED_LICENSE_TYPE } from '../../constants';
 
 const checkLicense: CheckLicense = (license) => {
   if (!license.isAvailable || !license.isActive) {
@@ -26,13 +24,13 @@ const checkLicense: CheckLicense = (license) => {
     };
   }
 
-  if (!license.hasAtLeast(RequiredLicenseType)) {
+  if (!license.hasAtLeast(REQUIRED_LICENSE_TYPE)) {
     return {
       valid: false,
       message: i18n.translate('plugins.workflowsManagement.checkLicense.invalidLicense', {
         defaultMessage:
-          'Your {licenseType} license does not support Workflows. Please upgrade to an {requiredLicenseType} license.',
-        values: { licenseType: license.type, requiredLicenseType: RequiredLicenseType },
+          'Your {licenseType} license does not have Workflows available. Please upgrade to an {requiredLicenseType} license.',
+        values: { licenseType: license.type, requiredLicenseType: REQUIRED_LICENSE_TYPE },
       }),
     };
   }
@@ -40,11 +38,28 @@ const checkLicense: CheckLicense = (license) => {
   return { valid: true, message: null };
 };
 
+const withServerlessAvailabilityCheck =
+  <P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = never>(
+    handler: RequestHandler<P, Q, B, WorkflowsRequestHandlerContext, Method>
+  ): RequestHandler<P, Q, B, WorkflowsRequestHandlerContext, Method> =>
+  async (context, request, response) => {
+    const { isWorkflowsAvailable } = await context.workflows;
+    if (!isWorkflowsAvailable) {
+      return response.forbidden({
+        body: {
+          message:
+            'Your project does not have Workflows available. Please upgrade your tier subscription.',
+        },
+      });
+    }
+    return handler(context, request, response);
+  };
+
 /**
- * Wraps a request handler with a license check.
- * If the license is not valid, it will return a 403 error with a message.
+ * Wraps a request handler with a license and serverless availability check.
+ * If workflows are not available in this environment, it will return a 403 (FORBIDDEN) error with a message.
  */
-export const withLicenseCheck = <
+export const withAvailabilityCheck = <
   P = unknown,
   Q = unknown,
   B = unknown,
@@ -52,4 +67,4 @@ export const withLicenseCheck = <
 >(
   handler: RequestHandler<P, Q, B, WorkflowsRequestHandlerContext, Method>
 ): RequestHandler<P, Q, B, WorkflowsRequestHandlerContext, Method> =>
-  wrapRouteWithLicenseCheck(checkLicense, handler);
+  wrapRouteWithLicenseCheck(checkLicense, withServerlessAvailabilityCheck(handler));

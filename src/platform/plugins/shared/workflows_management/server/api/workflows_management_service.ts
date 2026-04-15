@@ -10,17 +10,15 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
-import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { FindActionResult } from '@kbn/actions-plugin/server/types';
+import type { ActionsPlugin, FindActionResult } from '@kbn/actions-plugin/server/types';
 import type {
   CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
-  SecurityServiceStart,
+  StartServicesAccessor,
 } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   ExecutionType,
   NonTerminalExecutionStatuses,
@@ -53,8 +51,8 @@ import type {
   WorkflowPartialDetailDto,
 } from '@kbn/workflows/types/v1';
 import type {
-  IWorkflowEventLoggerService,
   LogSearchResult,
+  WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
 import type {
   ExecutionLogsParams,
@@ -85,7 +83,7 @@ import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import { createStorage, workflowIndexName } from '../storage/workflow_storage';
-import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
+import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 /** Derives a list of trigger type ids from a workflow definition (e.g. ['manual', 'scheduled', 'cases.updated']). */
@@ -111,63 +109,57 @@ export interface SearchWorkflowExecutionsParams {
 }
 
 export class WorkflowsService {
-  private esClient!: ElasticsearchClient;
+  // The following attributes require `ensureInitialized` to be called before use
+  private coreStart!: CoreStart;
+  private workflowsExecutionEngine!: WorkflowsExecutionEnginePluginStart;
   private workflowStorage!: WorkflowStorage;
-  private workflowEventLoggerService!: IWorkflowEventLoggerService;
-  private taskScheduler: WorkflowTaskScheduler | null = null;
-  private readonly logger: Logger;
-  private security?: SecurityServiceStart;
-  private workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
-  private getActionsClient: () => Promise<IUnsecuredActionsClient>;
-  private getActionsClientWithRequest: (
-    request: KibanaRequest
-  ) => Promise<PublicMethodsOf<ActionsClient>>;
+  private taskScheduler!: WorkflowTaskScheduler;
+  private esClient!: ElasticsearchClient;
+  private actions!: ActionsPlugin['start'];
+  private workflowsExtensions!: WorkflowsExtensionsServerPluginStart;
+
   private readonly initPromise: Promise<void>;
 
   constructor(
-    logger: Logger,
-    getCoreStart: () => Promise<CoreStart>,
-    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
+    startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>,
+    private readonly logger: Logger
   ) {
-    this.logger = logger;
-    this.getActionsClient = () =>
-      getPluginsStart().then((plugins) => plugins.actions.getUnsecuredActionsClient());
-    this.getActionsClientWithRequest = (request: KibanaRequest) =>
-      getPluginsStart().then((plugins) => plugins.actions.getActionsClientWithRequest(request));
-
-    this.initPromise = this.initialize(getCoreStart, getPluginsStart);
-  }
-
-  public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
-    this.taskScheduler = taskScheduler;
-  }
-
-  public setSecurityService(security: SecurityServiceStart) {
-    this.security = security;
+    this.initPromise = this.initialize(startServices);
   }
 
   private async ensureInitialized(): Promise<void> {
     await this.initPromise;
   }
 
-  private async initialize(
-    getCoreStart: () => Promise<CoreStart>,
-    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
-  ) {
-    const coreStart = await getCoreStart();
-    const pluginsStart = await getPluginsStart();
+  private async initialize(startServices: StartServicesAccessor<WorkflowsServerPluginStartDeps>) {
+    const [coreStart, pluginsStart] = await startServices();
+    this.coreStart = coreStart;
+    this.taskScheduler = new WorkflowTaskScheduler(this.logger, pluginsStart.taskManager);
 
+    this.actions = pluginsStart.actions;
     this.esClient = coreStart.elasticsearch.client.asInternalUser;
 
-    // Initialize workflow storage
     this.workflowStorage = createStorage({
       logger: this.logger,
       esClient: this.esClient,
     });
 
-    this.workflowEventLoggerService =
-      pluginsStart.workflowsExecutionEngine.workflowEventLoggerService;
+    this.workflowsExecutionEngine = pluginsStart.workflowsExecutionEngine;
     this.workflowsExtensions = pluginsStart.workflowsExtensions;
+  }
+
+  public async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
+    await this.ensureInitialized();
+    return this.workflowsExecutionEngine;
+  }
+  public async getWorkflowsExtensions(): Promise<WorkflowsExtensionsServerPluginStart> {
+    await this.ensureInitialized();
+    return this.workflowsExtensions;
+  }
+
+  public async getCoreStart(): Promise<CoreStart> {
+    await this.ensureInitialized();
+    return this.coreStart;
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
@@ -233,7 +225,9 @@ export class WorkflowsService {
     spaceId: string,
     source?: string[]
   ): Promise<WorkflowPartialDetailDto[]> {
-    if (!this.workflowStorage || ids.length === 0) {
+    await this.ensureInitialized();
+
+    if (ids.length === 0) {
       return [];
     }
 
@@ -350,7 +344,7 @@ export class WorkflowsService {
     }
 
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
-    const authenticatedUser = getAuthenticatedUser(request, this.security);
+    const authenticatedUser = getAuthenticatedUser(request, this.coreStart.security);
     const now = new Date();
     const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
@@ -396,9 +390,9 @@ export class WorkflowsService {
     await this.ensureInitialized();
 
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
-    const authenticatedUser = getAuthenticatedUser(request, this.security);
+    const authenticatedUser = getAuthenticatedUser(request, this.coreStart.security);
     const now = new Date();
-    const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    const triggerDefinitions = this.workflowsExtensions.getAllTriggerDefinitions();
 
     const created: WorkflowDetailDto[] = [];
     const failed: Array<{ index: number; id: string; error: string }> = [];
@@ -495,6 +489,8 @@ export class WorkflowsService {
     id: string,
     spaceId: string
   ): Promise<{ source: WorkflowProperties }> {
+    await this.ensureInitialized();
+
     const searchResponse = await this.workflowStorage.getClient().search({
       query: {
         bool: {
@@ -529,8 +525,10 @@ export class WorkflowsService {
     validationErrors: string[];
     shouldUpdateScheduler: boolean;
   }> {
+    await this.ensureInitialized();
+
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
-    const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    const triggerDefinitions = this.workflowsExtensions.getAllTriggerDefinitions();
     const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
 
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -657,7 +655,7 @@ export class WorkflowsService {
 
     try {
       const { source: existingSource } = await this.getExistingWorkflowDocument(id, spaceId);
-      const authenticatedUser = getAuthenticatedUser(request, this.security);
+      const authenticatedUser = getAuthenticatedUser(request, this.coreStart.security);
       const now = new Date();
       const validationErrors: string[] = [];
       let updatedData: Partial<WorkflowProperties> = {
@@ -1744,19 +1742,13 @@ export class WorkflowsService {
   }
 
   public async getExecutionLogs(params: ExecutionLogsParams): Promise<LogSearchResult> {
-    if (!this.workflowEventLoggerService) {
-      throw new Error('WorkflowEventLoggerService not initialized');
-    }
-
-    return this.workflowEventLoggerService.getExecutionLogs(params);
+    this.ensureInitialized();
+    return this.workflowsExecutionEngine.workflowEventLoggerService.getExecutionLogs(params);
   }
 
   public async getStepLogs(params: StepLogsParams): Promise<LogSearchResult> {
-    if (!this.workflowEventLoggerService) {
-      throw new Error('WorkflowEventLoggerService not initialized');
-    }
-
-    return this.workflowEventLoggerService.getStepLogs(params);
+    this.ensureInitialized();
+    return this.workflowsExecutionEngine.workflowEventLoggerService.getStepLogs(params);
   }
 
   public async getStepExecution(
@@ -1821,8 +1813,9 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<GetAvailableConnectorsResponse> {
-    const actionsClient = await this.getActionsClient();
-    const actionsClientWithRequest = await this.getActionsClientWithRequest(request);
+    await this.ensureInitialized();
+    const actionsClient = this.actions.getUnsecuredActionsClient();
+    const actionsClientWithRequest = await this.actions.getActionsClientWithRequest(request);
 
     // Get both connectors and action types
     const [connectors, actionTypes] = await Promise.all([

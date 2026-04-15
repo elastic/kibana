@@ -13,7 +13,7 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_CANCEL_SECURITY } from '../utils/route_security';
 import { workflowIdParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerCancelWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -42,7 +42,7 @@ export function registerCancelWorkflowExecutionsRoute({ router, api, spaces }: R
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { workflowId } = request.params;
           const spaceId = spaces.getSpaceId(request);

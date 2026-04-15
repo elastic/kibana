@@ -14,7 +14,7 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_RESUME_SECURITY } from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerResumeExecutionRoute(deps: RouteDependencies) {
   const { router, api, spaces, audit } = deps;
@@ -47,7 +47,7 @@ export function registerResumeExecutionRoute(deps: RouteDependencies) {
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
           const { input } = request.body;

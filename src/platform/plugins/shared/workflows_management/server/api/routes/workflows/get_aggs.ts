@@ -13,7 +13,7 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const MAX_AGG_FIELDS = 25;
 
@@ -51,7 +51,7 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { fields } = request.query;
           const spaceId = spaces.getSpaceId(request);

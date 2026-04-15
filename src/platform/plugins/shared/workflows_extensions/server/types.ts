@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { z } from '@kbn/zod/v4';
+import type { TriggerEventHandler } from './emit_event';
 import type { EventChainContext } from './event_chain_context';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
@@ -23,40 +24,12 @@ export type ServerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> =
 
 export type { EventChainContext };
 
-/**
- * Parameters passed to the trigger event handler when an event is emitted.
- */
-export interface TriggerEventHandlerParams {
-  timestamp: string;
-  triggerId: string;
-  spaceId: string;
-  payload: Record<string, unknown>;
-  request: KibanaRequest;
-  eventChainContext?: EventChainContext;
-}
+export type EventEmitter = (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
 
-/**
- * Handler invoked by the extensions plugin when emitEvent is called.
- * Registered during setup to resolve subscriptions and run workflows.
- */
-export type TriggerEventHandler = (params: TriggerEventHandlerParams) => Promise<void>;
-
-/**
- * Parameters for emitEvent.
- */
-export interface EmitEventParams {
-  triggerId: string;
-  spaceId: string;
-  payload: Record<string, unknown>;
-  request: KibanaRequest;
-}
-
-/**
- * Emits a trigger event. Validates trigger id, then invokes the registered handler (which logs and runs subscribed workflows).
- * @throws Error if triggerId is not registered
- */
-export type EmitEventFn = (params: EmitEventParams) => Promise<void>;
-
+export type GetEventEmitter = (
+  request: KibanaRequest,
+  triggerEventHandler: TriggerEventHandler
+) => EventEmitter;
 /**
  * Request-scoped client for emitting workflow trigger events.
  * Use from route handlers via ctx.workflows.getWorkflowsClient().
@@ -103,14 +76,6 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if trigger id is already registered, validation fails, or registration is attempted after setup
    */
   registerTriggerDefinition(definition: ServerTriggerDefinition): void;
-
-  /**
-   * Register the handler invoked when emitEvent is called.
-   * Should be called during the plugin's setup phase.
-   *
-   * @param handler - Function called with triggerId, spaceId, and payload when an event is emitted
-   */
-  registerTriggerEventHandler(handler: TriggerEventHandler): void;
 }
 
 /**
@@ -129,7 +94,7 @@ export type WorkflowsExtensionsServerPluginStart =
      * Emit a trigger event.
      * @throws Error if triggerId is not registered
      */
-    emitEvent: EmitEventFn;
+    getEventEmitter: GetEventEmitter;
   };
 
 /**

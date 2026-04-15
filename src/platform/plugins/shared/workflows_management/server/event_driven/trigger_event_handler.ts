@@ -11,24 +11,24 @@ import pLimit from 'p-limit';
 import { v4 as generateUuid } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowDetailDto, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type {
   EventChainContext,
   TriggerEventHandlerParams,
 } from '@kbn/workflows-extensions/server';
-import type {
-  ResolveMatchingWorkflowSubscriptionsParams,
-  ResolveMatchingWorkflowSubscriptionsResult,
-} from './resolve_workflow_subscriptions';
+import { resolveMatchingWorkflowSubscriptions } from './resolve_workflow_subscriptions';
 import {
   createEmptyTriggerScheduleStats,
   type TriggerEventScheduleStats,
 } from './trigger_event_stats';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
+import type { WorkflowsService } from '../api/workflows_management_service';
 import { validateWorkflowForExecution } from '../connectors/workflows/validate_workflow_for_execution';
-import { type TriggerEventDispatchedTelemetryEvent } from '../telemetry/events';
-import type { WorkflowsManagementTelemetryClient } from '../telemetry/workflows_management_telemetry_client';
-import { type TriggerEventsDataStreamClient, writeTriggerEvent } from '../trigger_events_log';
+import { WorkflowsManagementTelemetryClient } from '../telemetry/workflows_management_telemetry_client';
+import {
+  initializeTriggerEventsClient,
+  type TriggerEventsDataStreamClient,
+  writeTriggerEvent,
+} from '../trigger_events_log';
 
 const SCHEDULE_CONCURRENCY = 20;
 
@@ -171,13 +171,8 @@ async function scheduleMatchingWorkflows(
 
 export interface CreateTriggerEventHandlerParams {
   api: WorkflowsManagementApi;
+  workflowsService: WorkflowsService;
   logger: Logger;
-  telemetryClient: Pick<WorkflowsManagementTelemetryClient, 'reportTriggerEventDispatched'>;
-  getTriggerEventsClient: () => TriggerEventsDataStreamClient | null;
-  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>;
-  resolveMatchingWorkflowSubscriptions: (
-    params: ResolveMatchingWorkflowSubscriptionsParams
-  ) => Promise<ResolveMatchingWorkflowSubscriptionsResult>;
 }
 
 /**
@@ -190,16 +185,27 @@ export interface CreateTriggerEventHandlerParams {
 export function createTriggerEventHandler({
   api,
   logger,
-  telemetryClient,
-  getTriggerEventsClient,
-  getWorkflowExecutionEngine,
-  resolveMatchingWorkflowSubscriptions,
+  workflowsService,
 }: CreateTriggerEventHandlerParams): (params: TriggerEventHandlerParams) => Promise<void> {
-  const reportDispatchedEvent = (event: TriggerEventDispatchedTelemetryEvent): void =>
-    telemetryClient.reportTriggerEventDispatched(event);
+  const telemetryClient = new WorkflowsManagementTelemetryClient({ logger, workflowsService });
+
+  const triggerEventsClientPromise = new Promise<TriggerEventsDataStreamClient>(async (resolve) => {
+    try {
+      const { dataStreams } = await workflowsService.getCoreStart();
+      const client = await initializeTriggerEventsClient(dataStreams);
+      resolve(client);
+    } catch (error) {
+      logger.warn(
+        `Failed to initialize trigger events data stream client: ${
+          error instanceof Error ? error.message : String(error)
+        }. Event audit logging will be skipped.`
+      );
+    }
+  });
 
   return async (params: TriggerEventHandlerParams): Promise<void> => {
-    const engine = await getWorkflowExecutionEngine();
+    const triggerEventsClient = await triggerEventsClientPromise;
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
     const executionEnabled = engine.isEventDrivenExecutionEnabled();
     const logEventsEnabled = engine.isLogTriggerEventsEnabled();
     const baseTelemetry = {
@@ -225,11 +231,14 @@ export function createTriggerEventHandler({
       eventChainDepth: 1,
     };
     const resolutionStartMs = Date.now();
-    const { workflows, stats: resolutionStats } = await resolveMatchingWorkflowSubscriptions({
-      triggerId,
-      spaceId,
-      eventContext: eventContextForResolution,
-    });
+    const { workflows, stats: resolutionStats } = await resolveMatchingWorkflowSubscriptions(
+      {
+        triggerId,
+        spaceId,
+        eventContext: eventContextForResolution,
+      },
+      { api, logger }
+    );
     const subscriberResolutionMs = Math.max(0, Date.now() - resolutionStartMs);
     logger.trace(
       `Workflows trigger resolution funnel: triggerId=${triggerId} ${JSON.stringify(
@@ -239,7 +248,7 @@ export function createTriggerEventHandler({
     const subscriptions = workflows.map((w) => w.id);
 
     await writeTriggerEvents(
-      getTriggerEventsClient(),
+      triggerEventsClient,
       logEventsEnabled,
       {
         timestamp,
@@ -274,7 +283,7 @@ export function createTriggerEventHandler({
         )}`
       );
     }
-    reportDispatchedEvent({
+    telemetryClient.reportTriggerEventDispatched({
       ...baseTelemetry,
       eventChainDepth: eventChainContext?.depth ?? 0,
       eventId,
