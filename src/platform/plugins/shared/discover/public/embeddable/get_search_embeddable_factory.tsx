@@ -97,7 +97,7 @@ export const getSearchEmbeddableFactory = ({
         apiPublishesEditablePauseFetch(parentApi)
       ) {
         parentApi.setFetchPaused(true);
-        // Do the control init asych and allow the rest of the init to proceed, as we can be assured
+        // Do the control init async and allow the rest of the init to proceed, as we can be assured
         // the fetching will only start once unpaused by the Promise being settled. However, the panel
         // will be in a broken state regardless of whether fetching is reenabled if addControls fails
         // for any reason.
