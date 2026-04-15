@@ -10,6 +10,7 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import {
   SECURITY_FIND_PREBUILT_RULES_TOOL_ID,
   SECURITY_INSTALL_PREBUILT_RULES_TOOL_ID,
+  SECURITY_BULK_ACTIONS_TOOL_ID,
 } from '../../tools';
 
 const FLEET_LIST_INSTALLED_INTEGRATIONS_TOOL_ID = 'fleet.list_installed_integrations';
@@ -92,7 +93,7 @@ Based on the discovered data sources, determine which MITRE ATT&CK tactics can b
 
 For each MITRE ATT&CK tactic that the available data can support, search for prebuilt rules:
 
-- Use 'security.find_prebuilt_rules' with the \`mitre_tactic\` parameter to find rules for each covered tactic
+- Use '${SECURITY_FIND_PREBUILT_RULES_TOOL_ID}' with the \`mitre_tactic\` parameter to find rules for each covered tactic
 - Cross-reference rule \`related_integrations\` with the installed integrations from Step 1b
 - Prioritize rules that:
   1. Match installed integrations (the data source exists)
@@ -113,13 +114,25 @@ Before installing rules, present the user with a coverage plan:
 
 ### Step 5: Install Selected Rules
 
-- Use 'security.install_prebuilt_rules' to install the approved rules
+- Use '${SECURITY_INSTALL_PREBUILT_RULES_TOOL_ID}' to install the approved rules
 - Install in batches grouped by tactic or severity (max 50 rules per call)
 - Report results: successfully installed, already installed (skipped), and any failures
 - After installation, summarize the new coverage:
   - Total rules installed by tactic
   - Remaining coverage gaps
   - Recommendations for additional data sources to close blind spots
+
+### Step 6: Add "auto-installed" tag
+
+- Use '${SECURITY_BULK_ACTIONS_TOOL_ID}' to add tags to rules
+- Add 'auto-install' tag to the rules installed at the Step 5
+
+### Step 7: Enable installed rules
+
+- Use '${SECURITY_BULK_ACTIONS_TOOL_ID}' to enable rules
+- Enable the prebuilt rules previously installed at the Step 5
+- Enable rules in batches (max 1000 rules per call)
+- Report results: N rules were enabled
 
 ## Coverage Assessment Template
 
@@ -149,5 +162,6 @@ When presenting results, use this structure:
     FLEET_LIST_INSTALLED_INTEGRATIONS_TOOL_ID,
     SECURITY_FIND_PREBUILT_RULES_TOOL_ID,
     SECURITY_INSTALL_PREBUILT_RULES_TOOL_ID,
+    SECURITY_BULK_ACTIONS_TOOL_ID,
   ],
 });
