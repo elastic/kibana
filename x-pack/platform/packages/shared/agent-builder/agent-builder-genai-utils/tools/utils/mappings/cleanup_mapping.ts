@@ -22,6 +22,7 @@ export const cleanupMapping = (mapping: MappingTypeMapping): MappingTypeMapping 
     'description',
     'index',
     'enabled',
+    'inference_id',
   ];
 
   function recursiveCleanup(obj: Record<string, any>): Record<string, any> {
