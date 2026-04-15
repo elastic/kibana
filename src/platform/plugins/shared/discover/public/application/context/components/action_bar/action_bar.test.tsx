@@ -30,6 +30,7 @@ describe('Test Discover Context ActionBar', () => {
     };
 
     const renderComponent = (propsOverride: Partial<ActionBarProps> = {}) => {
+      const user = userEvent.setup();
       const onChangeCount = jest.fn();
       const props: ActionBarProps = {
         defaultStepSize: 5,
@@ -49,6 +50,7 @@ describe('Test Discover Context ActionBar', () => {
       );
 
       return {
+        user,
         onChangeCount,
         input: screen.getByTestId(`${type}CountPicker`),
         button: screen.getByTestId(`${type}LoadMoreButton`),
@@ -56,16 +58,14 @@ describe('Test Discover Context ActionBar', () => {
     };
 
     test('Load button click', async () => {
-      const user = userEvent.setup();
-      const { button, onChangeCount } = renderComponent();
+      const { button, onChangeCount, user } = renderComponent();
 
       await user.click(button);
       expect(onChangeCount).toHaveBeenCalledWith(type, 25);
     });
 
     test('Load button click doesnt submit when MAX_CONTEXT_SIZE was reached', async () => {
-      const user = userEvent.setup();
-      const { button, input, onChangeCount } = renderComponent();
+      const { button, input, onChangeCount, user } = renderComponent();
 
       await user.clear(input);
       await user.type(input, String(MAX_CONTEXT_SIZE));
@@ -79,8 +79,7 @@ describe('Test Discover Context ActionBar', () => {
     });
 
     test('Count input change submits on blur', async () => {
-      const user = userEvent.setup();
-      const { input, onChangeCount } = renderComponent();
+      const { input, onChangeCount, user } = renderComponent();
 
       await user.clear(input);
       await user.type(input, '123');
@@ -89,8 +88,7 @@ describe('Test Discover Context ActionBar', () => {
     });
 
     test('Count input change submits on return', async () => {
-      const user = userEvent.setup();
-      const { input, onChangeCount } = renderComponent();
+      const { input, onChangeCount, user } = renderComponent();
 
       await user.clear(input);
       await user.type(input, '124');
@@ -100,8 +98,7 @@ describe('Test Discover Context ActionBar', () => {
     });
 
     test('Count input doesnt submits values higher than MAX_CONTEXT_SIZE ', async () => {
-      const user = userEvent.setup();
-      const { input, onChangeCount } = renderComponent();
+      const { input, onChangeCount, user } = renderComponent();
 
       await user.clear(input);
       await user.type(input, String(MAX_CONTEXT_SIZE + 1));
@@ -111,8 +108,7 @@ describe('Test Discover Context ActionBar', () => {
     });
 
     test('Count input doesnt submits values lower than MIN_CONTEXT_SIZE ', async () => {
-      const user = userEvent.setup();
-      const { input, onChangeCount } = renderComponent();
+      const { input, onChangeCount, user } = renderComponent();
 
       await user.clear(input);
       await user.type(input, String(MIN_CONTEXT_SIZE - 1));
@@ -136,8 +132,7 @@ describe('Test Discover Context ActionBar', () => {
     });
 
     test('Load button disabled when defaultStepSize is 0', async () => {
-      const user = userEvent.setup();
-      const { input, button, onChangeCount } = renderComponent({ defaultStepSize: 0 });
+      const { input, button, onChangeCount, user } = renderComponent({ defaultStepSize: 0 });
 
       expect(button).toBeDisabled();
       await user.click(button);
