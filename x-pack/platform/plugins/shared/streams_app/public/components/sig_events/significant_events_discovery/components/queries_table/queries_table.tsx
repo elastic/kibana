@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
@@ -43,6 +44,7 @@ import {
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useQueriesApi, type PromoteResult } from '../../../../../hooks/sig_events/use_queries_api';
 import {
+  HIGH_SEVERITY_THRESHOLD,
   UNBACKED_QUERIES_COUNT_QUERY_KEY,
   useUnbackedQueriesCount,
 } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
@@ -60,6 +62,7 @@ import {
   BACKED_STATUS_COLUMN,
   CHART_SERIES_NAME,
   CHART_TITLE,
+  CREATE_RULES_BUTTON,
   DELETE_QUERY_ERROR_TOAST_TITLE,
   DETAILS_BUTTON_ARIA_LABEL,
   IMPACT_COLUMN,
@@ -74,11 +77,10 @@ import {
   OPEN_IN_DISCOVER_ACTION_TITLE,
   PROMOTED_BADGE_LABEL,
   PROMOTED_TOOLTIP_CONTENT,
-  PROMOTE_ALL_BUTTON,
-  PROMOTE_ALL_CALLOUT_DESCRIPTION,
   PROMOTE_ALL_ERROR_TOAST_TITLE,
   PROMOTE_QUERY_ACTION_DESCRIPTION,
   PROMOTE_QUERY_ACTION_TITLE,
+  getRuleCountLabel,
   SAVE_QUERY_ERROR_TOAST_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
@@ -90,7 +92,6 @@ import {
   UNABLE_TO_LOAD_QUERIES_BODY,
   UNABLE_TO_LOAD_QUERIES_TITLE,
   getEventsCount,
-  getPromoteAllCalloutTitle,
   getPromoteAllSuccessToast,
 } from './translations';
 import { PromoteAction } from './promote_action';
@@ -161,7 +162,7 @@ export function QueriesTable() {
   );
 
   const promoteAllMutation = useMutation<PromoteResult, Error>({
-    mutationFn: promoteAll,
+    mutationFn: () => promoteAll({ minSeverityScore: HIGH_SEVERITY_THRESHOLD }),
     mutationKey: ['promoteAll'],
     onSuccess: async ({ promoted, skipped_stats: skippedStats }) => {
       const toast = getPromoteAllSuccessToast(promoted, skippedStats);
@@ -447,20 +448,41 @@ export function QueriesTable() {
       {unbackedCount > 0 && (
         <EuiFlexItem grow={false}>
           <EuiCallOut
-            announceOnMount
-            title={getPromoteAllCalloutTitle(unbackedCount)}
-            iconType="info"
+            color="primary"
+            size="s"
+            announceOnMount={false}
             data-test-subj="queriesPromoteAllCallout"
           >
-            <p>{PROMOTE_ALL_CALLOUT_DESCRIPTION}</p>
-            <EuiButton
-              fill
-              onClick={() => promoteAllMutation.mutate()}
-              isLoading={promoteAllMutation.isLoading}
-              data-test-subj="queriesPromoteAllButton"
-            >
-              {PROMOTE_ALL_BUTTON}
-            </EuiButton>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <AssetImage type="significantEventsEmptyState" size={62} />
+              </EuiFlexItem>
+              <EuiFlexItem grow>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutMessage"
+                      defaultMessage="Based on severity, we recommend creating {ruleCount} based on the last run."
+                      values={{
+                        ruleCount: <strong>{getRuleCountLabel(unbackedCount)}</strong>,
+                      }}
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="primary"
+                  size="s"
+                  onClick={() => promoteAllMutation.mutate()}
+                  isLoading={promoteAllMutation.isLoading}
+                  data-test-subj="queriesPromoteAllButton"
+                >
+                  {CREATE_RULES_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiCallOut>
         </EuiFlexItem>
       )}
