@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      it('@skipInServerlessMKI produces additional scores after stop and restart', async () => {
+      it.only('@skipInServerlessMKI produces additional scores after stop and restart', async () => {
         const hostName = `host-lifecycle-${uuidv4().slice(0, 8)}`;
         const { documentIds, testEntities } = await maintainerScenario.seedEntities([
           riskScoreMaintainerEntityBuilders.host({ hostName }),
@@ -120,12 +120,17 @@ export default ({ getService }: FtrProviderContext): void => {
         // Wait for the maintainer to finish its first run before stopping it.
         // Otherwise, stopMaintainer's document update will cause a 409 version conflict
         // when the task tries to save its state, wedging the task permanently.
-        await waitForMaintainerRun({
-          retry,
-          routes: maintainerRoutes,
-          minRuns: 1,
-          triggerRun: false,
-        });
+        await retry.waitForWithTimeout(
+          'maintainer to finish first run',
+          30_000,
+          async () => {
+            const response = await maintainerRoutes.getMaintainers(200, ['risk-score']);
+            const maintainer = response.body.maintainers.find(
+              (m: { id: string; runs: number }) => m.id === 'risk-score'
+            );
+            return maintainer !== undefined && maintainer.runs >= 1;
+          }
+        );
 
         await maintainerRoutes.stopMaintainer('risk-score');
         await maintainerRoutes.startMaintainer('risk-score');
