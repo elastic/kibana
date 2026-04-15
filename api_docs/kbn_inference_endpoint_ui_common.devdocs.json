@@ -11,10 +11,10 @@
         "label": "InferenceFlyoutWrapper",
         "description": [],
         "signature": [
-          "({ onFlyoutClose, http, toasts, isEdit, enforceAdaptiveAllocations, onSubmitSuccess, inferenceEndpoint, enableEisPromoTour, focusTrapProps, allowedTaskTypes, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
+          "({ onFlyoutClose, http, toasts, isEdit, enforceAdaptiveAllocations, onSubmitSuccess, inferenceEndpoint, enableEisPromoTour, focusTrapProps, allowedTaskTypes, excludeProviders, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
-        "lineNumber": 114,
+        "lineNumber": 116,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -24,13 +24,13 @@
             "id": "def-public.InferenceFlyoutWrapper.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  enforceAdaptiveAllocations = false,\n  onSubmitSuccess,\n  inferenceEndpoint,\n  enableEisPromoTour,\n  focusTrapProps,\n  allowedTaskTypes,\n}",
+            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  enforceAdaptiveAllocations = false,\n  onSubmitSuccess,\n  inferenceEndpoint,\n  enableEisPromoTour,\n  focusTrapProps,\n  allowedTaskTypes,\n  excludeProviders,\n}",
             "description": [],
             "signature": [
               "InferenceFlyoutWrapperProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
-            "lineNumber": 114,
+            "lineNumber": 116,
             "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
@@ -48,10 +48,10 @@
         "label": "InferenceServiceFormFields",
         "description": [],
         "signature": [
-          "({ http, toasts, config: { allowContextWindowLength, allowTemperature, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, reenterSecretsOnEdit, enableEisPromoTour, allowedTaskTypes, }, }: InferenceServicesProps) => React.JSX.Element | null"
+          "({ http, toasts, config: { allowContextWindowLength, allowTemperature, isEdit, enforceAdaptiveAllocations, isPreconfigured, currentSolution, reenterSecretsOnEdit, enableEisPromoTour, allowedTaskTypes, excludeProviders, }, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
-        "lineNumber": 124,
+        "lineNumber": 126,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -61,13 +61,13 @@
             "id": "def-public.InferenceServiceFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  config: {\n    allowContextWindowLength,\n    allowTemperature,\n    isEdit,\n    enforceAdaptiveAllocations,\n    isPreconfigured,\n    currentSolution,\n    reenterSecretsOnEdit,\n    enableEisPromoTour,\n    allowedTaskTypes,\n  },\n}",
+            "label": "{\n  http,\n  toasts,\n  config: {\n    allowContextWindowLength,\n    allowTemperature,\n    isEdit,\n    enforceAdaptiveAllocations,\n    isPreconfigured,\n    currentSolution,\n    reenterSecretsOnEdit,\n    enableEisPromoTour,\n    allowedTaskTypes,\n    excludeProviders,\n  },\n}",
             "description": [],
             "signature": [
               "InferenceServicesProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
-            "lineNumber": 124,
+            "lineNumber": 126,
             "columnNumber": 78,
             "deprecated": false,
             "trackAdoption": false,
