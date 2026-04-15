@@ -109,6 +109,12 @@ export function createGenerateSignificantEventsPrompt({
                       minimum: 0,
                       maximum: 100,
                     },
+                    type: {
+                      type: 'string',
+                      enum: ['match', 'stats'],
+                      description:
+                        'Hint for query type. "match" for WHERE-only filters, "stats" for aggregation queries. The system derives the authoritative type from ES|QL content.',
+                    },
                     evidence: {
                       type: 'array',
                       items: {

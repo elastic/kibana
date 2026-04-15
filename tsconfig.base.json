@@ -2642,6 +2642,8 @@
       "@kbn/workspaces/*": ["src/platform/packages/shared/kbn-workspaces/*"],
       "@kbn/xstate-utils": ["src/platform/packages/shared/kbn-xstate-utils"],
       "@kbn/xstate-utils/*": ["src/platform/packages/shared/kbn-xstate-utils/*"],
+      "@kbn/yaml-loader": ["src/platform/packages/shared/kbn-yaml-loader"],
+      "@kbn/yaml-loader/*": ["src/platform/packages/shared/kbn-yaml-loader/*"],
       "@kbn/yaml-rule-editor": ["x-pack/platform/packages/shared/response-ops/yaml-rule-editor"],
       "@kbn/yaml-rule-editor/*": ["x-pack/platform/packages/shared/response-ops/yaml-rule-editor/*"],
       "@kbn/yarn-install-scripts": ["packages/kbn-yarn-install-scripts"],
