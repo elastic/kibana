@@ -11,32 +11,21 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiLink,
-  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useMemo } from 'react';
 import { SparkPlot } from '../../../../spark_plot';
-import { getConfidenceColor } from '../../../stream_detail_significant_events_view/utils/get_confidence_color';
 import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
-import {
-  BACKED_STATUS_COLUMN,
-  PROMOTED_BADGE_LABEL,
-  NOT_PROMOTED_BADGE_LABEL,
-  PROMOTED_TOOLTIP_CONTENT,
-  NOT_PROMOTED_TOOLTIP_CONTENT,
-} from '../queries_table/translations';
 import { getKnowledgeIndicatorTitle } from './use_knowledge_indicators_table';
 import {
   TITLE_COLUMN_LABEL,
   EVENTS_COLUMN_LABEL,
   TYPE_COLUMN_LABEL,
   QUERY_TYPE_LABEL,
-  CONFIDENCE_COLUMN_LABEL,
   STREAM_COLUMN_LABEL,
   ACTIONS_COLUMN_LABEL,
   VIEW_DETAILS_ARIA_LABEL,
@@ -129,40 +118,10 @@ export const useKnowledgeIndicatorsColumns = ({
         },
       },
       {
-        name: CONFIDENCE_COLUMN_LABEL,
-        width: '6.5em',
-        render: (ki: KnowledgeIndicator) => {
-          if (ki.kind !== 'feature') return null;
-          return (
-            <EuiHealth color={getConfidenceColor(ki.feature.confidence)}>
-              {ki.feature.confidence}
-            </EuiHealth>
-          );
-        },
-      },
-      {
         name: STREAM_COLUMN_LABEL,
         width: '9.5em',
         render: (ki: KnowledgeIndicator) => {
           return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
-        },
-      },
-      {
-        name: BACKED_STATUS_COLUMN,
-        width: '7.5em',
-        render: (ki: KnowledgeIndicator) => {
-          if (ki.kind !== 'query') return null;
-          return (
-            <EuiToolTip
-              content={ki.rule.backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
-            >
-              <span tabIndex={0}>
-                <EuiBadge color={ki.rule.backed ? 'hollow' : 'warning'}>
-                  {ki.rule.backed ? PROMOTED_BADGE_LABEL : NOT_PROMOTED_BADGE_LABEL}
-                </EuiBadge>
-              </span>
-            </EuiToolTip>
-          );
         },
       },
       {
