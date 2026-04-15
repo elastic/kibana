@@ -39,7 +39,7 @@ const TITLE_CASE_GLOSSARY = [
   'License Management',
   'Developer Tools',
   'Stack Management',
-  'Alerts and insights',
+  'Alerts and Insights',
   'AI',
   'Ingest and Integrations',
   'API keys',

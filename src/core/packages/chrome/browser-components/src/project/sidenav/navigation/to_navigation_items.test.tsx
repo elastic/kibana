@@ -275,7 +275,7 @@ describe('hidden panel link', () => {
     expect(footerItems[3]!.sections!.map((s) => s.label)).toMatchInlineSnapshot(`
       Array [
         undefined,
-        "Alerts and insights",
+        "Alerts and Insights",
         "Machine Learning",
         "Model management",
         "AI",
