@@ -378,6 +378,16 @@ import type {
   UpdateWatchlistEntitySourceResponse,
 } from './entity_analytics/watchlists/data_source/update.gen';
 import type {
+  AssignWatchlistEntitiesRequestParamsInput,
+  AssignWatchlistEntitiesRequestBodyInput,
+  AssignWatchlistEntitiesResponse,
+} from './entity_analytics/watchlists/entities/assign.gen';
+import type {
+  UnassignWatchlistEntitiesRequestParamsInput,
+  UnassignWatchlistEntitiesRequestBodyInput,
+  UnassignWatchlistEntitiesResponse,
+} from './entity_analytics/watchlists/entities/unassign.gen';
+import type {
   CreateWatchlistRequestBodyInput,
   CreateWatchlistResponse,
 } from './entity_analytics/watchlists/management/create.gen';
@@ -605,6 +615,27 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Assigns the provided entities to a watchlist by their EUIDs.
+The entities must already exist in the entity store.
+
+    */
+  async assignWatchlistEntities(props: AssignWatchlistEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API AssignWatchlistEntities`);
+    return this.kbnClient
+      .request<AssignWatchlistEntitiesResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entities/assign',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3257,6 +3288,29 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Unassigns the provided entities from a watchlist by their EUIDs.
+This only removes the "manual" assignment. If the entity is also
+assigned via other sources (e.g. index or integration), it will
+remain on the watchlist.
+
+    */
+  async unassignWatchlistEntities(props: UnassignWatchlistEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UnassignWatchlistEntities`);
+    return this.kbnClient
+      .request<UnassignWatchlistEntitiesResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entities/unassign',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Updates mutable fields of an existing dashboard migration
    */
   async updateDashboardMigration(props: UpdateDashboardMigrationProps) {
@@ -3524,6 +3578,10 @@ If the specified entity already exists, it is updated with the provided values. 
 
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
+}
+export interface AssignWatchlistEntitiesProps {
+  params: AssignWatchlistEntitiesRequestParamsInput;
+  body: AssignWatchlistEntitiesRequestBodyInput;
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
@@ -3927,6 +3985,10 @@ export interface SyncWatchlistProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UnassignWatchlistEntitiesProps {
+  params: UnassignWatchlistEntitiesRequestParamsInput;
+  body: UnassignWatchlistEntitiesRequestBodyInput;
 }
 export interface UpdateDashboardMigrationProps {
   params: UpdateDashboardMigrationRequestParamsInput;
