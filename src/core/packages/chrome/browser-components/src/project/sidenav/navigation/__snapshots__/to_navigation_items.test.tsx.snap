@@ -265,7 +265,7 @@ Array [
             "label": "Entity analytics",
           },
         ],
-        "label": "Alerts and Insights",
+        "label": "Alerts and insights",
       },
       Object {
         "id": "node-2",
@@ -322,7 +322,7 @@ Array [
             "href": "/jom/app/management/modelManagement/inference_endpoints",
             "id": "management:inference_endpoints",
             "isExternal": false,
-            "label": "External Inference",
+            "label": "External inference",
           },
           Object {
             "badgeType": undefined,
@@ -330,10 +330,10 @@ Array [
             "href": "/jom/app/management/modelManagement/model_settings",
             "id": "management:model_settings",
             "isExternal": false,
-            "label": "Feature Settings",
+            "label": "Feature settings",
           },
         ],
-        "label": "Model Management",
+        "label": "Model management",
       },
       Object {
         "id": "node-3",

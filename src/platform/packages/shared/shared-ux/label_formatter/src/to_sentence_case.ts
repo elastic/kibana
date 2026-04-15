@@ -39,7 +39,7 @@ const TITLE_CASE_GLOSSARY = [
   'License Management',
   'Developer Tools',
   'Stack Management',
-  'Alerts and Insights',
+  'Alerts and insights',
   'AI',
   'Ingest and Integrations',
   'API keys',
@@ -51,11 +51,6 @@ const TITLE_CASE_GLOSSARY = [
   'V2 Alerting Preview',
   'Ingest Hub',
   'Elastic Inference',
-  'External Inference',
-  'Inference Endpoints',
-  'Model Management',
-  'Model Settings',
-  'Feature Settings',
 ] as const;
 
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));
