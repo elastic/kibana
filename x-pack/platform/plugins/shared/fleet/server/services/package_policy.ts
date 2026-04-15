@@ -616,6 +616,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       soClient,
       esClient,
       packagePolicy: enrichedPackagePolicy,
+      spaceId: soClient.getCurrentNamespace(),
     });
 
     const pkgInfo =
@@ -1675,6 +1676,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       esClient,
       packagePolicy: restOfPackagePolicy,
       oldPackagePolicy,
+      spaceId: soClient.getCurrentNamespace(),
     });
 
     // If the package version has increased, save the previous package policy revision.
@@ -2099,6 +2101,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             esClient,
             packagePolicy,
             oldPackagePolicy,
+            spaceId: soClient.getCurrentNamespace(),
           });
         }
 
@@ -2437,6 +2440,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         soClient,
         esClient,
         packagePolicies: policiesToDelete,
+        spaceId: soClient.getCurrentNamespace(),
       });
     }
 

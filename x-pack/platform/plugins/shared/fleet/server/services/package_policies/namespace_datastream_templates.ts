@@ -19,8 +19,8 @@ import type {
 } from '../../types';
 import { ElasticsearchAssetType } from '../../../common/types';
 import { appContextService } from '../app_context';
-import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
 import {
+  updateCurrentWriteIndices,
   generateNamespaceTemplateName,
   generateNamespaceTemplateIndexPattern,
   getNamespaceTemplatePriority,
@@ -214,11 +214,13 @@ export async function handleNamespaceTemplateUpdate({
   esClient,
   packagePolicy,
   oldPackagePolicy,
+  spaceId,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packagePolicy: PackagePolicy | NewPackagePolicy;
   oldPackagePolicy?: PackagePolicy;
+  spaceId?: string;
 }) {
   if (!packagePolicy.package?.name) {
     return;
@@ -234,9 +236,11 @@ export async function handleNamespaceTemplateUpdate({
   }
 
   // Check if the new namespace is opted in for namespace-scoped templates
-  const newNamespaceEnabled = await isNamespaceIndexTemplateEnabled(newNamespace);
+  const newNamespaceEnabled = await isNamespaceIndexTemplateEnabled(newNamespace, spaceId);
   const oldNamespaceEnabled =
-    oldNamespace !== undefined ? await isNamespaceIndexTemplateEnabled(oldNamespace) : false;
+    oldNamespace !== undefined
+      ? await isNamespaceIndexTemplateEnabled(oldNamespace, spaceId)
+      : false;
 
   // If neither old nor new namespace is opted in, nothing to do
   if (!newNamespaceEnabled && !oldNamespaceEnabled) {
@@ -274,41 +278,45 @@ export async function handleNamespaceTemplateUpdate({
     );
   }
 
-  for (const dataStream of dataStreams) {
-    const templateName = getRegistryDataStreamAssetBaseName(dataStream);
+  await pMap(
+    dataStreams,
+    async (dataStream) => {
+      const templateName = getRegistryDataStreamAssetBaseName(dataStream);
 
-    // Create namespace template for the new namespace (if opted in)
-    if (newNamespaceEnabled) {
-      const baseTemplate = await fetchBaseTemplate(
-        esClient,
-        templateName,
-        'handleNamespaceTemplateUpdate'
-      );
-      if (baseTemplate) {
-        const { name: nsName, template: nsTemplate } = buildNamespaceTemplate({
-          baseTemplate,
-          dataStream,
-          namespace: newNamespace,
+      // Create namespace template for the new namespace (if opted in)
+      if (newNamespaceEnabled) {
+        const baseTemplate = await fetchBaseTemplate(
+          esClient,
           templateName,
-        });
-
-        await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate });
-        updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
-      }
-    }
-
-    // Delete old namespace template if safe to do so
-    if (oldNamespace && oldNamespaceEnabled && oldNamespaceSafeToRemove) {
-      const oldNsName = generateNamespaceTemplateName(templateName, oldNamespace);
-      try {
-        await esClient.indices.deleteIndexTemplate({ name: oldNsName }, { ignore: [404] });
-      } catch (err: any) {
-        logger.warn(
-          `[handleNamespaceTemplateUpdate] Failed to delete namespace template ${oldNsName}: ${err.message}`
+          'handleNamespaceTemplateUpdate'
         );
+        if (baseTemplate) {
+          const { name: nsName, template: nsTemplate } = buildNamespaceTemplate({
+            baseTemplate,
+            dataStream,
+            namespace: newNamespace,
+            templateName,
+          });
+
+          await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate });
+          updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
+        }
       }
-    }
-  }
+
+      // Delete old namespace template if safe to do so
+      if (oldNamespace && oldNamespaceEnabled && oldNamespaceSafeToRemove) {
+        const oldNsName = generateNamespaceTemplateName(templateName, oldNamespace);
+        try {
+          await esClient.indices.deleteIndexTemplate({ name: oldNsName }, { ignore: [404] });
+        } catch (err: any) {
+          logger.warn(
+            `[handleNamespaceTemplateUpdate] Failed to delete namespace template ${oldNsName}: ${err.message}`
+          );
+        }
+      }
+    },
+    { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+  );
 
   if (updatedIndexTemplates.length > 0) {
     await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
@@ -324,12 +332,11 @@ export async function handleNamespaceTemplateUpdate({
   const assetsToAdd: Array<{ id: string; type: ElasticsearchAssetType }> = [];
   const assetsToRemove: Array<{ id: string; type: ElasticsearchAssetType }> = [];
 
-  if (newNamespaceEnabled) {
-    // Track all namespace index templates and the namespace @custom component template
-    for (const dataStream of dataStreams) {
-      const templateName = getRegistryDataStreamAssetBaseName(dataStream);
+  if (newNamespaceEnabled && updatedIndexTemplates.length > 0) {
+    // Derive tracked assets from the templates that were actually created
+    for (const { templateName } of updatedIndexTemplates) {
       assetsToAdd.push({
-        id: generateNamespaceTemplateName(templateName, newNamespace),
+        id: templateName,
         type: ElasticsearchAssetType.indexTemplate,
       });
     }
@@ -373,11 +380,13 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
   esClient,
   packageName,
   dataStreams,
+  spaceId,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
   dataStreams: RegistryDataStream[];
+  spaceId?: string;
 }) {
   if (dataStreams.length === 0) {
     return;
@@ -403,7 +412,7 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
   const enabledChecks = await Promise.all(
     allNamespaces.map(async (ns) => ({
       namespace: ns,
-      enabled: await isNamespaceIndexTemplateEnabled(ns),
+      enabled: await isNamespaceIndexTemplateEnabled(ns, spaceId),
     }))
   );
   const uniqueNamespaces = enabledChecks
@@ -417,29 +426,33 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
   const logger = appContextService.getLogger();
   const updatedIndexTemplates: IndexTemplateEntry[] = [];
 
-  for (const dataStream of dataStreams) {
-    const templateName = getRegistryDataStreamAssetBaseName(dataStream);
-    const baseTemplate = await fetchBaseTemplate(
-      esClient,
-      templateName,
-      'handleNamespaceTemplateRestoreAfterPackageInstall'
-    );
-    if (!baseTemplate) {
-      continue;
-    }
-
-    for (const namespace of uniqueNamespaces) {
-      const { name: nsName, template: nsTemplate } = buildNamespaceTemplate({
-        baseTemplate,
-        dataStream,
-        namespace,
+  await pMap(
+    dataStreams,
+    async (dataStream) => {
+      const templateName = getRegistryDataStreamAssetBaseName(dataStream);
+      const baseTemplate = await fetchBaseTemplate(
+        esClient,
         templateName,
-      });
+        'handleNamespaceTemplateRestoreAfterPackageInstall'
+      );
+      if (!baseTemplate) {
+        return;
+      }
 
-      await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate });
-      updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
-    }
-  }
+      for (const namespace of uniqueNamespaces) {
+        const { name: nsName, template: nsTemplate } = buildNamespaceTemplate({
+          baseTemplate,
+          dataStream,
+          namespace,
+          templateName,
+        });
+
+        await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate });
+        updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
+      }
+    },
+    { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+  );
 
   if (updatedIndexTemplates.length === 0) {
     return;
@@ -481,15 +494,19 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
   );
 
   if (staleRefs.length > 0) {
-    for (const ref of staleRefs) {
-      try {
-        await esClient.indices.deleteIndexTemplate({ name: ref.id }, { ignore: [404] });
-      } catch (err: any) {
-        logger.warn(
-          `[handleNamespaceTemplateRestoreAfterPackageInstall] Failed to delete stale namespace template ${ref.id}: ${err.message}`
-        );
-      }
-    }
+    await pMap(
+      staleRefs,
+      async (ref) => {
+        try {
+          await esClient.indices.deleteIndexTemplate({ name: ref.id }, { ignore: [404] });
+        } catch (err: any) {
+          logger.warn(
+            `[handleNamespaceTemplateRestoreAfterPackageInstall] Failed to delete stale namespace template ${ref.id}: ${err.message}`
+          );
+        }
+      },
+      { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+    );
 
     // Also clean up stale @custom component template refs
     const staleNamespaces = [
@@ -528,10 +545,12 @@ export async function handleNamespaceTemplateDelete({
   soClient,
   esClient,
   packagePolicies,
+  spaceId,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packagePolicies: PackagePolicy[];
+  spaceId?: string;
 }) {
   // Build a de-duplicated list of (packageName, namespace) pairs to process
   const seen = new Set<string>();
@@ -563,7 +582,7 @@ export async function handleNamespaceTemplateDelete({
 
   for (const { packageName, namespace, policyIds } of toProcess) {
     // Only process opted-in namespaces
-    const namespaceEnabled = await isNamespaceIndexTemplateEnabled(namespace);
+    const namespaceEnabled = await isNamespaceIndexTemplateEnabled(namespace, spaceId);
     if (!namespaceEnabled) continue;
 
     const safeToRemove = await isNamespaceSafeToRemove(soClient, packageName, namespace, policyIds);
@@ -583,18 +602,22 @@ export async function handleNamespaceTemplateDelete({
     const logger = appContextService.getLogger();
 
     // Delete namespace index templates
-    for (const dataStream of packageInfo.data_streams ?? []) {
-      const templateName = getRegistryDataStreamAssetBaseName(dataStream);
-      const nsName = generateNamespaceTemplateName(templateName, namespace);
+    await pMap(
+      packageInfo.data_streams ?? [],
+      async (dataStream) => {
+        const templateName = getRegistryDataStreamAssetBaseName(dataStream);
+        const nsName = generateNamespaceTemplateName(templateName, namespace);
 
-      try {
-        await esClient.indices.deleteIndexTemplate({ name: nsName }, { ignore: [404] });
-      } catch (err: any) {
-        logger.warn(
-          `[handleNamespaceTemplateDelete] Failed to delete namespace template ${nsName}: ${err.message}`
-        );
-      }
-    }
+        try {
+          await esClient.indices.deleteIndexTemplate({ name: nsName }, { ignore: [404] });
+        } catch (err: any) {
+          logger.warn(
+            `[handleNamespaceTemplateDelete] Failed to delete namespace template ${nsName}: ${err.message}`
+          );
+        }
+      },
+      { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+    );
 
     // Remove refs from the Installation SO
     const freshInstallation = await getInstallation({

@@ -239,8 +239,11 @@ export const PutSpaceSettingsRequestSchema = {
       schema.arrayOf(
         schema.string({
           validate: (v) => {
-            if (v.includes('-')) {
-              return 'Must not contain -';
+            if (!v.length) {
+              return 'Must not be empty';
+            }
+            if (!/^[a-z0-9_]+$/.test(v)) {
+              return 'Must only contain lowercase letters, numbers, and underscores';
             }
           },
         }),

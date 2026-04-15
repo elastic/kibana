@@ -75,8 +75,11 @@ export const prepareToInstallTemplates = async (
 }> => {
   const { packageInfo } = packageInstallContext;
   // Remove package installation's references to index templates, but preserve
-  // namespace-scoped index templates — they are rebuilt separately in
-  // handleNamespaceTemplateRestoreAfterPackageInstall after base templates are in place.
+  // namespace-scoped index templates (e.g. `logs-nginx.access@namespace.production`)
+  // — they are rebuilt separately in handleNamespaceTemplateRestoreAfterPackageInstall
+  // after base templates are in place. Note: `<namespace>@custom` component template
+  // refs ARE removed here (they don't match `@namespace.`) and are re-added during
+  // the restore step.
   const assetsToRemove = esReferences.filter(
     ({ type, id }) =>
       (type === ElasticsearchAssetType.indexTemplate ||
