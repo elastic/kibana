@@ -307,7 +307,9 @@
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "matchUpdateTypes": ["minor", "patch"],
-      "addLabels": [
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
         "Team:SharedUX",
         "effort:high",
         "upgrade-risk:high"
@@ -680,7 +682,7 @@
       "matchDepNames": ["@elastic/charts"],
       "reviewers": ["team:kibana-visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Visualizations"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -698,7 +700,7 @@
       "matchDepNames": ["@elastic/elasticsearch"],
       "reviewers": ["team:kibana-operations", "team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations", "Team:Core"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Operations", "Team:Core"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -708,7 +710,7 @@
       "reviewers": ["team:kibana-operations", "team:appex-qa"],
       "allowedVersions": "<9.0.0",
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations", "Team:QA"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Operations", "Team:QA"],
       "enabled": true
     },
     {
@@ -730,7 +732,7 @@
       ],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security", "Team:Core"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Security", "Team:Core"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -740,7 +742,7 @@
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "matchManagers": ["github-actions"],
-      "addLabels": ["Team:Core"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Core"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -749,7 +751,7 @@
       "matchDepNames": ["@openfeature/core", "@openfeature/server-sdk", "@openfeature/web-sdk"],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security", "Team:Core"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Security", "Team:Core"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -763,7 +765,7 @@
       ],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Core"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Core"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -799,7 +801,7 @@
       "matchDepNames": ["@elastic/ebt"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Core"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Core"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -1218,7 +1220,7 @@
       "matchDepNames": ["chroma-js", "@types/chroma-js"],
       "reviewers": ["team:kibana-visualizations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Feature:Vega", "Team:Visualizations"],
+      "labels": ["release_note:skip", "backport:skip", "Feature:Vega", "Team:Visualizations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1251,7 +1253,7 @@
       ],
       "reviewers": ["team:kibana-visualizations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Feature:Vega", "Team:Visualizations"],
+      "labels": ["release_note:skip", "backport:skip", "Feature:Vega", "Team:Visualizations"],
       "dependencyDashboardApproval": true,
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2368,7 +2370,9 @@
         "team:stack-monitoring"
       ],
       "matchBaseBranches": ["main"],
-      "addLabels": [
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
         "Team:AI Infra",
         "Team:Monitoring",
         "Team:Core",
