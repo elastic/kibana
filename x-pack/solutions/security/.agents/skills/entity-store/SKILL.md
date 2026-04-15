@@ -1,5 +1,5 @@
 ---
-name: security-entity-store
+name: entity-store
 description: >
   Security Solution Entity Store architecture and implementation guide.
   Use when working with Security Entity Store code, entity analytics, entity resolution,
