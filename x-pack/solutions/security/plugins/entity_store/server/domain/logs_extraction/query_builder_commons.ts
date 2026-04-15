@@ -131,16 +131,16 @@ function buildLogsPageEndFilter(end: PaginationParams): string {
 export function aggregationStats(fields: EntityField[], renameToRecent: boolean = true): string {
   return fields
     .map((field) => {
-      const { retention, destination: dest, source } = field;
+      const { retention, destination: dest } = field;
       const finalDest = renameToRecent ? recentData(dest) : dest;
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_newest_value':
-          return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_oldest_value':
-          return `${finalDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         default:
           throw new Error('unknown field operation');
       }
