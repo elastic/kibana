@@ -11,7 +11,11 @@ import React, { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { EuiSearchBar } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import { useContentListConfig, useContentListSearch } from '@kbn/content-list-provider';
+import {
+  useContentListConfig,
+  useContentListSearch,
+  useContentListSelection,
+} from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { Filters } from './filters';
 import { useFilters } from './hooks';
@@ -43,13 +47,14 @@ const ContentListToolbarComponent = ({
   children,
   'data-test-subj': dataTestSubj = 'contentListToolbar',
 }: ContentListToolbarProps) => {
-  const { labels, supports } = useContentListConfig();
+  const { labels, supports, item: itemConfig } = useContentListConfig();
   const {
     queryText,
     setQueryFromEuiQuery,
     isSupported: searchIsSupported,
     fieldNames,
   } = useContentListSearch();
+  const { selectedCount } = useContentListSelection();
   const filters = useFilters(children);
 
   const handleSearchChange = useCallback(
@@ -86,13 +91,13 @@ const ContentListToolbarComponent = ({
     return { strict: false, fields: schemaFields };
   }, [fieldNames]);
 
-  // Only include the selection bar when selection is supported.
+  const hasSelectionAction = supports.selection && selectedCount > 0 && !!itemConfig?.onDelete;
   const toolsLeft = useMemo(
     () =>
-      supports.selection
+      hasSelectionAction
         ? [<SelectionBar key="selection" data-test-subj={`${dataTestSubj}-selectionBar`} />]
         : undefined,
-    [supports.selection, dataTestSubj]
+    [hasSelectionAction, dataTestSubj]
   );
 
   return (

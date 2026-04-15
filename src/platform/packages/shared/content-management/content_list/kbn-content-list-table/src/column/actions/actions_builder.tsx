@@ -124,10 +124,15 @@ export const buildActionsColumn = (
     return undefined;
   }
 
+  // Each `EuiButtonIcon` in EUI's expanded actions row is 24px wide with 4px
+  // inline gap. Add 8px for cell padding. This prevents the column from being
+  // squeezed by greedy siblings (e.g. Name with long descriptions).
+  const defaultWidth = `${actions.length * 28 + 8}px`;
+
   return {
     name: columnTitle ?? DEFAULT_ACTIONS_COLUMN_TITLE,
     actions,
-    ...(width && { width }),
+    width: width ?? defaultWidth,
     'data-test-subj': 'content-list-table-column-actions',
   };
 };

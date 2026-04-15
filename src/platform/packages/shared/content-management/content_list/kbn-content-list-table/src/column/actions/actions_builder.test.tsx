@@ -168,10 +168,11 @@ describe('actions column builder', () => {
         expect(result).toMatchObject({ width: '150px' });
       });
 
-      it('does not include width when not specified', () => {
+      it('computes a default width from the action count when not specified', () => {
         const result = buildActionsColumn({}, defaultContext);
 
-        expect(result).not.toHaveProperty('width');
+        // 2 actions × 28px + 8px padding = 64px.
+        expect(result).toMatchObject({ width: '64px' });
       });
 
       it('applies custom column title', () => {

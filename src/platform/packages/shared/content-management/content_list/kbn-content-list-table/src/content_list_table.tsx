@@ -128,7 +128,7 @@ const ContentListTableComponent = ({
 }: ContentListTableProps) => {
   const { supports } = useContentListConfig();
   const { euiTheme } = useEuiTheme();
-  const { items: rawItems, isLoading: loading, error } = useContentListItems();
+  const { items: rawItems, isLoading: loading, error, hasNoItems } = useContentListItems();
   const items = useMemo(() => (filter ? rawItems.filter(filter) : rawItems), [rawItems, filter]);
 
   const { requestDelete, deleteModal } = useDeleteConfirmation();
@@ -141,11 +141,16 @@ const ContentListTableComponent = ({
     ? cssFavoriteHoverWithinEuiTableRow(euiTheme)
     : undefined;
 
-  const isTableEmpty = !loading && !error && items.length === 0;
-
-  if (isTableEmpty) {
+  // The content type has zero saved objects (no search/filter active).
+  if (hasNoItems) {
     // TODO: Move this to the `ContentList` component, once it exists, as a part.
     return <>{customEmptyState ?? <EmptyState />}</>;
+  }
+
+  // A search or table-local filter matched nothing, but items may still exist.
+  // Always use the generic "no results" state here — not the create-first prompt.
+  if (!loading && !error && items.length === 0) {
+    return <EmptyState />;
   }
 
   return (

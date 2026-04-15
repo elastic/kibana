@@ -35,13 +35,21 @@ import { useContentListState } from './use_content_list_state';
  */
 export const useContentListItems = () => {
   const { state, refetch } = useContentListState();
+  const { isLoading, isFetching, error, items, totalItems, queryText } = state;
+
+  // True only when the unfiltered, unsearched list is genuinely empty.
+  // Uses `totalItems` (the server-reported count across all pages) rather
+  // than `items.length` (the current page slice) so that an emptied last
+  // page with earlier pages still populated is not treated as empty.
+  const hasNoItems = !isLoading && !isFetching && !error && totalItems === 0 && queryText === '';
 
   return {
-    items: state.items,
-    totalItems: state.totalItems,
-    isLoading: state.isLoading,
-    isFetching: state.isFetching,
-    error: state.error,
+    items,
+    totalItems,
+    hasNoItems,
+    isLoading,
+    isFetching,
+    error,
     refetch,
   };
 };

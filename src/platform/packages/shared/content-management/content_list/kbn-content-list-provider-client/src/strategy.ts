@@ -38,7 +38,7 @@ type DecoratedItem = UserContentCommonSchema & Record<string, unknown>;
 /**
  * Enriches raw items with external data (e.g. `starred` status).
  *
- * Called at cache-fill time and on {@link ClientStrategy.onRefresh}.
+ * Called at cache-fill time and on `ClientStrategy.onRefresh`.
  * The returned array must have the same length and order as the input.
  */
 export type ItemDecorator = (
@@ -57,7 +57,7 @@ export interface ClientStrategy {
    * recompute the client-side transforms. A new `searchQuery` triggers a
    * fresh server fetch.
    *
-   * The core provider calls {@link ClientStrategy.onInvalidate} before
+   * The core provider calls `ClientStrategy.onInvalidate` before
    * refetching after mutations so the next call always hits the server.
    */
   findItems: FindItemsFn;
@@ -302,7 +302,7 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => {
  * sort, or page change without a new search query, the cached items are reused
  * and only the client-side transforms are reapplied — no server fetch occurs.
  *
- * The core provider calls {@link ClientStrategy.onInvalidate} before any
+ * The core provider calls `ClientStrategy.onInvalidate` before any
  * explicit refetch (e.g. after a delete) to force the next `findItems` call
  * to hit the server.
  *
