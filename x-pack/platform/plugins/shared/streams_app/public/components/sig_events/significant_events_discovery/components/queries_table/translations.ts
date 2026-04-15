@@ -163,25 +163,16 @@ export const STATS_LAST_OCCURRED_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'Not monitored yet' }
 );
 
-export const getPromoteAllCalloutTitle = (count: number) =>
-  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutTitle', {
-    defaultMessage:
-      '{count} {count, plural, one {query is} other {queries are}} ready for promotion',
+export const CREATE_RULES_BUTTON = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.createRulesButton',
+  { defaultMessage: 'Create rules' }
+);
+
+export const getRuleCountLabel = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.ruleCountLabel', {
+    defaultMessage: '{count, plural, one {# new rule} other {# new rules}}',
     values: { count },
   });
-
-export const PROMOTE_ALL_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutDescription',
-  {
-    defaultMessage:
-      'Enable scheduled runs for these queries so their results are saved as Significant events, powering Insight generation.',
-  }
-);
-
-export const PROMOTE_ALL_BUTTON = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllButton',
-  { defaultMessage: 'Promote all' }
-);
 
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.searchPlaceholder',
