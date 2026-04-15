@@ -43,7 +43,17 @@ async function readFile(filePath: string): Promise<unknown> {
 }
 
 async function readYamlFile(filePath: string): Promise<Record<string, unknown>> {
-  const fileContent = await fs.readFile(filePath, { encoding: 'utf8' });
+  let fileContent = await fs.readFile(filePath, { encoding: 'utf8' });
+
+  // Normalize multi-line single-quoted YAML scalars. The yaml package rejects
+  // single-quoted scalars whose continuation lines are not indented beyond the
+  // current block level (a pattern accepted by js-yaml). Fold such spans into a
+  // single line by replacing each line-break and its leading whitespace with a
+  // single space, matching YAML's flow-scalar line-folding semantics.
+  fileContent = fileContent.replace(/'(?:[^']|'')*'/gs, (match) =>
+    match.includes('\n') ? match.replace(/\n[ \t]*/g, ' ') : match
+  );
+
   const maybeObject = parse(fileContent);
 
   if (!isPlainObjectType(maybeObject)) {
