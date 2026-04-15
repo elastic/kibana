@@ -41,7 +41,7 @@ const SIGNIFICANCE_THRESHOLD = 0.05;
 const ROW_HIGHLIGHT_ALPHA = 0.08;
 
 /**
- * Convert a hex color (#RRGGBB or #RGB) to an rgba string with the given alpha.
+ * Convert a hex color (#RRGGBB) to an rgba string with the given alpha.
  * Falls back to transparent if the input is not a valid hex color.
  */
 const hexToRgba = (hex: string, alpha: number): string => {
