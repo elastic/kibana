@@ -62,3 +62,10 @@ export const ADD_TO_CHAT = i18n.translate(
     defaultMessage: 'Add to chat',
   }
 );
+
+export const ADD_TO_DATASET = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToDatasetButtonLabel',
+  {
+    defaultMessage: 'Add to dataset',
+  }
+);

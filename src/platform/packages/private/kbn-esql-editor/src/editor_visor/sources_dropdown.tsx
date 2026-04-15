@@ -199,6 +199,9 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
           <EuiFormControlLayout compressed isDropdown fullWidth>
             <EuiPopover
               id={popoverId}
+              aria-label={i18n.translate('esqlEditor.visor.sourcesDropdownPopoverLabel', {
+                defaultMessage: 'Data sources',
+              })}
               button={createTrigger()}
               isOpen={isPopoverOpen}
               closePopover={() => setPopoverIsOpen(false)}
