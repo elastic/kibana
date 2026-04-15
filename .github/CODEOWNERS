@@ -3275,7 +3275,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /**/scout/.meta/**
 /**/scout_*/.meta/**
 
-# Macroscope
+# Macroscope Check Run Agents
 /.macroscope/scout-review.md @elastic/appex-qa
 /.macroscope/flaky-test-runner-nudge.md @elastic/appex-qa
 
