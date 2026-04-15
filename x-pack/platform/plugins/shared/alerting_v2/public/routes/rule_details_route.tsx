@@ -9,7 +9,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { lazy, Suspense } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { useExistingRule } from '../hooks/use_existing_rule';
+import { useFetchRule } from '../hooks/use_fetch_rule';
 import { Skeleton } from '../components/rule_details/skeleton';
 
 const LazyRuleDetailPage = lazy(async () => {
@@ -19,14 +19,14 @@ const LazyRuleDetailPage = lazy(async () => {
 
 export const RuleDetailsRoute: React.FunctionComponent = () => {
   const { ruleId } = useParams<{ ruleId: string }>();
-  const { rule, isLoading, error } = useExistingRule(ruleId);
+  const { data: rule, isLoading, isError } = useFetchRule(ruleId);
   const history = useHistory();
 
   if (isLoading) {
     return <Skeleton />;
   }
 
-  if (error || !rule) {
+  if (isError || !rule) {
     return (
       <EuiEmptyPrompt
         iconType="warning"

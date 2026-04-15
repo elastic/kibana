@@ -9,7 +9,9 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useSelectedTab, useTabs } from './hooks';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { TestProviders } from '../../../common/mock';
+import { RESOLUTION_GROUP_TAB_TEST_ID } from '../../../entity_analytics/components/entity_resolution/test_ids';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import type { HostDetailsPanelProps } from '.';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
@@ -18,6 +20,10 @@ jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(() => ({
     openLeftPanel: jest.fn(),
   })),
+}));
+
+jest.mock('../../../common/hooks/use_has_entity_resolution_license', () => ({
+  useHasEntityResolutionLicense: jest.fn(() => false),
 }));
 
 const defaultParams: HostDetailsPanelProps = {
@@ -100,6 +106,7 @@ describe.skip('hooks', () => {
   describe('useTabs', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
     });
 
     it('should include the risk score tab when isRiskScoreExist and name are true', () => {
@@ -148,7 +155,6 @@ describe.skip('hooks', () => {
 
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
-        expect.objectContaining({ id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP }),
       ]);
     });
 
@@ -168,6 +174,53 @@ describe.skip('hooks', () => {
       );
 
       expect(result.current).toEqual([]);
+    });
+
+    it('includes Resolution tab when entityStoreEntityId is set and Entity Resolution license is active', () => {
+      (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+      const { result } = renderHook(
+        () =>
+          useTabs({
+            ...defaultParams,
+            entityStoreEntityId: 'stored-host-entity-1',
+          }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current).toEqual([
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
+        expect.objectContaining({
+          id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
+          'data-test-subj': RESOLUTION_GROUP_TAB_TEST_ID,
+        }),
+      ]);
+    });
+
+    it('does not include Resolution tab when entityStoreEntityId is set but license is inactive', () => {
+      (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+      const { result } = renderHook(
+        () =>
+          useTabs({
+            ...defaultParams,
+            entityStoreEntityId: 'stored-host-entity-1',
+          }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current).toEqual([
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
+      ]);
+    });
+
+    it('does not include Resolution tab when license is active but entityStoreEntityId is missing', () => {
+      (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+      const { result } = renderHook(() => useTabs(defaultParams), { wrapper: TestProviders });
+
+      expect(result.current).toEqual([
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
+      ]);
     });
   });
 });

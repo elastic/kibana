@@ -1318,7 +1318,7 @@
             "label": "stateTransitionAlertDelayMode",
             "description": [],
             "signature": [
-              "\"duration\" | \"immediate\" | \"breaches\""
+              "\"duration\" | \"immediate\" | \"breaches\" | \"recoveries\""
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
             "lineNumber": 76,
@@ -1334,7 +1334,7 @@
             "label": "stateTransitionRecoveryDelayMode",
             "description": [],
             "signature": [
-              "\"duration\" | \"immediate\" | \"breaches\""
+              "\"duration\" | \"immediate\" | \"breaches\" | \"recoveries\""
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
             "lineNumber": 77,
@@ -2223,7 +2223,7 @@
           "Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`)."
         ],
         "signature": [
-          "\"duration\" | \"immediate\" | \"breaches\""
+          "\"duration\" | \"immediate\" | \"breaches\" | \"recoveries\""
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
         "lineNumber": 11,

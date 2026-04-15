@@ -29,6 +29,8 @@ export const NotionConnector: ConnectorSpec = {
         type: 'oauth_authorization_code',
         overrides: {
           meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
             scope: { hidden: true },
           },
         },

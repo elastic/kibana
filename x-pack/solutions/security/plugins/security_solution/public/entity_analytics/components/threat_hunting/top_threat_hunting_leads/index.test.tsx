@@ -87,12 +87,20 @@ describe('TopThreatHuntingLeads', () => {
     expect(screen.queryByTestId('leadCard-lead-6')).not.toBeInTheDocument();
   });
 
-  it('renders empty state when no leads', () => {
+  it('renders empty state when no leads and never generated', () => {
     render(<TopThreatHuntingLeads {...defaultProps} />);
 
     expect(screen.getByTestId('topThreatHuntingLeads')).toBeInTheDocument();
     expect(screen.getByTestId('leadsEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByText('No hunting leads yet')).toBeInTheDocument();
     expect(screen.queryByTestId('leadsLoadingSpinner')).not.toBeInTheDocument();
+  });
+
+  it('renders "no data found" empty state after generation with no results', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} hasGenerated />);
+
+    expect(screen.getByTestId('leadsEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByText('No data found')).toBeInTheDocument();
   });
 
   it('renders loading state (spinner visible)', () => {

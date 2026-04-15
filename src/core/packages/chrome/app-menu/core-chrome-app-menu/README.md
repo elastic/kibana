@@ -83,10 +83,8 @@ const Example = ({ config, core }: Props) => {
 
 3. `items` can only be `EuiHeaderLink` (a button with type `text`). For more advanced use cases, use action buttons.
 
-4. Action buttons - `AppMenu` introduces action buttons:
+4. Action button - `AppMenu` introduces action button:
 
     - `primaryActionButton` - this is meant to be used for primary actions (e.g saving), can be either an `EuiButton` or a split button, always placed as the rightmost item
-
-    - `secondaryActionButton` - this is meant for secondary actions (e.g adding a new panel), can only be an `EuiButton`, placed to the left from `primaryActionButton`
 
 5. Removal of `TopNavMenuExtensionsRegistry` - registering global items is no longer possible, add items locally to your application.

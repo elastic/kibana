@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useAppContext } from '../../../app_context';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
@@ -362,13 +362,13 @@ const StartStep: React.FC<StartStepProps> = ({
               ) : (
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <AiButton
                       data-test-subj="entSearchContent-connector-configuration-generateConfigButton"
                       data-telemetry-id="entSearchContent-connector-configuration-generateConfigButton"
-                      disabled={
+                      isDisabled={
                         !canConfigureConnector || !isValidIndexName(rawName) || Boolean(error)
                       }
-                      fill
+                      variant="accent"
                       iconType="sparkles"
                       isLoading={isGenerateLoading || isCreateLoading}
                       onClick={() => {
@@ -384,7 +384,7 @@ const StartStep: React.FC<StartStepProps> = ({
                           defaultMessage: 'Generate configuration',
                         }
                       )}
-                    </EuiButton>
+                    </AiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <ManualConfiguration

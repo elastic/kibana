@@ -8,57 +8,26 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { dataViewSchema } from '@kbn/as-code-data-views-schema';
+import { dataViewSchema, esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
+
+const anyDataSourceSchema = schema.oneOf([dataViewSchema, esqlDataSourceSchema], {
+  meta: {
+    id: 'viz_data_source',
+    title: 'Data Source configuration',
+    description:
+      'Defines where the visualization reads its data. Choose a data view (by reference or ad hoc) for index-pattern-based queries, or an ES|QL dataset for query-driven results.',
+  },
+});
 
 export const dataSourceSchema = {
   data_source: dataViewSchema,
 };
 
-export const dataSourceEsqlTableTypeSchema = schema.oneOf([
-  // ESQL datasource type
-  schema.object(
-    {
-      type: schema.literal('esql'),
-      /**
-       * The ESQL query string to use as the data source.
-       * Example: 'FROM my-index | LIMIT 100'
-       */
-      query: schema.string({
-        meta: {
-          description:
-            'The ESQL query string to use as the data source. Example: "FROM my-index | LIMIT 100".',
-        },
-      }),
-    },
-    { meta: { id: 'esqlDataset', title: 'ES|QL Dataset' } }
-  ),
-  // Table datasource type
-  schema.object(
-    {
-      type: schema.literal('table'),
-      /**
-       * The Kibana datatable object to use as the data source. The structure should match the Kibana Datatable contract.
-       */
-      table: schema.any({
-        meta: {
-          description:
-            'The Kibana datatable object to use as the data source. Structure should match the Kibana Datatable contract.',
-        },
-      }),
-    },
-    { meta: { id: 'tableESQLDataset', title: 'ES|QL Table Dataset' } }
-  ),
-]);
-
 export const dataSourceEsqlTableSchema = {
-  data_source: dataSourceEsqlTableTypeSchema,
+  data_source: esqlDataSourceSchema,
 };
 
-const anyDataSourceSchema = schema.oneOf([dataViewSchema, dataSourceEsqlTableTypeSchema], {
-  meta: { id: 'viz_data_source', title: 'Data Source configuration' },
-});
-
 export type DataSourceTypeNoESQL = TypeOf<typeof dataViewSchema>;
-export type DataSourceTypeESQL = TypeOf<typeof dataSourceEsqlTableTypeSchema>;
+export type DataSourceTypeESQL = TypeOf<typeof esqlDataSourceSchema>;
 
 export type DataSourceType = TypeOf<typeof anyDataSourceSchema>;

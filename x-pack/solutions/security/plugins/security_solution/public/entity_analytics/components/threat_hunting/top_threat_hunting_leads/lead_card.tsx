@@ -71,7 +71,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }
     >
       {onInfoClick && (
         <EuiButtonIcon
-          iconType="iInCircle"
+          iconType="info"
           aria-label={VIEW_LEAD_DETAILS}
           onClick={handleInfoClick}
           data-test-subj={`leadInfoButton-${lead.id}`}

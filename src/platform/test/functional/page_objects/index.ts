@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AppMenuPageObject } from './app_menu';
 import { CommonPageObject } from './common_page';
 import { ConsolePageObject } from './console_page';
 import { ContextPageObject } from './context_page';
@@ -47,6 +48,7 @@ import { IndexEditorObject } from './index_editor';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
+  appMenu: AppMenuPageObject,
   common: CommonPageObject,
   console: ConsolePageObject,
   context: ContextPageObject,

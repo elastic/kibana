@@ -94,6 +94,40 @@ describe('timeSeriesQuery', () => {
     });
   });
 
+  it('forwards project_routing to search and fieldCaps when set', async () => {
+    esClient.fieldCaps.mockResolvedValueOnce({
+      indices: ['index-name'] as estypes.Indices,
+      fields: {
+        'event.provider': {
+          keyword: {
+            type: 'keyword',
+            metadata_field: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        },
+      },
+    } as estypes.FieldCapsResponse);
+    await timeSeriesQuery({
+      ...params,
+      query: {
+        ...params.query,
+        filterKuery: 'event.provider: alerting',
+        project_routing: '_alias:*',
+      },
+    });
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: ['event.provider'],
+        project_routing: '_alias:*',
+      })
+    );
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ project_routing: '_alias:*' }),
+      expect.any(Object)
+    );
+  });
+
   it('generates a wildcard query for keyword fields with wildcard patterns', async () => {
     esClient.fieldCaps.mockResolvedValueOnce({
       indices: ['index-name'] as estypes.Indices,
@@ -867,6 +901,23 @@ describe('fetchDataViewBase', () => {
     const result = await fetchDataViewBase(esClient, ['index-a', 'index-b'], ['some-field']);
     expect(result.title).toBe('index-a,index-b');
     expect(result.fields).toEqual([]);
+  });
+
+  it('passes project_routing to fieldCaps when provided', async () => {
+    esClient.fieldCaps.mockResolvedValueOnce({
+      indices: ['my-index'] as estypes.Indices,
+      fields: {},
+    } as estypes.FieldCapsResponse);
+
+    await fetchDataViewBase(esClient, 'my-index', ['host.name'], '_alias:*');
+
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: ['my-index'],
+        fields: ['host.name'],
+        project_routing: '_alias:*',
+      })
+    );
   });
 });
 

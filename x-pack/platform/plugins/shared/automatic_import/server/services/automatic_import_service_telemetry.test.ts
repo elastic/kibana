@@ -548,6 +548,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
+        getIntegration: jest.fn().mockResolvedValue({ status: 'completed' }),
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
@@ -585,6 +586,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
+        getIntegration: jest.fn().mockResolvedValue({ status: 'completed' }),
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456', options);
@@ -619,6 +621,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
+        getIntegration: jest.fn().mockResolvedValue({ status: 'completed' }),
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
@@ -647,6 +650,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
+        getIntegration: jest.fn().mockResolvedValue({ status: 'completed' }),
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
@@ -709,6 +713,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
+        getIntegration: jest.fn().mockResolvedValue({ status: 'completed' }),
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');

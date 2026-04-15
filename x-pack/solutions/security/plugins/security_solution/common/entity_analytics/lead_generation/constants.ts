@@ -18,4 +18,4 @@ export const DISABLE_LEAD_GENERATION_URL = `${LEAD_GENERATION_URL}/disable` as c
 export type LeadGenerationMode = 'adhoc' | 'scheduled';
 
 export const getLeadsIndexName = (spaceId: string, mode: LeadGenerationMode = 'adhoc'): string =>
-  `.internal.${mode}.entity-analytics.entity-leads.entity-${spaceId}`;
+  `.entity-analytics.entity-leads-${mode}.entity-${spaceId}`;

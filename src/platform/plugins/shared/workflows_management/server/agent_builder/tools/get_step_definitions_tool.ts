@@ -9,13 +9,19 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { BaseStepDefinition, ConnectorContractUnion, StepParamSummary } from '@kbn/workflows';
+import type {
+  BaseStepDefinition,
+  ConnectorContractUnion,
+  StepDeprecationInfo,
+  StepParamSummary,
+} from '@kbn/workflows';
 import {
   buildBuiltInStepSchema,
   buildConnectorStepSchema,
   buildOutputSummary,
   buildStepParamsSummary,
   builtInStepDefinitions,
+  getDeprecatedStepMessage,
   StepCategories,
   StepCategory,
 } from '@kbn/workflows';
@@ -34,6 +40,9 @@ interface StepDefinitionForAgent {
   label: string;
   description?: string;
   category: StepCategory;
+  deprecated?: boolean;
+  replacementStepType?: string;
+  deprecationMessage?: string;
   connectorId?: 'required' | 'optional' | 'none';
   inputParams?: StepParamSummary[];
   configParams?: StepParamSummary[];
@@ -61,7 +70,8 @@ export async function resolveConnectors(
 }
 
 function categorizeConnectorType(type: string): StepCategory {
-  if (type.startsWith('kibana.') || type.startsWith('cases.')) return StepCategory.Kibana;
+  if (type.startsWith('kibana.')) return StepCategory.Kibana;
+  if (type.startsWith('cases.')) return StepCategory.KibanaCases;
   if (type.startsWith('elasticsearch.')) return StepCategory.Elasticsearch;
   if (type.startsWith('ai.')) return StepCategory.Ai;
   if (type.startsWith('data.')) return StepCategory.Data;
@@ -84,12 +94,14 @@ export function formatBuiltInStep(step: BaseStepDefinition): StepDefinitionForAg
   const inputParams = buildStepParamsSummary(step.inputSchema);
   const configParams = step.configSchema ? buildStepParamsSummary(step.configSchema) : undefined;
   const outputSummary = buildOutputSummary(step.outputSchema);
+  const deprecationMetadata = formatDeprecationMetadata(step.id, step.deprecation);
 
   return {
     id: step.id,
     label: step.label,
     description: step.description,
     category: step.category,
+    ...deprecationMetadata,
     connectorId: 'none',
     ...(inputParams.length > 0 ? { inputParams } : {}),
     ...(configParams && configParams.length > 0 ? { configParams } : {}),
@@ -105,12 +117,14 @@ export function formatConnectorStep(connector: ConnectorContractUnion): StepDefi
     ? buildStepParamsSummary(connector.configSchema)
     : undefined;
   const outputSummary = buildOutputSummary(connector.outputSchema);
+  const deprecationMetadata = formatDeprecationMetadata(connector.type, connector.deprecation);
 
   return {
     id: connector.type,
     label: connector.summary ?? connector.description ?? connector.type,
     description: truncateDescription(connector.description),
     category: categorizeConnectorType(connector.type),
+    ...deprecationMetadata,
     connectorId,
     ...(inputParams.length > 0 ? { inputParams } : {}),
     ...(configParams && configParams.length > 0 ? { configParams } : {}),
@@ -132,6 +146,21 @@ function matchesSearch(search: string, ...fields: Array<string | undefined | nul
   return fields.some((field) => field?.toLowerCase().includes(term));
 }
 
+function formatDeprecationMetadata(
+  stepType: string,
+  deprecation: StepDeprecationInfo | undefined
+): Pick<StepDefinitionForAgent, 'deprecated' | 'replacementStepType' | 'deprecationMessage'> {
+  if (!deprecation) {
+    return {};
+  }
+
+  return {
+    deprecated: true,
+    replacementStepType: deprecation.replacementStepType,
+    deprecationMessage: getDeprecatedStepMessage(stepType, deprecation),
+  };
+}
+
 export function registerGetStepDefinitionsTool(
   agentBuilder: AgentBuilderPluginSetupContract,
   api: WorkflowsManagementApi
@@ -145,6 +174,7 @@ export function registerGetStepDefinitionsTool(
 **When NOT to use:** To find connector instances configured in the environment (use get_connectors instead).
 
 Supports filtering by exact step type, keyword search, or category.
+Deprecated steps are excluded from broad discovery by default, but exact step type lookups still return them.
 When a small number of results is returned, input/config parameter summaries and usage examples are included.
 Common step properties (name, type, if, timeout, on-failure) are NOT listed per step -- they apply to all steps (see skill prompt).
 Set includeOutputSummary=true to get a compact one-line summary of each step's output fields (useful for knowing what data is available via \`{{ steps.name.field }}\`).
@@ -159,6 +189,12 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
         .optional()
         .describe(
           'Search term to match against step type IDs, labels, and descriptions (e.g., "case", "slack", "loop")'
+        ),
+      includeDeprecated: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, include deprecated step types in discovery results. Exact stepType lookups return deprecated steps even when this is false.'
         ),
       category: z
         .enum(StepCategories as [StepCategory, ...StepCategory[]])
@@ -190,7 +226,7 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
       cacheMode: 'space',
     },
     handler: async (
-      { stepType, search, category, includeOutputSummary, includeFullSchema },
+      { stepType, search, category, includeDeprecated, includeOutputSummary, includeFullSchema },
       { spaceId, request }
     ) => {
       const builtInTypes = new Set(builtInStepDefinitions.map((s) => s.id));
@@ -202,6 +238,10 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
       const builtInFormatted = builtInStepDefinitions.map(formatBuiltInStep);
 
       let allDefinitions: StepDefinitionForAgent[] = [...builtInFormatted, ...connectorDefinitions];
+
+      if (includeDeprecated !== true && !stepType) {
+        allDefinitions = allDefinitions.filter((def) => !def.deprecated);
+      }
 
       if (stepType) {
         allDefinitions = allDefinitions.filter((def) => def.id === stepType);
@@ -246,6 +286,16 @@ Set includeFullSchema=true to get the full JSON Schema for step input params (us
           description: def.description,
           category: def.category,
         };
+
+        if (def.deprecated) {
+          result.deprecated = true;
+          if (def.replacementStepType) {
+            result.replacementStepType = def.replacementStepType;
+          }
+          if (def.deprecationMessage) {
+            result.deprecationMessage = def.deprecationMessage;
+          }
+        }
 
         if (def.connectorId && def.connectorId !== 'none') {
           result.connectorId = def.connectorId;
