@@ -20,7 +20,10 @@ conclusion: neutral
 
 Decide whether this PR needs a Flaky Test Runner nudge. If not, post nothing.
 
-IMPORTANT: Ensure we never post the same flaky test runner comment twice on the same PR. We should only post the comment once.
+**Important:**
+
+- Never post the flaky test runner comment more than once on the same PR.
+- Do not run this check on backport PRs.
 
 ## Step 1: Are any in-scope files changed?
 
@@ -63,6 +66,8 @@ Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigge
 ```
 /flaky <scoutConfig or ftrConfig>:<resolved-scout-or-ftr-config-path>:30
 ```
+
+Provide feedback in the #appex-qa channel.
 ````
 
 Replace the example paths with the resolved paths from Step 3. Drop whichever line doesn't apply.
