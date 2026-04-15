@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import useAsync from 'react-use/lib/useAsync';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import type { HostMetricTypes } from '../charts/types';
 import {
   AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
