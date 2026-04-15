@@ -8,19 +8,12 @@
 import React, { useCallback, useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeSnoozeForm } from './snooze_form';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
 import { EpisodeActionButton } from './episode_action_button';
-
-const unsnoozeLabel = i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.unsnooze', {
-  defaultMessage: 'Unsnooze',
-});
-const snoozeLabel = i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.snooze', {
-  defaultMessage: 'Snooze',
-});
+import * as i18n from './translations';
 
 export interface AlertEpisodeSnoozeActionButtonProps {
   lastSnoozeAction?: string | null;
@@ -77,13 +70,11 @@ export function AlertEpisodeSnoozeActionButton({
       isLoading={isLoading}
       data-test-subj="alertEpisodeUnsnoozeActionButton"
     >
-      {unsnoozeLabel}
+      {i18n.SNOOZE_ACTION_UNSNOOZE}
     </EpisodeActionButton>
   ) : (
     <EuiPopover
-      aria-label={i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.popoverAriaLabel', {
-        defaultMessage: 'Snooze actions',
-      })}
+      aria-label={i18n.SNOOZE_ACTION_POPOVER_ARIA_LABEL}
       data-test-subj="alertEpisodeSnoozeActionPopover"
       display="inline-flex"
       css={css`
@@ -100,7 +91,7 @@ export function AlertEpisodeSnoozeActionButton({
           isLoading={isLoading}
           data-test-subj="alertEpisodeSnoozeActionButton"
         >
-          {snoozeLabel}
+          {i18n.SNOOZE_ACTION_SNOOZE}
         </EpisodeActionButton>
       }
       isOpen={isPopoverOpen}

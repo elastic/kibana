@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { colorMappingSchema, staticColorSchema } from '../color';
+import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
@@ -31,6 +31,7 @@ import {
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
+import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
 /**
@@ -86,7 +87,11 @@ const pieStateSharedSchema = {
  * Color configuration for primary metric in pie chart
  */
 const partitionStatePrimaryMetricOptionsSchema = {
-  color: schema.maybe(staticColorSchema),
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
 };
 
 /**
@@ -203,7 +208,7 @@ export const pieStateSchemaESQL = schema.object(
 /**
  * Complete pie chart configuration supporting both standard and ES|QL queries
  */
-export const pieStateSchema = schema.oneOf([pieStateSchemaNoESQL, pieStateSchemaESQL], {
+export const pieStateSchema = objectUnion([pieStateSchemaNoESQL, pieStateSchemaESQL], {
   meta: {
     id: 'pieChart',
     title: 'Pie Chart',

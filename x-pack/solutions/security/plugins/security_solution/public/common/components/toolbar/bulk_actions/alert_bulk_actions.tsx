@@ -17,6 +17,7 @@ import {
   tableEntity,
 } from '@kbn/securitysolution-data-table';
 import type { DataTableModel, DataTableState, TableId } from '@kbn/securitysolution-data-table';
+import { noop } from 'lodash';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import type {
   CustomBulkActionProp,
@@ -179,7 +180,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
 
     const eventIds = useMemo(() => Object.keys(selectedEventIds), [selectedEventIds]);
 
-    const closePopoverRef = useRef<() => void>(() => {});
+    const closePopoverRef = useRef<() => void>(noop);
     const closePopover = useCallback(() => closePopoverRef.current(), []);
 
     const { items: bulkActionItems, panels: bulkActionsPanels } = useBulkActionItems({

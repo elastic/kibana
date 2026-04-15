@@ -17,6 +17,7 @@ import {
 } from '@kbn/dashboard-agent-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createDashboardAttachmentType } from './dashboard';
 
 const dashboardAttachmentData: DashboardAttachmentData = {
@@ -24,7 +25,7 @@ const dashboardAttachmentData: DashboardAttachmentData = {
   description: 'Main dashboard for key metrics',
   panels: [
     {
-      type: 'lens',
+      type: LENS_EMBEDDABLE_TYPE,
       id: 'panel-1',
       grid: { x: 0, y: 0, w: 24, h: 15 },
       config: {

@@ -464,15 +464,15 @@ function buildXYLayerAPI(
   for (const visLayer of visualization.layers) {
     if (visLayer.layerType === 'referenceLine') {
       const datasourceLayer = layers[visLayer.layerId];
-      if (isFormBasedLayer(datasourceLayer) || isTextBasedLayer(datasourceLayer)) {
+      if (isFormBasedLayer(datasourceLayer)) {
         apiLayers.push(
           buildAPIReferenceLinesLayer(
             visLayer,
             datasourceLayer,
             adHocDataViews,
+            resolveAxisId,
             references,
-            adhocReferences,
-            resolveAxisId
+            adhocReferences
           )
         );
       }

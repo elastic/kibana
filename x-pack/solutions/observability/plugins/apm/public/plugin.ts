@@ -85,6 +85,14 @@ import type {
 } from '@kbn/discover-shared-plugin/public';
 import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { ICPSManager } from '@kbn/cps-utils';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+} from '../common/cps_feature_flag';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -131,6 +139,13 @@ export interface ApmServices {
   telemetry: ITelemetryClient;
 }
 
+export interface ApmInternalServices {
+  cpsManager?: ICPSManager;
+}
+
+export const [getApmInternalServices, setApmInternalServices] =
+  createGetterSetter<ApmInternalServices>('ApmInternalServices', false);
+
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   application: ApplicationStart;
@@ -175,6 +190,7 @@ export interface ApmPluginStartDeps {
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   slo?: SLOPublicStart;
+  cps?: CPSPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -517,6 +533,20 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet, discoverShared } = plugins;
+
+    if (
+      core.featureFlags.getBooleanValue(
+        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+      )
+    ) {
+      plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
+      setApmInternalServices({
+        cpsManager: plugins.cps?.cpsManager,
+      });
+    } else {
+      setApmInternalServices({});
+    }
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');

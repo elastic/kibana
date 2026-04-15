@@ -3321,6 +3321,48 @@
             "returnComment": [
               "T, encrypted attributes"
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsEncryptionExtension.getEncryptedAttributes",
+            "type": "Function",
+            "tags": [],
+            "label": "getEncryptedAttributes",
+            "description": [
+              "\nReturns the set of attribute names that are encrypted for the given type.\nReturns undefined if the type is not registered as encryptable."
+            ],
+            "signature": [
+              "(type: string) => ReadonlySet<string> | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/encryption.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsEncryptionExtension.getEncryptedAttributes.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "- the string name of the object type"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/extensions/encryption.ts",
+                "lineNumber": 81,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the set of encrypted attribute names, or undefined"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -11238,12 +11280,12 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
               },
               {
                 "plugin": "cases",
@@ -12105,12 +12147,12 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
               },
               {
                 "plugin": "cases",

@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
-import * as logTableI18n from '../execution_log_table/translations';
 import { getColumns } from './columns';
 import { useFilterByExecutionId } from './use_filter_by_execution_id';
 import {
@@ -142,7 +141,7 @@ export const ExecutionResultsTable: React.FC<ExecutionResultsTableProps> = ({
     <EuiPanel hasBorder data-test-subj="executionResultsContainer">
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={true}>
-          <HeaderSection title={logTableI18n.TABLE_TITLE} subtitle={logTableI18n.TABLE_SUBTITLE} />
+          <HeaderSection title={i18n.TABLE_TITLE} subtitle={i18n.TABLE_SUBTITLE} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
@@ -185,7 +184,7 @@ export const ExecutionResultsTable: React.FC<ExecutionResultsTableProps> = ({
 
       <EuiBasicTable
         data-test-subj="executionResultsTable"
-        tableCaption={i18n.TABLE_CAPTION}
+        tableCaption={i18n.TABLE_SUBTITLE}
         items={tableItems}
         columns={columns}
         pagination={pagination}

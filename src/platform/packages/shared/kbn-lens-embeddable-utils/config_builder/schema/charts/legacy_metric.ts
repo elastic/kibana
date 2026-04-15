@@ -16,9 +16,12 @@ import {
   applyColorToSchema,
   colorByValueAbsoluteSchema,
   legacyColorByValueAbsoluteSchema,
+  autoColorSchema,
+  AUTO_COLOR,
 } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
+import { objectUnion } from './utils/object_union';
 
 const legacyMetricStateMetricOptionsSchema = {
   /**
@@ -77,7 +80,11 @@ const legacyMetricStateMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema])),
+  color: schema.maybe(
+    schema.oneOf([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
 };
 
 export const legacyMetricStateSchemaNoESQL = schema.object(
@@ -110,7 +117,7 @@ const esqlLegacyMetricState = schema.object(
 );
 
 // Legacy metric is not currently supported for ES|QL datasets
-export const legacyMetricStateSchema = schema.oneOf([legacyMetricStateSchemaNoESQL], {
+export const legacyMetricStateSchema = objectUnion([legacyMetricStateSchemaNoESQL], {
   meta: { id: 'legacyMetricChart', title: 'Legacy Metric Chart' },
 });
 
