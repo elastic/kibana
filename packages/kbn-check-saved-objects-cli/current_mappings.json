@@ -3190,6 +3190,20 @@
     "dynamic": false,
     "properties": {}
   },
+  "lead-generation-config": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "lastError": {
+        "type": "text"
+      },
+      "lastExecutionUuid": {
+        "type": "keyword"
+      }
+    }
+  },
   "legacy-url-alias": {
     "dynamic": false,
     "properties": {
