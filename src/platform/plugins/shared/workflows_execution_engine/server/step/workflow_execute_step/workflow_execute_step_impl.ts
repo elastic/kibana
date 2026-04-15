@@ -10,7 +10,6 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
   EsWorkflow,
-  EsWorkflowExecution,
   WorkflowExecuteAsyncStep,
   WorkflowExecuteStep,
   WorkflowRepository,
@@ -23,15 +22,12 @@ import type {
 import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
 import { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
 import type { StrategyResult } from './types';
-import { DEFAULT_WORKFLOW_TIMEOUT } from '../../default_workflow_settings';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
-import { parseDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
-import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
 import type { CancellableNode, NodeImplementation } from '../node_implementation';
 
 export interface WorkflowExecuteStepImplInit {
@@ -47,7 +43,6 @@ export interface WorkflowExecuteStepImplInit {
   workflowLogger: IWorkflowEventLogger;
   maxWorkflowDepth: number;
   workflowExecutionGraph: WorkflowGraph;
-  workflowTaskManager: WorkflowTaskManager;
 }
 
 export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableNode {
@@ -179,35 +174,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       );
 
       this.handleResult(result);
-
-      if (
-        result.status === 'waiting' &&
-        node.type === 'workflow.execute' &&
-        !this.init.workflowExecutionGraph.getEnclosingStepLevelTimeout(node.id)
-      ) {
-        const startedAt = stepExecutionRuntime.stepExecution?.startedAt;
-        if (startedAt) {
-          const wfExec = stepExecutionRuntime.workflowExecution as EsWorkflowExecution;
-          const fallbackMs = parseDuration(DEFAULT_WORKFLOW_TIMEOUT);
-          const resumeAtMs = Math.max(
-            new Date(startedAt).getTime() + fallbackMs,
-            new Date().getTime() + 500
-          );
-          await this.init.workflowTaskManager
-            .scheduleResumeTask({
-              workflowExecution: wfExec,
-              resumeAt: new Date(resumeAtMs),
-              fakeRequest: this.init.request,
-            })
-            .catch((error: unknown) => {
-              this.init.workflowLogger.logWarn(
-                `Failed to schedule fallback wakeup for sync sub-workflow wait (execution=${
-                  wfExec.id
-                }): ${error instanceof Error ? error.message : String(error)}`
-              );
-            });
-        }
-      }
     } catch (error) {
       stepExecutionRuntime.failStep(error as Error);
       workflowExecutionRuntime.navigateToNextNode();

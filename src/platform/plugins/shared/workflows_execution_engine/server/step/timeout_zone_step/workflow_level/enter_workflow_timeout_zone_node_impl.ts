@@ -7,57 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { EsWorkflowExecution } from '@kbn/workflows';
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { parseDuration } from '../../../utils';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import type { WorkflowTaskManager } from '../../../workflow_task_manager/workflow_task_manager';
 import type { MonitorableNode, NodeImplementation } from '../../node_implementation';
 
+/** Workflow-level timeout zone; idle resume is scheduled from handleExecutionDelay, not here. */
 export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
-    private workflowTaskManager: WorkflowTaskManager,
-    private fakeRequest: KibanaRequest | undefined,
-    private workflowLogger: IWorkflowEventLogger
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
   ) {}
 
   public async run(): Promise<void> {
     this.wfExecutionRuntimeManager.navigateToNextNode();
-
-    const workflowExecution =
-      this.wfExecutionRuntimeManager.getWorkflowExecution() as EsWorkflowExecution;
-
-    if (!workflowExecution.startedAt || !this.fakeRequest) {
-      return;
-    }
-
-    const timeoutMs = parseDuration(this.node.timeout);
-    const resumeAtMs = Math.max(
-      new Date(workflowExecution.startedAt).getTime() + timeoutMs,
-      new Date().getTime() + 500
-    );
-
-    await this.workflowTaskManager
-      .scheduleResumeTask({
-        workflowExecution,
-        resumeAt: new Date(resumeAtMs),
-        fakeRequest: this.fakeRequest,
-      })
-      .catch((error: unknown) => {
-        this.workflowLogger.logWarn(
-          `Failed to schedule workflow resume for workflow timeout wakeup (execution=${
-            workflowExecution.id
-          }): ${error instanceof Error ? error.message : String(error)}`
-        );
-      });
   }
 
   public monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): void {
@@ -92,7 +59,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
         }
       }
 
-      // Errase error because otherwise execution will be marked "failed"
+      // Clear error so the run is not left in a generic failed state after timeout handling
       this.wfExecutionRuntimeManager.setWorkflowError(undefined);
       this.wfExecutionRuntimeManager.markWorkflowTimeouted();
     }

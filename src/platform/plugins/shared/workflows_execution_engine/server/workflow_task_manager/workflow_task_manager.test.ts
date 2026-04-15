@@ -8,12 +8,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOW_RESUME_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams } from './types';
-import { WorkflowTaskManager } from './workflow_task_manager';
+import { getWorkflowGlobalTimeoutResumeTaskId, WorkflowTaskManager } from './workflow_task_manager';
 import { generateExecutionTaskScope } from '../utils';
 
 // Mock uuid
@@ -66,6 +67,10 @@ describe('WorkflowTaskManager', () => {
       schedule: jest.fn(),
       fetch: jest.fn(),
       runSoon: jest.fn(),
+      removeIfExists: jest.fn().mockResolvedValue(undefined),
+      get: jest
+        .fn()
+        .mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'missing')),
     } as any;
     fakeRequest = jest.mocked({} as KibanaRequest);
 
@@ -172,6 +177,108 @@ describe('WorkflowTaskManager', () => {
           fakeRequest,
         })
       ).rejects.toThrow('Task scheduling failed');
+    });
+  });
+
+  describe('scheduleWorkflowGlobalTimeoutResumeTask', () => {
+    it('removes and schedules when no matching task exists (get returns not found)', async () => {
+      const workflowExecution = createMockWorkflowExecution();
+      const resumeAt = new Date('2025-11-17T12:00:00.000Z');
+      const stableId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecution.id);
+
+      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+
+      const result = await workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask({
+        workflowExecution,
+        resumeAt,
+        fakeRequest,
+      });
+
+      expect(result).toEqual({ taskId: stableId });
+      expect(mockTaskManager.get).toHaveBeenCalledWith(stableId);
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith(stableId);
+      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+        {
+          id: stableId,
+          taskType: WORKFLOW_RESUME_TASK_TYPE,
+          params: {
+            workflowRunId: 'test-execution-id',
+            spaceId: 'default',
+          } as ResumeWorkflowExecutionParams,
+          state: {},
+          runAt: resumeAt,
+          scope: ['workflow', 'workflow:test-workflow-id', 'workflow:execution:test-execution-id'],
+        },
+        { request: fakeRequest }
+      );
+    });
+
+    it('skips remove and schedule when an equivalent task already exists', async () => {
+      const workflowExecution = createMockWorkflowExecution();
+      const resumeAt = new Date('2025-11-17T12:00:00.000Z');
+      const stableId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecution.id);
+
+      mockTaskManager.get.mockResolvedValue({
+        id: stableId,
+        taskType: WORKFLOW_RESUME_TASK_TYPE,
+        runAt: resumeAt,
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        },
+      } as any);
+
+      const result = await workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask({
+        workflowExecution,
+        resumeAt,
+        fakeRequest,
+      });
+
+      expect(result).toEqual({ taskId: stableId });
+      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      expect(mockTaskManager.schedule).not.toHaveBeenCalled();
+    });
+
+    it('removes and reschedules when existing task has a different runAt', async () => {
+      const workflowExecution = createMockWorkflowExecution();
+      const resumeAt = new Date('2025-11-17T12:00:00.000Z');
+      const stableId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecution.id);
+
+      mockTaskManager.get.mockResolvedValue({
+        id: stableId,
+        taskType: WORKFLOW_RESUME_TASK_TYPE,
+        runAt: new Date('2020-01-01T00:00:00.000Z'),
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        },
+      } as any);
+      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+
+      await workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask({
+        workflowExecution,
+        resumeAt,
+        fakeRequest,
+      });
+
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith(stableId);
+      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+    });
+
+    it('propagates non-not-found errors from get', async () => {
+      const workflowExecution = createMockWorkflowExecution();
+      const resumeAt = new Date('2025-11-17T12:00:00.000Z');
+      mockTaskManager.get.mockRejectedValue(new Error('cluster unavailable'));
+
+      await expect(
+        workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask({
+          workflowExecution,
+          resumeAt,
+          fakeRequest,
+        })
+      ).rejects.toThrow('cluster unavailable');
     });
   });
 

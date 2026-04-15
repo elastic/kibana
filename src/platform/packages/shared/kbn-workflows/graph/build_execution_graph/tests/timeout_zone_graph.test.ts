@@ -219,6 +219,26 @@ describe('convertToWorkflowGraph', () => {
         })
       );
     });
+
+    it('WorkflowGraph.getWorkflowLevelTimeout returns the workflow-level timeout string', () => {
+      const workflowDefinition = {
+        settings: {
+          timeout: '5m',
+        },
+        steps: [
+          {
+            name: 'testAtomicStep1',
+            type: 'slack',
+            connectorId: 'slack',
+            with: {
+              message: 'Hello from atomic step 1',
+            },
+          } as ConnectorStep,
+        ],
+      } as Partial<WorkflowYaml>;
+      const wfGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+      expect(wfGraph.getWorkflowLevelTimeout()).toBe('5m');
+    });
   });
 
   describe('steps with timeout and step level flow-control', () => {

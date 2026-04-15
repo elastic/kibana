@@ -18,15 +18,30 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
   ({
     workflowRuntime: {
-      getWorkflowExecution: jest.fn().mockReturnValue({ id: 'exec-parent' }),
+      getWorkflowExecution: jest.fn().mockReturnValue({
+        id: 'exec-parent',
+        startedAt: '2025-06-01T12:00:00.000Z',
+        scopeStack: [],
+      }),
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
+      getLatestStepExecution: jest.fn().mockReturnValue(undefined),
     },
     workflowTaskManager: {
       scheduleResumeTask: jest.fn().mockResolvedValue({ taskId: 'resume-task-1' }),
+      scheduleWorkflowGlobalTimeoutResumeTask: jest
+        .fn()
+        .mockResolvedValue({ taskId: 'wf-global-timeout-1' }),
     },
     fakeRequest: {},
+    workflowExecutionGraph: {
+      getWorkflowLevelTimeout: jest.fn().mockReturnValue(undefined),
+      getNode: jest.fn().mockReturnValue(undefined),
+    },
+    workflowLogger: {
+      logWarn: jest.fn(),
+    },
   } as unknown as jest.Mocked<WorkflowExecutionLoopParams>);
 
 const makeStepRuntime = (
@@ -54,7 +69,7 @@ describe('handleExecutionDelay', () => {
       });
     });
 
-    it('should not schedule any resume task', async () => {
+    it('should not schedule workflow timeout resume when the graph has no workflow-level timeout', async () => {
       const params = makeParams();
       const stepRuntime = makeStepRuntime({
         stepExecution: { status: ExecutionStatus.WAITING_FOR_INPUT } as any,
@@ -62,8 +77,119 @@ describe('handleExecutionDelay', () => {
 
       await handleExecutionDelay(params, stepRuntime);
 
-      expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
+      expect(
+        params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask
+      ).not.toHaveBeenCalled();
     });
+
+    it('should schedule workflow timeout resume at startedAt + timeout when workflow-level timeout exists', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(new Date('2025-06-01T13:00:00.000Z'));
+        const params = makeParams();
+        (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue('2h');
+
+        const stepRuntime = makeStepRuntime({
+          stepExecution: { status: ExecutionStatus.WAITING_FOR_INPUT } as any,
+        });
+
+        await handleExecutionDelay(params, stepRuntime);
+
+        expect(
+          params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask
+        ).toHaveBeenCalledTimes(1);
+        const call = (
+          params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask as jest.Mock
+        ).mock.calls[0][0];
+        expect(call.workflowExecution).toEqual(
+          expect.objectContaining({
+            id: 'exec-parent',
+            startedAt: '2025-06-01T12:00:00.000Z',
+          })
+        );
+        expect(call.resumeAt.toISOString()).toBe('2025-06-01T14:00:00.000Z');
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it.each([
+      {
+        label: 'step deadline before workflow global',
+        nowIso: '2025-06-01T12:00:15.000Z',
+        workflowLevelTimeout: '10m',
+      },
+      {
+        label: 'step deadline with no workflow-level timeout',
+        nowIso: '2025-06-01T12:00:10.000Z',
+        workflowLevelTimeout: undefined as string | undefined,
+      },
+    ])(
+      'should schedule idle resume from enclosing step timeout ($label)',
+      async ({ nowIso, workflowLevelTimeout }) => {
+        jest.useFakeTimers();
+        try {
+          jest.setSystemTime(new Date(nowIso));
+          const params = makeParams();
+          (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue(
+            workflowLevelTimeout
+          );
+          (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
+            id: 'exec-parent',
+            startedAt: '2025-06-01T12:00:00.000Z',
+            scopeStack: [
+              {
+                stepId: 'timedParent',
+                nestedScopes: [
+                  {
+                    nodeId: 'enterTimeoutZone_timedParent',
+                    nodeType: 'enter-timeout-zone',
+                  },
+                ],
+              },
+            ],
+          });
+          (params.workflowExecutionGraph.getNode as jest.Mock).mockImplementation(
+            (nodeId: string) => {
+              if (nodeId === 'enterTimeoutZone_timedParent') {
+                return {
+                  id: 'enterTimeoutZone_timedParent',
+                  type: 'enter-timeout-zone',
+                  stepId: 'timedParent',
+                  stepType: 'step_level_timeout',
+                  timeout: '30s',
+                };
+              }
+              return undefined;
+            }
+          );
+          (params.workflowExecutionState.getLatestStepExecution as jest.Mock).mockImplementation(
+            (stepId: string) => {
+              if (stepId === 'timedParent') {
+                return { startedAt: '2025-06-01T12:00:00.000Z' };
+              }
+              return undefined;
+            }
+          );
+
+          const stepRuntime = makeStepRuntime({
+            stepExecution: { status: ExecutionStatus.WAITING_FOR_INPUT } as any,
+          });
+
+          await handleExecutionDelay(params, stepRuntime);
+
+          expect(
+            params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask
+          ).toHaveBeenCalledTimes(1);
+          const call = (
+            params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask as jest.Mock
+          ).mock.calls[0][0];
+          expect(call.resumeAt.toISOString()).toBe('2025-06-01T12:00:30.000Z');
+        } finally {
+          jest.useRealTimers();
+        }
+      }
+    );
   });
 
   describe('WAITING_FOR_CHILD step (sync child workflow)', () => {
@@ -79,7 +205,31 @@ describe('handleExecutionDelay', () => {
       expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
         status: ExecutionStatus.WAITING_FOR_CHILD,
       });
-      expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
+      expect(
+        params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should schedule workflow timeout resume when WAITING_FOR_CHILD and workflow-level timeout exists', async () => {
+      jest.useFakeTimers();
+      try {
+        jest.setSystemTime(new Date('2025-06-01T13:00:00.000Z'));
+        const params = makeParams();
+        (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue('2h');
+
+        const stepRuntime = makeStepRuntime({
+          node: { stepType: WORKFLOW_EXECUTE_STEP_TYPE } as any,
+          stepExecution: { status: ExecutionStatus.WAITING_FOR_CHILD } as any,
+        });
+
+        await handleExecutionDelay(params, stepRuntime);
+
+        expect(
+          params.workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask
+        ).toHaveBeenCalledTimes(1);
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 
@@ -216,7 +366,7 @@ describe('handleExecutionDelay', () => {
 
       expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
       const call = (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mock.calls[0][0];
-      expect(call.workflowExecution).toEqual({ id: 'exec-parent' });
+      expect(call.workflowExecution).toEqual(expect.objectContaining({ id: 'exec-parent' }));
       expect(call.resumeAt.getTime()).toBe(resumeAtDate.getTime());
       expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
         status: ExecutionStatus.WAITING,

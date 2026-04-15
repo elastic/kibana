@@ -19,7 +19,6 @@ import type { WorkflowsExecutionEnginePluginStart } from '../../types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
-import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
 import { isCancellableNode } from '../node_implementation';
 
 const MAX_WORKFLOW_DEPTH = 10;
@@ -100,10 +99,6 @@ const createMockInit = (
     getEnclosingStepLevelTimeout: jest.fn().mockReturnValue('30s'),
   } as unknown as WorkflowGraph;
 
-  const workflowTaskManager = {
-    scheduleResumeTask: jest.fn().mockResolvedValue({ taskId: 'task-1' }),
-  } as unknown as WorkflowTaskManager;
-
   return {
     node,
     stepExecutionRuntime,
@@ -117,7 +112,6 @@ const createMockInit = (
     workflowLogger,
     maxWorkflowDepth: MAX_WORKFLOW_DEPTH,
     workflowExecutionGraph,
-    workflowTaskManager,
     ...overrides,
   };
 };
@@ -407,41 +401,6 @@ describe('WorkflowExecuteStepImpl', () => {
         undefined,
         ExecutionStatus.WAITING_FOR_CHILD
       );
-      expect(init.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
-    });
-
-    it('schedules fallback resume when waiting without enclosing step timeout', async () => {
-      jest.useFakeTimers();
-      // Before startedAt + default workflow timeout (6h), so resume uses step start + 6h
-      jest.setSystemTime(new Date('2025-01-01T03:00:00.000Z'));
-
-      const workflowExecutionGraph = {
-        getEnclosingStepLevelTimeout: jest.fn().mockReturnValue(undefined),
-      };
-      const init = createMockInit({
-        workflowExecutionGraph: workflowExecutionGraph as any,
-      });
-      const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
-      repo.getWorkflow.mockResolvedValue(createMockWorkflow());
-      (init.stepExecutionRuntime as any).getCurrentStepState.mockReturnValue(undefined);
-      (init.stepExecutionRuntime as any).stepExecution = {
-        startedAt: '2025-01-01T00:00:00.000Z',
-      };
-
-      try {
-        const step = new WorkflowExecuteStepImpl(init);
-        await step.run();
-
-        expect(init.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
-        expect(init.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledWith(
-          expect.objectContaining({
-            resumeAt: new Date('2025-01-01T06:00:00.000Z'),
-            fakeRequest: init.request,
-          })
-        );
-      } finally {
-        jest.useRealTimers();
-      }
     });
 
     it('should catch and fail on unexpected errors', async () => {

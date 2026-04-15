@@ -8,15 +8,77 @@
  */
 
 import { v4 } from 'uuid';
-import type { KibanaRequest } from '@kbn/core/server';
+import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WORKFLOW_RESUME_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams } from './types';
 import { generateExecutionTaskScope } from '../utils';
 
+/** Stable task id so idle-timeout (workflow + enclosing step) resumes dedupe per execution. */
+export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string): string =>
+  `workflow-global-timeout-${workflowExecutionId}`;
+
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
+
+  /**
+   * Schedules or updates a single `workflow:resume` at the earliest idle deadline (HITL /
+   * sync child). Skips TM writes when runAt and params already match.
+   */
+  async scheduleWorkflowGlobalTimeoutResumeTask({
+    workflowExecution,
+    resumeAt,
+    fakeRequest,
+  }: {
+    workflowExecution: EsWorkflowExecution;
+    resumeAt: Date;
+    fakeRequest: KibanaRequest;
+  }): Promise<{ taskId: string }> {
+    const taskId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecution.id);
+    const desiredRunAtMs = resumeAt.getTime();
+
+    try {
+      const existing = await this.taskManager.get(taskId);
+      if (existing.runAt != null) {
+        const existingRunAtMs = new Date(existing.runAt).getTime();
+        const params = existing.params as ResumeWorkflowExecutionParams | undefined;
+        if (
+          existing.taskType === WORKFLOW_RESUME_TASK_TYPE &&
+          existingRunAtMs === desiredRunAtMs &&
+          params?.workflowRunId === workflowExecution.id &&
+          params?.spaceId === workflowExecution.spaceId
+        ) {
+          return { taskId: existing.id };
+        }
+      }
+    } catch (err) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        throw err;
+      }
+    }
+
+    await this.taskManager.removeIfExists(taskId);
+
+    const task = await this.taskManager.schedule(
+      {
+        id: taskId,
+        taskType: WORKFLOW_RESUME_TASK_TYPE,
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        } satisfies ResumeWorkflowExecutionParams,
+        state: {},
+        runAt: resumeAt,
+        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+      },
+      { request: fakeRequest }
+    );
+
+    return {
+      taskId: task.id,
+    };
+  }
 
   async scheduleResumeTask({
     workflowExecution,

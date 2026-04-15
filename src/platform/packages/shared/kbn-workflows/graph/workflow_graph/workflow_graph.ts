@@ -13,7 +13,7 @@ import { createTypedGraph } from './create_typed_graph';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import type { GraphNodeUnion } from '../types';
-import { isEnterStepTimeoutZone } from '../types/guards';
+import { isEnterStepTimeoutZone, isEnterWorkflowTimeoutZone } from '../types/guards';
 
 /**
  * A class that encapsulates the logic of workflow graph operations and provides
@@ -177,13 +177,8 @@ export class WorkflowGraph {
   }
 
   /**
-   * Returns the step-level timeout wrapping `nodeId`, if any.
-   *
-   * Only checks **direct** predecessors, so this is correct only for leaf
-   * nodes that are not wrapped in a step-level `foreach`/`while` (which
-   * would insert an intermediate enter-foreach/enter-while node between the
-   * timeout zone and the leaf). Currently used exclusively for
-   * `workflow.execute` nodes, whose schema forbids `foreach`/`while`.
+   * Step-level timeout from a direct `enter-timeout-zone` predecessor with the same `stepId`.
+   * Incorrect if enter-foreach / enter-while sits between that zone and `nodeId`.
    */
   public getEnclosingStepLevelTimeout(nodeId: string): string | undefined {
     const target = this.graph.node(nodeId);
@@ -192,6 +187,16 @@ export class WorkflowGraph {
       const n = this.graph.node(predId);
       if (isEnterStepTimeoutZone(n) && n.stepId === target.stepId) {
         return n.timeout;
+      }
+    }
+    return undefined;
+  }
+
+  /** Workflow settings timeout from the workflow-level enter-timeout-zone node, if present. */
+  public getWorkflowLevelTimeout(): string | undefined {
+    for (const node of this.getAllNodes()) {
+      if (isEnterWorkflowTimeoutZone(node)) {
+        return node.timeout;
       }
     }
     return undefined;
