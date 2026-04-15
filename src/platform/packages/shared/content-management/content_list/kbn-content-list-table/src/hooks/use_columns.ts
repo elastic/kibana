@@ -15,13 +15,34 @@ import type { ParsedPart } from '@kbn/content-list-assembly';
 import type { ColumnBuilderContext } from '../column/types';
 import { column } from '../column/part';
 
-/** Default columns when no children are provided. */
+/**
+ * Default columns when no children are provided.
+ *
+ * Provides Name, Last updated, and Actions columns out of the box.
+ * The Actions column auto-hides when the provider has no edit/delete handlers
+ * configured, and individual actions are shown/hidden based on the item config.
+ * Any explicit `<Column.*>` child replaces **all** defaults.
+ */
 const DEFAULT_PARTS: ParsedPart[] = [
   {
     type: 'part',
     part: 'column',
     preset: 'name',
     instanceId: 'name',
+    attributes: {},
+  },
+  {
+    type: 'part',
+    part: 'column',
+    preset: 'updatedAt',
+    instanceId: 'updatedAt',
+    attributes: {},
+  },
+  {
+    type: 'part',
+    part: 'column',
+    preset: 'actions',
+    instanceId: 'actions',
     attributes: {},
   },
 ];

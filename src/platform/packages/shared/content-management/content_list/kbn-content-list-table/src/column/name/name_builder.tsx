@@ -50,7 +50,11 @@ export interface NameColumnProps {
    * Requires `item.tags` to contain tag IDs and a tags service
    * to be configured on the `ContentListProvider`.
    *
-   * @default false
+   * Auto-enabled when the provider has `supports.tags === true`
+   * (i.e., a tags service is configured). Set to `false` to
+   * explicitly disable tags even when the service is available.
+   *
+   * @default supports.tags
    */
   showTags?: boolean;
   /**
@@ -87,7 +91,7 @@ export const buildNameColumn = (
     width,
     sortable: sortableProp,
     showDescription = true,
-    showTags = false,
+    showTags = context.supports?.tags ?? false,
     showStarred = false,
     onTagClick,
     render: customRender,

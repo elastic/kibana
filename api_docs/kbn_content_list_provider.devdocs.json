@@ -164,6 +164,192 @@
       },
       {
         "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.isPaginationConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "isPaginationConfig",
+        "description": [
+          "\nType guard to check if pagination config is a {@link PaginationConfig} object (not boolean)."
+        ],
+        "signature": [
+          "(pagination?: boolean | ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.PaginationConfig",
+            "text": "PaginationConfig"
+          },
+          " | undefined) => pagination is ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.PaginationConfig",
+            "text": "PaginationConfig"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.isPaginationConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pagination",
+            "description": [],
+            "signature": [
+              "boolean | ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.PaginationConfig",
+                "text": "PaginationConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.isSearchConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "isSearchConfig",
+        "description": [
+          "\nType guard to check if search config is a {@link SearchConfig} object (not boolean)."
+        ],
+        "signature": [
+          "(search: boolean | ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SearchConfig",
+            "text": "SearchConfig"
+          },
+          " | undefined) => search is ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SearchConfig",
+            "text": "SearchConfig"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.isSearchConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "boolean | ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.SearchConfig",
+                "text": "SearchConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.isSortingConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "isSortingConfig",
+        "description": [
+          "\nType guard to check if sorting config is a {@link SortingConfig} object (not boolean)."
+        ],
+        "signature": [
+          "(sorting?: boolean | ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SortingConfig",
+            "text": "SortingConfig"
+          },
+          " | undefined) => sorting is ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SortingConfig",
+            "text": "SortingConfig"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.isSortingConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sorting",
+            "description": [],
+            "signature": [
+              "boolean | ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.SortingConfig",
+                "text": "SortingConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
         "id": "def-public.useContentListConfig",
         "type": "Function",
         "tags": [
@@ -281,7 +467,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/pagination/use_content_list_pagination.ts",
-        "lineNumber": 80,
+        "lineNumber": 94,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3327,6 +3513,32 @@
       },
       {
         "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.DEFAULT_SORT_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_SORT_FIELDS",
+        "description": [
+          "\nDefault sort fields used when sorting is enabled but no explicit fields are configured.\n\nProvides Name (A-Z / Z-A) and Last updated (Newest / Oldest) sort options,\nmatching the common pattern across `TableListView` consumers."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SortField",
+            "text": "SortField"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/types.ts",
+        "lineNumber": 79,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
         "id": "def-public.FilterCounts",
         "type": "Type",
         "tags": [],
@@ -3606,6 +3818,53 @@
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/state/types.ts",
             "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.DEFAULT_INITIAL_SORT",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_INITIAL_SORT",
+        "description": [
+          "\nDefault initial sort used when sorting is enabled but no explicit `initialSort` is configured.\n\nSorts by `title` ascending (A-Z), matching `TableListView` behavior.\nConsumers that prefer \"newest first\" can set `initialSort: { field: 'updatedAt', direction: 'desc' }`."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/types.ts",
+        "lineNumber": 90,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DEFAULT_INITIAL_SORT.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DEFAULT_INITIAL_SORT.direction",
+            "type": "string",
+            "tags": [],
+            "label": "direction",
+            "description": [],
+            "signature": [
+              "\"asc\""
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/types.ts",
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
