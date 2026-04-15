@@ -8,6 +8,11 @@
 import React, { useMemo } from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  PublishesFilters,
+  PublishesTimeRange,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
 import {
   apiPublishesUnifiedSearch,
   initializeTitleManager,
@@ -16,9 +21,12 @@ import {
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import useObservable from 'react-use/lib/useObservable';
-import type { Query } from '@kbn/es-query';
-import { BehaviorSubject, map, merge } from 'rxjs';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../common/environment_filter_values';
 
 const NO_QUERY$ = new BehaviorSubject<Query | undefined>(undefined);
 import type { EmbeddableDeps } from '../types';
@@ -30,11 +38,52 @@ import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 const DEFAULT_RANGE_FROM = 'now-15m';
 const DEFAULT_RANGE_TO = 'now';
 
+export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
+  PublishesFilters &
+  PublishesTimeRange & {
+    query$: PublishingSubject<Query | undefined>;
+  };
+
+function buildFiltersFromState(
+  serviceName: string | undefined,
+  environment: string | undefined
+): Filter[] {
+  const filters: Filter[] = [];
+
+  if (serviceName) {
+    filters.push({
+      meta: { key: 'service.name', type: 'phrase', params: { query: serviceName } },
+      query: { match_phrase: { 'service.name': serviceName } },
+    });
+  }
+
+  if (environment && environment !== ENVIRONMENT_ALL.value) {
+    if (environment === ENVIRONMENT_NOT_DEFINED.value) {
+      filters.push({
+        meta: { key: 'service.environment', type: 'exists', negate: true },
+        query: { exists: { field: 'service.environment' } },
+      });
+    } else {
+      filters.push({
+        meta: { key: 'service.environment', type: 'phrase', params: { query: environment } },
+        query: { match_phrase: { 'service.environment': environment } },
+      });
+    }
+  }
+
+  return filters;
+}
+
+function buildQueryFromKuery(kuery: string): Query | undefined {
+  const trimmed = kuery.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  return { query: trimmed, language: 'kuery' };
+}
+
 export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: EmbeddableFactory<
-    ServiceMapEmbeddableState,
-    DefaultEmbeddableApi<ServiceMapEmbeddableState>
-  > = {
+  const factory: EmbeddableFactory<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
     type: APM_SERVICE_MAP_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
@@ -45,6 +94,25 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       const kuery$ = new BehaviorSubject(state.kuery ?? '');
       const serviceName$ = new BehaviorSubject(state.serviceName);
       const serviceGroupId$ = new BehaviorSubject(state.serviceGroupId);
+
+      const query$ = new BehaviorSubject<Query | undefined>(buildQueryFromKuery(state.kuery ?? ''));
+      const filters$ = new BehaviorSubject<Filter[] | undefined>(
+        buildFiltersFromState(state.serviceName, state.environment)
+      );
+      const timeRange$ = new BehaviorSubject<TimeRange | undefined>({
+        from: rangeFrom$.getValue(),
+        to: rangeTo$.getValue(),
+      });
+
+      combineLatest([serviceName$, environment$]).subscribe(([sn, env]) => {
+        filters$.next(buildFiltersFromState(sn, env));
+      });
+      kuery$.subscribe((k) => {
+        query$.next(buildQueryFromKuery(k));
+      });
+      combineLatest([rangeFrom$, rangeTo$]).subscribe(([from, to]) => {
+        timeRange$.next({ from, to });
+      });
 
       function serializeState(): ServiceMapEmbeddableState {
         return {
@@ -95,6 +163,9 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         ...titleManager.api,
         ...unsavedChangesApi,
         serializeState,
+        filters$,
+        query$,
+        timeRange$,
       });
 
       return {
