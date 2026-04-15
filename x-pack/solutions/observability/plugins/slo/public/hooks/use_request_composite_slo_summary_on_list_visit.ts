@@ -19,7 +19,7 @@ export function useRequestCompositeSloSummaryOnListVisit(): void {
     requestedRef.current = true;
 
     void sloClient
-      .fetch('POST /internal/observability/slos/_composite_summary/refresh', {
+      .fetch('POST /internal/observability/slo_composites/_summary_refresh', {
         params: { body: {} },
       })
       .catch(() => {});
