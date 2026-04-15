@@ -45,7 +45,7 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { serverless, management, security } = setupDeps;
+    const { serverless, management, security, workflowsManagement } = setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
@@ -64,6 +64,13 @@ export class ServerlessObservabilityPlugin
       })
     );
     serverless.initNavigation('oblt', navigationTree$);
+
+    if (workflowsManagement && !core.pricing.isFeatureAvailable('observability:workflows')) {
+      workflowsManagement.setUnavailableInServerlessTier({
+        // Hardcoded for now since it's the only product that can require an upgrade. Could be improved by retrieving the required products from the pricing config.
+        requiredProducts: ['Observability: Complete'],
+      });
+    }
 
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
     const roleManagementEnabled = security.authz.isRoleManagementEnabled();
