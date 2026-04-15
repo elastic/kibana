@@ -77,6 +77,7 @@ const Accordion = ({ children, accordionContent, textColor }: AccordionProps) =>
 interface ThinkingItemLayoutProps {
   children: ReactNode;
   icon?: ReactNode;
+  loading?: boolean;
   accordionContent?: ToolCallStep['params']; // potentially to be extended in the future to accomodate other types of content
   textColor?: string;
 }
@@ -84,6 +85,7 @@ export const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({
   children,
   icon,
   accordionContent,
+  loading = false,
   textColor,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -97,7 +99,7 @@ export const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({
       {icon && (
         <EuiFlexItem
           css={css`
-            padding-top: ${accordionContent ? euiTheme.size.xs : '0px'};
+            padding-top: ${accordionContent ? (loading ? '6px' : euiTheme.size.xs) : '0px'};
           `}
           grow={false}
         >

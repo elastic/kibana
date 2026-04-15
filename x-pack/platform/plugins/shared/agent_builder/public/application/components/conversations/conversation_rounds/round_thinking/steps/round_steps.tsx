@@ -17,7 +17,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { ToolResponseFlyout } from './tool_response_flyout';
 import { useToolResultsFlyout } from '../../../../../hooks/thinking/use_tool_results_flyout';
 import { ThinkingItemLayout } from './thinking_item_layout';
@@ -53,12 +53,27 @@ const mainThinkingResultTypes: string[] = [
 // Tool result types that should not have an icon displayed in the thinking steps list
 const disabledToolResultIconTypes: string[] = [ToolResultType.error, ToolResultType.query];
 
-const getItemIcon = (isLastItem: boolean, isLoading: boolean): ReactNode => {
-  if (isLastItem && isLoading) {
+const getItemIcon = ({
+  isLoading,
+  isExecutingTool,
+}: {
+  isLoading: boolean;
+  isExecutingTool: boolean;
+}): ReactNode => {
+  if (isExecutingTool) {
+    return <EuiLoadingSpinner size="s" />;
+  }
+  if (isLoading) {
     return <EuiIcon type="chevronDoubleRight" color="text" />;
   }
   return <EuiIcon type="check" color="success" />;
 };
+
+interface ItemFactoryEntry {
+  key: string;
+  factory: ItemFactory;
+  isExecuting?: boolean;
+}
 
 type ItemFactory = (icon?: ReactNode, textColor?: string) => ReactNode;
 
@@ -81,13 +96,15 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
   const { euiTheme } = useEuiTheme();
 
   const renderedSteps = useMemo(() => {
-    const itemFactories: { key: string; factory: ItemFactory }[] = [];
+    const itemFactories: ItemFactoryEntry[] = [];
 
     // First pass: build all item factories to determine total count
     steps.forEach((step, stepIndex) => {
       if (isToolCallStep(step)) {
+        const hasResults = step.results.length > 0;
         itemFactories.push({
           key: `step-${stepIndex}-tool-call`,
+          isExecuting: !hasResults,
           factory: (icon, textColor) => (
             <ToolCallDisplay
               key={`step-${stepIndex}-tool-call`}
@@ -219,14 +236,10 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
     // The last item should always be loading unless the round has completed
     return itemFactories.map((itemFactory, flatIndex) => {
       const isLastItem = flatIndex === totalItems - 1;
-      const itemIcon = getItemIcon(isLastItem, isLoading);
-      const getItemTextColor = () => {
-        if (isLastItem && isLoading) {
-          return euiTheme.colors.textParagraph;
-        }
-        return euiTheme.colors.textSubdued;
-      };
-      const textColor = getItemTextColor();
+      const isExecutingTool = !!(itemFactory.isExecuting && isLoading);
+      const isItemLoading = (isLastItem && isLoading) || isExecutingTool;
+      const itemIcon = getItemIcon({ isLoading: isItemLoading, isExecutingTool });
+      const textColor = isItemLoading ? euiTheme.colors.textParagraph : euiTheme.colors.textSubdued;
       return itemFactory.factory(itemIcon, textColor);
     });
   }, [steps, openFlyout, isLoading, euiTheme.colors.textSubdued, euiTheme.colors.textParagraph]);

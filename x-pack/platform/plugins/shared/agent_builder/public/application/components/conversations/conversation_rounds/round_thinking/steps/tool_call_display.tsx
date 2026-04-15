@@ -36,9 +36,15 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
   const { createAgentBuilderUrl } = useNavigation();
   const toolHref = createAgentBuilderUrl(appPaths.tools.details({ toolId }));
   const toolLinkId = `tool-link-${toolId}`;
+  const hasResults = step.results.length > 0;
 
   return (
-    <ThinkingItemLayout icon={icon} accordionContent={step.params} textColor={textColor}>
+    <ThinkingItemLayout
+      icon={icon}
+      accordionContent={step.params}
+      textColor={textColor}
+      loading={!hasResults}
+    >
       <EuiText size="s">
         <p role="status" aria-label={labels.toolCall}>
           <FormattedMessage
