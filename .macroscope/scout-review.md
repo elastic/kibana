@@ -5,19 +5,19 @@ reasoning: high
 effort: high
 input: full_diff
 exclude:
-  - "api_docs/**"
-  - "config/**"
-  - "dev_docs/**"
-  - "docs/**"
-  - "legacy_rfcs/**"
-  - "licenses/**"
-  - "node_modules/**"
-  - "oas_docs/**"
-  - "packages/**"
-  - "plugins/**"
-  - "scripts/**"
-  - "typings/**"
-  - ".buildkite/**"
+  - 'api_docs/**'
+  - 'config/**'
+  - 'dev_docs/**'
+  - 'docs/**'
+  - 'legacy_rfcs/**'
+  - 'licenses/**'
+  - 'node_modules/**'
+  - 'oas_docs/**'
+  - 'packages/**'
+  - 'plugins/**'
+  - 'scripts/**'
+  - 'typings/**'
+  - '.buildkite/**'
 conclusion: neutral
 ---
 
@@ -40,6 +40,7 @@ Read `docs/extend/scout/best-practices.md` with `browse_code` and enforce all ru
 
 - Before creating new helpers, use `browse_code` to check what's already available in `@kbn/scout`, solution Scout packages (`@kbn/scout-oblt`, `@kbn/scout-search`, `@kbn/scout-security`), and plugin-local `test/scout/` directories.
 - When adding helpers, place them in the correct scope: plugin-local `test/scout/` for plugin-specific, solution Scout package for cross-plugin within a solution, `@kbn/scout` for cross-solution.
+- Flaky Test Runner nudges for PRs: `.macroscope/flaky-test-runner-nudge.md` (Scout and FTR).
 
 ## Output Format
 
