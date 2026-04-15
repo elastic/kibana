@@ -135,10 +135,10 @@ steps:
         type: data.set
         with:
           iteration: "${{ variables.iteration | plus: 1 }}"
-          successCount: "${{ steps.identify_inferred.output.successCount }}"
-          discoveredFeatures: "${{ steps.identify_inferred.output.discoveredFeatures }}"
-          totalTokensUsed: "${{ steps.identify_inferred.output.totalTokensUsed }}"
-          iterationResults: "${{ steps.identify_inferred.output.iterationResults }}"
+          successCount: "${{ steps.identify_inferred.output.state.successCount }}"
+          discoveredFeatures: "${{ steps.identify_inferred.output.state.discoveredFeatures }}"
+          totalTokensUsed: "${{ steps.identify_inferred.output.state.totalTokensUsed }}"
+          iterationResults: "${{ steps.identify_inferred.output.state.iterationResults }}"
 
   # -----------------------------------------------------------------------
   # Step 3: Identify computed features.
