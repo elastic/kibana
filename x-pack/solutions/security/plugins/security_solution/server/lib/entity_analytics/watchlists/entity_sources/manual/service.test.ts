@@ -10,11 +10,20 @@ import { MANUAL_SOURCE_ID } from './constants';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
+import { bulkUpsertOperationsFactory } from '../bulk/upsert';
 
-jest.mock('../sync/utils');
+jest.mock('../sync/utils', () => {
+  const actual = jest.requireActual('../sync/utils');
+  return {
+    ...actual,
+    getExistingEntitiesMap: jest.fn().mockResolvedValue(new Map()),
+  };
+});
 jest.mock('../bulk/upsert');
 jest.mock('../sync/entity_store_sync');
 jest.mock('../bulk/soft_delete');
+
+const bulkUpsertOperationsFactoryMock = bulkUpsertOperationsFactory as jest.Mock;
 
 describe('manual entity service', () => {
   const logger = loggerMock.create();
@@ -36,6 +45,10 @@ describe('manual entity service', () => {
 
     return { esClient, crudClient, service };
   };
+
+  beforeEach(() => {
+    bulkUpsertOperationsFactoryMock.mockReturnValue(() => [{ index: {} }, {}]);
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -71,8 +84,10 @@ describe('manual entity service', () => {
           },
         ],
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (esClient.bulk as any).mockResolvedValue({ items: [], errors: false });
+      (esClient.bulk as jest.Mock).mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'user:known', status: 200 } }],
+      });
 
       const result = await service.assign(['user:known', 'user:unknown']);
 
@@ -92,6 +107,55 @@ describe('manual entity service', () => {
           filter: { terms: { 'entity.id': ['user:known', 'user:unknown'] } },
         })
       );
+    });
+
+    it('reports per-item failures on partial bulk errors', async () => {
+      const { esClient, crudClient, service } = createService();
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [
+          {
+            entity: { id: 'user:ok', type: 'user', name: 'OK', attributes: { watchlists: [] } },
+          },
+          {
+            entity: {
+              id: 'user:fail',
+              type: 'user',
+              name: 'Fail',
+              attributes: { watchlists: [] },
+            },
+          },
+        ],
+      });
+      (esClient.bulk as jest.Mock).mockResolvedValue({
+        errors: true,
+        items: [
+          { index: { _id: 'user:ok', status: 200 } },
+          {
+            index: {
+              _id: 'user:fail',
+              status: 400,
+              error: { type: 'mapper_parsing_exception', reason: 'field mapping error' },
+            },
+          },
+        ],
+      });
+
+      const result = await service.assign(['user:ok', 'user:fail']);
+
+      expect(result).toEqual({
+        successful: 1,
+        failed: 1,
+        not_found: 0,
+        total: 2,
+        items: [
+          { euid: 'user:ok', status: 'success' },
+          {
+            euid: 'user:fail',
+            status: 'failure',
+            error: 'mapper_parsing_exception: field mapping error',
+          },
+        ],
+      });
     });
 
     it('handles errors during assignment', async () => {
