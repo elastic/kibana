@@ -64,6 +64,14 @@ node scripts/generate_openapi --rootDir ./x-pack/solutions/security/plugins/secu
 
 By default it uses the `zod_operation_schema` template which produces runtime types for request and response schemas described in OpenAPI specification. The generated code will be placed adjacent to the `.schema.yaml` file and will have `.gen.ts` extension.
 
+## Zod helpers, imports, and `GenerationContext`
+
+Codegen picks `@kbn/zod-helpers/v4` imports to match what the emitted Zod actually uses (for example `BooleanFromString` for boolean query parameters, `ArrayFromString` for array query parameters). For import analysis, local `#/components/...` `$ref`s in query and path parameters are resolved; external file `$ref`s are not, because the corresponding Zod lives in the generated file for that schema. String `format` helpers (`date-math`, `nonempty`) are inferred from operation bodies/responses and from `components.schemas`, not from a blanket string scan of the whole document.
+
+- **Cross-file schema imports:** Discovery ignores `$ref`s that appear only under **non-200** responses, because this template only emits Zod for success responses. That avoids unused imports without changing runtime behavior.
+- **`GenerationContext`:** Prefer `hasZodHelpersImports` and `zodHelpersImports`. The field `useZodHelpers` is a deprecated alias equal to `hasZodHelpersImports`.
+- **Regenerated `*.gen.ts` files:** After changing a `.schema.yaml` or the generator, run codegen and commit the updated `*.gen.ts` output (including import-line churn). That is expected; it does not by itself mean the OpenAPI source was incorrect.
+
 Example of generated code:
 
 ```ts

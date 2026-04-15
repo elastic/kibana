@@ -8,8 +8,8 @@
  {{> disclaimer}}
 
 import { z } from '@kbn/zod/v4';
-{{#if useZodHelpers}}
-import { isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
+{{#if hasZodHelpersImports}}
+import { {{#each zodHelpersImports}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} } from '@kbn/zod-helpers/v4';
 {{/if}}
 
 {{#each imports}}

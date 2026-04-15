@@ -8,9 +8,40 @@
  */
 
 import { uniq } from 'lodash';
+import { OpenAPIV3 } from 'openapi-types';
 import type { OpenApiDocument } from '../openapi_types';
 import { findRefs } from './helpers/find_refs';
 import { isLocalRef } from './helpers/is_local_ref';
+
+const HTTP_METHODS = Object.values(OpenAPIV3.HttpMethods);
+
+/**
+ * Codegen only emits Zod for success responses (typically 200). `findRefs` for import
+ * discovery should ignore `$ref`s that exist only under error responses so consumers
+ * do not need to edit OpenAPI YAML; this does not change runtime route behavior.
+ */
+function cloneDocumentOmittingNonSuccessResponses(parsedSchema: OpenApiDocument): OpenApiDocument {
+  const clone = structuredClone(parsedSchema) as OpenApiDocument;
+  if (!clone.paths) {
+    return clone;
+  }
+  for (const pathItem of Object.values(clone.paths)) {
+    if (!pathItem) {
+      continue;
+    }
+    for (const method of HTTP_METHODS) {
+      const op = pathItem[method];
+      if (op?.responses) {
+        for (const code of Object.keys(op.responses)) {
+          if (code !== '200') {
+            delete op.responses[code];
+          }
+        }
+      }
+    }
+  }
+  return clone;
+}
 
 export interface ImportsMap {
   [importPath: string]: string[];
@@ -25,7 +56,7 @@ export interface ImportsMap {
  */
 export const getImportsMap = (parsedSchema: OpenApiDocument): ImportsMap => {
   const importMap: Record<string, string[]> = {}; // key: import path, value: list of symbols to import
-  const refs = findRefs(parsedSchema);
+  const refs = findRefs(cloneDocumentOmittingNonSuccessResponses(parsedSchema));
   refs.forEach((ref) => {
     // Skip local references (e.g., #/components/schemas/SomeName) as they don't need imports
     if (isLocalRef(ref)) {
