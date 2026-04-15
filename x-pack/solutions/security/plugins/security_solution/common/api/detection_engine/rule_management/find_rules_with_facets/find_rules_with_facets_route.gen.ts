@@ -71,13 +71,18 @@ export const FindRulesWithFacetsRequestBody = z
     per_page: z.number().int().min(0).max(10000).optional().default(20),
     /**
       * Elasticsearch-style `search_after` tiebreaker values. Requires `sort_field` and
-`sort_order`. When set, `page` is ignored.
+`sort_order`. When set, `page` is ignored. `search_after` cannot be used together with gap filter parameters
+(`gap_fill_statuses`, `gaps_range_start`, `gaps_range_end`). Use `page` and `per_page`
+to paginate gap-filtered results instead.
 
       */
     search_after: z.array(FindRulesWithFacetsSearchAfterItem).min(1).optional(),
     /**
-     * Filter rules to only those with gaps matching these fill statuses in the given range.
-     */
+      * Filter rules to only those with gaps matching these fill statuses in the given range.
+When active, the result set is capped and `search_after` is not supported. Use
+offset pagination (`page` / `per_page`) instead.
+
+      */
     gap_fill_statuses: z.array(GapFillStatus).optional(),
     /**
      * Start of the gap range (ISO 8601). Required when gap_fill_statuses is set.

@@ -1689,11 +1689,8 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Paginated listing of installed detection rules using a JSON body: KQL `filter`, optional `search` (`term` + `mode`), 
-`aggregations.counts` for facet buckets, and optional `search_after` for deep pagination (same `sort_field` /
-`sort_order` on each request. `Page` is ignored when `search_after` is set).
-
-    */
+   * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
+   */
   async findRulesWithFacets(props: FindRulesWithFacetsProps) {
     this.log.info(`${new Date().toISOString()} Calling API FindRulesWithFacets`);
     return this.kbnClient

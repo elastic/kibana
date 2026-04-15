@@ -56,8 +56,10 @@ export const expandRawAggregationResult = (
 ): FacetCounts => {
   const counts: FacetCounts = {};
   for (const category of categories) {
-    const aggResult = raw[`facet_${category}`] as TermsAggBuckets;
-    counts[category] = bucketsToFacetMap(aggResult.buckets);
+    const aggResult = raw[`facet_${category}`] as TermsAggBuckets | undefined;
+    if (aggResult?.buckets) {
+      counts[category] = bucketsToFacetMap(aggResult.buckets);
+    }
   }
   return counts;
 };

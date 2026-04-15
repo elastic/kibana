@@ -228,6 +228,7 @@ export async function findRules<Params extends RuleParams = never>(
     perPage,
     total,
     searchAfter,
+    aggregations,
     data: authorizedData as Array<SanitizedRule<Params>>,
   };
 }

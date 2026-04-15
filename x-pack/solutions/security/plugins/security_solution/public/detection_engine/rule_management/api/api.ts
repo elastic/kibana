@@ -242,7 +242,7 @@ export const fetchRules = async ({
  * @param sort_order sort order (e.g. `asc` or `desc`)
  * @param aggregations aggregations to include (e.g. `{ counts: ['tags', 'enabled'] }`)
  * @param pagination pagination options (e.g. `{ page, perPage }`)
- * @param search_after tiebreaker values for the next page (requires sort_field + sort_order)
+ * @param search_after for deep pagination
  * @param signal to cancel request
  *
  * @throws An error if response is not OK

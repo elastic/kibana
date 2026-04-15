@@ -18,17 +18,13 @@ import { z } from '@kbn/zod/v4';
 
 /**
   * Search mode for free-text search combined with the KQL `filter`.
-Only `legacy` is supported; additional modes may be added later.
 
   */
 export type GranularRulesSearchMode = z.infer<typeof GranularRulesSearchMode>;
 export const GranularRulesSearchMode = z.literal('legacy').default('legacy');
 
 /**
-  * Optional free-text search combined with the KQL `filter` on `_find_with_facets`.
-When `mode` is `legacy`, the server ANDs the filter KQL with a KQL fragment derived from
-`term` (same semantics as legacy rule management search). An empty string means no
-free-text constraint.
+  * Free-text search combined with the KQL `filter`. Interpreted according to search mode.
 
   */
 export type GranularRulesSearch = z.infer<typeof GranularRulesSearch>;
@@ -39,12 +35,6 @@ export const GranularRulesSearch = z
   })
   .strict();
 
-/**
-  * Facet dimension for facet **counts** in the response when requested via
-`aggregations.counts` on `_find_with_facets`.
-The server maps friendly names to underlying rule fields.
-
-  */
 export type GranularRulesFacetCategory = z.infer<typeof GranularRulesFacetCategory>;
 export const GranularRulesFacetCategory = z.enum([
   'tags',
@@ -61,7 +51,6 @@ export const GranularRulesFacetCategoryEnum = GranularRulesFacetCategory.enum;
 
 /**
   * A rule attribute that can be requested via the `fields` parameter on `_find_with_facets`.
-When provided, only the listed attributes are returned in each rule object.
 
   */
 export type FindRulesWithFacetsField = z.infer<typeof FindRulesWithFacetsField>;
@@ -91,37 +80,7 @@ export type FindRulesWithFacetsFieldEnum = typeof FindRulesWithFacetsField.enum;
 export const FindRulesWithFacetsFieldEnum = FindRulesWithFacetsField.enum;
 
 /**
-  * Friendly field names accepted in the KQL `filter` on `_find_with_facets`.
-
-  */
-export type FindRulesWithFacetsKqlFilterField = z.infer<typeof FindRulesWithFacetsKqlFilterField>;
-export const FindRulesWithFacetsKqlFilterField = z.enum([
-  'name',
-  'enabled',
-  'tags',
-  'type',
-  'ruleType',
-  'immutable',
-  'isCustomized',
-  'createdBy',
-  'updatedBy',
-  'createdAt',
-  'updatedAt',
-  'lastRunOutcome',
-  'lastRunStatus',
-  'index',
-  'tacticId',
-  'tacticName',
-  'techniqueId',
-  'techniqueName',
-  'subtechniqueId',
-  'subtechniqueName',
-]);
-export type FindRulesWithFacetsKqlFilterFieldEnum = typeof FindRulesWithFacetsKqlFilterField.enum;
-export const FindRulesWithFacetsKqlFilterFieldEnum = FindRulesWithFacetsKqlFilterField.enum;
-
-/**
-  * Aggregation-related options on `_find_with_facets`.
+  * Aggregation options on `_find_with_facets`.
 
   */
 export type FindRulesWithFacetsAggregations = z.infer<typeof FindRulesWithFacetsAggregations>;

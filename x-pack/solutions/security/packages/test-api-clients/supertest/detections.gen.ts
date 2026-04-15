@@ -267,11 +267,8 @@ finalize it.
       .query(props.query);
   },
   /**
-      * Paginated listing of installed detection rules using a JSON body: KQL `filter`, optional `search` (`term` + `mode`), 
-`aggregations.counts` for facet buckets, and optional `search_after` for deep pagination (same `sort_field` /
-`sort_order` on each request. `Page` is ignored when `search_after` is set).
-
-      */
+   * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
+   */
   findRulesWithFacets(props: FindRulesWithFacetsProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/detection_engine/rules/_find_with_facets', kibanaSpace))

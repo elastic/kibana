@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -157,7 +156,7 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
             search,
             sort_field: sortField,
             sort_order: sortOrder,
-            search_after: searchAfterInput,
+            search_after: searchAfterParam,
             page = 1,
             per_page: perPage,
             fields,
@@ -177,6 +176,12 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
           });
           const hasGapFilters =
             (gapFillStatuses && gapFillStatuses.length > 0) || gapsRangeStart || gapsRangeEnd;
+
+          const shouldUseSearchAfter =
+            sortField != null &&
+            sortOrder != null &&
+            !hasGapFilters &&
+            (page * perPage >= MAX_RESULTS_WINDOW || searchAfterParam);
 
           const gapPreFilter = await resolveGapPreFilter({
             body: request.body,
@@ -198,11 +203,6 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
 
           const { ruleIds, warnings } = gapPreFilter;
 
-          const searchAfter: SortResults | undefined =
-            searchAfterInput != null && searchAfterInput.length > 0 && !hasGapFilters
-              ? ([...searchAfterInput] as SortResults)
-              : undefined;
-
           const categoryCounts = aggregations?.counts ?? [];
 
           const aggs =
@@ -215,12 +215,12 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
           const rules = await findRules({
             rulesClient,
             perPage,
-            page: searchAfter ? undefined : page,
+            page: shouldUseSearchAfter ? undefined : page,
             sortField,
             sortOrder,
             filter: combinedKql,
             fields: effectiveFields,
-            searchAfter,
+            searchAfter: shouldUseSearchAfter ? searchAfterParam : undefined,
             aggregations: aggs,
             ruleIds,
           });
@@ -231,17 +231,10 @@ export const findRulesWithFacetsRoute = (router: SecuritySolutionPluginRouter, l
 
           const transformedRules = transformFindAlerts(rules, warnings);
 
-          const shouldReturnSearchAfter =
-            sortField != null &&
-            sortOrder != null &&
-            (page * perPage >= MAX_RESULTS_WINDOW || searchAfter);
-
-          const responseSearchAfter = shouldReturnSearchAfter ? searchAfter : undefined;
-
           const responseBody: FindRulesWithFacetsResponse = {
             ...transformedRules,
             ...(counts ? { counts } : {}),
-            ...(responseSearchAfter ? { search_after: responseSearchAfter } : {}),
+            ...(shouldUseSearchAfter ? { search_after: rules.searchAfter } : {}),
           };
 
           return response.ok({ body: responseBody });

@@ -10,7 +10,6 @@ components:
       type: string
       description: |
         Search mode for free-text search combined with the KQL `filter`.
-        Only `legacy` is supported; additional modes may be added later.
       enum:
         - legacy
       default: legacy
@@ -21,10 +20,7 @@ components:
       required:
         - term
       description: |
-        Optional free-text search combined with the KQL `filter` on `_find_with_facets`.
-        When `mode` is `legacy`, the server ANDs the filter KQL with a KQL fragment derived from
-        `term` (same semantics as legacy rule management search). An empty string means no
-        free-text constraint.
+        Free-text search combined with the KQL `filter`. Interpreted according to search mode.
       properties:
         term:
           type: string
@@ -33,10 +29,6 @@ components:
 
     GranularRulesFacetCategory:
       type: string
-      description: |
-        Facet dimension for facet **counts** in the response when requested via
-        `aggregations.counts` on `_find_with_facets`.
-        The server maps friendly names to underlying rule fields.
       enum:
         - tags
         - type
@@ -51,7 +43,6 @@ components:
       type: string
       description: |
         A rule attribute that can be requested via the `fields` parameter on `_find_with_facets`.
-        When provided, only the listed attributes are returned in each rule object.
       enum:
         - id
         - name
@@ -74,37 +65,11 @@ components:
         - running
         - nextRun
 
-    FindRulesWithFacetsKqlFilterField:
-      type: string
-      description: |
-        Friendly field names accepted in the KQL `filter` on `_find_with_facets`.
-      enum:
-        - name
-        - enabled
-        - tags
-        - type
-        - ruleType
-        - immutable
-        - isCustomized
-        - createdBy
-        - updatedBy
-        - createdAt
-        - updatedAt
-        - lastRunOutcome
-        - lastRunStatus
-        - index
-        - tacticId
-        - tacticName
-        - techniqueId
-        - techniqueName
-        - subtechniqueId
-        - subtechniqueName
-
     FindRulesWithFacetsAggregations:
       type: object
       additionalProperties: false
       description: |
-        Aggregation-related options on `_find_with_facets`.
+        Aggregation options on `_find_with_facets`.
       properties:
         counts:
           type: array
