@@ -35,5 +35,6 @@
     "@kbn/core",
     "@kbn/search-types",
     "@kbn/es-types",
+    "@kbn/esql-language",
   ]
 }

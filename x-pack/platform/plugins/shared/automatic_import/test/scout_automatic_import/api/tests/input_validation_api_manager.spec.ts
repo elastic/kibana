@@ -33,14 +33,14 @@ import {
 } from '../fixtures/api_test_constants';
 
 const minimalDataStream = (i: number) => ({
-  dataStreamId: `scout-oversize-ds-${i}`,
+  dataStreamId: `scout_oversize_ds_${i}`,
   title: `Stream ${i}`,
   description: `Description ${i}`,
   inputTypes: [{ name: 'filestream' as const }],
 });
 
-const VALIDATION_INTEGRATION_ID = 'scout-input-validation-integration';
-const VALIDATION_DS_ID = 'scout-input-validation-ds';
+const VALIDATION_INTEGRATION_ID = 'scout_input_validation_integration';
+const VALIDATION_DS_ID = 'scout_input_validation_ds';
 
 const validPutIntegrationBody = (integrationId: string) => ({
   connectorId: 'test-connector-placeholder',
@@ -78,7 +78,7 @@ apiTest.describe(
     apiTest(
       'PUT /integrations: rejects unknown top-level key (strict schema)',
       async ({ apiClient }) => {
-        const id = 'scout-neg-unknown-key';
+        const id = 'scout_neg_unknown_key';
         const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
@@ -95,7 +95,7 @@ apiTest.describe(
     apiTest(
       'PUT /integrations: rejects prototype-style keys as unrecognized (__proto__)',
       async ({ apiClient }) => {
-        const id = 'scout-neg-proto-key';
+        const id = 'scout_neg_proto_key';
         const base = validPutIntegrationBody(id);
         const bodyJson = `{"connectorId":${JSON.stringify(
           base.connectorId
@@ -121,7 +121,7 @@ apiTest.describe(
     apiTest(
       'PUT /integrations: rejects nested constructor payload as unknown key (constructor)',
       async ({ apiClient }) => {
-        const id = 'scout-neg-ctor-key';
+        const id = 'scout_neg_ctor_key';
         const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
@@ -136,7 +136,7 @@ apiTest.describe(
     );
 
     apiTest('PUT /integrations: rejects wrong types for required fields', async ({ apiClient }) => {
-      const id = 'scout-neg-wrong-types';
+      const id = 'scout_neg_wrong_types';
       const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -150,12 +150,42 @@ apiTest.describe(
     });
 
     apiTest(
-      'PUT /integrations: rejects empty integrationId (NonEmptyString)',
+      'PUT /integrations: rejects empty integrationId (SafeIdentifier)',
       async ({ apiClient }) => {
         const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
             ...validPutIntegrationBody(''),
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+        expectZodBadRequest(response.body);
+      }
+    );
+
+    apiTest(
+      'PUT /integrations: rejects integrationId with hyphens (SafeIdentifier)',
+      async ({ apiClient }) => {
+        const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            ...validPutIntegrationBody('scout-hyphenated-id'),
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+        expectZodBadRequest(response.body);
+      }
+    );
+
+    apiTest(
+      'PUT /integrations: rejects integrationId with special characters (SafeIdentifier)',
+      async ({ apiClient }) => {
+        const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            ...validPutIntegrationBody('scout@invalid!id'),
           },
           responseType: 'json',
         });
@@ -273,7 +303,7 @@ apiTest.describe(
     });
 
     apiTest('PUT /integrations: rejects more than 50 data streams', async ({ apiClient }) => {
-      const integrationId = 'scout-oversized-ds-list';
+      const integrationId = 'scout_oversized_ds_list';
       const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -317,5 +347,92 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
       expectZodBadRequest(response.body);
     });
+
+    apiTest('POST .../approve: rejects non-semver version string', async ({ apiClient }) => {
+      const response = await apiClient.post(
+        `${INTEGRATION_API_BASE_PATH}/${VALIDATION_INTEGRATION_ID}/approve`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: { version: 'build-2026-01-29', categories: ['security'] },
+          responseType: 'json',
+        }
+      );
+      expect(response).toHaveStatusCode(400);
+      expectZodBadRequest(response.body);
+    });
+
+    apiTest(
+      'POST .../approve: rejects version shorter than minimum (SemVer)',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(
+          `${INTEGRATION_API_BASE_PATH}/${VALIDATION_INTEGRATION_ID}/approve`,
+          {
+            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+            body: { version: '1.0', categories: ['security'] },
+            responseType: 'json',
+          }
+        );
+        expect(response).toHaveStatusCode(400);
+        expectZodBadRequest(response.body);
+      }
+    );
+
+    apiTest(
+      'POST .../upload: rejects sourceIndex exceeding 100 characters',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(`${dsBasePath}/${VALIDATION_DS_ID}/upload`, {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            sourceIndex: 'a'.repeat(101),
+            originalSource: { sourceType: 'index', sourceValue: 'a'.repeat(101) },
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+        expectZodBadRequest(response.body);
+      }
+    );
+
+    apiTest(
+      'POST .../upload: rejects sourceIndex starting with dot (system indices)',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(`${dsBasePath}/${VALIDATION_DS_ID}/upload`, {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            sourceIndex: '.kibana',
+            originalSource: { sourceType: 'index', sourceValue: '.kibana' },
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+        expect(scoutApiErrorText(response.body)).toContain('system indices');
+      }
+    );
+
+    apiTest(
+      'PUT /integrations: rejects dataStreamId with hyphens (SafeIdentifier)',
+      async ({ apiClient }) => {
+        const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            connectorId: 'test-connector-placeholder',
+            integrationId: 'scout_ds_id_validation',
+            title: 'DS ID validation',
+            description: 'Test dataStreamId SafeIdentifier',
+            dataStreams: [
+              {
+                dataStreamId: 'invalid-ds-id',
+                title: 'DS',
+                description: 'Should be rejected',
+                inputTypes: [{ name: 'filestream' }],
+              },
+            ],
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+        expectZodBadRequest(response.body);
+      }
+    );
   }
 );

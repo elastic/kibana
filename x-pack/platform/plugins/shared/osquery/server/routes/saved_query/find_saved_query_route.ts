@@ -73,8 +73,9 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
             const searchTerm = escapeKuery(request.query.search.trim());
             if (searchTerm) {
               const searchFilter = [
-                `${savedQuerySavedObjectType}.attributes.id: ${searchTerm}*`,
-                `${savedQuerySavedObjectType}.attributes.description: ${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.id: *${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.description: *${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.query: *${searchTerm}*`,
               ].join(' OR ');
               filters.push(`(${searchFilter})`);
             }

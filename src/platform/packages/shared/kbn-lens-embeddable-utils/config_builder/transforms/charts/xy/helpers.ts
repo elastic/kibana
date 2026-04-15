@@ -8,12 +8,13 @@
  */
 
 import type { XYDataLayerConfig, XYLayerConfig, XYPersistedLayerConfig } from '@kbn/lens-common';
+import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
 import type {
   AnnotationLayerType,
   DataLayerType,
   LayerTypeESQL,
-  LayerTypeNoESQL,
   ReferenceLineLayerType,
+  XYLayer,
 } from '../../../schema/charts/xy';
 import { isEsqlTableTypeDataSource } from '../../../utils';
 import {
@@ -22,8 +23,7 @@ import {
   XY_DATA_LAYER_TYPES,
   XY_REFERENCE_LAYER_TYPES,
 } from './constants';
-
-type XYLayer = DataLayerType | ReferenceLineLayerType | AnnotationLayerType;
+import { getReversibleMappings } from '../utils';
 
 export function getAccessorNameForXY(
   layer: XYLayer,
@@ -36,7 +36,7 @@ export function getAccessorNameForXY(
   return `${layer.type}_${accessorType}_${index}`;
 }
 
-export function getIdForLayer(layer: LayerTypeNoESQL | LayerTypeESQL, i: number) {
+export function getIdForLayer(layer: XYLayer, i: number) {
   return `${layer.type}_${i}`;
 }
 
@@ -71,3 +71,23 @@ export function isLensStateDataLayer(
 ): layer is XYDataLayerConfig {
   return layer.layerType === 'data' || !('layerType' in layer);
 }
+
+type XYApiIconName = NonNullable<ReferenceLineLayerType['thresholds'][number]['icon']>;
+
+export const xyIconCompat = getReversibleMappings<XYApiIconName, AvailableAnnotationIcon>([
+  ['alert', 'alert'],
+  ['asterisk', 'asterisk'],
+  ['bell', 'bell'],
+  ['bolt', 'bolt'],
+  ['bug', 'bug'],
+  ['circle', 'circle'],
+  ['editor_comment', 'editorComment'],
+  ['flag', 'flag'],
+  ['heart', 'heart'],
+  ['map_marker', 'mapMarker'],
+  ['pin_filled', 'pinFilled'],
+  ['star_empty', 'starEmpty'],
+  ['star_filled', 'starFilled'],
+  ['tag', 'tag'],
+  ['triangle', 'triangle'],
+]);

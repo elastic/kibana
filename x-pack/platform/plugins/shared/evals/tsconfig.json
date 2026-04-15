@@ -10,6 +10,7 @@
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/features-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
     "@kbn/management-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/storage-adapter",
@@ -22,6 +23,9 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/code-editor",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-http-browser"
   ]
 }

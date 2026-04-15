@@ -30,6 +30,7 @@ interface TopThreatHuntingLeadsProps {
   totalCount: number;
   isLoading: boolean;
   isGenerating: boolean;
+  hasGenerated?: boolean;
   onSeeAll: () => void;
   onLeadClick: (lead: HuntingLead) => void;
   onHuntInChat: () => void;
@@ -44,6 +45,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   totalCount,
   isLoading,
   isGenerating,
+  hasGenerated,
   onSeeAll,
   onLeadClick,
   onHuntInChat,
@@ -142,15 +144,15 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         </EuiFlexGroup>
       ) : leads.length === 0 ? (
         <EuiEmptyPrompt
-          iconType="searchProfilerApp"
-          title={<h3>{i18n.NO_LEADS_TITLE}</h3>}
-          body={<p>{i18n.NO_LEADS_DESCRIPTION}</p>}
+          iconType={hasGenerated ? 'inspect' : 'searchProfilerApp'}
+          title={<h3>{hasGenerated ? i18n.NO_DATA_TITLE : i18n.NO_LEADS_TITLE}</h3>}
+          body={<p>{hasGenerated ? i18n.NO_DATA_DESCRIPTION : i18n.NO_LEADS_DESCRIPTION}</p>}
           data-test-subj="leadsEmptyPrompt"
         />
       ) : (
         <EuiFlexGroup gutterSize="m" wrap responsive style={{ marginTop: 12 }}>
           {leads.slice(0, MAX_VISIBLE_CARDS).map((lead) => (
-            <EuiFlexItem key={lead.id} grow={false}>
+            <EuiFlexItem key={lead.id} grow={1}>
               <LeadCard lead={lead} onClick={onLeadClick} onInfoClick={onLeadInfoClick} />
             </EuiFlexItem>
           ))}

@@ -17,7 +17,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { elasticsearchOnboardingAgent } from '@kbn/search-agent';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 
 import anthropicIcon from '../../assets/anthropic.svg';
@@ -45,9 +44,8 @@ export const AgentInstallSection = () => {
 
   const handleOpenInAgentBuilder = useCallback(() => {
     services.agentBuilder?.openChat({
-      agentId: elasticsearchOnboardingAgent.id,
       initialMessage: buildPrompt('agent-builder'),
-      autoSendInitialMessage: false,
+      autoSendInitialMessage: true,
       newConversation: true,
       sessionTag: 'search-getting-started',
     });

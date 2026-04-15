@@ -356,7 +356,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   const handleManageConnectorsClick = useCallback(() => {
     setIsPopoverOpen(false);
     application.navigateToApp('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+      path: '/modelManagement/model_settings',
     });
   }, [application]);
 
