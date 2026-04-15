@@ -78,45 +78,18 @@ export async function computeAndPersistCompositeSummaries({
         const compositeSlo = decodeCompositeSLO(so, logger);
         if (!compositeSlo) continue;
 
-        try {
-          const existingMemberSlos = await findMemberSLOs(
-            compositeSlo.members.map((m) => m.sloId),
-            spaceId,
-            soClient,
-            logger
-          );
-
-          const memberDefinitionMap = new Map(existingMemberSlos.map((slo) => [slo.id, slo]));
-          const activeMembers = compositeSlo.members.filter((m) =>
-            memberDefinitionMap.has(m.sloId)
-          );
-
-          const summaryParams = activeMembers.map((member) => ({
-            slo: memberDefinitionMap.get(member.sloId)!,
-            instanceId: member.instanceId ?? ALL_VALUE,
-            timeWindowOverride: compositeSlo.timeWindow,            
-          }));
-
-          const summaryResults = await summaryClient.computeSummaries(summaryParams);
-
-          const memberSummaries: MemberSummaryData[] = activeMembers.map((member, i) => ({
-            member,
-            sloName: memberDefinitionMap.get(member.sloId)!.name,
-            summary: summaryResults[i].summary,
-            burnRateWindows: summaryResults[i].burnRateWindows,
-          }));
-
-          const { compositeSummary } = computeCompositeSummary(compositeSlo, memberSummaries);
-
-          const docId = `${spaceId}:${compositeSlo.id}`;
-          const doc = buildSummaryDoc(compositeSlo, compositeSummary, spaceId);
-
-          bulkOps.push({ index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: docId } });
-          bulkOps.push(doc);
-        } catch (err) {
-          logger.debug(
-            `Failed to compute summary for composite SLO [${compositeSlo.id}] in space [${spaceId}]: ${err}`
-          );
+        const persisted = await computeCompositeSummaryDocument({
+          summaryClient,
+          soClient,
+          logger,
+          spaceId,
+          compositeSlo,
+        });
+        if (persisted) {
+          bulkOps.push({
+            index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: persisted.docId },
+          });
+          bulkOps.push(persisted.doc);
         }
       }
 
@@ -267,4 +240,99 @@ function buildSummaryDoc(
     oneHourBurnRate: summary.oneHourBurnRate,
     oneDayBurnRate: summary.oneDayBurnRate,
   };
+}
+
+async function computeCompositeSummaryDocument({
+  summaryClient,
+  soClient,
+  logger,
+  spaceId,
+  compositeSlo,
+}: {
+  summaryClient: InstanceType<typeof DefaultSummaryClient>;
+  soClient: SavedObjectsClientContract;
+  logger: Logger;
+  spaceId: string;
+  compositeSlo: CompositeSLODefinition;
+}): Promise<{ docId: string; doc: CompositeSummaryDoc } | null> {
+  try {
+    const existingMemberSlos = await findMemberSLOs(
+      compositeSlo.members.map((m) => m.sloId),
+      spaceId,
+      soClient,
+      logger
+    );
+
+    const memberDefinitionMap = new Map(existingMemberSlos.map((slo) => [slo.id, slo]));
+    const activeMembers = compositeSlo.members.filter((m) => memberDefinitionMap.has(m.sloId));
+
+    const summaryParams = activeMembers.map((member) => ({
+      slo: memberDefinitionMap.get(member.sloId)!,
+      instanceId: member.instanceId ?? ALL_VALUE,
+      timeWindowOverride: compositeSlo.timeWindow,
+    }));
+
+    const summaryResults = await summaryClient.computeSummaries(summaryParams);
+
+    const memberSummaries: MemberSummaryData[] = activeMembers.map((member, i) => ({
+      member,
+      sloName: memberDefinitionMap.get(member.sloId)!.name,
+      summary: summaryResults[i].summary,
+      burnRateWindows: summaryResults[i].burnRateWindows,
+    }));
+
+    const { compositeSummary } = computeCompositeSummary(compositeSlo, memberSummaries);
+
+    const docId = `${spaceId}:${compositeSlo.id}`;
+    const doc = buildSummaryDoc(compositeSlo, compositeSummary, spaceId);
+
+    return { docId, doc };
+  } catch (err) {
+    logger.debug(
+      `Failed to compute summary for composite SLO [${compositeSlo.id}] in space [${spaceId}]: ${err}`
+    );
+    return null;
+  }
+}
+
+export async function computeAndPersistSingleCompositeSummary({
+  esClient,
+  soClient,
+  logger,
+  spaceId,
+  compositeSlo,
+}: {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  logger: Logger;
+  spaceId: string;
+  compositeSlo: CompositeSLODefinition;
+}): Promise<void> {
+  const burnRatesClient = new DefaultBurnRatesClient(esClient);
+  const summaryClient = new DefaultSummaryClient(esClient, burnRatesClient);
+
+  const computed = await computeCompositeSummaryDocument({
+    summaryClient,
+    soClient,
+    logger,
+    spaceId,
+    compositeSlo,
+  });
+
+  if (!computed) {
+    return;
+  }
+
+  try {
+    await esClient.index({
+      index: COMPOSITE_SUMMARY_INDEX_NAME,
+      id: computed.docId,
+      document: computed.doc,
+      refresh: true,
+    });
+  } catch (err) {
+    logger.warn(
+      `Failed to persist composite SLO summary for [${compositeSlo.id}] in space [${spaceId}]: ${err}`
+    );
+  }
 }

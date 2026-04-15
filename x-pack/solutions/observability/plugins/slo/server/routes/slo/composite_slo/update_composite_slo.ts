@@ -7,6 +7,7 @@
 
 import { updateCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { DefaultCompositeSLORepository } from '../../../services/composite_slo_repository';
+import { computeAndPersistSingleCompositeSummary } from '../../../services/tasks/composite_slo_summary_task/compute_and_persist_composite_summaries';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 import { validateCompositeSloMembers } from './create_composite_slo';
@@ -23,7 +24,7 @@ export const updateCompositeSLORoute = createSloServerRoute({
   handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { soClient } = await getScopedClients({ request, logger });
+    const { soClient, scopedClusterClient, spaceId } = await getScopedClients({ request, logger });
     const repository = new DefaultCompositeSLORepository(soClient, logger);
 
     const existing = await repository.findById(params.path.id);
@@ -40,6 +41,16 @@ export const updateCompositeSLORoute = createSloServerRoute({
 
     validateCompositeSloMembers(updated.members);
 
-    return await repository.update(updated);
+    const saved = await repository.update(updated);
+
+    await computeAndPersistSingleCompositeSummary({
+      esClient: scopedClusterClient.asCurrentUser,
+      soClient,
+      logger,
+      spaceId,
+      compositeSlo: saved,
+    });
+
+    return saved;
   },
 });

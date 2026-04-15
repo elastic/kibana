@@ -10,6 +10,7 @@ import { createCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { IllegalArgumentError } from '../../../errors';
 import { DefaultCompositeSLORepository } from '../../../services/composite_slo_repository';
+import { computeAndPersistSingleCompositeSummary } from '../../../services/tasks/composite_slo_summary_task/compute_and_persist_composite_summaries';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
@@ -50,7 +51,7 @@ export const createCompositeSLORoute = createSloServerRoute({
 
     validateCompositeSloMembers(params.body.members);
 
-    const { soClient } = await getScopedClients({ request, logger });
+    const { soClient, scopedClusterClient, spaceId } = await getScopedClients({ request, logger });
     const repository = new DefaultCompositeSLORepository(soClient, logger);
 
     const core = await context.core;
@@ -69,6 +70,16 @@ export const createCompositeSLORoute = createSloServerRoute({
       updatedBy: userId,
     };
 
-    return await repository.create(compositeSlo);
+    const created = await repository.create(compositeSlo);
+
+    await computeAndPersistSingleCompositeSummary({
+      esClient: scopedClusterClient.asCurrentUser,
+      soClient,
+      logger,
+      spaceId,
+      compositeSlo: created,
+    });
+
+    return created;
   },
 });
