@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { Parser, synth } from '../../../..';
+import { Parser, synth } from '@elastic/esql';
 import { UnmappedFieldsStrategy, type ESQLColumnData } from '../types';
 import { columnsAfter } from './columns_after';
 import { additionalFieldsMock } from '../../../__tests__/language/helpers';
 
 describe('STATS', () => {
-  const unmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL;
+  const unmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT;
   it('adds the user defined column, when no grouping is given', () => {
     const previousCommandFields: ESQLFieldWithMetadata[] = [
       { name: 'field1', type: 'keyword', userDefined: false },
@@ -59,6 +59,38 @@ describe('STATS', () => {
 
     expect(result).toEqual([
       { name: 'AVG(field2)', type: 'double', userDefined: true, location: { min: 19, max: 29 } },
+    ]);
+  });
+
+  it('adds the generated column when aggregation has an inline WHERE clause', () => {
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
+
+    const queryString = `FROM index | STATS COUNT() WHERE field2 > 0`;
+
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual([
+      {
+        name: 'COUNT() WHERE field2 > 0',
+        type: 'long',
+        userDefined: true,
+        location: { min: 19, max: 42 },
+      },
     ]);
   });
 

@@ -20,7 +20,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { LinksEmbeddableState } from '../common';
 import {
   APP_ICON,
@@ -87,6 +87,11 @@ export class LinksPlugin
       plugins.embeddable.registerReactEmbeddableFactory(LINKS_EMBEDDABLE_TYPE, async () => {
         const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
         return getLinksEmbeddableFactory();
+      });
+
+      plugins.embeddable.registerLegacyURLTransform(LINKS_EMBEDDABLE_TYPE, async () => {
+        const { transformOut } = await import('../common/embeddable/transforms/transform_out');
+        return transformOut;
       });
 
       plugins.visualizations.registerAlias({

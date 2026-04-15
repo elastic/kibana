@@ -28,13 +28,13 @@ const LatencyChartContent = ({
     useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
-    metric: {
-      name: 'duration_ms',
-      instrument: 'histogram',
-      unit,
-      index: indexes,
-      dimensions: [],
-      type: ES_FIELD_TYPES.DOUBLE,
+    metricItem: {
+      metricName: 'duration_ms',
+      metricTypes: ['histogram'],
+      units: ['ms'],
+      dataStream: indexes,
+      fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+      dimensionFields: [],
     },
     color,
     seriesType,
@@ -60,11 +60,12 @@ const LatencyChartContent = ({
 };
 
 export const LatencyChart = () => {
-  const { filters, indexes } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields } = useTraceMetricsContext();
 
   const latencyChart = getLatencyChart({
     indexes,
     filters,
+    metadataFields,
   });
 
   if (!latencyChart) {

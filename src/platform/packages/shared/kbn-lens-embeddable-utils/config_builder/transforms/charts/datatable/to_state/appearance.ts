@@ -20,8 +20,8 @@ function getSortingColumnId(sortBy: NonNullable<DatatableState['sort_by']>): str
       return getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.index);
     case 'row':
       return getAccessorName(ROW_ACCESSOR_PREFIX, sortBy.index);
-    case 'split_metrics_by': {
-      const metricColumnId = getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.metric_index);
+    case 'pivoted_metric': {
+      const metricColumnId = getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.index);
       return getTransposeId(sortBy.values.join(TRANSPOSE_SEPARATOR), metricColumnId);
     }
     default:
@@ -87,6 +87,15 @@ function buildPagingState(config: DatatableState): Pick<DatatableVisualizationSt
   return { paging: { size: config.paging, enabled: true } };
 }
 
+function buildShowRowNumbers(
+  config: DatatableState
+): Pick<DatatableVisualizationState, 'showRowNumbers'> {
+  if (config.row_numbers == null) {
+    return {};
+  }
+  return { showRowNumbers: config.row_numbers.visible };
+}
+
 export function buildAppearanceState(
   config: DatatableState
 ): Pick<
@@ -98,10 +107,12 @@ export function buildAppearanceState(
   | 'density'
   | 'paging'
   | 'sorting'
+  | 'showRowNumbers'
 > {
   return {
     ...buildDensityState(config),
     ...buildPagingState(config),
     ...buildSortingState(config),
+    ...buildShowRowNumbers(config),
   };
 }

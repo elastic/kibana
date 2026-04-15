@@ -112,11 +112,7 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
           <EuiSpacer size="m" />
         </>
       )}
-      <IntegrationPreference
-        initialType={preference}
-        prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
-        onChange={setPreference}
-      />
+      <IntegrationPreference initialType={preference} onChange={setPreference} />
     </EuiFlexItem>,
   ];
 

@@ -83,15 +83,12 @@ export function TraceContextLogEvents({
       title={logsTitle}
       description={logsDescription}
       id="traceContextLogEvents"
+      data-test-subj="unifiedDocViewerLogsSection"
       forceState="closed"
       actions={actions}
     >
       <div tabIndex={0} className="eui-yScrollWithShadows" style={{ maxHeight: '400px' }}>
-        <LogEventsComponent
-          nonHighlightingQuery={query}
-          timeRange={savedSearchTimeRange}
-          index={indexes.logs}
-        />
+        <LogEventsComponent query={query} timeRange={savedSearchTimeRange} index={indexes.logs} />
       </div>
     </ContentFrameworkSection>
   );

@@ -19,6 +19,7 @@ export function getAnonymizableMessageParts(message: Message) {
   if (message.role === MessageRole.Tool) {
     return {
       response: message.response,
+      ...(message.data !== undefined ? { data: message.data } : {}),
     };
   }
 

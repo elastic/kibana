@@ -411,6 +411,11 @@ export interface Endpoint {
   name: string;
   description: string;
   docUrl: string;
+  /**
+   * Optional serverless-specific documentation URL.
+   * When present, Console can prefer this for serverless deployments.
+   */
+  docUrlServerless?: string;
   docId?: string;
   deprecation?: Deprecation;
   availability: Availabilities;

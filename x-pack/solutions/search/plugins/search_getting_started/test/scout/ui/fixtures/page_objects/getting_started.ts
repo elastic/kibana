@@ -40,6 +40,10 @@ export class GettingStarted {
     await this.page.testSubj.locator('skipAndGoHomeBtn').click();
   }
 
+  async getKibanaVersionBadge() {
+    return this.page.testSubj.locator('kibana-version-badge');
+  }
+
   async getEndpointValueField() {
     return this.page.testSubj.locator('endpointValueField');
   }
@@ -80,30 +84,18 @@ export class GettingStarted {
     return this.page.testSubj.locator(`console_tutorials_${tutorialId}`);
   }
 
-  async getTutorialCardButton(tutorialId: string) {
-    return this.page.testSubj.locator(`console_tutorials_${tutorialId}-btn`);
+  async getTutorialCards() {
+    return this.page.locator('[data-test-subj^="console_tutorials_"]').all();
   }
 
   async clickTutorialCard(tutorialId: string) {
     await this.page.testSubj.locator(`console_tutorials_${tutorialId}`).click();
   }
 
-  async clickTutorialCardButton(tutorialId: string) {
-    const button = this.page.testSubj.locator(`console_tutorials_${tutorialId}-btn`);
-    await button.scrollIntoViewIfNeeded();
-    await button.click();
-  }
-
-  async clickTutorialExpandButton() {
-    const button = this.page.testSubj.locator(
-      'searchGettingStartedConsoleTutorialsGroupExpandButton'
-    );
-    await button.scrollIntoViewIfNeeded();
-    await button.click();
-  }
-
-  async getTutorialExpandButton() {
-    return this.page.testSubj.locator('searchGettingStartedConsoleTutorialsGroupExpandButton');
+  async clickTutorialCardAndScrollIntoView(tutorialId: string) {
+    const card = this.page.testSubj.locator(`console_tutorials_${tutorialId}`);
+    await card.scrollIntoViewIfNeeded();
+    await card.click();
   }
 
   async getLanguageSelector() {

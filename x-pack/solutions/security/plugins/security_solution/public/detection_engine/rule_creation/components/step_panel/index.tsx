@@ -9,12 +9,14 @@ import { EuiPanel, EuiProgress } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
+import type { HeaderSectionProps } from '../../../../common/components/header_section';
 import { HeaderSection } from '../../../../common/components/header_section';
 
 interface StepPanelProps {
   children: React.ReactNode;
   loading: boolean;
   title?: string;
+  headerProps?: Omit<HeaderSectionProps, 'title'>;
 }
 
 const MyPanel = styled(EuiPanel)`
@@ -23,7 +25,12 @@ const MyPanel = styled(EuiPanel)`
 
 MyPanel.displayName = 'MyPanel';
 
-const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title }) => (
+const StepPanelComponent: React.FC<StepPanelProps> = ({
+  children,
+  loading,
+  title,
+  headerProps,
+}) => (
   <MyPanel hasBorder>
     {loading && (
       <EuiProgress
@@ -33,7 +40,7 @@ const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title
         data-test-subj="stepPanelProgress"
       />
     )}
-    {title && <HeaderSection title={title} />}
+    {title && <HeaderSection title={title} {...headerProps} />}
     {children}
   </MyPanel>
 );

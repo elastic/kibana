@@ -12,8 +12,8 @@ import {
   isFunctionExpression,
   isLiteral,
   LeafPrinter,
-  SettingNames,
-} from '@kbn/esql-language';
+} from '@elastic/esql';
+import { SettingNames } from '@kbn/esql-language';
 
 /**
  * Extracts the project routing value from an ES|QL query string.

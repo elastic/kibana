@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { INpreClient } from './npre';
+
 export interface CPSServerSetup {
   getCpsEnabled(): boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CPSServerStart {}
+export interface CPSServerStart {
+  createNpreClient(request: KibanaRequest): INpreClient;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CPSServerStop {}

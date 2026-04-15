@@ -32,6 +32,7 @@ const renderCell = (logLevelField: string, record: DataTableRecord) => {
         fieldFormats={fieldFormatsMock}
         setCellProps={() => {}}
         closePopover={() => {}}
+        columnsMeta={undefined}
       />
     </EuiProvider>
   );

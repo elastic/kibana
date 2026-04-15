@@ -8,7 +8,7 @@
  */
 
 import { Position } from '@elastic/charts';
-import type { XYState as XYConfiguration, XYLayerConfig } from '@kbn/lens-common';
+import type { XYVisualizationState as XYConfiguration, XYLayerConfig } from '@kbn/lens-common';
 import { XYCurveTypes } from '@kbn/expression-xy-plugin/common';
 import type { Panel } from '../../../../../common/types';
 import { getYExtents } from './extents';

@@ -212,7 +212,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('edit meta data', () => {
+    describe('edit meta data', function () {
+      // FIPS mode upgrades the license to trial which triggers a toast notification when
+      // saving a dashboard, blocking the save button click
+      this.tags('skipFIPS');
       it('saves changes to dashboard metadata', async () => {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickCreateDashboardPrompt();

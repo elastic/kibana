@@ -28,19 +28,25 @@
       "share",
       "spaces",
       "stackConnectors",
+      "taskManager",
       "licensing",
       "triggersActionsUi",
       "esUiShared",
       "workflowsExtensions",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "usageCollection"
     ],
     "optionalPlugins": [
       "cloud",
+      "evals",
       "licenseManagement",
+      "security",
       "workflowsManagement",
+      "searchInferenceEndpoints",
       "usageCollection",
+      "usageApi",
       "home",
     ],
     "extraPublicDirs": []

@@ -27,6 +27,7 @@ export function connectorFromInMemoryConnector({
     isSystemAction: inMemoryConnector.isSystemAction,
     isDeprecated: isConnectorDeprecated(inMemoryConnector),
     isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(inMemoryConnector.actionTypeId),
+    authMode: inMemoryConnector.authMode ?? 'shared',
   };
 
   if (inMemoryConnector.exposeConfig) {

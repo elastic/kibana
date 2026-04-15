@@ -19,6 +19,8 @@ export class AddRuleFlyout {
   public readonly scheduleValueInput: Locator;
   public readonly scheduleUnitSelect: Locator;
 
+  public readonly nameInput: Locator;
+
   constructor(private readonly page: ScoutPage) {
     this.flyout = this.page.getByRole('dialog');
     this.saveButton = this.flyout.getByTestId('ruleFlyoutFooterSaveButton');
@@ -28,10 +30,17 @@ export class AddRuleFlyout {
 
     this.scheduleValueInput = this.flyout.getByTestId('ruleScheduleNumberInput');
     this.scheduleUnitSelect = this.flyout.getByTestId('ruleScheduleUnitInput');
+
+    this.nameInput = this.flyout.getByTestId('ruleDetailsNameInput');
   }
 
   public async waitForErrorCountToLoad() {
     await this.flyout.getByRole('heading', { name: 'Error count threshold' }).waitFor();
+  }
+
+  public async fillName(name: string) {
+    await this.nameInput.clear();
+    await this.nameInput.fill(name);
   }
 
   public async fillIsAbove(amount: number) {

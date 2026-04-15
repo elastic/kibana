@@ -47,8 +47,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // check the aiops subsection
       await svlCommonNavigation.sidenav.expandMore();
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'agent_builder' }); // click on Agents link
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Agents' });
       // navigate to a different section
 
       await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
@@ -112,10 +112,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'observability-overview:alerts',
       });
       await testSubjects.click('manageRulesPageButton');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
-      await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-overview:alerts',
-      });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Rules']);
     });
 
     it('navigates to integrations', async () => {
@@ -137,16 +134,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
       await svlCommonNavigation.sidenav.clickPanelLink('management:maintenanceWindows');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Maintenance Windows']);
-    });
-
-    it('renders a feedback callout', async () => {
-      await svlCommonNavigation.sidenav.feedbackCallout.reset();
-      await svlCommonNavigation.sidenav.openPanel('applications');
-      await svlCommonNavigation.sidenav.feedbackCallout.expectExists();
-      await svlCommonNavigation.sidenav.feedbackCallout.dismiss();
-      await svlCommonNavigation.sidenav.feedbackCallout.expectMissing();
-      await browser.refresh();
-      await svlCommonNavigation.sidenav.feedbackCallout.expectMissing();
     });
 
     it('opens panel on legacy management landing page', async () => {

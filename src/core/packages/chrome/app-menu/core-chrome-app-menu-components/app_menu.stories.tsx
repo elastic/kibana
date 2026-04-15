@@ -55,19 +55,99 @@ type Story = StoryObj<AppMenuWrapperProps>;
 const dashboardEditModeConfig: AppMenuConfig = {
   items: [
     {
+      id: 'add',
+      order: 0,
+      label: 'add',
+      testId: 'addButton',
+      iconType: 'plus',
+      popoverWidth: 200,
+      items: [
+        {
+          run: () => action('create-visualization-clicked'),
+          order: 1,
+          id: 'createVisualization',
+          label: 'Visualization',
+          iconType: 'lensApp',
+          testId: 'createNewVisButton',
+        },
+        {
+          run: () => action('new-panel-clicked'),
+          id: 'newPanel',
+          order: 2,
+          label: 'New panel',
+          iconType: 'plusCircle',
+          testId: 'openAddPanelFlyoutButton',
+        },
+        {
+          run: () => action('add-section-clicked'),
+          id: 'collapsibleSection',
+          order: 3,
+          label: 'Collapsible section',
+          iconType: 'section',
+          testId: 'addCollapsibleSectionButton',
+        },
+        {
+          id: 'controls',
+          order: 4,
+          label: 'Controls',
+          iconType: 'controls',
+          testId: 'controls-menu-button',
+          items: [
+            {
+              run: () => action('control-clicked'),
+              id: 'control',
+              order: 1,
+              label: 'control',
+              testId: 'controlButton',
+            },
+            {
+              run: () => action('variable-control-clicked'),
+              id: 'variableControl',
+              order: 2,
+              label: 'variable control',
+              testId: 'variableControlButton',
+            },
+            {
+              run: () => action('time-slider-control-clicked'),
+              id: 'timeSliderControl',
+              order: 3,
+              label: 'time slider control',
+              testId: 'timeSliderControlButton',
+            },
+            {
+              run: () => action('setting-clicked'),
+              id: 'settings',
+              order: 4,
+              label: 'settings',
+              testId: 'settingButton',
+              separator: 'above',
+            },
+          ],
+        },
+        {
+          run: () => action('add-from-library-clicked'),
+          id: 'fromLibrary',
+          order: 5,
+          label: 'From library',
+          iconType: 'folderOpen',
+          testId: 'addFromLibraryButton',
+        },
+      ],
+    },
+    {
       run: action('exit-edit-clicked'),
       id: 'exitEdit',
       order: 1,
       label: 'exit edit',
       testId: 'exitEditButton',
-      iconType: 'exit',
+      iconType: 'logOut',
     },
     {
       id: 'export',
       order: 2,
       label: 'export',
       testId: 'exportButton',
-      iconType: 'exportAction',
+      iconType: 'upload',
       popoverWidth: 150,
       items: [
         {
@@ -91,7 +171,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
           id: 'exportCSV',
           order: 3,
           label: 'CSV reports',
-          iconType: 'exportAction',
+          iconType: 'upload',
           testId: 'exportCSVButton',
         },
       ],
@@ -121,87 +201,6 @@ const dashboardEditModeConfig: AppMenuConfig = {
       iconType: 'backgroundTask',
     },
   ],
-  secondaryActionItem: {
-    id: 'add',
-    label: 'add',
-    testId: 'addButton',
-    iconType: 'plusInCircle',
-    color: 'success',
-    minWidth: false,
-    popoverWidth: 200,
-    items: [
-      {
-        run: () => action('create-visualization-clicked'),
-        order: 1,
-        id: 'createVisualization',
-        label: 'Visualization',
-        iconType: 'lensApp',
-        testId: 'createNewVisButton',
-      },
-      {
-        run: () => action('new-panel-clicked'),
-        id: 'newPanel',
-        order: 2,
-        label: 'New panel',
-        iconType: 'plusInCircle',
-        testId: 'openAddPanelFlyoutButton',
-      },
-      {
-        run: () => action('add-section-clicked'),
-        id: 'collapsibleSection',
-        order: 3,
-        label: 'Collapsible section',
-        iconType: 'section',
-        testId: 'addCollapsibleSectionButton',
-      },
-      {
-        id: 'controls',
-        order: 4,
-        label: 'Controls',
-        iconType: 'controlsHorizontal',
-        testId: 'controls-menu-button',
-        items: [
-          {
-            run: () => action('control-clicked'),
-            id: 'control',
-            order: 1,
-            label: 'control',
-            testId: 'controlButton',
-          },
-          {
-            run: () => action('variable-control-clicked'),
-            id: 'variableControl',
-            order: 2,
-            label: 'variable control',
-            testId: 'variableControlButton',
-          },
-          {
-            run: () => action('time-slider-control-clicked'),
-            id: 'timeSliderControl',
-            order: 3,
-            label: 'time slider control',
-            testId: 'timeSliderControlButton',
-          },
-          {
-            run: () => action('setting-clicked'),
-            id: 'settings',
-            order: 4,
-            label: 'settings',
-            testId: 'settingButton',
-            separator: 'above',
-          },
-        ],
-      },
-      {
-        run: () => action('add-from-library-clicked'),
-        id: 'fromLibrary',
-        order: 5,
-        label: 'From library',
-        iconType: 'folderOpen',
-        testId: 'addFromLibraryButton',
-      },
-    ],
-  },
   primaryActionItem: {
     run: action('save-clicked'),
     id: 'save',
@@ -211,7 +210,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
     popoverWidth: 150,
     splitButtonProps: {
       secondaryButtonAriaLabel: 'Save options',
-      secondaryButtonIcon: 'arrowDown',
+      secondaryButtonIcon: 'chevronSingleDown',
       notifcationIndicatorTooltipContent: 'You have unsaved changes',
       showNotificationIndicator: true,
       items: [
@@ -228,7 +227,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
           id: 'resetChanges',
           order: 2,
           label: 'Reset changes',
-          iconType: 'editorUndo',
+          iconType: 'undo',
           testId: 'discardChangesMenuItem',
         },
       ],
@@ -243,5 +242,88 @@ export const DashboardEditModeConfig: Story = {
   name: 'Dashboard edit mode',
   args: {
     config: dashboardEditModeConfig,
+  },
+};
+
+const standaloneForcedOverflowConfig: AppMenuConfig = {
+  items: [
+    {
+      run: action('only-overflow-item-clicked'),
+      id: 'standaloneOverflowItem',
+      order: 1,
+      overflow: true,
+      label: 'Overflow item',
+      testId: 'standaloneOverflowItemButton',
+      iconType: 'gear',
+    },
+  ],
+};
+
+export const StandaloneForcedOverflow: Story = {
+  name: 'Forced overflow',
+  args: {
+    config: standaloneForcedOverflowConfig,
+  },
+};
+
+const overflowAndOrderingConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'item6',
+      order: 6,
+      label: 'Item 6 (order 6)',
+      run: action('item-6-clicked'),
+      iconType: 'gear',
+      testId: 'item6Button',
+    },
+    {
+      id: 'item1ForcedOverflow',
+      order: 1,
+      overflow: true,
+      label: 'Item 1 forced overflow (order 1)',
+      run: action('item-1-forced-overflow-clicked'),
+      iconType: 'gear',
+      testId: 'item1ForcedOverflowButton',
+    },
+    {
+      id: 'item4',
+      order: 4,
+      label: 'Item 4 (order 4)',
+      run: action('item-4-clicked'),
+      iconType: 'gear',
+      testId: 'item4Button',
+    },
+    {
+      id: 'item2',
+      order: 2,
+      label: 'Item 2 (order 2)',
+      run: action('item-2-clicked'),
+      iconType: 'gear',
+      testId: 'item2Button',
+    },
+    {
+      id: 'item5',
+      order: 5,
+      label: 'Item 5 (order 5)',
+      run: action('item-5-clicked'),
+      iconType: 'gear',
+      testId: 'item5Button',
+      separator: 'below',
+    },
+    {
+      id: 'item3',
+      order: 3,
+      label: 'Item 3 (order 3)',
+      run: action('item-3-clicked'),
+      iconType: 'gear',
+      testId: 'item3Button',
+    },
+  ],
+};
+
+export const OverflowAndOrdering: Story = {
+  name: 'Overflow and ordering',
+  args: {
+    config: overflowAndOrderingConfig,
   },
 };

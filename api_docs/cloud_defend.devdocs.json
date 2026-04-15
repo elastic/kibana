@@ -448,7 +448,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"process\" | \"file\""
+              "\"file\" | \"process\""
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "lineNumber": 116,
@@ -749,7 +749,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"process\" | \"file\""
+              "\"file\" | \"process\""
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "lineNumber": 105,
@@ -829,7 +829,7 @@
         "label": "CloudDefendStatusCode",
         "description": [],
         "signature": [
-          "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\""
+          "\"indexed\" | \"unprivileged\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "lineNumber": 15,
@@ -916,7 +916,7 @@
           "\ncloud_defend/control types"
         ],
         "signature": [
-          "\"process\" | \"file\""
+          "\"file\" | \"process\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "lineNumber": 56,

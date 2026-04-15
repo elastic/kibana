@@ -962,7 +962,7 @@
         "label": "Expression",
         "description": [],
         "signature": [
-          "({ grokCollection, draftGrokExpression, onChange, height, dataTestSubj, }: { grokCollection: ",
+          "({ grokCollection, pattern, onChange, height, dataTestSubj, }: { grokCollection: ",
           {
             "pluginId": "@kbn/grok-ui",
             "scope": "common",
@@ -970,26 +970,10 @@
             "section": "def-common.GrokCollection",
             "text": "GrokCollection"
           },
-          "; draftGrokExpression: ",
-          {
-            "pluginId": "@kbn/grok-ui",
-            "scope": "common",
-            "docId": "kibKbnGrokUiPluginApi",
-            "section": "def-common.DraftGrokExpression",
-            "text": "DraftGrokExpression"
-          },
-          "; onChange?: ((expression: ",
-          {
-            "pluginId": "@kbn/grok-ui",
-            "scope": "common",
-            "docId": "kibKbnGrokUiPluginApi",
-            "section": "def-common.DraftGrokExpression",
-            "text": "DraftGrokExpression"
-          },
-          ") => void) | undefined; height?: string | number | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
+          "; pattern: string; onChange?: ((pattern: string) => void) | undefined; height?: string | number | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
-        "lineNumber": 17,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -999,10 +983,10 @@
             "id": "def-common.Expression.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  grokCollection,\n  draftGrokExpression,\n  onChange,\n  height = '100px',\n  dataTestSubj,\n}",
+            "label": "{\n  grokCollection,\n  pattern,\n  onChange,\n  height = '100px',\n  dataTestSubj,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
-            "lineNumber": 23,
+            "lineNumber": 22,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1024,29 +1008,20 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
-                "lineNumber": 24,
+                "lineNumber": 23,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/grok-ui",
-                "id": "def-common.Expression.$1.draftGrokExpression",
-                "type": "Object",
+                "id": "def-common.Expression.$1.pattern",
+                "type": "string",
                 "tags": [],
-                "label": "draftGrokExpression",
+                "label": "pattern",
                 "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/grok-ui",
-                    "scope": "common",
-                    "docId": "kibKbnGrokUiPluginApi",
-                    "section": "def-common.DraftGrokExpression",
-                    "text": "DraftGrokExpression"
-                  }
-                ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
-                "lineNumber": 25,
+                "lineNumber": 24,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1059,18 +1034,10 @@
                 "label": "onChange",
                 "description": [],
                 "signature": [
-                  "((expression: ",
-                  {
-                    "pluginId": "@kbn/grok-ui",
-                    "scope": "common",
-                    "docId": "kibKbnGrokUiPluginApi",
-                    "section": "def-common.DraftGrokExpression",
-                    "text": "DraftGrokExpression"
-                  },
-                  ") => void) | undefined"
+                  "((pattern: string) => void) | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
-                "lineNumber": 26,
+                "lineNumber": 25,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1078,21 +1045,15 @@
                   {
                     "parentPluginId": "@kbn/grok-ui",
                     "id": "def-common.Expression.$1.onChange.$1",
-                    "type": "Object",
+                    "type": "string",
                     "tags": [],
-                    "label": "expression",
+                    "label": "pattern",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/grok-ui",
-                        "scope": "common",
-                        "docId": "kibKbnGrokUiPluginApi",
-                        "section": "def-common.DraftGrokExpression",
-                        "text": "DraftGrokExpression"
-                      }
+                      "string"
                     ],
                     "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
-                    "lineNumber": 26,
+                    "lineNumber": 25,
                     "columnNumber": 15,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1112,7 +1073,7 @@
                   "string | number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
-                "lineNumber": 27,
+                "lineNumber": 26,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1128,12 +1089,168 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
-                "lineNumber": 28,
+                "lineNumber": 27,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.GrokCollectionProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "GrokCollectionProvider",
+        "description": [
+          "\nProvider component that makes a GrokCollection instance available to all child components.\nThe collection is set up (patterns loaded) automatically when the provider mounts.\n\nThis allows multiple UI components to share the same Grok collection, and for custom\npattern definitions to be updated centrally."
+        ],
+        "signature": [
+          "({ grokCollection, children, }: GrokCollectionProviderProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_collection_context.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokCollectionProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  grokCollection,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "GrokCollectionProviderProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_collection_context.tsx",
+            "lineNumber": 33,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.GrokExpressionsProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "GrokExpressionsProvider",
+        "description": [
+          "\nProvider component that converts an array of grok pattern strings into\nDraftGrokExpression instances and makes them available to child components.\n\nThis provider sits between the GrokCollectionProvider (which provides the collection)\nand components that need to render/interact with specific grok patterns (like Sample components).\n\nUsage:\n```tsx\n<GrokExpressionsProvider patterns={['%{TIMESTAMP}', '%{IP}']}>\n  <Sample />  // Can access expressions via useGrokExpressionsFromContext()\n</GrokExpressionsProvider>\n```"
+        ],
+        "signature": [
+          "({ patterns, children }: GrokExpressionsProviderProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_expressions_context.tsx",
+        "lineNumber": 113,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokExpressionsProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ patterns, children }",
+            "description": [],
+            "signature": [
+              "GrokExpressionsProviderProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_expressions_context.tsx",
+            "lineNumber": 113,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.GrokSampleInputWithContext",
+        "type": "Function",
+        "tags": [],
+        "label": "GrokSampleInputWithContext",
+        "description": [
+          "\nWrapper component for the Grok Sample component that reads\ngrokCollection and draftGrokExpressions from context.\n\nMust be used within both GrokCollectionProvider and GrokExpressionsProvider.\n\nUsage:\n```tsx\n<GrokCollectionProvider grokCollection={collection}>\n  <GrokExpressionsProvider patterns={['%{TIMESTAMP}', '%{IP}']}>\n    <GrokSampleInputWithContext sample=\"2024-01-27 192.168.1.1\" />\n  </GrokExpressionsProvider>\n</GrokCollectionProvider>\n```"
+        ],
+        "signature": [
+          "({ sample }: GrokSampleWithContextProps) => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_sample_with_context.tsx",
+        "lineNumber": 66,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokSampleInputWithContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ sample }",
+            "description": [],
+            "signature": [
+              "GrokSampleWithContextProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_sample_with_context.tsx",
+            "lineNumber": 66,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.GrokSampleWithContext",
+        "type": "Function",
+        "tags": [],
+        "label": "GrokSampleWithContext",
+        "description": [
+          "\nWrapper component for the Grok Sample component that reads\ngrokCollection and draftGrokExpressions from context.\n\nMust be used within both GrokCollectionProvider and GrokExpressionsProvider.\n\nUsage:\n```tsx\n<GrokCollectionProvider grokCollection={collection}>\n  <GrokExpressionsProvider patterns={['%{TIMESTAMP}', '%{IP}']}>\n    <GrokSampleWithContext sample=\"2024-01-27 192.168.1.1\" />\n  </GrokExpressionsProvider>\n</GrokCollectionProvider>\n```"
+        ],
+        "signature": [
+          "({ sample }: GrokSampleWithContextProps) => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_sample_with_context.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.GrokSampleWithContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ sample }",
+            "description": [],
+            "signature": [
+              "GrokSampleWithContextProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_sample_with_context.tsx",
+            "lineNumber": 34,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1475,6 +1592,115 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.useGrokCollection",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useGrokCollection",
+        "description": [
+          "\nHook to access the GrokCollection instance from context.\n"
+        ],
+        "signature": [
+          "() => GrokCollectionContextValue"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_collection_context.tsx",
+        "lineNumber": 69,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "The grokCollection instance, loading state, and any error"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.useGrokExpressions",
+        "type": "Function",
+        "tags": [],
+        "label": "useGrokExpressions",
+        "description": [
+          "\nHook to manage DraftGrokExpression instances based on an array of grok pattern strings.\n\nThis hook abstracts away the complexity of creating, updating, and destroying DraftGrokExpression\ninstances. Consumers just work with plain string arrays, and this hook ensures that:\n- DraftGrokExpression instances are created and destroyed as needed\n- Instances are reused for stable identity (important for React reconciliation)\n- Subscriptions to custom pattern changes are properly managed\n- Memory leaks are prevented through proper cleanup\n"
+        ],
+        "signature": [
+          "(patterns: string[]) => ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.DraftGrokExpression",
+            "text": "DraftGrokExpression"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_expressions_context.tsx",
+        "lineNumber": 40,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-ui",
+            "id": "def-common.useGrokExpressions.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "patterns",
+            "description": [
+              "- Array of grok pattern strings"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_expressions_context.tsx",
+            "lineNumber": 40,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Array of DraftGrokExpression instances corresponding to the input strings"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-ui",
+        "id": "def-common.useGrokExpressionsFromContext",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useGrokExpressionsFromContext",
+        "description": [
+          "\nHook to access DraftGrokExpression instances from context.\nMust be used within a GrokExpressionsProvider.\n"
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/grok-ui",
+            "scope": "common",
+            "docId": "kibKbnGrokUiPluginApi",
+            "section": "def-common.DraftGrokExpression",
+            "text": "DraftGrokExpression"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-grok-ui/contexts/grok_expressions_context.tsx",
+        "lineNumber": 130,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "Array of DraftGrokExpression instances"
+        ],
         "initialIsOpen": false
       }
     ],

@@ -90,7 +90,7 @@ export function Reorder() {
                                     css={{ marginTop: '20px' }}
                                     aria-label="Change row order"
                                   >
-                                    <EuiIcon type="grab" />
+                                    <EuiIcon type="dragVertical" />
                                   </div>
                                 </EuiFlexItem>
                                 <EuiFlexItem>
@@ -120,7 +120,7 @@ export function Reorder() {
                                 {items.length > 1 && (
                                   <EuiFlexItem grow={false}>
                                     <EuiButtonIcon
-                                      iconType="minusInCircle"
+                                      iconType="minusCircle"
                                       onClick={() => removeItem(id)}
                                       aria-label="Remove item"
                                     />
@@ -217,7 +217,7 @@ const MyFormComponent = () => {
                                   css={{ marginTop: '20px' }}
                                   aria-label="Change row order"
                                 >
-                                  <EuiIcon type="grab" />
+                                  <EuiIcon type="dragVertical" />
                                 </div>
                               </EuiFlexItem>
                               <EuiFlexItem>
@@ -247,7 +247,7 @@ const MyFormComponent = () => {
                               {items.length > 1 && (
                                 <EuiFlexItem grow={false}>
                                   <EuiButtonIcon
-                                    iconType="minusInCircle"
+                                    iconType="minusCircle"
                                     onClick={() => removeItem(id)}
                                     aria-label="Remove item"
                                   />

@@ -17,6 +17,7 @@ import type { OutputsForAgentPolicy } from '../../../../../../server/types';
 
 import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../common/services/version_specific_policies_utils';
 import { Loading, Error } from '../../../components';
 import {
   useGetOneAgent,
@@ -64,7 +65,11 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     isLoading: isAgentPolicyLoading,
     data: agentPolicyData,
     sendRequest: sendAgentPolicyRequest,
-  } = useGetOneAgentPolicy(agentData?.item?.policy_id);
+  } = useGetOneAgentPolicy(
+    agentData?.item?.policy_id
+      ? removeVersionSuffixFromPolicyId(agentData.item.policy_id)
+      : undefined
+  );
 
   const { data: outputsData } = useGetInfoOutputsForPolicy(agentPolicyData?.item?.id);
 
@@ -92,7 +97,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
           <EuiButtonEmpty
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             href={getHref('agent_list')}
             flush="left"
             size="xs"

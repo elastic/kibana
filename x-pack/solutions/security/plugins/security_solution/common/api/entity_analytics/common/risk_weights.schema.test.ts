@@ -6,8 +6,8 @@
  */
 
 import { RiskScoreWeight } from '.';
-import type { SafeParseError, SafeParseSuccess } from '@kbn/zod';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import type { ZodSafeParseError, ZodSafeParseSuccess } from '@kbn/zod/v4';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { RiskCategories, RiskWeightTypes } from '../../../entity_analytics/risk_engine';
 
 describe('risk weight schema', () => {
@@ -19,7 +19,7 @@ describe('risk weight schema', () => {
         type: RiskWeightTypes.global,
         host: 0.1,
       };
-      const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
+      const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseSuccess<object>;
 
       expect(decoded.success).toBeTruthy();
       expect(decoded.data).toEqual(payload);
@@ -30,7 +30,7 @@ describe('risk weight schema', () => {
         type: RiskWeightTypes.global,
         host: 0.1,
       };
-      const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
+      const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseSuccess<object>;
 
       expect(decoded.success).toBeTruthy();
       expect(decoded.data).toEqual(payload);
@@ -41,10 +41,10 @@ describe('risk weight schema', () => {
         type: 'unknown',
         host: 0.1,
       };
-      const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
+      const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseError<object>;
 
       expect(decoded.success).toBeFalsy();
-      expect(decoded.error.errors.length).toBeGreaterThan(0);
+      expect(decoded.error.issues.length).toBeGreaterThan(0);
     });
   });
 
@@ -56,15 +56,17 @@ describe('risk weight schema', () => {
 
       it('rejects if neither host nor user weight are specified', () => {
         const payload = { type };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
+        const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseError<object>;
 
         expect(decoded.success).toBeFalsy();
-        expect(stringifyZodError(decoded.error)).toContain('host: Required, user: Required');
+        expect(stringifyZodError(decoded.error)).toContain(
+          'host: Invalid input: expected number, received undefined, user: Invalid input: expected number, received undefined'
+        );
       });
 
       it('allows a single host weight', () => {
         const payload = { type, host: 0.1 };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
+        const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseSuccess<object>;
 
         expect(decoded.success).toBeTruthy();
         expect(decoded.data).toEqual(payload);
@@ -72,7 +74,7 @@ describe('risk weight schema', () => {
 
       it('allows a single user weight', () => {
         const payload = { type, user: 0.1 };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
+        const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseSuccess<object>;
 
         expect(decoded.success).toBeTruthy();
         expect(decoded.data).toEqual(payload);
@@ -80,7 +82,7 @@ describe('risk weight schema', () => {
 
       it('allows both a host and user weight', () => {
         const payload = { type, host: 0.1, user: 0.5 };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
+        const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseSuccess<object>;
 
         expect(decoded.success).toBeTruthy();
         expect(decoded.data).toEqual({ type, host: 0.1, user: 0.5 });
@@ -88,11 +90,11 @@ describe('risk weight schema', () => {
 
       it('rejects a weight outside of 0-1', () => {
         const payload = { type, user: 55 };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
+        const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseError<object>;
 
         expect(decoded.success).toBeFalsy();
         expect(stringifyZodError(decoded.error)).toContain(
-          `user: Number must be less than or equal to 1`
+          `user: Too big: expected number to be <=1`
         );
       });
 
@@ -103,7 +105,7 @@ describe('risk weight schema', () => {
           value: 'superfluous',
           extra: 'even more',
         };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
+        const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseSuccess<object>;
 
         expect(decoded.success).toBeTruthy();
         expect(decoded.data).toEqual({ type, host: 0.1 });
@@ -117,21 +119,21 @@ describe('risk weight schema', () => {
 
       it('requires a value', () => {
         const payload = { type, user: 0.1 };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
+        const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseError<object>;
 
         expect(decoded.success).toBeFalsy();
         expect(stringifyZodError(decoded.error)).toEqual(
-          'type: Invalid literal value, expected "global_identifier", host: Required, type: Invalid literal value, expected "global_identifier", type: Invalid literal value, expected "global_identifier", service: Required'
+          'type: Invalid input: expected "global_identifier", host: Invalid input: expected number, received undefined, type: Invalid input: expected "global_identifier", type: Invalid input: expected "global_identifier", service: Invalid input: expected number, received undefined'
         );
       });
 
       it('rejects a weight outside of 0-1', () => {
         const payload = { type, value: RiskCategories.category_1, host: -5 };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
+        const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseError<object>;
 
         expect(decoded.success).toBeFalsy();
         expect(stringifyZodError(decoded.error)).toContain(
-          `host: Number must be greater than or equal to 0`
+          `host: Too small: expected number to be >=0`
         );
       });
     });

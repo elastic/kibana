@@ -16,6 +16,7 @@ import {
   GetAgentsRequestSchema,
   GetTagsRequestSchema,
   GetOneAgentRequestSchema,
+  GetAgentEffectiveConfigRequestSchema,
   UpdateAgentRequestSchema,
   MigrateSingleAgentRequestSchema,
   BulkMigrateAgentsRequestSchema,
@@ -66,6 +67,9 @@ import {
   PostCancelActionRequestSchema,
   PostNewAgentActionResponseSchema,
   PostRetrieveAgentsByActionsResponseSchema,
+  PostGenerateAgentsReportRequestSchema,
+  PostGenerateAgentsReportResponseSchema,
+  GetAgentEffectiveConfigResponseSchema,
 } from '../../types/rest_spec/agent';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { calculateRouteAuthz } from '../../services/security/security';
@@ -90,6 +94,7 @@ import {
   postAgentReassignHandler,
   postRetrieveAgentsByActionsHandler,
   getAgentStatusRuntimeFieldHandler,
+  getAgentEffectiveConfigHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -107,6 +112,7 @@ import {
   changeAgentPrivilegeLevelHandler,
 } from './change_privilege_level_handlers';
 import { bulkRollbackAgentHandler, rollbackAgentHandler } from './rollback_handlers';
+import { generateReportHandler } from './generate_report_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   const experimentalFeatures = parseExperimentalConfigValue(
@@ -147,6 +153,75 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
       getAgentHandler
     );
+
+  if (experimentalFeatures.enableOpAMP) {
+    // Get effective config
+    router.versioned
+      .get({
+        path: AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+          },
+        },
+        summary: `Get an agent's effective config`,
+        description: `Get an agent's effective config by ID.`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: GetAgentEffectiveConfigRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => GetAgentEffectiveConfigResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+                description: 'A bad request.',
+              },
+            },
+          },
+          options: {
+            oasOperationObject: () => ({
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            effective_config: {},
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
+        },
+        getAgentEffectiveConfigHandler
+      );
+  }
 
   // Migrate
   // Single agent migration
@@ -1203,6 +1278,44 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
 
         bulkChangeAgentsPrivilegeLevelHandler
+      );
+
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
+        access: 'internal',
+        enableQueryVersion: true,
+        security: {
+          authz: {
+            requiredPrivileges: [
+              FLEET_API_PRIVILEGES.AGENTS.READ,
+              FLEET_API_PRIVILEGES.GENERATE_REPORTS.ALL,
+            ],
+          },
+        },
+        summary: `Generate agent csv report`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.internal.v1,
+          validate: {
+            request: PostGenerateAgentsReportRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => PostGenerateAgentsReportResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        generateReportHandler
       );
   }
 

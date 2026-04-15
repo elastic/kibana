@@ -11,6 +11,7 @@ import { ESLint } from 'eslint';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { File } from '../file';
+import { LINT_LOG_PREFIX } from './constants';
 
 /**
  * Filters a list of files to only include lintable files.
@@ -29,11 +30,11 @@ export async function pickFilesToLint(log: ToolingLog, files: File[]) {
     const path = file.getRelativePath();
 
     if (await eslint.isPathIgnored(path)) {
-      log.warning(`[eslint] %j ignored by .eslintignore`, file);
+      log.warning(`${LINT_LOG_PREFIX} %j ignored by .eslintignore`, file);
       continue;
     }
 
-    log.debug('[eslint] linting %j', file);
+    log.debug(`${LINT_LOG_PREFIX} linting %j`, file);
     filesToLint.push(file);
   }
 

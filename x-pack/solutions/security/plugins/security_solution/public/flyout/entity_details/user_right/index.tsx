@@ -9,6 +9,12 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { EuiSpacer } from '@elastic/eui';
+import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
+import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
+import { buildUserNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
+import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
@@ -18,30 +24,49 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { UsersType } from '../../../explore/users/store/model';
-import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
-import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelFooter } from './footer';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
-import { useObservedUser } from './hooks/use_observed_user';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
-import { useKibana } from '../../../common/lib/kibana';
+import { EntityType } from '../../../../common/entity_analytics/types';
+import { useObservedUser } from './hooks/use_observed_user';
+import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
+import {
+  buildRiskScoreStateFromEntityRecord,
+  getRiskFromEntityRecord,
+} from '../shared/entity_store_risk_utils';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
+import {
+  mergeLegacyIdentityWhenStoreEntityMissing,
+  type IdentityFields,
+} from '../../document_details/shared/utils';
+import { USER_PANEL_RISK_SCORE_QUERY_ID, USER_PANEL_OBSERVED_USER_QUERY_ID } from './constants';
+import { FlyoutBody } from '../../shared/components/flyout_body';
+import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
+
+export { USER_PANEL_RISK_SCORE_QUERY_ID, USER_PANEL_OBSERVED_USER_QUERY_ID };
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
-  userName: string;
   isPreviewMode: boolean;
+  /**
+   * Display name from the source row / document (typically `user.name`).
+   */
+  userName: string;
+  /**
+   * Canonical Entity Store v2 id (`entity.id`) when already resolved (e.g. from alerts/events table).
+   */
+  entityId?: string;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -50,7 +75,7 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
 }
 
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
-export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
+
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
@@ -59,15 +84,58 @@ const FIRST_RECORD_PAGINATION = {
 export const UserPanel = ({
   contextID,
   scopeId,
-  userName,
   isPreviewMode = false,
+  userName,
+  entityId: entityIdProp,
 }: UserPanelProps) => {
   const { uiSettings } = useKibana().services;
+  const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+
+  const safeContextID = contextID ?? scopeId ?? 'user-panel';
+
+  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+
+  const userStoreIdentityFields = useMemo(
+    () => (!entityIdProp && userName ? { 'user.name': userName } : undefined),
+    [entityIdProp, userName]
+  );
+
+  const entityFromStoreResult = useEntityFromStore({
+    entityId: entityIdProp,
+    identityFields: userStoreIdentityFields,
+    entityType: 'user',
+    skip: !entityStoreV2Enabled || isInitializing,
+  });
+
+  const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
+    const legacyFields =
+      userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
+    if (entityStoreV2Enabled) {
+      const fromStore =
+        euidApi?.euid?.getEntityIdentifiersFromDocument(
+          'user',
+          entityFromStoreResult.entityRecord
+        ) ?? {};
+      return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
+    }
+    return legacyFields;
+  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, userName]);
 
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
+  );
+  const observedUser = useObservedUser(
+    userName,
+    scopeId,
+    entityStoreV2Enabled ? entityFromStoreResult : undefined
+  );
+
+  const panelDisplayEntityId = useMemo(
+    () => (entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : entityIdProp),
+    [entityIdProp, entityStoreV2Enabled, observedUser.entityRecord?.entity?.id]
   );
 
   const riskScoreState = useRiskScore({
@@ -75,18 +143,14 @@ export const UserPanel = ({
     filterQuery: userNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
+    skip: entityStoreV2Enabled && !!observedUser?.entityRecord,
   });
 
   const { inspect, refetch, loading } = riskScoreState;
-  const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
-
-  const observedUser = useObservedUser(userName, scopeId);
-  const email = observedUser.details.user?.email;
   const managedUser = useManagedUser();
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-  const isRiskScoreExist = !!userRiskData?.user.risk;
 
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchRiskScore = useCallback(() => {
@@ -100,105 +164,189 @@ export const UserPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations('user.name', userName);
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
+    onSuccess: calculateEntityRiskScore,
+  });
+
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    buildEuidCspPreviewOptions('user', entityFromStoreResult.entityRecord, euidApi, {
+      entityStoreV2Enabled,
+      legacyIdentityFields:
+        userName != null && userName !== '' ? { 'user.name': userName } : undefined,
+    })
+  );
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.userName,
-    value: userName,
+    identityFields: documentEntityIdentifiers,
+    entityType: EntityType.user,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
   });
 
+  const useEntityStoreInspectForRisk = entityStoreV2Enabled && observedUser.entityRecord != null;
+
   useQueryInspector({
     deleteQuery,
-    inspect,
-    loading,
+    inspect: useEntityStoreInspectForRisk ? entityFromStoreResult?.inspect ?? null : inspect,
+    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
     queryId: USER_PANEL_RISK_SCORE_QUERY_ID,
-    refetch,
+    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
     setQuery,
   });
 
+  const isRiskScoreExist =
+    entityStoreV2Enabled && observedUser.entityRecord
+      ? !!getRiskFromEntityRecord(observedUser.entityRecord)
+      : !!userRiskData?.user?.risk;
+
+  const entityStoreEntityId = entityStoreV2Enabled
+    ? observedUser.entityRecord?.entity?.id
+    : undefined;
+
   const openDetailsPanel = useNavigateToUserDetails({
     userName,
-    email,
+    entityId: panelDisplayEntityId,
     scopeId,
-    contextID,
+    identityFields: documentEntityIdentifiers ?? {},
+    contextID: safeContextID,
     isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     isPreviewMode,
+    entityStoreEntityId,
   });
 
-  const openPanelFirstTab = useCallback(
-    () =>
-      openDetailsPanel({
-        tab: isRiskScoreExist
-          ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      }),
-    [isRiskScoreExist, openDetailsPanel]
+  const riskScoreStateFromStore =
+    entityStoreV2Enabled && observedUser.entityRecord
+      ? buildRiskScoreStateFromEntityRecord(EntityType.user, observedUser.entityRecord, {
+          refetch: observedUser.refetchEntityStore ?? (() => {}),
+          isLoading: observedUser.isLoading,
+          error: null,
+          inspect: entityFromStoreResult?.inspect,
+        })
+      : null;
+
+  const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
+
+  const onCriticalitySave = entityFromStoreResult.entityRecord
+    ? (level: CriticalityLevelWithUnassigned) =>
+        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
+    : undefined;
+
+  const defaultTab = useMemo(() => {
+    if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
+    if (hasMisconfigurationFindings || hasNonClosedAlerts)
+      return EntityDetailsLeftPanelTab.CSP_INSIGHTS;
+    if (entityStoreEntityId) return EntityDetailsLeftPanelTab.RESOLUTION_GROUP;
+    return EntityDetailsLeftPanelTab.RISK_INPUTS;
+  }, [isRiskScoreExist, hasMisconfigurationFindings, hasNonClosedAlerts, entityStoreEntityId]);
+
+  const openDefaultPanel = useCallback(
+    () => openDetailsPanel({ tab: defaultTab }),
+    [openDetailsPanel, defaultTab]
   );
 
+  const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
+    ? observedUser.entityRecord ?? undefined
+    : undefined;
+
+  const entityStoreLookupRequested =
+    Boolean(entityIdProp) ||
+    Boolean(userStoreIdentityFields && Object.keys(userStoreIdentityFields).length > 0);
+
+  const noEntityInStore =
+    entityStoreV2Enabled &&
+    entityStoreLookupRequested &&
+    !entityFromStoreResult.isLoading &&
+    !entityFromStoreResult.entityRecord;
+
   const hasUserDetailsData =
-    !!userRiskData?.user.risk ||
+    isRiskScoreExist ||
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
-  if (observedUser.isLoading) {
-    return <FlyoutLoading />;
-  }
+  const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
+    entityRecord: entityFromStoreResult.entityRecord ?? null,
+  });
+
+  const tabsNode = tabs ? (
+    <EntityPanelHeaderTabs
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      setSelectedTabId={setSelectedTabId}
+    />
+  ) : undefined;
 
   return (
-    <AnomalyTableProvider
-      criteriaFields={getCriteriaFromUsersType(UsersType.details, userName)}
-      startDate={from}
-      endDate={to}
-      skip={isInitializing}
-    >
-      {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => {
-        const observedUserWithAnomalies = {
-          ...observedUser,
-          anomalies: {
-            isLoading: isLoadingAnomaliesData,
-            anomalies: anomaliesData,
-            jobNameById,
-          },
-        };
-        return (
-          <>
-            <FlyoutNavigation
-              flyoutIsExpandable={
-                hasUserDetailsData || hasMisconfigurationFindings || hasNonClosedAlerts
-              }
-              expandDetails={openPanelFirstTab}
-              isPreviewMode={isPreviewMode}
-              isRulePreview={scopeId === TableId.rulePreview}
-            />
-            <UserPanelHeader
-              userName={userName}
-              observedUser={observedUserWithAnomalies}
-              managedUser={managedUser}
-            />
-            <UserPanelContent
-              userName={userName}
-              observedUser={observedUserWithAnomalies}
-              riskScoreState={riskScoreState}
-              recalculatingScore={recalculatingScore}
-              onAssetCriticalityChange={calculateEntityRiskScore}
-              contextID={contextID}
-              scopeId={scopeId}
-              openDetailsPanel={openDetailsPanel}
-              isPreviewMode={isPreviewMode}
-            />
-            {!isPreviewMode && assetInventoryEnabled && <UserPanelFooter userName={userName} />}
-            {isPreviewMode && (
-              <UserPreviewPanelFooter userName={userName} contextID={contextID} scopeId={scopeId} />
-            )}
-          </>
-        );
-      }}
-    </AnomalyTableProvider>
+    <>
+      <FlyoutNavigation
+        flyoutIsExpandable={
+          hasUserDetailsData ||
+          hasMisconfigurationFindings ||
+          hasNonClosedAlerts ||
+          !!entityStoreEntityId
+        }
+        expandDetails={openDefaultPanel}
+        isPreviewMode={isPreviewMode}
+        isRulePreview={scopeId === TableId.rulePreview}
+      />
+      <UserPanelHeader
+        lastSeen={observedUser.lastSeen}
+        managedUser={managedUser}
+        userName={userName}
+        entityId={panelDisplayEntityId}
+        identityFields={documentEntityIdentifiers}
+        isEntityInStore={!!entityFromStoreResult.entityRecord}
+        riskLevel={
+          entityFromStoreResult.entityRecord
+            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+                'Unknown') as RiskSeverity)
+            : undefined
+        }
+      />
+      <FlyoutBody>
+        {entityFromStoreResult.entityRecord && (
+          <EntitySummaryGrid
+            entityRecord={entityFromStoreResult.entityRecord}
+            criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
+            onCriticalitySave={onCriticalitySave}
+          />
+        )}
+        {tabsNode}
+        {tabs && <EuiSpacer size="l" />}
+        {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (
+          <EntityStoreTableTab entityRecord={entityFromStoreResult.entityRecord} />
+        ) : (
+          <UserPanelContent
+            observedUser={observedUser}
+            riskScoreState={effectiveRiskScoreState}
+            recalculatingScore={recalculatingScore}
+            onAssetCriticalityChange={calculateEntityRiskScore}
+            contextID={safeContextID}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
+            identityFields={documentEntityIdentifiers}
+            entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
+            skipRiskAndCriticality={noEntityInStore}
+            entityStoreEntityId={entityStoreEntityId}
+          />
+        )}
+      </FlyoutBody>
+      {!isPreviewMode && assetInventoryEnabled && (
+        <UserPanelFooter identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+      )}
+      {isPreviewMode && (
+        <UserPreviewPanelFooter
+          userName={userName}
+          entityId={panelDisplayEntityId}
+          contextID={safeContextID}
+          scopeId={scopeId}
+          entity={entityFromStore}
+        />
+      )}
+    </>
   );
 };
 

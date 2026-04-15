@@ -572,6 +572,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   );
                 }}
                 legendAction={legendActions}
+                legendActionOnHover={interactive}
                 theme={[
                   // Chart background should be transparent for the usage at Canvas.
                   { background: { color: 'transparent' } },

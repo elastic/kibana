@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
+import {
+  getIndexPatternFromESQLQuery,
+  getSourceCommandFromESQLQuery,
+} from './get_index_pattern_from_query';
 
 describe('getIndexPatternFromESQLQuery', () => {
   it('should return the index pattern string from esql queries', () => {
@@ -89,5 +92,37 @@ describe('getIndexPatternFromESQLQuery', () => {
       'PROMQL index = kibana_sample_data_logstsdb step="5m" start=?_tstart end=?_tend avg(bytes)'
     );
     expect(idxPattern23).toBe('kibana_sample_data_logstsdb');
+  });
+});
+
+describe('getSourceCommandFromESQLQuery', () => {
+  it('should return FROM for FROM queries', () => {
+    expect(getSourceCommandFromESQLQuery('FROM metrics-*')).toBe('FROM');
+  });
+
+  it('should return TS for TS queries', () => {
+    expect(getSourceCommandFromESQLQuery('TS metrics-*')).toBe('TS');
+  });
+
+  it('should return an empty string for empty or missing input', () => {
+    expect(getSourceCommandFromESQLQuery('')).toBe('');
+    expect(getSourceCommandFromESQLQuery(undefined)).toBe('');
+    expect(getSourceCommandFromESQLQuery('STATS count()')).toBe('');
+  });
+
+  it('should return FROM when the query starts with SET and then FROM', () => {
+    expect(
+      getSourceCommandFromESQLQuery(
+        'SET unmapped_fields = "FAIL"; FROM kibana_sample_data_logstsdb'
+      )
+    ).toBe('FROM');
+  });
+
+  it('should return FROM when the query starts with a comment and then FROM', () => {
+    expect(
+      getSourceCommandFromESQLQuery(
+        '// a comment before the query\nFROM kibana_sample_data_logstsdb'
+      )
+    ).toBe('FROM');
   });
 });

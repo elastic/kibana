@@ -14,7 +14,8 @@
  */
 
 import type { KbnClient, RoleApiCredentials, ScoutLogger } from '@kbn/scout';
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
 import {
   ATTRIBUTE_TITLE_KEY,
@@ -25,7 +26,7 @@ import {
 import { apiTest } from '../../fixtures';
 import { prepareImportFormData } from '../../helpers';
 
-apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () => {
+apiTest.describe(`_import API with multiple spaces`, { tag: tags.stateful.all }, () => {
   // Note: since version 8.0, Kibana requires most saved objects to have globally unique IDs
   // Learn more: https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects
 
@@ -98,7 +99,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
         }
       );
 
-      expect(importResponse1.statusCode).toBe(200);
+      expect(importResponse1).toHaveStatusCode(200);
       expect(importResponse1.body.success).toBe(true);
       expect(importResponse1.body.successCount).toBe(1);
 
@@ -124,7 +125,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
         }
       );
 
-      expect(importResponse2.statusCode).toBe(200);
+      expect(importResponse2).toHaveStatusCode(200);
       expect(importResponse2.body.success).toBe(true);
       expect(importResponse2.body.successCount).toBe(1);
 
@@ -180,7 +181,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
         }
       );
 
-      expect(importResponse1.statusCode).toBe(200);
+      expect(importResponse1).toHaveStatusCode(200);
       expect(importResponse1.body.success).toBe(true);
       expect(importResponse1.body.successCount).toBe(1);
 
@@ -207,7 +208,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
         }
       );
 
-      expect(importResponse2.statusCode).toBe(200);
+      expect(importResponse2).toHaveStatusCode(200);
       expect(importResponse2.body.success).toBe(true);
       expect(importResponse2.body.successCount).toBe(1);
       expect(importResponse2.body.successResults[0].id).toBe(uniqueId);
@@ -224,7 +225,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
       });
 
       // Import should succeed and the object should exist in space 2 with the new ID
-      expect(importResponse2.statusCode).toBe(200);
+      expect(importResponse2).toHaveStatusCode(200);
       expect(importResponse2.body.success).toBe(true);
 
       // The originId should point to the original object's ID

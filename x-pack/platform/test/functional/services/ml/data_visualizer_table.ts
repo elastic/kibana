@@ -111,12 +111,15 @@ export function MachineLearningDataVisualizerTableProvider(
         if (!(await testSubjects.exists(this.detailsSelector(fieldName)))) {
           const selector = this.rowSelector(
             fieldName,
-            `dataVisualizerDetailsToggle-${fieldName}-arrowRight`
+            `dataVisualizerDetailsToggle-${fieldName}-chevronSingleRight`
           );
           await testSubjects.moveMouseTo(selector); // move mouse to selector before clicking to ensure a tooltip isn't blocking the button
           await testSubjects.click(selector);
           await testSubjects.existOrFail(
-            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`),
+            this.rowSelector(
+              fieldName,
+              `dataVisualizerDetailsToggle-${fieldName}-chevronSingleDown`
+            ),
             {
               timeout: 1000,
             }
@@ -130,10 +133,16 @@ export function MachineLearningDataVisualizerTableProvider(
       await retry.tryForTime(10000, async () => {
         if (await testSubjects.exists(this.detailsSelector(fieldName))) {
           await testSubjects.click(
-            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`)
+            this.rowSelector(
+              fieldName,
+              `dataVisualizerDetailsToggle-${fieldName}-chevronSingleDown`
+            )
           );
           await testSubjects.existOrFail(
-            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowRight`),
+            this.rowSelector(
+              fieldName,
+              `dataVisualizerDetailsToggle-${fieldName}-chevronSingleRight`
+            ),
             {
               timeout: 1000,
             }
@@ -480,10 +489,11 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
-      await this.ensureDetailsOpen(fieldName);
-
-      await this.assertExamplesList(fieldName, expectedExamplesCount);
-      await this.ensureDetailsClosed(fieldName);
+      if (expectedExamplesCount > 0) {
+        await this.ensureDetailsOpen(fieldName);
+        await this.assertExamplesList(fieldName, expectedExamplesCount);
+        await this.ensureDetailsClosed(fieldName);
+      }
     }
 
     public async assertGeoPointFieldContents(

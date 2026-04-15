@@ -39,6 +39,12 @@ export interface StreamlangValidationOptions {
    */
   reservedFields: string[];
   streamType: 'classic' | 'wired';
+  /**
+   * When true, skip namespace validation for processor-generated fields.
+   * Use for logs.ecs streams which follow ECS conventions (direct field names like host.name,
+   * service.name) rather than OTEL namespacing (attributes.*, resource.attributes.*, etc.).
+   */
+  skipNamespaceValidation?: boolean;
 }
 
 export interface StreamlangValidationResult {

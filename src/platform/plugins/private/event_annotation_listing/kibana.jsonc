@@ -21,7 +21,8 @@
       "kql",
       "kibanaUtils",
       "contentManagement",
-      "embeddable"
+      "embeddable",
+      "uiActions"
     ],
     "optionalPlugins": [
       "savedObjectsTagging",

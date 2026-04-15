@@ -6,11 +6,21 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import { Formik } from 'formik';
 import React from 'react';
 
 import { FormRow } from './form_row';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiFormRow: jest.fn(({ children }: any) => <div>{children}</div>),
+  };
+});
+
+const MockedEuiFormRow = EuiFormRow as unknown as jest.Mock;
 
 describe('FormRow', () => {
   it('should render form row with correct error states', () => {
@@ -20,7 +30,9 @@ describe('FormRow', () => {
       { error: undefined, touched: true, isInvalid: false },
     ];
     assertions.forEach(({ error, touched, isInvalid }) => {
-      const wrapper = mount(
+      MockedEuiFormRow.mockClear();
+
+      render(
         <Formik
           onSubmit={jest.fn()}
           initialValues={{ email: '' }}
@@ -33,11 +45,12 @@ describe('FormRow', () => {
         </Formik>
       );
 
-      expect(wrapper.find(EuiFormRow).props()).toEqual(
+      expect(MockedEuiFormRow).toHaveBeenCalledWith(
         expect.objectContaining({
           error,
           isInvalid,
-        })
+        }),
+        expect.anything()
       );
     });
   });

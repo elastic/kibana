@@ -9,29 +9,32 @@
 
 import { getTopNavBadges } from './get_top_nav_badges';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
-const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 const discoverServiceMock = createDiscoverServicesMock();
 discoverServiceMock.capabilities.discover_v2.save = true;
 
 describe('getTopNavBadges()', function () {
-  describe('managed saved search', () => {
-    const stateContainerWithManagedSavedSearch = getDiscoverStateMock({
-      savedSearch: { ...savedSearchMock, managed: true },
-    });
-
-    test('should return the managed badge when managed saved search', () => {
+  describe('managed discover session', () => {
+    test('should return the managed badge when managed discover session', () => {
       const topNavBadges = getTopNavBadges({
         isMobile: false,
+        isManaged: true,
         services: discoverServiceMock,
-        stateContainer: stateContainerWithManagedSavedSearch,
       });
 
       expect(topNavBadges).toHaveLength(1);
       expect(topNavBadges[0].badgeText).toEqual('Managed');
+    });
+
+    test('should not return the managed badge when not managed discover session', () => {
+      const topNavBadges = getTopNavBadges({
+        isMobile: false,
+        isManaged: false,
+        services: discoverServiceMock,
+      });
+
+      expect(topNavBadges).toHaveLength(0);
     });
   });
 
@@ -43,8 +46,8 @@ describe('getTopNavBadges()', function () {
     test('should return the solutions view badge when spaces is enabled', () => {
       const topNavBadges = getTopNavBadges({
         isMobile: false,
+        isManaged: false,
         services: discoverServiceWithSpacesMock,
-        stateContainer,
       });
       expect(topNavBadges).toMatchInlineSnapshot(`
         Array [

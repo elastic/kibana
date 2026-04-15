@@ -7,7 +7,7 @@
 
 import type { ExternalReferenceSOAttachmentPayload } from '../../common/types/domain';
 import { AttachmentType, ExternalReferenceStorageType } from '../../common/types/domain';
-import type { AttachmentRequestAttributes } from '../common/types/attachments';
+import type { AttachmentRequestAttributes } from '../common/types/attachments_v1';
 
 /**
  * A type narrowing function for external reference saved object attachments.

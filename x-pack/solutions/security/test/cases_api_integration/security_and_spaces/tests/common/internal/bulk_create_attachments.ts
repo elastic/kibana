@@ -11,7 +11,7 @@ import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import type { Case } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
+import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
 import { CaseStatuses, ExternalReferenceStorageType } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const validateCommentsIgnoringOrder = (
     comments: Case['comments'],
-    attachments: BulkCreateAttachmentsRequest
+    attachments: BulkCreateAttachmentsRequestV2
   ) => {
     expect(comments?.length).to.eql(attachments.length);
 

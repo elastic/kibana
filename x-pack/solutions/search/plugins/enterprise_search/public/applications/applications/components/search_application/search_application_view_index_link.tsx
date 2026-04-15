@@ -13,14 +13,16 @@ import { EuiLink } from '@elastic/eui';
 import { KibanaLogic } from '../../../shared/kibana';
 
 export const SearchApplicationViewIndexLink: React.FC<{
-  indexName: string;
-  dataTestSubj?: string;
   dataTelemetryId?: string;
+  dataTestSubj?: string;
+  indexName: string;
 }> = ({ indexName, dataTestSubj, dataTelemetryId }) => {
   const { share } = useValues(KibanaLogic);
 
   const searchIndexDetailsUrl: string =
-    share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID')?.useUrl({ indexName }) ?? '';
+    share?.url.locators
+      .get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID')
+      ?.useUrl({ indexName, page: 'index_details' }) ?? '';
 
   return searchIndexDetailsUrl ? (
     <EuiLink

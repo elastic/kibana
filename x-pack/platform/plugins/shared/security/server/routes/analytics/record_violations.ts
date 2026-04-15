@@ -136,6 +136,18 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
     {
       path: '/internal/security/analytics/_record_violations',
       security: {
+        /**
+         * Browsers will stop sending reports for the duration of the browser session and without
+         * further retries once this endpoint has returned a single 403. This would effectively
+         * prevent us from capture any reports. To work around this behaviour we optionally
+         * authenticate users but silently ignore any reports that have been received from
+         * unauthenticated users.
+         */
+        authc: {
+          enabled: 'optional',
+          reason:
+            'Browsers stop sending violation reports after receiving a 403, so authentication must be optional to avoid losing reports from unauthenticated users',
+        },
         authz: {
           enabled: false,
           reason:
@@ -156,14 +168,6 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
         ]),
       },
       options: {
-        /**
-         * Browsers will stop sending reports for the duration of the browser session and without
-         * further retries once this endpoint has returned a single 403. This would effectively
-         * prevent us from capture any reports. To work around this behaviour we optionally
-         * authenticate users but silently ignore any reports that have been received from
-         * unauthenticated users.
-         */
-        authRequired: 'optional',
         /**
          * This endpoint is called by the browser in the background so `kbn-xsrf` header is not sent.
          */

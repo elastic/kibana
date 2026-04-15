@@ -27,25 +27,31 @@ import {
   applyPaletteParams,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
-import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
-import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import type { KbnPaletteId } from '@kbn/palettes';
+import type {
+  VisualizationDimensionEditorProps,
+  MetricVisualizationState,
+  SecondaryTrend,
+  SecondaryTrendType,
+} from '@kbn/lens-common';
 import { css } from '@emotion/react';
+import {
+  LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+  LENS_METRIC_GROUP_ID,
+  LENS_METRIC_STATE_DEFAULTS,
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
+} from '@kbn/lens-common';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
-import { getColorMode, getDefaultConfigForMode, getSecondaryLabelSelected } from './helpers';
-import {
-  SECONDARY_DEFAULT_STATIC_COLOR,
-  GROUP_ID,
-  metricStateDefaults,
-  legacyMetricStateDefaults,
-} from './constants';
+import { getColorMode, getSecondaryLabelSelected } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
+import { getColumnFromActiveData } from '../utils';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -137,7 +143,7 @@ interface TrendPalette {
   // select id
   id: string;
   // original ref to the palette
-  paletteId: string;
+  paletteId: KbnPaletteId;
   name: string;
   reversed?: boolean;
   colors: [string, string, string];
@@ -153,7 +159,7 @@ function useTrendPalettes(): { defaultPalette: TrendPalette; allPalettes: TrendP
   const palettes = useKbnPalettes();
   const computedPalettes = useMemo(() => {
     const defaultKbnPalette = palettes.get(KbnPalette.CompareTo);
-    const trendPalettes = new Set<string>([KbnPalette.Complementary, KbnPalette.Temperature]);
+    const trendPalettes = new Set<KbnPaletteId>([KbnPalette.Complementary, KbnPalette.Temperature]);
     const defaultPalette = {
       id: defaultKbnPalette.id,
       paletteId: defaultKbnPalette.id,
@@ -198,9 +204,28 @@ function TrendEditor({
   setState,
   state,
   datasource,
-}: Pick<SubProps, 'accessor' | 'idPrefix' | 'setState' | 'state' | 'datasource'>) {
-  const { isNumeric: secondaryMetricCanTrend } = getAccessorType(datasource, accessor);
-  const { isNumeric: primaryMetricCanTrend } = getAccessorType(datasource, state?.metricAccessor);
+  frame,
+}: Pick<SubProps, 'accessor' | 'idPrefix' | 'setState' | 'state' | 'datasource' | 'frame'>) {
+  const secondaryMetricTypeFallback = getColumnFromActiveData({
+    accessor,
+    layerId: state.layerId,
+    activeData: frame?.activeData,
+  })?.meta?.type;
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: state.metricAccessor,
+    layerId: state.layerId,
+    activeData: frame?.activeData,
+  })?.meta?.type;
+  const { isNumeric: secondaryMetricCanTrend } = getAccessorType(
+    datasource,
+    accessor,
+    secondaryMetricTypeFallback
+  );
+  const { isNumeric: primaryMetricCanTrend } = getAccessorType(
+    datasource,
+    state?.metricAccessor,
+    primaryMetricTypeFallback
+  );
   const { defaultPalette, allPalettes } = useTrendPalettes();
 
   // Translate palette to show it on the picker UI
@@ -427,10 +452,27 @@ function SecondaryMetricEditor({
   state,
   datasource,
 }: SubProps) {
-  const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId]?.columns)?.name;
+  const column = getColumnFromActiveData({ accessor, activeData: frame?.activeData, layerId });
+  const columnName = column?.name;
   const defaultSecondaryLabel = columnName || '';
-  const { isNumeric: isNumericType } = getAccessorType(datasource, accessor);
-  const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
+  const secondaryMetricTypeFallback = column?.meta?.type;
+
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: state.metricAccessor,
+    activeData: frame?.activeData,
+    layerId,
+  })?.meta?.type;
+
+  const { isNumeric: isNumericType } = getAccessorType(
+    datasource,
+    accessor,
+    secondaryMetricTypeFallback
+  );
+  const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(
+    datasource,
+    state.metricAccessor,
+    primaryMetricTypeFallback
+  );
   const colorMode = getColorMode(state.secondaryTrend, isNumericType);
   const [prevColorConfig, setPrevColorConfig] = useState<{
     static: SecondaryTrendConfigByType<'static'> | undefined;
@@ -451,7 +493,7 @@ function SecondaryMetricEditor({
     () =>
       state.secondaryTrend?.type === 'static'
         ? state.secondaryTrend.color
-        : SECONDARY_DEFAULT_STATIC_COLOR,
+        : LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
     [state]
   );
 
@@ -563,7 +605,7 @@ function SecondaryMetricEditor({
               },
             ]}
             idSelected={`${idPrefix}${
-              state.secondaryLabelPosition ?? metricStateDefaults.secondaryLabelPosition
+              state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition
             }`}
             onChange={(_id, secondaryLabelPosition) => {
               setState({
@@ -652,6 +694,7 @@ function SecondaryMetricEditor({
           setState={setState}
           state={state}
           datasource={datasource}
+          frame={frame}
         />
       ) : null}
     </div>
@@ -661,8 +704,17 @@ function SecondaryMetricEditor({
 const supportingVisualization = (state: MetricVisualizationState) =>
   state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'panel';
 
-function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps) {
-  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, accessor);
+function PrimaryMetricEditor({ state, setState, datasource, accessor, frame }: SubProps) {
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: state.metricAccessor,
+    activeData: frame?.activeData,
+    layerId: state.layerId,
+  })?.meta?.type;
+  const { isNumeric: isMetricNumeric } = getAccessorType(
+    datasource,
+    accessor,
+    primaryMetricTypeFallback
+  );
   const setColor = useCallback(
     (color: string) => {
       setState({ ...state, color: color === '' ? undefined : color });
@@ -724,7 +776,7 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps
               setState({
                 ...state,
                 icon: newIcon,
-                iconAlign: legacyMetricStateDefaults.iconAlign,
+                iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
               });
               return;
             }
@@ -733,7 +785,7 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps
             setState({
               ...state,
               icon: newIcon,
-              iconAlign: metricStateDefaults.iconAlign,
+              iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
             });
           }}
         />
@@ -811,7 +863,16 @@ export function DimensionEditorAdditionalSection({
 }: Props) {
   const euiThemeContext = useEuiTheme();
 
-  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, accessor);
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: state.metricAccessor,
+    activeData: frame?.activeData,
+    layerId: state.layerId,
+  })?.meta?.type;
+  const { isNumeric: isMetricNumeric } = getAccessorType(
+    datasource,
+    accessor,
+    primaryMetricTypeFallback
+  );
 
   const setColor = useCallback(
     (color: string) => {
@@ -979,7 +1040,7 @@ export function DimensionEditorAdditionalSection({
             setState({
               ...state,
               showBar: supportingVisualizationType === 'bar',
-              applyColorTo: metricStateDefaults.applyColorTo,
+              applyColorTo: LENS_METRIC_STATE_DEFAULTS.applyColorTo,
             });
 
             if (supportingVisualizationType === 'trendline') {
@@ -1086,7 +1147,7 @@ export function DimensionEditorAdditionalSection({
               },
             ]}
             idSelected={`${buttonIdPrefix}${
-              state.applyColorTo ?? metricStateDefaults.applyColorTo
+              state.applyColorTo ?? LENS_METRIC_STATE_DEFAULTS.applyColorTo
             }`}
             onChange={(_id, newApplyColorTo) => {
               setState({
@@ -1208,9 +1269,21 @@ export function DimensionEditorDataExtraComponent({
   datasource,
   state,
   setState,
+  frame,
 }: Omit<Props, 'paletteService'>) {
-  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
-  if (!isMetricNumeric || groupId !== GROUP_ID.BREAKDOWN_BY) {
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: state.metricAccessor,
+    activeData: frame?.activeData,
+    layerId: state.layerId,
+  })?.meta?.type;
+
+  const { isNumeric: isMetricNumeric } = getAccessorType(
+    datasource,
+    state.metricAccessor,
+    primaryMetricTypeFallback
+  );
+
+  if (!isMetricNumeric || groupId !== LENS_METRIC_GROUP_ID.BREAKDOWN_BY) {
     return null;
   }
   return (

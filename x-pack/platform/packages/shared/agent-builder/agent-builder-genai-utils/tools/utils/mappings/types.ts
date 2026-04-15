@@ -15,4 +15,6 @@ export interface MappingField {
   type: string;
   /** meta attached to the field */
   meta: Record<string, string>;
+  /** whether the field is searchable (defaults to true when not set) */
+  searchable?: boolean;
 }

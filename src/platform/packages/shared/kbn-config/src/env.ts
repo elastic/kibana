@@ -8,8 +8,8 @@
  */
 
 import { resolve, join } from 'path';
-import loadJsonFile from 'load-json-file';
 import { getPluginSearchPaths } from '@kbn/repo-packages';
+import { loadJsonFile } from '@kbn/utils';
 import type { Package } from '@kbn/repo-packages';
 import type { PackageInfo, EnvironmentMode } from './types';
 
@@ -36,6 +36,7 @@ export interface CliArgs {
   cache: boolean;
   dist: boolean;
   serverless?: boolean;
+  uiam?: boolean;
   retrictInternalApis?: boolean;
 }
 
@@ -57,7 +58,7 @@ export class Env {
    */
   public static createDefault(repoRoot: string, options: EnvOptions, pkg?: RawPackageInfo): Env {
     if (!pkg) {
-      pkg = loadJsonFile.sync(join(repoRoot, 'package.json')) as RawPackageInfo;
+      pkg = loadJsonFile<RawPackageInfo>(join(repoRoot, 'package.json'));
     }
     return new Env(repoRoot, pkg, options);
   }

@@ -28,13 +28,13 @@ const ThroughputChartContent = ({
     useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
-    metric: {
-      name: 'id',
-      instrument: 'counter',
-      unit,
-      index: indexes,
-      dimensions: [],
-      type: ES_FIELD_TYPES.DOUBLE,
+    metricItem: {
+      metricName: 'id',
+      metricTypes: ['counter'],
+      units: ['count'],
+      dataStream: indexes,
+      fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+      dimensionFields: [],
     },
     color,
     seriesType,
@@ -61,10 +61,11 @@ const ThroughputChartContent = ({
 };
 
 export const ThroughputChart = () => {
-  const { filters, indexes } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields } = useTraceMetricsContext();
   const throughputChart = getThroughputChart({
     indexes,
     filters,
+    metadataFields,
   });
 
   if (!throughputChart) {

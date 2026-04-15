@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 export const SAVED_QUERIES_ID = 'savedQueryList';
 export const SAVED_QUERY_ID = 'savedQuery';
+export const SAVED_QUERY_USERS_ID = 'savedQueryUsers';
 
 export const QUERIES_DROPDOWN_LABEL = i18n.translate(
   'xpack.osquery.savedQueries.dropdown.searchFieldPlaceholder',

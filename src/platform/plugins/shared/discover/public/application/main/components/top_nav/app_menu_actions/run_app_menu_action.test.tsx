@@ -32,12 +32,14 @@ describe('run app menu actions', () => {
         appMenuItem,
         anchorElement,
         services: discoverServiceMock,
+        returnFocus: jest.fn(),
       });
 
       expect(mockRun).toHaveBeenCalledTimes(1);
       expect(mockRun).toHaveBeenCalledWith(
         expect.objectContaining({
           triggerElement: anchorElement,
+          returnFocus: expect.any(Function),
           context: expect.objectContaining({
             onFinishAction: expect.any(Function),
           }),
@@ -62,6 +64,7 @@ describe('run app menu actions', () => {
         appMenuItem,
         anchorElement,
         services: discoverServiceMock,
+        returnFocus: jest.fn(),
       });
 
       expect(mockRun).toHaveBeenCalled();
@@ -87,12 +90,13 @@ describe('run app menu actions', () => {
 
       const anchorElement = document.createElement('div');
       document.body.appendChild(anchorElement);
-      const focusSpy = jest.spyOn(anchorElement, 'focus');
+      const returnFocusMock = jest.fn();
 
       await runAppMenuAction({
         appMenuItem,
         anchorElement,
         services: discoverServiceMock,
+        returnFocus: returnFocusMock,
       });
 
       expect(mockRun).toHaveBeenCalled();
@@ -106,7 +110,7 @@ describe('run app menu actions', () => {
       onFinishAction!();
 
       expect(document.body.querySelectorAll('div').length).toBe(1);
-      expect(focusSpy).toHaveBeenCalled();
+      expect(returnFocusMock).toHaveBeenCalled();
     });
   });
 
@@ -148,7 +152,11 @@ describe('run app menu actions', () => {
       });
 
       const triggerElement = document.createElement('div');
-      enhanced.run?.({ triggerElement, context: { onFinishAction: jest.fn() } });
+      enhanced.run?.({
+        triggerElement,
+        returnFocus: jest.fn(),
+        context: { onFinishAction: jest.fn() },
+      });
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 

@@ -46,7 +46,6 @@ describe('useProjectRouting', () => {
     const mockProjectRouting: ProjectRouting = `alias:_*`;
     mockServices.cps = {
       cpsManager: {
-        getProjectPickerAccess: jest.fn(() => 'enabled'),
         getProjectRouting: jest.fn(() => mockProjectRouting),
         getProjectRouting$: jest.fn(() => mockProjectRouting$),
       },
@@ -67,7 +66,6 @@ describe('useProjectRouting', () => {
 
     mockServices.cps = {
       cpsManager: {
-        getProjectPickerAccess: jest.fn(() => 'enabled'),
         getProjectRouting: jest.fn(() => mockProjectRouting),
         getProjectRouting$: jest.fn(() => mockProjectRouting$),
       },
@@ -82,7 +80,6 @@ describe('useProjectRouting', () => {
     const mockProjectRouting: ProjectRouting = `_alias:_origin`;
     mockServices.cps = {
       cpsManager: {
-        getProjectPickerAccess: jest.fn(() => 'enabled'),
         getProjectRouting: jest.fn(() => mockProjectRouting),
         getProjectRouting$: jest.fn(() => mockProjectRouting$),
       },
@@ -115,7 +112,6 @@ describe('useProjectRouting', () => {
 
     mockServices.cps = {
       cpsManager: {
-        getProjectPickerAccess: jest.fn(() => 'enabled'),
         getProjectRouting: jest.fn(() => mockProjectRouting),
         getProjectRouting$: jest.fn(() => mockProjectRouting$),
       },
@@ -158,7 +154,6 @@ describe('useProjectRouting', () => {
 
     mockServices.cps = {
       cpsManager: {
-        getProjectPickerAccess: jest.fn(() => 'enabled'),
         getProjectRouting: jest.fn(() => undefined),
         getProjectRouting$: jest.fn(() => mockProjectRouting$),
       },
@@ -181,7 +176,6 @@ describe('useProjectRouting', () => {
 
     mockServices.cps = {
       cpsManager: {
-        getProjectPickerAccess: jest.fn(() => 'enabled'),
         getProjectRouting: jest.fn(() => mockProjectRouting),
         getProjectRouting$: jest.fn(() => mockProjectRouting$),
       },

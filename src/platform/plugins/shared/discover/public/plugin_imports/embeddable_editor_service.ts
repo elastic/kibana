@@ -6,23 +6,52 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ApplicationStart } from '@kbn/core/public';
 import type {
   DiscoverSessionTab,
   SavedSearchByValueAttributes,
 } from '@kbn/saved-search-plugin/common';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
+
+/**
+ * Specifies the action to be taken for navigating back to an editor.
+ */
+export enum TransferAction {
+  /**
+   * A Cancel operation. Returns to the editor without modifying the original state.
+   */
+  Cancel,
+  /**
+   * A Save Session operation. Updates the saved session and doesn't pass back any serialised state.
+   */
+  SaveSession,
+  /**
+   * A Save By Value operation. Sends back to the editor the serialised updated state for the embeddable.
+   */
+  SaveByValue,
+}
+
+interface TransferOptions {
+  state?: SavedSearchByValueAttributes;
+  path?: string;
+  app?: string;
+}
 
 export class EmbeddableEditorService {
   private embeddableState?: EmbeddableEditorState;
 
   constructor(
-    private application: ApplicationStart,
-    private embeddableStateTransfer: EmbeddableStateTransfer
+    private embeddableStateTransfer: EmbeddableStateTransfer,
+    private application: ApplicationStart
   ) {
     this.embeddableState = embeddableStateTransfer.getIncomingEditorState('discover', true);
   }
+
+  public canSaveToDashboard = (): boolean =>
+    !this.isEmbeddedEditor() &&
+    Boolean(this.application.capabilities.dashboard_v2.show) &&
+    Boolean(this.application.capabilities.dashboard_v2.createNew);
 
   public isByValueEditor = (): boolean => Boolean(this.embeddableState?.valueInput);
 
@@ -31,30 +60,50 @@ export class EmbeddableEditorService {
   public getByValueInput = (): DiscoverSessionTab | undefined =>
     this.embeddableState?.valueInput as DiscoverSessionTab | undefined;
 
-  public transferBackToEditor = (state?: SavedSearchByValueAttributes) => {
+  /**
+   * Resets the embeddable transfer state, ensuring it is cleared in storage and then dropped in memory.
+   */
+  public clearEditorState = () => {
     if (this.embeddableState) {
-      const app = this.embeddableState.originatingApp;
-      const path = this.embeddableState.originatingPath;
-
-      if (app && path) {
-        this.embeddableStateTransfer.clearEditorState('discover');
-        if (state) {
-          this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
-            path,
-            state: [
-              {
-                type: SEARCH_EMBEDDABLE_TYPE,
-                serializedState: { attributes: state },
-                embeddableId: this.embeddableState?.embeddableId,
-              },
-            ],
-          });
-        } else {
-          this.application.navigateToApp(app, {
-            path,
-          });
-        }
-      }
+      this.embeddableStateTransfer.clearEditorState('discover');
+      this.embeddableState = undefined;
     }
   };
+
+  public transferBackToEditor(
+    action: TransferAction.Cancel | TransferAction.SaveSession,
+    options?: Omit<TransferOptions, 'state'>
+  ): void;
+  public transferBackToEditor(
+    action: TransferAction.SaveByValue,
+    options: Required<Pick<TransferOptions, 'state'>> & Omit<TransferOptions, 'state'>
+  ): void;
+  public transferBackToEditor(action: TransferAction, options?: TransferOptions): void;
+  /**
+   * Initiates a navigation back to the editing application, either cancelling the current action to return
+   * or passing a state for an embeddable to receive an updated view.
+   *
+   * **NOTE**: Cancelling will never pass an updated state, so the state param is ignored for cancel actions.
+   */
+  public transferBackToEditor(action: TransferAction, options?: TransferOptions) {
+    const app = options?.app || this.embeddableState?.originatingApp;
+    const path = options?.path || this.embeddableState?.originatingPath;
+
+    if (app && path) {
+      this.embeddableStateTransfer.clearEditorState('discover');
+      this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
+        path,
+        state:
+          action !== TransferAction.Cancel
+            ? [
+                {
+                  type: SEARCH_EMBEDDABLE_TYPE,
+                  serializedState: { attributes: options?.state },
+                  embeddableId: this.embeddableState?.embeddableId,
+                },
+              ]
+            : [],
+      });
+    }
+  }
 }

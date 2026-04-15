@@ -13,6 +13,7 @@ import type {
   ChatAgentEvent,
   AgentCapabilities,
   AgentConfigurationOverrides,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -23,14 +24,17 @@ import type {
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
+  WritableSkillsStore,
   AttachmentsService,
   PromptManager,
   ConversationStateManager,
   SkillsService,
+  PluginsService,
   ToolManager,
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
+import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 
 export type AgentHandlerFn = (
@@ -50,6 +54,16 @@ export interface AgentHandlerParams {
 export interface AgentHandlerReturn {
   /** The plain result of the agent */
   result: AgentResponse;
+}
+
+/**
+ * Experimental features configuration for agent builder.
+ */
+export interface ExperimentalFeatures {
+  /** Whether the filestore feature is enabled */
+  filestore: boolean;
+  /** Whether the skills feature is enabled */
+  skills: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -98,6 +112,10 @@ export interface AgentHandlerContext {
    */
   skills: SkillsService;
   /**
+   * Plugins service to resolve plugin-contributed skill IDs during execution.
+   */
+  plugins: PluginsService;
+  /**
    * Tool manager to manage active tools for the agent.
    */
   toolManager: ToolManager;
@@ -105,6 +123,11 @@ export interface AgentHandlerContext {
    * Result store to access and add tool results during execution.
    */
   resultStore: WritableToolResultStore;
+  /**
+   * Skills store to populate with filtered skills during execution.
+   * Backs the skills volume in the virtual filesystem.
+   */
+  skillsStore: WritableSkillsStore;
   /**
    * Attachment state manager to manage conversation attachments during execution.
    */
@@ -126,9 +149,18 @@ export interface AgentHandlerContext {
    */
   logger: Logger;
   /**
+   * Hooks service for agent lifecycle interception.
+   */
+  hooks: AgentBuilderHooks;
+  /**
    * File store to access data from the agent's virtual filesystem
    */
   filestore: IFileStore;
+  /**
+   * Experimental features configuration for this agent execution.
+   * Determined by the UI setting at the start of execution.
+   */
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -170,6 +202,10 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
+  /**
+   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
+   */
+  action?: ConversationAction;
 }
 
 export interface AgentResponse {

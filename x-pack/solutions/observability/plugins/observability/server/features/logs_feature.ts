@@ -61,6 +61,9 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
         alerting: {
           rule: {
             all: logsAlertingFeatures,
+            enable: logsAlertingFeatures,
+            manual_run: logsAlertingFeatures,
+            manage_rule_settings: logsAlertingFeatures,
           },
           alert: {
             all: logsAlertingFeatures,

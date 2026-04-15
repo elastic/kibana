@@ -368,9 +368,7 @@
                 "type": "number",
                 "tags": [],
                 "label": "startTime",
-                "description": [
-                  "Set an optional start time for the request"
-                ],
+                "description": [],
                 "signature": [
                   "number"
                 ],
@@ -1842,7 +1840,7 @@
               "tags": [],
               "label": "adapters",
               "description": [
-                "- An object of adapters. This should be the same\nyou would pass into `open`."
+                "- An object of adapters. This should be the same"
               ],
               "signature": [
                 {
@@ -1911,7 +1909,7 @@
               "tags": [],
               "label": "adapters",
               "description": [
-                "- An object of adapters for which you want to show\nthe inspector panel."
+                "- An object of adapters for which you want to show"
               ],
               "signature": [
                 {
@@ -2114,9 +2112,7 @@
                 "type": "number",
                 "tags": [],
                 "label": "startTime",
-                "description": [
-                  "Set an optional start time for the request"
-                ],
+                "description": [],
                 "signature": [
                   "number"
                 ],

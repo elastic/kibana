@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import {
-  MAX_FILE_SIZE_BYTES,
+  ABSOLUTE_MAX_FILE_SIZE_BYTES,
   MAX_TIKA_FILE_SIZE_BYTES,
 } from '@kbn/file-upload-common/src/constants';
 import { omit } from 'lodash';
@@ -111,7 +111,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       options: {
         body: {
           accepts: ['text/*', 'application/json'],
-          maxBytes: MAX_FILE_SIZE_BYTES,
+          maxBytes: ABSOLUTE_MAX_FILE_SIZE_BYTES,
         },
       },
     })
@@ -160,7 +160,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: MAX_FILE_SIZE_BYTES,
+          maxBytes: ABSOLUTE_MAX_FILE_SIZE_BYTES,
         },
       },
       security: {
@@ -219,7 +219,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: MAX_FILE_SIZE_BYTES,
+          maxBytes: ABSOLUTE_MAX_FILE_SIZE_BYTES,
         },
       },
       security: {
@@ -413,20 +413,22 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
               /** Query to match documents in the index(es). */
               query: schema.maybe(schema.any()),
               runtimeMappings: schema.maybe(runtimeMappingsSchema),
+              projectRouting: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
         try {
-          const { index, timeFieldName, query, runtimeMappings } = request.body;
+          const { index, timeFieldName, query, runtimeMappings, projectRouting } = request.body;
           const esClient = (await context.core).elasticsearch.client;
           const resp = await getTimeFieldRange(
             esClient,
             index,
             timeFieldName,
             query,
-            runtimeMappings
+            runtimeMappings,
+            projectRouting
           );
 
           return response.ok({

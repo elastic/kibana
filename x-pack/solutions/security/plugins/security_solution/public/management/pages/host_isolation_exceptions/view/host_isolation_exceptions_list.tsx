@@ -32,25 +32,31 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageLabels = Object.freeze({
   pageImportButtonTitle: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.pageImportButtonTitle',
     {
-      defaultMessage: 'Import host isolation exception list',
+      defaultMessage: 'Import host isolation exceptions',
     }
   ),
   pageExportButtonTitle: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.pageExportButtonTitle',
     {
-      defaultMessage: 'Export host isolation exception list',
+      defaultMessage: 'Export host isolation exceptions',
     }
   ),
   pageExportSuccessToastTitle: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.exportSuccessToastTitle',
     {
-      defaultMessage: 'Host isolation exception list exported successfully',
+      defaultMessage: 'Host isolation exceptions exported successfully',
     }
   ),
   pageExportErrorToastTitle: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.exportErrorToastTitle',
     {
-      defaultMessage: 'Host isolation exception list export failed',
+      defaultMessage: 'Host isolation exceptions export failed',
+    }
+  ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'You can only import host isolation exceptions here.',
     }
   ),
   getShowingCountLabel: (total) =>
@@ -130,6 +136,10 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageLabels = Object.freeze({
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add host isolation exception' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import host isolation exceptions' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.searchPlaceholderInfo',

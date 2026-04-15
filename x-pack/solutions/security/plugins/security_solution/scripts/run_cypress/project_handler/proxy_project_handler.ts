@@ -50,9 +50,20 @@ export class ProxyHandler extends ProjectHandler {
       process.env.KIBANA_MKI_QUALITY_GATE &&
       process.env.KIBANA_MKI_QUALITY_GATE === '1' &&
       !monitoringQualityGate;
-    const override = commit && commit !== '' ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;
-    if (override && !qualityGate) {
-      const kibanaOverrideImage = `${override?.substring(0, 12)}`;
+
+    // KIBANA_DOCKER_IMAGE takes highest priority -- it is a fully qualified image tag.
+    const dockerImageOverride = process.env.KIBANA_DOCKER_IMAGE;
+    const commitOverride = commit && commit !== '' ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;
+
+    if (dockerImageOverride && !qualityGate) {
+      this.log.info(`Overriding Kibana image with KIBANA_DOCKER_IMAGE: ${dockerImageOverride}`);
+      body.overrides = {
+        kibana: {
+          docker_image: dockerImageOverride,
+        },
+      };
+    } else if (commitOverride && !qualityGate) {
+      const kibanaOverrideImage = `${commitOverride?.substring(0, 12)}`;
       this.log.info(`Kibana Image Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`);
       this.log.info(
         `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:git-${kibanaOverrideImage}`

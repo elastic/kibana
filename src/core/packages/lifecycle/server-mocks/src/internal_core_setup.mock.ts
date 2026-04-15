@@ -14,6 +14,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
@@ -54,6 +55,7 @@ export function createInternalCoreSetupMock() {
     logging: loggingServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
     deprecations: deprecationsServiceMock.createInternalSetupContract(),
+    userActivity: userActivityServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     coreUsageData: coreUsageDataServiceMock.createSetupContract(),
     customBranding: customBrandingServiceMock.createSetupContract(),

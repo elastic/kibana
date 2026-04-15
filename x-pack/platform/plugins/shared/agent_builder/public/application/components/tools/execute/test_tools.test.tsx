@@ -207,13 +207,12 @@ describe('ToolTestFlyout date-time picker', () => {
       return datePicker;
     });
 
-  it('renders date-time picker with default ISO string value', async () => {
+  it('renders date-time picker without a default value', async () => {
     const { container } = renderComponent();
     const datePicker = await waitForDatePicker(container);
 
     const input = datePicker?.querySelector('input');
-    // Displays local time using the browser/Intl locale format (not an ISO string).
-    expect(input?.value).toMatch(/^\d{1,2}\/\d{1,2}\/\d{4} \d{1,2}:\d{2} [AP]M$/);
+    expect(input?.value).toBe('');
   });
 
   it('converts date picker onChange to ISO string format', async () => {

@@ -132,7 +132,13 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
         expect(body.items.length).to.eql(1);
-        const { id, updated_at: updatedAt, version, ...rest } = body.items[0];
+        const {
+          id,
+          updated_at: updatedAt,
+          created_at: createdAt,
+          version,
+          ...rest
+        } = body.items[0];
         expectSnapshot(rest).toMatch();
       });
 
@@ -163,6 +169,56 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/agent_policies?kuery='test%3A'`)
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
+      });
+    });
+
+    describe('GET /api/fleet/agent_policies/:id/full', () => {
+      let fullPolicyTestAgentPolicyId: string;
+
+      before(async () => {
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+        const { body: res } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: 'Test full policy', namespace: 'default' })
+          .expect(200);
+        fullPolicyTestAgentPolicyId = res.item.id;
+      });
+
+      after(async () => {
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: fullPolicyTestAgentPolicyId })
+          .expect(200);
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
+      it('should return 400 if revision and kubernetes or standalone are used together', async () => {
+        await supertest
+          .get(
+            `/api/fleet/agent_policies/${fullPolicyTestAgentPolicyId}/full?revision=1&kubernetes=true`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+
+        await supertest
+          .get(
+            `/api/fleet/agent_policies/${fullPolicyTestAgentPolicyId}/full?revision=1&standalone=true`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return fleet-server document if revision is provided', async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${fullPolicyTestAgentPolicyId}/full?revision=1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(body.item.id).to.eql(fullPolicyTestAgentPolicyId);
       });
     });
 
@@ -521,6 +577,49 @@ export default function (providerContext: FtrProviderContext) {
         expect(policy.package_policies[0].name).be('system-457');
       });
 
+      it('should create unique system package policy names when creating multiple policies concurrently with sys_monitoring', async () => {
+        const concurrentCount = 3;
+
+        const results = await Promise.all(
+          new Array(concurrentCount).fill(null).map((_, i) =>
+            supertest
+              .post(`/api/fleet/agent_policies`)
+              .query({ sys_monitoring: true })
+              .set('kbn-xsrf', 'xxxx')
+              .send({
+                name: `Concurrent sys monitoring policy ${Date.now()}-${i}`,
+                namespace: 'default',
+                force: true,
+              })
+              .expect(200)
+          )
+        );
+
+        const policyIds = results.map((r: any) => r.body.item.id);
+
+        // Use _bulk_get with explicit IDs to avoid pagination issues and get full package policy details
+        const {
+          body: { items: createdPolicies },
+        } = await supertest
+          .post('/api/fleet/agent_policies/_bulk_get')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: policyIds, full: true })
+          .expect(200);
+
+        const systemPolicyNames: string[] = createdPolicies.map(
+          (p: any) => p.package_policies[0].name
+        );
+
+        // All system package policy names must be unique — no duplicates from the race condition
+        const uniqueNames = new Set(systemPolicyNames);
+        expect(uniqueNames.size).to.equal(concurrentCount);
+
+        // Names must follow the numeric scheme (system-N), not fall back to UUID suffixes
+        systemPolicyNames.forEach((name) => {
+          expect(name).to.match(/^system-\d+$/);
+        });
+      });
+
       it('should create policy with global data tags given valid tags', async () => {
         const {
           body: { item: createdPolicy },
@@ -807,7 +906,7 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test',
           })
           .expect(200);
-        const { id, updated_at, version, ...newPolicy } = item;
+        const { id, updated_at, created_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
           name: 'Copied policy',
@@ -823,6 +922,8 @@ export default function (providerContext: FtrProviderContext) {
           is_protected: false,
           space_ids: ['default'],
           supports_agentless: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
@@ -1318,7 +1419,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1378,7 +1479,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1538,7 +1639,7 @@ export default function (providerContext: FtrProviderContext) {
             force: true,
           })
           .expect(200);
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
         createdPolicyIds.push(updatedPolicy.id);
 
         expect(newPolicy).to.eql({
@@ -1598,7 +1699,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1715,7 +1816,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -2034,6 +2135,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           package_policies: packagePolicies,
           id,
+          created_at: createdAt,
           space_ids: spaceIds,
           updated_at: updatedAt,
           version: policyVersion,
@@ -2538,6 +2640,78 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/agent_policies/${requestBody.id}`)
           .set('kbn-xsrf', 'xxxx')
           .expect(404);
+      });
+    });
+
+    describe('GET /api/fleet/agent_policies agents_per_version', () => {
+      let policyId: string;
+      const agentId1 = `agent-per-version-1-${Date.now()}`;
+      const agentId2 = `agent-per-version-2-${Date.now()}`;
+      const agentId3 = `agent-per-version-3-${Date.now()}`;
+
+      before(async () => {
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test agents_per_version policy',
+            namespace: 'default',
+            force: true,
+          })
+          .expect(200);
+        policyId = agentPolicyResponse.item.id;
+
+        await fleetAndAgents.generateAgent('online', agentId1, policyId, '8.15.0');
+        await fleetAndAgents.generateAgent('online', agentId2, policyId, '8.16.0');
+        await fleetAndAgents.generateAgent('online', agentId3, policyId, '8.16.0');
+      });
+
+      after(async () => {
+        for (const agentId of [agentId1, agentId2, agentId3]) {
+          await es.delete({ index: '.fleet-agents', id: agentId, refresh: true });
+        }
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: policyId })
+          .expect(200);
+      });
+
+      it('should return agents_per_version when getting a single agent policy', async () => {
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${policyId}`).expect(200);
+
+        const agentsPerVersion = body.item.agents_per_version;
+        expect(agentsPerVersion).to.be.an('array');
+        expect(agentsPerVersion.length).to.eql(2);
+
+        const sorted = [...agentsPerVersion].sort((a: any, b: any) =>
+          a.version.localeCompare(b.version)
+        );
+        expect(sorted[0]).to.eql({ version: '8.15.0', count: 1 });
+        expect(sorted[1]).to.eql({ version: '8.16.0', count: 2 });
+      });
+
+      it('should return agents_per_version when listing agent policies with withAgentCount', async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies?withAgentCount=true&perPage=100`)
+          .expect(200);
+
+        const policy = body.items.find((p: { id: string }) => p.id === policyId);
+        expect(policy).to.be.ok();
+
+        const agentsPerVersion = policy.agents_per_version;
+        expect(agentsPerVersion).to.be.an('array');
+        expect(agentsPerVersion.length).to.eql(2);
+
+        const sorted = [...agentsPerVersion].sort((a: any, b: any) =>
+          a.version.localeCompare(b.version)
+        );
+        expect(sorted[0]).to.eql({ version: '8.15.0', count: 1 });
+        expect(sorted[1]).to.eql({ version: '8.16.0', count: 2 });
       });
     });
   });

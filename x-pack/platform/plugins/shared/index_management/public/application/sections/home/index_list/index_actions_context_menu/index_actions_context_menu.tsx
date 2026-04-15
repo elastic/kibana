@@ -11,7 +11,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { every } from 'lodash';
 import type { EuiPopoverProps, EuiButtonProps } from '@elastic/eui';
-import { EuiButton, EuiContextMenu, EuiPopover, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenu,
+  EuiPopover,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
@@ -21,9 +31,10 @@ import {
   MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX,
   MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX,
 } from '../../../../../../common/constants';
-import { getIndexDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
+import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
 import type { Index } from '../../../../../../common';
+import { type DocCountApi, RequestResultType } from '../index_table/get_doc_count';
 import { ModalHost, type ModalHostHandles } from './modal_host/modal_host';
 
 export interface IndexActionsContextMenuProps {
@@ -65,6 +76,9 @@ export interface IndexActionsContextMenuProps {
   // this function is called to "refresh" the indices data after and extension service action that uses a modal
   reloadIndices: () => void;
 
+  // observable API for doc counts
+  docCountApi?: DocCountApi;
+
   /**
    * Props added to use the context menu on the new index details page
    */
@@ -80,9 +94,9 @@ export const IndexActionsContextMenu = ({
   indices,
   isOnListView,
   resetSelection,
-  anchorPosition = 'rightUp',
+  anchorPosition,
   iconSide = 'right',
-  iconType = 'arrowDown',
+  iconType = 'chevronSingleDown',
   label,
   closeIndices,
   openIndices,
@@ -92,6 +106,7 @@ export const IndexActionsContextMenu = ({
   forcemergeIndices,
   deleteIndices,
   indexStatusByName,
+  docCountApi,
   performExtensionAction,
   reloadIndices,
   fill = true,
@@ -101,22 +116,53 @@ export const IndexActionsContextMenu = ({
   const {
     services: { extensionsService },
     plugins: { reindexService },
-    core: { getUrlForApp, application, http },
+    core: { getUrlForApp },
     history,
     config: { enableIndexActions, isServerless },
   } = useAppContext();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const modalRef = useRef<ModalHostHandles | null>(null);
+  const { euiTheme } = useEuiTheme();
+  const docCountMap = useObservable(docCountApi?.getObservable() ?? EMPTY);
+
+  const computedAnchorPosition: EuiPopoverProps['anchorPosition'] =
+    anchorPosition ?? (isOnListView ? 'downLeft' : 'downRight');
+
+  const popoverStyles = css`
+    overflow-x: hidden;
+    max-height: min(60vh, calc(100vh - ${euiTheme.size.xxxl} - ${euiTheme.size.m}));
+    max-width: calc(100vw - ${euiTheme.size.xl});
+    @supports (height: 100dvh) {
+      max-height: min(60dvh, calc(100dvh - ${euiTheme.size.xxxl} - ${euiTheme.size.m}));
+    }
+    @supports (width: 100dvw) {
+      max-width: calc(100dvw - ${euiTheme.size.xl});
+    }
+  `;
 
   const onButtonClick = () => {
+    // When opening for a single index, trigger a doc-count fetch if neither the
+    // index data nor the observable cache already has a result. Without this,
+    // isConvertableToLookupIndex returns false until the index list page
+    // populates the count, so the action may appear disabled incorrectly.
+    if (!isPopoverOpen && indexNames.length === 1 && docCountApi) {
+      const indexName = indexNames[0];
+      const selectedIndex = indices.find((index) => index.name === indexName);
+      if (selectedIndex?.documents === undefined && !docCountMap?.[indexName]) {
+        docCountApi.getByName(indexName);
+      }
+    }
     setIsPopoverOpen((prevState) => !prevState);
   };
 
-  const closePopoverAndExecute = (func: () => void) => {
+  const closePopoverAndExecute = async (func: () => void | Promise<void>) => {
     setIsPopoverOpen(false);
-    func();
-    resetSelection?.();
+    try {
+      await func();
+    } finally {
+      resetSelection?.();
+    }
   };
 
   const closePopover = () => {
@@ -125,8 +171,16 @@ export const IndexActionsContextMenu = ({
 
   const isConvertableToLookupIndex = (indexName: string) => {
     const selectedIndex = indices.find((index) => index.name === indexName);
+    if (!selectedIndex) {
+      return false;
+    }
 
-    if (!selectedIndex || selectedIndex.documents === undefined) {
+    const docCount = docCountMap?.[indexName];
+    const documents =
+      selectedIndex.documents ??
+      (docCount?.status === RequestResultType.Success ? docCount.count : undefined);
+
+    if (documents === undefined) {
       return false;
     }
 
@@ -136,8 +190,7 @@ export const IndexActionsContextMenu = ({
     }
 
     const isWithinDocumentLimit =
-      selectedIndex.documents >= 0 &&
-      selectedIndex.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX;
+      documents >= 0 && documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX;
 
     const hasSinglePrimaryShard =
       Number(selectedIndex.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX;
@@ -165,16 +218,9 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index overview',
         }),
         onClick: () => {
-          closePopoverAndExecute(() => {
-            navigateToIndexDetailsPage(
-              indexNames[0],
-              indicesListURLParams,
-              extensionsService,
-              application,
-              http,
-              IndexDetailsSection.Overview
-            );
-          });
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Overview)
+          );
         },
       });
       items.push({
@@ -183,16 +229,9 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index settings',
         }),
         onClick: () => {
-          closePopoverAndExecute(() => {
-            navigateToIndexDetailsPage(
-              indexNames[0],
-              indicesListURLParams,
-              extensionsService,
-              application,
-              http,
-              IndexDetailsSection.Settings
-            );
-          });
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Settings)
+          );
         },
       });
       items.push({
@@ -201,16 +240,9 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index mapping',
         }),
         onClick: () => {
-          closePopoverAndExecute(() => {
-            navigateToIndexDetailsPage(
-              indexNames[0],
-              indicesListURLParams,
-              extensionsService,
-              application,
-              http,
-              IndexDetailsSection.Mappings
-            );
-          });
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Mappings)
+          );
         },
       });
       if (allOpen && enableIndexActions) {
@@ -432,17 +464,23 @@ export const IndexActionsContextMenu = ({
         reloadIndices={reloadIndices}
         extensionsService={extensionsService}
         getUrlForApp={getUrlForApp}
-        application={application}
-        http={http}
+        history={history}
       />
       <EuiPopover
         id="contextMenuIndices"
+        aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.popoverAriaLabel', {
+          defaultMessage: 'Index actions menu',
+        })}
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
-        anchorPosition={anchorPosition}
+        anchorPosition={computedAnchorPosition}
         repositionOnScroll
+        repositionToCrossAxis={false}
+        panelProps={{
+          css: popoverStyles,
+        }}
       >
         <EuiContextMenu data-test-subj="indexContextMenu" initialPanelId={0} panels={panels} />
       </EuiPopover>

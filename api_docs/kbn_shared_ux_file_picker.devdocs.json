@@ -75,7 +75,7 @@
           "<Kind>"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-        "lineNumber": 38,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -93,7 +93,7 @@
               "Kind"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -119,7 +119,7 @@
               "<unknown>) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -142,7 +142,7 @@
                   "<unknown>"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-                "lineNumber": 46,
+                "lineNumber": 47,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -164,7 +164,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -192,7 +192,7 @@
               "<unknown>[]) => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -215,7 +215,7 @@
                   "<unknown>[]"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-                "lineNumber": 54,
+                "lineNumber": 55,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -245,7 +245,7 @@
               "<unknown>[]) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -268,7 +268,7 @@
                   "<unknown>[]"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-                "lineNumber": 58,
+                "lineNumber": 59,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -290,7 +290,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -308,7 +308,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -328,7 +328,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

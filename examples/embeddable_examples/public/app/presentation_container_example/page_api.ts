@@ -10,13 +10,9 @@
 import { BehaviorSubject, Subject, combineLatest, map, merge, tap } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import type { TimeRange } from '@kbn/es-query';
-import type { PanelPackage } from '@kbn/presentation-containers';
-import {
-  childrenUnsavedChanges$,
-  combineCompatibleChildrenApis,
-} from '@kbn/presentation-containers';
 import { isEqual, omit } from 'lodash';
 import type {
+  PanelPackage,
   PublishesDataLoading,
   PublishingSubject,
   ViewMode,
@@ -24,7 +20,8 @@ import type {
 import {
   apiHasSerializableState,
   apiPublishesDataLoading,
-  apiPublishesUnsavedChanges,
+  childrenUnsavedChanges$,
+  combineCompatibleChildrenApis,
 } from '@kbn/presentation-publishing';
 import { lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
@@ -158,6 +155,31 @@ export function getPageApi() {
     unsavedChangesSessionStorage.save(serializePage());
   });
 
+  const applySerializedState = (state?: PageState) => {
+    const nextState = state ?? initialState;
+    timeRange$.next(nextState.timeRange);
+    const { layout: nextLayout, childState: nextChildState } = deserializePanels(nextState.panels);
+    layout$.next(nextLayout);
+    currentChildState = nextChildState;
+    let childrenModified = false;
+    const currentChildren = { ...children$.value };
+    for (const uuid of Object.keys(currentChildren)) {
+      const existsInNextLayout = nextLayout.some(({ id }) => id === uuid);
+      if (existsInNextLayout) {
+        const child = currentChildren[uuid];
+        if (apiHasSerializableState(child)) {
+          void child.applySerializedState(nextChildState[uuid]);
+        }
+      } else {
+        // if reset resulted in panel removal, we need to update the list of children
+        delete currentChildren[uuid];
+        delete currentChildState[uuid];
+        childrenModified = true;
+      }
+    }
+    if (childrenModified) children$.next(currentChildren);
+  };
+
   return {
     cleanUp: () => {
       childrenDataLoadingSubscripiton.unsubscribe();
@@ -177,6 +199,9 @@ export function getPageApi() {
         lastSavedState$.next(serializedPage);
         lastSavedStateSessionStorage.save(serializedPage);
         unsavedChangesSessionStorage.clear();
+      },
+      onReset: () => {
+        applySerializedState(lastSavedState$.value);
       },
       layout$,
       setChild: (id: string, api: unknown) => {
@@ -221,30 +246,8 @@ export function getPageApi() {
       lastSavedStateForChild$: (panelId: string) =>
         lastSavedState$.pipe(map(() => getLastSavedStateForChild(panelId))),
       getLastSavedStateForChild,
-      resetUnsavedChanges: () => {
-        const lastSavedState = lastSavedState$.value;
-        timeRange$.next(lastSavedState.timeRange);
-        const { layout: lastSavedLayout, childState: lastSavedChildState } = deserializePanels(
-          lastSavedState.panels
-        );
-        layout$.next(lastSavedLayout);
-        currentChildState = lastSavedChildState;
-        let childrenModified = false;
-        const currentChildren = { ...children$.value };
-        for (const uuid of Object.keys(currentChildren)) {
-          const existsInLastSavedLayout = lastSavedLayout.some(({ id }) => id === uuid);
-          if (existsInLastSavedLayout) {
-            const child = currentChildren[uuid];
-            if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
-          } else {
-            // if reset resulted in panel removal, we need to update the list of children
-            delete currentChildren[uuid];
-            delete currentChildState[uuid];
-            childrenModified = true;
-          }
-        }
-        if (childrenModified) children$.next(currentChildren);
-      },
+      serializeState: serializePage,
+      applySerializedState,
       timeRange$,
       hasUnsavedChanges$,
     } as PageApi,

@@ -14,6 +14,7 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { LayersFieldFormats } from './layers';
 import type { DatatablesWithFormatInfo } from './data_layers';
+import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 
 describe('color_assignment', () => {
   const tables: Record<string, Datatable> = {
@@ -320,6 +321,73 @@ describe('color_assignment', () => {
 
       // if the split column is missing, assume it is the first splitted series. One series in front - 0/y1
       expect(assignments.palette1.getRank(layers[0].layerId, 'test2')).toEqual(1);
+    });
+
+    it('should handle multiple split accessors by joining them with separator', () => {
+      const multiSplitTable: Datatable = {
+        type: 'datatable',
+        columns: [
+          { id: 'split1', name: '', meta: { type: 'string' } },
+          { id: 'split2', name: '', meta: { type: 'string' } },
+          { id: 'y1', name: '', meta: { type: 'number' } },
+        ],
+        rows: [
+          { split1: 'A', split2: 'X' },
+          { split1: 'A', split2: 'Y' },
+          { split1: 'B', split2: 'X' },
+        ],
+      };
+
+      const multiSplitFieldFormats = {
+        first: {
+          splitSeriesAccessors: {
+            split1: {
+              format: { id: 'string' },
+              formatter: {
+                convert: (x) => x,
+              } as FieldFormat,
+            },
+            split2: {
+              format: { id: 'string' },
+              formatter: {
+                convert: (x) => x,
+              } as FieldFormat,
+            },
+          },
+        },
+      } as unknown as LayersFieldFormats;
+
+      const multiSplitFormattedDatatables: DatatablesWithFormatInfo = {
+        first: {
+          table: multiSplitTable,
+          formattedColumns: {},
+          invertedRawValueMap: new Map(multiSplitTable.columns.map((c) => [c.id, new Map()])),
+        },
+      };
+
+      const multiSplitLayer: DataLayerConfig = {
+        ...layers[0],
+        splitAccessors: ['split1', 'split2'],
+        accessors: ['y1'],
+        table: multiSplitTable,
+      };
+
+      const assignments = getColorAssignments(
+        [multiSplitLayer],
+        titles,
+        multiSplitFieldFormats,
+        multiSplitFormattedDatatables
+      );
+
+      expect(assignments.palette1.totalSeriesCount).toEqual(3);
+
+      const expectedSeriesName1 = `A${MULTI_FIELD_KEY_SEPARATOR}X`;
+      const expectedSeriesName2 = `A${MULTI_FIELD_KEY_SEPARATOR}Y`;
+      const expectedSeriesName3 = `B${MULTI_FIELD_KEY_SEPARATOR}X`;
+
+      expect(assignments.palette1.getRank(multiSplitLayer.layerId, expectedSeriesName1)).toEqual(0);
+      expect(assignments.palette1.getRank(multiSplitLayer.layerId, expectedSeriesName2)).toEqual(1);
+      expect(assignments.palette1.getRank(multiSplitLayer.layerId, expectedSeriesName3)).toEqual(2);
     });
   });
 });

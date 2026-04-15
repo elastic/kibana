@@ -118,6 +118,11 @@ describe('transaction_details/distribution', () => {
           status: useFetcherModule.FETCH_STATUS.SUCCESS,
         }))
         .mockImplementationOnce(() => ({
+          data: { traceItems: [], errors: [], agentMarks: {} },
+          refetch: () => {},
+          status: useFetcherModule.FETCH_STATUS.SUCCESS,
+        }))
+        .mockImplementationOnce(() => ({
           data: { percentileThresholdValue: 1234, overallHistogram: [] },
           refetch: () => {},
           status: useFetcherModule.FETCH_STATUS.SUCCESS,

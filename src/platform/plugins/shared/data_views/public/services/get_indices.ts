@@ -10,7 +10,6 @@
 import { sortBy } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { sanitizeProjectRoutingForES } from '@kbn/es-query';
 import type { Tag } from '../types';
 import { INDEX_PATTERN_TYPE } from '../types';
 import type { MatchedItem, ResolveIndexResponse } from '../types';
@@ -119,7 +118,7 @@ export async function getIndices({
     pattern,
     showAllIndices,
     isRollupIndex,
-    projectRouting: sanitizeProjectRoutingForES(projectRouting),
+    projectRouting,
   }).catch(() => []);
 }
 

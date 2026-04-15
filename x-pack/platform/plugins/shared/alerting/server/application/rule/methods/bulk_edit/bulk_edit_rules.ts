@@ -198,15 +198,20 @@ async function ensureAuthorizationForBulkUpdate(
     return;
   }
 
+  const needsAuth = new Set<BulkEditFields>();
   for (const operation of operations) {
-    const { field } = operation;
-    if (field === 'snoozeSchedule' || field === 'apiKey') {
-      try {
-        await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-        break;
-      } catch (error) {
-        throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);
-      }
+    if (operation.field === 'snoozeSchedule' || operation.field === 'apiKey') {
+      needsAuth.add(operation.field);
+    }
+  }
+
+  if (needsAuth.size > 0) {
+    try {
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+    } catch (error) {
+      throw Error(
+        `Rule not authorized for bulk ${[...needsAuth].join(', ')} update - ${error.message}`
+      );
     }
   }
 }

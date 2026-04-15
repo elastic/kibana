@@ -12,8 +12,10 @@ import {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,
   type ResolveIndexResponse,
+  type ESQLFieldWithMetadata,
   SOURCES_TYPES,
 } from '@kbn/esql-types';
+import type { EsqlFieldType } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSourceResult, InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 import { getListOfCCSIndices } from '../lookup/utils';
@@ -55,12 +57,14 @@ export class EsqlService {
       mode,
     })) as ResolveIndexResponse;
 
+    const mappedMode = this.getIndexSourceType(mode);
+
     sources.indices?.forEach((index) => {
-      indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
+      indices.push({ name: index.name, mode: mappedMode, aliases: index.aliases ?? [] });
     });
 
     sources.data_streams?.forEach((dataStream) => {
-      indices.push({ name: dataStream.name, mode, aliases: dataStream.aliases ?? [] });
+      indices.push({ name: dataStream.name, mode: mappedMode, aliases: dataStream.aliases ?? [] });
     });
 
     const crossClusterCommonIndices = remoteClusters
@@ -77,26 +81,39 @@ export class EsqlService {
   /**
    * Get all indices, aliases, and data streams for ES|QL sources autocomplete.
    * @param scope The scope to retrieve indices for (local or all).
+   * @param projectRouting Optional CPS project routing value. When provided it is forwarded
+   *   directly to Elasticsearch as `project_routing` so that index resolution reflects the
+   *   project picker selection or an explicit `SET project_routing` pre-statement.
    * @returns A promise that resolves to an array of ESQL source results.
    */
-  public async getAllIndices(scope: 'local' | 'all' = 'local'): Promise<ESQLSourceResult[]> {
+  public async getAllIndices(
+    scope: 'local' | 'all' | 'remote' = 'local',
+    projectRouting?: string
+  ): Promise<ESQLSourceResult[]> {
     const { client } = this.options;
 
-    // All means local + remote indices (queried with <cluster>:*)
-    const namesToQuery = scope === 'local' ? ['*'] : ['*', '*:*'];
+    const scopeToNames: Record<typeof scope, string[]> = {
+      local: ['*'],
+      remote: ['*:*'],
+      all: ['*', '*:*'],
+    };
+    const namesToQuery = scopeToNames[scope];
 
     // hidden and not, important for finding timeseries mode
     // mode is not returned for time_series datastreams, we need to find it from the indices
     // which are usually hidden
+    const cpsParams = projectRouting ? { project_routing: projectRouting } : {};
     const [allSources, availableSources] = (await Promise.all([
       client.indices.resolveIndex({
         name: namesToQuery,
         expand_wildcards: 'all', // this returns hidden indices too
-      }),
+        ...cpsParams,
+      } as Parameters<typeof client.indices.resolveIndex>[0]),
       client.indices.resolveIndex({
         name: namesToQuery,
         expand_wildcards: 'open',
-      }),
+        ...cpsParams,
+      } as Parameters<typeof client.indices.resolveIndex>[0]),
     ])) as [ResolveIndexResponse, ResolveIndexResponse];
 
     const suggestedIndices = this.processSuggestedIndices(availableSources.indices ?? []);
@@ -172,6 +189,21 @@ export class EsqlService {
   }
 
   /**
+   * Get all ES|QL views from the cluster (GET _query/view).
+   * @returns A promise that resolves to the views response (list of view names and queries).
+   */
+  public async getViews(): Promise<{ views: Array<{ name: string; query: string }> }> {
+    const { client } = this.options;
+    const response = await client.transport.request<{
+      views: Array<{ name: string; query: string }>;
+    }>({
+      method: 'GET',
+      path: '/_query/view',
+    });
+    return response ?? { views: [] };
+  }
+
+  /**
    * Get inference endpoints for a specific task type.
    * @param taskType The type of inference task to retrieve endpoints for.
    * @returns A promise that resolves to the inference endpoints autocomplete result.
@@ -192,5 +224,57 @@ export class EsqlService {
         task_type: endpoint.task_type,
       })),
     };
+  }
+
+  /**
+   * Get enrich policies formatted for ES|QL autocomplete.
+   * @returns A promise that resolves to an array of enrich policy objects.
+   */
+  public async getPolicies(): Promise<
+    Array<{
+      name: string;
+      sourceIndices: string[];
+      matchField: string;
+      enrichFields: string[];
+    }>
+  > {
+    const { client } = this.options;
+
+    const response = await client.enrich.getPolicy();
+    return response.policies.flatMap((p) => {
+      const config = p.config.match ?? p.config.range ?? p.config.geo_match;
+      if (!config?.name) return [];
+      return [
+        {
+          name: config.name,
+          sourceIndices: config.indices as string[],
+          matchField: config.match_field,
+          enrichFields: config.enrich_fields as string[],
+        },
+      ];
+    });
+  }
+
+  /**
+   * Get columns for an ES|QL query by executing it with LIMIT 0.
+   * @param esqlQuery The ES|QL query to get columns for.
+   * @returns A promise that resolves to an array of ESQLFieldWithMetadata.
+   */
+  public async getColumns(esqlQuery: string): Promise<ESQLFieldWithMetadata[]> {
+    const { client } = this.options;
+
+    const response = await client.esql.query({
+      query: `${esqlQuery} | LIMIT 0`,
+      format: 'json',
+    });
+
+    return (
+      (response.columns as Array<{ name: string; type: string }>)?.map((c) => ({
+        name: c.name,
+        type: c.type as EsqlFieldType,
+        hasConflict: false,
+        userDefined: false,
+      })) ?? []
+    );
   }
 }

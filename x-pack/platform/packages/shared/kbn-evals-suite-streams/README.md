@@ -6,10 +6,13 @@ Evaluation suite for Elastic Streams pattern extraction quality.
 
 ```bash
 # Start Scout server
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run evaluations
-node scripts/playwright test --config x-pack/platform/packages/shared/kbn-evals-suite-streams/playwright.config.ts
+node scripts/evals run --suite streams --evaluation-connector-id azure-gpt4o
+
+# Only run pipeline_suggestion
+node scripts/evals run --suite streams --evaluation-connector-id azure-gpt4o pipeline_suggestion
 ```
 
 ## Creating New Datasets
@@ -23,6 +26,7 @@ You can easily create new dataset entries from AI suggestions generated in Kiban
    pbpaste | node --require ./src/setup_node_env/ ./x-pack/platform/packages/shared/kbn-evals-suite-streams/scripts/create_dataset_from_clipboard.ts
    ```
 4. The script will automatically:
+
    - Read the JSON from stdin (piped from clipboard)
    - Generate a dataset entry with appropriate structure
    - Insert it into the correct dataset file with a `🔧 NEW DATASETS GO HERE` marker
@@ -32,6 +36,21 @@ You can easily create new dataset entries from AI suggestions generated in Kiban
    - Adjust expected fields and their types
    - Set appropriate quality thresholds
    - Add any missing metadata
+
+## Parallel Execution
+
+Tests run in parallel across 20 Playwright workers using `fullyParallel: true`. A shared setup/teardown project handles lifecycle:
+
+- **Setup project** (runs once): enables streams, forks child streams from `logs.otel`, indexes synthtrace data
+- **Test projects** (one per connector, fully parallel): all eval tests are stateless and run concurrently
+- **Teardown project** (runs once): disables streams, deletes connectors, cleans up data streams
+
+Connector creation is idempotent (handles 409 conflicts) so multiple workers can safely set up the same connector.
+
+To run a single connector:
+```bash
+node scripts/evals run --suite streams --evaluation-connector-id bedrock-claude --project bedrock-claude
+```
 
 ## Pattern Extraction Evaluation
 

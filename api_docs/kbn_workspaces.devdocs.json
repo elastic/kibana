@@ -418,7 +418,39 @@
             "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/workspaces",
+                "id": "def-server.IWorkspace.exec.$1",
+                "type": "string",
+                "tags": [],
+                "label": "command",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-workspaces/src/types.ts",
+                "lineNumber": 87,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/workspaces",
+                "id": "def-server.IWorkspace.exec.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ExecOptions"
+                ],
+                "path": "src/platform/packages/shared/kbn-workspaces/src/types.ts",
+                "lineNumber": 87,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

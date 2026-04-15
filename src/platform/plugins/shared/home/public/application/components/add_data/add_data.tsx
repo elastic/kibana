@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FC, MouseEvent } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ApplicationStart } from '@kbn/core/public';
 import { MoveData } from '../move_data';
-import { SetupCloudConnect } from '../setup_cloud_connect';
+import { SetupCloudConnect, CalloutSkeleton } from '../setup_cloud_connect';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 
@@ -41,7 +41,7 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
-  const { trackUiMetric } = getServices();
+  const { trackUiMetric, addDataService } = getServices();
   const euiBreakpointM = useEuiMinBreakpoint('m');
   const euiBreakpointL = useEuiMinBreakpoint('l');
   const styles = ({ euiTheme }: UseEuiTheme) =>
@@ -57,10 +57,19 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
       },
     });
 
+  // Check cloud connect status
+  const useCloudConnectStatus = useMemo(
+    () => addDataService.getCloudConnectStatusHook(),
+    [addDataService]
+  );
+  const { isLoading: isCloudConnectStatusLoading, isCloudConnected: isAlreadyConnected } =
+    useCloudConnectStatus();
+
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
   const hasCloudConnectPermission = Boolean(
     application.capabilities.cloudConnect?.show || application.capabilities.cloudConnect?.configure
   );
+  const shouldShowCloudConnectCallout = hasCloudConnectPermission && !isAlreadyConnected;
   if (canAccessIntegrations) {
     return (
       <KibanaPageTemplate.Section
@@ -97,9 +106,9 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButton
                   data-test-subj="homeAddData"
-                  fill={!hasCloudConnectPermission}
+                  fill={false}
                   href={addBasePath('/app/integrations/browse')}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={(event: MouseEvent) => {
                     trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
                     createAppNavigationHandler('/app/integrations/browse')(event);
@@ -130,7 +139,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 <EuiButtonEmpty
                   data-test-subj="uploadFile"
                   href={addBasePath('#/tutorial_directory/fileDataViz')}
-                  iconType="importAction"
+                  iconType="download"
                 >
                   <FormattedMessage
                     id="home.addData.uploadFileButtonLabel"
@@ -144,7 +153,13 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
           <EuiFlexItem>
             {!isCloudEnabled ? (
               hasCloudConnectPermission ? (
-                <SetupCloudConnect addBasePath={addBasePath} application={application} />
+                isCloudConnectStatusLoading ? (
+                  <CalloutSkeleton />
+                ) : shouldShowCloudConnectCallout ? (
+                  <SetupCloudConnect addBasePath={addBasePath} application={application} />
+                ) : (
+                  <MoveData addBasePath={addBasePath} />
+                )
               ) : (
                 <MoveData addBasePath={addBasePath} />
               )

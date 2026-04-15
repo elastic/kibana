@@ -10,7 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { useObservable } from '@kbn/use-observable';
 import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
-import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
+import type { SidebarAppId, SidebarAppStatus } from '@kbn/core-chrome-sidebar';
 
 /** Global sidebar state API */
 export interface UseSidebarApi {
@@ -47,39 +47,44 @@ export function useSidebarWidth(): number {
   return useObservable(sidebar.getWidth$(), sidebar.getWidth());
 }
 
-/** App-specific sidebar API with reactive params */
-export interface UseSidebarAppApi<TParams = unknown> {
-  /** Current params (reactive) */
-  params: TParams;
-  /** Update params (merges with existing) */
-  setParams: (newParams: Partial<TParams>) => void;
+/**
+ * App-specific sidebar API with reactive state and actions.
+ * For stateless apps, `state` and `actions` are undefined.
+ */
+export interface UseSidebarAppApi<TState = undefined, TActions = undefined> {
+  /** Current state (reactive). Undefined for stateless apps. */
+  state: TState;
+  /** Bound actions to modify state. Undefined for stateless apps. */
+  actions: TActions;
+  /** Current app status (reactive) */
+  status: SidebarAppStatus;
   /** Open sidebar to this app */
-  open: (openParams?: Partial<TParams>) => void;
+  open: () => void;
   /** Close sidebar */
   close: () => void;
 }
 
 /** Hook for app-specific sidebar actions and state */
-export function useSidebarApp<TParams = unknown>(appId: SidebarAppId): UseSidebarAppApi<TParams> {
+export function useSidebarApp<TState = undefined, TActions = undefined>(
+  appId: SidebarAppId
+): UseSidebarAppApi<TState, TActions> {
   const sidebar = useSidebarService();
-  const appApi = sidebar.getApp<TParams>(appId);
+  const appApi = sidebar.getApp<TState, TActions>(appId);
 
-  const params = useObservable(appApi.getParams$(), appApi.getParams());
+  const state = useObservable(appApi.getState$(), appApi.getState());
+  const status = useObservable(appApi.getStatus$(), appApi.getStatus());
 
-  const open = useCallback((openParams?: Partial<TParams>) => appApi.open(openParams), [appApi]);
+  const open = useCallback(() => appApi.open(), [appApi]);
   const close = useCallback(() => appApi.close(), [appApi]);
-  const setParams = useCallback(
-    (newParams: Partial<TParams>) => appApi.setParams(newParams),
-    [appApi]
-  );
 
   return useMemo(
     () => ({
-      params,
+      state,
+      actions: appApi.actions,
+      status,
       open,
       close,
-      setParams,
     }),
-    [params, open, close, setParams]
+    [state, appApi.actions, status, open, close]
   );
 }

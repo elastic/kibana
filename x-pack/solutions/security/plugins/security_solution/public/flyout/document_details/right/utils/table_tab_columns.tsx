@@ -60,6 +60,10 @@ export type ColumnsProvider = (providerOptions: {
    * Function to toggle pinned fields
    */
   onTogglePinned: (field: string, action: 'pin' | 'unpin') => void;
+  /**
+   * Resolved entity store id for host/user preview links for this document
+   */
+  entityId?: string;
 }) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
 
 /**
@@ -73,6 +77,7 @@ export const getTableTabColumns: ColumnsProvider = ({
   ruleId,
   isRulePreview,
   onTogglePinned,
+  entityId,
 }) => [
   {
     name: ' ',
@@ -82,7 +87,7 @@ export const getTableTabColumns: ColumnsProvider = ({
         <EuiButtonIcon
           aria-label={isPinned ? UNPIN : PIN}
           className={isPinned ? 'flyout_table__unPinAction' : 'flyout_table__pinAction'}
-          iconType={isPinned ? 'pinFilled' : 'pin'}
+          iconType={isPinned ? 'pinFill' : 'pin'}
           color="text"
           iconSize="m"
           onClick={() => {
@@ -126,6 +131,7 @@ export const getTableTabColumns: ColumnsProvider = ({
             ruleId={ruleId}
             isRulePreview={isRulePreview}
             values={values}
+            entityId={entityId}
           />
         </CellActions>
       );

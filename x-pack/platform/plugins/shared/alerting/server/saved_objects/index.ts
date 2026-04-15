@@ -13,7 +13,11 @@ import type {
 } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { triggersActionsRoute, createRuleFromTemplateRoute } from '@kbn/rule-data-utils';
+import {
+  triggersActionsRoute,
+  createRuleFromTemplateRoute,
+  getRuleDetailsRoute,
+} from '@kbn/rule-data-utils';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
@@ -33,6 +37,7 @@ import {
   ruleTemplateModelVersions,
   rulesSettingsModelVersions,
   gapAutoFillSchedulerModelVersions,
+  uiamApiKeysProvisioningStatusModelVersions,
 } from './model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
@@ -40,8 +45,10 @@ export const RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'alerting_rule_template';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
 export const GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE = 'gap_auto_fill_scheduler';
+export const UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE =
+  'uiam_api_keys_provisioning_status';
 
-export const RuleAttributesToEncrypt = ['apiKey'];
+export const RuleAttributesToEncrypt = ['apiKey', 'uiamApiKey'];
 
 // Use caution when removing items from this array! These fields
 // are used to construct decryption AAD and must be remain in
@@ -119,6 +126,12 @@ export function setupSavedObjects(
       getTitle(ruleSavedObject: SavedObject<RawRule>) {
         return `Rule: [${ruleSavedObject.attributes.name}]`;
       },
+      getInAppUrl: (savedObject: SavedObject<RawRule>) => {
+        return {
+          path: `${triggersActionsRoute}${getRuleDetailsRoute(encodeURIComponent(savedObject.id))}`,
+          uiCapabilitiesPath: 'management.insightsAndAlerting.triggersActions',
+        };
+      },
       onImport(ruleSavedObjects) {
         return {
           warnings: getImportWarnings(ruleSavedObjects),
@@ -146,6 +159,9 @@ export function setupSavedObjects(
         },
         createdAt: {
           type: 'date',
+        },
+        uiamApiKey: {
+          type: 'binary',
         },
       },
     },
@@ -255,6 +271,34 @@ export function setupSavedObjects(
     modelVersions: ruleTemplateModelVersions,
   });
 
+  // Serverless only saved object used to track the status of UIAM API keys provisioning.
+  savedObjects.registerType({
+    name: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        '@timestamp': {
+          type: 'date',
+        },
+        entityId: {
+          type: 'keyword',
+        },
+        entityType: {
+          type: 'keyword',
+        },
+        status: {
+          type: 'keyword',
+        },
+        message: {
+          type: 'text',
+        },
+      },
+    },
+    modelVersions: uiamApiKeysProvisioningStatusModelVersions,
+  });
+
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: RULE_SAVED_OBJECT_TYPE,
@@ -270,7 +314,7 @@ export function setupSavedObjects(
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: API_KEY_PENDING_INVALIDATION_TYPE,
-    attributesToEncrypt: new Set(['apiKeyId']),
+    attributesToEncrypt: new Set(['apiKeyId', 'uiamApiKey']),
     attributesToIncludeInAAD: new Set(['createdAt']),
   });
 

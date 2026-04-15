@@ -283,6 +283,57 @@ describe.each([
     });
   });
 
+  describe('elastic_line_optimized palette', () => {
+    it('should be registered and return colors', () => {
+      const palette = palettes.elastic_line_optimized;
+      expect(palette).toBeDefined();
+      const colors = palette.getCategoricalColors(10);
+      expect(colors).toHaveLength(10);
+    });
+
+    it('should return different colors based on rank at current series', () => {
+      const palette = palettes.elastic_line_optimized;
+      const color1 = palette.getCategoricalColor([
+        {
+          name: 'abc',
+          rankAtDepth: 0,
+          totalSeriesAtDepth: 5,
+        },
+      ]);
+      const color2 = palette.getCategoricalColor([
+        {
+          name: 'abc',
+          rankAtDepth: 1,
+          totalSeriesAtDepth: 5,
+        },
+      ]);
+      expect(color1).not.toEqual(color2);
+    });
+
+    it('should produce a different color order than the default palette', () => {
+      const defaultColors = palettes.default.getCategoricalColors(10);
+      const lineOptimizedColors = palettes.elastic_line_optimized.getCategoricalColors(10);
+      expect(lineOptimizedColors).not.toEqual(defaultColors);
+    });
+
+    it('should generate a system_palette expression', () => {
+      const palette = palettes.elastic_line_optimized;
+      const expression = palette.toExpression({});
+      expect(expression).toEqual({
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'system_palette',
+            arguments: {
+              name: ['elastic_line_optimized'],
+            },
+          },
+        ],
+      });
+    });
+  });
+
   describe('gradient palette', () => {
     const palette = palettes.warm;
 

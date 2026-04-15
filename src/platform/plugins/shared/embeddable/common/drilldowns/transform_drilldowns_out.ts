@@ -8,7 +8,15 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DrilldownsState, DrilldownState } from '../../server';
+import {
+  ON_APPLY_FILTER,
+  ON_CLICK_IMAGE,
+  ON_CLICK_ROW,
+  ON_CLICK_VALUE,
+  ON_OPEN_PANEL_MENU,
+  ON_SELECT_RANGE,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { SerializedDrilldowns, DrilldownState } from '../../server';
 import { transformEnhancementsOut } from '../bwc/enhancements/transform_enhancements_out';
 
 export function getTransformDrilldownsOut(
@@ -16,7 +24,7 @@ export function getTransformDrilldownsOut(
     type: string
   ) => ((state: DrilldownState, references?: Reference[]) => DrilldownState) | undefined
 ) {
-  function transformDrilldownsOut<StoredState extends DrilldownsState>(
+  function transformDrilldownsOut<StoredState extends SerializedDrilldowns>(
     storedState: StoredState,
     references?: Reference[]
   ): StoredState {
@@ -26,10 +34,26 @@ export function getTransformDrilldownsOut(
           ...(restOfState as StoredState),
           drilldowns: drilldowns.map((drilldownState) => {
             const transformOut = getTranformOut(drilldownState.type);
-            return transformOut ? transformOut(drilldownState, references) : drilldownState;
+            const transformedDrilldownState = transformOut
+              ? transformOut(drilldownState, references)
+              : drilldownState;
+            return {
+              ...transformedDrilldownState,
+              trigger: TRIGGER_ID_MIGRATIONS[drilldownState.trigger] ?? drilldownState.trigger,
+            };
           }),
         }
       : (restOfState as StoredState);
   }
   return transformDrilldownsOut;
 }
+
+// Drilldowns used different Trigger Ids before 9.4.0
+const TRIGGER_ID_MIGRATIONS: { [key: string]: string } = {
+  VALUE_CLICK_TRIGGER: ON_CLICK_VALUE,
+  IMAGE_CLICK_TRIGGER: ON_CLICK_IMAGE,
+  ROW_CLICK_TRIGGER: ON_CLICK_ROW,
+  SELECT_RANGE_TRIGGER: ON_SELECT_RANGE,
+  FILTER_TRIGGER: ON_APPLY_FILTER,
+  CONTEXT_MENU_TRIGGER: ON_OPEN_PANEL_MENU,
+};

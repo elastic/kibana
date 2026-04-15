@@ -47,6 +47,7 @@
       "{index}/_doc"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-create",
     "availability": {
       "stack": true,
       "serverless": true

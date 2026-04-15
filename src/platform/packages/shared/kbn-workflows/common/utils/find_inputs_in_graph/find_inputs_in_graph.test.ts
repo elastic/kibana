@@ -10,7 +10,6 @@
 import { findInputsInGraph } from './find_inputs_in_graph';
 import { WorkflowGraph } from '../../../graph';
 
-import type { EnterForeachNode } from '../../../graph';
 import type { ConnectorStep, ForEachStep, IfStep, WorkflowYaml } from '../../../spec/schema';
 
 describe('findInputsInGraph', () => {
@@ -34,14 +33,6 @@ describe('findInputsInGraph', () => {
           },
         ],
       } as WorkflowYaml;
-      it('should return foreach step inputs if foreach references another step', () => {
-        const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
-        const stepGraph = graph.getStepGraph('foreachstep');
-        const inputs = findInputsInGraph(stepGraph);
-        expect(inputs).toEqual({
-          foreachstep: ['steps.analysis.output.0.result'],
-        });
-      });
 
       it('should return foreach inputs for step inside foreach', () => {
         const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
@@ -53,21 +44,64 @@ describe('findInputsInGraph', () => {
       });
 
       it('should not return inputs for foreach if in foreach is already array', () => {
-        const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+        const workflowTemplateForForeach = {
+          steps: [
+            {
+              name: 'foreachstep',
+              type: 'foreach',
+              foreach: JSON.stringify(['item1', 'item2']),
+              steps: [
+                {
+                  name: 'iterable-step',
+                  type: 'console',
+                  with: {
+                    message: '{{ foreach.item.name }} {{ foreach.item.surname }}',
+                  },
+                } as ConnectorStep,
+              ],
+            },
+          ],
+        } as WorkflowYaml;
+        const graph = WorkflowGraph.fromWorkflowDefinition(workflowTemplateForForeach);
         const stepGraph = graph.getStepGraph('foreachstep');
-        (stepGraph.getNode('enterForeach_foreachstep') as EnterForeachNode).configuration.foreach =
-          JSON.stringify(['item1', 'item2']);
         const inputs = findInputsInGraph(stepGraph);
         expect(inputs).toEqual({});
       });
 
-      it('should extract template variables from foreach expression with template syntax', () => {
+      it('should extract template variables from foreach expression with template syntax {{}}', () => {
         const workflowWithTemplateForEach = {
           steps: [
             {
               name: 'foreachstep',
               type: 'foreach',
               foreach: '{{ inputs.people }}',
+              steps: [
+                {
+                  name: 'log-step',
+                  type: 'console',
+                  with: {
+                    message: '{{ foreach.item }}',
+                  },
+                } as ConnectorStep,
+              ],
+            },
+          ],
+        } as WorkflowYaml;
+        const graph = WorkflowGraph.fromWorkflowDefinition(workflowWithTemplateForEach);
+        const stepGraph = graph.getStepGraph('foreachstep');
+        const inputs = findInputsInGraph(stepGraph);
+        expect(inputs).toEqual({
+          foreachstep: ['inputs.people'],
+        });
+      });
+
+      it('should extract template variables from foreach expression with expression syntax ${{}}', () => {
+        const workflowWithTemplateForEach = {
+          steps: [
+            {
+              name: 'foreachstep',
+              type: 'foreach',
+              foreach: '${{ inputs.people }}',
               steps: [
                 {
                   name: 'log-step',
@@ -95,12 +129,12 @@ describe('findInputsInGraph', () => {
           {
             name: 'outer_foreach',
             type: 'foreach',
-            foreach: 'steps.analysis.output.0.result',
+            foreach: '{{steps.analysis.output.0.result}}',
             steps: [
               {
                 name: 'inner_foreach',
                 type: 'foreach',
-                foreach: 'foreach.item',
+                foreach: '{{foreach.item}}',
                 steps: [
                   {
                     name: 'log-name-surname',

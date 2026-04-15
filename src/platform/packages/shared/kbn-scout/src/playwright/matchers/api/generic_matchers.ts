@@ -8,15 +8,15 @@
  */
 
 import { expect as baseExpect } from '@playwright/test';
-import type { GenericMatchers } from './types';
+import type { ExpectOptions, GenericMatchers } from './types';
 import { wrapMatcher } from './utils';
 
 /**
  * Create generic matchers delegating to Playwright/Jest expect
  */
-export function createGenericMatchers(actual: unknown): GenericMatchers {
+export function createGenericMatchers(actual: unknown, options?: ExpectOptions): GenericMatchers {
   // eslint-disable-next-line playwright/valid-expect
-  const base = baseExpect(actual);
+  const base = baseExpect(actual, options);
   return {
     toBe: wrapMatcher((expected: unknown) => base.toBe(expected)),
     toBeDefined: wrapMatcher(() => base.toBeDefined()),
@@ -29,6 +29,19 @@ export function createGenericMatchers(actual: unknown): GenericMatchers {
     toMatchObject: wrapMatcher((expected: Record<string, unknown> | unknown[]) =>
       base.toMatchObject(expected)
     ),
+    toMatch: wrapMatcher((expected: RegExp | string) => base.toMatch(expected)),
+    toBeNull: wrapMatcher(() => base.toBeNull()),
+    toBeCloseTo: wrapMatcher((expected: number, precision?: number) =>
+      base.toBeCloseTo(expected, precision)
+    ),
+    toBeInstanceOf: wrapMatcher((expected: new (...args: unknown[]) => unknown) =>
+      base.toBeInstanceOf(expected)
+    ),
+    toThrow: wrapMatcher((expected?: unknown) => base.toThrow(expected)),
+    toThrowError: wrapMatcher((expected?: unknown) => base.toThrowError(expected)),
+    rejects: {
+      toThrow: wrapMatcher((expected?: unknown) => base.rejects.toThrow(expected)),
+    },
     not: {
       toBe: wrapMatcher((expected: unknown) => base.not.toBe(expected)),
       toBeUndefined: wrapMatcher(() => base.not.toBeUndefined()),
@@ -40,6 +53,15 @@ export function createGenericMatchers(actual: unknown): GenericMatchers {
       toMatchObject: wrapMatcher((expected: Record<string, unknown> | unknown[]) =>
         base.not.toMatchObject(expected)
       ),
+      toMatch: wrapMatcher((expected: string | RegExp) => base.not.toMatch(expected)),
+      toBeCloseTo: wrapMatcher((expected: number, precision?: number) =>
+        base.not.toBeCloseTo(expected, precision)
+      ),
+      toBeInstanceOf: wrapMatcher((expected: new (...args: unknown[]) => unknown) =>
+        base.not.toBeInstanceOf(expected)
+      ),
+      toThrow: wrapMatcher((expected?: unknown) => base.not.toThrow(expected)),
+      toThrowError: wrapMatcher((expected?: unknown) => base.not.toThrowError(expected)),
     },
   };
 }

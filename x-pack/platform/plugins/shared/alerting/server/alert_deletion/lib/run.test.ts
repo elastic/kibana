@@ -332,6 +332,7 @@ describe('runTask', () => {
       took: 10,
       timed_out: false,
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+      pit_id: 'pit1-1',
       hits: {
         total: { relation: 'eq', value: 2 },
         hits: [
@@ -344,6 +345,7 @@ describe('runTask', () => {
       took: 10,
       timed_out: false,
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+      pit_id: 'pit1-2',
       hits: {
         total: { relation: 'eq', value: 2 },
         hits: [
@@ -356,6 +358,7 @@ describe('runTask', () => {
       took: 10,
       timed_out: false,
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+      pit_id: 'pit1-3',
       hits: {
         total: { relation: 'eq', value: 2 },
         hits: [getMockAlert({ id: 'mno', searchAfter: ['555'] })],
@@ -365,6 +368,7 @@ describe('runTask', () => {
       took: 10,
       timed_out: false,
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+      pit_id: 'pit1-4',
       hits: {
         total: { relation: 'eq', value: 0 },
         hits: [],
@@ -436,7 +440,7 @@ describe('runTask', () => {
         query: inactiveAlertsQuery(30, 'default'),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
-        pit: { id: 'pit1', keep_alive: '1m' },
+        pit: { id: 'pit1-1', keep_alive: '1m' },
         search_after: ['222'],
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
@@ -448,7 +452,7 @@ describe('runTask', () => {
         query: inactiveAlertsQuery(30, 'default'),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
-        pit: { id: 'pit1', keep_alive: '1m' },
+        pit: { id: 'pit1-2', keep_alive: '1m' },
         search_after: ['444'],
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
@@ -460,7 +464,7 @@ describe('runTask', () => {
         query: inactiveAlertsQuery(30, 'default'),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
-        pit: { id: 'pit1', keep_alive: '1m' },
+        pit: { id: 'pit1-3', keep_alive: '1m' },
         search_after: ['555'],
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
@@ -513,6 +517,7 @@ describe('runTask', () => {
     });
 
     expect(esClient.closePointInTime).toHaveBeenCalledTimes(1);
+    expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit1-4' });
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
