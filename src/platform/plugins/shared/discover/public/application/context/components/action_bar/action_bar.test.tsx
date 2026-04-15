@@ -17,8 +17,8 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
 import { SurrDocType } from '../../services/context';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
-describe('Test Discover Context ActionBar for successor | predecessor records', () => {
-  [SurrDocType.SUCCESSORS, SurrDocType.PREDECESSORS].forEach((type) => {
+describe('Test Discover Context ActionBar', () => {
+  describe.each([SurrDocType.SUCCESSORS, SurrDocType.PREDECESSORS])('for %s', (type) => {
     const submitForm = (input: HTMLElement) => {
       const form = input.closest('form');
       if (!form) {
@@ -55,7 +55,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
       };
     };
 
-    test(`${type}: Load button click`, async () => {
+    test('Load button click', async () => {
       const user = userEvent.setup();
       const { button, onChangeCount } = renderComponent();
 
@@ -63,7 +63,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
       expect(onChangeCount).toHaveBeenCalledWith(type, 25);
     });
 
-    test(`${type}: Load button click doesnt submit when MAX_CONTEXT_SIZE was reached`, async () => {
+    test('Load button click doesnt submit when MAX_CONTEXT_SIZE was reached', async () => {
       const user = userEvent.setup();
       const { button, input, onChangeCount } = renderComponent();
 
@@ -78,7 +78,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
       expect(onChangeCount).toHaveBeenCalledTimes(0);
     });
 
-    test(`${type}: Count input change submits on blur`, async () => {
+    test('Count input change submits on blur', async () => {
       const user = userEvent.setup();
       const { input, onChangeCount } = renderComponent();
 
@@ -88,7 +88,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
       expect(onChangeCount).toHaveBeenCalledWith(type, 123);
     });
 
-    test(`${type}: Count input change submits on return`, async () => {
+    test('Count input change submits on return', async () => {
       const user = userEvent.setup();
       const { input, onChangeCount } = renderComponent();
 
@@ -99,7 +99,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
       expect(onChangeCount).toHaveBeenCalledWith(type, 124);
     });
 
-    test(`${type}: Count input doesnt submits values higher than MAX_CONTEXT_SIZE `, async () => {
+    test('Count input doesnt submits values higher than MAX_CONTEXT_SIZE ', async () => {
       const user = userEvent.setup();
       const { input, onChangeCount } = renderComponent();
 
@@ -110,7 +110,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
       expect(onChangeCount).toHaveBeenCalledTimes(0);
     });
 
-    test(`${type}: Count input doesnt submits values lower than MIN_CONTEXT_SIZE `, async () => {
+    test('Count input doesnt submits values lower than MIN_CONTEXT_SIZE ', async () => {
       const user = userEvent.setup();
       const { input, onChangeCount } = renderComponent();
 
@@ -121,7 +121,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
       expect(onChangeCount).toHaveBeenCalledTimes(0);
     });
 
-    test(`${type}: Warning about limitation of additional records`, () => {
+    test('Warning about limitation of additional records', () => {
       renderComponent();
 
       if (type === SurrDocType.PREDECESSORS) {
@@ -135,7 +135,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
       }
     });
 
-    test(`${type}: Load button disabled when defaultStepSize is 0`, async () => {
+    test('Load button disabled when defaultStepSize is 0', async () => {
       const user = userEvent.setup();
       const { input, button, onChangeCount } = renderComponent({ defaultStepSize: 0 });
 
