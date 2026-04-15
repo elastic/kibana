@@ -12,12 +12,14 @@ import {
   EntityStoreUtils,
   riskEngineRouteHelpersFactory,
   entityMaintainerRouteHelpersFactory,
+  waitForMaintainerRun,
   cleanUpRiskScoreMaintainer,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const spaces = getService('spaces');
+  const retry = getService('retry');
   const es = getService('es');
   const log = getService('log');
   const customSpaceName = 'ea-customspace-it';
@@ -133,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
           entityTypes: ['host'],
           waitForEntities: false,
         });
-        await maintainerRoutes.runMaintainerSync('risk-score');
+        await waitForMaintainerRun({ retry, routes: maintainerRoutes });
 
         await checkAssets('default', maintainerRoutes);
       });
@@ -143,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
           entityTypes: ['host'],
           waitForEntities: false,
         });
-        await maintainerRoutesCustomSpace.runMaintainerSync('risk-score');
+        await waitForMaintainerRun({ retry, routes: maintainerRoutesCustomSpace });
 
         await checkAssets(customSpaceName, maintainerRoutesCustomSpace);
       });

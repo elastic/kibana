@@ -181,9 +181,7 @@ export const createDataStream = async ({
     // 404 is expected if no datastream have been created
     if (error.statusCode !== 404) {
       logger.error(
-        `Error fetching concrete indices for ${indexPatterns.alias} pattern - ${
-          (error as Error).message
-        }`
+        `Error fetching concrete indices for ${indexPatterns.alias} pattern - ${error.message}`
       );
       throw error;
     }
@@ -206,17 +204,9 @@ export const createDataStream = async ({
           }),
         { logger }
       );
-    } catch (error: unknown) {
-      const err = error as { meta?: { body?: { error?: { type?: string } } } };
-      if (
-        err?.meta?.body?.error?.type === 'resource_already_exists_exception' ||
-        err?.meta?.body?.error?.type === 'illegal_state_exception'
-      ) {
-        logger.debug(`Datastream ${indexPatterns.alias} already exists, skipping creation`);
-      } else {
-        logger.error(`Error creating datastream - ${(error as Error).message}`);
-        throw error;
-      }
+    } catch (error) {
+      logger.error(`Error creating datastream - ${error.message}`);
+      throw error;
     }
   }
 };

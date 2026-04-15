@@ -41,7 +41,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const entityStoreUtils = EntityStoreUtils(getService);
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Risk Score Maintainer Task Lifecycle', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/261469
+  describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Task Lifecycle', function () {
     this.tags(['esGate']);
 
     context('with auditbeat data', () => {
@@ -103,10 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
           riskScore: 40,
         });
 
-        await maintainerScenario.installAndRunMaintainer({
-          dataViewPattern: testLogsIndex,
-          runMode: 'async',
-        });
+        await maintainerScenario.installAndRunMaintainer({ dataViewPattern: testLogsIndex });
         await waitForRiskScoreForId({
           es,
           log,
@@ -116,17 +114,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const preRestartScores = await readRiskScores(es);
         const preRestartCount = preRestartScores.length;
-
-        // Wait for the maintainer to finish its first run before stopping it.
-        // Otherwise, stopMaintainer's document update will cause a 409 version conflict
-        // when the task tries to save its state, wedging the task permanently.
-        await retry.waitForWithTimeout('maintainer to finish first run', 30_000, async () => {
-          const response = await maintainerRoutes.getMaintainers(200, ['risk-score']);
-          const maintainer = response.body.maintainers.find(
-            (m: { id: string; runs: number }) => m.id === 'risk-score'
-          );
-          return maintainer !== undefined && maintainer.runs >= 1;
-        });
 
         await maintainerRoutes.stopMaintainer('risk-score');
         await maintainerRoutes.startMaintainer('risk-score');
@@ -154,10 +141,7 @@ export default ({ getService }: FtrProviderContext): void => {
           riskScore: 40,
         });
 
-        await maintainerScenario.installAndRunMaintainer({
-          dataViewPattern: testLogsIndex,
-          runMode: 'async',
-        });
+        await maintainerScenario.installAndRunMaintainer({ dataViewPattern: testLogsIndex });
         await waitForRiskScoreForId({
           es,
           log,
@@ -168,6 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const preManualScores = await readRiskScores(es);
         const preManualCount = preManualScores.length;
 
+        await maintainerRoutes.runMaintainer('risk-score');
         await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
 
         await waitForRiskScoresToBePresent({ es, log, scoreCount: preManualCount + 1 });

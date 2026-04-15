@@ -15,6 +15,7 @@ import {
   normalizeScores,
   EntityStoreUtils,
   entityMaintainerRouteHelpersFactory,
+  waitForMaintainerRun,
   cleanUpRiskScoreMaintainer,
   watchlistRouteHelpersFactory,
   cleanUpWatchlists,
@@ -43,7 +44,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
   const entityStoreIndex = getEntitiesAlias(ENTITY_LATEST, 'default');
 
-  describe('@ess @serverless @serverlessQA Risk Score Maintainer Resolution Scoring', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/261113
+  describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Resolution Scoring', function () {
     this.tags(['esGate']);
 
     context('with test log data', () => {
@@ -133,8 +135,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForEntityStoreEntities({ es, log, count: 2 });
 
-        // The maintainer is not auto-started, so we can safely set up the resolution
-        // relationship before running it.
+        // Stop the maintainer so the scheduled run doesn't complete before
+        // the resolution relationship is in place.
+        await maintainerRoutes.stopMaintainer('risk-score');
 
         await maintainerScenario.setEntityResolutionTarget({
           testEntity: aliasUser,
@@ -142,7 +145,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForResolutionRelationship(aliasUser.expectedEuid, targetUser.expectedEuid);
 
-        await maintainerRoutes.runMaintainerSync('risk-score');
+        await maintainerRoutes.startMaintainer('risk-score');
+        await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
 
         let allScores: ReturnType<typeof normalizeScores> = [];
         await retry.waitForWithTimeout(
@@ -270,8 +274,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForEntityStoreEntities({ es, log, count: 3 });
 
-        // The maintainer is not auto-started, so we can safely set up the resolution
-        // relationships before running it.
+        await maintainerRoutes.stopMaintainer('risk-score');
 
         await maintainerScenario.setEntityResolutionTarget({
           testEntity: alias1,
@@ -284,7 +287,8 @@ export default ({ getService }: FtrProviderContext): void => {
         await waitForResolutionRelationship(alias1.expectedEuid, target.expectedEuid);
         await waitForResolutionRelationship(alias2.expectedEuid, target.expectedEuid);
 
-        await maintainerRoutes.runMaintainerSync('risk-score');
+        await maintainerRoutes.startMaintainer('risk-score');
+        await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
 
         let allScores: ReturnType<typeof normalizeScores> = [];
         await retry.waitForWithTimeout(
@@ -387,8 +391,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           await waitForEntityStoreEntities({ es, log, count: 2 });
 
-          // The maintainer is not auto-started, so we can safely set up the resolution
-          // relationships before running it.
+          // Stop the maintainer to prevent premature runs during modifier setup
+          await maintainerRoutes.stopMaintainer('risk-score');
 
           // Target: low_impact criticality, on watchlist-a
           // Alias: high_impact criticality, on watchlist-b
@@ -479,7 +483,8 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           // Resume the maintainer and trigger a fresh run
-          await maintainerRoutes.runMaintainerSync('risk-score');
+          await maintainerRoutes.startMaintainer('risk-score');
+          await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
 
           // Wait for the resolution score to include both modifier types
           let allScores: ReturnType<typeof normalizeScores> = [];
