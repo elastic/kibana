@@ -244,8 +244,7 @@ export function storedPackagePoliciesToAgentPermissions(
                     dataStreams_.push({
                       type: 'logs',
                       dataset: getEffectiveOtelStreamDataset(stream),
-                      ...(spanEventElasticsearch
-                        ? { elasticsearch: spanEventElasticsearch } : {}),
+                      ...(spanEventElasticsearch ? { elasticsearch: spanEventElasticsearch } : {}),
                     });
 
                     if (stream.vars?.[USE_APM_VAR_NAME]?.value === true) {
