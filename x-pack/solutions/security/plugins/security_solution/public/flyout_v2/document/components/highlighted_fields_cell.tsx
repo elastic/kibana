@@ -22,8 +22,11 @@ import {
 } from './test_ids';
 import { isFlyoutLink } from '../../../flyout/shared/utils/link_utils';
 import { PreviewLink } from '../../../flyout/shared/components/preview_link';
+import type { PreviewLinkProps } from '../../shared/components/preview_link';
 
 const EMPTY_ARRAY: string[] = [];
+
+export type PreviewLinkRenderer = React.FC<PreviewLinkProps>;
 
 export interface HighlightedFieldsCellProps {
   /**
@@ -62,6 +65,12 @@ export interface HighlightedFieldsCellProps {
    * If the limit is reached a "show more" button is being rendered
    */
   displayValuesLimit?: number;
+  /**
+   * Optional wrapper that renders a preview link for supported field types.
+   * When provided, wraps each cell value. If the wrapper handles the field
+   * (e.g. IP), it renders its own link; otherwise it passes through children.
+   */
+  renderPreviewLink?: PreviewLinkRenderer;
 }
 
 /**
@@ -76,6 +85,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   ancestorsIndexName,
   displayValuesLimit = 2,
   entityId,
+  renderPreviewLink: RenderPreviewLink,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
@@ -125,9 +135,9 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   );
 
   const renderValue = useCallback(
-    (value: string, i: number) => (
-      <div key={`${i}-${value}`} data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}>
-        {showPreview && isFlyoutLink({ field, scopeId }) ? (
+    (value: string, i: number) => {
+      const content =
+        showPreview && isFlyoutLink({ field, scopeId }) ? (
           <PreviewLink
             field={field}
             value={value}
@@ -146,10 +156,21 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
           />
         ) : (
           <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
-        )}
-      </div>
-    ),
-    [agentType, ancestorsIndexName, field, scopeId, showPreview, entityId]
+        );
+
+      return (
+        <div key={`${i}-${value}`} data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}>
+          {RenderPreviewLink ? (
+            <RenderPreviewLink field={field} value={value} scopeId={scopeId}>
+              {content}
+            </RenderPreviewLink>
+          ) : (
+            content
+          )}
+        </div>
+      );
+    },
+    [agentType, ancestorsIndexName, field, scopeId, showPreview, entityId, RenderPreviewLink]
   );
 
   if (values === null) return null;
