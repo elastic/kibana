@@ -35,8 +35,8 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
         serializedState: {
           content: '',
           settings: {
-            open_links_in_new_tab: true
-          }
+            open_links_in_new_tab: true,
+          },
         },
       },
       { displaySuccessMessage: true }
