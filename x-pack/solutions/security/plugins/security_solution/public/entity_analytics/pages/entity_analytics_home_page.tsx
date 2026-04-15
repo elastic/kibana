@@ -71,7 +71,6 @@ export const EntityAnalyticsHomePage = () => {
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
 
-  const spaceId = useSpaceId();
   const resolvedSpaceId = spaceId ?? 'default';
   const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
   const connectorId = spaceId ? storedConnectorId ?? '' : '';
