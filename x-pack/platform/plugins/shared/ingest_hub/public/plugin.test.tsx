@@ -6,7 +6,7 @@
  */
 
 import { of, firstValueFrom } from 'rxjs';
-import type { AppUpdater, PluginInitializerContext } from '@kbn/core/public';
+import type { AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -14,11 +14,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { IngestHubPlugin as IngestHubPluginClass } from './plugin';
 
 const createPluginContext = (buildFlavor: 'traditional' | 'serverless' = 'traditional') =>
-  ({
-    env: {
-      packageInfo: { buildFlavor },
-    },
-  } as unknown as PluginInitializerContext);
+  coreMock.createPluginInitializerContext({}, { buildFlavor });
 
 const enableFeatureFlag = (coreStart: ReturnType<typeof coreMock.createStart>) => {
   (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReturnValue(of(true));
