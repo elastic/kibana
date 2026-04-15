@@ -10,7 +10,7 @@ import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import { TaskStatus, baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
-import { streamNamePredicate } from '../../../../lib/workflows/workflow_client';
+import { streamNamePredicate } from '../../../../lib/workflows/features_identification_utils';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';

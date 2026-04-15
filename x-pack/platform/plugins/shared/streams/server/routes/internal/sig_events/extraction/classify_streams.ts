@@ -8,7 +8,7 @@
 import { Streams } from '@kbn/streams-schema';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { minimatch } from 'minimatch';
-import { getStreamNameFromExecution } from '../../../../lib/workflows/workflow_client';
+import { getStreamNameFromExecution } from '../../../../lib/workflows/features_identification_utils';
 
 export interface StreamCandidate {
   streamName: string;

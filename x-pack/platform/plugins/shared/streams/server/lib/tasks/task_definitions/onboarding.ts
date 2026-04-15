@@ -34,7 +34,8 @@ import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
 } from '../../sig_events/tasks/significant_events_queries_generation';
-import { type WorkflowClient, streamNamePredicate } from '../../workflows/workflow_client';
+import type { WorkflowClient } from '../../workflows/workflow_client';
+import { streamNamePredicate } from '../../workflows/features_identification_utils';
 import type { FeaturesIdentificationWorkflowInputs } from '../../../../common/constants';
 import { workflowExecutionToTaskResult } from '../../../routes/utils/workflow_execution_to_task_result';
 
