@@ -43,6 +43,7 @@ export const ELASTIC_INFERENCE_SERVICE_TITLE = i18n.translate(
   }
 );
 
+export const INFERENCE_CONNECTORS_QUERY_KEY = 'inferenceConnectorsQueryKey';
 export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
 export const INFERENCE_FEATURES_QUERY_KEY = 'inferenceFeaturesQueryKey';
 export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
