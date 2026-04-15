@@ -51,7 +51,7 @@ export const useHostsView = () => {
           dateRange: parsedDateRange,
           esQuery: buildQuery(),
           limit: searchCriteria.limit,
-          schema: searchCriteria?.preferredSchema || 'ecs',
+          schema: searchCriteria?.preferredSchema || 'semconv',
         })
       ),
     [buildQuery, parsedDateRange, searchCriteria.limit, searchCriteria.preferredSchema]

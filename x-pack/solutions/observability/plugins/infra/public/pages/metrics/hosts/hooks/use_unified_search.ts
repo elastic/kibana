@@ -121,7 +121,7 @@ export const useUnifiedSearch = () => {
     (preferredSchema: HostsState['preferredSchema']) => {
       setSearch({ type: 'SET_PREFERRED_SCHEMA', preferredSchema });
 
-      inventoryPrefill.setPrefillState({ schema: preferredSchema ?? 'ecs' });
+      inventoryPrefill.setPrefillState({ schema: preferredSchema ?? 'semconv' });
 
       updateTopbarMenuVisibilityBySchema(preferredSchema);
       triggerDataRefresh();
@@ -205,7 +205,7 @@ export const useUnifiedSearch = () => {
     inventoryPrefill.reset();
     inventoryPrefill.setPrefillState({
       nodeType: 'host',
-      schema: searchCriteria.preferredSchema ?? 'ecs',
+      schema: searchCriteria.preferredSchema ?? 'semconv',
     });
     updateTopbarMenuVisibilityBySchema(searchCriteria.preferredSchema);
 

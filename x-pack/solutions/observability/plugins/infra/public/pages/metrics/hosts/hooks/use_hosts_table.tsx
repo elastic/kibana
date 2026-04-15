@@ -162,7 +162,7 @@ export const useHostsTable = () => {
   const { value: formulas } = useAsync(
     () =>
       inventoryModel.metrics.getFormulas({
-        schema: searchCriteria.preferredSchema ?? 'ecs',
+        schema: searchCriteria.preferredSchema ?? 'semconv',
       }),
     [inventoryModel.metrics, searchCriteria.preferredSchema]
   );

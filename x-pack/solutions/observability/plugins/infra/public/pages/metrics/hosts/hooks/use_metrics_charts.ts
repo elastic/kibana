@@ -21,7 +21,7 @@ export const useMetricsCharts = ({
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
     const { cpu, disk, memory, network } = await model.metrics.getCharts({
-      schema: schema ?? 'ecs',
+      schema: schema ?? 'semconv',
     });
 
     return [
