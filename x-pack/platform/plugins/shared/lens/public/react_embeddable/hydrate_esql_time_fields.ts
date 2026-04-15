@@ -26,8 +26,10 @@ import type { ESQLStartServices } from './esql';
  *    call produces a DataView instance with the correct time field, preventing
  *    the DataViewsService cache from being polluted with a stale, time-field-less
  *    instance.
- * 3. Temporal grouping columns (`meta.type` → `'date'`) — columns produced by
- *    BUCKET / TBUCKET / DATE_TRUNC on the time field are tagged as date type.
+ * 3. Time-field-derived columns (`meta.type` → `'date'`) — columns that
+ *    directly reference the time field (including renamed references like
+ *    `ts = @timestamp`) or are produced by BUCKET / TBUCKET / DATE_TRUNC on
+ *    the time field are tagged as date type.
  *
  * This runs once during `deserializeState` — the earliest async entry point for
  * the embeddable — before any downstream consumer (`getUsedDataViews`,
@@ -71,7 +73,7 @@ export async function hydrateESQLTimeFields(
       continue;
     }
 
-    const temporalColumns = getTemporalGroupingColumns(layer.query.esql, timeFieldName);
+    const temporalColumns = getTimeFieldDerivedColumns(layer.query.esql, timeFieldName);
     const columns =
       temporalColumns.size > 0
         ? layer.columns.map((c) =>
@@ -113,12 +115,16 @@ const TEMPORAL_GROUPING_FUNCTIONS = new Set(['bucket', 'tbucket', 'date_trunc'])
 
 /**
  * Given an ES|QL query and its detected timeFieldName, returns the set of
- * output column names that represent temporal groupings (produced by BUCKET,
- * TBUCKET, or DATE_TRUNC operating on the time field), or columns that
- * directly reference the time field.  Returns an empty set when the query
- * contains no such groupings.
+ * output column names that are time-field-derived. This includes:
+ *
+ * - Direct references to the time field (e.g. `... BY @timestamp`).
+ * - Renamed references (e.g. `... BY ts = @timestamp`).
+ * - Temporal grouping functions — BUCKET, TBUCKET, or DATE_TRUNC — applied
+ *   to the time field (e.g. `... BY bucket(@timestamp, 1 day)`).
+ *
+ * Returns an empty set when the query contains no such columns.
  */
-function getTemporalGroupingColumns(esqlQuery: string, timeFieldName: string): Set<string> {
+function getTimeFieldDerivedColumns(esqlQuery: string, timeFieldName: string): Set<string> {
   const result = new Set<string>();
   try {
     const { grouping } = getQuerySummary(esqlQuery);
@@ -131,7 +137,14 @@ function getTemporalGroupingColumns(esqlQuery: string, timeFieldName: string): S
       }
 
       const def = isAssignment(arg) ? [...singleItems(arg.args)][1] : arg;
-      if (!def || def.type !== 'function') continue;
+      if (!def) continue;
+
+      if (def.type === 'column' && def.name === timeFieldName) {
+        result.add(field);
+        continue;
+      }
+
+      if (def.type !== 'function') continue;
 
       const funcName = def.name.toLowerCase();
       if (funcName === '=') continue;

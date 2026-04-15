@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import * as esqlUtils from '@kbn/esql-utils';
-import type { LensRuntimeState } from '@kbn/lens-common';
+import type { LensRuntimeState, TextBasedPersistedState } from '@kbn/lens-common';
 
 // Barrel re-exports are non-configurable; wrapping the module makes spyOn work.
 jest.mock('@kbn/esql-utils', () => ({
@@ -50,5 +50,39 @@ describe('hydrateESQLTimeFields', () => {
     const result = await hydrateESQLTimeFields(textBasedEsqlAttributes, http);
     expect(result).toBe(textBasedEsqlAttributes);
     spy.mockRestore();
+  });
+
+  it('marks renamed direct time-field references as date type', async () => {
+    const attrs: LensRuntimeState['attributes'] = {
+      version: LENS_ITEM_LATEST_VERSION,
+      title: '',
+      description: '',
+      visualizationType: 'lnsXY',
+      references: [],
+      state: {
+        query: { query: '', language: 'kuery' },
+        filters: [],
+        internalReferences: [],
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer1: {
+                query: { esql: 'FROM logs-* | STATS count() BY ts = @timestamp' },
+                timeField: '@timestamp',
+                columns: [
+                  { columnId: 'c1', fieldName: 'count()', meta: { type: 'number' } },
+                  { columnId: 'c2', fieldName: 'ts', meta: { type: 'string' } },
+                ],
+              },
+            },
+          },
+        },
+        visualization: {},
+      },
+    };
+    const result = await hydrateESQLTimeFields(attrs, http);
+    const { layers } = result.state.datasourceStates?.textBased as TextBasedPersistedState;
+    expect(layers.layer1.columns[1].meta?.type).toBe('date');
+    expect(layers.layer1.columns[0].meta?.type).toBe('number');
   });
 });
