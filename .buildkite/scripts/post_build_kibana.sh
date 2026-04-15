@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+ci_stats_pid=""
 if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
   cmd=(
     "node" "scripts/ship_ci_stats"
@@ -14,7 +15,8 @@ if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
   fi
 
   echo "--- Ship Kibana Distribution Metrics to CI Stats"
-  "${cmd[@]}"
+  "${cmd[@]}" &
+  ci_stats_pid=$!
 fi
 
 echo "--- Upload Build Artifacts"
@@ -24,3 +26,7 @@ cd "$KIBANA_DIR/target"
 cp "kibana-$version-SNAPSHOT-linux-x86_64.tar.gz" kibana-default.tar.gz
 buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
 cd -
+
+if [[ -n "$ci_stats_pid" ]]; then
+  wait "$ci_stats_pid"
+fi
