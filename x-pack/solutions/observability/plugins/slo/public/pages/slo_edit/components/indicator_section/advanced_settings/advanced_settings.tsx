@@ -133,12 +133,9 @@ export function AdvancedSettings() {
                     min={1}
                     max={59}
                     step={1}
-                    aria-label={i18n.translate(
-                      'xpack.slo.sloEdit.settings.frequency.ariaLabel',
-                      {
-                        defaultMessage: 'Frequency (in minutes)',
-                      }
-                    )}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.settings.frequency.ariaLabel', {
+                      defaultMessage: 'Frequency (in minutes)',
+                    })}
                     onChange={(event) => onChange(event.target.value)}
                   />
                 )}
