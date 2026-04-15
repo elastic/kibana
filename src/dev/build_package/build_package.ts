@@ -72,8 +72,6 @@ run(
     throw e;
   });
 
-const useRspack = process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
-
 async function buildPackage(
   {
     packageRoot,
@@ -92,12 +90,24 @@ async function buildPackage(
   const srcs = packageConfig.buildSourcePaths;
 
   const outPath = getFullOutputPath(packageRelPath, taskName);
+  const webpackArgs = [
+    '--config',
+    path.resolve(packageRoot, 'webpack.config.js'),
+    '--output-path',
+    outPath,
+  ];
 
   const isDist =
     dist ||
     process.env?.NODE_ENV?.toLowerCase()?.match(/^prod/) ||
     process.env?.DIST?.toLowerCase() === 'true';
   const env = isDist ? envOptions.dist : envOptions.default;
+
+  if (watch) {
+    webpackArgs.push('--watch', '--stats=minimal');
+  } else {
+    webpackArgs.push('--stats=errors-only');
+  }
 
   await copySources({
     log,
@@ -110,132 +120,6 @@ async function buildPackage(
     log.info(`watching ${packageName}`);
   } else {
     log.info(`building ${packageName}`);
-  }
-
-  // [rspack-transition] Use rspack programmatic API when KBN_USE_RSPACK is set
-  // and the package has a rspack.config.js. Falls through to webpack-cli otherwise.
-  const rspackConfigPath = path.resolve(packageRoot, 'rspack.config.js');
-  if (useRspack && fs.existsSync(rspackConfigPath)) {
-    await buildWithRspack({ packageName, rspackConfigPath, outPath, env, watch, quiet }, log);
-  } else {
-    await buildWithWebpack({ packageRoot, packageName, outPath, env, watch, quiet }, log);
-  }
-}
-
-async function buildWithRspack(
-  {
-    packageName,
-    rspackConfigPath,
-    outPath,
-    env,
-    watch,
-    quiet,
-  }: {
-    packageName: string;
-    rspackConfigPath: string;
-    outPath: string;
-    env: Record<string, string>;
-    watch?: boolean;
-    quiet?: boolean;
-  },
-  log: ToolingLog
-) {
-  Object.assign(process.env, env);
-
-  // Load the rspack config (supports both object and function exports)
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const configModule = require(rspackConfigPath);
-  const config =
-    typeof configModule === 'function' ? configModule({}, { outputPath: outPath }) : configModule;
-
-  // Override output path (mirrors webpack-cli --output-path behavior)
-  config.output = config.output || {};
-  config.output.path = outPath;
-
-  const { rspack } = await import('@rspack/core');
-
-  return new Promise<void>((resolve, reject) => {
-    const compiler = rspack(config);
-
-    if (watch) {
-      compiler.watch({}, (err, stats) => {
-        if (err) {
-          log.error(`rspack watch error for ${packageName}: ${err}`);
-          return;
-        }
-        if (stats) {
-          if (stats.hasErrors()) {
-            const info = stats.toJson('errors-only');
-            for (const e of info.errors || []) {
-              log.error(e.message);
-            }
-          }
-          if (!quiet) {
-            log.info(stats.toString({ preset: 'minimal', colors: true }));
-          }
-        }
-      });
-    } else {
-      compiler.run((err, stats) => {
-        if (err) {
-          reject(new Error(`rspack build failed for ${packageName}: ${err}`));
-          return;
-        }
-
-        if (stats) {
-          if (!quiet) {
-            log.info(stats.toString({ preset: 'errors-warnings', colors: true }));
-          }
-
-          if (stats.hasErrors()) {
-            const info = stats.toJson('errors-only');
-            const messages = (info.errors || []).map((e) => e.message).join('\n');
-            reject(new Error(`rspack build failed for ${packageName}:\n${messages}`));
-            return;
-          }
-        }
-
-        compiler.close((closeErr) => {
-          if (closeErr) {
-            log.warning(`rspack compiler close warning for ${packageName}: ${closeErr}`);
-          }
-          log.success(`rspack build successful for ${packageName}.`);
-          resolve();
-        });
-      });
-    }
-  });
-}
-
-async function buildWithWebpack(
-  {
-    packageRoot,
-    packageName,
-    outPath,
-    env,
-    watch,
-    quiet,
-  }: {
-    packageRoot: string;
-    packageName: string;
-    outPath: string;
-    env: Record<string, string>;
-    watch?: boolean;
-    quiet?: boolean;
-  },
-  log: ToolingLog
-) {
-  const webpackArgs = [
-    '--config',
-    path.resolve(packageRoot, 'webpack.config.js'),
-    '--output-path',
-    outPath,
-  ];
-
-  if (watch) {
-    webpackArgs.push('--watch', '--stats=minimal');
-  } else {
-    webpackArgs.push('--stats=errors-only');
   }
 
   try {
