@@ -5,11 +5,24 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout-security/api';
+import type { SearchHitsMetadata } from '@elastic/elasticsearch/lib/api/types';
 import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
 
 const LATEST_INDEX = getLatestEntitiesIndexName('default');
+type Hits = SearchHitsMetadata<unknown>['hits'];
 
-export const expectedHostEntities = [
+// Takes non sorted hits and compares them by _id
+export function assertEntitiesEqual(expected: Hits, actual: Hits) {
+  expect(actual).toHaveLength(expected.length);
+  for (const expectedHit of expected) {
+    const actualHit = actual.find((h) => h._id === expectedHit._id);
+    expect(actualHit, `Could not find hit with id ${expectedHit._id}`).toBeDefined();
+    expect(actualHit).toMatchObject(expectedHit);
+  }
+}
+
+export const expectedHostEntities: Hits = [
   {
     _index: LATEST_INDEX,
     _id: '5c4590a1e799d5fa9d43908d6f609027f1caa55efef5979757a094cfd80f2f81',
@@ -292,7 +305,7 @@ export const expectedHostEntities = [
   },
 ];
 
-export const expectedUserEntities = [
+export const expectedUserEntities: Hits = [
   {
     _index: LATEST_INDEX,
     _id: 'b567c98b4ef4ba050d3201175d7cbf1ef5a4377e10f1a7ca23f8f7b2c384dbb4',
@@ -653,7 +666,7 @@ export const expectedUserEntities = [
   },
 ];
 
-export const expectedServiceEntities = [
+export const expectedServiceEntities: Hits = [
   {
     _index: LATEST_INDEX,
     _id: '4a03614567f337f8129a115df2fa0ee23657227a4e3c5bcaf6a06e5a295a77a9',
@@ -682,7 +695,7 @@ export const expectedServiceEntities = [
   },
 ];
 
-export const expectedGenericEntities = [
+export const expectedGenericEntities: Hits = [
   {
     _index: LATEST_INDEX,
     _id: 'd98cd38cf7da05a3c32920813a0529fbc6fff7312d0bf774e85e1fc273a5ffdb',
