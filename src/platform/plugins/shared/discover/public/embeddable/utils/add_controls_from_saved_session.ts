@@ -24,19 +24,23 @@ export const addControlsFromSavedSession = async (
   const esqlVariables = esqlVariables$?.getValue();
 
   // Only add controls whose variableName does not exist in current esqlVariables
-  for (const panel of Object.values(controlsState)) {
-    const variableName = panel.variable_name;
-    const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
-    const { width, grow, order, ...serializedState } = panel;
+  // Do this operation concurrently instead of serially to improve initialisation
+  // efficiency.
+  await Promise.all(
+    Object.values(controlsState).map(async (panel) => {
+      const variableName = panel.variable_name;
+      const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
+      const { width, grow, order, ...serializedState } = panel;
 
-    if (!variableExists) {
-      await container.addNewPanel(
-        {
-          panelType: ESQL_CONTROL,
-          serializedState,
-        },
-        { beside: uuid, scrollToPanel: false }
-      );
-    }
-  }
+      if (!variableExists) {
+        await container.addNewPanel(
+          {
+            panelType: ESQL_CONTROL,
+            serializedState,
+          },
+          { beside: uuid, scrollToPanel: false }
+        );
+      }
+    })
+  );
 };

@@ -150,7 +150,13 @@ export function fromStoredSearchEmbeddableByValue(
     description: description || attributes.description,
     ...(hide_title && { hide_title }),
     ...(hide_border && { hide_border }),
-    tabs: [{ ...apiTab, ...panelOverrides, controlGroupJson: attributes.controlGroupJson }],
+    tabs: [
+      {
+        ...apiTab,
+        ...panelOverrides,
+        ...('controlGroupJson' in attributes && { controlGroupJson: attributes.controlGroupJson }),
+      },
+    ],
   };
 }
 
