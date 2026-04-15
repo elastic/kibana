@@ -88,10 +88,7 @@ export const useGridNavigation = ({
           event.preventDefault();
           if (rowIndex < gridRows - 1) {
             newRowIndex = rowIndex + 1;
-            const itemsInTargetRow = Math.min(
-              gridColumns,
-              totalRows - newRowIndex * gridColumns
-            );
+            const itemsInTargetRow = Math.min(gridColumns, totalRows - newRowIndex * gridColumns);
             newColIndex = Math.min(colIndex, itemsInTargetRow - 1);
           }
           break;
