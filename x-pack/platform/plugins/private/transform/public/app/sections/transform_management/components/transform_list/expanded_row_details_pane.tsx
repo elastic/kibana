@@ -70,13 +70,26 @@ export const SourceIndexDescription: FC<{ index: string | string[] }> = ({ index
               'xpack.transform.transformList.transformDetails.sourceIndex.showAllLabel',
               { defaultMessage: 'Show all source indices' }
             )}
+            css={{
+              verticalAlign: 'top',
+            }}
           >
             +{index.length - 1}
           </EuiBadge>
         }
       >
-        <EuiText size="s" data-test-subj="transformSourceIndexPopover">
-          <ul>
+        <EuiText
+          size="s"
+          data-test-subj="transformSourceIndexPopover"
+          css={{ overflowY: 'scroll' }}
+        >
+          <ul
+            css={{
+              maxWidth: '600px',
+              maxHeight: '600px',
+              overflowWrap: 'break-word',
+            }}
+          >
             {index.map((sourceIndex, i) => (
               <li key={`${sourceIndex}-${i}`}>{sourceIndex}</li>
             ))}
