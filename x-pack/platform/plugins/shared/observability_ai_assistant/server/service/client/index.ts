@@ -36,6 +36,7 @@ import type {
   InferenceClient,
 } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
+import { getConnectorByIdWithoutClientRequest } from '@kbn/inference-plugin/server/util/get_connector_by_id';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { CONTEXT_FUNCTION_NAME } from '../../../common';
 import { resourceNames } from '..';
@@ -282,9 +283,11 @@ export class ObservabilityAIAssistantClient {
 
       const connector$ = defer(() =>
         from(
-          this.dependencies.actionsClient.get({
-            id: connectorId,
-            throwIfSystemAction: true,
+          getConnectorByIdWithoutClientRequest({
+            connectorId,
+            actionsClient: this.dependencies.actionsClient,
+            esClient: this.dependencies.esClient.asInternalUser,
+            logger: this.dependencies.logger,
           })
         ).pipe(
           catchError((error) => {
