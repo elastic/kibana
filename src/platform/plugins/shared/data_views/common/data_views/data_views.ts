@@ -1151,19 +1151,26 @@ export class DataViewsService {
     const cachedDataView = specId ? this.dataViewCache.get(specId) : undefined;
 
     if (specId && cachedDataView) {
-      const cachedDataViewPromise = new Promise<DataView>(async (resolve, reject) => {
+      const cachedDataViewPromise = (async (): Promise<DataView> => {
+        let dataView: DataView;
         try {
-          const dataView = await cachedDataView;
-          // refresh fields if they are not fetched yet
-          if (!skipFetchFields && dataView.fields.length === 0) {
-            await this.refreshFields(dataView, displayErrors);
-            this.dataViewCache.set(specId, Promise.resolve(dataView));
-          }
-          resolve(dataView);
-        } catch (error) {
-          reject(error);
+          dataView = await cachedDataView;
+        } catch {
+          // Cache may hold a failed `get()` (saved object load). `create(spec)` must still be able
+          // to build an ad hoc data view from `spec` for the same id.
+          this.dataViewCache.delete(specId);
+          const created = await this.createFromSpec(spec, skipFetchFields, displayErrors);
+          this.dataViewCache.set(specId, Promise.resolve(created));
+          return created;
         }
-      });
+
+        // refresh fields if they are not fetched yet
+        if (!skipFetchFields && dataView.fields.length === 0) {
+          await this.refreshFields(dataView, displayErrors);
+          this.dataViewCache.set(specId, Promise.resolve(dataView));
+        }
+        return dataView;
+      })();
       // update the cache with the new promise so parallel requests for the same data view will wait for the first one to complete
       this.dataViewCache.set(specId, cachedDataViewPromise);
       return cachedDataViewPromise;
