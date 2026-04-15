@@ -16,6 +16,12 @@ import { isLocalRef } from './helpers/is_local_ref';
 const HTTP_METHODS = Object.values(OpenAPIV3.HttpMethods);
 
 /**
+ * The only response code emitted as Zod by `zod_operation_schema` / `getApiOperationsList`.
+ * Must stay aligned with the `responses['200']` slice used in `get_api_operations_list.ts`.
+ */
+const SUCCESS_RESPONSE_CODE = '200' as const;
+
+/**
  * Returns a copy of the document where each operation keeps only the `200` response entry
  * under `paths.*.*.responses`. This must stay aligned with `getApiOperationsList`
  * (`get_api_operations_list.ts`): emitted Zod for an operation uses `responses['200']` only,
@@ -37,7 +43,7 @@ function cloneDocumentOmittingNonSuccessResponses(parsedSchema: OpenApiDocument)
       const op = pathItem[method];
       if (op?.responses) {
         for (const code of Object.keys(op.responses)) {
-          if (code !== '200') {
+          if (code !== SUCCESS_RESPONSE_CODE) {
             delete op.responses[code];
           }
         }

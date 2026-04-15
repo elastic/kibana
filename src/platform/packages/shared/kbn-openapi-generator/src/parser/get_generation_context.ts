@@ -19,6 +19,7 @@ import { getInfo } from './lib/get_info';
 import { getCircularRefs } from './lib/get_circular_refs';
 import { extractByJsonPointer } from './lib/helpers/extract_by_json_pointer';
 import { parseRef } from './lib/helpers/parse_ref';
+import { ZOD_HELPERS_ORDER } from './lib/zod_helpers_order';
 
 export interface GenerationContext {
   components: OpenAPIV3.ComponentsObject | undefined;
@@ -47,13 +48,6 @@ export interface BundleGenerationContext {
   info: OpenAPIV3.InfoObject;
   config: Pick<GeneratorConfig, 'schemaNameTransform' | 'zodHelpersImportMode'>;
 }
-
-const ZOD_HELPERS_ORDER = [
-  'isValidDateMath',
-  'isNonEmptyString',
-  'ArrayFromString',
-  'BooleanFromString',
-] as const;
 
 function collectZodHelpersFromParamSchema(
   schema: unknown,
@@ -148,7 +142,7 @@ function collectStringSuperRefineHelpersFromSchema(
       const resolved = extractByJsonPointer(document, pointer);
       collectStringSuperRefineHelpersFromSchema(resolved, document, needed, visitedRefs);
     } catch {
-      // ignore
+      // ignore unresolvable refs — worst case a helper is missed; use zodHelpersImportMode:'full' to recover
     }
     return;
   }
