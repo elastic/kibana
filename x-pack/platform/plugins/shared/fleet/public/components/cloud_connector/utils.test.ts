@@ -908,16 +908,16 @@ describe('Cloud Connector Name Validation', () => {
 
   describe('getCloudConnectorNameError', () => {
     it('should return required error for undefined name', () => {
-      expect(getCloudConnectorNameError(undefined)).toBe('Cloud Connector Name is required');
+      expect(getCloudConnectorNameError(undefined)).toBe('Federated Identity Name is required');
     });
 
     it('should return required error for empty string', () => {
-      expect(getCloudConnectorNameError('')).toBe('Cloud Connector Name is required');
+      expect(getCloudConnectorNameError('')).toBe('Federated Identity Name is required');
     });
 
     it('should return required error for whitespace-only string', () => {
-      expect(getCloudConnectorNameError('   ')).toBe('Cloud Connector Name is required');
-      expect(getCloudConnectorNameError('\t\n')).toBe('Cloud Connector Name is required');
+      expect(getCloudConnectorNameError('   ')).toBe('Federated Identity Name is required');
+      expect(getCloudConnectorNameError('\t\n')).toBe('Federated Identity Name is required');
     });
 
     it('should return undefined for valid name', () => {
@@ -933,7 +933,7 @@ describe('Cloud Connector Name Validation', () => {
     it('should return length error for name exceeding 255 characters', () => {
       const chars256 = 'a'.repeat(256);
       expect(getCloudConnectorNameError(chars256)).toBe(
-        'Cloud Connector Name must be 255 characters or less'
+        'Federated Identity Name must be 255 characters or less'
       );
     });
 
@@ -941,7 +941,7 @@ describe('Cloud Connector Name Validation', () => {
       expect(getCloudConnectorNameError('a'.repeat(254))).toBeUndefined();
       expect(getCloudConnectorNameError('a'.repeat(255))).toBeUndefined();
       expect(getCloudConnectorNameError('a'.repeat(256))).toBe(
-        'Cloud Connector Name must be 255 characters or less'
+        'Federated Identity Name must be 255 characters or less'
       );
     });
   });

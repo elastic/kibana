@@ -16,7 +16,6 @@ import {
   fromEvent,
   switchMap,
   takeUntil,
-  takeWhile,
   tap,
   throwError,
   timer,
@@ -49,11 +48,11 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
   };
 
   return defer(() => {
-    const startTime = Date.now();
-
     if (abortSignal?.aborted) {
       throw new AbortError();
     }
+
+    const startTime = Date.now();
 
     const safeCancel = () =>
       cancel?.().catch((e) => {
@@ -69,16 +68,17 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
     );
 
     return from(search()).pipe(
-      expand(() => {
+      expand((response) => {
         const elapsedTime = Date.now() - startTime;
-        return timer(getPollInterval(elapsedTime)).pipe(switchMap(() => search()));
+        return isRunningResponse(response)
+          ? timer(getPollInterval(elapsedTime)).pipe(switchMap(() => search()))
+          : EMPTY;
       }),
       tap((response) => {
         if (isAbortResponse(response)) {
           throw new AbortError();
         }
       }),
-      takeWhile<Response>(isRunningResponse, true),
       takeUntil<Response>(aborted$)
     );
   });

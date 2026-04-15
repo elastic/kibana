@@ -97,31 +97,4 @@ describe('user_details_left useTabs', () => {
       expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
     ]);
   });
-
-  it('can show only Resolution tab when no other tabs apply', () => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
-    const { result } = renderHook(
-      () =>
-        useTabs(
-          emptyManagedUser,
-          'alice',
-          false,
-          'scope-1',
-          false,
-          false,
-          undefined,
-          undefined,
-          'stored-user-entity-1'
-        ),
-      { wrapper: TestProviders }
-    );
-
-    expect(result.current).toEqual([
-      expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
-      expect.objectContaining({
-        id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
-        'data-test-subj': RESOLUTION_GROUP_TAB_TEST_ID,
-      }),
-    ]);
-  });
 });

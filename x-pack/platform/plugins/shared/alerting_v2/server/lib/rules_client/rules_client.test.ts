@@ -832,7 +832,7 @@ describe('RulesClient', () => {
       });
     });
 
-    it('translates search into name and tag prefix query', async () => {
+    it('translates search into name, description, tags, and grouping prefix query', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.find.mockResolvedValueOnce({
@@ -856,7 +856,7 @@ describe('RulesClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.tags: alerts*'
+            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.description: alerts* OR alerting_rule.attributes.metadata.tags: alerts* OR alerting_rule.attributes.grouping.fields: alerts*'
           ),
         })
       );
@@ -877,7 +877,7 @@ describe('RulesClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.tags: alerts*'
+            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.description: alerts* OR alerting_rule.attributes.metadata.tags: alerts* OR alerting_rule.attributes.grouping.fields: alerts*'
           ),
         })
       );
@@ -903,7 +903,7 @@ describe('RulesClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.tags: prod*'
+            'alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.description: prod* OR alerting_rule.attributes.metadata.tags: prod* OR alerting_rule.attributes.grouping.fields: prod*'
           ),
         })
       );

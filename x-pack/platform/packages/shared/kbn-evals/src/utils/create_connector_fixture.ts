@@ -31,6 +31,27 @@ export function resolveConnectorId(connectorId: string): string {
     : getConnectorIdAsUuid(connectorId);
 }
 
+export async function deleteConnectorById({
+  fetch,
+  connectorId,
+  log,
+}: {
+  fetch: HttpHandler;
+  connectorId: string;
+  log: ToolingLog;
+}) {
+  log.info(`Deleting connector: ${connectorId}`);
+  await fetch({
+    path: `/api/actions/connector/${connectorId}`,
+    method: 'DELETE',
+  }).catch((error) => {
+    if (isAxiosError(error) && error.status === 404) {
+      return;
+    }
+    throw error;
+  });
+}
+
 export async function createConnectorFixture({
   predefinedConnector,
   fetch,
@@ -89,38 +110,27 @@ export async function createConnectorFixture({
     id: connectorIdAsUuid,
   };
 
-  async function deleteConnector() {
+  log.info(`Creating connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
+
+  try {
     await fetch({
-      path: `/api/actions/connector/${connectorIdAsUuid}`,
-      method: 'DELETE',
-    }).catch((error) => {
-      if (isAxiosError(error) && error.status === 404) {
-        return;
-      }
-      throw error;
+      path: `/api/actions/connector/${connectorWithUuid.id}`,
+      method: 'POST',
+      body: JSON.stringify({
+        config: connectorWithUuid.config,
+        connector_type_id: connectorWithUuid.actionTypeId,
+        name: connectorWithUuid.name,
+        secrets: connectorWithUuid.secrets,
+      }),
     });
+  } catch (error) {
+    const status = isAxiosError(error) ? error.status : (error as any)?.status;
+    if (status === 409) {
+      log.info(`Connector already exists, reusing: ${connectorIdAsUuid}`);
+    } else {
+      throw error;
+    }
   }
 
-  log.info(`Deleting existing connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
-
-  await deleteConnector();
-
-  log.info(`Creating connector`);
-
-  await fetch({
-    path: `/api/actions/connector/${connectorWithUuid.id}`,
-    method: 'POST',
-    body: JSON.stringify({
-      config: connectorWithUuid.config,
-      connector_type_id: connectorWithUuid.actionTypeId,
-      name: connectorWithUuid.name,
-      secrets: connectorWithUuid.secrets,
-    }),
-  });
-
   await use(connectorWithUuid);
-
-  // teardown
-  log.info(`Deleting connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
-  await deleteConnector();
 }

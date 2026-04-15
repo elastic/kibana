@@ -8,6 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const kibanaVersionMismatchParamsSchema = stackMonitoringCommonSchema.extends({});
+export const kibanaVersionMismatchParamsSchema = stackMonitoringCommonSchema.extends(
+  {},
+  {
+    meta: {
+      title: 'Kibana Version Mismatch Rule Params',
+      description:
+        'The parameters for the Kibana version mismatch rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_kibana_version_mismatch`.',
+    },
+  }
+);
 
 export type KibanaVersionMismatchParams = TypeOf<typeof kibanaVersionMismatchParamsSchema>;

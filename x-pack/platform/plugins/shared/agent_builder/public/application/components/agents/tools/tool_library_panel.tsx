@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
@@ -16,7 +17,17 @@ const libraryLabels: LibraryPanelLabels = {
   title: labels.agentTools.addToolFromLibraryTitle,
   manageLibraryLink: labels.agentTools.manageToolLibraryLink,
   searchPlaceholder: labels.agentTools.searchAvailableToolsPlaceholder,
-  availableSummary: labels.agentTools.availableToolsSummary,
+  availableSummary: (showing, total) => (
+    <FormattedMessage
+      id="xpack.agentBuilder.agentTools.availableToolsSummary"
+      defaultMessage="Showing <bold>1-{showing}</bold> of {total} <bold>{total, plural, one {Tool} other {Tools}}</bold>"
+      values={{
+        showing,
+        total,
+        bold: (chunks) => <strong>{chunks}</strong>,
+      }}
+    />
+  ),
   noMatchMessage: labels.agentTools.noAvailableToolsMatchMessage,
   noItemsMessage: labels.agentTools.noAvailableToolsMessage,
   disabledBadgeLabel: labels.agentTools.autoIncludedBadgeLabel,
@@ -48,6 +59,11 @@ export const ToolLibraryPanel: React.FC<ToolLibraryPanelProps> = ({
     return builtinToolIdSet;
   }, [enableElasticCapabilities, builtinToolIdSet]);
 
+  const readOnlyItemIdSet = useMemo(
+    () => new Set(allTools.filter((t) => t.readonly).map((t) => t.id)),
+    [allTools]
+  );
+
   return (
     <LibraryPanel<ToolDefinition>
       onClose={onClose}
@@ -59,6 +75,7 @@ export const ToolLibraryPanel: React.FC<ToolLibraryPanelProps> = ({
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.tools.list}
       disabledItemIdSet={disabledItemIdSet}
+      readOnlyItemIdSet={readOnlyItemIdSet}
     />
   );
 };
