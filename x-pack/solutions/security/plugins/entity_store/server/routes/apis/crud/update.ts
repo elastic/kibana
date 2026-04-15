@@ -16,11 +16,9 @@ import { wrapMiddlewares } from '../../middleware';
 import { BadCRUDRequestError, EntityNotFoundError } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
-const paramsSchema = z
-  .object({
-    entityType: z.enum(ALL_ENTITY_TYPES),
-  })
-  .required();
+const paramsSchema = z.object({
+  entityType: z.enum(ALL_ENTITY_TYPES),
+});
 
 const querySchema = z.object({
   force: BooleanFromString.optional().default(false),
