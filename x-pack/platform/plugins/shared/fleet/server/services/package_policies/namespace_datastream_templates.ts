@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
@@ -38,6 +39,7 @@ import {
   SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  MAX_CONCURRENT_COMPONENT_TEMPLATES,
 } from '../../constants';
 import { PackageNotFoundError } from '../../errors';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
@@ -686,25 +688,29 @@ export async function syncNamespaceTemplates({
 
         const updatedIndexTemplates: IndexTemplateEntry[] = [];
 
-        for (const dataStream of dataStreams) {
-          const templateName = getRegistryDataStreamAssetBaseName(dataStream);
-          const baseTemplate = await fetchBaseTemplate(
-            esClient,
-            templateName,
-            'syncNamespaceTemplates'
-          );
-          if (!baseTemplate) continue;
+        await pMap(
+          dataStreams,
+          async (dataStream) => {
+            const templateName = getRegistryDataStreamAssetBaseName(dataStream);
+            const baseTemplate = await fetchBaseTemplate(
+              esClient,
+              templateName,
+              'syncNamespaceTemplates'
+            );
+            if (!baseTemplate) return;
 
-          const { name: nsName, template: nsTemplate } = buildNamespaceTemplate({
-            baseTemplate,
-            dataStream,
-            namespace,
-            templateName,
-          });
+            const { name: nsName, template: nsTemplate } = buildNamespaceTemplate({
+              baseTemplate,
+              dataStream,
+              namespace,
+              templateName,
+            });
 
-          await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate });
-          updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
-        }
+            await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate });
+            updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
+          },
+          { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+        );
 
         if (updatedIndexTemplates.length > 0) {
           await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
@@ -762,15 +768,19 @@ export async function syncNamespaceTemplates({
         if (nsTemplateRefs.length === 0) continue;
 
         // Delete the templates from ES
-        for (const ref of nsTemplateRefs) {
-          try {
-            await esClient.indices.deleteIndexTemplate({ name: ref.id }, { ignore: [404] });
-          } catch (err: any) {
-            logger.warn(
-              `[syncNamespaceTemplates] Failed to delete namespace template ${ref.id}: ${err.message}`
-            );
-          }
-        }
+        await pMap(
+          nsTemplateRefs,
+          async (ref) => {
+            try {
+              await esClient.indices.deleteIndexTemplate({ name: ref.id }, { ignore: [404] });
+            } catch (err: any) {
+              logger.warn(
+                `[syncNamespaceTemplates] Failed to delete namespace template ${ref.id}: ${err.message}`
+              );
+            }
+          },
+          { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+        );
 
         // Remove refs from installed_es — re-fetch to avoid stale data when
         // multiple namespaces affect the same package in successive iterations.
