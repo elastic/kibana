@@ -50,6 +50,8 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
+    let userProvided: UserProvided<T> | undefined;
+
     // 1. Check shared process-wide cache
     if (this.sharedUserProvidedCache) {
       // await any in-flight write to prevent reading stale data while a write is in progress
@@ -60,7 +62,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
         this.log.info(
           `[UiSettings] getUserProvided cache HIT (shared) for namespace=${this.namespace}`
         );
-        return sharedCached as UserProvided<T>;
+        userProvided = sharedCached as UserProvided<T>;
       }
 
       // check for in-flight read request (deduplication)
@@ -69,44 +71,48 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
         this.log.info(
           `[UiSettings] getUserProvided using IN-FLIGHT READ for namespace=${this.namespace}`
         );
-        return inflightRead as Promise<UserProvided<T>>;
+        userProvided = await inflightRead;
       }
     }
 
-    // 4. Check per-instance cache (within same request)
+    // Check per-instance cache (within same request)
     const instanceCached = this.cache.get();
     if (instanceCached) {
       this.log.info(
         `[UiSettings] getUserProvided cache HIT (instance) for namespace=${this.namespace}`
       );
-      return instanceCached;
+      userProvided = instanceCached;
     }
 
     this.log.info(
       `[UiSettings] getUserProvided cache MISS - fetching from ES for namespace=${this.namespace}`
     );
 
-    // 5. Fetch from ES, process, and cache at all levels
-    const promise = this.computeUserProvided<T>();
+    if (!userProvided) {
+      // Fetch from ES, process, and cache at all levels
+      const promise = this.computeUserProvided<T>();
 
-    // Register in-flight promise for deduplication
-    if (this.sharedUserProvidedCache) {
-      this.sharedUserProvidedCache.setInflightRead(this.namespace, promise);
+      // Register in-flight promise for deduplication
+      if (this.sharedUserProvidedCache) {
+        this.sharedUserProvidedCache.setInflightRead(this.namespace, promise);
+      }
+
+      userProvided = await promise;
     }
 
-    return promise;
-  }
-
-  private async computeUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    this.log.info(`[UiSettings] computeUserProvided START for namespace=${this.namespace}`);
-    const userProvided: UserProvided<T> = this.onReadHook(await this.read());
-
-    // write all overridden keys, dropping the userValue is override is null and
+    // write all overridden keys, dropping the userValue if override is null and
     // adding keys for overrides that are not in saved object
     for (const [key, value] of Object.entries(this.overrides)) {
       userProvided[key] =
         value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
     }
+
+    return userProvided;
+  }
+
+  private async computeUserProvided<T = unknown>(): Promise<UserProvided<T>> {
+    this.log.info(`[UiSettings] computeUserProvided START for namespace=${this.namespace}`);
+    const userProvided: UserProvided<T> = this.onReadHook(await this.read());
 
     // Cache at instance level (per-request, 5s TTL)
     this.cache.set(userProvided);
