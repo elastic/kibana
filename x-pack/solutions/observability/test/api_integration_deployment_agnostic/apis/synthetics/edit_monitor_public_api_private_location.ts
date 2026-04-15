@@ -20,6 +20,7 @@ import { PrivateLocationTestService } from '../../services/synthetics_private_lo
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EditMonitorsPublicAPI - Private Location', function () {
+    this.tags(['skipCloud']);
     const supertestAPI = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');

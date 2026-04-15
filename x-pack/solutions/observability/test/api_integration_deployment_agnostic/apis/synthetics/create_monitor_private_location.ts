@@ -30,6 +30,7 @@ import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor'
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('PrivateLocationCreateMonitor', function () {
+    this.tags(['skipCloud']);
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility

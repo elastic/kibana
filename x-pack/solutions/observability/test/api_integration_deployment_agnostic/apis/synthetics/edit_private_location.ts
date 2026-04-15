@@ -20,6 +20,7 @@ import type { SupertestWithRoleScopeType } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EditPrivateLocationAPI', function () {
+    this.tags(['skipCloud']);
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const samlAuth = getService('samlAuth');

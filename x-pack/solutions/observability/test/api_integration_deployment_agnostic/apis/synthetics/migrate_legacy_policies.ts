@@ -28,6 +28,7 @@ import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor'
  */
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('MigrateLegacyPolicies', function () {
+    this.tags(['skipCloud']);
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const roleScopedSupertest = getService('roleScopedSupertest');

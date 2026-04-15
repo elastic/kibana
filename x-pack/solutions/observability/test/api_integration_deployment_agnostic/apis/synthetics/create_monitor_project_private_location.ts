@@ -31,6 +31,7 @@ import { comparePolicies } from './sample_data/test_policy';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitorsPrivateLocations', function () {
+    this.tags(['skipCloud']);
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
     // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
