@@ -62,12 +62,32 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: '.node-version'
 
       - name: Bootstrap Kibana
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           corepack enable
-          yarn kbn bootstrap
+          mkdir -p "$HOME/.moon/temp" "$HOME/.moon/plugins/toolchains"
+          yarn kbn bootstrap --no-vscode || yarn kbn bootstrap --no-vscode
+
+      - name: Verify type checker
+        run: |
+          TYPE_CHECK="x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js"
+          if [ -f "$TYPE_CHECK" ]; then
+            echo "Type checker found at $TYPE_CHECK"
+            echo "Contents:"
+            cat "$TYPE_CHECK"
+            echo ""
+            echo "Testing invocation..."
+            node "$TYPE_CHECK" --help 2>&1 | head -10 || true
+          else
+            echo "::error::Type checker not found at $TYPE_CHECK"
+            echo "Listing directory contents:"
+            ls -la "x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/" || true
+            find "x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/" -name "*.js" 2>/dev/null || true
+          fi
 
       - name: Install OpenCode
         run: |
@@ -163,8 +183,9 @@ jobs:
           - You are running in CI. Do NOT attempt interactive git operations.
           - All commits will be pushed by the workflow after you finish.
           - Focus on implementing the instruction above. Update files directly.
-          - To type-check your changes, use the fast observability type checker:
-            node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --project path/to/tsconfig.json
+          - To type-check your changes, use the fast observability type checker with --with-archive (required on first run to restore cached tsc artifacts from GCS):
+            node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --with-archive --project path/to/tsconfig.json
+          - If the fast type checker is unavailable, fall back to: yarn test:type_check --project path/to/tsconfig.json
           - If validation fails, fix the issues and try again.
           TASK_FOOTER
 
@@ -209,7 +230,7 @@ jobs:
             exit 0
           fi
 
-          rm -f opencode.json
+          rm -f opencode.json .ralph_task.md .ralph_fix_task.md .ralph_context.json ralph-output.md
 
           git config user.name "Ralph-Agent"
           git config user.email "ralph@bot.local"
@@ -227,11 +248,9 @@ jobs:
             git checkout -b "$BRANCH_NAME"
             git push origin "$BRANCH_NAME"
 
-            FORK_REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-
             gh pr create \
               --repo elastic/kibana \
-              --head "${FORK_REPO}:${BRANCH_NAME}" \
+              --head "${BRANCH_NAME}" \
               --base main \
               --title "Ralph: ${INSTRUCTION}" \
               --body "Drafted by Ralph Engine.
