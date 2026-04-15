@@ -82,7 +82,7 @@ test.describe(
       });
     });
 
-    test('model family filter filters cards by provider', async ({ pageObjects }) => {
+    test('model family filter filters cards by provider', async ({ page, pageObjects }) => {
       const { eisModels } = pageObjects;
 
       await test.step('open model family filter popover', async () => {
@@ -90,7 +90,7 @@ test.describe(
       });
 
       await test.step('select Anthropic provider and close popover', async () => {
-        await eisModels.modelFamilyFilter.getByRole('option', { name: 'Anthropic' }).click();
+        await page.getByRole('option', { name: 'Anthropic' }).click();
         await eisModels.modelFamilyFilter.getByRole('button').click();
       });
 
