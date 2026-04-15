@@ -46,6 +46,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
           response: {
             200: {
               description: 'Indicates a successful call.',
+              body: () => getSpaceSchema(isServerless),
             },
           },
         },
