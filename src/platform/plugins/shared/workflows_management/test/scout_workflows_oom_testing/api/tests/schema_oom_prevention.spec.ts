@@ -13,7 +13,7 @@ import type { WorkflowsApiService } from '../fixtures';
 import { spaceTest } from '../fixtures';
 
 const GIB = 1024 * 1024 * 1024;
-const MAX_HEAP_SIZE_LIMIT_BYTES = Math.floor(1.2 * GIB);
+const MAX_HEAP_SIZE_LIMIT_BYTES = Math.floor(0.9 * GIB);
 const MAX_SETTLED_HEAP_USAGE_RATIO = 0.85;
 
 const WORKFLOW_YAML = `
@@ -51,10 +51,12 @@ steps:
 `;
 
 /**
- * These tests run against a memory-constrained Kibana (1 GB heap via the
- * workflows_oom_testing server config set). Each endpoint triggers full
- * workflow Zod schema materialisation. If the schema grows too large for a
- * 1 GB pod (the serverless baseline), Kibana OOMs and the test fails.
+ * These tests run against a memory-constrained Kibana (768 MB old-space heap
+ * via the workflows_oom_testing server config set). Each endpoint triggers
+ * full workflow Zod schema materialisation. The 768 MB limit is ~75% of a
+ * 1 GB pod (the serverless baseline), matching real deployments where the
+ * remaining headroom goes to externals and background processes. If the
+ * schema grows too large, Kibana OOMs and the test fails.
  *
  * Run with:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet workflows_oom_testing
@@ -80,7 +82,7 @@ spaceTest.describe('Workflow schema OOM prevention', { tag: tags.deploymentAgnos
     await workflowsApi.deleteAll();
   });
 
-  spaceTest('create and update workflow succeeds under 1 GB heap', async () => {
+  spaceTest('create and update workflow succeeds under constrained heap', async () => {
     const created = await workflowsApi.create(WORKFLOW_YAML);
     expect(created.id).toBeDefined();
     expect(created.valid).toBe(true);
@@ -95,14 +97,14 @@ spaceTest.describe('Workflow schema OOM prevention', { tag: tags.deploymentAgnos
     await expectHeapUsageWithinBudget();
   });
 
-  spaceTest('validate workflow succeeds under 1 GB heap', async () => {
+  spaceTest('validate workflow succeeds under constrained heap', async () => {
     const result = await workflowsApi.validate(WORKFLOW_YAML);
     expect(result.valid).toBe(true);
 
     await expectHeapUsageWithinBudget();
   });
 
-  spaceTest('validate invalid workflow returns errors under 1 GB heap', async () => {
+  spaceTest('validate invalid workflow returns errors under constrained heap', async () => {
     const invalidYaml = `
 name: Invalid Workflow
 triggers:
@@ -118,7 +120,7 @@ steps:
     await expectHeapUsageWithinBudget();
   });
 
-  spaceTest('create multi-step workflow succeeds under 1 GB heap', async () => {
+  spaceTest('create multi-step workflow succeeds under constrained heap', async () => {
     const created = await workflowsApi.create(MULTI_STEP_WORKFLOW_YAML);
     expect(created.id).toBeDefined();
     expect(created.valid).toBe(true);
@@ -127,7 +129,7 @@ steps:
     await expectHeapUsageWithinBudget();
   });
 
-  spaceTest('bulk create workflows succeeds under 1 GB heap', async () => {
+  spaceTest('bulk create workflows succeeds under constrained heap', async () => {
     const result = await workflowsApi.bulkCreate([WORKFLOW_YAML, MULTI_STEP_WORKFLOW_YAML]);
     expect(result.created).toHaveLength(2);
     expect(result.failed).toHaveLength(0);
