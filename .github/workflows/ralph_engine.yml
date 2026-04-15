@@ -29,7 +29,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           token: ${{ secrets.MY_PAT }}
 
       - name: Ralph Context Assembly
@@ -41,7 +41,8 @@ jobs:
               echo "ERROR: pr_id is required for adjust command"
               exit 1
             fi
-            gh pr checkout ${{ inputs.pr_id }}
+            git fetch origin pull/${{ inputs.pr_id }}/head:pr-${{ inputs.pr_id }}
+            git checkout pr-${{ inputs.pr_id }}
             gh pr view ${{ inputs.pr_id }} --json comments,title,body,headRefName,headRepository > .ralph_context.json
             echo "Checked out PR #${{ inputs.pr_id }}"
           else
