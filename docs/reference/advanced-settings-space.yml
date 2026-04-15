@@ -1287,6 +1287,18 @@ groups:
     id: kibana-search-settings
     settings:
 
+
+      - setting: "query_activity:minRunningTime"
+        id: query-activity-minrunningtime
+        description: |
+          The minimum time in milliseconds that a query must be running before it appears on the [Query activity](docs-content://deploy-manage/monitor/query-activity.md) page. Increase this value to filter out fast-completing queries and focus on long-running ones. `100` by default.
+        datatype: int
+        default: 100
+        applies_to:
+          stack: preview 9.4
+          elasticsearch: preview 9.4
+          serverless: unavailable
+
       - setting: "courier:ignoreFilterIfFieldNotInIndex"
         id: courier-ignorefilteriffieldnotinindex
         description: |
