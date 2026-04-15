@@ -20,7 +20,9 @@ import type { TaskParams } from '../../types';
 import { cancellableTask } from '../../cancellable_task';
 import { isDefinitionNotFoundError } from '../../../streams/errors/definition_not_found_error';
 import {
-  EMPTY_ACCUMULATED_STATE,
+  createEmptyAccumulatedState,
+  deriveSuccessCount,
+  deriveTotalTokensUsed,
   identifyInferredFeatures,
   identifyComputedFeatures,
   type AccumulatedIterationState,
@@ -111,7 +113,7 @@ async function runFeaturesIdentification(
   taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
   let hasTrackedIteration = false;
-  let state: AccumulatedIterationState = { ...EMPTY_ACCUMULATED_STATE };
+  let state: AccumulatedIterationState = createEmptyAccumulatedState();
 
   try {
     const stream = await streamsClient.getStream(streamName);
@@ -127,12 +129,26 @@ async function runFeaturesIdentification(
       taskContext.telemetry.trackFeaturesIdentified(data);
     };
 
-    const {
-      max_iterations: maxIterations,
-      semantic_min_score: _,
-      rrf_rank_constant: __,
-      ...tuning
-    } = tuningConfig;
+    const { max_iterations: maxIterations } = tuningConfig;
+    const tuning = {
+      sample_size: tuningConfig.sample_size,
+      feature_ttl_days: tuningConfig.feature_ttl_days,
+      entity_filtered_ratio: tuningConfig.entity_filtered_ratio,
+      diverse_ratio: tuningConfig.diverse_ratio,
+      max_excluded_features_in_prompt: tuningConfig.max_excluded_features_in_prompt,
+      max_entity_filters: tuningConfig.max_entity_filters,
+    };
+
+    const computedFeaturesPromise = identifyComputedFeatures({
+      stream,
+      streamName: stream.name,
+      start,
+      end,
+      esClient,
+      featureClient,
+      logger: taskLogger,
+      featureTtlDays: tuningConfig.feature_ttl_days,
+    });
 
     for (let i = 0; i < maxIterations; i++) {
       if (runContext.abortController.signal.aborted) {
@@ -158,7 +174,6 @@ async function runFeaturesIdentification(
         start,
         end,
         runId,
-        iteration: i + 1,
         state,
         tuning,
         trackFeaturesIdentified,
@@ -172,21 +187,14 @@ async function runFeaturesIdentification(
       state = result.state;
     }
 
-    if (state.iterationResults.length > 0 && state.successCount === 0) {
+    if (state.iterationResults.length > 0 && deriveSuccessCount(state.iterationResults) === 0) {
       throw new Error(`All iterations failed for stream ${streamName}`);
     }
 
-    const reconciledComputedFeatures = await identifyComputedFeatures({
-      stream,
-      streamName: stream.name,
-      start,
-      end,
-      esClient,
-      featureClient,
-      logger: taskLogger,
-      featureTtlDays: tuningConfig.feature_ttl_days,
+    const reconciledComputedFeatures = await computedFeaturesPromise.catch((err) => {
+      taskLogger.warn(`Computed features generation failed: ${parseError(err).message}`);
+      return [] as Awaited<ReturnType<typeof identifyComputedFeatures>>;
     });
-
     const allFeatures = [...state.discoveredFeatures, ...reconciledComputedFeatures];
 
     await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
@@ -196,7 +204,7 @@ async function runFeaturesIdentification(
         features: allFeatures,
         durationMs: taskDurationMs(),
         iterations: state.iterationResults,
-        totalTokensUsed: state.totalTokensUsed,
+        totalTokensUsed: deriveTotalTokensUsed(state.iterationResults),
       }
     );
   } catch (error) {
@@ -228,7 +236,7 @@ async function runFeaturesIdentification(
         features: [],
         durationMs: taskDurationMs(),
         iterations: state.iterationResults,
-        totalTokensUsed: state.totalTokensUsed,
+        totalTokensUsed: deriveTotalTokensUsed(state.iterationResults),
       }
     );
 

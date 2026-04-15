@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import {
   featureSchema,
+  iterationResultSchema,
   getStreamTypeFromDefinition,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
 } from '@kbn/streams-schema';
@@ -17,33 +19,10 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import {
-  EMPTY_TOKENS,
+  MS_PER_DAY,
   identifyInferredFeatures,
   identifyComputedFeatures,
 } from '../../../../lib/sig_events/features/features_identification_service';
-
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-const tokensSchema = z.object({
-  prompt: z.number(),
-  completion: z.number(),
-  total: z.number(),
-  cached: z.number().optional(),
-});
-
-const featureSummarySchema = z.object({
-  id: z.string(),
-  title: z.string(),
-});
-
-const iterationResultSchema = z.object({
-  iteration: z.number(),
-  durationMs: z.number(),
-  state: z.enum(['success', 'failure']),
-  tokensUsed: tokensSchema,
-  newFeatures: z.array(featureSummarySchema),
-  updatedFeatures: z.array(featureSummarySchema),
-});
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -67,9 +46,13 @@ const identifyInferredFeaturesRoute = createServerRoute({
       connectorId: z.string().optional(),
       start: z.number().optional(),
       end: z.number().optional(),
-      runId: z.string(),
-      iteration: z.number(),
-      discoveredFeatures: z.array(featureSchema),
+      runId: z.string().optional(),
+      // Caller must pass back discoveredFeatures from previous iterations so
+      // the service can distinguish intra-run features (merge semantics) from
+      // stored features (full replace). These are already persisted to ES but
+      // cannot be distinguished from pre-existing features without this context.
+      discoveredFeatures: z.array(featureSchema).optional().default([]),
+      iterationResults: z.array(iterationResultSchema).optional().default([]),
       featureTtlDays: z.number().optional(),
       sampleSize: z.number().optional(),
       entityFilteredRatio: z.number().min(0).max(1).optional(),
@@ -77,9 +60,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxEntityFilters: z.number().optional(),
       maxExcludedFeaturesInPrompt: z.number().optional(),
       maxPreviouslyIdentifiedFeatures: z.number().optional(),
-      totalTokensUsed: tokensSchema.optional(),
-      successCount: z.number().optional(),
-      iterationResults: z.array(iterationResultSchema).optional().default([]),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
@@ -97,14 +77,15 @@ const identifyInferredFeaturesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name: streamName } = params.path;
+    const routeLogger = logger.get('features_identification', 'inferred', streamName);
     const now = Date.now();
     const {
       start = now - MS_PER_DAY,
       end = now,
       connectorId: connectorIdOverride,
-      runId,
-      iteration,
+      runId = uuidv4(),
       discoveredFeatures,
+      iterationResults,
       featureTtlDays = tuningConfig.feature_ttl_days,
       sampleSize = tuningConfig.sample_size,
       entityFilteredRatio = tuningConfig.entity_filtered_ratio,
@@ -112,12 +93,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxEntityFilters = tuningConfig.max_entity_filters,
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
-      totalTokensUsed = { ...EMPTY_TOKENS },
-      successCount = 0,
-      iterationResults = [],
     } = params.body;
-
-    const taskLogger = logger.get('features_identification_workflow', streamName);
 
     const [connectorId, stream] = await Promise.all([
       connectorIdOverride
@@ -133,36 +109,39 @@ const identifyInferredFeaturesRoute = createServerRoute({
 
     const featureClient = await getFeatureClient();
 
-    return identifyInferredFeatures({
-      esClient: scopedClusterClient.asCurrentUser,
-      featureClient,
-      soClient,
-      inferenceClient: inferenceClient.bindTo({ connectorId }),
-      logger: taskLogger,
-      signal: getRequestAbortSignal(request),
-      streamName,
-      streamType: getStreamTypeFromDefinition(stream),
-      start,
-      end,
-      runId,
-      iteration,
-      state: {
-        discoveredFeatures,
-        totalTokensUsed,
-        successCount,
-        iterationResults,
-      },
-      tuning: {
-        feature_ttl_days: featureTtlDays,
-        sample_size: sampleSize,
-        entity_filtered_ratio: entityFilteredRatio,
-        diverse_ratio: diverseRatio,
-        max_entity_filters: maxEntityFilters,
-        max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
-        maxPreviouslyIdentifiedFeatures,
-      },
-      trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
-    });
+    try {
+      return await identifyInferredFeatures({
+        esClient: scopedClusterClient.asCurrentUser,
+        featureClient,
+        soClient,
+        inferenceClient: inferenceClient.bindTo({ connectorId }),
+        logger: routeLogger,
+        signal: getRequestAbortSignal(request),
+        streamName,
+        streamType: getStreamTypeFromDefinition(stream),
+        start,
+        end,
+        runId,
+        state: { discoveredFeatures, iterationResults },
+        tuning: {
+          feature_ttl_days: featureTtlDays,
+          sample_size: sampleSize,
+          entity_filtered_ratio: entityFilteredRatio,
+          diverse_ratio: diverseRatio,
+          max_entity_filters: maxEntityFilters,
+          max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
+          maxPreviouslyIdentifiedFeatures,
+        },
+        trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
+      });
+    } catch (error) {
+      routeLogger.error(
+        `Inferred feature identification failed for stream [${streamName}] after ${
+          iterationResults.length
+        } completed iterations: ${error instanceof Error ? error.message : String(error)}`
+      );
+      throw error;
+    }
   },
 });
 
@@ -186,8 +165,6 @@ const identifyComputedFeaturesRoute = createServerRoute({
     body: z.object({
       start: z.number().optional(),
       end: z.number().optional(),
-      iteration: z.number().optional(),
-      successCount: z.number().optional(),
       featureTtlDays: z.number().optional(),
     }),
   }),
@@ -204,39 +181,43 @@ const identifyComputedFeaturesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name: streamName } = params.path;
+    const routeLogger = logger.get('features_identification', 'computed', streamName);
     const now = Date.now();
     const {
       start = now - MS_PER_DAY,
       end = now,
-      iteration = 0,
-      successCount = 0,
       featureTtlDays = tuningConfig.feature_ttl_days,
     } = params.body;
-
-    if (iteration > 0 && successCount === 0) {
-      throw new Error(`All iterations failed for stream ${streamName}`);
-    }
 
     const [featureClient, stream] = await Promise.all([
       getFeatureClient(),
       streamsClient.getStream(streamName),
     ]);
 
-    const computedFeatures = await identifyComputedFeatures({
-      stream,
-      streamName,
-      start,
-      end,
-      esClient: scopedClusterClient.asCurrentUser,
-      featureClient,
-      logger: logger.get('features_identification_workflow', streamName),
-      featureTtlDays,
-    });
+    try {
+      const computedFeatures = await identifyComputedFeatures({
+        stream,
+        streamName,
+        start,
+        end,
+        esClient: scopedClusterClient.asCurrentUser,
+        featureClient,
+        logger: routeLogger,
+        featureTtlDays,
+      });
 
-    return {
-      computedFeatures,
-      computedFeaturesCount: computedFeatures.length,
-    };
+      return {
+        computedFeatures,
+        computedFeaturesCount: computedFeatures.length,
+      };
+    } catch (error) {
+      routeLogger.error(
+        `Computed feature identification failed for stream [${streamName}]: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw error;
+    }
   },
 });
 
