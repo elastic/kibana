@@ -205,6 +205,7 @@ steps:
         end: "${{ steps.setup.output.end }}"
         iteration: "${{ variables.iteration }}"
         successCount: "${{ variables.successCount }}"
+        featureTtlDays: "${{ inputs.featureTtlDays }}"
 
   # -----------------------------------------------------------------------
   # Step 5: Output results.

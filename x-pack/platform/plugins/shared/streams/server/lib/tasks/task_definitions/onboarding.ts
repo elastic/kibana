@@ -327,6 +327,10 @@ async function waitForWorkflowExecution(
         return workflowExecutionToTaskResult(execution);
       }
 
+      if (cancelRequested) {
+        return { status: TaskStatus.Canceled };
+      }
+
       const errorMsg = execution.error ?? `Workflow execution ${executionId} ${execution.status}`;
       throw new Error(errorMsg);
     }

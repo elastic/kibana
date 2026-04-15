@@ -36,6 +36,7 @@ export const createContinuousKiExtractionWorkflowService = (
       {
         workflowId: CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
         statuses: [...NonTerminalExecutionStatuses],
+        size: 10_000,
       },
       DEFAULT_SPACE_ID
     );

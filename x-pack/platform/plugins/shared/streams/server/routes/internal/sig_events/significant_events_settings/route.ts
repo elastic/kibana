@@ -57,19 +57,6 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
 
     const { continuousKiExtraction } = params.body;
 
-    if (continuousKiExtractionWorkflowService) {
-      const enabled =
-        continuousKiExtraction.enabled ??
-        (await globalUiSettingsClient.get<boolean>(
-          OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
-        ));
-      await continuousKiExtractionWorkflowService.ensureWorkflow({
-        enabled,
-        request,
-        featuresWorkflowClient: featuresIdentificationWorkflowClient,
-      });
-    }
-
     const updates: Record<string, boolean | number | string> = {};
 
     if (continuousKiExtraction.enabled !== undefined) {
@@ -87,6 +74,19 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
 
     if (Object.keys(updates).length > 0) {
       await globalUiSettingsClient.setMany(updates);
+    }
+
+    if (continuousKiExtractionWorkflowService) {
+      const enabled =
+        continuousKiExtraction.enabled ??
+        (await globalUiSettingsClient.get<boolean>(
+          OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+        ));
+      await continuousKiExtractionWorkflowService.ensureWorkflow({
+        enabled,
+        request,
+        featuresWorkflowClient: featuresIdentificationWorkflowClient,
+      });
     }
 
     return { success: true };

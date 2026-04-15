@@ -159,19 +159,15 @@ const sampleRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: z
-      .object({
-        start: z.number(),
-        end: z.number(),
-        discoveredFeatures: z.array(featureSchema),
-        sampleSize: z.number().optional(),
-        entityFilteredRatio: z.number().min(0).max(1).optional(),
-        diverseRatio: z.number().min(0).max(1).optional(),
-        maxEntityFilters: z.number().optional(),
-      })
-      .refine((data) => (data.entityFilteredRatio ?? 0) + (data.diverseRatio ?? 0) <= 1, {
-        message: 'entityFilteredRatio + diverseRatio must be <= 1',
-      }),
+    body: z.object({
+      start: z.number(),
+      end: z.number(),
+      discoveredFeatures: z.array(featureSchema),
+      sampleSize: z.number().optional(),
+      entityFilteredRatio: z.number().min(0).max(1).optional(),
+      diverseRatio: z.number().min(0).max(1).optional(),
+      maxEntityFilters: z.number().optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { scopedClusterClient, tuningConfig, licensing, uiSettingsClient } =

@@ -104,6 +104,7 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
       {
         workflowId,
         statuses: [...NonTerminalExecutionStatuses],
+        size: 10_000,
       },
       DEFAULT_SPACE_ID
     );

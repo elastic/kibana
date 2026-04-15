@@ -18,9 +18,7 @@ import {
   STREAMS_API_PRIVILEGES,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MAX_SCHEDULED_STREAMS,
-  type FeaturesIdentificationWorkflowInputs,
 } from '../../../../../common/constants';
-import type { WorkflowClient } from '../../../../lib/workflows/workflow_client';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import {
   classifyStreams,
@@ -58,12 +56,6 @@ const NumberFromString = z.string().transform((value) => {
   }
   return Number(trimmed);
 });
-
-const COMPLETED_EXECUTIONS_MAX_AGE_MS = 48 * 3_600_000;
-
-const fetchCompletedExecutions = (
-  workflowClient: WorkflowClient<FeaturesIdentificationWorkflowInputs>
-) => workflowClient.getCompletedExecutions({ maxAgeMs: COMPLETED_EXECUTIONS_MAX_AGE_MS });
 
 const eligibleStreamsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_extraction/_eligible',
@@ -125,6 +117,8 @@ const eligibleStreamsRoute = createServerRoute({
 
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
+    const intervalHours =
+      query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
     const [connectorId, { results: runningExecutions }, completedExecutions, allStreams] =
       await Promise.all([
@@ -135,12 +129,9 @@ const eligibleStreamsRoute = createServerRoute({
           request,
         }),
         workflowClient.getNonTerminalExecutions(),
-        fetchCompletedExecutions(workflowClient),
+        workflowClient.getCompletedExecutions({ maxAgeMs: intervalHours * 3_600_000 }),
         streamsClient.listStreams(),
       ]);
-
-    const intervalHours =
-      query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
     const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
 
