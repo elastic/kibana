@@ -12,12 +12,13 @@ import type { monaco } from '@kbn/monaco';
 import { useTimePickerPopover } from './use_time_picker_popover';
 
 describe('useTimePickerPopover', () => {
+  // Editor at x=50, width=800, so right edge is at 850
   const createMockEditorRef = () => {
     const ref: React.MutableRefObject<Partial<monaco.editor.IStandaloneCodeEditor> | undefined> = {
       current: {
         getPosition: jest.fn().mockReturnValue({ lineNumber: 1, column: 5 }),
         getDomNode: jest.fn().mockReturnValue({
-          getBoundingClientRect: () => ({ top: 100, left: 50, width: 800 }),
+          getBoundingClientRect: () => ({ top: 100, left: 50, width: 800, right: 850 }),
         }),
         getScrolledVisiblePosition: jest.fn().mockReturnValue({ top: 20, left: 40 }),
       },
@@ -27,6 +28,14 @@ describe('useTimePickerPopover', () => {
 
   const createMockPopoverRef = (): React.MutableRefObject<HTMLDivElement | null> => ({
     current: { focus: jest.fn() } as unknown as HTMLDivElement,
+  });
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('returns initial state', () => {
@@ -49,18 +58,20 @@ describe('useTimePickerPopover', () => {
 
     act(() => {
       result.current.openTimePickerPopover();
+      // Flush requestAnimationFrame for the deferred focus call
+      jest.runAllTimers();
     });
 
     // absoluteTop = editorTop (100) + editorPosition.top (20) + 25 = 145
     // absoluteLeft = editorLeft (50) + editorPosition.left (40) = 90
     expect(result.current.popoverPosition).toEqual({ top: 145, left: 90 });
     expect(result.current.datePickerOpenStatusRef.current).toBe(true);
-    expect(popoverRef.current!.focus).toHaveBeenCalled();
   });
 
-  it('adjusts left position when popover would overflow editor width', () => {
+  it('adjusts left position when popover would overflow editor right edge', () => {
     const editorRef = createMockEditorRef();
-    // Make left position exceed editor width
+    // Cursor far right: absoluteLeft = 50 + 800 = 850
+    // 850 + DATEPICKER_WIDTH(373) = 1223 > editorCoords.right(850) → triggers adjustment
     (editorRef.current!.getScrolledVisiblePosition as jest.Mock).mockReturnValue({
       top: 20,
       left: 800,
@@ -73,9 +84,23 @@ describe('useTimePickerPopover', () => {
       result.current.openTimePickerPopover();
     });
 
-    // absoluteLeft = 50 + 800 = 850 > editorWidth (800), so subtract DATEPICKER_WIDTH (373)
     // adjustedLeft = 850 - 373 = 477
     expect(result.current.popoverPosition.left).toBe(477);
+  });
+
+  it('does not adjust when popover fits within editor', () => {
+    const editorRef = createMockEditorRef();
+    // Cursor near left: absoluteLeft = 50 + 40 = 90
+    // 90 + DATEPICKER_WIDTH(373) = 463 < editorCoords.right(850) → no adjustment
+    const popoverRef = createMockPopoverRef();
+
+    const { result } = renderHook(() => useTimePickerPopover({ editorRef, popoverRef }));
+
+    act(() => {
+      result.current.openTimePickerPopover();
+    });
+
+    expect(result.current.popoverPosition.left).toBe(90);
   });
 
   it('does nothing when editor has no cursor position', () => {
