@@ -215,6 +215,18 @@ export const AgentTools: React.FC = () => {
     );
   }
 
+  const toolModals = isLibraryOpen ? (
+    <ToolLibraryPanel
+      onClose={closeLibrary}
+      allTools={allTools}
+      activeToolIdSet={libraryActiveToolIdSet}
+      onToggleTool={handleToggleTool}
+      mutatingToolId={null}
+      enableElasticCapabilities={enableElasticCapabilities}
+      builtinToolIdSet={defaultToolIdSet}
+    />
+  ) : null;
+
   return (
     <PageWrapper>
       {showCustomizeEmptyState ? (
@@ -303,17 +315,7 @@ export const AgentTools: React.FC = () => {
         </>
       )}
 
-      {isLibraryOpen && (
-        <ToolLibraryPanel
-          onClose={closeLibrary}
-          allTools={allTools}
-          activeToolIdSet={libraryActiveToolIdSet}
-          onToggleTool={handleToggleTool}
-          mutatingToolId={null}
-          enableElasticCapabilities={enableElasticCapabilities}
-          builtinToolIdSet={defaultToolIdSet}
-        />
-      )}
+      {toolModals}
     </PageWrapper>
   );
 };
