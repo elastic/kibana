@@ -1731,12 +1731,12 @@ steps:
       expect(result.created).toHaveLength(1);
       expect(result.failed).toHaveLength(0);
       // Should NOT have called search for conflict check when overwrite is true
-      // (only the resolveUniqueWorkflowIdsBatch search is expected for server-gen IDs,
+      // (only the resolveUniqueWorkflowIds search is expected for server-gen IDs,
       // but this workflow has a custom ID so no server-gen resolution needed)
     });
 
     it('should resolve server-generated ID collisions against database', async () => {
-      // Mock resolveUniqueWorkflowIdsBatch search to return 'workflow-one' as existing
+      // Mock resolveUniqueWorkflowIds search to return 'workflow-one' as existing
       mockEsClient.search.mockResolvedValueOnce({
         hits: {
           hits: [
@@ -1929,7 +1929,7 @@ steps:
     });
 
     it('should route server-generated IDs around user-supplied IDs in the same batch', async () => {
-      // resolveUniqueWorkflowIdsBatch: no candidates exist in DB
+      // resolveUniqueWorkflowIds: no candidates exist in DB
       mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
       mockEsClient.bulk.mockResolvedValue({
@@ -3813,7 +3813,7 @@ steps:
     });
   });
 
-  describe('resolveUniqueWorkflowId (via createWorkflow)', () => {
+  describe('resolveUniqueWorkflowIds (via createWorkflow)', () => {
     const mockRequest = {
       auth: { credentials: { username: 'test-user' } },
     } as any;
@@ -3852,7 +3852,7 @@ steps:
     const noHits = { hits: { hits: [] } };
 
     it('should return slug unchanged when no collision exists', async () => {
-      // resolveUniqueWorkflowId: single batch search returns no hits
+      // resolveUniqueWorkflowIds: single batch search returns no hits
       mockEsClient.search.mockResolvedValue(noHits as any);
       mockEsClient.index.mockResolvedValue({ _id: 'my-workflow' } as any);
 
@@ -3862,7 +3862,7 @@ steps:
     });
 
     it('should append -1 suffix on single collision', async () => {
-      // resolveUniqueWorkflowId: batch search returns "my-workflow" as existing
+      // resolveUniqueWorkflowIds: batch search returns "my-workflow" as existing
       mockEsClient.search.mockResolvedValueOnce(existingWorkflowHits('my-workflow') as any);
       mockEsClient.index.mockResolvedValue({ _id: 'my-workflow-1' } as any);
 
@@ -3872,7 +3872,7 @@ steps:
     });
 
     it('should increment suffix on multiple collisions', async () => {
-      // resolveUniqueWorkflowId: batch search returns three existing IDs
+      // resolveUniqueWorkflowIds: batch search returns three existing IDs
       mockEsClient.search.mockResolvedValueOnce(
         existingWorkflowHits('my-workflow', 'my-workflow-1', 'my-workflow-2') as any
       );
@@ -3897,7 +3897,7 @@ steps:
 `;
       const longSlug = 'a'.repeat(255);
 
-      // resolveUniqueWorkflowId: batch search returns the long slug as existing
+      // resolveUniqueWorkflowIds: batch search returns the long slug as existing
       mockEsClient.search.mockResolvedValueOnce(existingWorkflowHits(longSlug) as any);
       mockEsClient.index.mockResolvedValue({ _id: 'truncated' } as any);
 
@@ -3909,7 +3909,7 @@ steps:
     });
 
     it('should fall back to UUID after exhausting max collision retries', async () => {
-      // resolveUniqueWorkflowId: batch search returns ALL 101 candidate IDs as existing
+      // resolveUniqueWorkflowIds: batch search returns ALL 101 candidate IDs as existing
       const allCandidates = ['my-workflow'];
       for (let i = 1; i <= 100; i++) {
         allCandidates.push(`my-workflow-${i}`);

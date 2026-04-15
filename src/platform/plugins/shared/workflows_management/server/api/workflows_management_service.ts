@@ -100,6 +100,8 @@ function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefin
 }
 
 const DEFAULT_PAGE_SIZE = 100;
+const MAX_COLLISION_RETRIES = 100;
+const ES_MAX_IDS_PER_QUERY = 10_000;
 
 type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
 
@@ -382,7 +384,7 @@ export class WorkflowsService {
       }
     } else {
       // Server-generated ID: resolve collisions with numeric suffix
-      id = await this.resolveUniqueWorkflowId(baseId, spaceId);
+      [id] = await this.resolveUniqueWorkflowIds([baseId], new Set(), spaceId);
     }
 
     await this.workflowStorage.getClient().index({
@@ -1857,48 +1859,6 @@ export class WorkflowsService {
   }
 
   /**
-   * Resolves a unique workflow ID by checking for existing workflows in the
-   * given space and picking the first available candidate.
-   * Only used for server-generated IDs (not user-supplied ones).
-   *
-   * Generates candidate IDs (baseId, baseId-1, baseId-2, ...) and checks them
-   * in a single batch query to avoid sequential network roundtrips.
-   */
-  private async resolveUniqueWorkflowId(baseId: string, spaceId: string): Promise<string> {
-    const MAX_COLLISION_RETRIES = 100;
-
-    // Build all candidate IDs upfront
-    const candidates = [baseId];
-    for (let i = 1; i <= MAX_COLLISION_RETRIES; i++) {
-      const suffix = `-${i}`;
-      candidates.push(`${baseId.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`);
-    }
-
-    // Check which candidates already exist in a single batch query.
-    // Intentionally does NOT exclude soft-deleted workflows (no must_not deleted_at)
-    // to avoid reassigning an ID that belongs to a soft-deleted workflow.
-    const response = await this.workflowStorage.getClient().search({
-      query: {
-        bool: {
-          must: [{ ids: { values: candidates } }, { term: { spaceId } }],
-        },
-      },
-      size: candidates.length,
-      track_total_hits: false,
-    });
-    const existingIds = new Set(response.hits.hits.map((hit) => hit._id));
-
-    // Return the first candidate that doesn't exist
-    const available = candidates.find((c) => !existingIds.has(c));
-    if (available) {
-      return available;
-    }
-
-    // All candidates taken — fall back to a UUID-based ID to guarantee uniqueness.
-    return `workflow-${generateUuid()}`;
-  }
-
-  /**
    * Phase 1.5 of bulkCreateWorkflows: resolves server-generated IDs against the
    * database and in-batch collisions, checks user-supplied IDs for conflicts,
    * deduplicates within the batch, and rebuilds bulkOperations with the correct
@@ -1942,7 +1902,7 @@ export class WorkflowsService {
     // For server-generated IDs: resolve unique IDs in batch
     // (handles both in-batch dedup and database collision avoidance)
     if (serverGenWorkflows.length > 0) {
-      const resolvedIds = await this.resolveUniqueWorkflowIdsBatch(
+      const resolvedIds = await this.resolveUniqueWorkflowIds(
         serverGenWorkflows.map((vw) => vw.id),
         seenIds,
         spaceId
@@ -1972,7 +1932,7 @@ export class WorkflowsService {
     }
 
     // Deduplicate user-supplied IDs within the batch (first wins, later ones fail).
-    // Server-generated IDs are already guaranteed unique by resolveUniqueWorkflowIdsBatch.
+    // Server-generated IDs are already guaranteed unique by resolveUniqueWorkflowIds.
     const seenUserIds = new Set<string>();
     for (let i = 0; i < validWorkflows.length; i++) {
       if (validWorkflows[i].hasCustomId) {
@@ -2004,18 +1964,17 @@ export class WorkflowsService {
   }
 
   /**
-   * Batched version of resolveUniqueWorkflowId for multiple base IDs.
-   * Generates candidate IDs for each base, checks them all in a single ES query,
-   * and picks the first available candidate per base ID while also respecting
-   * the in-batch `seenIds` set to avoid collisions within the same batch.
+   * Resolves unique workflow IDs for one or more base IDs.
+   * Generates candidate IDs for each base (baseId, baseId-1, baseId-2, ...),
+   * checks them all in a single ES query, and picks the first available candidate
+   * per base ID while also respecting the in-batch `seenIds` set to avoid
+   * collisions within the same batch.
    */
-  private async resolveUniqueWorkflowIdsBatch(
+  private async resolveUniqueWorkflowIds(
     baseIds: string[],
     seenIds: Set<string>,
     spaceId: string
   ): Promise<string[]> {
-    const MAX_COLLISION_RETRIES = 100;
-
     // Build candidate lists per base ID.
     // Note: truncation of near-max-length IDs could cause candidate overlap between
     // different base IDs. The seenIds check in the resolution loop below prevents
@@ -2041,7 +2000,6 @@ export class WorkflowsService {
     // Chunked to stay within ES default max_result_window (10,000).
     const candidateArray = [...allCandidates];
     const existingIds = new Set<string>();
-    const ES_MAX_IDS_PER_QUERY = 10_000;
 
     for (let offset = 0; offset < candidateArray.length; offset += ES_MAX_IDS_PER_QUERY) {
       const chunk = candidateArray.slice(offset, offset + ES_MAX_IDS_PER_QUERY);
