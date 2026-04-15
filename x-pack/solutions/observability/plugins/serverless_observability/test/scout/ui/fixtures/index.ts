@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ObltPageObjects,
-  ObltTestFixtures,
-  ObltWorkerFixtures,
-} from '@kbn/scout-oblt';
+import type { ObltPageObjects, ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout-oblt';
 import { ServerlessNav } from './page_objects';
 
