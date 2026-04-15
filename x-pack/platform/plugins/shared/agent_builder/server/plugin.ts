@@ -42,6 +42,7 @@ import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './ser
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { createMemoryTools } from './services/memory/create_memory_tools';
 
 export class AgentBuilderPlugin
   implements
@@ -217,6 +218,19 @@ export class AgentBuilderPlugin
       },
     });
     connectorTools.forEach((tool) => {
+      serviceSetups.tools.register(tool);
+    });
+
+    const memoryTools = createMemoryTools({
+      getMemoryService: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Memory service not available — plugin has not started');
+        }
+        return services.memory;
+      },
+    });
+    memoryTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
 
