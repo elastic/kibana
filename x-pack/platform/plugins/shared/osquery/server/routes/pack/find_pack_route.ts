@@ -21,6 +21,7 @@ import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { findPacksRequestQuerySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { findPackResponseSchema } from './response_schemas';
 
 export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -42,6 +43,11 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
               typeof findPacksRequestQuerySchema,
               FindPacksRequestQuerySchema
             >(findPacksRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => findPackResponseSchema,
+            },
           },
         },
       },
