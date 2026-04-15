@@ -40,20 +40,38 @@ Evaluate Scout and FTR independently. Only nudge the side(s) that qualify.
 
 **Scout:** Walk up from the changed file to the nearest `playwright.config.ts` or `parallel.playwright.config.ts`. Use `parallel.playwright.config.ts` if the path contains `parallel_tests/`.
 
+Sample Scout config path: `x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts`
+
 **FTR:** Walk up to the nearest leaf `config*.ts` (skip `*.base.ts` files). If none found, check which config's `testFiles`/`loadTestFile` includes the changed file.
+
+Sample FTR config path: `x-pack/platform/test/serverless/functional/configs/search/config.group7.ts`
 
 ## Output
 
 Post exactly one PR comment:
 
-```markdown
-## Run the Flaky Test Runner (recommended)
+````markdown
+## Catch flakiness early (recommended)
 
 **Recommended before merge**: run the flaky test runner against this PR to catch flakiness early.
 
 Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigger_flaky_test_runner) or post a comment in the PR:
 
+```
 /flaky <ftrConfig or scoutConfig here>:<resolved-path>:30
 ```
+````
 
 Include only the `/flaky` line(s) for the runner(s) that qualify. Replace each `<resolved-path>` with the actual config path from Step 3. Replace "ftrConfig or scoutConfig here" with the actual test runner.
+
+Sample Scout command:
+
+```
+/flaky scoutConfig:x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts:30
+```
+
+Sample FTR command:
+
+```
+/flaky ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group7.ts:30
+```
