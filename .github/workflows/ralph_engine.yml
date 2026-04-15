@@ -1,0 +1,233 @@
+name: Ralph Engine
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "new or adjust"
+        required: true
+        type: string
+      instruction:
+        description: "What Ralph should do"
+        required: true
+        type: string
+      pr_id:
+        description: "PR number (for adjust command)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  agent-exec:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.MY_PAT }}
+
+      - name: Ralph Context Assembly
+        env:
+          GH_TOKEN: ${{ secrets.MY_PAT }}
+        run: |
+          if [ "${{ inputs.command }}" == "adjust" ]; then
+            if [ -z "${{ inputs.pr_id }}" ]; then
+              echo "ERROR: pr_id is required for adjust command"
+              exit 1
+            fi
+            gh pr checkout ${{ inputs.pr_id }}
+            gh pr view ${{ inputs.pr_id }} --json comments,title,body,headRefName,headRepository > .ralph_context.json
+            echo "Checked out PR #${{ inputs.pr_id }}"
+          else
+            echo "New task mode — working on default branch"
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Bootstrap Kibana
+        run: |
+          corepack enable
+          yarn kbn bootstrap
+
+      - name: Install OpenCode
+        run: |
+          npm install -g opencode
+
+      - name: Build Task Prompt
+        run: |
+          PROTOCOL=""
+          if [ -f "AGENT_LOOP_PROTOCOL.md" ]; then
+            PROTOCOL=$(cat AGENT_LOOP_PROTOCOL.md)
+          fi
+
+          CONTEXT=""
+          if [ "${{ inputs.command }}" == "adjust" ] && [ -f .ralph_context.json ]; then
+            CONTEXT=$(cat .ralph_context.json)
+          fi
+
+          cat > .ralph_task.md <<'TASK_HEADER'
+          You are Ralph, an AI coding agent running in a GitHub Actions workflow.
+
+          TASK_HEADER
+
+          if [ -n "$PROTOCOL" ]; then
+            echo "" >> .ralph_task.md
+            echo "$PROTOCOL" >> .ralph_task.md
+          fi
+
+          cat >> .ralph_task.md <<'TASK_MID'
+
+          ---
+
+          ## Instruction
+
+          TASK_MID
+
+          echo "${{ inputs.instruction }}" >> .ralph_task.md
+
+          if [ -n "$CONTEXT" ]; then
+            cat >> .ralph_task.md <<'TASK_CTX'
+
+          ## PR Context
+
+          TASK_CTX
+            echo "$CONTEXT" >> .ralph_task.md
+          fi
+
+          cat >> .ralph_task.md <<'TASK_FOOTER'
+
+          ---
+
+          ## Important Reminders
+
+          - You are running in CI. Do NOT attempt interactive git operations.
+          - All commits will be pushed by the workflow after you finish.
+          - Focus on implementing the instruction above. Update files directly.
+          - Run validation commands (lint, type-check) to verify your changes.
+          - If validation fails, fix the issues and try again.
+          TASK_FOOTER
+
+          echo "Task prompt written to .ralph_task.md"
+
+      - name: Run Agent
+        env:
+          LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          GH_TOKEN: ${{ secrets.MY_PAT }}
+        run: |
+          opencode run "$(cat .ralph_task.md)" --model anthropic/claude-sonnet-4-20250514 2>&1 | tee ralph-output.md
+
+      - name: Self-Fix on Failure
+        if: failure()
+        env:
+          LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+        run: |
+          echo "Agent step failed. Attempting one self-fix..."
+          ERROR_CONTEXT=$(tail -200 ralph-output.md 2>/dev/null || echo "No output captured")
+          cat > .ralph_fix_task.md <<FIX_EOF
+          The previous agent run failed. Here is the error output from the last 200 lines:
+
+          ${ERROR_CONTEXT}
+
+          Fix the issue that caused the failure. Focus on the actual error, not on re-implementing the original task.
+          FIX_EOF
+          opencode run "$(cat .ralph_fix_task.md)" --model anthropic/claude-sonnet-4-20250514 2>&1 | tee -a ralph-output.md
+
+      - name: Verify Changes
+        run: |
+          CHANGED=0
+          if ! git diff --quiet 2>/dev/null; then CHANGED=1; fi
+          if ! git diff --cached --quiet 2>/dev/null; then CHANGED=1; fi
+          if [ -n "$(git ls-files --others --exclude-standard)" ]; then CHANGED=1; fi
+
+          if [ "$CHANGED" -eq 0 ]; then
+            echo "No changes detected"
+            exit 0
+          fi
+
+          echo "Changes detected — running validation..."
+
+          VALIDATION_FAILED=0
+
+          echo "=== ESLint ==="
+          if ! node scripts/eslint.js 2>&1 | tail -20; then
+            echo "ESLint found issues"
+            VALIDATION_FAILED=1
+          fi
+
+          echo "=== Type Check ==="
+          if ! yarn test:type_check 2>&1 | tail -20; then
+            echo "Type check found issues"
+            VALIDATION_FAILED=1
+          fi
+
+          if [ "$VALIDATION_FAILED" -eq 1 ]; then
+            echo "::warning::Validation had issues but changes will still be pushed for review"
+          else
+            echo "All validation passed"
+          fi
+
+      - name: Push Changes
+        env:
+          GH_TOKEN: ${{ secrets.MY_PAT }}
+        run: |
+          CHANGED=0
+          if ! git diff --quiet 2>/dev/null; then CHANGED=1; fi
+          if ! git diff --cached --quiet 2>/dev/null; then CHANGED=1; fi
+          if [ -n "$(git ls-files --others --exclude-standard)" ]; then CHANGED=1; fi
+
+          if [ "$CHANGED" -eq 0 ]; then
+            echo "No changes to push"
+            exit 0
+          fi
+
+          git config user.name "Ralph-Agent"
+          git config user.email "ralph@bot.local"
+          git add -A
+          INSTRUCTION="${{ inputs.instruction }}"
+          COMMIT_MSG="Ralph: ${INSTRUCTION}"
+          if [ ${#COMMIT_MSG} -gt 72 ]; then
+            COMMIT_MSG="${COMMIT_MSG:0:69}..."
+          fi
+          git commit -m "$COMMIT_MSG"
+
+          if [ "${{ inputs.command }}" == "new" ]; then
+            BRANCH_SLUG=$(echo "$INSTRUCTION" | head -c 40 | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//;s/-$//')
+            BRANCH_NAME="ralph/${BRANCH_SLUG}-$(date +%Y%m%d-%H%M%S)"
+            git checkout -b "$BRANCH_NAME"
+            git push origin "$BRANCH_NAME"
+
+            FORK_REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+
+            gh pr create \
+              --repo elastic/kibana \
+              --head "${FORK_REPO}:${BRANCH_NAME}" \
+              --base main \
+              --title "Ralph: ${INSTRUCTION}" \
+              --body "Drafted by Ralph Engine.
+
+          Instruction: ${INSTRUCTION}
+
+          ---
+          *This PR was created automatically by the Ralph Engine GitHub Action.*" \
+              --draft
+          else
+            git push origin HEAD
+            gh pr comment ${{ inputs.pr_id }} --body "Ralph applied changes for: ${INSTRUCTION}
+
+          ---
+          *Updated by Ralph Engine.*"
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f .ralph_task.md .ralph_fix_task.md .ralph_context.json ralph-output.md
