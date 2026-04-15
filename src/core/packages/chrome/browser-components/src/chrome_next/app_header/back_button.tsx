@@ -15,6 +15,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useBackButton } from './hooks';
@@ -29,8 +30,20 @@ const getBackToLabel = (destination: string) =>
     values: { destination },
   });
 
-export const BackButton = React.memo(() => {
+const useBackButtonStyles = () => {
   const { euiTheme } = useEuiTheme();
+
+  return useMemo(() => {
+    const button = css`
+      color: ${euiTheme.colors.textSubdued};
+    `;
+
+    return { button };
+  }, [euiTheme]);
+};
+
+export const BackButton = React.memo(() => {
+  const styles = useBackButtonStyles();
   const targets = useBackButton();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -38,20 +51,9 @@ export const BackButton = React.memo(() => {
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const primary = targets[0];
-
-  const tooltip = useMemo(() => {
-    if (!primary) return '';
-    return primary.backDestinationLabel ? getBackToLabel(primary.backDestinationLabel) : backLabel;
-  }, [primary]);
-
-  const menuItems = useMemo(() => {
-    if (targets.length < 2) return [];
-    return targets.map((target, idx) => (
-      <EuiContextMenuItem key={idx} href={target.backHref} size="s">
-        {target.backDestinationLabel ?? target.backHref}
-      </EuiContextMenuItem>
-    ));
-  }, [targets]);
+  const tooltip = primary?.backDestinationLabel
+    ? getBackToLabel(primary.backDestinationLabel)
+    : backLabel;
 
   if (!primary) {
     return null;
@@ -63,7 +65,7 @@ export const BackButton = React.memo(() => {
       color="text"
       display="empty"
       size="xs"
-      css={{ color: euiTheme.colors.textSubdued }}
+      css={styles.button}
       aria-label={tooltip}
       data-test-subj="chromeNextAppHeaderBack"
       {...(targets.length > 1
@@ -85,7 +87,14 @@ export const BackButton = React.memo(() => {
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel items={menuItems} size="s" />
+        <EuiContextMenuPanel
+          items={targets.map((target, idx) => (
+            <EuiContextMenuItem key={idx} href={target.backHref} size="s">
+              {target.backDestinationLabel ?? target.backHref}
+            </EuiContextMenuItem>
+          ))}
+          size="s"
+        />
       </EuiPopover>
     );
   }

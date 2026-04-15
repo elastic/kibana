@@ -117,8 +117,27 @@ const createStartContractMock = () => {
     next: lazyObject({
       header: lazyObject({
         get$: jest.fn().mockReturnValue(nextHeaderState$),
-        set: jest.fn((config?: ChromeNextHeaderConfig) => {
-          nextHeaderState$.next(config);
+        set: jest.fn((config: Partial<ChromeNextHeaderConfig>) => {
+          const current = nextHeaderState$.getValue();
+          const next = { ...current, ...config };
+          nextHeaderState$.next(
+            Object.keys(next).length > 0 ? (next as ChromeNextHeaderConfig) : undefined
+          );
+        }),
+        reset: jest.fn((...keys: Array<keyof ChromeNextHeaderConfig>) => {
+          if (keys.length === 0) {
+            nextHeaderState$.next(undefined);
+            return;
+          }
+          const current = nextHeaderState$.getValue();
+          if (!current) return;
+          const next = { ...current };
+          for (const key of keys) {
+            delete next[key];
+          }
+          nextHeaderState$.next(
+            Object.keys(next).length > 0 ? (next as ChromeNextHeaderConfig) : undefined
+          );
         }),
       }),
       aiButton: lazyObject({
