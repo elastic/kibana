@@ -46,10 +46,18 @@ paths:
                         type: integer
                       skippedNullScores:
                         type: integer
+                      truncatedA:
+                        type: boolean
+                        description: Whether Run A scores were truncated due to size limits
+                      truncatedB:
+                        type: boolean
+                        description: Whether Run B scores were truncated due to size limits
                     required:
                       - totalPairs
                       - skippedMissingPairs
                       - skippedNullScores
+                      - truncatedA
+                      - truncatedB
                 required:
                   - results
                   - pairing

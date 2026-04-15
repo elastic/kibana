@@ -94,7 +94,9 @@ describe('GET /internal/evals/runs/compare', () => {
 
   it('queries the correct index for both runs', async () => {
     const { handler, context, esClient } = setup();
-    esClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+    esClient.search.mockResolvedValue({
+      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+    } as any);
 
     await handler(context, makeRequest(), kibanaResponseFactory);
 
@@ -106,9 +108,14 @@ describe('GET /internal/evals/runs/compare', () => {
 
   it('returns 404 when no scores exist for the first run', async () => {
     const { handler, context, esClient } = setup();
-    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any).mockResolvedValueOnce({
-      hits: { hits: [{ _source: makeScoreDoc({ runId: 'run-b' }) }] },
-    } as any);
+    esClient.search
+      .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0, relation: 'eq' } } } as any)
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [{ _source: makeScoreDoc({ runId: 'run-b' }) }],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
@@ -120,9 +127,12 @@ describe('GET /internal/evals/runs/compare', () => {
     const { handler, context, esClient } = setup();
     esClient.search
       .mockResolvedValueOnce({
-        hits: { hits: [{ _source: makeScoreDoc({ runId: 'run-a' }) }] },
+        hits: {
+          hits: [{ _source: makeScoreDoc({ runId: 'run-a' }) }],
+          total: { value: 1, relation: 'eq' },
+        },
       } as any)
-      .mockResolvedValueOnce({ hits: { hits: [] } } as any);
+      .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0, relation: 'eq' } } } as any);
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
@@ -134,10 +144,16 @@ describe('GET /internal/evals/runs/compare', () => {
     const { handler, context, esClient } = setup();
     esClient.search
       .mockResolvedValueOnce({
-        hits: { hits: [{ _source: makeScoreDoc({ datasetId: 'ds-only-a' }) }] },
+        hits: {
+          hits: [{ _source: makeScoreDoc({ datasetId: 'ds-only-a' }) }],
+          total: { value: 1, relation: 'eq' },
+        },
       } as any)
       .mockResolvedValueOnce({
-        hits: { hits: [{ _source: makeScoreDoc({ datasetId: 'ds-only-b' }) }] },
+        hits: {
+          hits: [{ _source: makeScoreDoc({ datasetId: 'ds-only-b' }) }],
+          total: { value: 1, relation: 'eq' },
+        },
       } as any);
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
@@ -145,6 +161,8 @@ describe('GET /internal/evals/runs/compare', () => {
     expect(response.status).toBe(200);
     expect(response.payload.results).toEqual([]);
     expect(response.payload.pairing.totalPairs).toBe(0);
+    expect(response.payload.pairing.truncatedA).toBe(false);
+    expect(response.payload.pairing.truncatedB).toBe(false);
   });
 
   it('returns comparison results with pairing stats for overlapping datasets', async () => {
@@ -157,6 +175,7 @@ describe('GET /internal/evals/runs/compare', () => {
             { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-1', score: 0.9 }) },
             { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-2', score: 0.7 }) },
           ],
+          total: { value: 2, relation: 'eq' },
         },
       } as any)
       .mockResolvedValueOnce({
@@ -165,6 +184,7 @@ describe('GET /internal/evals/runs/compare', () => {
             { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-1', score: 0.5 }) },
             { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-2', score: 0.3 }) },
           ],
+          total: { value: 2, relation: 'eq' },
         },
       } as any);
 
@@ -178,6 +198,8 @@ describe('GET /internal/evals/runs/compare', () => {
     expect(response.payload.pairing.totalPairs).toBe(2);
     expect(response.payload.pairing.skippedMissingPairs).toBe(0);
     expect(response.payload.pairing.skippedNullScores).toBe(0);
+    expect(response.payload.pairing.truncatedA).toBe(false);
+    expect(response.payload.pairing.truncatedB).toBe(false);
   });
 
   it('filters out hits with no _source', async () => {
@@ -190,11 +212,13 @@ describe('GET /internal/evals/runs/compare', () => {
             { _source: makeScoreDoc({ ...sharedDataset, score: 0.8 }) },
             { _source: undefined },
           ],
+          total: { value: 2, relation: 'eq' },
         },
       } as any)
       .mockResolvedValueOnce({
         hits: {
           hits: [{ _source: makeScoreDoc({ ...sharedDataset, score: 0.6 }) }],
+          total: { value: 1, relation: 'eq' },
         },
       } as any);
 
@@ -203,6 +227,30 @@ describe('GET /internal/evals/runs/compare', () => {
     expect(response.status).toBe(200);
     expect(response.payload.results).toHaveLength(1);
     expect(response.payload.pairing.totalPairs).toBe(1);
+  });
+
+  it('reports truncation when total hits exceed the fetch limit', async () => {
+    const { handler, context, esClient } = setup();
+    const sharedDataset = { datasetId: 'ds-1', datasetName: 'DS' };
+    esClient.search
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [{ _source: makeScoreDoc({ ...sharedDataset, score: 0.8 }) }],
+          total: { value: 15_000, relation: 'eq' },
+        },
+      } as any)
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [{ _source: makeScoreDoc({ ...sharedDataset, score: 0.6 }) }],
+          total: { value: 5_000, relation: 'eq' },
+        },
+      } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.pairing.truncatedA).toBe(true);
+    expect(response.payload.pairing.truncatedB).toBe(false);
   });
 
   it('returns 500 when ES throws', async () => {

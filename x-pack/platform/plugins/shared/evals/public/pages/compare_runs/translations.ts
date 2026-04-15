@@ -235,3 +235,20 @@ export const EXPORT_CSV = i18n.translate('xpack.evals.compareRuns.exportCsv', {
 export const EXPORT_CSV_COPIED = i18n.translate('xpack.evals.compareRuns.exportCsvCopied', {
   defaultMessage: 'Copied!',
 });
+
+export const TRUNCATION_WARNING_TITLE = i18n.translate(
+  'xpack.evals.compareRuns.truncationWarningTitle',
+  { defaultMessage: 'Results may be incomplete' }
+);
+
+export const TRUNCATION_WARNING_BODY = i18n.translate(
+  'xpack.evals.compareRuns.truncationWarningBody',
+  {
+    defaultMessage:
+      'One or both runs exceeded the maximum number of scores that can be compared. The statistical results below are based on a truncated subset and may not be accurate.',
+  }
+);
+
+export const EXPORT_CSV_FAILED = i18n.translate('xpack.evals.compareRuns.exportCsvFailed', {
+  defaultMessage: 'Copy failed',
+});

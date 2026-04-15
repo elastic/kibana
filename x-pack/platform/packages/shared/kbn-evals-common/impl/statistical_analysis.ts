@@ -27,7 +27,7 @@ function buildPairKey(score: EvaluationScoreDocument): string {
     score.example.id,
     score.evaluator.name,
     score.task.repetition_index,
-  ].join('|');
+  ].join('\0');
 }
 
 function isFiniteNumber(value: number | null | undefined): value is number {

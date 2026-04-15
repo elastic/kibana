@@ -18,6 +18,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
+  EuiCallOut,
   EuiLoadingSpinner,
   EuiPageSection,
   EuiPanel,
@@ -37,6 +38,20 @@ import { TraceWaterfall } from '../../components/trace_waterfall';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
+const ROW_HIGHLIGHT_ALPHA = 0.08;
+
+/**
+ * Convert a hex color (#RRGGBB or #RGB) to an rgba string with the given alpha.
+ * Falls back to transparent if the input is not a valid hex color.
+ */
+const hexToRgba = (hex: string, alpha: number): string => {
+  const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!match) return 'transparent';
+  const r = parseInt(match[1], 16);
+  const g = parseInt(match[2], 16);
+  const b = parseInt(match[3], 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 
 interface ExampleScorePair {
   exampleId: string;
@@ -433,11 +448,21 @@ const ExampleDrilldownFlyout: React.FC<{
                 if (diff === 0) return {};
                 if (isImproved(diff, item.evaluatorName)) {
                   return {
-                    style: { backgroundColor: `${euiTheme.colors.backgroundFilledSuccess}15` },
+                    style: {
+                      backgroundColor: hexToRgba(
+                        euiTheme.colors.backgroundFilledSuccess,
+                        ROW_HIGHLIGHT_ALPHA
+                      ),
+                    },
                   };
                 }
                 return {
-                  style: { backgroundColor: `${euiTheme.colors.backgroundFilledDanger}15` },
+                  style: {
+                    backgroundColor: hexToRgba(
+                      euiTheme.colors.backgroundFilledDanger,
+                      ROW_HIGHLIGHT_ALPHA
+                    ),
+                  },
                 };
               }}
             />
@@ -488,7 +513,10 @@ export const CompareRunsPage: React.FC = () => {
 
   const isNewerA = useMemo(() => {
     if (!runDataA?.timestamp || !runDataB?.timestamp) return undefined;
-    return new Date(runDataA.timestamp) >= new Date(runDataB.timestamp);
+    const tsA = new Date(runDataA.timestamp).getTime();
+    const tsB = new Date(runDataB.timestamp).getTime();
+    if (tsA === tsB) return undefined;
+    return tsA > tsB;
   }, [runDataA?.timestamp, runDataB?.timestamp]);
 
   const [flyoutState, setFlyoutState] = useState<{
@@ -515,7 +543,7 @@ export const CompareRunsPage: React.FC = () => {
     [data?.results]
   );
 
-  const [csvCopied, setCsvCopied] = useState(false);
+  const [csvCopyState, setCsvCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const csvTimerRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => clearTimeout(csvTimerRef.current), []);
 
@@ -576,11 +604,12 @@ export const CompareRunsPage: React.FC = () => {
     const csv = [header.join(','), ...rows.map((row) => row.join(','))].join('\n');
     navigator.clipboard.writeText(csv).then(
       () => {
-        setCsvCopied(true);
-        csvTimerRef.current = setTimeout(() => setCsvCopied(false), 2000);
+        setCsvCopyState('copied');
+        csvTimerRef.current = setTimeout(() => setCsvCopyState('idle'), 2000);
       },
       () => {
-        setCsvCopied(false);
+        setCsvCopyState('failed');
+        csvTimerRef.current = setTimeout(() => setCsvCopyState('idle'), 2000);
       }
     );
   }, [sortedResults]);
@@ -689,12 +718,22 @@ export const CompareRunsPage: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
-              color="text"
-              iconType={csvCopied ? 'check' : 'exportAction'}
+              color={csvCopyState === 'failed' ? 'danger' : 'text'}
+              iconType={
+                csvCopyState === 'copied'
+                  ? 'check'
+                  : csvCopyState === 'failed'
+                  ? 'warning'
+                  : 'exportAction'
+              }
               onClick={handleCsvExport}
-              disabled={csvCopied}
+              disabled={csvCopyState !== 'idle'}
             >
-              {csvCopied ? i18n.EXPORT_CSV_COPIED : i18n.EXPORT_CSV}
+              {csvCopyState === 'copied'
+                ? i18n.EXPORT_CSV_COPIED
+                : csvCopyState === 'failed'
+                ? i18n.EXPORT_CSV_FAILED
+                : i18n.EXPORT_CSV}
             </EuiButton>
           </EuiFlexItem>
         )}
@@ -750,6 +789,21 @@ export const CompareRunsPage: React.FC = () => {
 
       {data && !isLoading && (
         <>
+          {(data.pairing.truncatedA || data.pairing.truncatedB) && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                title={i18n.TRUNCATION_WARNING_TITLE}
+                color="warning"
+                iconType="warning"
+                size="s"
+              >
+                <p>{i18n.TRUNCATION_WARNING_BODY}</p>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
+
           {data.pairing.totalPairs > 0 && (
             <EuiFlexGroup wrap>
               <EuiFlexItem>

@@ -64,6 +64,7 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_RUN,
               _source: COMPARE_SOURCE_FIELDS,
+              track_total_hits: true,
             }),
             esClient.search<EvaluationScoreDocument>({
               index: EVALUATIONS_INDEX_PATTERN,
@@ -71,8 +72,27 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_RUN,
               _source: COMPARE_SOURCE_FIELDS,
+              track_total_hits: true,
             }),
           ]);
+
+          const totalHitsA =
+            typeof responseA.hits.total === 'number'
+              ? responseA.hits.total
+              : responseA.hits.total?.value ?? 0;
+          const totalHitsB =
+            typeof responseB.hits.total === 'number'
+              ? responseB.hits.total
+              : responseB.hits.total?.value ?? 0;
+          const truncatedA = totalHitsA > MAX_SCORES_PER_RUN;
+          const truncatedB = totalHitsB > MAX_SCORES_PER_RUN;
+
+          if (truncatedA || truncatedB) {
+            logger.warn(
+              `Compare runs: results truncated to ${MAX_SCORES_PER_RUN} scores per run. ` +
+                `Run A (${runIdA}): ${totalHitsA} total, Run B (${runIdB}): ${totalHitsB} total.`
+            );
+          }
 
           const scoresA = (responseA.hits?.hits ?? [])
             .map((hit) => hit._source)
@@ -97,7 +117,13 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
             return response.ok({
               body: {
                 results: [],
-                pairing: { totalPairs: 0, skippedMissingPairs: 0, skippedNullScores: 0 },
+                pairing: {
+                  totalPairs: 0,
+                  skippedMissingPairs: 0,
+                  skippedNullScores: 0,
+                  truncatedA,
+                  truncatedB,
+                },
               },
             });
           }
@@ -119,11 +145,20 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
                 totalPairs: pairs.length,
                 skippedMissingPairs,
                 skippedNullScores,
+                truncatedA,
+                truncatedB,
               },
             },
           });
         } catch (error) {
-          logger.error(`Failed to compare evaluation runs: ${error}`);
+          logger.error(
+            `Failed to compare evaluation runs: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          if (error instanceof Error && error.stack) {
+            logger.debug(error.stack);
+          }
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to compare evaluation runs' },

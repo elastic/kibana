@@ -47,5 +47,13 @@ export const CompareRunsResponse = z.object({
     totalPairs: z.number().int(),
     skippedMissingPairs: z.number().int(),
     skippedNullScores: z.number().int(),
+    /**
+     * Whether Run A scores were truncated due to size limits
+     */
+    truncatedA: z.boolean(),
+    /**
+     * Whether Run B scores were truncated due to size limits
+     */
+    truncatedB: z.boolean(),
   }),
 });
