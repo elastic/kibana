@@ -61,8 +61,12 @@ const IpCellRendererComponent: React.FC<IpCellRendererProps> = ({ services, stor
 
   return (
     <>
-      {addresses.map((ip) => (
-        <EuiLink key={ip} onClick={() => handleClick(ip)} data-test-subj="one-discover-ip-link">
+      {addresses.map((ip, idx) => (
+        <EuiLink
+          key={`${ip}-${idx}`}
+          onClick={() => handleClick(ip)}
+          data-test-subj="one-discover-ip-link"
+        >
           {ip}
         </EuiLink>
       ))}
