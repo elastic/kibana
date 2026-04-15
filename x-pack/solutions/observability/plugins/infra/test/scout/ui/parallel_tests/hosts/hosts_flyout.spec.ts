@@ -26,6 +26,7 @@ test.describe(
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
+        preferredSchema: 'ecs',
       });
       await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
     });
@@ -183,6 +184,7 @@ test.describe(
         await hostsPage.goToPage({
           from: DATE_WITH_HOSTS_DATA_FROM,
           to: DATE_WITH_HOSTS_DATA_TO,
+          preferredSchema: 'ecs',
         });
         await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
         await hostsPage.openHostFlyout(HOST1_NAME);

@@ -24,6 +24,7 @@ test.describe(
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
+        preferredSchema: 'ecs',
       });
 
       await test.step('wait for table and KPIs to load', async () => {
@@ -47,7 +48,7 @@ test.describe(
       await test.step('click a host link to navigate to host details', async () => {
         const hostLink = hostsPage.getHostDetailLinks();
         await expect(hostLink).not.toHaveCount(0);
-        const linkRow = hostsPage.tableRows.filter({ hasText: 'host-1' });
+        const linkRow = hostsPage.getHostRow('host-1');
         await linkRow.getByTestId('hostsViewTableEntryTitleLink').click();
       });
 

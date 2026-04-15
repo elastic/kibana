@@ -30,6 +30,7 @@ test.describe(
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
+        preferredSchema: 'ecs',
       });
 
       await test.step('wait for table and KPIs to load', async () => {
@@ -52,7 +53,7 @@ test.describe(
       pageObjects: { hostsPage },
     }) => {
       for (const host of HOSTS) {
-        const row = hostsPage.tableRows.filter({ hasText: host.hostName });
+        const row = hostsPage.getHostRow(host.hostName);
         await expect(row).toBeVisible();
         const rowData = await hostsPage.getRowData(row);
         expect(rowData.title).toBe(host.hostName);
@@ -156,13 +157,13 @@ test.describe(
 
       await test.step('sort ascending and verify lowest CPU host is on first page', async () => {
         await hostsPage.sortByCpuUsage();
-        const lowestCpuRow = hostsPage.tableRows.filter({ hasText: HOST5_NAME });
+        const lowestCpuRow = hostsPage.getHostRow(HOST5_NAME);
         await expect(lowestCpuRow).toBeVisible();
       });
 
       await test.step('navigate to last page and verify highest CPU host', async () => {
         await hostsPage.paginateTo(2);
-        const highestCpuRow = hostsPage.tableRows.filter({ hasText: 'host-3' });
+        const highestCpuRow = hostsPage.getHostRow('host-3');
         await expect(highestCpuRow).toBeVisible();
       });
     });
@@ -173,13 +174,13 @@ test.describe(
       await test.step('sort descending and verify highest CPU host is on first page', async () => {
         await hostsPage.sortByCpuUsage();
         await hostsPage.sortByCpuUsage();
-        const highestCpuRow = hostsPage.tableRows.filter({ hasText: 'host-3' });
+        const highestCpuRow = hostsPage.getHostRow('host-3');
         await expect(highestCpuRow).toBeVisible();
       });
 
       await test.step('navigate to last page and verify lowest CPU host', async () => {
         await hostsPage.paginateTo(2);
-        const lowestCpuRow = hostsPage.tableRows.filter({ hasText: HOST5_NAME });
+        const lowestCpuRow = hostsPage.getHostRow(HOST5_NAME);
         await expect(lowestCpuRow).toBeVisible();
       });
     });
@@ -189,13 +190,13 @@ test.describe(
 
       await test.step('sort ascending and verify host-1 is on first page', async () => {
         await hostsPage.sortByTitle();
-        const firstHostRow = hostsPage.tableRows.filter({ hasText: HOST1_NAME });
+        const firstHostRow = hostsPage.getHostRow(HOST1_NAME);
         await expect(firstHostRow).toBeVisible();
       });
 
       await test.step('navigate to last page and verify host-6', async () => {
         await hostsPage.paginateTo(2);
-        const lastHostRow = hostsPage.tableRows.filter({ hasText: HOST6_NAME });
+        const lastHostRow = hostsPage.getHostRow(HOST6_NAME);
         await expect(lastHostRow).toBeVisible();
       });
     });
@@ -206,13 +207,13 @@ test.describe(
       await test.step('sort descending and verify host-6 is on first page', async () => {
         await hostsPage.sortByTitle();
         await hostsPage.sortByTitle();
-        const lastHostRow = hostsPage.tableRows.filter({ hasText: HOST6_NAME });
+        const lastHostRow = hostsPage.getHostRow(HOST6_NAME);
         await expect(lastHostRow).toBeVisible();
       });
 
       await test.step('navigate to last page and verify host-1', async () => {
         await hostsPage.paginateTo(2);
-        const firstHostRow = hostsPage.tableRows.filter({ hasText: HOST1_NAME });
+        const firstHostRow = hostsPage.getHostRow(HOST1_NAME);
         await expect(firstHostRow).toBeVisible();
       });
     });

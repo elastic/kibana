@@ -33,6 +33,7 @@ export class HostsPage {
   public readonly pageSizeSelector: Locator;
   public readonly selectedHostsFilterButton: Locator;
   public readonly addFilterButton: Locator;
+  public readonly noDataPage: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
@@ -57,6 +58,7 @@ export class HostsPage {
     this.pageSizeSelector = this.page.getByTestId('tablePaginationPopoverButton');
     this.selectedHostsFilterButton = this.page.getByTestId('hostsViewTableSelectHostsFilterButton');
     this.addFilterButton = this.page.getByTestId('hostsViewTableAddFilterButton');
+    this.noDataPage = this.page.getByTestId('kbnNoDataPage');
   }
 
   private async waitForTableToLoad() {
@@ -103,13 +105,18 @@ export class HostsPage {
     await this.page.goto(`${baseUrl}/hosts`);
   }
 
+  public getHostRow(hostName: string) {
+    return this.tableRows.filter({
+      has: this.page
+        .getByTestId('hostsViewTableEntryTitleLink')
+        .getByText(hostName, { exact: true }),
+    });
+  }
+
   public async openHostFlyout(hostName: string) {
-    const row = this.tableRows.filter({ hasText: hostName });
+    const row = this.getHostRow(hostName);
     await row.getByTestId('hostsView-flyout-button').click();
-    await this.page
-      .getByRole('dialog')
-      .getByRole('heading', { name: hostName })
-      .waitFor({ timeout: EXTENDED_TIMEOUT });
+    await this.page.getByTestId('infraAssetDetailsFlyout').waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   public async closeFlyout() {

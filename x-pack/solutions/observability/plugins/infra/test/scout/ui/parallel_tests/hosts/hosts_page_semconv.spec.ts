@@ -39,7 +39,7 @@ test.describe(
 
       await test.step('verify all semconv hosts are listed', async () => {
         for (const host of SEMCONV_HOSTS) {
-          await expect(hostsPage.tableRows.filter({ hasText: host.hostName })).toBeVisible();
+          await expect(hostsPage.getHostRow(host.hostName)).toBeVisible();
         }
       });
     });
@@ -69,7 +69,7 @@ test.describe(
 
       for (const host of SEMCONV_HOSTS) {
         await test.step(`verify ${host.hostName} has metric values`, async () => {
-          const row = hostsPage.tableRows.filter({ hasText: host.hostName });
+          const row = hostsPage.getHostRow(host.hostName);
 
           for (const cellTestId of metricCells) {
             const cell = row.getByTestId(cellTestId).locator('.euiTableCellContent');

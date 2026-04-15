@@ -14,7 +14,7 @@ test.describe(
   'Hosts Page - Empty State',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test('should show empty state when no data is present', async ({
+    test('should show onboarding page when no data is present', async ({
       browserAuth,
       pageObjects: { hostsPage },
     }) => {
@@ -24,17 +24,8 @@ test.describe(
         await hostsPage.goToHostsPage();
       });
 
-      await test.step('verify the hosts page shows zero hosts', async () => {
-        await expect(hostsPage.kpiGrid.getByTestId('hostsViewKPI-hostsCount')).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
-        await expect(
-          hostsPage.kpiGrid.getByTestId('hostsViewKPI-hostsCount').locator('.echMetricText__value')
-        ).toHaveAttribute('title', '0');
-      });
-
-      await test.step('verify the table shows no data message', async () => {
-        await expect(hostsPage.tableNoData).toBeVisible();
+      await test.step('verify the onboarding page is shown', async () => {
+        await expect(hostsPage.noDataPage).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       });
     });
   }
