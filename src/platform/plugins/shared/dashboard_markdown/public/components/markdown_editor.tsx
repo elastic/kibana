@@ -139,7 +139,7 @@ export const MarkdownEditor = ({
                 />
                 <EuiMarkdownEditorHelpButton
                   uiPlugins={uiPlugins}
-                  tooltipProps={{ position: 'bottom' }}
+                  tooltipProps={{ position: 'bottom', delay: 'regular' }}
                 />
               </>
             ),
