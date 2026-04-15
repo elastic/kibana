@@ -10,7 +10,6 @@ import {
   EuiBasicTable,
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -673,9 +672,26 @@ export const CompareRunsPage: React.FC = () => {
 
   return (
     <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
-      <EuiTitle size="l">
-        <h2>{i18n.PAGE_TITLE}</h2>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="l">
+            <h2>{i18n.PAGE_TITLE}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {sortedResults.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              color="text"
+              iconType={csvCopied ? 'check' : 'exportAction'}
+              onClick={handleCsvExport}
+              disabled={csvCopied}
+            >
+              {csvCopied ? i18n.EXPORT_CSV_COPIED : i18n.EXPORT_CSV}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="l" />
 
       <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
@@ -773,21 +789,6 @@ export const CompareRunsPage: React.FC = () => {
           )}
 
           <EuiSpacer size="l" />
-
-          {sortedResults.length > 0 && (
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  iconType={csvCopied ? 'check' : 'exportAction'}
-                  onClick={handleCsvExport}
-                  disabled={csvCopied}
-                >
-                  {csvCopied ? i18n.EXPORT_CSV_COPIED : i18n.EXPORT_CSV}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
 
           {sortedResults.length === 0 ? (
             <EuiEmptyPrompt
