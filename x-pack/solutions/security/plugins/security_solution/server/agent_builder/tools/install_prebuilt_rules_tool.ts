@@ -75,7 +75,11 @@ export const installPrebuiltRulesTool = (
           savedObjectsClient,
         });
 
-        const rulesAuthz = await calculateRulesAuthz({ coreStart, request });
+        const rulesAuthz = await calculateRulesAuthz({
+          coreStart,
+          request,
+          security: startPlugins.security.authz,
+        });
 
         const detectionRulesClient = createDetectionRulesClient({
           actionsClient,

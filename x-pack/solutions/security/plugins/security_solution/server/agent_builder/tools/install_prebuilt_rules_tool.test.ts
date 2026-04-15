@@ -114,6 +114,7 @@ describe('installPrebuiltRulesTool', () => {
         alerting: { getRulesClientWithRequest: jest.fn().mockResolvedValue(mockRulesClient) },
         actions: { getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient) },
         licensing: { license$: mockLicense$ },
+        security: { authz: {} },
       },
       {},
     ]);

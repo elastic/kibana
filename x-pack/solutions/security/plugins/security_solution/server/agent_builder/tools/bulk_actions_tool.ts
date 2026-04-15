@@ -161,7 +161,11 @@ export const bulkActionsTool = (
           savedObjectsClient,
         });
 
-        const rulesAuthz = await calculateRulesAuthz({ coreStart, request });
+        const rulesAuthz = await calculateRulesAuthz({
+          coreStart,
+          request,
+          security: startPlugins.security.authz,
+        });
 
         const deps: ActionDependencies = {
           rulesClient,
@@ -181,7 +185,7 @@ export const bulkActionsTool = (
           const fetchOutcome = await fetchRulesByQueryOrIds({
             rulesClient,
             query: undefined,
-            ids: ids,
+            ids,
             maxRules: MAX_RULES_PER_BULK_ACTION,
           });
 
