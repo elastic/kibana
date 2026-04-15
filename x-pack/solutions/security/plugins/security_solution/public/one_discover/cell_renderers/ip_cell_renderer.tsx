@@ -49,9 +49,7 @@ const IpCellRendererComponent: React.FC<IpCellRendererProps> = ({ services, stor
           services,
           store,
           history,
-          children: (
-            <Network ip={ip} flowTarget={flowTarget} scopeId={ONE_DISCOVER_SCOPE_ID} />
-          ),
+          children: <Network ip={ip} flowTarget={flowTarget} scopeId={ONE_DISCOVER_SCOPE_ID} />,
         }),
         {
           ...defaultToolsFlyoutProperties,

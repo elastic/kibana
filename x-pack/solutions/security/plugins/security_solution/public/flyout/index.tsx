@@ -269,9 +269,7 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
   },
   {
     key: NetworkPanelKey,
-    component: (props) => (
-      <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />
-    ),
+    component: (props) => <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />,
     'aria-label': NETWORK_PANEL_ARIA_LABEL,
   },
   {
