@@ -20,13 +20,19 @@ import type { ChromeNextSpaceSelectorConfig } from './space_selector';
 export interface ChromeNext {
   header: {
     /**
-     * Set the Chrome-Next header configuration for the current page.
-     * Chrome renders the title, metadata, global actions, and app menu.
-     *
-     * Pass `undefined` to clear (e.g. on unmount or route change).
-     * Automatically cleared on app change.
+     * Shallow-merge fields into the current Chrome-Next header configuration.
+     * Only provided keys are updated; `undefined` values in the partial are ignored.
+     * Use {@link reset} to clear fields.
      */
-    set(config?: ChromeNextHeaderConfig): void;
+    set(config: Partial<ChromeNextHeaderConfig>): void;
+
+    /**
+     * Clear Chrome-Next header configuration.
+     * Called with no arguments: clears everything.
+     * Called with key names: clears only those fields.
+     * Automatically called with no arguments on app change.
+     */
+    reset(...keys: Array<keyof ChromeNextHeaderConfig>): void;
   };
   aiButton: {
     /**

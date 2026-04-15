@@ -323,10 +323,10 @@ export function InternalDashboardTopNav({
 
     coreServices.chrome.next.header.set({
       title: title ?? '',
-      globalActions: Object.keys(globalActions).length > 0 ? globalActions : undefined,
+      ...(Object.keys(globalActions).length > 0 ? { globalActions } : {}),
     });
     return () => {
-      coreServices.chrome.next.header.set(undefined);
+      coreServices.chrome.next.header.reset();
     };
   }, [title, chromeNextHeaderShareGlobalAction, chromeNextHeaderFavoriteGlobalAction]);
 

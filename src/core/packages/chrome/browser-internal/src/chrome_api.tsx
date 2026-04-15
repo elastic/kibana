@@ -176,6 +176,7 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
       header: {
         get$: services.nextHeader.get$,
         set: services.nextHeader.set,
+        reset: services.nextHeader.reset,
       },
       aiButton: {
         get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),

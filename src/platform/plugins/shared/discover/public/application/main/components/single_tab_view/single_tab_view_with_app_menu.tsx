@@ -22,7 +22,7 @@ export const SingleTabViewWithAppMenu = (props: SingleTabViewProps) => {
     if (isNextChrome && topNavMenuItems) {
       chrome.next.header.set({ appMenu: topNavMenuItems });
       return () => {
-        chrome.next.header.set(undefined);
+        chrome.next.header.reset('appMenu');
       };
     }
   }, [isNextChrome, topNavMenuItems, chrome.next.header]);

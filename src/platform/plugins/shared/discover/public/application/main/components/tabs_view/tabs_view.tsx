@@ -53,7 +53,7 @@ export const TabsView = (props: SingleTabViewProps) => {
     if (isNextChrome && topNavMenuItems) {
       services.chrome.next.header.set({ appMenu: topNavMenuItems });
       return () => {
-        services.chrome.next.header.set(undefined);
+        services.chrome.next.header.reset('appMenu');
       };
     }
   }, [isNextChrome, topNavMenuItems, services.chrome.next.header]);

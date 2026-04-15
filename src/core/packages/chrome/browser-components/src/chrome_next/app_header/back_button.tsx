@@ -7,43 +7,93 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useBackButton } from './hooks';
 
+const backLabel = i18n.translate('core.ui.chrome.appHeader.backButtonAriaLabel', {
+  defaultMessage: 'Back',
+});
+
+const getBackToLabel = (destination: string) =>
+  i18n.translate('core.ui.chrome.appHeader.backButtonAriaLabelWithDestination', {
+    defaultMessage: 'Back to {destination}',
+    values: { destination },
+  });
+
 export const BackButton = React.memo(() => {
-  const back = useBackButton();
+  const { euiTheme } = useEuiTheme();
+  const targets = useBackButton();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const ariaLabel = useMemo(() => {
-    if (!back) {
-      return '';
-    }
-    if (back.backDestinationLabel) {
-      return i18n.translate('core.ui.chrome.appHeader.backButtonAriaLabelWithDestination', {
-        defaultMessage: 'Back to {destination}',
-        values: { destination: back.backDestinationLabel },
-      });
-    }
-    return i18n.translate('core.ui.chrome.appHeader.backButtonAriaLabel', {
-      defaultMessage: 'Back',
-    });
-  }, [back]);
+  const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  if (!back) {
+  const primary = targets[0];
+
+  const tooltip = useMemo(() => {
+    if (!primary) return '';
+    return primary.backDestinationLabel ? getBackToLabel(primary.backDestinationLabel) : backLabel;
+  }, [primary]);
+
+  const menuItems = useMemo(() => {
+    if (targets.length < 2) return [];
+    return targets.map((target, idx) => (
+      <EuiContextMenuItem key={idx} href={target.backHref} size="s">
+        {target.backDestinationLabel ?? target.backHref}
+      </EuiContextMenuItem>
+    ));
+  }, [targets]);
+
+  if (!primary) {
     return null;
   }
 
-  return (
+  const buttonIcon = (
     <EuiButtonIcon
-      iconType="arrowLeft"
+      iconType="sortLeft"
       color="text"
       display="empty"
-      size="s"
-      aria-label={ariaLabel}
+      size="xs"
+      css={{ color: euiTheme.colors.textSubdued }}
+      aria-label={tooltip}
       data-test-subj="chromeNextAppHeaderBack"
-      href={back.backHref}
+      {...(targets.length > 1
+        ? { onClick: togglePopover }
+        : { href: primary.backHref })}
     />
+  );
+
+  if (targets.length > 1) {
+    return (
+      <EuiPopover
+        button={
+          <EuiToolTip content={tooltip} delay="long">
+            {buttonIcon}
+          </EuiToolTip>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel items={menuItems} size="s" />
+      </EuiPopover>
+    );
+  }
+
+  return (
+    <EuiToolTip content={tooltip} delay="long">
+      {buttonIcon}
+    </EuiToolTip>
   );
 });
 

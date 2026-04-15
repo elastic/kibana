@@ -8,46 +8,67 @@
  */
 
 import { useMemo } from 'react';
+import type { AppDeepLinkId, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { useNextHeader, useProjectBreadcrumbs } from '../../../shared/chrome_hooks';
 import { getBreadcrumbPlainText } from '../../../shared/breadcrumb_utils';
 
+const EXCLUDED_BACK_DEEP_LINKS = new Set<AppDeepLinkId>([]);
+const EXCLUDED_BACK_HREFS = [/\/app\/management\/?$/];
+
+const isExcludedBackTarget = (crumb: ChromeBreadcrumb): boolean => {
+  if (crumb.deepLinkId && EXCLUDED_BACK_DEEP_LINKS.has(crumb.deepLinkId)) {
+    return true;
+  }
+  if (crumb.href) {
+    return EXCLUDED_BACK_HREFS.some((re) => re.test(crumb.href!));
+  }
+  return false;
+};
+
 export interface BackNavigation {
   backHref: string;
-  /** Plain-text title of the destination crumb (for `aria-label` on the back control). */
   backDestinationLabel?: string;
 }
 
+const EMPTY: BackNavigation[] = [];
+
 /**
- * Resolution: explicit `chrome.next.header` `back.href` (and optional `back.label`) -> else the
- * last non-last project breadcrumb with a truthy `href` (scanning right to left). Returns
- * `undefined` if neither applies.
+ * Returns all valid back-navigation targets derived from project breadcrumbs
+ * (scanning right-to-left, so the immediate parent is first).
+ *
+ * An explicit `chrome.next.header` `back.href` takes priority and produces a
+ * single-element array.
  */
-export function useBackButton(): BackNavigation | undefined {
+export function useBackButton(): BackNavigation[] {
   const config = useNextHeader();
   const breadcrumbs = useProjectBreadcrumbs();
 
   return useMemo(() => {
-    const explicitHref = config?.back?.href?.trim();
-    if (explicitHref) {
-      return {
-        backHref: explicitHref,
-        backDestinationLabel: config?.back?.label,
-      };
+    if (config?.back) {
+      const backItems = Array.isArray(config.back) ? config.back : [config.back];
+      const explicit = backItems
+        .filter((b) => b.href?.trim())
+        .map((b) => ({ backHref: b.href, backDestinationLabel: b.label }));
+      if (explicit.length > 0) {
+        return explicit;
+      }
     }
 
     if (breadcrumbs.length < 2) {
-      return undefined;
+      return EMPTY;
     }
+
+    const targets: BackNavigation[] = [];
     for (let i = breadcrumbs.length - 2; i >= 0; i--) {
       const crumb = breadcrumbs[i];
       const href = crumb.href;
-      if (href) {
-        return {
+      if (href && !isExcludedBackTarget(crumb)) {
+        targets.push({
           backHref: href,
           backDestinationLabel: getBreadcrumbPlainText(crumb),
-        };
+        });
       }
     }
-    return undefined;
+    return targets.length > 0 ? targets : EMPTY;
   }, [breadcrumbs, config]);
 }
