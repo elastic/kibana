@@ -34,6 +34,8 @@ if (Number.isNaN(concurrency)) {
 
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
+const WORKFLOWS_OOM_SCOUT_CONFIG =
+  'src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts';
 
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
@@ -116,7 +118,9 @@ function getTestSuitesFromJson(json: string) {
 }
 
 const testSuites = getTestSuitesFromJson(configJson);
-const hasScoutSuites = testSuites.some((t) => t.type === 'scoutConfig' && t.count > 0);
+const hasManifestBackedScoutSuites = testSuites.some(
+  (t) => t.type === 'scoutConfig' && t.count > 0 && t.scoutConfig !== WORKFLOWS_OOM_SCOUT_CONFIG
+);
 
 const totalJobs = testSuites.reduce((acc, t) => acc + t.count, BASE_JOBS);
 
@@ -148,7 +152,7 @@ steps.push({
   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
 
-if (hasScoutSuites) {
+if (hasManifestBackedScoutSuites) {
   steps.push({
     command: '.buildkite/scripts/steps/test/scout/discover_playwright_configs.sh',
     label: 'Discover Scout Playwright configs',
@@ -190,14 +194,19 @@ for (const testSuite of testSuites) {
   }
 
   if (testSuite.type === 'scoutConfig') {
+    const isWorkflowsOomSuite = testSuite.scoutConfig === WORKFLOWS_OOM_SCOUT_CONFIG;
     const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
 
     steps.push({
-      command: `.buildkite/scripts/steps/test/scout/flaky_configs.sh`,
-      env: {
-        SCOUT_CONFIG: testSuite.scoutConfig,
-        SCOUT_REPORTER_ENABLED: 'true',
-      },
+      command: isWorkflowsOomSuite
+        ? '.buildkite/scripts/steps/test/scout/workflows_oom_testing.sh'
+        : '.buildkite/scripts/steps/test/scout/flaky_configs.sh',
+      env: isWorkflowsOomSuite
+        ? undefined
+        : {
+            SCOUT_CONFIG: testSuite.scoutConfig,
+            SCOUT_REPORTER_ENABLED: 'true',
+          },
       key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
       label: `${testSuite.scoutConfig}`,
       parallelism: testSuite.count,
@@ -205,7 +214,10 @@ for (const testSuite of testSuites) {
       concurrency_group: process.env.UUID,
       concurrency_method: 'eager',
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-      depends_on: hasScoutSuites ? ['build', 'scout_playwright_configs'] : 'build',
+      depends_on:
+        isWorkflowsOomSuite || !hasManifestBackedScoutSuites
+          ? 'build'
+          : ['build', 'scout_playwright_configs'],
       timeout_in_minutes: 60,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
