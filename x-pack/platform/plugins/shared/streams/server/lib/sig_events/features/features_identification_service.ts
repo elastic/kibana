@@ -37,7 +37,7 @@ import { PromptsConfigService } from '../saved_objects/prompts_config_service';
 import type { SigEventsTuningConfig } from '../../../../common/sig_events_tuning_config';
 import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../../../../common/sig_events_tuning_config';
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
+export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 
 export const EMPTY_TOKENS: ChatCompletionTokenCount = {
@@ -97,17 +97,23 @@ type IterationTuningParams = Partial<
 
 export interface AccumulatedIterationState {
   discoveredFeatures: Feature[];
-  totalTokensUsed: ChatCompletionTokenCount;
-  successCount: number;
   iterationResults: IterationResult[];
 }
 
-export const EMPTY_ACCUMULATED_STATE: Readonly<AccumulatedIterationState> = {
-  discoveredFeatures: [],
-  totalTokensUsed: EMPTY_TOKENS,
-  successCount: 0,
-  iterationResults: [],
-};
+export function createEmptyAccumulatedState(): AccumulatedIterationState {
+  return {
+    discoveredFeatures: [],
+    iterationResults: [],
+  };
+}
+
+export function deriveSuccessCount(results: IterationResult[]): number {
+  return results.filter((r) => r.state === 'success').length;
+}
+
+export function deriveTotalTokensUsed(results: IterationResult[]): ChatCompletionTokenCount {
+  return results.reduce((acc, r) => sumTokens(acc, r.tokensUsed), { ...EMPTY_TOKENS });
+}
 
 // ---------------------------------------------------------------------------
 // Telemetry
@@ -508,7 +514,6 @@ export interface IdentifyInferredFeaturesOptions {
   start: number;
   end: number;
   runId: string;
-  iteration: number;
   state: AccumulatedIterationState;
   tuning?: IterationTuningParams;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
@@ -534,11 +539,11 @@ export async function identifyInferredFeatures({
   start,
   end,
   runId,
-  iteration,
   state: prevState,
   tuning = {},
   trackFeaturesIdentified,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
+  const iteration = prevState.iterationResults.length + 1;
   const [
     { hits: allFeatures },
     { hits: excludedFeatures },
@@ -619,7 +624,7 @@ export async function identifyInferredFeatures({
       docIds,
       iterationResult: failedResult,
       state: {
-        ...prevState,
+        discoveredFeatures: prevState.discoveredFeatures,
         iterationResults: [...prevState.iterationResults, failedResult],
       },
     };
@@ -669,8 +674,6 @@ export async function identifyInferredFeatures({
     iterationResult: successResult,
     state: {
       discoveredFeatures: nextDiscovered,
-      totalTokensUsed: sumTokens(prevState.totalTokensUsed, tokensUsed),
-      successCount: prevState.successCount + 1,
       iterationResults: [...prevState.iterationResults, successResult],
     },
   };
