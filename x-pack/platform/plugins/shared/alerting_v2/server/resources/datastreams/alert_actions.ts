@@ -7,6 +7,7 @@
 
 import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
+import { alertActionTypeDefinitions } from '@kbn/alerting-v2-alert-actions';
 import type { AlertActionTypeRegistry } from '../../lib/alert_action_types';
 import type { ResourceDefinition } from './types';
 
@@ -29,22 +30,29 @@ export const ALERT_ACTIONS_ILM_POLICY: IlmPolicy = {
   },
 };
 
-export const alertActionSchema = z.object({
+const baseAlertActionSchema = z.object({
   '@timestamp': z.string(),
   group_hash: z.string(),
   last_series_event_timestamp: z.string(),
-  expiry: z.string().optional(),
   actor: z.string().nullable(),
   action_type: z.string(),
-  episode_id: z.string().optional(),
   episode_status: z.string().optional(),
   rule_id: z.string(),
   notification_group_id: z.string().optional(),
   source: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  reason: z.string().optional(),
   space_id: z.string(),
 });
+
+/**
+ * Collects all action-type-specific body fields from the registered definitions
+ * and makes them optional, since each document only carries fields for its
+ * particular action type.
+ */
+const actionSpecificShape = Object.fromEntries(
+  alertActionTypeDefinitions.flatMap((def) => Object.entries(def.bodySchema.partial().shape))
+);
+
+export const alertActionSchema = baseAlertActionSchema.extend(actionSpecificShape);
 
 export type AlertAction = z.infer<typeof alertActionSchema>;
 
