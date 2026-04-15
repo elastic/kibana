@@ -47,6 +47,7 @@ async function setup(actualShaSums?: Record<string, string>) {
     isRelease: true,
     targetAllPlatforms: true,
     targetServerlessPlatforms: false,
+    skipServerless: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerNamespace: null,

@@ -65,6 +65,26 @@ export { getUrl } from './src/jest/get_url';
 export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';
 
 export { runJest } from './src/jest/run';
+export {
+  executeJestValidation,
+  JEST_LABEL,
+  JEST_LOG_PREFIX,
+  planJestContractRuns,
+  runJestContract,
+} from './src/jest/run_contract';
+export type { JestConfigResult, JestValidationResult } from './src/jest/run_contract';
+
+export {
+  runJestViaMoon,
+  parseMoonJestOutput,
+  findJestConfig,
+  JEST_CONFIG_NAMES,
+} from './src/jest/run_jest_via_moon';
+export type {
+  MoonJestResult,
+  MoonJestTaskResult,
+  JestFailedTest,
+} from './src/jest/run_jest_via_moon';
 
 export * from './src/kbn_archiver_cli';
 

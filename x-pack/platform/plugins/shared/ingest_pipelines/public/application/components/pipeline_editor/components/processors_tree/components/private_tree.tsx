@@ -204,6 +204,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
                       isScrolling={isScrolling}
                       onChildScroll={onChildScroll}
                       scrollTop={scrollTop}
+                      tabIndex={processors.length === 0 ? -1 : 0}
                       rowCount={processors.length}
                       rowHeight={({ index }) => {
                         const processor = processors[index];
