@@ -42,7 +42,7 @@ export class CustomVisualizationsPublicPlugin
     visualizations.createBaseVisualization<SelfChangingVisParams>({
       name: 'self_changing_vis',
       title: 'Self Changing Vis',
-      icon: 'controlsHorizontal',
+      icon: 'controls',
       description:
         'This visualization is able to change its own settings, that you could also set in the editor.',
       visConfig: {

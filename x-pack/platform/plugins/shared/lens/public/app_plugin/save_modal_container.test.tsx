@@ -10,6 +10,7 @@ import { type SaveVisualizationProps, runSaveLensVisualization } from './save_mo
 import { defaultDoc, makeDefaultServices } from '../mocks';
 import { faker } from '@faker-js/faker';
 import { makeAttributeService } from '../mocks/services_mock';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 describe('runSaveLensVisualization', () => {
   // Need to call reset here as makeDefaultServices() reuses some mocks from core
@@ -30,7 +31,7 @@ describe('runSaveLensVisualization', () => {
       ...makeDefaultServices(),
       // start with both the initial input and lastKnownDoc synced
       lastKnownDoc: defaultDoc,
-      initialInput: { attributes: defaultDoc, savedObjectId: defaultDoc.savedObjectId },
+      initialInput: { attributes: defaultDoc, ref_id: defaultDoc.savedObjectId },
       redirectToOrigin,
       redirectTo,
       onAppLeave,
@@ -108,7 +109,7 @@ describe('runSaveLensVisualization', () => {
               initialInput: {
                 attributes: defaultByValueDoc,
                 title: 'blah',
-                timeRange: { from: 'now-7d', to: 'now' },
+                time_range: { from: 'now-7d', to: 'now' },
               },
             },
             { returnToOrigin: true }
@@ -121,7 +122,7 @@ describe('runSaveLensVisualization', () => {
             expect.objectContaining({
               state: expect.objectContaining({
                 title: 'blah',
-                timeRange: { from: 'now-7d', to: 'now' },
+                time_range: { from: 'now-7d', to: 'now' },
               }),
             })
           );
@@ -259,8 +260,8 @@ describe('runSaveLensVisualization', () => {
           expect.objectContaining({
             state: expect.arrayContaining([
               expect.objectContaining({
-                type: 'lens',
-                serializedState: expect.objectContaining({ savedObjectId: undefined }),
+                type: LENS_EMBEDDABLE_TYPE,
+                serializedState: expect.objectContaining({ ref_id: undefined }),
               }),
             ]),
           })
@@ -289,8 +290,8 @@ describe('runSaveLensVisualization', () => {
           expect.objectContaining({
             state: expect.arrayContaining([
               expect.objectContaining({
-                type: 'lens',
-                serializedState: expect.objectContaining({ savedObjectId: '1234' }),
+                type: LENS_EMBEDDABLE_TYPE,
+                serializedState: expect.objectContaining({ ref_id: '1234' }),
               }),
             ]),
           })

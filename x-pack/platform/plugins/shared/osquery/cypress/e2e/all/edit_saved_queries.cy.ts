@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { customActionEditSavedQuerySelector, UPDATE_QUERY_BUTTON } from '../../screens/packs';
+import { rowActionsMenuSelector, UPDATE_QUERY_BUTTON } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
@@ -31,7 +31,8 @@ describe('ALL - Edit saved query', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('by changing ecs mappings and platforms', () => {
-    cy.get(customActionEditSavedQuerySelector(savedQueryName)).click();
+    cy.get(rowActionsMenuSelector(savedQueryName)).click();
+    cy.contains('Edit query').click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
     cy.get('[data-test-subj="ECSMappingEditorForm"]')
@@ -52,7 +53,8 @@ describe('ALL - Edit saved query', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.wait(5000);
 
-    cy.get(customActionEditSavedQuerySelector(savedQueryName)).click();
+    cy.get(rowActionsMenuSelector(savedQueryName)).click();
+    cy.contains('Edit query').click();
 
     cy.contains('Custom key/value pairs').should('not.exist');
     cy.contains('Hours of uptime').should('not.exist');

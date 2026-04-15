@@ -18,7 +18,10 @@ import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import {
+  ADD_CANVAS_ELEMENT_TRIGGER,
+  ADD_PANEL_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   setNotifications,
   setData,
@@ -113,10 +116,7 @@ export class VegaPlugin implements Plugin<void, void> {
       return getAddVegaPanelAction(deps);
     });
     deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addVegaPanelAction');
-    if (deps.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
-      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
-      // the create action if the Canvas-specific trigger does indeed exist.
-      deps.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addVegaPanelAction');
-    }
+
+    deps.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addVegaPanelAction');
   }
 }

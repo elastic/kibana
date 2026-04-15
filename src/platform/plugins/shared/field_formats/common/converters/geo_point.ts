@@ -119,8 +119,9 @@ export class GeoPointFormat extends FieldFormat {
     val: Point | { lat: number; lon: number } | string,
     options
   ) => {
-    if (!val) {
-      return '';
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
     }
 
     const point: Point | null = isPoint(val) ? (val as Point) : toPoint(val);

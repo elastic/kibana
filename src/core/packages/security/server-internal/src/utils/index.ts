@@ -14,6 +14,7 @@ export interface SecurityServiceConfigType {
   fipsMode?: {
     enabled: boolean;
   };
+  uiam?: { enabled: false } | { enabled: true; sharedSecret: string };
 }
 
 export interface PKCS12ConfigType {

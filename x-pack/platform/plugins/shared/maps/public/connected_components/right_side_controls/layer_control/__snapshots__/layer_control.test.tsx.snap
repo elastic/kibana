@@ -43,7 +43,7 @@ exports[`LayerControl is rendered 1`] = `
             <EuiButtonIcon
               aria-label="Hide all layers"
               color="text"
-              iconType="eyeClosed"
+              iconType="eyeSlash"
               onClick={[Function]}
             />
           </EuiToolTip>
@@ -204,7 +204,7 @@ exports[`LayerControl isReadOnly 1`] = `
             <EuiButtonIcon
               aria-label="Hide all layers"
               color="text"
-              iconType="eyeClosed"
+              iconType="eyeSlash"
               onClick={[Function]}
             />
           </EuiToolTip>
@@ -301,7 +301,7 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
             <EuiButtonIcon
               aria-label="Hide all layers"
               color="text"
-              iconType="eyeClosed"
+              iconType="eyeSlash"
               onClick={[Function]}
             />
           </EuiToolTip>

@@ -309,7 +309,6 @@ FROM employees
       label: i18n.translate('languageDocumentation.documentationESQL.fork', {
         defaultMessage: 'FORK',
       }),
-      preview: true,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.fork.markdown', {
           defaultMessage: `### FORK
@@ -813,7 +812,7 @@ FROM employees
       label: i18n.translate('languageDocumentation.documentationESQL.rerank', {
         defaultMessage: 'RERANK',
       }),
-      preview: true,
+      preview: false,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.rerank.markdown', {
           defaultMessage: `### RERANK

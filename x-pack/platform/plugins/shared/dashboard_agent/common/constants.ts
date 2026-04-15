@@ -6,13 +6,7 @@
  */
 
 /**
- * Feature flag for enabling the dashboard agent
- */
-export const DASHBOARD_AGENT_FEATURE_FLAG = 'dashboardAgent.enabled';
-export const DASHBOARD_AGENT_FEATURE_FLAG_DEFAULT = false;
-
-/**
- * Namespace for dashboard-related tools and agents
+ * Namespace for dashboard-related tools
  */
 export const DASHBOARD_NAMESPACE = 'platform.dashboard';
 
@@ -28,6 +22,5 @@ const dashboardTool = (toolName: string) => {
  * These tools are registered by the dashboard_agent plugin.
  */
 export const dashboardTools = {
-  createDashboard: dashboardTool('create_dashboard'),
-  updateDashboard: dashboardTool('update_dashboard'),
+  manageDashboard: dashboardTool('manage_dashboard'),
 } as const;

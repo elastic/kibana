@@ -6,15 +6,28 @@
  */
 
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { MAX_OPEN_CASES } from '../../../../common/constants';
+import { MAX_OPEN_CASES_DEFAULT_MAXIMUM } from '../../../../common/constants';
 import { getConnectorType } from './cases';
 import { MAX_CASES_TO_OPEN_ERROR } from './translations';
+import { KibanaServices } from '../../../common/lib/kibana';
+
+jest.mock('../../../common/lib/kibana');
+
 const CONNECTOR_TYPE_ID = '.cases';
-const MAX_CASES_ERROR_MESSAGE = MAX_CASES_TO_OPEN_ERROR(MAX_OPEN_CASES);
+const MAX_CASES_ERROR_MESSAGE = MAX_CASES_TO_OPEN_ERROR(MAX_OPEN_CASES_DEFAULT_MAXIMUM);
 let connectorTypeModel: ActionTypeModel;
+const mockKibanaServices = jest.mocked(KibanaServices);
 
 beforeAll(() => {
   connectorTypeModel = getConnectorType();
+});
+
+beforeEach(() => {
+  mockKibanaServices.get.mockReturnValue({
+    uiSettings: {
+      get: jest.fn().mockReturnValue(MAX_OPEN_CASES_DEFAULT_MAXIMUM),
+    },
+  } as never);
 });
 
 describe('has correct connector id', () => {
@@ -112,11 +125,28 @@ describe('action params validation', () => {
 
   test('params validation fails when maximumCasesToOpen exceeds the limit', async () => {
     const actionParams = {
-      subActionParams: { timeWindow: '7d', maximumCasesToOpen: MAX_OPEN_CASES + 1 },
+      subActionParams: { timeWindow: '7d', maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM + 1 },
     };
 
     expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { timeWindow: [], maximumCasesToOpen: [MAX_CASES_ERROR_MESSAGE] },
+    });
+  });
+
+  test('params validation uses the configured advanced setting ceiling', async () => {
+    mockKibanaServices.get.mockReturnValue({
+      uiSettings: {
+        get: jest.fn().mockReturnValue(30),
+      },
+    } as never);
+
+    expect(
+      await connectorTypeModel.validateParams(
+        { subActionParams: { timeWindow: '7d', maximumCasesToOpen: 31 } },
+        null
+      )
+    ).toEqual({
+      errors: { timeWindow: [], maximumCasesToOpen: [MAX_CASES_TO_OPEN_ERROR(30)] },
     });
   });
 });

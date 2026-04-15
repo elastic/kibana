@@ -6,7 +6,7 @@
  */
 
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
-import { createActor, fromPromise, waitFor } from 'xstate5';
+import { createActor, fromPromise, waitFor } from 'xstate';
 import type { LogsOverviewFeatureFlags } from '../../types';
 import type {
   LogsSourceConfiguration,

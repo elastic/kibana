@@ -1,0 +1,42 @@
+openapi: 3.0.0
+info:
+  title: Get Trace API endpoint
+  version: "1"
+paths:
+  /internal/evals/traces/{traceId}:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetTrace
+      description: Get trace spans for a given trace ID from traces-* indices
+      summary: Get trace spans
+      tags:
+        - Evals API
+      parameters:
+        - name: traceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trace_id:
+                    type: string
+                  spans:
+                    type: array
+                    items:
+                      $ref: '../common_attributes.schema.yaml#/components/schemas/TraceSpan'
+                  total_spans:
+                    type: integer
+                  duration_ms:
+                    type: number
+                required:
+                  - trace_id
+                  - spans
+                  - total_spans

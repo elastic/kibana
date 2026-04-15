@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { FAILURE_STORE_SELECTOR } from '../../../../../common/constants';
+import { parseError } from '../../../../lib/streams/errors/parse_error';
 import { simulateProcessing } from './simulation_handler';
 
 const DEFAULT_SAMPLE_SIZE = 100;
@@ -48,7 +49,7 @@ export interface FailureStoreSamplesParams {
 
 export interface FailureStoreSamplesDeps {
   params: FailureStoreSamplesParams;
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
 }
@@ -73,7 +74,7 @@ export interface FailureStoreSamplesResponse {
  */
 export const getFailureStoreSamples = async ({
   params,
-  scopedClusterClient,
+  esClient,
   streamsClient,
   fieldsMetadataClient,
 }: FailureStoreSamplesDeps): Promise<FailureStoreSamplesResponse> => {
@@ -87,7 +88,7 @@ export const getFailureStoreSamples = async ({
   // skipping ancestor retrieval entirely.
   if (isDirectChildOfRoot(name)) {
     const failureStoreDocs = await fetchFailureStoreDocuments({
-      scopedClusterClient,
+      esClient,
       streamName: name,
       size,
       start,
@@ -99,7 +100,7 @@ export const getFailureStoreSamples = async ({
   // 2. For deeper nested streams, first fetch failure store documents.
   // If no documents exist, we can return early without fetching ancestors.
   const failureStoreDocs = await fetchFailureStoreDocuments({
-    scopedClusterClient,
+    esClient,
     streamName: name,
     size,
     start,
@@ -110,14 +111,11 @@ export const getFailureStoreSamples = async ({
     return { documents: [] };
   }
 
-  // 3. Only fetch ancestors and stream definition when we have documents that need processing
-  const [ancestors, stream] = await Promise.all([
-    streamsClient.getAncestors(name),
-    streamsClient.getStream(name),
-  ]);
+  // 3. Only fetch ancestors when we have documents that need processing
+  const ancestors = await streamsClient.getAncestors(name);
 
-  // 4. Collect and combine processing steps from all ancestors (root to current stream)
-  const combinedProcessing = collectAncestorProcessing(ancestors, stream);
+  // 4. Collect and combine processing steps from all ancestors (root to closest parent)
+  const combinedProcessing = collectAncestorProcessing(ancestors);
 
   // If no processing steps are configured, return the raw documents
   if (combinedProcessing.steps.length === 0) {
@@ -133,7 +131,7 @@ export const getFailureStoreSamples = async ({
         documents: failureStoreDocs,
       },
     },
-    scopedClusterClient,
+    esClient,
     streamsClient,
     fieldsMetadataClient,
   });
@@ -165,13 +163,13 @@ function isDirectChildOfRoot(streamName: string): boolean {
  * Optionally filters by time range if start/end are provided.
  */
 async function fetchFailureStoreDocuments({
-  scopedClusterClient,
+  esClient,
   streamName,
   size,
   start,
   end,
 }: {
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   streamName: string;
   size: number;
   start?: string;
@@ -197,7 +195,7 @@ async function fetchFailureStoreDocuments({
           }
         : undefined;
 
-    const response = await scopedClusterClient.asCurrentUser.search({
+    const response = await esClient.search({
       index: `${streamName}${FAILURE_STORE_SELECTOR}`,
       size,
       sort: [{ '@timestamp': { order: 'desc' } }],
@@ -216,7 +214,8 @@ async function fetchFailureStoreDocuments({
       .filter((doc): doc is FlattenRecord => doc !== undefined);
   } catch (error) {
     // If the failure store doesn't exist or is empty, return empty array
-    if (error.meta?.statusCode === 404) {
+    const { statusCode } = parseError(error);
+    if (statusCode === 404) {
       return [];
     }
     throw error;
@@ -224,34 +223,27 @@ async function fetchFailureStoreDocuments({
 }
 
 /**
- * Collects and combines processing steps from all ancestors in order from root to current stream.
- * This ensures processors are applied in the correct order as they would be during normal ingestion.
- * Returns a combined StreamlangDSL that can be passed to simulateProcessing.
+ * Collects and combines processing steps from all ancestors in order from root to closest parent.
+ * This brings failure store documents to the state they would be in when entering the current
+ * stream's pipeline, so the simulation can accurately show what the current stream's processors
+ * do to them.
+ *
+ * The current stream's own processors are intentionally excluded — those are what the UI simulation
+ * will run, and pre-applying them here would cause docs to appear already-parsed and then fail
+ * the simulation on a second pass.
  */
-function collectAncestorProcessing(
-  ancestors: Streams.WiredStream.Definition[],
-  currentStream: Streams.all.Definition
+export function collectAncestorProcessing(
+  ancestors: Streams.WiredStream.Definition[]
 ): StreamlangDSL {
   const allSteps: StreamlangDSL['steps'] = [];
 
   // Sort ancestors from root (shortest name) to closest parent
   const sortedAncestors = [...ancestors].sort((a, b) => a.name.length - b.name.length);
 
-  // Add processing steps from each ancestor
+  // Add processing steps from each ancestor only
   for (const ancestor of sortedAncestors) {
     if (ancestor.ingest.processing.steps.length > 0) {
       allSteps.push(...ancestor.ingest.processing.steps);
-    }
-  }
-
-  // Add processing steps from the current stream if it's a wired or classic stream
-  if (Streams.WiredStream.Definition.is(currentStream)) {
-    if (currentStream.ingest.processing.steps.length > 0) {
-      allSteps.push(...currentStream.ingest.processing.steps);
-    }
-  } else if (Streams.ClassicStream.Definition.is(currentStream)) {
-    if (currentStream.ingest.processing.steps.length > 0) {
-      allSteps.push(...currentStream.ingest.processing.steps);
     }
   }
 

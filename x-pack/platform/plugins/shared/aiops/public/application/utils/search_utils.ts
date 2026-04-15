@@ -20,7 +20,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDefaultDSLQuery, type SearchQueryLanguage } from '@kbn/ml-query-utils';
 
-function getSavedSearchSource(savedSearch: SavedSearch) {
+function getSavedSearchSource(savedSearch: Pick<SavedSearch, 'searchSource'>) {
   return savedSearch &&
     'searchSource' in savedSearch &&
     savedSearch?.searchSource instanceof SearchSource
@@ -42,7 +42,7 @@ export function getEsQueryFromSavedSearch({
 }: {
   dataView: DataView;
   uiSettings: IUiSettingsClient;
-  savedSearch: SavedSearch | null | undefined;
+  savedSearch: Pick<SavedSearch, 'searchSource'> | null | undefined;
   query?: Query;
   filters?: Filter[];
   filterManager?: FilterManager;
@@ -65,10 +65,10 @@ export function getEsQueryFromSavedSearch({
       cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
     const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
 
-    if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
+    if (savedQuery?.bool && Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
       savedQuery.bool.filter = savedQuery.bool.filter.filter(
         (c: QueryDslQueryContainer) =>
-          !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
+          c != null && !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
       );
     }
     return {

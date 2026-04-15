@@ -10,8 +10,11 @@ import dateMath from '@elastic/datemath';
 import type { Filter, Query } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { parseAttacksVolumeData, getInterval } from './helpers';
-import { useAttackIds } from './use_attack_ids';
+import { useAlertsAggregation } from '../common/use_alerts_aggregation';
 import { useAttackTimestamps } from './use_attack_timestamps';
+import type { AttacksVolumeAgg, AttacksVolumeBucket } from './types';
+import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
+import { getAttacksVolumeAggregations } from './aggregations';
 
 export interface UseAttacksVolumeDataProps {
   /** Optional array of filters to apply to the query */
@@ -35,15 +38,24 @@ export const useAttacksVolumeData = ({ filters, query }: UseAttacksVolumeDataPro
   // Get the interval between the start and end times
   const intervalMs = useMemo(() => getInterval(startTime, endTime), [startTime, endTime]);
 
+  const aggs = useMemo(() => getAttacksVolumeAggregations(), []);
+
   // Get the attack IDs
   const {
-    attackIds,
-    isLoading: isAggLoading,
+    data: aggData,
+    loading: isAggLoading,
     refetch: refetchAgg,
-  } = useAttackIds({
+  } = useAlertsAggregation<AttacksVolumeAgg>({
     filters,
     query,
+    aggs,
+    queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
   });
+
+  const attackIds = useMemo(() => {
+    if (!aggData?.aggregations?.attacks?.buckets) return [];
+    return aggData.aggregations.attacks.buckets.map((b: AttacksVolumeBucket) => b.key);
+  }, [aggData]);
 
   // Get the attack start times
   const {

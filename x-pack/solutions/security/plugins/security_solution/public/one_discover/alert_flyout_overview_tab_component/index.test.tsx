@@ -1,0 +1,306 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { DataTableRecord } from '@kbn/discover-utils';
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import TestRenderer, { act } from 'react-test-renderer';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { createMemoryHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
+import { createStore } from 'redux';
+import { AlertFlyoutOverviewTab } from '.';
+import type { StartServices } from '../../types';
+
+jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../flyout_v2/document/tabs/overview_tab', () => ({
+  OverviewTab: () => <div>{'MockOverviewTab'}</div>,
+}));
+
+jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+jest.mock('../../common/components/discover_in_timeline/provider', () => ({
+  DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
+jest.mock('../../cases/components/provider/provider', () => ({
+  CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../assistant/provider', () => ({
+  AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+const mockUseInitDataViewManager = jest.fn();
+jest.mock('../../data_view_manager/hooks/use_init_data_view_manager', () => ({
+  useInitDataViewManager: () => mockUseInitDataViewManager(),
+}));
+
+const mockUseIsExperimentalFeatureEnabled = jest.fn();
+jest.mock('../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: (feature: string) =>
+    mockUseIsExperimentalFeatureEnabled(feature),
+}));
+
+describe('AlertFlyoutOverviewTab', () => {
+  const onAlertUpdated = jest.fn();
+  const servicesMock = {
+    core: { overlays: {} },
+    uiActions: {
+      getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+    },
+    application: {
+      capabilities: {
+        securitySolution: { show: true, crud: true },
+      },
+    },
+    upselling: {},
+  } as unknown as StartServices;
+
+  beforeEach(() => {
+    mockUseInitDataViewManager.mockReset();
+    mockUseIsExperimentalFeatureEnabled.mockReset();
+  });
+
+  it('wraps the overview tab in KibanaContextProvider and ReactQueryClientProvider', async () => {
+    const hit = {
+      id: '1',
+      raw: {},
+      flattened: {
+        'event.kind': 'signal',
+      },
+    } as unknown as DataTableRecord;
+
+    let resolveServices: (services: StartServices) => void;
+    const servicesPromise = new Promise<StartServices>((resolve) => {
+      resolveServices = resolve;
+    });
+
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseInitDataViewManager.mockReturnValue(jest.fn());
+
+    const store = createStore(() => ({
+      dataViewManager: {
+        shared: { status: 'pristine' },
+      },
+    }));
+    const storePromise = Promise.resolve(store as never);
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <AlertFlyoutOverviewTab
+          hit={hit}
+          servicesPromise={servicesPromise}
+          storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
+        />
+      );
+    });
+
+    await act(async () => {
+      resolveServices(servicesMock);
+      await servicesPromise;
+      await Promise.resolve();
+    });
+
+    const providers = tree.root.findAllByType(KibanaContextProvider);
+    expect(providers).toHaveLength(1);
+
+    // Ensure the nested provider preserves the react-query wrapper
+    const reactQueryProviders = tree.root.findAll((node) => {
+      const nodeType = node.type as React.ComponentType;
+      return nodeType?.displayName === 'ReactQueryClientProvider';
+    });
+    expect(reactQueryProviders).toHaveLength(1);
+  });
+
+  it('initializes dataViewManager once when feature flag enabled and status is pristine', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
+      return feature === 'newDataViewPickerEnabled';
+    });
+
+    const initSpy = jest.fn();
+    mockUseInitDataViewManager.mockReturnValue(initSpy);
+
+    const store = createStore(() => ({
+      dataViewManager: {
+        shared: { status: 'pristine' },
+      },
+    }));
+
+    const servicesPromise = Promise.resolve(servicesMock);
+    const storePromise = Promise.resolve(store as never);
+
+    await act(async () => {
+      TestRenderer.create(
+        <AlertFlyoutOverviewTab
+          hit={hit}
+          servicesPromise={servicesPromise}
+          storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
+        />
+      );
+      await servicesPromise;
+      await storePromise;
+      await Promise.resolve();
+    });
+
+    expect(initSpy).toHaveBeenCalledTimes(1);
+    expect(initSpy).toHaveBeenCalledWith([]);
+  });
+
+  it('retries initialization when feature flag enabled and status is error', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
+      return feature === 'newDataViewPickerEnabled';
+    });
+
+    const initSpy = jest.fn();
+    mockUseInitDataViewManager.mockReturnValue(initSpy);
+
+    const store = createStore(() => ({
+      dataViewManager: {
+        shared: { status: 'error' },
+      },
+    }));
+
+    const servicesPromise = Promise.resolve(servicesMock);
+    const storePromise = Promise.resolve(store as never);
+
+    await act(async () => {
+      TestRenderer.create(
+        <AlertFlyoutOverviewTab
+          hit={hit}
+          servicesPromise={servicesPromise}
+          storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
+        />
+      );
+      await Promise.resolve();
+    });
+
+    expect(initSpy).toHaveBeenCalledTimes(1);
+    expect(initSpy).toHaveBeenCalledWith([]);
+  });
+
+  it('does not initialize when feature flag disabled', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+
+    const initSpy = jest.fn();
+    mockUseInitDataViewManager.mockReturnValue(initSpy);
+
+    const store = createStore(() => ({
+      dataViewManager: {
+        shared: { status: 'pristine' },
+      },
+    }));
+
+    const servicesPromise = Promise.resolve(servicesMock);
+    const storePromise = Promise.resolve(store as never);
+
+    await act(async () => {
+      TestRenderer.create(
+        <AlertFlyoutOverviewTab
+          hit={hit}
+          servicesPromise={servicesPromise}
+          storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
+        />
+      );
+      await Promise.resolve();
+    });
+
+    expect(initSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not initialize when status is loading or ready', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
+      return feature === 'newDataViewPickerEnabled';
+    });
+
+    const initSpy = jest.fn();
+    mockUseInitDataViewManager.mockReturnValue(initSpy);
+
+    const storeLoading = createStore(() => ({
+      dataViewManager: {
+        shared: { status: 'loading' },
+      },
+    }));
+    const storeReady = createStore(() => ({
+      dataViewManager: {
+        shared: { status: 'ready' },
+      },
+    }));
+
+    const servicesPromise = Promise.resolve(servicesMock);
+
+    await act(async () => {
+      TestRenderer.create(
+        <AlertFlyoutOverviewTab
+          hit={hit}
+          servicesPromise={servicesPromise}
+          storePromise={Promise.resolve(storeLoading as never)}
+          onAlertUpdated={onAlertUpdated}
+        />
+      );
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      TestRenderer.create(
+        <AlertFlyoutOverviewTab
+          hit={hit}
+          servicesPromise={servicesPromise}
+          storePromise={Promise.resolve(storeReady as never)}
+          onAlertUpdated={onAlertUpdated}
+        />
+      );
+      await Promise.resolve();
+    });
+
+    expect(initSpy).not.toHaveBeenCalled();
+  });
+
+  it('renders under an existing parent router without nesting another router', async () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseInitDataViewManager.mockReturnValue(jest.fn());
+
+    const store = createStore(() => ({
+      dataViewManager: {
+        shared: { status: 'pristine' },
+      },
+    }));
+
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutOverviewTab
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={onAlertUpdated}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MockOverviewTab')).toBeInTheDocument();
+    });
+  });
+});

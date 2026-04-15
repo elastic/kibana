@@ -66,12 +66,21 @@ jest.mock('./logs_flyout', () => ({
 }));
 
 jest.mock('.', () => ({
-  WaterfallFlyout: ({ onCloseFlyout, dataView, hit, loading, title, children }: any) => (
+  WaterfallFlyout: ({
+    onCloseFlyout,
+    dataView,
+    hit,
+    loading,
+    title,
+    children,
+    dataTestSubj,
+  }: any) => (
     <div
       data-test-subj="waterfallFlyout"
       data-loading={loading}
       data-title={title}
       data-has-hit={!!hit}
+      data-flyout-test-subj={dataTestSubj}
     >
       {loading ? (
         <div data-test-subj="loadingSkeleton">Loading...</div>
@@ -214,6 +223,26 @@ describe('DocumentDetailFlyout', () => {
       expect(flyout).toHaveAttribute('data-loading', 'false');
       expect(flyout).toHaveAttribute('data-title', 'Span document');
       expect(flyout).toHaveAttribute('data-has-hit', 'true');
+    });
+
+    it('should forward the flyout test subject to WaterfallFlyout', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'spanDetailFlyout',
+        hit: mockSpanHit,
+        loading: false,
+        title: 'Span document',
+        logDataView: null,
+        error: null,
+      });
+
+      render(
+        <DocumentDetailFlyout {...defaultSpanProps} dataTestSubj="traceWaterfallDocumentFlyout" />
+      );
+
+      expect(screen.getByTestId('waterfallFlyout')).toHaveAttribute(
+        'data-flyout-test-subj',
+        'traceWaterfallDocumentFlyout'
+      );
     });
 
     it('should pass correct props to WaterfallFlyout for log type', () => {

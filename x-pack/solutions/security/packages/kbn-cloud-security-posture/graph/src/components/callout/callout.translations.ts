@@ -10,9 +10,7 @@ import { i18n } from '@kbn/i18n';
 const i18nNamespaceKey = 'securitySolutionPackages.csp.graph.callout';
 
 export type CalloutVariant =
-  | 'missingAllRequirements'
   | 'uninstalledIntegration'
-  | 'disabledEntityStore'
   | 'unavailableEntityInfo'
   | 'unknownEntityType';
 
@@ -45,26 +43,11 @@ export const UNKNOWN_ENTITY_TYPE_TITLE = i18n.translate(
 );
 
 // Message translations
-export const MISSING_ALL_REQUIREMENTS_MESSAGE = i18n.translate(
-  `${i18nNamespaceKey}.missingAllRequirements.message`,
-  {
-    defaultMessage:
-      'Install the Cloud Asset Discovery integration and enable Entity Store to enrich your graph visualization with entity metadata.',
-  }
-);
-
 export const MISSING_INTEGRATION_MESSAGE = i18n.translate(
   `${i18nNamespaceKey}.missingIntegration.message`,
   {
     defaultMessage:
       'Install the Cloud Asset Discovery integration to enrich your graph visualization with entity metadata.',
-  }
-);
-
-export const MISSING_ENTITY_STORE_MESSAGE = i18n.translate(
-  `${i18nNamespaceKey}.missingEntityStore.message`,
-  {
-    defaultMessage: 'Enable Entity Store to enrich your graph visualization with entity metadata.',
   }
 );
 
@@ -89,10 +72,6 @@ export const INSTALL_CLOUD_ASSET_DISCOVERY_TEXT = i18n.translate(
     defaultMessage: 'Install Cloud Asset Discovery',
   }
 );
-
-export const ENABLE_ENTITY_STORE_TEXT = i18n.translate(`${i18nNamespaceKey}.enableEntityStore`, {
-  defaultMessage: 'Enable Entity Store',
-});
 
 export const VERIFY_CLOUD_ASSET_DISCOVERY_DATA_TEXT = i18n.translate(
   `${i18nNamespaceKey}.verifyCloudAssetDiscoveryData`,

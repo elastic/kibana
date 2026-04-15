@@ -7,6 +7,10 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestPipelineProcessor } from '../../../types/processors/ingest_pipeline_processors';
+import {
+  getStreamlangResolverForProcessor,
+  type StreamlangResolverOptions,
+} from '../../../types/resolvers';
 
 import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import { conditionToPainless } from '../../conditions/condition_to_painless';
@@ -21,14 +25,18 @@ import type { ActionToIngestType } from './processors/processor';
 import { processRemoveByPrefixProcessor } from './processors/remove_by_prefix_processor';
 
 import type { IngestPipelineTranspilationOptions } from '.';
-import { processJoinProcessor } from './processors/join_processor';
 import { processConcatProcessor } from './processors/concat_processor';
+import { processSortProcessor } from './processors/sort_processor';
+import { processJsonExtractProcessor } from './processors/json_extract_processor';
+import { processEnrichProcessor } from './processors/enrich_processor';
+import { processJoinProcessor } from './processors/join_processor';
 
-export function convertStreamlangDSLActionsToIngestPipelineProcessors(
+export async function convertStreamlangDSLActionsToIngestPipelineProcessors(
   actionSteps: StreamlangProcessorDefinition[],
-  transpilationOptions?: IngestPipelineTranspilationOptions
-): IngestProcessorContainer[] {
-  return actionSteps.flatMap((actionStep) => {
+  transpilationOptions?: IngestPipelineTranspilationOptions,
+  resolverOptions?: StreamlangResolverOptions
+): Promise<IngestProcessorContainer[]> {
+  const processors = actionSteps.flatMap((actionStep) => {
     const renames = processorFieldRenames[actionStep.action] || {};
     const { action, ...rest } = actionStep;
 
@@ -49,6 +57,15 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
       }
     }
 
+    // manual_ingest_pipeline handles its own condition compilation because it needs to
+    // combine the parent 'where' condition with nested processor 'if' conditions
+    if (action === 'manual_ingest_pipeline') {
+      return processManualIngestPipelineProcessors(
+        processorWithRenames as Parameters<typeof processManualIngestPipelineProcessors>[0],
+        transpilationOptions
+      );
+    }
+
     const processorWithCompiledConditions =
       'if' in processorWithRenames && processorWithRenames.if
         ? {
@@ -56,15 +73,6 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
             if: conditionToPainless(processorWithRenames.if),
           }
         : processorWithRenames;
-
-    if (action === 'manual_ingest_pipeline') {
-      return processManualIngestPipelineProcessors(
-        processorWithCompiledConditions as Parameters<
-          typeof processManualIngestPipelineProcessors
-        >[0],
-        transpilationOptions
-      );
-    }
 
     if (action === 'remove_by_prefix') {
       return processRemoveByPrefixProcessor(
@@ -93,6 +101,33 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
       );
     }
 
+    if (action === 'sort') {
+      return processSortProcessor(
+        processorWithCompiledConditions as Parameters<typeof processSortProcessor>[0]
+      );
+    }
+
+    if (action === 'json_extract') {
+      return [
+        processJsonExtractProcessor(
+          processorWithCompiledConditions as Parameters<typeof processJsonExtractProcessor>[0]
+        ),
+      ];
+    }
+
+    if (action === 'enrich') {
+      const resolver = getStreamlangResolverForProcessor(actionStep, resolverOptions);
+      if (!resolver) {
+        throw new Error('Enrich processor requires an enrich policy resolver.');
+      }
+      return processEnrichProcessor(
+        processorWithCompiledConditions as Parameters<typeof processEnrichProcessor>[0],
+        resolver
+      );
+    }
+
     return applyPreProcessing(action, processorWithCompiledConditions as IngestPipelineProcessor);
   });
+
+  return Promise.all(processors);
 }

@@ -113,6 +113,11 @@ export function ESQLEditor({
     initialAttributes: attributes,
   });
 
+  // Use a ref to always read the latest currentAttributes in async callbacks,
+  // avoiding stale closures when the user changes chart type/config between renders
+  const currentAttributesRef = useRef(currentAttributes);
+  currentAttributesRef.current = currentAttributes;
+
   const adHocDataViews =
     attributes && attributes.state.adHocDataViews
       ? Object.values(attributes.state.adHocDataViews)
@@ -165,7 +170,7 @@ export function ESQLEditor({
         setDataGridAttrs,
         esqlVariables,
         shouldUpdateAttrs,
-        currentAttributes
+        currentAttributesRef.current
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -184,7 +189,6 @@ export function ESQLEditor({
       visualizationMap,
       adHocDataViews,
       esqlVariables,
-      currentAttributes,
       setCurrentAttributes,
       updateSuggestion,
     ]
@@ -310,7 +314,6 @@ function InnerESQLEditor({
       <div
         css={css`
           border-top: ${euiTheme.border.thin};
-          background-color: ${euiTheme.colors.backgroundBaseHighlighted};
         `}
       >
         <ESQLLangEditor
@@ -326,7 +329,6 @@ function InnerESQLEditor({
               : undefined
           }
           editorIsInline
-          hideRunQueryText
           onTextLangQuerySubmit={async (q, a) => {
             // do not run the suggestions if the query is the same as the previous one
             if (q && !isEqual(q, prevQuery.current)) {

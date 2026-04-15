@@ -145,7 +145,7 @@ export const AttachmentsMenu = ({
                       minimumTimeRangeOption: 'No minimum',
                       randomSamplerMode,
                       randomSamplerProbability,
-                      timeRange,
+                      time_range: timeRange,
                     });
                   },
                 },
@@ -225,7 +225,7 @@ export const AttachmentsMenu = ({
                 color="text"
                 display="base"
                 isSelected={isActionMenuOpen}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
               />
             }

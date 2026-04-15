@@ -17,7 +17,7 @@ import {
   getFakeKibanaRequest,
   validateRuleAndCreateFakeRequest,
 } from './rule_loader';
-import type { TaskRunnerContext } from './types';
+import { ApiKeyType, type TaskRunnerContext } from './types';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import type { Rule } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
@@ -255,7 +255,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
@@ -269,8 +269,8 @@ describe('rule_loader', () => {
       expect(fakeRequest.isFakeRequest).toEqual(true);
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
-      expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.route.path).toEqual('/s/rule-spaceId');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/s/rule-spaceId');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
@@ -285,8 +285,20 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
+    });
+
+    test('returns UIAM API key when config is set to uiam', async () => {
+      const fakeRequest = getFakeKibanaRequest(
+        { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
+        'default',
+        null,
+        Buffer.from('456:essu_uiam_api_key').toString('base64')
+      );
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_uiam_api_key`,
+      });
     });
   });
 });

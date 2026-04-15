@@ -35,15 +35,16 @@ export const ProjectPickerSettings = ({ onResetToDefaults }: ProjectPickerSettin
             closePopover();
           },
         },
-        {
-          isSeparator: true as const,
-        },
-        {
-          name: strings.getManageCrossProjectSearchLabel(),
-          icon: 'gear',
-          'data-test-subj': 'projectPickerManageSettingsMenuItem',
-          onClick: closePopover, // TODO: redirect to CPS management - UI not ready yet
-        },
+        // TODO: Enable this when cloud CPS management link is ready: https://github.com/elastic/kibana/issues/257859
+        // {
+        //   isSeparator: true as const,
+        // },
+        // {
+        //   name: strings.getManageCrossProjectSearchLabel(),
+        //   icon: 'gear',
+        //   'data-test-subj': 'projectPickerManageSettingsMenuItem',
+        //   onClick: closePopover, // TODO: redirect to CPS management - UI not ready yet
+        // },
       ],
     },
   ];
@@ -54,9 +55,7 @@ export const ProjectPickerSettings = ({ onResetToDefaults }: ProjectPickerSettin
         <EuiButtonIcon
           display="empty"
           iconType="ellipsis"
-          aria-label={i18n.translate('cpsUtils.projectPicker.settingsButtonLabel', {
-            defaultMessage: 'Manage cross-project search',
-          })}
+          aria-label={strings.getManageCrossProjectSearchLabel()}
           onClick={() => setIsOpen(!isOpen)}
           size="s"
           color="text"
@@ -68,6 +67,9 @@ export const ProjectPickerSettings = ({ onResetToDefaults }: ProjectPickerSettin
       anchorPosition="rightCenter"
       ownFocus
       panelPaddingSize="none"
+      aria-label={i18n.translate('cpsUtils.projectPicker.settingsPopoverAriaLabel', {
+        defaultMessage: 'Cross-project search settings',
+      })}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

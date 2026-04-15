@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/utility-types-jest'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/utility-types-jest'
+  title: '@kbn/utility-types-jest'
   description: Moon project for @kbn/utility-types-jest
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-utility-types-jest
+  sourceRoot: src/platform/packages/shared/kbn-utility-types-jest
 tags:
   - shared-common
   - package

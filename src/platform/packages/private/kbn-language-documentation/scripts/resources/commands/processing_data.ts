@@ -355,7 +355,6 @@ FROM books METADATA _score
       ignoreTag: true,
     },
     openLinksInNewTab: true,
-    preview: true,
   },
   {
     name: 'fuse',
@@ -856,7 +855,7 @@ FROM books METADATA _score
       ignoreTag: true,
     },
     openLinksInNewTab: true,
-    preview: true,
+    preview: false,
   },
   {
     name: 'sample',

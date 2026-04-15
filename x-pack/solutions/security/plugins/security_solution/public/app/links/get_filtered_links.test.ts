@@ -18,6 +18,7 @@ import { getManagementFilteredLinks } from '../../management/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 const mockGetManagementFilteredLinks = getManagementFilteredLinks as jest.MockedFunction<
   typeof getManagementFilteredLinks
@@ -34,6 +35,7 @@ const createMockLinkItem = (overrides: Partial<LinkItem> = {}): LinkItem => ({
 describe('getFilteredLinks', () => {
   const mockCore = createCoreStartMock();
   const mockPlugins = {} as StartPlugins;
+  const mockExperimentalFeatures = { ...allowedExperimentalValues };
   const mockManagementLinks = createMockLinkItem({
     id: SecurityPageName.administration,
     title: 'Management',
@@ -49,17 +51,21 @@ describe('getFilteredLinks', () => {
   it('returns filtered links including AI Value links', async () => {
     mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-    const result = await getFilteredLinks(mockCore, mockPlugins);
+    const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
     expect(result).toContainEqual(expect.objectContaining({ id: SecurityPageName.aiValue }));
     expect(result).toContainEqual(mockManagementLinks);
-    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins);
+    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(
+      mockCore,
+      mockPlugins,
+      mockExperimentalFeatures
+    );
   });
 
   it('includes all base links in the result', async () => {
     mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-    const result = await getFilteredLinks(mockCore, mockPlugins);
+    const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
     // Check that base links are included by checking the result has expected length
     expect(result.length).toBeGreaterThan(10);
@@ -76,7 +82,7 @@ describe('getFilteredLinks', () => {
   it('returns a frozen array', async () => {
     mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-    const result = await getFilteredLinks(mockCore, mockPlugins);
+    const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
     expect(Object.isFrozen(result)).toBe(true);
   });
@@ -84,10 +90,14 @@ describe('getFilteredLinks', () => {
   it('calls management filter function with correct parameters', async () => {
     mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-    await getFilteredLinks(mockCore, mockPlugins);
+    await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
     expect(mockGetManagementFilteredLinks).toHaveBeenCalledTimes(1);
-    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins);
+    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(
+      mockCore,
+      mockPlugins,
+      mockExperimentalFeatures
+    );
   });
 
   describe('`securitySolution:enableAlertsAndAttacksAlignment` setting', () => {
@@ -95,7 +105,7 @@ describe('getFilteredLinks', () => {
       mockCore.uiSettings.get.mockReturnValue(false);
       mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-      const result = await getFilteredLinks(mockCore, mockPlugins);
+      const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
       // Check that base links are included by checking the result has expected length
       expect(result.length).toBeGreaterThan(10);
@@ -114,7 +124,7 @@ describe('getFilteredLinks', () => {
       mockCore.uiSettings.get.mockReturnValue(true);
       mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-      const result = await getFilteredLinks(mockCore, mockPlugins);
+      const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
       // Check that base links are included by checking the result has expected length
       expect(result.length).toBeGreaterThan(10);

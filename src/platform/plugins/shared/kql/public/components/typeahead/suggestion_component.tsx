@@ -19,15 +19,15 @@ import type { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 function getEuiIconType(type: string) {
   switch (type) {
     case 'field':
-      return 'kqlField';
+      return 'queryField';
     case 'value':
-      return 'kqlValue';
+      return 'queryValue';
     case 'recentSearch':
       return 'search';
     case 'conjunction':
-      return 'kqlSelector';
+      return 'querySelector';
     case 'operator':
-      return 'kqlOperand';
+      return 'queryOperand';
     default:
       throw new Error(`Unknown type: ${type}`);
   }
@@ -87,7 +87,7 @@ export const SuggestionComponent = React.memo(function SuggestionComponent(props
         })}
       >
         <div className="kbnSuggestionItem__type">
-          <EuiIcon type={getEuiIconType(props.suggestion.type)} />
+          <EuiIcon type={getEuiIconType(props.suggestion.type)} aria-hidden={true} />
         </div>
         <div className="kbnSuggestionItem__text" data-test-subj="autoCompleteSuggestionText">
           {props.suggestion.text}

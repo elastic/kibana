@@ -34,6 +34,17 @@ const mockInvalidatePendingApiKeyObject2 = {
   references: [],
 };
 
+const mockInvalidatePendingUIAMApiKeyObject = {
+  id: '2',
+  type: 'api_key_pending_invalidation',
+  attributes: {
+    apiKeyId: '111',
+    createdAt: '2024-04-11T17:08:44.035Z',
+    uiamApiKey: 'essu_test_uiam_api_key',
+  },
+  references: [],
+};
+
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
     getDecryptedAsInternalUser: jest.fn(),
@@ -45,6 +56,9 @@ function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClien
 
 describe('getApiKeyIdsToInvalidate', () => {
   describe('with encryptedSavedObjectsClient', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
     const encryptedSavedObjectsClient = createEncryptedSavedObjectsClientMock();
 
     test('should get decrypted api key pending invalidation saved object', async () => {
@@ -99,6 +113,67 @@ describe('getApiKeyIdsToInvalidate', () => {
         apiKeyIdsToInvalidate: [
           { id: '1', apiKeyId: 'abcd====!' },
           { id: '2', apiKeyId: 'xyz!==!' },
+        ],
+        apiKeyIdsToExclude: [],
+      });
+    });
+
+    test('should get decrypted UIAM api key pending invalidation saved object', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        mockInvalidatePendingApiKeyObject1
+      );
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        mockInvalidatePendingUIAMApiKeyObject
+      );
+
+      const result = await getApiKeyIdsToInvalidate({
+        apiKeySOsPendingInvalidation: {
+          saved_objects: [
+            {
+              id: '1',
+              type: 'api_key_pending_invalidation',
+              score: 0,
+              attributes: { apiKeyId: 'encryptedencrypted', createdAt: '2024-04-11T17:08:44.035Z' },
+              references: [],
+            },
+            {
+              id: '2',
+              type: 'api_key_pending_invalidation',
+              score: 0,
+              attributes: {
+                apiKeyId: '111',
+                createdAt: '2024-04-11T17:08:44.035Z',
+                uiamApiKey: 'essu_test_uiam_api_key',
+              },
+              references: [],
+            },
+          ],
+          total: 2,
+          per_page: 10,
+          page: 1,
+        },
+        encryptedSavedObjectsClient,
+        savedObjectsClient: internalSavedObjectsRepository,
+        savedObjectType: 'api_key_pending_invalidation',
+        savedObjectTypesToQuery: [],
+      });
+
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenNthCalledWith(
+        1,
+        'api_key_pending_invalidation',
+        '1'
+      );
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenNthCalledWith(
+        2,
+        'api_key_pending_invalidation',
+        '2'
+      );
+      expect(internalSavedObjectsRepository.find).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        apiKeyIdsToInvalidate: [{ id: '1', apiKeyId: 'abcd====!' }],
+        uiamApiKeysToInvalidate: [
+          { id: '2', apiKeyId: '111', uiamApiKey: 'essu_test_uiam_api_key' },
         ],
         apiKeyIdsToExclude: [],
       });

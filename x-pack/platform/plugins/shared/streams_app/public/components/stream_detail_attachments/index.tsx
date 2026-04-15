@@ -26,7 +26,7 @@ import type {
   Attachment,
   AttachmentType,
 } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAttachmentsApi } from '../../hooks/use_attachments_api';
@@ -54,11 +54,7 @@ const getCountByType = (attachments: Attachment[]): Record<AttachmentType, numbe
   );
 };
 
-export function StreamDetailAttachments({
-  definition,
-}: {
-  definition: Streams.ingest.all.GetResponse;
-}) {
+export function StreamDetailAttachments({ definition }: { definition: Streams.all.GetResponse }) {
   const [filters, setFilters] = useState<AttachmentFiltersState>(DEFAULT_ATTACHMENT_FILTERS);
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
@@ -101,6 +97,9 @@ export function StreamDetailAttachments({
   useEffect(() => {
     if (definition && !attachmentsFetch.loading) {
       const streamType = getStreamTypeFromDefinition(definition.stream);
+      const processingStepsCount = Streams.ingest.all.Definition.is(definition.stream)
+        ? definition.stream.ingest.processing.steps.length
+        : 0;
       onPageReady({
         meta: {
           description: `[ttfmp_streams_detail_attachments] streamType: ${streamType}`,
@@ -109,7 +108,7 @@ export function StreamDetailAttachments({
           key1: 'attachment_count',
           value1: attachmentsFetch.value?.attachments?.length ?? 0,
           key2: 'processing_steps_count',
-          value2: definition.stream.ingest.processing.steps.length,
+          value2: processingStepsCount,
         },
       });
     }
@@ -163,7 +162,7 @@ export function StreamDetailAttachments({
         title: i18n.translate('xpack.streams.attachments.addSuccess.title', {
           defaultMessage: 'Attachments added successfully',
         }),
-        iconType: 'cheer',
+        iconType: 'popper',
         text: toMountPoint(
           <FormattedMessage
             id="xpack.streams.attachments.addSuccess.text"
@@ -205,7 +204,7 @@ export function StreamDetailAttachments({
         title: i18n.translate('xpack.streams.attachments.removeSuccess.title', {
           defaultMessage: 'Attachments removed',
         }),
-        iconType: 'unlink',
+        iconType: 'linkSlash',
         text: toMountPoint(
           <FormattedMessage
             id="xpack.streams.attachments.removeSuccess.text"
@@ -303,7 +302,9 @@ export function StreamDetailAttachments({
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiIcon
-                              type={isSelectionPopoverOpen ? 'arrowUp' : 'arrowDown'}
+                              type={
+                                isSelectionPopoverOpen ? 'chevronSingleUp' : 'chevronSingleDown'
+                              }
                               size="s"
                             />
                           </EuiFlexItem>
@@ -320,7 +321,7 @@ export function StreamDetailAttachments({
                       items={[
                         <EuiContextMenuItem
                           key="unlink"
-                          icon="unlink"
+                          icon="linkSlash"
                           disabled={isUnlinkLoading}
                           onClick={() => {
                             setAttachmentsToUnlink(selectedAttachments);

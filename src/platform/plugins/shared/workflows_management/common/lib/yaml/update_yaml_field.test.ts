@@ -138,6 +138,64 @@ steps:
     expect(result).toContain('- name: step1');
   });
 
+  it('should preserve comments, blank lines, and formatting when toggling enabled', () => {
+    const yaml = `# Workflow configuration
+name: Test Workflow
+description: A workflow that does things
+
+# Whether the workflow is active
+enabled: false
+
+steps:
+  # Create a Jira ticket
+  - name: step1
+    type: jira
+    params:
+      summary: test
+
+  # Notify the user
+  - name: step2
+    type: slack
+    params:
+      channel: general`;
+
+    const result = updateYamlField(yaml, 'enabled', true);
+
+    // Only the enabled value should change
+    expect(result).toContain('enabled: true');
+    expect(result).not.toContain('enabled: false');
+
+    // All comments preserved
+    expect(result).toContain('# Workflow configuration');
+    expect(result).toContain('# Whether the workflow is active');
+    expect(result).toContain('# Create a Jira ticket');
+    expect(result).toContain('# Notify the user');
+
+    // Blank lines preserved
+    const blankLineCount = (result.match(/\n\n/g) || []).length;
+    expect(blankLineCount).toBeGreaterThanOrEqual(3);
+
+    // Rest of content unchanged
+    expect(result).toContain('name: Test Workflow');
+    expect(result).toContain('description: A workflow that does things');
+    expect(result).toContain('channel: general');
+  });
+
+  it('should preserve template expressions like {{ inputs.comment }}', () => {
+    const yaml = `name: Test Workflow
+enabled: false
+steps:
+  - name: step1
+    type: jira
+    params:
+      comment: "{{ inputs.comment }}"`;
+
+    const result = updateYamlField(yaml, 'enabled', true);
+
+    expect(result).toContain('enabled: true');
+    expect(result).toContain('comment: "{{ inputs.comment }}"');
+  });
+
   it('should handle nested field paths with dot notation', () => {
     const yaml = `metadata:
   version: 1.0

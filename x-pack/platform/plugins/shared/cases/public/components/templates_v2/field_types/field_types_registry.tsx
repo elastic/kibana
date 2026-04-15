@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FC } from 'react';
+import type { z } from '@kbn/zod/v4';
+
+import { FieldType } from '../../../../common/types/domain/template/fields';
+import type {
+  FieldSchema,
+  ConditionRenderProps,
+} from '../../../../common/types/domain/template/fields';
+
+import { InputText } from './controls/input_text';
+import { SelectBasic } from './controls/select_basic';
+import { Textarea } from './controls/textarea';
+import { InputNumber } from './controls/input_number';
+import { DatePicker } from './controls/date_picker';
+import { CheckboxGroup } from './controls/checkbox_group';
+import { RadioGroup } from './controls/radio_group';
+
+// NOTE: this guarantees the control will receive props aligned with the schema plus condition render props
+export type FieldMap = {
+  [K in FieldType]: FC<Extract<z.infer<typeof FieldSchema>, { control: K }> & ConditionRenderProps>;
+};
+
+// NOTE: Register ui controls here (remember to update FieldSchema as well)
+export const controlRegistry: FieldMap = {
+  [FieldType.INPUT_TEXT]: InputText,
+  [FieldType.INPUT_NUMBER]: InputNumber,
+  [FieldType.SELECT_BASIC]: SelectBasic,
+  [FieldType.TEXTAREA]: Textarea,
+  [FieldType.DATE_PICKER]: DatePicker,
+  [FieldType.CHECKBOX_GROUP]: CheckboxGroup,
+  [FieldType.RADIO_GROUP]: RadioGroup,
+};

@@ -69,9 +69,10 @@ describe('secrets validation', () => {
   test('fails when secret token is not provided', () => {
     expect(() => {
       validateSecrets(actionType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Field \\"token\\": Required"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type secrets: ✖ Invalid input: expected string, received undefined
+        → at token"
+    `);
   });
 });
 

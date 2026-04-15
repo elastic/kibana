@@ -31,6 +31,15 @@ const mockMaintenanceWindow = {
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
   duration: 864000000,
+  schedule: {
+    custom: {
+      ...getMockMaintenanceWindow().schedule.custom,
+      duration: '10d',
+      recurring: {
+        ...getMockMaintenanceWindow().schedule.custom.recurring,
+      },
+    },
+  },
   id: 'test-id',
 } as MaintenanceWindow;
 
@@ -122,6 +131,19 @@ describe('updateMaintenanceWindowRoute', () => {
         scopedQuery: {
           filters: [],
           kql: "_id: '1234'",
+        },
+        schedule: {
+          custom: {
+            duration: '10d',
+            start: '2021-03-07T00:00:00.000Z',
+            recurring: { every: '1d', end: '2022-05-17T05:05:00.000Z', onWeekDay: ['MO', 'FR'] },
+          },
+        },
+        scope: {
+          alerting: {
+            kql: "_id: '1234'",
+            filters: [],
+          },
         },
       },
     });

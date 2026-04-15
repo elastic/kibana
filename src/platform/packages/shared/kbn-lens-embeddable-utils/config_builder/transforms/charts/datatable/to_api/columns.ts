@@ -12,16 +12,21 @@ import type {
   TextBasedLayer,
   ColumnState,
 } from '@kbn/lens-common';
+import type { PaletteOutput } from '@kbn/coloring';
 import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
 import { isFormBasedLayer, operationFromColumn } from '../../../utils';
 import { getValueApiColumn } from '../../../columns/esql_column';
-import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '../../../coloring';
+import {
+  AUTO_COLOR,
+  fromColorByValueLensStateToAPI,
+  fromColorMappingLensStateToAPI,
+} from '../../../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
-import { isMetricColumnESQL, isMetricColumnNoESQL } from '../helpers';
+import { isMetricColumnESQL, isMetricColumnNoESQL, colorModeToApplyColorTo } from '../helpers';
 import { stripUndefined } from '../../utils';
 
 type APIMetricRowCommonProps = Partial<
-  Pick<DatatableState['metrics'][number], 'visible' | 'alignment' | 'width'>
+  Pick<NonNullable<DatatableState['metrics']>[number], 'visible' | 'alignment' | 'width'>
 >;
 
 function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps {
@@ -39,11 +44,11 @@ function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps
  */
 function buildColorProps(
   column: ColumnState
-): Partial<Pick<DatatableState['metrics'][number], 'apply_color_to' | 'color'>> {
+): Partial<Pick<NonNullable<DatatableState['metrics']>[number], 'apply_color_to' | 'color'>> {
   const { colorMode, palette, colorMapping } = column;
   if (!colorMode || colorMode === 'none') return {};
 
-  const applyColorTo = colorMode === 'text' ? 'value' : 'background';
+  const applyColorTo = colorModeToApplyColorTo(colorMode);
 
   // Prefer colorMapping if present, otherwise use palette
   if (colorMapping) {
@@ -56,15 +61,19 @@ function buildColorProps(
   if (palette) {
     return {
       apply_color_to: applyColorTo,
-      color: fromColorByValueLensStateToAPI(palette),
+      color: palette.params
+        ? fromColorByValueLensStateToAPI(palette)
+        : fromColorMappingLensStateToAPI(undefined, palette as PaletteOutput), // support for legacy palettes
     };
   }
 
-  return { apply_color_to: applyColorTo };
+  return { apply_color_to: applyColorTo, color: AUTO_COLOR };
 }
 
 type APIMetricProps = APIMetricRowCommonProps &
-  Partial<Pick<DatatableState['metrics'][number], 'apply_color_to' | 'color' | 'summary'>>;
+  Partial<
+    Pick<NonNullable<DatatableState['metrics']>[number], 'apply_color_to' | 'color' | 'summary'>
+  >;
 
 function buildMetricsAPI(column: ColumnState): APIMetricProps {
   const { summaryRow, summaryLabel } = column;
@@ -97,13 +106,16 @@ type APIRowPropsNoESQL = APIMetricRowCommonProps &
   >;
 
 function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
-  const { colorMode, colorMapping } = column;
+  const { colorMode, colorMapping, palette } = column;
   return {
     ...buildRowCommonProps(column),
     ...(colorMode && colorMode !== 'none'
       ? {
-          apply_color_to: colorMode === 'text' ? 'value' : 'background',
-          ...(colorMapping ? { color: fromColorMappingLensStateToAPI(colorMapping) } : {}),
+          apply_color_to: colorModeToApplyColorTo(colorMode),
+          color:
+            colorMapping || palette
+              ? fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
+              : AUTO_COLOR,
         }
       : {}),
   };
@@ -158,7 +170,7 @@ export function convertDatatableColumnsToAPI(
 ): DatatableColumnsNoESQLAndMapping | DatatableColumnsESQLAndMapping {
   const { columns } = visualization;
   if (columns.length === 0) {
-    throw new Error('Datatable must have at least one metric column');
+    throw new Error('Datatable must have at least one column');
   }
 
   // Used for the sorting columnId mapping during transformation to API format
@@ -256,12 +268,12 @@ export function convertDatatableColumnsToAPI(
     }
   }
 
-  if (metrics.length === 0) {
-    throw new Error('Datatable must have at least one metric column');
+  if (metrics.length === 0 && rows.length === 0) {
+    throw new Error('Datatable must have at least one column');
   }
 
   return {
-    metrics,
+    ...(metrics.length > 0 ? { metrics } : {}),
     ...(rows.length > 0 ? { rows } : {}),
     ...(splitMetricsBy.length > 0 ? { split_metrics_by: splitMetricsBy } : {}),
     columnIdMapping,

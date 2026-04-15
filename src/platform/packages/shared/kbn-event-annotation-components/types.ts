@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type {
@@ -16,6 +17,8 @@ import type {
 } from '@kbn/event-annotation-common';
 
 export interface EventAnnotationServiceType {
+  /** Emits the annotation group ID whenever a library annotation group is updated */
+  annotationGroupUpdated$: Observable<string>;
   loadAnnotationGroup: (savedObjectId: string) => Promise<EventAnnotationGroupConfig>;
   groupExistsWithTitle: (title: string) => Promise<boolean>;
   findAnnotationGroupContent: (

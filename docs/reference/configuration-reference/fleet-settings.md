@@ -60,6 +60,10 @@ Go to the [{{fleet}}](docs-content://reference/fleet/index.md) docs for more inf
 `xpack.fleet.agents.elasticsearch.ca_sha256`
 :   Hash pin used for certificate verification. The pin is a base64-encoded string of the SHA-256 fingerprint.
 
+::::{note}
+The `xpack.fleet.agents.elasticsearch.*` settings are intended for a quickstart setup. For more advanced use cases, use the `xpack.fleet.outputs` setting to preconfigure outputs.
+::::
+
 
 ## Preconfiguration settings (for advanced use cases) [_preconfiguration_settings_for_advanced_use_cases]
 
@@ -237,6 +241,9 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
 
         `certificate`
         :   The SSL certificate that {{agents}} use to authenticate with the output. Include the full contents of the certificate here.
+
+        `certificate_authorities`
+        :   Certificate authority (CA) used to issue the certificate.
 
     `secrets`
     :   Include here any values for preconfigured outputs that should be stored as secrets. A secret value is replaced in the `kibana.yml` settings file with a reference, with the original value stored externally as a secure hash. Note that this type of secret storage requires all configured {{fleet-server}}s to be on version 8.12.0 or later.

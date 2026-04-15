@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { StopTransformsRequestSchema, StopTransformsResponseSchema } from '../../../../common';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig } from '../helpers/transform_config';
@@ -15,7 +16,7 @@ import { COMMON_HEADERS } from '../constants';
 
 const transformId = 'transform-test-stop';
 
-apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/stop_transforms', { tag: tags.stateful.all }, () => {
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     // to test stopping transforms we create a slow continuous transform so it doesn't stop automatically
     const config = {

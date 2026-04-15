@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, NEVER, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
@@ -22,20 +22,19 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public';
-import type {
-  Datasource,
-  DatasourceMap,
-  Visualization,
-  VisualizationMap,
-  ExpressionWrapperProps,
-  LensInternalApi,
-  LensRendererProps,
-  LensRuntimeState,
-  LensSerializedState,
+import {
+  type Datasource,
+  type DatasourceMap,
+  type Visualization,
+  type VisualizationMap,
+  type ExpressionWrapperProps,
+  type LensInternalApi,
+  type LensRendererProps,
+  type LensRuntimeState,
+  type LensSerializedState,
+  LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
-import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
@@ -44,7 +43,7 @@ import type { LensEmbeddableStartServices } from '../types';
 function getDefaultLensApiMock() {
   const LensApiMock: LensApi = {
     // Static props
-    type: DOC_TYPE,
+    type: LENS_EMBEDDABLE_TYPE,
     uuid: faker.string.uuid(),
     // Shared Embeddable Observables
     title$: new BehaviorSubject<string | undefined>(faker.lorem.words()),
@@ -96,7 +95,7 @@ function getDefaultLensApiMock() {
     savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
     adapters$: new BehaviorSubject<Adapters>({}),
     updateAttributes: jest.fn(),
-    updateSavedObjectId: jest.fn(),
+    updateRefId: jest.fn(),
     updateOverrides: jest.fn(),
     getSerializedStateByReference: jest.fn(),
     getSerializedStateByValue: jest.fn(),
@@ -110,7 +109,7 @@ function getDefaultLensApiMock() {
     rendered$: new BehaviorSubject<boolean>(false),
     searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
-    resetUnsavedChanges: jest.fn(),
+    applySerializedState: jest.fn(),
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
   };
   return LensApiMock;
@@ -139,7 +138,7 @@ export function getLensApiMock(overrides: Partial<LensApi> = {}): LensApi {
 
 export function getLensSerializedStateMock(overrides: Partial<LensSerializedState> = {}) {
   return {
-    savedObjectId: faker.string.uuid(),
+    ref_id: faker.string.uuid(),
     ...getDefaultLensSerializedStateMock(),
     ...overrides,
   };
@@ -180,6 +179,9 @@ export function makeEmbeddableServices(
     visualizations: visualizationsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     eventAnnotation: {} as LensEmbeddableStartServices['eventAnnotation'],
+    eventAnnotationService: {
+      annotationGroupUpdated$: NEVER,
+    } as unknown as LensEmbeddableStartServices['eventAnnotationService'],
     timefilter: services.data.query.timefilter.timefilter,
     coreHttp: services.http,
     coreStart: coreMock.createStart(),
@@ -199,30 +201,8 @@ export function makeEmbeddableServices(
       ...services.uiActions,
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
-    embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn().mockResolvedValue(mockDynamicActionsManager),
-    },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
-}
-
-export function mockDynamicActionsManager() {
-  return {
-    api: {
-      enhancements: { dynamicActions: {} },
-      setDynamicActions: jest.fn(),
-      dynamicActionsState$: {},
-    } as unknown as EmbeddableDynamicActionsManager['api'],
-    anyStateChange$: of(undefined),
-    comparators: {
-      drilldown: jest.fn(),
-      enhancements: jest.fn(),
-    } as unknown as EmbeddableDynamicActionsManager['comparators'],
-    getLatestState: jest.fn(),
-    serializeState: jest.fn(),
-    reinitializeState: jest.fn(),
-    startDynamicActions: jest.fn(),
-  } as EmbeddableDynamicActionsManager;
 }
 
 export const mockVisualizationMap = (

@@ -6,20 +6,23 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { isInferenceProviderError } from '@kbn/inference-common';
 import type {
   GeneratedSignificantEventQuery,
+  IdentifyFeaturesResult,
+  OnboardingResult,
   SignificantEventsQueriesGenerationResult,
+  TaskResult,
 } from '@kbn/streams-schema';
-import { TaskStatus } from '@kbn/streams-schema';
+import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
-import type { IdentifyFeaturesResult, OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { OnboardingStep } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import type { LogMeta } from '@kbn/logging';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { StreamsTaskType, TaskContext } from '.';
-import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';
+import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
 import type { TaskParams } from '../types';
@@ -28,24 +31,56 @@ import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
   getFeaturesIdentificationTaskId,
 } from './features_identification';
-import type { SignificantEventsQueriesGenerationTaskParams } from './significant_events_queries_generation';
+import type { MemoryGenerationTaskParams } from './memory_generation';
+import { MEMORY_GENERATION_TASK_TYPE } from './memory_generation';
+import type { SignificantEventsQueriesGenerationTaskParams } from '../../sig_events/tasks/significant_events_queries_generation';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
-} from './significant_events_queries_generation';
+} from '../../sig_events/tasks/significant_events_queries_generation';
 
 export interface OnboardingTaskParams {
-  connectorId: string;
   streamName: string;
   from: number;
   to: number;
   steps: OnboardingStep[];
+  saveQueries: boolean;
+  connectors?: {
+    features?: string;
+    queries?: string;
+  };
 }
 
 export const STREAMS_ONBOARDING_TASK_TYPE = 'streams_onboarding';
 
-export function getOnboardingTaskId(streamName: string) {
-  return `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
+export function getOnboardingTaskId(streamName: string, saveQueries: boolean = true) {
+  const base = `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
+  return saveQueries ? base : `${base}_no_save_queries`;
+}
+
+const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
+
+async function areFeaturesUpToDate({
+  taskClient,
+  featuresTaskId,
+}: {
+  taskClient: TaskClient<StreamsTaskType>;
+  featuresTaskId: string;
+}) {
+  const featuresTask = await taskClient.get<
+    FeaturesIdentificationTaskParams,
+    IdentifyFeaturesResult
+  >(featuresTaskId);
+
+  if (featuresTask.status !== TaskStatus.Completed) {
+    return false;
+  }
+
+  return Boolean(
+    featuresTask.last_completed_at &&
+      Date.now() - new Date(featuresTask.last_completed_at).getTime() <
+        FEATURES_IDENTIFICATION_RECENCY_MS
+  );
 }
 
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
@@ -59,13 +94,14 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
-              const { connectorId, streamName, from, to, steps, _task } = runContext.taskInstance
-                .params as TaskParams<OnboardingTaskParams>;
+              const { streamName, from, to, steps, saveQueries, connectors, _task } = runContext
+                .taskInstance.params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, inferenceClient, queryClient } =
+              const { taskClient, getQueryClient, streamsClient, uiSettingsClient } =
                 await taskContext.getScopedClients({
-                  request: runContext.fakeRequest,
+                  request: fakeRequest,
                 });
 
               try {
@@ -76,38 +112,53 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 for (const step of steps) {
                   switch (step) {
-                    case OnboardingStep.FeaturesIdentification:
-                      const featuresTaskId = await scheduleFeaturesIdentificationTask(
-                        {
-                          connectorId,
-                          start: from,
-                          end: to,
-                          streamName,
-                        },
-                        taskClient,
-                        runContext.fakeRequest
-                      );
+                    case OnboardingStep.FeaturesIdentification: {
+                      const featuresTaskId = getFeaturesIdentificationTaskId(streamName);
+                      const isFeaturesOnlyStep =
+                        steps.length === 1 && steps[0] === OnboardingStep.FeaturesIdentification;
 
-                      featuresTaskResult = await waitForSubtask<
-                        FeaturesIdentificationTaskParams,
-                        IdentifyFeaturesResult
-                      >(featuresTaskId, runContext.taskInstance.id, taskClient);
+                      if (
+                        !isFeaturesOnlyStep &&
+                        (await areFeaturesUpToDate({ taskClient, featuresTaskId }))
+                      ) {
+                        featuresTaskResult = await taskClient.getStatus<
+                          FeaturesIdentificationTaskParams,
+                          IdentifyFeaturesResult
+                        >(featuresTaskId);
+                      } else {
+                        await scheduleFeaturesIdentificationTask(
+                          {
+                            start: from,
+                            end: to,
+                            streamName,
+                            connectorId: connectors?.features,
+                          },
+                          taskClient,
+                          fakeRequest
+                        );
+
+                        featuresTaskResult = await waitForSubtask<
+                          FeaturesIdentificationTaskParams,
+                          IdentifyFeaturesResult
+                        >(featuresTaskId, runContext.taskInstance.id, taskClient);
+                      }
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
                         return;
                       }
                       break;
+                    }
 
                     case OnboardingStep.QueriesGeneration:
                       const queriesTaskId = await scheduleQueriesGenerationTask(
                         {
-                          connectorId,
                           start: from,
                           end: to,
                           streamName,
+                          connectorId: connectors?.queries,
                         },
                         taskClient,
-                        runContext.fakeRequest
+                        fakeRequest
                       );
 
                       queriesTaskResult = await waitForSubtask<
@@ -119,7 +170,12 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         return;
                       }
 
-                      await saveQueries(streamName, queriesTaskResult.queries, { queryClient });
+                      if (saveQueries) {
+                        await persistQueries(streamName, queriesTaskResult.queries, {
+                          queryClient: await getQueryClient(),
+                          streamsClient,
+                        });
+                      }
                       break;
 
                     default:
@@ -129,16 +185,67 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 await taskClient.complete<OnboardingTaskParams, OnboardingResult>(
                   _task,
-                  { connectorId, streamName, from, to, steps },
+                  {
+                    streamName,
+                    from,
+                    to,
+                    steps,
+                    saveQueries,
+                    connectors,
+                  },
                   { featuresTaskResult, queriesTaskResult }
                 );
-              } catch (error) {
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
 
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                // Schedule memory generation from discovered features and queries
+                const memoryParams: MemoryGenerationTaskParams = {};
+
+                if (
+                  featuresTaskResult?.status === TaskStatus.Completed &&
+                  featuresTaskResult.features.length > 0
+                ) {
+                  memoryParams.features = featuresTaskResult.features;
+                }
+
+                if (
+                  queriesTaskResult?.status === TaskStatus.Completed &&
+                  queriesTaskResult.queries.length > 0
+                ) {
+                  memoryParams.queries = queriesTaskResult.queries.map((query) => ({
+                    streamName,
+                    query,
+                  }));
+                }
+
+                const hasMemoryInputs =
+                  (memoryParams.features?.length ?? 0) > 0 ||
+                  (memoryParams.queries?.length ?? 0) > 0;
+
+                const onboardingUseMemory = await uiSettingsClient.get<boolean>(
+                  OBSERVABILITY_STREAMS_ENABLE_MEMORY
+                );
+                if (hasMemoryInputs && onboardingUseMemory && runContext.fakeRequest) {
+                  try {
+                    await taskClient.schedule<MemoryGenerationTaskParams>({
+                      task: {
+                        type: MEMORY_GENERATION_TASK_TYPE,
+                        id: MEMORY_GENERATION_TASK_TYPE,
+                        space: '*',
+                      },
+                      params: memoryParams,
+                      request: runContext.fakeRequest,
+                    });
+                  } catch (scheduleError) {
+                    taskContext.logger
+                      .get('onboarding')
+                      .warn(
+                        `Failed to schedule memory generation: ${getErrorMessage(scheduleError)}`
+                      );
+                  }
+                }
+              } catch (error) {
+                // Errors here originate from waitForSubtask (plain Error), not from inference calls.
+                // isInferenceProviderError is always false, so no connector enrichment is needed.
+                const errorMessage = parseError(error).message;
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -149,17 +256,18 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 taskContext.logger.error(
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`,
-                  { error }
+                  { error } as LogMeta
                 );
 
                 await taskClient.fail<OnboardingTaskParams>(
                   _task,
                   {
-                    connectorId,
                     streamName,
                     from,
                     to,
                     steps,
+                    saveQueries,
+                    connectors,
                   },
                   errorMessage
                 );
@@ -175,35 +283,34 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
   } satisfies TaskDefinitionRegistry;
 }
 
+const SUBTASK_POLL_INTERVAL_MS = 2000;
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>(
   subtaskId: string,
   parentTaskId: string,
   taskClient: TaskClient<StreamsTaskType>
 ): Promise<TaskResult<TPayload>> {
-  const sleepInterval = 2000;
-  let intervalId: NodeJS.Timeout;
+  while (true) {
+    const parentTask = await taskClient.get(parentTaskId);
 
-  return await new Promise<TaskResult<TPayload>>((resolve, reject) => {
-    intervalId = setInterval(async () => {
-      const parentTask = await taskClient.get(parentTaskId);
+    if (parentTask.status === TaskStatus.BeingCanceled) {
+      await taskClient.cancel(subtaskId);
+    }
 
-      if (parentTask.status === TaskStatus.BeingCanceled) {
-        await taskClient.cancel(subtaskId);
-      }
+    const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
 
-      const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
+    if (result.status === TaskStatus.Failed) {
+      throw new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`);
+    }
 
-      if (result.status === TaskStatus.Failed) {
-        reject(new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`));
-      }
+    if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
+      return result;
+    }
 
-      if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
-        resolve(result);
-      }
-    }, sleepInterval);
-  }).finally(() => {
-    clearInterval(intervalId);
-  });
+    await sleep(SUBTASK_POLL_INTERVAL_MS);
+  }
 }
 
 async function scheduleFeaturesIdentificationTask(
@@ -246,27 +353,31 @@ async function scheduleQueriesGenerationTask(
   return id;
 }
 
-export async function saveQueries(
+export async function persistQueries(
   streamName: string,
   queries: GeneratedSignificantEventQuery[],
   deps: {
     queryClient: QueryClient;
+    streamsClient: StreamsClient;
   }
 ) {
-  const { queryClient } = deps;
+  const { queryClient, streamsClient } = deps;
 
   if (queries.length === 0) {
     return;
   }
 
+  const definition = await streamsClient.getStream(streamName);
+
   await queryClient.bulk(
-    streamName,
+    definition,
     queries.map((query) => ({
       index: {
         id: v4(),
-        kql: { query: query.kql },
+        type: query.type,
+        esql: query.esql,
         title: query.title,
-        feature: query.feature,
+        description: query.description,
         severity_score: query.severity_score,
         evidence: query.evidence,
       },

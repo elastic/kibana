@@ -720,6 +720,12 @@ exports[`XYChart component it renders area 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -964,6 +970,7 @@ exports[`XYChart component it renders area 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -1040,7 +1047,7 @@ exports[`XYChart component it renders area 1`] = `
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -1048,6 +1055,9 @@ exports[`XYChart component it renders area 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -1143,6 +1153,7 @@ exports[`XYChart component it renders area 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -1177,6 +1188,7 @@ exports[`XYChart component it renders area 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -2174,6 +2186,12 @@ exports[`XYChart component it renders bar 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -2418,6 +2436,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -2494,7 +2513,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -2502,6 +2521,9 @@ exports[`XYChart component it renders bar 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -2597,6 +2619,7 @@ exports[`XYChart component it renders bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -2631,6 +2654,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -3628,6 +3652,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -3872,6 +3902,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -3948,7 +3979,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -3956,6 +3987,9 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -4051,6 +4085,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -4085,6 +4120,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -5082,6 +5118,12 @@ exports[`XYChart component it renders line 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -5326,6 +5368,7 @@ exports[`XYChart component it renders line 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -5402,7 +5445,7 @@ exports[`XYChart component it renders line 1`] = `
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -5410,6 +5453,9 @@ exports[`XYChart component it renders line 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -5505,6 +5551,7 @@ exports[`XYChart component it renders line 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -5539,6 +5586,7 @@ exports[`XYChart component it renders line 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -6536,6 +6584,12 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -6780,6 +6834,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -6856,7 +6911,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -6864,6 +6919,9 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -6959,6 +7017,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -6993,6 +7052,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -7990,6 +8050,12 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -8234,6 +8300,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -8310,7 +8377,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -8318,6 +8385,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -8413,6 +8483,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -8447,6 +8518,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -9444,6 +9516,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -9688,6 +9766,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -9764,7 +9843,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -9772,6 +9851,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -9867,6 +9949,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -9901,6 +9984,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -10917,6 +11001,12 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -11161,6 +11251,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -11237,7 +11328,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -11245,6 +11336,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -11340,6 +11434,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -11374,6 +11469,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -12461,6 +12557,12 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -12705,6 +12807,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -12781,7 +12884,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -12789,6 +12892,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -12884,6 +12990,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -12918,6 +13025,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -13998,6 +14106,12 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -14242,6 +14356,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -14318,7 +14433,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -14326,6 +14441,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -14421,6 +14539,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -14455,6 +14574,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,

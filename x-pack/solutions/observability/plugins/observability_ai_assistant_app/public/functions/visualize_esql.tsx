@@ -290,7 +290,7 @@ export function VisualizeESQL({
                   >
                     <EuiButtonIcon
                       size="xs"
-                      iconType={isTableVisible ? 'visBarVerticalStacked' : 'tableDensityExpanded'}
+                      iconType={isTableVisible ? 'chartBarVerticalStack' : 'tableDensityLow'}
                       onClick={() => setIsTableVisible(!isTableVisible)}
                       data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
                       aria-label={
@@ -318,7 +318,10 @@ export function VisualizeESQL({
                     onClick={() => {
                       chatFlyoutSecondSlotHandler?.setVisibility?.(true);
                       if (triggerOptions) {
-                        uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
+                        uiActions.executeTriggerActions(
+                          'IN_APP_EMBEDDABLE_EDIT_TRIGGER',
+                          triggerOptions
+                        );
                       }
                     }}
                     data-test-subj="observabilityAiAssistantLensESQLEditButton"

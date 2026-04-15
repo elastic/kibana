@@ -17,4 +17,5 @@ export const DASHBOARD_LOCATORS_IDS = {
   ELASTIC_AGENT_AGENT_INFO: 'elastic_agent-0600ffa0-6b5e-11ed-98de-67bdecd21824',
   ELASTIC_AGENT_AGENT_METRICS: 'elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395',
   ELASTIC_AGENT_INTEGRATIONS: 'elastic_agent-1a4e7280-6b5e-11ed-98de-67bdecd21824',
+  OTEL_INTERNAL_TELEMETRY: 'otel_internal_telemetry-9d120e25-539a-41b0-8b27-47a937342f3d',
 } as const;

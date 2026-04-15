@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { transformRRuleToCustomSchedule } from '../../../../../../../lib/transforms/rrule_to_custom/latest';
 import type { UpdateMaintenanceWindowRequestBodyV1 } from '../../../../../../schemas/maintenance_window/internal/request/update';
 import type { UpdateMaintenanceWindowParams } from '../../../../../../../application/methods/update/types';
 
@@ -20,6 +21,14 @@ export const transformUpdateBody = (
     scoped_query: scopedQuery,
   } = updateBody;
 
+  const schedule =
+    rRule && duration
+      ? transformRRuleToCustomSchedule({
+          rRule,
+          duration,
+        })
+      : undefined;
+
   return {
     ...(title !== undefined ? { title } : {}),
     ...(enabled !== undefined ? { enabled } : {}),
@@ -27,5 +36,7 @@ export const transformUpdateBody = (
     ...(rRule !== undefined ? { rRule } : {}),
     ...(categoryIds !== undefined ? { categoryIds } : {}),
     ...(scopedQuery !== undefined ? { scopedQuery } : {}),
+    ...(schedule !== undefined ? { schedule: { custom: schedule } } : {}),
+    ...(scopedQuery !== undefined ? { scope: { alerting: scopedQuery } } : {}),
   };
 };

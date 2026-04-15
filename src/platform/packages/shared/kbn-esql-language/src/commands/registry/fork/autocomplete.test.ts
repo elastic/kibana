@@ -24,9 +24,12 @@ import {
 } from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
 import type { FunctionReturnType } from '../../definitions/types';
-import { ESQL_STRING_TYPES, ESQL_NUMBER_TYPES } from '../../definitions/types';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import {
+  ESQL_COMMON_NUMERIC_TYPES,
+  ESQL_STRING_TYPES,
+  ESQL_NUMBER_TYPES,
+} from '../../definitions/types';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 
 const allEvalFnsForWhere = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
@@ -76,7 +79,15 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 ];
 
 // types accepted by the AVG function
-export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = ['double', 'integer', 'long'];
+export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = [
+  'double',
+  'integer',
+  'long',
+  'aggregate_metric_double',
+  'exponential_histogram',
+  'tdigest',
+];
+const ACOS_TYPES = [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'] as const;
 
 export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
   'BY ',
@@ -339,10 +350,10 @@ describe('FORK Autocomplete', () => {
             await forkExpectSuggestions(
               'FROM a | FORK (STATS AVG(integerField) BY ACOS(',
               [
-                ...getFieldNamesByType([...AVG_TYPES, 'unsigned_long']),
+                ...getFieldNamesByType(ACOS_TYPES),
                 ...getFunctionSignaturesByReturnType(
                   Location.STATS,
-                  [...AVG_TYPES, 'unsigned_long'],
+                  ACOS_TYPES,
                   {
                     scalar: true,
                     grouping: true,
@@ -416,11 +427,8 @@ describe('FORK Autocomplete', () => {
 
       it('suggests pipe after complete subcommands', async () => {
         const assertSuggestsPipe = async (query: string) => {
-          const correctedQuery = correctQuerySyntax(query);
-          const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
           const cursorPosition = query.length;
-          const { command } = findAstPosition(root, cursorPosition);
+          const { command } = findAutocompleteAstPosition(query, cursorPosition);
           if (!command) {
             throw new Error('Command not found in the parsed query');
           }

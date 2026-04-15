@@ -259,6 +259,7 @@ describe('Cases Plugin', () => {
                 "text/json",
                 "application/json",
                 "application/zip",
+                "application/x-zip-compressed",
                 "application/gzip",
                 "application/x-bzip",
                 "application/x-bzip2",
@@ -286,6 +287,7 @@ describe('Cases Plugin', () => {
           "getCasesClientWithRequest": [Function],
           "getExternalReferenceAttachmentTypeRegistry": [Function],
           "getPersistableStateAttachmentTypeRegistry": [Function],
+          "getUnifiedAttachmentTypeRegistry": [Function],
         }
       `);
     });

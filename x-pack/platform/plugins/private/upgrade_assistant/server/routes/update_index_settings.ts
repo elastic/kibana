@@ -25,7 +25,7 @@ export function registerUpdateSettingsRoute({ router, current }: RouteDependenci
           indexName: schema.string(),
         }),
         body: schema.object({
-          settings: schema.arrayOf(schema.string()),
+          settings: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
         }),
       },
     },

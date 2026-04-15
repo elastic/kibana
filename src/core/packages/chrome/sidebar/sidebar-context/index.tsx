@@ -10,6 +10,8 @@
 import React, { type ReactNode, useContext, createContext } from 'react';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
 
+// -- Sidebar service context (internal) --
+
 interface SidebarContextValue {
   sidebar: SidebarStart;
 }
@@ -39,3 +41,24 @@ function useSidebarContext(): SidebarContextValue {
 export function useSidebarService(): SidebarStart {
   return useSidebarContext().sidebar;
 }
+
+// -- Sidebar panel context (shared between core and plugins) --
+
+/** Context for the sidebar panel, shared with consumer components */
+export interface SidebarPanelContextValue {
+  /** ID to place on the panel's heading element for aria-labelledby */
+  headingId: string;
+  /** Override focus target when the panel unmounts with focus inside. Defaults to main content. */
+  setOnFocusRescue: (callback: (() => void) | undefined) => void;
+}
+
+export const SidebarPanelContext = createContext<SidebarPanelContextValue | null>(null);
+
+/** Hook for consumer components to access the sidebar panel context. Throws outside SidebarPanel. */
+export const useSidebarPanel = (): SidebarPanelContextValue => {
+  const ctx = useContext(SidebarPanelContext);
+  if (!ctx) {
+    throw new Error('useSidebarPanel must be used within a SidebarPanel');
+  }
+  return ctx;
+};

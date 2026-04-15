@@ -1,49 +1,106 @@
 openapi: 3.0.0
 info:
-  title: Find Saved Queries Schema
+  title: Find Packs Schema
   version: '2023-10-31'
 paths: { }
 components:
   schemas:
     FindPacksResponse:
+      description: 'A paginated list of query packs.'
       type: object
-      properties: { }
+      properties:
+        page:
+          description: 'The current page number.'
+          type: integer
+        per_page:
+          description: 'The number of results per page.'
+          type: integer
+        total:
+          description: 'The total number of packs.'
+          type: integer
+        data:
+          description: 'The list of packs.'
+          type: array
+          items:
+            type: object
       example:
         page: 1
-        pageSize: 10
+        per_page: 10
         total: 1
         data:
-          - type: 'osquery-pack'
-            id: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
-            namespaces:
-              - 'default'
-            attributes:
-              name: 'My Pack'
-              queries:
-                - query: 'select * from uptime;'
-                  interval: '3600'
-                  id: 'uptime'
-                  ecs_mapping:
-                    - host.uptime:
-                        field: 'total_seconds'
-              enabled: true
-              created_at: '2023-10-31T00:00:00Z'
-              updated_at: '2023-10-31T00:00:00Z'
-              created_by: 'elastic'
-              updated_by: 'elastic'
-              description: 'My pack description'
-        policy_ids: []
+          - saved_object_id: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+            name: 'My Pack'
+            description: 'My pack description'
+            queries:
+              - query: 'select * from uptime;'
+                interval: 3600
+                id: 'uptime'
+                ecs_mapping:
+                  host.uptime:
+                    field: 'total_seconds'
+            version: 1
+            enabled: true
+            created_at: '2023-10-31T00:00:00Z'
+            created_by: 'elastic'
+            updated_at: '2023-10-31T00:00:00Z'
+            updated_by: 'elastic'
+            policy_ids:
+              - 'policy-id-1'
+            read_only: false
     FindPackResponse:
+      description: 'The details of a single query pack.'
       type: object
-      properties: { }
+      properties:
+        data:
+          description: 'The pack details.'
+          type: object
+          properties:
+            saved_object_id:
+              description: 'The saved object ID of the pack.'
+              type: string
+            name:
+              description: 'The pack name.'
+              type: string
+            description:
+              description: 'The pack description.'
+              type: string
+            queries:
+              description: 'The queries in the pack, keyed by query name.'
+              type: object
+            version:
+              description: 'The pack version.'
+              type: integer
+            enabled:
+              description: 'Whether the pack is enabled.'
+              type: boolean
+            created_at:
+              description: 'The creation timestamp.'
+              type: string
+            created_by:
+              description: 'The user who created the pack.'
+              type: string
+            updated_at:
+              description: 'The last update timestamp.'
+              type: string
+            updated_by:
+              description: 'The user who last updated the pack.'
+              type: string
+            policy_ids:
+              description: 'A list of agent policy IDs associated with the pack.'
+              type: array
+              items:
+                type: string
+            shards:
+              description: 'Shard configuration for policies, as a map of policy ID to percentage.'
+              type: object
+            read_only:
+              description: 'Whether the pack is read-only (true for prebuilt packs).'
+              type: boolean
       example:
         data:
-          id: "3c42c847-eb30-4452-80e0-728584042334"
-          type: "osquery-pack"
-          namespaces:
-            - "default"
-          updated_at: "2022-07-25T20:12:01.455Z"
+          saved_object_id: "3c42c847-eb30-4452-80e0-728584042334"
           name: "test_pack"
+          description: ""
           queries:
             uptime:
               interval: 3600
@@ -51,11 +108,12 @@ components:
               ecs_mapping:
                 message:
                   field: "days"
+          version: 1
           enabled: true
           created_at: "2022-07-25T19:41:10.263Z"
           created_by: "elastic"
+          updated_at: "2022-07-25T20:12:01.455Z"
           updated_by: "elastic"
-          description: ""
           policy_ids: [ ]
-          read_only: false  # true for prebuilt packs
-
+          shards: { }
+          read_only: false

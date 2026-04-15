@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstRerankCommand, ESQLAstAllCommands } from '../../../types';
+import type { ESQLAstRerankCommand, ESQLAstAllCommands } from '@elastic/esql/types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { Location } from '../types';
 import { getPosition, CaretPosition } from './utils';
 import {
@@ -58,7 +58,6 @@ export async function autocomplete(
           ...buildConstantsDefinitions(
             [QUERY_TEXT_SNIPPET],
             '',
-            '1',
             undefined,
             undefined,
             SuggestionCategory.CONSTANT_VALUE
@@ -79,7 +78,6 @@ export async function autocomplete(
           ...buildConstantsDefinitions(
             [QUERY_TEXT_SNIPPET],
             '',
-            '1',
             undefined,
             undefined,
             SuggestionCategory.CONSTANT_VALUE
@@ -103,7 +101,6 @@ export async function autocomplete(
         {
           ...withCompleteItem,
           text: withCompleteItem.text,
-          sortText: '01',
         },
       ];
       return suggestFieldsList(
@@ -117,7 +114,7 @@ export async function autocomplete(
         {
           afterCompleteSuggestions,
           allowSingleColumnFields: true,
-          preferredExpressionType: 'text',
+          preferredExpressionType: ['text', 'keyword'],
         }
       );
     }

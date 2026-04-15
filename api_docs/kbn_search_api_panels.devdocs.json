@@ -212,7 +212,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -234,7 +234,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -551,7 +551,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -573,7 +573,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -582,9 +582,198 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.useCloudConnectStatus",
+        "type": "Function",
+        "tags": [],
+        "label": "useCloudConnectStatus",
+        "description": [],
+        "signature": [
+          "(hook?: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.UseCloudConnectStatusHook",
+            "text": "UseCloudConnectStatusHook"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.CloudConnectStatusWithDerived",
+            "text": "CloudConnectStatusWithDerived"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.useCloudConnectStatus.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "hook",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.UseCloudConnectStatusHook",
+                "text": "UseCloudConnectStatusHook"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.CloudConnectStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudConnectStatus",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.CloudConnectStatus.isCloudConnected",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudConnected",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.CloudConnectStatus.isCloudConnectEisEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudConnectEisEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.CloudConnectStatus.isCloudConnectAutoopsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudConnectAutoopsEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.CloudConnectStatus.isLoading",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLoading",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.CloudConnectStatus.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.CloudConnectStatusWithDerived",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudConnectStatusWithDerived",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.CloudConnectStatusWithDerived",
+            "text": "CloudConnectStatusWithDerived"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.CloudConnectStatus",
+            "text": "CloudConnectStatus"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.CloudConnectStatusWithDerived.isCloudConnectedWithEisEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudConnectedWithEisEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/search-api-panels",
         "id": "def-public.EisCloudConnectPromoCalloutProps",
@@ -783,7 +972,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
             "lineNumber": 60,
@@ -873,7 +1062,7 @@
         "label": "EisPromotionalTourProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -889,7 +1078,7 @@
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -905,7 +1094,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -918,7 +1107,7 @@
             "label": "promoId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -931,7 +1120,7 @@
             "label": "isCloudEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -944,10 +1133,10 @@
             "label": "children",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1103,7 +1292,7 @@
           "\nProps for the InferenceCostsTransparencyTour component.\n"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1119,7 +1308,7 @@
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1135,7 +1324,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1148,7 +1337,7 @@
             "label": "promoId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1161,7 +1350,7 @@
             "label": "isCloudEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1177,7 +1366,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1190,10 +1379,10 @@
             "label": "children",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1628,7 +1817,34 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.UseCloudConnectStatusHook",
+        "type": "Type",
+        "tags": [],
+        "label": "UseCloudConnectStatusHook",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.CloudConnectStatus",
+            "text": "CloudConnectStatus"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/hooks/use_cloud_connect_status.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

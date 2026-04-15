@@ -12,23 +12,26 @@ import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 import { PanelFooter } from './footer';
 import { PanelContent } from './content';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
-import { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from './constants/panel_keys';
+import { AttackDetailsRightPanelKey } from './constants/panel_keys';
 import type { AttackDetailsPanelTabType } from './tabs';
 import { useKibana } from '../../common/lib/kibana';
 
 import { useTabs } from './hooks/use_tabs';
+import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useAttackDetailsContext } from './context';
 import { PanelHeader } from './header';
 
 export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
+export { ATTACK_PREVIEW_BANNER } from './context';
 
 /**
- * Panel to be displayed in Attack Details flyout
+ * Panel to be displayed in Attack Details flyout right section.
  */
-export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
+export const AttackDetailsRightPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
   const { storage } = useKibana().services;
-  const { openRightPanel, openLeftPanel } = useExpandableFlyoutApi();
+  const { openRightPanel } = useExpandableFlyoutApi();
   const { attackId, indexName } = useAttackDetailsContext();
+  const expandDetails = useNavigateToAttackDetailsLeftPanel();
 
   const { tabsDisplayed, selectedTabId } = useTabs({ path });
 
@@ -37,20 +40,17 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
       openRightPanel({
         id: AttackDetailsRightPanelKey,
         path: { tab: tabId },
-        params: { attackId, indexName },
+        params: {
+          attackId,
+          indexName,
+        },
       });
+
       // saving which tab is currently selected in the right panel in local storage
       storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
     },
     [attackId, indexName, openRightPanel, storage]
   );
-
-  const expandDetails = useCallback(() => {
-    openLeftPanel({
-      id: AttackDetailsLeftPanelKey,
-      params: { attackId, indexName },
-    });
-  }, [attackId, indexName, openLeftPanel]);
 
   return (
     <>
@@ -66,4 +66,5 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
   );
 });
 
-AttackDetailsPanel.displayName = 'AttackDetailsPanel';
+AttackDetailsRightPanel.displayName = 'AttackDetailsRightPanel';
+export { AttackDetailsPreviewPanel } from './preview';

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { I18nProvider } from '@kbn/i18n-react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen, within } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { WithServices } from './tests.helpers';
 import { TableListViewTable, type TableListViewTableProps } from '../table_list_view_table';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import userEvent from '@testing-library/user-event';
+import { WithServices } from './tests.helpers';
 
 const hits: UserContentCommonSchema[] = [
   {
@@ -91,7 +91,7 @@ describe('created_by filter', () => {
           },
           data: {},
         },
-      ].filter((user) => uids.includes(user.uid))
+      ].filter(({ uid }) => uids.includes(uid))
     )
   );
 
@@ -106,36 +106,63 @@ describe('created_by filter', () => {
     </I18nProvider>
   );
 
+  let user: UserEvent;
+
+  beforeEach(() => {
+    user = userEvent.setup({ delay: null });
+  });
+
   test("shouldn't render created by filter when createdBy is disabled", async () => {
     render(<TableListView {...requiredProps} />);
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
 
     expect(() => screen.getByTestId('userFilterPopoverButton')).toThrow();
   });
 
-  test('should be able to filter by creators', async () => {
+  test('shows creator filter options when popover is opened', async () => {
     render(<TableListView {...requiredProps} createdByEnabled={true} />);
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
 
-    // 5 items in the list
+    // 4 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
 
-    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await user.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
     expect(await popover.findAllByTestId(/userProfileSelectableOption/)).toHaveLength(3);
+  });
 
-    await userEvent.click(popover.getByTestId('userProfileSelectableOption-user1'));
+  test('filtering by one creator shows correct item count', async () => {
+    render(<TableListView {...requiredProps} createdByEnabled={true} />);
+
+    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+
+    await user.click(screen.getByTestId('userFilterPopoverButton'));
+
+    const userSelectablePopover = screen.getByTestId('userSelectableList');
+    const popover = within(userSelectablePopover);
+    await user.click(await popover.findByTestId('userProfileSelectableOption-user1'));
 
     // 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
+  });
 
-    await userEvent.click(popover.getByTestId('userProfileSelectableOption-user2'));
+  test('filtering by multiple creators shows correct item count', async () => {
+    render(<TableListView {...requiredProps} createdByEnabled={true} />);
+
+    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+
+    await user.click(screen.getByTestId('userFilterPopoverButton'));
+
+    const userSelectablePopover = screen.getByTestId('userSelectableList');
+    const popover = within(userSelectablePopover);
+    await user.click(await popover.findByTestId('userProfileSelectableOption-user1'));
+    await user.click(await popover.findByTestId('userProfileSelectableOption-user2'));
 
     // 2 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(2);
@@ -144,17 +171,17 @@ describe('created_by filter', () => {
   test('should be able to filter by "no creators"', async () => {
     render(<TableListView {...requiredProps} createdByEnabled={true} />);
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
 
     // 4 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
 
-    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await user.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
-    await userEvent.click(await popover.findByTestId('userProfileSelectableOption-null'));
+    await user.click(await popover.findByTestId('userProfileSelectableOption-null'));
 
     // just 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
@@ -172,12 +199,12 @@ describe('created_by filter', () => {
       />
     );
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
     // 3 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(3);
 
-    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await user.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
@@ -197,16 +224,21 @@ describe('created_by filter', () => {
       />
     );
 
-    // wait until first render
-    expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
+    // wait until loading is complete
+    expect(await screen.findByTestId('table-is-ready')).toBeInTheDocument();
     // 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
 
-    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await user.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
     expect(popover.queryByRole('progressbar')).not.toBeInTheDocument();
-    expect(popover.getAllByTestId('userFilterEmptyMessage')[1]).toBeVisible();
+    const messageContainer = await popover.findByTestId(
+      'euiSelectableMessage',
+      {},
+      { timeout: 3000 }
+    );
+    expect(within(messageContainer).getByText(/none of the.*have creators/i)).toBeVisible();
   });
 });

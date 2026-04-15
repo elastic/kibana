@@ -205,11 +205,9 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       data-test-subj="ruleStatusDropdownBadge"
       color={badgeColor}
       iconSide="right"
-      iconType={!isUpdating && isEditable ? 'arrowDown' : undefined}
+      iconType={!isUpdating && isEditable ? 'chevronSingleDown' : undefined}
       onClick={onClickBadge}
-      iconOnClick={onClickBadge}
       onClickAriaLabel={OPEN_MENU_ARIA_LABEL}
-      iconOnClickAriaLabel={OPEN_MENU_ARIA_LABEL}
       isDisabled={isUpdating}
     >
       {badgeMessage}

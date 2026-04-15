@@ -51,3 +51,50 @@ responses:
                   - platform.core.list_indices
                   - platform.core.get_index_mapping
                   - platform.core.get_document_by_id
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "Search Index Helper",
+        "description": "Updated description - Search for anything in \"content-*\" indices!",
+        "labels": ["custom-indices", "department-search", "elastic-employees"],
+        "avatar_color": "#BFDBFF",
+        "avatar_symbol": "SI",
+        "configuration": {
+          "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+          "tools": [{
+            "tool_ids": [
+              "platform.core.search",
+              "platform.core.list_indices",
+              "platform.core.get_index_mapping",
+              "platform.core.get_document_by_id"
+            ]
+          }]
+        }
+      }'
+- lang: Console
+  source: |
+    PUT kbn://api/agent_builder/agents/{id}
+    {
+      "name": "Search Index Helper",
+      "description": "Updated description - Search for anything in \"content-*\" indices!",
+      "labels": ["custom-indices", "department-search", "elastic-employees"],
+      "avatar_color": "#BFDBFF",
+      "avatar_symbol": "SI",
+      "configuration": {
+        "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+        "tools": [{
+          "tool_ids": [
+            "platform.core.search",
+            "platform.core.list_indices",
+            "platform.core.get_index_mapping",
+            "platform.core.get_document_by_id"
+          ]
+        }]
+      }
+    }

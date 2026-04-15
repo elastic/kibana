@@ -15,6 +15,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import { getNoneConnector } from '../../../common/utils/connectors';
 import type { CaseConnectors, CaseUI } from '../../../common/ui/types';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import type { CaseActionConnector } from '../types';
@@ -26,7 +27,7 @@ import {
   getConnectorsFormValidators,
 } from '../utils';
 import { ConnectorSelector } from '../connector_selector/form';
-import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
+import { normalizeActionConnector } from '../configure_cases/utils';
 import * as i18n from './translations';
 import type { ConnectorTypeFields, CaseConnector } from '../../../common/types/domain';
 

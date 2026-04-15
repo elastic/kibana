@@ -67,8 +67,8 @@ export default {
         http: {
           get: async (): Promise<SpanDetailsApiReturnType> => {
             return {
-              span: dedot(data.spanEvent, {}) as Span,
-              parentTransaction: dedot(data.parentTransaction, {}) as Transaction,
+              span: dedot(data.spanEvent, {}) as unknown as Span,
+              parentTransaction: dedot(data.parentTransaction, {}) as unknown as Transaction,
             };
           },
         },
@@ -94,8 +94,8 @@ export const TransactionSpan: StoryFn<Args> = () => {
       spanLinksCount={{ linkedChildren: 0, linkedParents: 0 }}
       parentTransactionId={data.spanEvent['parent.id']}
       onClose={() => {}}
-      start="fake-time"
-      end="fake-time"
+      rangeFrom="now-15m"
+      rangeTo="now"
     />
   );
 };

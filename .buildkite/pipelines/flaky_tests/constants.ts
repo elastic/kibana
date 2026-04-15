@@ -11,7 +11,6 @@ export enum TestSuiteType {
   FTR = 'ftr-suite',
   SCOUT = 'scout-suite',
   CYPRESS = 'cypress-suite',
-  SYNTHETICS = 'synthetics-suite',
 }
 
 export const TEST_SUITE_TYPES = Object.values(TestSuiteType);

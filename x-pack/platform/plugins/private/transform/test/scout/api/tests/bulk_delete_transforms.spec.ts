@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { CookieHeader } from '@kbn/scout';
 import type {
   DeleteTransformsRequestSchema,
@@ -18,7 +19,7 @@ import { COMMON_HEADERS } from '../constants';
 
 const transformIds = ['bulk_delete_test_1', 'bulk_delete_test_2'];
 
-apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('bulk delete', { tag: tags.stateful.all }, () => {
   const destinationIndices = transformIds.map(generateDestIndex);
   let transformManagerCookieHeader: CookieHeader;
 

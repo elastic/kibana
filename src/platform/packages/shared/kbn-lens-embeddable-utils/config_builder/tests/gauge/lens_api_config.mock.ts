@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 import type { GaugeState } from '../../schema/charts/gauge';
 
 /**
@@ -15,9 +19,9 @@ import type { GaugeState } from '../../schema/charts/gauge';
 export const basicGaugeWithAdHocDataView: GaugeState = {
   type: 'gauge',
   title: 'Test Gauge',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -36,9 +40,9 @@ export const basicGaugeWithDataView: GaugeState = {
   type: 'gauge',
   title: 'Test Gauge',
   description: 'A test gauge chart',
-  dataset: {
-    type: 'dataView',
-    id: 'test-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'test-id',
   },
   metric: {
     operation: 'count',
@@ -56,12 +60,11 @@ export const esqlGauge: GaugeState = {
   type: 'gauge',
   title: 'Test ESQL Gauge',
   description: 'A test gauge chart using ESQL',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS count = COUNT(*)',
   },
   metric: {
-    operation: 'value',
     column: 'count',
   },
   sampling: 1,
@@ -75,9 +78,9 @@ export const comprehensiveGaugeWithAdHocDataView: GaugeState = {
   type: 'gauge',
   title: 'Comprehensive Test Gauge',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'index',
-    index: 'comprehensive-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'comprehensive-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -86,15 +89,18 @@ export const comprehensiveGaugeWithAdHocDataView: GaugeState = {
     min: { operation: 'formula', formula: 'round(average(bytes) - 1000)' },
     max: { operation: 'max', field: 'bytes' },
     goal: { operation: 'static_value', value: 7000 },
-    hide_title: false,
-    sub_title: 'Bytes Subtitle',
-    ticks: 'bands',
+    title: { visible: true },
+    subtitle: 'Bytes Subtitle',
+    ticks: {
+      visible: true,
+      mode: 'bands',
+    },
     color: {
       type: 'dynamic',
       steps: [
-        { type: 'from', from: 0, color: '#00FF00' },
-        { type: 'exact', value: 300, color: '#FFFF00' },
-        { type: 'to', to: 300, color: '#FF0000' },
+        { lt: 0, color: '#00FF00' },
+        { gte: 0, lt: 300, color: '#FFFF00' },
+        { gte: 300, color: '#FF0000' },
       ],
       range: 'absolute',
     },
@@ -110,24 +116,27 @@ export const comprehensiveGaugeWithDataView: GaugeState = {
   type: 'gauge',
   title: 'Comprehensive Test Gauge',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'dataView',
-    id: 'my-custom-data-view-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'average',
     field: 'bytes',
     min: { operation: 'formula', formula: 'round(average(bytes) - 1000)' },
     goal: { operation: 'static_value', value: 7000 },
-    hide_title: false,
-    sub_title: 'Bytes Subtitle',
-    ticks: 'bands',
+    title: { visible: true },
+    subtitle: 'Bytes Subtitle',
+    ticks: {
+      visible: true,
+      mode: 'bands',
+    },
     color: {
       type: 'dynamic',
       steps: [
-        { type: 'from', from: 0, color: '#00FF00' },
-        { type: 'exact', value: 300, color: '#FFFF00' },
-        { type: 'to', to: 300, color: '#FF0000' },
+        { lt: 0, color: '#00FF00' },
+        { gte: 0, lt: 300, color: '#FFFF00' },
+        { gte: 300, color: '#FF0000' },
       ],
       range: 'absolute',
     },
@@ -143,23 +152,25 @@ export const comprehensiveEsqlGauge: GaugeState = {
   type: 'gauge',
   title: 'Comprehensive Test Gauge',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS countA = COUNT(*) WHERE a > 1, countB = COUNT(*) WHERE b > 1',
   },
   metric: {
-    operation: 'value',
     column: 'countA',
-    min: { operation: 'value', column: 'countB' },
-    hide_title: true,
-    sub_title: 'Bytes Subtitle',
-    ticks: 'bands',
+    min: { column: 'countB' },
+    title: { visible: false },
+    subtitle: 'Bytes Subtitle',
+    ticks: {
+      visible: true,
+      mode: 'bands',
+    },
     color: {
       type: 'dynamic',
       steps: [
-        { type: 'from', from: 0, color: '#00FF00' },
-        { type: 'exact', value: 300, color: '#FFFF00' },
-        { type: 'to', to: 300, color: '#FF0000' },
+        { lt: 0, color: '#00FF00' },
+        { gte: 0, lt: 300, color: '#FFFF00' },
+        { gte: 300, color: '#FF0000' },
       ],
       range: 'absolute',
     },

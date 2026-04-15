@@ -16,6 +16,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
@@ -27,7 +28,7 @@ export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
 export interface DiscoverGridFlyoutProps
   extends Pick<
-    DocViewerProps,
+    UnifiedDocViewerFlyoutProps,
     'initialDocViewerState' | 'onInitialDocViewerStateChange' | 'onUpdateSelectedTabId'
   > {
   savedSearchId?: string;
@@ -118,6 +119,8 @@ export function DiscoverGridFlyout({
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
       services={services}
       docViewsRegistry={docViewer.docViewsRegistry}
+      renderCustomHeader={docViewer.renderHeader}
+      renderCustomFooter={docViewer.renderFooter}
       isEsqlQuery={isESQLQuery}
       hit={hit}
       hits={hits}

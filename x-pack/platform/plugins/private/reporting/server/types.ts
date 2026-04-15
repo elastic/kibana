@@ -6,6 +6,7 @@
  */
 
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
@@ -39,19 +40,33 @@ import type {
   RawNotification,
   RawScheduledReport,
 } from './saved_objects/scheduled_report/schemas/latest';
+import type {
+  GenerateSystemReportRequestParams,
+  HandleResponseFunc,
+} from './routes/common/request_handler/generate_system_report_request_handler';
 
 /**
  * Plugin Setup Contract
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
+  /**
+   * Process a user request to generate a report
+   * that requires accessing system indices as an internal user.
+   * Plugins should encapsulate the use of this function with their own authorization checks.
+   */
+  handleGenerateSystemReportRequest: (
+    path: string,
+    requestParams: GenerateSystemReportRequestParams,
+    handleResponseFunc: HandleResponseFunc
+  ) => Promise<IKibanaResponse>;
 }
 
 /**
  * Plugin Start Contract
  */
 export type ReportingStart = ReportingSetup;
-export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
+export type ReportingUser = AuthenticatedUser | undefined;
 
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 

@@ -8,10 +8,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
 import { AISummarySection } from './ai_summary_section';
 import { useOverviewTabData } from '../hooks/use_overview_tab_data';
-import { useExpandSection } from '../../shared/hooks/use_expand_section';
+import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 
 jest.mock('@kbn/i18n-react', () => ({
   FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
@@ -21,22 +20,25 @@ jest.mock('../hooks/use_overview_tab_data', () => ({
   useOverviewTabData: jest.fn(),
 }));
 
-jest.mock('../../shared/hooks/use_expand_section', () => ({
+jest.mock('../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
 
-jest.mock('../../shared/components/expandable_section', () => ({
+jest.mock('../../../flyout_v2/shared/components/expandable_section', () => ({
   ExpandableSection: ({
     title,
     children,
+    extraAction,
     'data-test-subj': dataTestSubj,
   }: {
     title: React.ReactNode;
     children: React.ReactNode;
+    extraAction?: React.ReactNode;
     'data-test-subj'?: string;
   }) => (
     <section data-test-subj={dataTestSubj}>
       <div>{title}</div>
+      {extraAction}
       {children}
     </section>
   ),
@@ -65,14 +67,18 @@ describe('AISummarySection', () => {
     });
   });
 
-  it('renders the section title, switch label, and background title', () => {
+  it('renders the section title, settings menu, and background title', async () => {
+    const user = userEvent.setup();
     render(<AISummarySection />);
 
     expect(screen.getByText('Attack Summary')).toBeInTheDocument();
-    expect(screen.getByText('Show anonymized values')).toBeInTheDocument();
     expect(screen.getByText('Background')).toBeInTheDocument();
+    expect(screen.getByTestId('overview-tab-ai-summary-settings-menu')).toBeInTheDocument();
 
     expect(document.querySelector(`[data-test-subj="${KEY}"]`)).toBeTruthy();
+
+    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
+    expect(screen.getByText('Show anonymized values')).toBeInTheDocument();
   });
 
   it('renders the panel wrapper', () => {
@@ -93,17 +99,15 @@ describe('AISummarySection', () => {
   });
 
   it('toggles to anonymized markdown when the switch is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     render(<AISummarySection />);
 
-    const toggle = document.querySelector(
-      '[data-test-subj="overview-tab-toggle-anonymized"]'
-    ) as HTMLElement;
+    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
 
-    expect(toggle).toBeTruthy();
+    const toggleSwitch = await screen.findByTestId('overview-tab-toggle-anonymized');
 
     // ON -> anonymized
-    await user.click(toggle);
+    await user.click(toggleSwitch);
 
     expect(
       document.querySelector('[data-test-subj="overview-tab-ai-summary-content"]')
@@ -112,7 +116,8 @@ describe('AISummarySection', () => {
       document.querySelector('[data-test-subj="overview-tab-ai-background-content"]')
     ).toHaveTextContent('DETAILS (ANONYMIZED)');
 
-    await user.click(toggle);
+    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
+    await user.click(await screen.findByTestId('overview-tab-toggle-anonymized'));
 
     expect(
       document.querySelector('[data-test-subj="overview-tab-ai-summary-content"]')
@@ -122,10 +127,34 @@ describe('AISummarySection', () => {
     ).toHaveTextContent('DETAILS (WITH REPLACEMENTS)');
   });
 
-  it('renders the anonymized switch with the expected data-test-subj', () => {
+  it('renders the anonymized switch with the expected data-test-subj when the menu is open', async () => {
+    const user = userEvent.setup();
     render(<AISummarySection />);
+
+    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
+
     expect(
       document.querySelector('[data-test-subj="overview-tab-toggle-anonymized"]')
     ).toBeTruthy();
+  });
+
+  it('disables the anonymized switch when there is no anonymized markdown', async () => {
+    const user = userEvent.setup();
+    mockedUseOverviewTabData.mockReturnValue({
+      summaryMarkdown: '',
+      summaryMarkdownWithReplacements: 'SUMMARY (WITH REPLACEMENTS)',
+      detailsMarkdown: '',
+      detailsMarkdownWithReplacements: 'DETAILS (WITH REPLACEMENTS)',
+    });
+
+    render(<AISummarySection />);
+    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
+
+    const toggle = document.querySelector(
+      '[data-test-subj="overview-tab-toggle-anonymized"]'
+    ) as HTMLInputElement;
+
+    expect(toggle).toBeTruthy();
+    expect(toggle.disabled).toBe(true);
   });
 });

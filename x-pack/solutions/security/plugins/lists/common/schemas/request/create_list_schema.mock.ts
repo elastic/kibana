@@ -11,11 +11,9 @@ import { DESCRIPTION, LIST_ID, META, NAME, TYPE, VERSION } from '../../constants
 
 export const getCreateListSchemaMock = (): CreateListRequestBodyInput => ({
   description: DESCRIPTION,
-  deserializer: undefined,
   id: LIST_ID,
   meta: META,
   name: NAME,
-  serializer: undefined,
   type: TYPE,
   version: VERSION,
 });

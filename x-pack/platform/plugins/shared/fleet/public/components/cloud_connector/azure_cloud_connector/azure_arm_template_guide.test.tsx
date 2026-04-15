@@ -28,6 +28,11 @@ describe('AzureArmTemplateGuide', () => {
       expect(screen.getByText(/region/i)).toBeInTheDocument();
       expect(screen.getByText(/Review \+ Create/i)).toBeInTheDocument();
       expect(screen.getByText(/Outputs/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Paste the Client ID and Tenant ID into their respective fields/)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/paste the Elastic Cloud Connector ID into the/)).toBeInTheDocument();
+      expect(screen.getByText('Federated Identity ID')).toBeInTheDocument();
 
       expect(screen.getByRole('code')).toHaveTextContent(testStackId);
     });

@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { spaceTest, testData } from '../fixtures';
 import type { ExtParallelRunTestFixtures } from '../fixtures';
 
@@ -27,7 +28,13 @@ const assertNoFilterAndEmptyQuery = async (
 
 spaceTest.describe(
   'Discover app - saved searches',
-  { tag: ['@ess', '@svlSearch', '@svlOblt'] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.search,
+      ...tags.serverless.observability.complete,
+    ],
+  },
   () => {
     // TODO: Update to use an ES archive with an index accessible to 'viewer'
     // for running this test against the Security serverless project.

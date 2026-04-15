@@ -17,7 +17,9 @@ export class DashboardResourceIdentifier extends ResourceIdentifier<OriginalDash
     if (!originalDashboardXMLString) {
       return [];
     }
-    const splunkDashboardXMLPaser = await getSplunkDashboardXmlParser(originalDashboardXMLString);
+    const splunkDashboardXMLPaser = await getSplunkDashboardXmlParser(originalDashboardXMLString, {
+      experimentalFeatures: this.deps.experimentalFeatures,
+    });
     const queries: string[] = await splunkDashboardXMLPaser.extractQueries();
     const resources = await Promise.all(queries.map((query) => this.identifier(query)));
     return resources.flat();

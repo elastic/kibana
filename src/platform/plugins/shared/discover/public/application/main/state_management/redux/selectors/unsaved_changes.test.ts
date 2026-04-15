@@ -9,8 +9,8 @@
 
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { getTabStateMock } from '../__mocks__/internal_state.mocks';
-import { fromTabStateToSavedObjectTab, internalStateActions } from '..';
+import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
+import { internalStateActions } from '..';
 import { selectHasUnsavedChanges } from './unsaved_changes';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
@@ -28,14 +28,9 @@ const setup = async () => {
     services,
     persistedDataViews: [dataViewWithTimefieldMock],
   });
-  const persistedTab = fromTabStateToSavedObjectTab({
-    tab: getTabStateMock({
-      id: 'persisted-tab',
-      initialInternalState: {
-        serializedSearchSource: { index: dataViewWithTimefieldMock.id },
-      },
-    }),
-    timeRestore: false,
+  const persistedTab = getPersistedTabMock({
+    tabId: 'persisted-tab',
+    dataView: dataViewWithTimefieldMock,
     services,
   });
   const persistedDiscoverSession = createDiscoverSessionMock({
@@ -123,5 +118,128 @@ describe('selectHasUnsavedChanges', () => {
 
     expect(result.hasUnsavedChanges).toBe(true);
     expect(result.unsavedTabIds).toEqual([currentTab.id, 'new-tab']);
+  });
+
+  describe('timeRestore behavior', () => {
+    const setupTimeRestoreTest = async (timeRestore: boolean) => {
+      const services = createDiscoverServicesMock();
+      const {
+        internalState,
+        runtimeStateManager,
+        initializeTabs,
+        initializeSingleTab,
+        getCurrentTab,
+      } = getDiscoverInternalStateMock({
+        services,
+        persistedDataViews: [dataViewWithTimefieldMock],
+      });
+
+      const persistedTab = getPersistedTabMock({
+        tabId: 'persisted-tab',
+        dataView: dataViewWithTimefieldMock,
+        globalStateOverrides: {
+          timeRange: { from: 'now-15m', to: 'now' },
+          refreshInterval: { pause: true, value: 0 },
+        },
+        attributesOverrides: {
+          timeRestore,
+        },
+        services,
+      });
+
+      const persistedDiscoverSession = createDiscoverSessionMock({
+        id: 'test-id',
+        tabs: [persistedTab],
+      });
+
+      await initializeTabs({ persistedDiscoverSession });
+      await initializeSingleTab({ tabId: persistedTab.id });
+
+      return { internalState, runtimeStateManager, services, getCurrentTab };
+    };
+
+    it('detects unsaved changes when timeRestore is true and timeRange changes', async () => {
+      const { internalState, runtimeStateManager, services, getCurrentTab } =
+        await setupTimeRestoreTest(true);
+      const currentTab = getCurrentTab();
+
+      internalState.dispatch(
+        internalStateActions.setGlobalState({
+          tabId: currentTab.id,
+          globalState: { timeRange: { from: 'now-30m', to: 'now' } },
+        })
+      );
+
+      const result = selectHasUnsavedChanges(internalState.getState(), {
+        runtimeStateManager,
+        services,
+      });
+
+      expect(result.hasUnsavedChanges).toBe(true);
+      expect(result.unsavedTabIds).toEqual([currentTab.id]);
+    });
+
+    it('detects unsaved changes when timeRestore is true and refreshInterval changes', async () => {
+      const { internalState, runtimeStateManager, services, getCurrentTab } =
+        await setupTimeRestoreTest(true);
+      const currentTab = getCurrentTab();
+
+      internalState.dispatch(
+        internalStateActions.setGlobalState({
+          tabId: currentTab.id,
+          globalState: { refreshInterval: { pause: false, value: 5000 } },
+        })
+      );
+
+      const result = selectHasUnsavedChanges(internalState.getState(), {
+        runtimeStateManager,
+        services,
+      });
+
+      expect(result.hasUnsavedChanges).toBe(true);
+      expect(result.unsavedTabIds).toEqual([currentTab.id]);
+    });
+
+    it('does not detect unsaved changes when timeRestore is false and timeRange changes', async () => {
+      const { internalState, runtimeStateManager, services, getCurrentTab } =
+        await setupTimeRestoreTest(false);
+      const currentTab = getCurrentTab();
+
+      internalState.dispatch(
+        internalStateActions.setGlobalState({
+          tabId: currentTab.id,
+          globalState: { timeRange: { from: 'now-30m', to: 'now' } },
+        })
+      );
+
+      const result = selectHasUnsavedChanges(internalState.getState(), {
+        runtimeStateManager,
+        services,
+      });
+
+      expect(result.hasUnsavedChanges).toBe(false);
+      expect(result.unsavedTabIds).toEqual([]);
+    });
+
+    it('does not detect unsaved changes when timeRestore is false and refreshInterval changes', async () => {
+      const { internalState, runtimeStateManager, services, getCurrentTab } =
+        await setupTimeRestoreTest(false);
+      const currentTab = getCurrentTab();
+
+      internalState.dispatch(
+        internalStateActions.setGlobalState({
+          tabId: currentTab.id,
+          globalState: { refreshInterval: { pause: false, value: 5000 } },
+        })
+      );
+
+      const result = selectHasUnsavedChanges(internalState.getState(), {
+        runtimeStateManager,
+        services,
+      });
+
+      expect(result.hasUnsavedChanges).toBe(false);
+      expect(result.unsavedTabIds).toEqual([]);
+    });
   });
 });

@@ -16,14 +16,22 @@ import type {
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { GaugeState, LensApiState } from '../../schema';
-import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
+import {
+  AUTO_COLOR,
+  NO_COLOR,
+  fromColorByValueAPIToLensState,
+  fromColorByValueLensStateToAPI,
+  isAutoColor,
+  isNoColor,
+} from '../coloring';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import type { DeepMutable, DeepPartial } from '../utils';
 import {
   addLayerColumn,
-  buildDatasetState,
+  buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
@@ -42,12 +50,30 @@ import type { GaugeStateESQL, GaugeStateNoESQL } from '../../schema/charts/gauge
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import { isEsqlTableTypeDataset } from '../../utils';
+import { isEsqlTableTypeDataSource } from '../../utils';
 
 const ACCESSOR = 'gauge_accessor';
 
 function getAccessorName(type: 'metric' | 'max' | 'min' | 'goal') {
   return `${ACCESSOR}_${type}`;
+}
+
+function convertColorToLensState(color: GaugeState['metric']['color']): {
+  colorMode: GaugeVisualizationState['colorMode'];
+  palette?: PaletteOutput<CustomPaletteParams>;
+} {
+  if (!color || isAutoColor(color)) {
+    return { colorMode: 'palette' };
+  }
+
+  if (isNoColor(color)) {
+    return { colorMode: 'none' };
+  }
+
+  return {
+    colorMode: 'palette' as const,
+    palette: fromColorByValueAPIToLensState(color),
+  };
 }
 
 function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
@@ -62,21 +88,22 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
     goalAccessor: layer.metric.goal ? getAccessorName('goal') : undefined,
     shape: layer.shape
       ? layer.shape.type === 'bullet'
-        ? layer.shape.direction === 'horizontal'
+        ? layer.shape.orientation === 'horizontal'
           ? 'horizontalBullet'
           : 'verticalBullet'
+        : layer.shape.type === 'semi_circle'
+        ? 'semiCircle'
         : layer.shape.type
       : 'horizontalBullet',
-    ...(layer.metric.color
-      ? { colorMode: 'palette', palette: fromColorByValueAPIToLensState(layer.metric.color) }
-      : {}),
-    ticksPosition: layer.metric.ticks ?? 'auto',
-    ...(layer.metric.hide_title
+    ...convertColorToLensState(layer.metric.color),
+    ticksPosition:
+      layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'bands',
+    ...(layer.metric.title?.visible === false
       ? { labelMajorMode: 'none' }
-      : layer.metric.title
-      ? { labelMajorMode: 'custom', labelMajor: layer.metric.title }
+      : layer.metric.title?.text
+      ? { labelMajorMode: 'custom', labelMajor: layer.metric.title.text }
       : { labelMajorMode: 'auto' }),
-    labelMinor: layer.metric.sub_title,
+    labelMinor: layer.metric.subtitle,
   };
 }
 
@@ -93,21 +120,29 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
+  const dataSource = buildDataSourceState(
+    layer,
+    layerId,
+    adHocDataViews,
+    references,
+    adhocReferences
+  );
 
-  if (!dataset || dataset.type == null) {
-    throw new Error('Unsupported dataset type');
+  if (!dataSource || dataSource.type == null) {
+    throw new Error('Unsupported DataSource type');
   }
 
   const props: DeepPartial<DeepMutable<GaugeState>> = {
     ...generateApiLayer(layer),
     shape:
       visualization.shape === 'horizontalBullet'
-        ? { type: 'bullet', direction: 'horizontal' }
+        ? { type: 'bullet', orientation: 'horizontal' }
         : visualization.shape === 'verticalBullet'
-        ? { type: 'bullet', direction: 'vertical' }
-        : { type: visualization.shape },
-    metric: isEsqlTableTypeDataset(dataset)
+        ? { type: 'bullet', orientation: 'vertical' }
+        : {
+            type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
+          },
+    metric: isEsqlTableTypeDataSource(dataSource)
       ? {
           ...getValueApiColumn(metricAccessor, layer as TextBasedLayer),
           ...(visualization.minAccessor
@@ -150,28 +185,38 @@ function reverseBuildVisualizationState(
   } as GaugeState;
 
   if (props.metric) {
-    props.metric.hide_title = visualization.labelMajorMode === 'none';
+    props.metric.title = {
+      visible: visualization.labelMajorMode !== 'none',
+    };
+    const titleValue = visualization.labelMajor;
 
-    if (visualization.labelMajor) {
-      props.metric.title = visualization.labelMajor;
+    if (titleValue) {
+      props.metric.title.text = titleValue;
     }
 
     if (visualization.labelMinor) {
-      props.metric.sub_title = visualization.labelMinor;
+      props.metric.subtitle = visualization.labelMinor;
     }
 
     if (visualization.ticksPosition) {
-      props.metric.ticks = visualization.ticksPosition;
+      props.metric.ticks =
+        visualization.ticksPosition === 'hidden'
+          ? { visible: false }
+          : visualization.ticksPosition === 'bands'
+          ? { visible: true, mode: 'bands' }
+          : { visible: true, mode: 'auto' };
     }
 
-    if (visualization.colorMode === 'palette' && visualization.palette) {
-      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette);
+    if (visualization.colorMode === 'palette') {
+      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
+    } else {
+      props.metric.color = NO_COLOR;
     }
   }
 
   return {
     type: 'gauge',
-    dataset: dataset satisfies GaugeState['dataset'],
+    data_source: dataSource satisfies GaugeState['data_source'],
     ...props,
   } as GaugeState;
 }
@@ -211,11 +256,15 @@ function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['
 
 function getValueColumns(layer: GaugeStateESQL) {
   return [
-    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
-    ...(layer.metric.max ? [getValueColumn(getAccessorName('max'), layer.metric.max.column)] : []),
-    ...(layer.metric.min ? [getValueColumn(getAccessorName('min'), layer.metric.min.column)] : []),
+    getValueColumn(getAccessorName('metric'), layer.metric, 'number'),
+    ...(layer.metric.max
+      ? [getValueColumn(getAccessorName('max'), layer.metric.max, 'number')]
+      : []),
+    ...(layer.metric.min
+      ? [getValueColumn(getAccessorName('min'), layer.metric.min, 'number')]
+      : []),
     ...(layer.metric.goal
-      ? [getValueColumn(getAccessorName('goal'), layer.metric.goal.column)]
+      ? [getValueColumn(getAccessorName('goal'), layer.metric.goal, 'number')]
       : []),
   ];
 }
@@ -252,7 +301,7 @@ export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFi
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

@@ -4,22 +4,23 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test'
+  title: '@kbn/test'
   description: Moon project for @kbn/test
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-test
+  sourceRoot: src/platform/packages/shared/kbn-test
 dependsOn:
-  - '@kbn/dev-utils'
+  - '@kbn/kbn-client'
+  - '@kbn/dev-validation-runner'
   - '@kbn/std'
+  - '@kbn/test-es-server'
   - '@kbn/tooling-log'
   - '@kbn/get-repo-files'
   - '@kbn/peggy'
@@ -29,12 +30,13 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/es'
   - '@kbn/dev-proc-runner'
+  - '@kbn/test-kibana-server'
   - '@kbn/jest-serializers'
   - '@kbn/stdio-dev-helpers'
+  - '@kbn/test-docker-servers'
   - '@kbn/babel-register'
   - '@kbn/repo-packages'
-  - '@kbn/core-saved-objects-api-server'
-  - '@kbn/mock-idp-utils'
+  - '@kbn/test-saml-auth'
   - '@kbn/code-owners'
   - '@kbn/scout-reporting'
   - '@kbn/scout-info'
@@ -42,6 +44,7 @@ dependsOn:
   - '@kbn/babel-preset'
   - '@kbn/dot-text'
   - '@kbn/apm-utils'
+  - '@kbn/moon'
 tags:
   - shared-common
   - package
@@ -57,16 +60,6 @@ fileGroups:
     - '!types/**/*'
     - '!**/__fixtures__/**/*'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

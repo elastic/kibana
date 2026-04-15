@@ -53,7 +53,8 @@ export const DataStreamsResponseSchema = {
       schema.object({
         name: schema.string(),
         storageSizeBytes: schema.number(),
-      })
+      }),
+      { maxSize: 1000 }
     ),
 };
 

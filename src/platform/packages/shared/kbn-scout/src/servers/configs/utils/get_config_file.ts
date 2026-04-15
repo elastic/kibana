@@ -8,30 +8,14 @@
  */
 
 import path from 'path';
-import type { CliSupportedServerModes } from '../../../types';
+import type { ScoutTestTarget } from '@kbn/scout-info';
 
 /**
  * Gets the config file path from a config root directory and mode.
  * @param configRootDir The root directory for the config (e.g., 'default/serverless', 'custom/uiam_local/stateful')
- * @param mode The server mode (e.g., 'serverless=es', 'stateful')
+ * @param testTarget The test target definition (based on location, architecture and domain)
  * @returns The full path to the config file
  */
-export function getConfigFilePath(configRootDir: string, mode: CliSupportedServerModes): string {
-  let configFileName: string;
-
-  if (mode === 'stateful') {
-    configFileName = 'stateful.config.ts';
-  } else {
-    const [modeType, type] = mode.split('=');
-    if (modeType !== 'serverless' || !type) {
-      throw new Error(
-        `Invalid config format: "${mode}". Expected "stateful" or "serverless=<type>".`
-      );
-    }
-    // Convert hyphens to underscores for filename
-    const normalizedType = type.replace(/-/g, '_');
-    configFileName = `${normalizedType}.serverless.config.ts`;
-  }
-
-  return path.join(configRootDir, configFileName);
+export function getConfigFilePath(configRootDir: string, testTarget: ScoutTestTarget): string {
+  return path.join(configRootDir, [testTarget.domain, testTarget.arch, 'config.ts'].join('.'));
 }
