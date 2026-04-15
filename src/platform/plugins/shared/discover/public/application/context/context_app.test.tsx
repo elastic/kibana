@@ -186,31 +186,14 @@ describe('ContextApp test', () => {
       expect(screen.getByTestId('mockTopNavMenu')).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('mockTopNavMenu')).toHaveAttribute(
-      'data-app-name',
-      topNavProps.appName
-    );
-    expect(screen.getByTestId('mockTopNavMenu')).toHaveAttribute(
-      'data-show-search-bar',
-      String(topNavProps.showSearchBar)
-    );
-    expect(screen.getByTestId('mockTopNavMenu')).toHaveAttribute(
-      'data-show-query-input',
-      String(topNavProps.showQueryInput)
-    );
-    expect(screen.getByTestId('mockTopNavMenu')).toHaveAttribute(
-      'data-show-filter-bar',
-      String(topNavProps.showFilterBar)
-    );
-    expect(screen.getByTestId('mockTopNavMenu')).toHaveAttribute(
-      'data-show-date-picker',
-      String(topNavProps.showDatePicker)
-    );
-    expect(screen.getByTestId('mockTopNavMenu')).toHaveAttribute(
-      'data-index-pattern-ids',
-      dataViewMock.id
-    );
-    expect(screen.getByTestId('mockTopNavMenu')).toHaveAttribute(
+    const topNav = screen.getByTestId('mockTopNavMenu');
+    expect(topNav).toHaveAttribute('data-app-name', topNavProps.appName);
+    expect(topNav).toHaveAttribute('data-show-search-bar', String(topNavProps.showSearchBar));
+    expect(topNav).toHaveAttribute('data-show-query-input', String(topNavProps.showQueryInput));
+    expect(topNav).toHaveAttribute('data-show-filter-bar', String(topNavProps.showFilterBar));
+    expect(topNav).toHaveAttribute('data-show-date-picker', String(topNavProps.showDatePicker));
+    expect(topNav).toHaveAttribute('data-index-pattern-ids', dataViewMock.id);
+    expect(topNav).toHaveAttribute(
       'data-use-default-behaviors',
       String(topNavProps.useDefaultBehaviors)
     );

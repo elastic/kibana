@@ -335,12 +335,9 @@ describe('Discover flyout', function () {
         dataView: dataViewMock,
         processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
       });
-      const { component } = await mountComponent({ services, records });
+      await renderComponent({ services, records });
 
-      // The custom footer should be rendered in the flyout
-      const customFooter = findTestSubject(component, 'customDocViewerFooter');
-      expect(customFooter.length).toBe(1);
-      expect(customFooter.text()).toBe('Custom Footer');
+      expect(screen.getByTestId('customDocViewerFooter')).toHaveTextContent('Custom Footer');
     });
   });
 });

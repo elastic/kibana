@@ -164,9 +164,6 @@ describe('DiscoverNoResults', () => {
 
         await waitFor(() => {
           expect(searchMock).toHaveBeenCalledTimes(1);
-        });
-
-        await waitFor(() => {
           expect(findSubjects()).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
@@ -216,9 +213,6 @@ describe('DiscoverNoResults', () => {
 
         await waitFor(() => {
           expect(searchMock).toHaveBeenCalledTimes(1);
-        });
-
-        await waitFor(() => {
           expect(findSubjects()).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
@@ -279,9 +273,6 @@ describe('DiscoverNoResults', () => {
 
         await waitFor(() => {
           expect(searchMock).toHaveBeenCalledTimes(1);
-        });
-
-        await waitFor(() => {
           expect(findSubjects()).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
@@ -386,9 +377,6 @@ describe('DiscoverNoResults', () => {
 
         await waitFor(() => {
           expect(searchMock).toHaveBeenCalledTimes(1);
-        });
-
-        await waitFor(() => {
           expect(findSubjects()).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": true,

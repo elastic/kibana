@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -50,18 +49,14 @@ describe('DiscoverMainApp', () => {
       initialEntries: ['/'],
     });
 
-    await act(async () => {
-      renderWithKibanaRenderContext(
-        <Router history={history}>
-          <DiscoverToolkitTestProvider toolkit={toolkit}>
-            <DiscoverMainApp />
-          </DiscoverToolkitTestProvider>
-        </Router>
-      );
+    renderWithKibanaRenderContext(
+      <Router history={history}>
+        <DiscoverToolkitTestProvider toolkit={toolkit}>
+          <DiscoverMainApp />
+        </DiscoverToolkitTestProvider>
+      </Router>
+    );
 
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    expect(screen.getByTestId('discoverTopNavMock')).toBeInTheDocument();
+    expect(await screen.findByTestId('discoverTopNavMock')).toBeInTheDocument();
   });
 });

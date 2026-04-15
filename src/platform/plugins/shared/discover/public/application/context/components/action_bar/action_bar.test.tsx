@@ -19,14 +19,14 @@ import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 describe('Test Discover Context ActionBar for successor | predecessor records', () => {
   [SurrDocType.SUCCESSORS, SurrDocType.PREDECESSORS].forEach((type) => {
-    const getForm = (element: HTMLElement) => {
-      const form = element.closest('form');
-
-      if (!(form instanceof HTMLFormElement)) {
+    const submitForm = (input: HTMLElement) => {
+      const form = input.closest('form');
+      if (!form) {
         throw new Error('Expected count picker to be rendered inside a form');
       }
-
-      return form;
+      // jsdom doesn't support implicit form submission via Enter key,
+      // so we call requestSubmit() directly to simulate it
+      form.requestSubmit();
     };
 
     const renderComponent = (propsOverride: Partial<ActionBarProps> = {}) => {
@@ -94,8 +94,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
 
       await user.clear(input);
       await user.type(input, '124');
-
-      getForm(input).requestSubmit();
+      submitForm(input);
 
       expect(onChangeCount).toHaveBeenCalledWith(type, 124);
     });
@@ -106,8 +105,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
 
       await user.clear(input);
       await user.type(input, String(MAX_CONTEXT_SIZE + 1));
-
-      getForm(input).requestSubmit();
+      submitForm(input);
 
       expect(onChangeCount).toHaveBeenCalledTimes(0);
     });
@@ -118,8 +116,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
 
       await user.clear(input);
       await user.type(input, String(MIN_CONTEXT_SIZE - 1));
-
-      getForm(input).requestSubmit();
+      submitForm(input);
 
       expect(onChangeCount).toHaveBeenCalledTimes(0);
     });

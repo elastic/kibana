@@ -82,6 +82,8 @@ describe('ContextAppContent test', () => {
   it('should render discover grid correctly', async () => {
     await renderComponent();
 
+    expect(screen.getByRole('grid')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverDocTable')).toBeInTheDocument();
     expect(screen.getByTestId('unifiedDataTableToolbar')).toBeInTheDocument();
   });
 
