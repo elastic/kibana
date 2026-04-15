@@ -10,6 +10,8 @@ import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/pub
 import { screen, fireEvent } from '@testing-library/react';
 import { RemoteClustersForm } from './remote_clusters_form';
 import { render } from '../../../utils/testing';
+import * as settingsHooks from '../../../contexts/synthetics_settings_context';
+import type { SyntheticsSettingsContextValues } from '../../../contexts';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   ...jest.requireActual('@kbn/observability-shared-plugin/public'),
@@ -18,14 +20,16 @@ jest.mock('@kbn/observability-shared-plugin/public', () => ({
 
 const mockSaveSettings = jest.fn();
 
+const mockCCSSettingsData = {
+  useAllRemoteClusters: false,
+  selectedRemoteClusters: [] as string[],
+  remoteKibanaUrls: {} as Record<string, string>,
+};
+
 jest.mock('./hooks/use_get_ccs_settings', () => ({
   ...jest.requireActual('./hooks/use_get_ccs_settings'),
   useGetCCSSettings: () => ({
-    data: {
-      useAllRemoteClusters: false,
-      selectedRemoteClusters: [],
-      remoteKibanaUrls: {},
-    },
+    data: mockCCSSettingsData,
     loading: false,
     error: undefined,
   }),
@@ -43,9 +47,18 @@ const mockRemoteClusters = [
   { name: 'cluster-b', isConnected: false },
 ];
 
+jest.mock('../../../contexts/synthetics_settings_context', () => ({
+  ...jest.requireActual('../../../contexts/synthetics_settings_context'),
+  useSyntheticsSettingsContext: jest.fn(),
+}));
+
 describe('<RemoteClustersForm />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (settingsHooks.useSyntheticsSettingsContext as jest.Mock).mockReturnValue({
+      isServerless: false,
+      isCCSEnabled: true,
+    } as SyntheticsSettingsContextValues);
   });
 
   const renderWithClusters = (clusters = mockRemoteClusters) => {
@@ -79,7 +92,7 @@ describe('<RemoteClustersForm />', () => {
     fireEvent.click(toggle);
 
     const comboBox = screen.getByTestId('syntheticsSelectRemoteClusters');
-    expect(comboBox).toBeDisabled();
+    expect(comboBox).toHaveAttribute('disabled');
   });
 
   it('shows the Kibana URL table when clusters are selected', () => {
