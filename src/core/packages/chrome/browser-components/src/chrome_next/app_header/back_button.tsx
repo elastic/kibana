@@ -68,9 +68,7 @@ export const BackButton = React.memo(() => {
       css={styles.button}
       aria-label={tooltip}
       data-test-subj="chromeNextAppHeaderBack"
-      {...(targets.length > 1
-        ? { onClick: togglePopover }
-        : { href: primary.backHref })}
+      {...(targets.length > 1 ? { onClick: togglePopover } : { href: primary.backHref })}
     />
   );
 
