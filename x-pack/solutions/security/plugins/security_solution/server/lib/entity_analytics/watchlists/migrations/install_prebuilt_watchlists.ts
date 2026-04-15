@@ -94,6 +94,14 @@ const isConflictError = (e: unknown): boolean => {
   return message.includes('conflict');
 };
 
+const findExistingByName = async (
+  watchlistClient: WatchlistConfigClient,
+  name: string
+): Promise<string | undefined> => {
+  const all = await watchlistClient.list();
+  return all.find((w) => w.name === name)?.id;
+};
+
 const getOrCreateWatchlist = async ({
   watchlistClient,
   logger,
@@ -124,6 +132,14 @@ const getOrCreateWatchlist = async ({
       return created.id;
     } catch (createError) {
       if (isConflictError(createError)) {
+        const existing = await findExistingByName(watchlistClient, attrs.name);
+        if (existing) {
+          logger.info(
+            `Prebuilt watchlist '${attrs.name}' already exists (concurrent creation), using existing ID`
+          );
+          return existing;
+        }
+
         logger.info(
           `Prebuilt watchlist '${attrs.name}' ID conflicts across namespaces, creating with auto-generated ID`
         );
