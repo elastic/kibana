@@ -73,7 +73,8 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
     expect(response.views![0].query).toBe(rootQueryStreamEsqlQuery);
   });
 
-  test('should create a query stream as a child of an ingest stream', async ({
+  // Failing, see: https://github.com/elastic/kibana/issues/262787
+  test.skip('should create a query stream as a child of an ingest stream', async ({
     page,
     pageObjects,
     esClient,

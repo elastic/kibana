@@ -24,6 +24,7 @@ import {
   isFilterActiveForScope,
   emitEntityRelationshipToggle,
   isEntityRelationshipExpandedForScope,
+  emitPinnedEuidToggle,
 } from '../../../../filters/filter_store';
 import { RELATED_ENTITY } from '../../../../../common/constants';
 import { useOpenEntityPreviewPanel } from '../../../hooks/use_open_entity_preview_panel';
@@ -55,7 +56,7 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
 
   const openEntityPreviewPanel = useOpenEntityPreviewPanel();
-  const sourceFields = item.entity.sourceFields ?? {};
+  const sourceFields = (item.entity.sourceFields ?? {}) as Record<string, string | string[]>;
 
   const entityFilterActions: EntityFilterActions = {
     toggleEntityFilter: (role, action) => {
@@ -63,6 +64,21 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
         // Flatten string | string[] to string[] so each value gets its own OR'd phrase filter
         for (const v of ([] as string[]).concat(value)) {
           emitFilterToggle(scopeId, fieldForRole(field, role), v, action);
+        }
+      }
+      if (action === 'show') {
+        emitPinnedEuidToggle(scopeId, item.id, 'show');
+      } else {
+        // Only unpin when no entity filters remain active for either role
+        const hasRemainingFilters = (['actor', 'target'] as const).some((r) =>
+          Object.entries(sourceFields).some(([field, value]) =>
+            ([] as string[])
+              .concat(value)
+              .some((v) => isFilterActiveForScope(scopeId, fieldForRole(field, r), v))
+          )
+        );
+        if (!hasRemainingFilters) {
+          emitPinnedEuidToggle(scopeId, item.id, 'hide');
         }
       }
     },
@@ -97,6 +113,7 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
 
   return (
     <EuiPopover
+      aria-label={actionsButtonAriaLabel}
       button={
         <EuiButtonIcon
           iconType="boxesHorizontal"

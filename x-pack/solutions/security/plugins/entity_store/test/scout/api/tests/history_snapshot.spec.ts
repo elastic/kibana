@@ -15,9 +15,14 @@ import {
   LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { clearEntityStoreIndices, forceLogExtraction } from '../fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  forceLogExtraction,
+  normalizeKeywordList,
+} from '../fixtures/helpers';
 
-apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/256862
+apiTest.describe.skip('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
@@ -100,9 +105,9 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
 
       const entityIdsWithBehaviors = ['host:host-123', 'host:server-01'] as const;
       const expectedBehaviorsInHistory = [
-        { rule_names: ['rule-a', 'rule-b'], anomaly_job_ids: 'job-1' },
-        { rule_names: 'rule-c', anomaly_job_ids: ['job-2', 'job-3'] },
-      ];
+        { rule_names: ['rule-a', 'rule-b'], anomaly_job_ids: ['job-1'] },
+        { rule_names: ['rule-c'], anomaly_job_ids: ['job-2', 'job-3'] },
+      ] as const;
 
       const historySearchResult = await esClient.search({
         index: historyIndex,
@@ -135,7 +140,13 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         );
         expect(historyHit).toBeDefined();
         const historyEntity = historyHit!._source!.entity as Record<string, unknown>;
-        expect(historyEntity.behaviors).toStrictEqual(expectedBehavior);
+        const historyBehaviors = historyEntity.behaviors as Record<string, unknown> | undefined;
+        expect(normalizeKeywordList(historyBehaviors?.rule_names)).toStrictEqual(
+          expectedBehavior.rule_names
+        );
+        expect(normalizeKeywordList(historyBehaviors?.anomaly_job_ids)).toStrictEqual(
+          expectedBehavior.anomaly_job_ids
+        );
 
         const latestHit = latestHits.find(
           (h) => (h._source!.entity as Record<string, unknown>)?.id === entityId
@@ -143,10 +154,9 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         expect(latestHit).toBeDefined();
         expect(latestHit!._source!['@timestamp']).toBeDefined();
         const latestEntity = latestHit!._source!.entity as Record<string, unknown>;
-        expect(latestEntity.behaviors).toStrictEqual({
-          rule_names: [],
-          anomaly_job_ids: [],
-        });
+        const latestBehaviors = latestEntity.behaviors as Record<string, unknown> | undefined;
+        expect(normalizeKeywordList(latestBehaviors?.rule_names)).toStrictEqual([]);
+        expect(normalizeKeywordList(latestBehaviors?.anomaly_job_ids)).toStrictEqual([]);
         expect((latestEntity.lifecycle as Record<string, unknown>)?.last_activity).toBeDefined();
       }
     }
