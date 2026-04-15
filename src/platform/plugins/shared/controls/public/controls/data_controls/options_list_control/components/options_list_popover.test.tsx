@@ -392,6 +392,7 @@ describe('Options list popover', () => {
       await waitFor(() => {
         expect(option).toBeChecked();
       });
+      expect(existsOption).not.toBeChecked();
     });
 
     test('clicking "Exists" unselects all other selections', async () => {
