@@ -94,13 +94,23 @@ describe('useContentListPagination', () => {
       expect(result.current.pageSize).toBe(50);
     });
 
-    it('returns custom page size options from config', () => {
+    it('returns custom page size options from config, including active page size', () => {
       const customOptions = [25, 50, 100];
       const { result } = renderHook(() => useContentListPagination(), {
         wrapper: createWrapper({ pageSizeOptions: customOptions }),
       });
 
-      expect(result.current.pageSizeOptions).toEqual(customOptions);
+      // Active page size (20, the default) is injected in sorted order.
+      expect(result.current.pageSizeOptions).toEqual([20, 25, 50, 100]);
+    });
+
+    it('does not duplicate when active page size is already in options', () => {
+      const customOptions = [10, 20, 50];
+      const { result } = renderHook(() => useContentListPagination(), {
+        wrapper: createWrapper({ pageSizeOptions: customOptions }),
+      });
+
+      expect(result.current.pageSizeOptions).toEqual([10, 20, 50]);
     });
 
     it('returns isSupported false when pagination is disabled', () => {
