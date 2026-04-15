@@ -38,7 +38,7 @@ import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
 import type { SkillRegistry } from './services/skills/skill_registry';
 import type { AgentExecutionService } from './services/execution';
-import type { ModelProviderFactoryFn } from './services/runner/model_provider';
+import type { ModelProviderFactoryFn } from './services/execution/runner/model_provider';
 import type { SmlTypeDefinition, SmlIndexAttachmentParams } from './services/sml';
 import type { PluginsServiceSetup, PluginRegistry } from './services/plugins';
 import type { ConversationListOptions } from './services/conversation/client/types';
