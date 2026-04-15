@@ -56,7 +56,7 @@ export const AppMenuComponent = ({
   });
 
   const handlePopoverToggle = (id: string) => {
-    setOpenPopoverId(openPopoverId === id ? null : id);
+    setOpenPopoverId((prev) => (prev === id ? null : id));
   };
 
   const handleOnPopoverClose = () => {
