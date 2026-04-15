@@ -1627,6 +1627,8 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
         ca_sha256: null,
         ca_trusted_fingerprint: null,
+        otel_disable_beatsauth: null,
+        otel_exporter_config_yaml: null,
         write_to_logs_streams: null,
       });
     });
