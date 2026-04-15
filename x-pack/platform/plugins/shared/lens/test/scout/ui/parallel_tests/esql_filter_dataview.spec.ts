@@ -55,6 +55,7 @@ spaceTest.describe(
 
         await spaceTest.step('set the ESQL query and apply', async () => {
           const codeEditor = new KibanaCodeEditorWrapper(page);
+          await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
           await codeEditor.setCodeEditorValue(WILDCARD_ESQL_QUERY);
 
           await page.testSubj.click('ESQLEditor-run-query-button');
@@ -137,6 +138,7 @@ spaceTest.describe(
 
         await spaceTest.step('set the initial ESQL query and apply', async () => {
           const codeEditor = new KibanaCodeEditorWrapper(page);
+          await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
           await codeEditor.setCodeEditorValue(INITIAL_ESQL_QUERY);
           await page.testSubj.click('ESQLEditor-run-query-button');
           await page.locator('.echCanvasRenderer').waitFor({ state: 'visible', timeout: 30_000 });
@@ -158,6 +160,7 @@ spaceTest.describe(
           await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
 
           const codeEditor = new KibanaCodeEditorWrapper(page);
+          await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
           await codeEditor.setCodeEditorValue(WILDCARD_ESQL_QUERY);
           await page.testSubj.click('ESQLEditor-run-query-button');
           await page.locator('.echCanvasRenderer').waitFor({ state: 'visible', timeout: 30_000 });
