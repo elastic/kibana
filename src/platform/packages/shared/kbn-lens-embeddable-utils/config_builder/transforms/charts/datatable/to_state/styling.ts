@@ -14,7 +14,9 @@ import { stripUndefined } from '../../utils';
 import { getAccessorName } from '../helpers';
 import { METRIC_ACCESSOR_PREFIX, ROW_ACCESSOR_PREFIX } from '../constants';
 
-function getSortingColumnId(sortBy: NonNullable<DatatableState['sort_by']>): string | undefined {
+function getSortingColumnId(
+  sortBy: NonNullable<NonNullable<DatatableState['styling']>['sort_by']>
+): string | undefined {
   switch (sortBy.column_type) {
     case 'metric':
       return getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.index);
@@ -30,11 +32,11 @@ function getSortingColumnId(sortBy: NonNullable<DatatableState['sort_by']>): str
 }
 
 function buildSortingState(config: DatatableState): Pick<DatatableVisualizationState, 'sorting'> {
-  if (!config.sort_by) {
+  if (!config.styling?.sort_by) {
     return {};
   }
 
-  const columnId = getSortingColumnId(config.sort_by);
+  const columnId = getSortingColumnId(config.styling.sort_by);
   if (!columnId) {
     return {};
   }
@@ -42,7 +44,7 @@ function buildSortingState(config: DatatableState): Pick<DatatableVisualizationS
   return {
     sorting: {
       columnId,
-      direction: config.sort_by.direction,
+      direction: config.styling.sort_by.direction,
     },
   };
 }
@@ -53,18 +55,20 @@ function buildDensityState(
   DatatableVisualizationState,
   'headerRowHeight' | 'headerRowHeightLines' | 'rowHeight' | 'rowHeightLines' | 'density'
 > {
-  const headerRowHeight = config.density?.height?.header?.type;
+  const headerRowHeight = config.styling?.density?.height?.header?.type;
   const headerRowHeightLines =
-    config.density?.height?.header?.type === 'custom'
-      ? config.density?.height?.header?.max_lines
+    config.styling?.density?.height?.header?.type === 'custom'
+      ? config.styling?.density?.height?.header?.max_lines
       : undefined;
-  const rowHeight = config.density?.height?.value?.type;
+  const rowHeight = config.styling?.density?.height?.value?.type;
   const rowHeightLines =
-    config.density?.height?.value?.type === 'custom'
-      ? config.density?.height?.value?.lines
+    config.styling?.density?.height?.value?.type === 'custom'
+      ? config.styling?.density?.height?.value?.lines
       : undefined;
   const density =
-    config.density?.mode === 'default' ? LENS_DATAGRID_DENSITY.NORMAL : config.density?.mode;
+    config.styling?.density?.mode === 'default'
+      ? LENS_DATAGRID_DENSITY.NORMAL
+      : config.styling?.density?.mode;
 
   return stripUndefined<
     Pick<
@@ -81,22 +85,22 @@ function buildDensityState(
 }
 
 function buildPagingState(config: DatatableState): Pick<DatatableVisualizationState, 'paging'> {
-  if (!config.paging) {
+  if (!config.styling?.paging) {
     return {};
   }
-  return { paging: { size: config.paging, enabled: true } };
+  return { paging: { size: config.styling.paging, enabled: true } };
 }
 
 function buildShowRowNumbers(
   config: DatatableState
 ): Pick<DatatableVisualizationState, 'showRowNumbers'> {
-  if (config.row_numbers == null) {
+  if (config.styling?.row_numbers == null) {
     return {};
   }
-  return { showRowNumbers: config.row_numbers.visible };
+  return { showRowNumbers: config.styling.row_numbers.visible };
 }
 
-export function buildAppearanceState(
+export function buildStylingState(
   config: DatatableState
 ): Pick<
   DatatableVisualizationState,
