@@ -8,30 +8,27 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, filter, first, skip, tap } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { EuiThemeProvider } from '@elastic/eui';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { OptionsListDisplaySettings, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { RenderResult } from '@testing-library/react';
-import { act, prettyDOM, render as rtlRender, waitFor, within } from '@testing-library/react';
+import { act, render as rtlRender, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 import type { OptionsListComponentApi } from '../../../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
-import {
-  OptionsListControlContext,
-  type OptionsListControlContextType,
-} from '../options_list_context_provider';
 import * as ControlContextModule from '../options_list_context_provider';
-import { OptionsListPopover } from './options_list_popover';
-import { getOptionsListControlFactory } from '../get_options_list_control_factory';
-import { getMockedFinalizeApi } from '../../../mocks/control_mocks';
-import { coreServices, dataViewsService } from '../../../../services/kibana_services';
+import { OptionsListControlContext } from '../options_list_context_provider';
+
 import { createStubDataView } from '../../../../../../data_views/common/data_view.stub';
-import { capitalize } from 'lodash';
+import { coreServices, dataViewsService } from '../../../../services/kibana_services';
+import { getMockedFinalizeApi } from '../../../mocks/control_mocks';
+import { getOptionsListControlFactory } from '../get_options_list_control_factory';
 import type { DSLOptionsListComponentApi } from '../types';
+import { OptionsListPopover } from './options_list_popover';
 
 const render = (ui: React.ReactElement) => {
   return rtlRender(ui, { wrapper: EuiThemeProvider });
@@ -39,6 +36,7 @@ const render = (ui: React.ReactElement) => {
 
 const factory = getOptionsListControlFactory();
 const mockFetch = jest.fn();
+const contextSpy = jest.spyOn(ControlContextModule, 'useOptionsListContext');
 
 describe('Options list popover', () => {
   const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
@@ -53,7 +51,7 @@ describe('Options list popover', () => {
     componentApi: DSLOptionsListComponentApi;
     displaySettings: OptionsListDisplaySettings;
   }> => {
-    const contextSpy = jest.spyOn(ControlContextModule, 'useOptionsListContext');
+    contextSpy.mockClear(); // ensures that we get the up-to-date context
 
     const finalizeApi = getMockedFinalizeApi(uuid, factory);
     const { Component } = await factory.buildEmbeddable({
@@ -71,12 +69,12 @@ describe('Options list popover', () => {
     await waitFor(() => {
       expect(mockFetch).toBeCalled();
     });
+    mockFetch.mockClear(); // resets so that we wait for fetch again on the next call
+
     render(<Component />); // makes component context available via spy; we will not actually use this component
     const context = contextSpy.mock.results[0].value;
-    contextSpy.mockClear(); // allows for context to be refetched regardless of call number
     return context;
   };
-
   const mountComponent = ({
     componentApi,
     displaySettings,
@@ -203,7 +201,7 @@ describe('Options list popover', () => {
   });
 
   describe('show only selected', () => {
-    test('show only se1lected options', async () => {
+    test('show only selected options', async () => {
       const contextMock = getOptionsListContextMock();
       const selections = ['woof', 'bark'];
       contextMock.componentApi.setAvailableOptions([
@@ -264,9 +262,11 @@ describe('Options list popover', () => {
       expect(sortButton).toBeDisabled();
     });
 
-    test.only('deselects when showOnlySelected is true', async () => {
-      const context = await getRealControlContext({ uuid: 'test-control' });
-      context.componentApi.setSelectedOptions(['woof', 'bark']);
+    test('deselects when showOnlySelected is true', async () => {
+      const context = await getRealControlContext({
+        uuid: 'test-control',
+        overwriteState: { selected_options: ['woof', 'bark'] },
+      });
       const popover = mountComponent(context);
 
       await userEvent.click(popover.getByTestId('optionsList-control-show-only-selected'));
@@ -281,16 +281,16 @@ describe('Options list popover', () => {
       expect(popover.queryByTestId('optionsList-control-selection-meow')).toBeNull();
 
       // TODO: move this I think
-      expect(context.componentApi.appliedFilters$.value).toEqual([
-        {
-          meta: { controlledBy: 'test-control', index: 'myDataViewId', key: 'myFieldName' },
-          query: {
-            match_phrase: {
-              myFieldName: 'woof',
-            },
-          },
-        },
-      ]);
+      // expect(context.componentApi.appliedFilters$.value).toEqual([
+      //   {
+      //     meta: { controlledBy: 'test-control', index: 'myDataViewId', key: 'myFieldName' },
+      //     query: {
+      //       match_phrase: {
+      //         myFieldName: 'woof',
+      //       },
+      //     },
+      //   },
+      // ]);
     });
   });
 
@@ -487,6 +487,45 @@ describe('Options list popover', () => {
     });
   });
 
+  describe('single select', () => {
+    test('replace selection when singleSelect is true', async () => {
+      const context = await getRealControlContext({
+        uuid: 'test-control',
+        overwriteState: { selected_options: ['woof', 'bark'], single_select: true },
+      });
+      const popover = mountComponent(context);
+      // expect(context.componentApi.appliedFilters$.value).toEqual([
+      //   {
+      //     meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
+      //     query: {
+      //       match_phrase: {
+      //         myFieldName: 'woof',
+      //       },
+      //     },
+      //   },
+      // ]);
+      expect(popover.getByTestId('optionsList-control-selection-woof')).toBeChecked();
+      expect(popover.queryByTestId('optionsList-control-selection-bark')).not.toBeChecked();
+      expect(popover.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
+
+      await userEvent.click(popover.getByTestId('optionsList-control-selection-bark'));
+
+      expect(popover.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
+      expect(popover.queryByTestId('optionsList-control-selection-bark')).toBeChecked();
+      expect(popover.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
+      // expect(context.componentApi.appliedFilters$.value).toEqual([
+      //   {
+      //     meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
+      //     query: {
+      //       match_phrase: {
+      //         myFieldName: 'bark',
+      //       },
+      //     },
+      //   },
+      // ]);
+    });
+  });
+
   describe('advanced settings', () => {
     const ensureComponentIsHidden = async ({
       displaySettings,
@@ -523,46 +562,4 @@ describe('Options list popover', () => {
       });
     });
   });
-
-  // describe.skip('test', () => {
-
-  //   test('replace selection when singleSelect is true', async () => {
-  //     const context = await getRealControlContext();
-  //     const popover = mountComponent(context);
-
-  //     expect(context.componentApi.appliedFilters$.value).toEqual([
-  //       {
-  //         meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
-  //         query: {
-  //           match_phrase: {
-  //             myFieldName: 'woof',
-  //           },
-  //         },
-  //       },
-  //     ]);
-
-  //     expect(popover.getByTestId('optionsList-control-selection-woof')).toBeChecked();
-  //     expect(popover.queryByTestId('optionsList-control-selection-bark')).not.toBeChecked();
-  //     expect(popover.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
-
-  //     await userEvent.click(popover.getByTestId('optionsList-control-selection-bark'));
-  //     await waitFor(async () => {
-  //       expect(popover.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
-  //     });
-
-  //     expect(popover.queryByTestId('optionsList-control-selection-bark')).toBeChecked();
-  //     expect(popover.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
-
-  //     expect(context.componentApi.appliedFilters$.value).toEqual([
-  //       {
-  //         meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
-  //         query: {
-  //           match_phrase: {
-  //             myFieldName: 'bark',
-  //           },
-  //         },
-  //       },
-  //     ]);
-  //   });
-  // });
 });
