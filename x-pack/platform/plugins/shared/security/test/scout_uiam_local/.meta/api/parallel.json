@@ -1,5 +1,5 @@
 {
-  "sha1": "1f507e58ebfb6b12fdfd35106f57c178e581fc02",
+  "sha1": "151d9c512fd0103509dd6e0ba595814f4d5ba7a8",
   "tests": [
     {
       "id": "1927b5fbbdf0acf-9f84f21350dbcbe",
@@ -431,7 +431,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 72,
+        "line": 74,
         "column": 10
       }
     },
@@ -457,7 +457,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 102,
+        "line": 106,
         "column": 10
       }
     },
