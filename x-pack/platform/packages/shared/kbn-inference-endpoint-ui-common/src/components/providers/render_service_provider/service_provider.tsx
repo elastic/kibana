@@ -19,7 +19,7 @@ import elasticIcon from '../assets/images/elastic.svg';
 import huggingFaceIcon from '../assets/images/hugging_face.svg';
 import cohereIcon from '../assets/images/cohere.svg';
 import openAIIcon from '../assets/images/open_ai.svg';
-import azureAIStudioIcon from '../assets/images/azure_ai_studio.svg';
+import azureIcon from '../assets/images/azure_ai_studio.svg';
 import googleAIStudioIcon from '../assets/images/google_ai_studio.svg';
 import mistralIcon from '../assets/images/mistral.svg';
 import amazonBedrockIcon from '../assets/images/amazon_bedrock.svg';
@@ -36,7 +36,6 @@ import defaultIcon from '../assets/images/default_connector_icon.svg';
 import contextualAiIcon from '../assets/images/contextual_ai_icon.svg';
 import fireworksIcon from '../assets/images/fireworks.svg';
 import groqIcon from '../assets/images/grok.svg';
-import azureIcon from '../assets/images/azure.svg';
 import nvidiaIcon from '../assets/images/nvidia.svg';
 
 interface ServiceProviderProps {
@@ -74,7 +73,7 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     solutions: ['Search'],
   },
   [ServiceProviderKeys.azureaistudio]: {
-    icon: azureAIStudioIcon,
+    icon: azureIcon,
     name: 'Azure AI Studio',
     solutions: ['Search'],
   },
