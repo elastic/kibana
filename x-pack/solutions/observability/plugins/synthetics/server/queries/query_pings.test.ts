@@ -73,7 +73,13 @@ describe('queryPings', () => {
     const mockResponse = {
       body: {
         hits: {
-          hits: [{ _source: { '@timestamp': '2023-01-01T00:00:00Z' }, _id: 'doc1', _index: 'synthetics-browser-default' }],
+          hits: [
+            {
+              _source: { '@timestamp': '2023-01-01T00:00:00Z' },
+              _id: 'doc1',
+              _index: 'synthetics-browser-default',
+            },
+          ],
           total: { value: 1 },
         },
       },
