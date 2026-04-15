@@ -62,15 +62,7 @@ components:
               policy_ids:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PolicyIdsOrUndefined'
               shards:
-                description: 'Shard configuration as an array of key-value pairs.'
-                type: array
-                items:
-                  type: object
-                  properties:
-                    key:
-                      type: string
-                    value:
-                      type: number
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Shards'
         example:
           data:
             saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"

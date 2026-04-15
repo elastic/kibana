@@ -1714,15 +1714,7 @@ components:
               description: The saved object ID of the pack.
               type: string
             shards:
-              description: Shard configuration as an array of key-value pairs.
-              items:
-                type: object
-                properties:
-                  key:
-                    type: string
-                  value:
-                    type: number
-              type: array
+              $ref: '#/components/schemas/Shards'
             updated_at:
               format: date-time
               type: string
