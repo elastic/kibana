@@ -96,62 +96,64 @@ const RunHeader: React.FC<{
   const evaluatorModel = runData?.evaluator_model?.id;
 
   return (
-    <EuiPanel hasShadow={false} hasBorder>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <strong>{label}</strong>
-          </EuiText>
-        </EuiFlexItem>
+    <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={runId}>
-            <EuiBadge color="hollow" tabIndex={0}>
-              <code>{runId.slice(0, 12)}</code>
-            </EuiBadge>
+            <EuiTitle size="xs">
+              <h3 tabIndex={0}>{label}</h3>
+            </EuiTitle>
           </EuiToolTip>
         </EuiFlexItem>
         {branch && (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="default">{branch}</EuiBadge>
+            <EuiText size="s">{branch}</EuiText>
+          </EuiFlexItem>
+        )}
+        {timestamp && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {new Date(timestamp).toLocaleString()}
+            </EuiText>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
       {isLoading ? (
         <>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <EuiLoadingSpinner size="s" />
         </>
       ) : (
-        <EuiFlexGroup gutterSize="l" wrap responsive={false} css={{ marginTop: 8 }}>
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          responsive={false}
+          wrap
+          css={{ marginTop: 6 }}
+        >
           {taskModel && (
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                title={<EuiBadge color="primary">{taskModel}</EuiBadge>}
-                description={i18n.STAT_TASK_MODEL}
-                titleSize="xs"
-                isLoading={false}
-              />
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  <strong>{i18n.STAT_TASK_MODEL}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="primary">{taskModel}</EuiBadge>
+              </EuiFlexItem>
+            </>
           )}
           {evaluatorModel && (
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                title={<EuiBadge color="accent">{evaluatorModel}</EuiBadge>}
-                description={i18n.STAT_EVALUATOR_MODEL}
-                titleSize="xs"
-                isLoading={false}
-              />
-            </EuiFlexItem>
-          )}
-          {timestamp && (
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                title={new Date(timestamp).toLocaleString()}
-                description={i18n.STAT_TIMESTAMP}
-                titleSize="xs"
-                isLoading={false}
-              />
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="accent">{evaluatorModel}</EuiBadge>
+              </EuiFlexItem>
+            </>
           )}
         </EuiFlexGroup>
       )}
