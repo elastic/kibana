@@ -16,6 +16,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPublicSetup {}
@@ -39,4 +40,5 @@ export interface ServerlessObservabilityPublicStartDependencies {
   security: SecurityPluginStart;
   streams?: StreamsPluginStart;
   cases?: CasesPublicStart;
+  workflowsManagement?: WorkflowsPublicPluginStart;
 }
