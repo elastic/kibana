@@ -19,7 +19,7 @@ if (getFips() === 1) {
 }
 
 // Failing: See https://github.com/elastic/kibana/issues/253605
-describe.skip('SelectedFilters', function () {
+describe('SelectedFilters', function () {
   mockAppDataView();
 
   const dataViewSeries = getDefaultConfigs({
