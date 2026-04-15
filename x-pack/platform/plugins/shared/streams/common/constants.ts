@@ -79,6 +79,13 @@ export const MAX_SCHEDULED_STREAMS = 5;
 
 export const POLL_DELAY_SECONDS = 5;
 
+export interface ContinuousExtractionWorkflowInputs extends Record<string, unknown> {
+  maxScheduledStreams?: number;
+  lookbackHours?: number;
+  extractionIntervalHours?: number;
+  excludedStreamPatterns?: string;
+}
+
 // KI features identification workflow
 export const KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
   'workflow-f1c2d3e4-a5b6-47c8-9d0e-1f2a3b4c5d6e';

@@ -26,10 +26,12 @@ import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { InsightClient } from '../lib/sig_events/insights/client/insight_client';
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
-import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
 import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
 import type { WorkflowClient } from '../lib/workflows/workflow_client';
-import type { FeaturesIdentificationWorkflowInputs } from '../../common/constants';
+import type {
+  ContinuousExtractionWorkflowInputs,
+  FeaturesIdentificationWorkflowInputs,
+} from '../../common/constants';
 
 export type GetScopedClients = ({
   request,
@@ -63,7 +65,7 @@ export interface RouteDependencies {
   getScopedClients: GetScopedClients;
   processorSuggestions: ProcessorSuggestionsService;
   patternExtractionService: IPatternExtractionService;
-  continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
+  continuousExtractionWorkflowClient?: WorkflowClient<ContinuousExtractionWorkflowInputs>;
   featuresIdentificationWorkflowClient?: WorkflowClient<FeaturesIdentificationWorkflowInputs>;
 }
 

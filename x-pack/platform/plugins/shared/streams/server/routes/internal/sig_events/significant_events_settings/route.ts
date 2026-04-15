@@ -17,6 +17,7 @@ import {
   STREAMS_API_PRIVILEGES,
   MIN_EXTRACTION_INTERVAL_HOURS,
 } from '../../../../../common/constants';
+import { ensureContinuousExtraction } from '../../../../lib/workflows/continuous_extraction_workflow';
 
 const putSignificantEventsSettingsBodySchema = z.object({
   continuousKiExtraction: z.object({
@@ -47,7 +48,8 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    continuousKiExtractionWorkflowService,
+    logger,
+    continuousExtractionWorkflowClient,
     featuresIdentificationWorkflowClient,
   }): Promise<{ success: true }> => {
     const { licensing, uiSettingsClient, globalUiSettingsClient } = await getScopedClients({
@@ -76,16 +78,18 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
       await globalUiSettingsClient.setMany(updates);
     }
 
-    if (continuousKiExtractionWorkflowService) {
+    if (continuousExtractionWorkflowClient) {
       const enabled =
         continuousKiExtraction.enabled ??
         (await globalUiSettingsClient.get<boolean>(
           OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
         ));
-      await continuousKiExtractionWorkflowService.ensureWorkflow({
+      await ensureContinuousExtraction({
+        continuousExtractionWorkflowClient,
         enabled,
         request,
-        featuresWorkflowClient: featuresIdentificationWorkflowClient,
+        featuresIdentificationWorkflowClient,
+        logger,
       });
     }
 

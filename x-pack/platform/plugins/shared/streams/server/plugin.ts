@@ -29,6 +29,8 @@ import { isNotFoundError } from '@kbn/es-errors';
 import type { StreamsConfig } from '../common/config';
 import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
+  type ContinuousExtractionWorkflowInputs,
+  CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
   type FeaturesIdentificationWorkflowInputs,
   KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   STREAMS_API_PRIVILEGES,
@@ -73,12 +75,9 @@ import { registerSuggestionsInferenceFeatures } from './register_suggestions_inf
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
 import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
-import {
-  createContinuousKiExtractionWorkflowService,
-  type ContinuousKiExtractionWorkflowService,
-} from './lib/workflows/continuous_extraction_workflow';
 import { createWorkflowClient, type WorkflowClient } from './lib/workflows/workflow_client';
 import FEATURES_IDENTIFICATION_WORKFLOW_YAML from './lib/workflows/features_identification_workflow.yaml';
+import CONTINUOUS_EXTRACTION_WORKFLOW_YAML from './lib/workflows/continuous_extraction_workflow.yaml';
 import { createInferenceResolver } from './lib/streams/assets/query/helpers/inference_availability';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -281,21 +280,26 @@ export class StreamsPlugin
         });
     }
 
-    let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
+    let continuousExtractionWorkflowClient:
+      | WorkflowClient<ContinuousExtractionWorkflowInputs>
+      | undefined;
     let featuresIdentificationWorkflowClient:
       | WorkflowClient<FeaturesIdentificationWorkflowInputs>
       | undefined;
 
     if (plugins.workflowsManagement) {
-      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService(
-        this.logger,
-        plugins.workflowsManagement.management
-      );
+      const { management: managementApi } = plugins.workflowsManagement;
+      continuousExtractionWorkflowClient = createWorkflowClient({
+        workflowId: CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+        yaml: CONTINUOUS_EXTRACTION_WORKFLOW_YAML,
+        logger: this.logger,
+        managementApi,
+      });
       featuresIdentificationWorkflowClient = createWorkflowClient({
         workflowId: KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
         yaml: FEATURES_IDENTIFICATION_WORKFLOW_YAML,
         logger: this.logger,
-        managementApi: plugins.workflowsManagement.management,
+        managementApi,
       });
     }
 
@@ -376,7 +380,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
-        continuousKiExtractionWorkflowService,
+        continuousExtractionWorkflowClient,
         featuresIdentificationWorkflowClient,
       },
       core,
