@@ -28,7 +28,7 @@ import { useFetchMoreRecords } from '../layout/use_fetch_more_records';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../../../../common/agent_builder';
 
 const SESSION_TAG = 'discover';
-const MAX_SAMPLE_ROWS = 15;
+const MAX_SAMPLE_ROWS = 10;
 const MAX_COLUMNS = 100;
 const MAX_VALUE_LENGTH = 100;
 
@@ -101,7 +101,20 @@ export const buildEsqlResultsAttachment = (
   totalHits: number,
   timeRange: { from: string; to: string } | undefined
 ): AttachmentInput => {
-  const columns = esqlQueryColumns.slice(0, MAX_COLUMNS).map((col) => ({
+  // Build a set of base field names to detect .keyword duplicates
+  const columnNames = new Set(esqlQueryColumns.map((col) => col.name));
+
+  // Filter out .keyword columns when the base field also exists (e.g. skip "host.keyword" if "host" exists)
+  // no need to send columns with the same content twice
+  const filteredColumns = esqlQueryColumns.filter((col) => {
+    if (col.name.endsWith('.keyword')) {
+      const baseName = col.name.slice(0, -'.keyword'.length);
+      return !columnNames.has(baseName);
+    }
+    return true;
+  });
+
+  const columns = filteredColumns.slice(0, MAX_COLUMNS).map((col) => ({
     name: col.name,
     type: col.meta?.type ?? 'unknown',
   }));

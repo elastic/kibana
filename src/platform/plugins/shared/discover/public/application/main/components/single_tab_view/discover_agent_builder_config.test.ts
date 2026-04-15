@@ -126,7 +126,7 @@ describe('buildEsqlResultsAttachment', () => {
     });
   });
 
-  it('limits sample rows to 15', () => {
+  it('limits sample rows to 10', () => {
     const manyRows = Array.from({ length: 20 }, (_, i) => ({
       flattened: { status: `row-${i}` },
     }));
@@ -140,7 +140,20 @@ describe('buildEsqlResultsAttachment', () => {
     );
 
     const { sampleRows } = getEsqlResultsData(attachment);
-    expect(sampleRows).toHaveLength(15);
+    expect(sampleRows).toHaveLength(10);
+  });
+
+  it('filters out .keyword columns when the base field exists', () => {
+    const columns = [
+      { name: 'host', meta: { type: 'string' } },
+      { name: 'host.keyword', meta: { type: 'string' } },
+      { name: 'status.keyword', meta: { type: 'keyword' } },
+    ];
+
+    const attachment = buildEsqlResultsAttachment('FROM logs-*', columns, [], 0, undefined);
+
+    const { columns: resultColumns } = getEsqlResultsData(attachment);
+    expect(resultColumns.map((c: { name: string }) => c.name)).toEqual(['host', 'status.keyword']);
   });
 
   it('limits columns to 100', () => {
