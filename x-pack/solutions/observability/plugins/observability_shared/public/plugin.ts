@@ -88,7 +88,6 @@ export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
   private appChangeSubscription?: Subscription;
-  private lastIsObservabilityApp?: boolean;
 
   constructor() {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
