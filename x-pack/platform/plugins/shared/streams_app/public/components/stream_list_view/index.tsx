@@ -37,15 +37,17 @@ import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_fl
 import { getFormattedError } from '../../util/errors';
 
 // Fun random emoji easter egg for the header
-const getRandomEmoji = () => {
+const getRandomEmojis = () => {
   const emojis = ['🌊', '💧', '🏄', '🐠', '🌀', '💦', '🌊', '🚣', '⛵', '🎣'];
-  return emojis[Math.floor(Math.random() * emojis.length)];
+  const first = emojis[Math.floor(Math.random() * emojis.length)];
+  const second = emojis[Math.floor(Math.random() * emojis.length)];
+  return `${first}${second}`;
 };
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
   const context = useKibana();
-  const [randomEmoji] = useState(getRandomEmoji());
+  const [randomEmojis] = useState(getRandomEmojis());
   const {
     dependencies: {
       start: {
@@ -169,7 +171,7 @@ export function StreamListView() {
           >
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
-                {randomEmoji}{' '}
+                {randomEmojis}{' '}
                 {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
                   defaultMessage: 'Streams',
                 })}
