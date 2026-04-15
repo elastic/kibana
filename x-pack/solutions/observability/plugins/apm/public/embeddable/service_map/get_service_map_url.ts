@@ -39,6 +39,6 @@ export function getServiceMapUrl(core: CoreStart, params: ServiceMapUrlParams): 
   const hashPath = serviceName
     ? `#/services/${encodeURIComponent(serviceName)}/service-map`
     : '#/service-map';
-  const path = queryString ? `${hashPath}?${queryString}` : hashPath;
+  const path = `${hashPath}?${queryString}`;
   return core.application.getUrlForApp('apm', { path });
 }

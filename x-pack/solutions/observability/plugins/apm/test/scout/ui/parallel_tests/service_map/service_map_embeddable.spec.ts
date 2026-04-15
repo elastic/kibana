@@ -26,17 +26,17 @@ test.describe(
       dataViewId = data.id;
     });
 
+    test.beforeEach(async ({ browserAuth, uiSettings }) => {
+      await browserAuth.loginAsAdmin();
+      await uiSettings.set({ defaultIndex: dataViewId });
+      await uiSettings.setDefaultTime({ from: testData.START_DATE, to: testData.END_DATE });
+    });
+
     test.afterAll(async ({ apiServices, uiSettings }) => {
       await uiSettings.unset('defaultIndex');
       if (dataViewId) {
         await apiServices.dataViews.delete(dataViewId);
       }
-    });
-
-    test.beforeEach(async ({ browserAuth, uiSettings }) => {
-      await browserAuth.loginAsAdmin();
-      await uiSettings.set({ defaultIndex: dataViewId });
-      await uiSettings.setDefaultTime({ from: testData.START_DATE, to: testData.END_DATE });
     });
 
     test('adds and renders Service map embeddable on a new dashboard', async ({
@@ -56,6 +56,10 @@ test.describe(
         });
         await expect(serviceMapMenuItem).toBeVisible();
         await serviceMapMenuItem.click();
+
+        await expect(
+          page.getByRole('heading', { name: 'Service map configuration', level: 2 })
+        ).toBeVisible();
       });
 
       await test.step('verify embeddable panel is rendered', async () => {

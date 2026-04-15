@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* istanbul ignore file */
 
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import type { Environment } from '../../../common/environment_rt';

@@ -46,7 +46,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       const serviceName$ = new BehaviorSubject(state.serviceName);
       const serviceGroupId$ = new BehaviorSubject(state.serviceGroupId);
 
-      function serializeState() {
+      function serializeState(): ServiceMapEmbeddableState {
         return {
           ...titleManager.getLatestState(),
           rangeFrom: rangeFrom$.getValue(),

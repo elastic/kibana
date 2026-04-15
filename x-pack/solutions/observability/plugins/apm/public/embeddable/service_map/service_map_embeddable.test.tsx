@@ -7,14 +7,29 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { BehaviorSubject } from 'rxjs';
 import { ServiceMapEmbeddable } from './service_map_embeddable';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import { mockApmPluginContextValue } from '../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import * as useServiceMapHook from '../../components/app/service_map/use_service_map';
+import * as urlParamHelpers from '../../context/url_params_context/helpers';
 import { LicenseContext } from '../../context/license/license_context';
+
+jest.mock('../../context/time_range_metadata/time_range_metadata_context', () => {
+  const actual = jest.requireActual(
+    '../../context/time_range_metadata/time_range_metadata_context'
+  );
+  return {
+    ...actual,
+    TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  };
+});
 
 const mockCore = mockApmPluginContextValue.core as Parameters<
   typeof ApmEmbeddableContext
@@ -55,11 +70,20 @@ const mockDeps = {
 } as unknown as Parameters<typeof ApmEmbeddableContext>[0]['deps'];
 
 function renderEmbeddable(
-  extraProps: Partial<React.ComponentProps<typeof ServiceMapEmbeddable>> = {}
+  extraProps: Partial<React.ComponentProps<typeof ServiceMapEmbeddable>> = {},
+  options: {
+    license?: License;
+    deps?: Parameters<typeof ApmEmbeddableContext>[0]['deps'];
+  } = {}
 ) {
+  const license = Object.prototype.hasOwnProperty.call(options, 'license')
+    ? options.license
+    : platinumLicense;
+  const deps = options.deps ?? mockDeps;
+
   return render(
-    <ApmEmbeddableContext deps={mockDeps} rangeFrom="now-15m" rangeTo="now">
-      <LicenseContext.Provider value={platinumLicense}>
+    <ApmEmbeddableContext deps={deps} rangeFrom="now-15m" rangeTo="now">
+      <LicenseContext.Provider value={license}>
         <ServiceMapEmbeddable {...defaultProps} {...extraProps} />
       </LicenseContext.Provider>
     </ApmEmbeddableContext>
@@ -68,9 +92,11 @@ function renderEmbeddable(
 
 describe('ServiceMapEmbeddable', () => {
   const mockUseServiceMap = jest.spyOn(useServiceMapHook, 'useServiceMap');
+  const mockGetDateRange = jest.spyOn(urlParamHelpers, 'getDateRange');
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetDateRange.mockReturnValue({ start: 'resolved-start', end: 'resolved-end' });
     (mockCore.application.getUrlForApp as jest.Mock)?.mockImplementation(
       (appId: string, options?: { path?: string }) => `/basepath/app/${appId}${options?.path ?? ''}`
     );
@@ -86,109 +112,162 @@ describe('ServiceMapEmbeddable', () => {
     expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('renders empty state when no data', () => {
-    mockUseServiceMap.mockReturnValue({
-      data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
-      status: FETCH_STATUS.SUCCESS,
+  describe('when license is missing', () => {
+    it('renders the loading state', () => {
+      renderEmbeddable({}, { license: undefined });
+      expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
+      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
     });
-    renderEmbeddable();
-    expect(screen.getByText(/No services available/)).toBeInTheDocument();
   });
 
-  it('renders license prompt when license is not platinum', () => {
-    const goldLicense = new License({
-      signature: 'test',
-      license: {
-        expiryDateInMillis: 0,
-        mode: 'gold',
-        status: 'active',
-        type: 'gold',
-        uid: '1',
-      },
+  describe('when no data is returned', () => {
+    it('renders the empty state', () => {
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      renderEmbeddable();
+      expect(screen.getByText(/No services available/)).toBeInTheDocument();
     });
-    mockUseServiceMap.mockReturnValue({
-      data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
-      status: FETCH_STATUS.SUCCESS,
-    });
-    render(
-      <ApmEmbeddableContext deps={mockDeps} rangeFrom="now-15m" rangeTo="now">
-        <LicenseContext.Provider value={goldLicense}>
-          <ServiceMapEmbeddable {...defaultProps} />
-        </LicenseContext.Provider>
-      </ApmEmbeddableContext>
-    );
-    expect(screen.getByText(/Platinum/)).toBeInTheDocument();
   });
 
-  it('renders error state on generic failure', () => {
-    mockUseServiceMap.mockReturnValue({
-      data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
-      status: FETCH_STATUS.FAILURE,
+  describe('when license is not platinum', () => {
+    it('renders the license prompt', () => {
+      const goldLicense = new License({
+        signature: 'test',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'gold',
+          status: 'active',
+          type: 'gold',
+          uid: '1',
+        },
+      });
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      render(
+        <ApmEmbeddableContext deps={mockDeps} rangeFrom="now-15m" rangeTo="now">
+          <LicenseContext.Provider value={goldLicense}>
+            <ServiceMapEmbeddable {...defaultProps} />
+          </LicenseContext.Provider>
+        </ApmEmbeddableContext>
+      );
+      expect(screen.getByText(/Platinum/)).toBeInTheDocument();
     });
-    renderEmbeddable();
-    expect(screen.getByText(/Unable to load service map/)).toBeInTheDocument();
-    expect(screen.getByTestId('apmServiceMapEmbeddableError')).toBeInTheDocument();
   });
 
-  it('renders map with view full map link when data is loaded', () => {
-    mockUseServiceMap.mockReturnValue({
-      data: {
-        nodes: [
-          {
-            id: 'node-1',
-            data: { id: 'node-1', label: 'service-a', isService: true as const },
-            position: { x: 0, y: 0 },
-            type: 'service',
+  describe('when service map is not enabled', () => {
+    it('renders the disabled prompt', () => {
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      renderEmbeddable(
+        {},
+        {
+          deps: {
+            ...mockDeps,
+            config: {
+              ...mockDeps.config,
+              serviceMapEnabled: false,
+            },
           },
-        ],
-        edges: [],
-        nodesCount: 1,
-        tracesCount: 10,
-      },
-      status: FETCH_STATUS.SUCCESS,
+        }
+      );
+      expect(
+        screen.getByText(
+          /The service map has been disabled\. It can be enabled via `xpack\.apm\.serviceMapEnabled`/
+        )
+      ).toBeInTheDocument();
     });
-    renderEmbeddable();
-    expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /View full service map/i })).toBeInTheDocument();
   });
 
-  it('updates graph height to match panel height on resize', async () => {
-    mockUseServiceMap.mockReturnValue({
-      data: {
-        nodes: [
-          {
-            id: 'node-1',
-            data: { id: 'node-1', label: 'service-a', isService: true as const },
-            position: { x: 0, y: 0 },
-            type: 'service',
+  describe('when fetch status fails', () => {
+    it('renders the error state', () => {
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.FAILURE,
+      });
+      renderEmbeddable();
+      expect(screen.getByText(/Unable to load service map/)).toBeInTheDocument();
+      expect(screen.getByTestId('apmServiceMapEmbeddableError')).toBeInTheDocument();
+    });
+
+    describe('when timeout error is returned', () => {
+      it('renders the timeout prompt', () => {
+        const timeoutError = {
+          name: 'HttpFetchError',
+          message: 'Request failed',
+          request: new Request('http://localhost/internal/apm/service-map'),
+          body: {
+            statusCode: 500,
+            message: SERVICE_MAP_TIMEOUT_ERROR,
           },
-        ],
-        edges: [],
-        nodesCount: 1,
-        tracesCount: 10,
-      },
-      status: FETCH_STATUS.SUCCESS,
+        } as IHttpFetchError<ResponseErrorBody>;
+
+        mockUseServiceMap.mockReturnValue({
+          data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+          status: FETCH_STATUS.FAILURE,
+          error: timeoutError,
+        });
+
+        renderEmbeddable();
+
+        expect(screen.getByText(/Service map timeout/)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('when data is loaded', () => {
+    beforeEach(() => {
+      mockUseServiceMap.mockReturnValue({
+        data: {
+          nodes: [
+            {
+              id: 'node-1',
+              data: { id: 'node-1', label: 'service-a', isService: true as const },
+              position: { x: 0, y: 0 },
+              type: 'service',
+            },
+          ],
+          edges: [],
+          nodesCount: 1,
+          tracesCount: 10,
+        },
+        status: FETCH_STATUS.SUCCESS,
+      });
     });
 
-    const { container } = renderEmbeddable();
-    const panel = container.querySelector('.euiPanel') as HTMLElement;
-    const embeddable = screen.getByTestId('apmServiceMapEmbeddable');
+    it('renders the map with a link to view the full map', () => {
+      renderEmbeddable();
+      expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /View full service map/i })).toBeInTheDocument();
+    });
 
-    Object.defineProperty(panel, 'clientHeight', { configurable: true, value: 720 });
-    window.dispatchEvent(new Event('resize'));
+    describe('when the panel is resized', () => {
+      it('keeps graph height at embeddable minimum height', () => {
+        renderEmbeddable();
+        const embeddable = screen.getByTestId('apmServiceMapEmbeddable');
+        const graph = screen.getByTestId('serviceMapGraph');
 
-    expect(embeddable).toHaveStyle({ height: '720px' });
-  });
+        Object.defineProperty(embeddable, 'clientHeight', { configurable: true, value: 720 });
+        window.dispatchEvent(new Event('resize'));
+        expect(graph).toHaveStyle({ height: '400px' });
+      });
+    });
 
-  it('does not expose service map dashboard embeddable when feature flag is false', () => {
-    expect(
-      'Implement feature flag gating for APM service map dashboard embeddable (flag=false)'
-    ).toBe('');
-  });
+    it('falls back to raw range values when date range is unresolved', () => {
+      mockGetDateRange.mockReturnValue({ start: undefined, end: undefined });
+      renderEmbeddable({ rangeFrom: 'now-2h', rangeTo: 'now-1h' });
 
-  it('exposes service map dashboard embeddable when feature flag is true', () => {
-    expect(
-      'Implement feature flag gating for APM service map dashboard embeddable (flag=true)'
-    ).toBe('');
+      expect(mockUseServiceMap).toHaveBeenCalledWith(
+        expect.objectContaining({
+          start: 'now-2h',
+          end: 'now-1h',
+        })
+      );
+    });
   });
 });
