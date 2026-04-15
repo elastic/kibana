@@ -18,6 +18,7 @@ import type {
 import type {
   Datatable,
   DatatableColumn,
+  DatatableRow,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -29,11 +30,10 @@ import {
   isComputedColumn,
   getQuerySummary,
 } from '@kbn/esql-utils';
-import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { catchError, defer, map, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter, getTimeZoneFromSettings } from '@kbn/es-query';
-import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLColumn, ESQLRow, ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import DateMath from '@kbn/datemath';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
@@ -96,6 +96,44 @@ function extractTypeAndReason(attributes: any): { type?: string; reason?: string
   }
   return {};
 }
+
+const hasNoValueCells = (values: ESQLRow[]): boolean => {
+  return values.length === 0 || values.every((row) => Array.isArray(row) && row.length === 0);
+};
+
+/**
+ * Maps ES|QL `values` rows to expression datatable rows in `datatableColumns` order.
+ */
+const mapEsqlValuesToDatatableRows = (
+  datatableColumns: DatatableColumn[],
+  { valueColumns, values }: { valueColumns: ESQLColumn[]; values: ESQLRow[] }
+): DatatableRow[] => {
+  if (datatableColumns.length === 0) {
+    return [];
+  }
+
+  if (valueColumns.length === 0 || hasNoValueCells(values)) {
+    const row: DatatableRow = {};
+    for (const col of datatableColumns) {
+      row[col.name] = null;
+    }
+    return [row];
+  }
+
+  return values.map((valueRow) => {
+    const byName: Record<string, unknown> = {};
+
+    valueColumns.forEach((col, i) => {
+      byName[col.name] = valueRow[i] ?? null;
+    });
+
+    const row: DatatableRow = {};
+    for (const col of datatableColumns) {
+      row[col.name] = byName[col.name] ?? null;
+    }
+    return row;
+  });
+};
 
 export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
   const essql: EsqlExpressionFunctionDefinition = {
@@ -358,13 +396,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               }
             : undefined;
 
-          // Normalize body.values: if all arrays are empty, convert to single empty array
-          const normalizedValues = body.values.every(
-            (row) => Array.isArray(row) && row.length === 0
-          )
-            ? []
-            : body.values;
-
           // Get query summary to identify computed columns
           const querySummary = getQuerySummary(query);
 
@@ -409,13 +440,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             allColumns as DatatableColumn[]
           );
 
-          // sort only in case of empty columns to correctly align columns to items in values array
-          if (hasEmptyColumns) {
-            updatedWithVariablesColumns.sort((a, b) => Number(a.isNull) - Number(b.isNull));
-          }
-          const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
-
-          const rows = normalizedValues.map((row) => zipObject(columnNames, row));
+          const rows = mapEsqlValuesToDatatableRows(updatedWithVariablesColumns, {
+            valueColumns: body.columns ?? [],
+            values: body.values,
+          });
 
           return {
             type: 'datatable',
@@ -423,13 +451,13 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               type: ESQL_TABLE_TYPE,
               query,
               statistics: {
-                totalCount: normalizedValues.length,
+                totalCount: hasNoValueCells(body.values) ? 0 : body.values.length,
               },
             },
             columns: updatedWithVariablesColumns,
             rows,
             warning,
-          } as Datatable;
+          } satisfies Datatable;
         })
       );
     },
