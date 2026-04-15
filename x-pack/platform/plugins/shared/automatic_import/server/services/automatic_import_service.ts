@@ -131,8 +131,6 @@ export class AutomaticImportService {
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
   private logger: Logger;
-  private analytics: AnalyticsServiceSetup;
-
   constructor(
     loggerFactory: LoggerFactory,
     savedObjectsServiceSetup: SavedObjectsServiceSetup,
@@ -143,7 +141,6 @@ export class AutomaticImportService {
     this.pluginStop$ = new ReplaySubject(1);
     this.loggerFactory = loggerFactory;
     this.logger = loggerFactory.get('automaticImportService');
-    this.analytics = analytics;
     this.savedObjectsServiceSetup = savedObjectsServiceSetup;
     this.samplesIndexService = new AutomaticImportSamplesIndexService(loggerFactory);
 
