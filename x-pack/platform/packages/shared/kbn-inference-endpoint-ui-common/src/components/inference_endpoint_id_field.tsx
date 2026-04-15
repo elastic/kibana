@@ -53,7 +53,7 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
   isEdit,
 }) => {
   const { setFieldValue } = useFormContext();
-  const inferenceUri = useMemo(() => `_inference/${selectedTaskType}/`, [selectedTaskType]);
+  const inferenceUri = useMemo(() => `_inference/${selectedTaskType ?? ''}/`, [selectedTaskType]);
 
   return (
     <>
@@ -93,7 +93,7 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
                   <EuiCopy
                     beforeMessage={LABELS.COPY_TOOLTIP}
                     afterMessage={LABELS.COPIED_TOOLTIP}
-                    textToCopy={config.inferenceId}
+                    textToCopy={config.inferenceId ?? ''}
                   >
                     {(copy) => (
                       <EuiFormAppend
@@ -129,14 +129,14 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
           <EuiFlexItem grow>
             <EuiText size="s">
-              <code>{`${inferenceUri}${config.inferenceId}`}</code>
+              <code>{`${inferenceUri}${config.inferenceId ?? ''}`}</code>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCopy
               beforeMessage={LABELS.COPY_TOOLTIP}
               afterMessage={LABELS.COPIED_TOOLTIP}
-              textToCopy={`${inferenceUri}${config.inferenceId}`}
+              textToCopy={`${inferenceUri}${config.inferenceId ?? ''}`}
             >
               {(copy) => (
                 <EuiButtonIcon

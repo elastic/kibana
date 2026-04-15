@@ -536,7 +536,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     config?.provider,
     config?.taskType,
     isEdit,
-    selectedTaskType,
     updatedProviders,
     getOverrides,
     allowedTaskTypes,
