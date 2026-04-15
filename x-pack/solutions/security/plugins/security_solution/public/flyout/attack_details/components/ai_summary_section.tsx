@@ -9,6 +9,7 @@ import React, { memo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon, EuiPanel, EuiSpacer, EuiSwitch, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import { useOverviewTabData } from '../hooks/use_overview_tab_data';
 import { ExpandableSection } from '../../../flyout_v2/shared/components/expandable_section';
@@ -84,7 +85,8 @@ export const AISummarySection = memo(() => {
       <EuiPanel hasBorder data-test-subj="overview-tab-ai-summary-panel">
         <div data-test-subj="overview-tab-ai-summary-content">
           <AttackDiscoveryMarkdownFormatter
-            disableActions
+            scopeId={TableId.alertsOnAttacksPage}
+            disableActions={showAnonymized}
             markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
           />
         </div>
@@ -104,7 +106,8 @@ export const AISummarySection = memo(() => {
 
         <div data-test-subj="overview-tab-ai-background-content">
           <AttackDiscoveryMarkdownFormatter
-            disableActions
+            disableActions={showAnonymized}
+            scopeId={TableId.alertsOnAttacksPage}
             markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
           />
         </div>
