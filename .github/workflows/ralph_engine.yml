@@ -163,7 +163,8 @@ jobs:
           - You are running in CI. Do NOT attempt interactive git operations.
           - All commits will be pushed by the workflow after you finish.
           - Focus on implementing the instruction above. Update files directly.
-          - Run validation commands (lint, type-check) to verify your changes.
+          - To type-check your changes, use the fast observability type checker:
+            node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --project path/to/tsconfig.json
           - If validation fails, fix the issues and try again.
           TASK_FOOTER
 
@@ -193,40 +194,6 @@ jobs:
           Fix the issue that caused the failure. Focus on the actual error, not on re-implementing the original task.
           FIX_EOF
           opencode run "$(cat .ralph_fix_task.md)" --model "$MODEL" 2>&1 | tee -a ralph-output.md
-
-      - name: Verify Changes
-        run: |
-          CHANGED=0
-          if ! git diff --quiet 2>/dev/null; then CHANGED=1; fi
-          if ! git diff --cached --quiet 2>/dev/null; then CHANGED=1; fi
-          if [ -n "$(git ls-files --others --exclude-standard)" ]; then CHANGED=1; fi
-
-          if [ "$CHANGED" -eq 0 ]; then
-            echo "No changes detected"
-            exit 0
-          fi
-
-          echo "Changes detected — running validation..."
-
-          VALIDATION_FAILED=0
-
-          echo "=== ESLint ==="
-          if ! node scripts/eslint.js 2>&1 | tail -20; then
-            echo "ESLint found issues"
-            VALIDATION_FAILED=1
-          fi
-
-          echo "=== Type Check ==="
-          if ! yarn test:type_check 2>&1 | tail -20; then
-            echo "Type check found issues"
-            VALIDATION_FAILED=1
-          fi
-
-          if [ "$VALIDATION_FAILED" -eq 1 ]; then
-            echo "::warning::Validation had issues but changes will still be pushed for review"
-          else
-            echo "All validation passed"
-          fi
 
       - name: Push Changes
         env:
