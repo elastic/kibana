@@ -72,7 +72,8 @@ export function createMaintainerStatus({
   namespace?: string;
   initialState: EntityMaintainerState;
 }): EntityMaintainerStatus {
-  const resolvedNamespace = namespace || currentStatus?.namespace || currentStatus?.metadata?.namespace;
+  const resolvedNamespace =
+    namespace || currentStatus?.namespace || currentStatus?.metadata?.namespace;
   if (!resolvedNamespace) {
     throw new Error('Entity maintainer namespace is required');
   }
