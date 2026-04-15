@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PassThrough, Readable } from 'stream';
+import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -139,20 +139,19 @@ export class QueryService implements QueryServiceContract {
   ): AsyncIterable<T[]> {
     let reader: AsyncRecordBatchStreamReader;
     const scope = context.createScope();
-    const passthrough = new PassThrough();
-    const streamPipeline = pipeline(response, passthrough, { signal: context.signal });
+    const { stream: capturingStream, getBuffer: getCapturedBuffer } =
+      createCapturingTransform(MAX_ERROR_CAPTURE_BYTES);
+    const streamPipeline = pipeline(response, capturingStream, { signal: context.signal });
 
     scope.add(() => {
-      passthrough.destroy();
+      capturingStream.destroy();
     });
 
     try {
       context.throwIfAborted();
-      reader = await AsyncRecordBatchStreamReader.from(Readable.from(passthrough));
+      reader = await AsyncRecordBatchStreamReader.from(Readable.from(capturingStream));
     } catch (error) {
-      // ES returns JSON instead of Arrow format when there's an error
-      // Apache Arrow will fail to parse it, so we throw a more descriptive error
-      throw this.buildParseError(error);
+      throw this.buildParseError(error, getCapturedBuffer());
     }
 
     scope.add(async () => {
@@ -173,9 +172,7 @@ export class QueryService implements QueryServiceContract {
         yield rows;
       }
     } catch (error) {
-      // ES may return JSON error response instead of Arrow format
-      // which causes parsing errors during iteration
-      throw this.buildParseError(error);
+      throw this.buildParseError(error, getCapturedBuffer());
     } finally {
       await this.cleanupStream({ scope, streamPipeline, context });
     }
@@ -213,7 +210,13 @@ export class QueryService implements QueryServiceContract {
     }
   }
 
-  private buildParseError(error: unknown): Error {
+  private buildParseError(error: unknown, capturedBuffer?: Buffer): Error {
+    const esError = tryExtractEsError(capturedBuffer);
+
+    if (esError) {
+      return new Error(`ES|QL query failed: ${esError}`);
+    }
+
     const message = error instanceof Error ? error.message : String(error);
     return new Error(`Failed to parse ES|QL response. Error: ${message}`);
   }
@@ -249,4 +252,61 @@ const coerceBigInts = (row: Record<string, unknown>): Record<string, unknown> =>
   }
 
   return coerced;
+};
+
+/**
+ * Max bytes to capture from the response stream for error diagnosis.
+ * ES JSON errors are typically small, so 64 KB is more than enough.
+ */
+const MAX_ERROR_CAPTURE_BYTES = 64 * 1024;
+
+/**
+ * Creates a Transform stream that captures the first `maxBytes` of data
+ * flowing through it, while forwarding all data unchanged. The captured
+ * buffer is used to diagnose errors when Arrow parsing fails — ES returns
+ * JSON error bodies even when Arrow format was requested.
+ */
+const createCapturingTransform = (
+  maxBytes: number
+): { stream: Transform; getBuffer: () => Buffer } => {
+  let capturedBytes = 0;
+  const chunks: Buffer[] = [];
+
+  const stream = new Transform({
+    transform(chunk, _encoding, callback) {
+      if (capturedBytes < maxBytes) {
+        const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        chunks.push(buf);
+        capturedBytes += buf.length;
+      }
+      callback(null, chunk);
+    },
+  });
+
+  return { stream, getBuffer: () => Buffer.concat(chunks) };
+};
+
+/**
+ * Attempts to parse a captured response buffer as a JSON error from
+ * Elasticsearch. ES returns JSON errors even when Arrow format is
+ * requested, causing the Arrow IPC parser to fail with confusing
+ * buffer-allocation errors.
+ */
+const tryExtractEsError = (buffer?: Buffer): string | undefined => {
+  if (!buffer?.length) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(buffer.toString('utf-8'));
+    if (parsed.error) {
+      return typeof parsed.error === 'string'
+        ? parsed.error
+        : parsed.error.reason || parsed.error.type || JSON.stringify(parsed.error);
+    }
+  } catch {
+    // Not a JSON response
+  }
+
+  return undefined;
 };

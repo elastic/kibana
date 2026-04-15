@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -320,6 +321,76 @@ describe('QueryService', () => {
 
       expect(mockLogger.debug).toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('extracts ES error from JSON response when Arrow parsing fails', async () => {
+      const esErrorBody = JSON.stringify({
+        error: {
+          root_cause: [{ type: 'index_not_found_exception', reason: 'no such index [foo]' }],
+          type: 'index_not_found_exception',
+          reason: 'no such index [foo]',
+        },
+        status: 404,
+      });
+
+      const stream = Readable.from(Buffer.from(esErrorBody));
+      mockEsClient.esql.query.mockResolvedValue(stream as any);
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow('ES|QL query failed: no such index [foo]');
+    });
+
+    it('extracts ES error when error field is a string', async () => {
+      const esErrorBody = JSON.stringify({
+        error: 'parsing_exception',
+        status: 400,
+      });
+
+      const stream = Readable.from(Buffer.from(esErrorBody));
+      mockEsClient.esql.query.mockResolvedValue(stream as any);
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow('ES|QL query failed: parsing_exception');
+    });
+
+    it('falls back to generic error when response is not parseable JSON', async () => {
+      const stream = Readable.from(Buffer.from('not json or arrow data'));
+      mockEsClient.esql.query.mockResolvedValue(stream as any);
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow('Failed to parse ES|QL response');
+    });
+
+    it('throws when Arrow format is unsupported for a column type', async () => {
+      const arrowUnsupportedError = JSON.stringify({
+        error: {
+          type: 'illegal_argument_exception',
+          reason: 'ES|QL type [date_range] is not supported by the Arrow format',
+        },
+        status: 400,
+      });
+
+      const stream = Readable.from(Buffer.from(arrowUnsupportedError));
+      mockEsClient.esql.query.mockResolvedValue(stream as any);
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow(
+        'ES|QL query failed: ES|QL type [date_range] is not supported by the Arrow format'
+      );
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
     });
   });
 });
