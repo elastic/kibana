@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import { existsSync, readFileSync } from 'fs';
-import { resolve } from 'path';
-
-import type { Client } from '@elastic/elasticsearch';
 import { isToolCallStep, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import {
-  getAvailableConnectors,
-  takeRandomLlmSample,
-  AI_CONNECTORS_VAR_ENV,
-} from '@kbn/gen-ai-functional-testing';
-import { REPO_ROOT } from '@kbn/repo-info';
+import { getAvailableConnectors, takeRandomLlmSample } from '@kbn/gen-ai-functional-testing';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -24,73 +15,21 @@ import type { ChatRequestBodyPayload, ChatResponse } from '../../../../common/ht
 
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import {
+  enableCcmForScoutSmokeTests,
+  getPreDiscoveredEisModelsForScout,
+  type DiscoveredEisModel,
+} from '../../lib/eis_smoke_for_scout_tests';
 
 const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
-const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
 
-interface DiscoveredModel {
-  inferenceId: string;
-  modelId: string;
-  metadata?: {
-    heuristics?: {
-      properties?: string[];
-    };
-  };
-}
+const eisCcmKeyMissingReason = `${EIS_CCM_API_KEY_ENV} not set. For local dev: export ${EIS_CCM_API_KEY_ENV}="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"`;
 
-const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
-  if (!existsSync(EIS_MODELS_PATH)) {
-    return [];
-  }
-  try {
-    const data = JSON.parse(readFileSync(EIS_MODELS_PATH, 'utf8')) as {
-      models?: DiscoveredModel[];
-    };
-    const models = data.models ?? [];
-    return models.filter((model) => !model.metadata?.heuristics?.properties?.includes('efficient'));
-  } catch {
-    return [];
-  }
-};
+/** Mirrors FTR `x-pack/platform/test/agent_builder/smoke_tests/tests/index.ts` (no try/catch). */
+const allStaticConnectors: AvailableConnectorWithId[] = getAvailableConnectors();
+const allEisModels: DiscoveredEisModel[] = getPreDiscoveredEisModelsForScout();
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-const enableCcm = async (es: Client, apiKey: string): Promise<void> => {
-  process.stdout.write('[EIS] Enabling Cloud Connected Mode...\n');
-  await es.transport.request({
-    method: 'PUT',
-    path: '/_inference/_ccm',
-    body: { api_key: apiKey },
-  });
-  process.stdout.write('[EIS] ✅ CCM enabled\n');
-
-  process.stdout.write('[EIS] Waiting for EIS endpoints to be provisioned...\n');
-  const maxRetries = 5;
-  const retryDelayMs = 3000;
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const response = await es.inference.get({ inference_id: '_all' });
-    const endpoints = response.endpoints as Array<{ task_type: string; service: string }>;
-    const eisEndpoints = endpoints.filter(
-      (ep) => ep.task_type === 'chat_completion' && ep.service === 'elastic'
-    );
-
-    if (eisEndpoints.length > 0) {
-      process.stdout.write(
-        `[EIS] ✅ Found ${eisEndpoints.length} EIS endpoints on attempt ${attempt}\n`
-      );
-      return;
-    }
-    if (attempt < maxRetries) {
-      process.stdout.write(
-        `[EIS] No endpoints yet (attempt ${attempt}/${maxRetries}), waiting...\n`
-      );
-      await sleep(retryDelayMs);
-    }
-  }
-
-  process.stderr.write('[EIS] ⚠️ No EIS endpoints found after waiting\n');
-};
+let eisCcmConfigured = false;
 
 const expectNonEmptyReply = (response: ChatResponse) => {
   const hasTextReply = Boolean(response.response.message?.trim().length);
@@ -100,8 +39,24 @@ const expectNonEmptyReply = (response: ChatResponse) => {
 
 const expectListIndicesToolCalled = (body: ChatResponse) => {
   const toolCalls = body.steps.filter(isToolCallStep);
-  expect(toolCalls.length).toBeGreaterThan(0);
-  expect(toolCalls.some((step) => step.tool_id === platformCoreTools.listIndices)).toBe(true);
+
+  // eslint-disable-next-line playwright/prefer-comparison-matcher -- match FTR `>= 1`
+  expect(toolCalls.length >= 1).toBe(true);
+  expect(toolCalls[0].tool_id).toBe(platformCoreTools.listIndices);
+};
+
+const ensureEisCcmIfNeeded = async (
+  esClient: Parameters<typeof enableCcmForScoutSmokeTests>[0]
+) => {
+  if (allEisModels.length === 0 || eisCcmConfigured) {
+    return;
+  }
+  const apiKey = process.env[EIS_CCM_API_KEY_ENV];
+  if (!apiKey) {
+    throw new Error(eisCcmKeyMissingReason);
+  }
+  await enableCcmForScoutSmokeTests(esClient, apiKey);
+  eisCcmConfigured = true;
 };
 
 apiTest.describe(
@@ -110,150 +65,113 @@ apiTest.describe(
   () => {
     apiTest.setTimeout(300_000);
 
-    let staticConnectorLoadError: string | undefined;
-    let sampledStaticConnectors: AvailableConnectorWithId[] = [];
-    try {
-      sampledStaticConnectors = takeRandomLlmSample(getAvailableConnectors());
-    } catch (e) {
-      staticConnectorLoadError =
-        e instanceof Error
-          ? e.message
-          : `Failed to load static connectors (${AI_CONNECTORS_VAR_ENV} / kibana.dev.yml)`;
-      sampledStaticConnectors = [];
-    }
-
-    const allEisModels = getPreDiscoveredEisModels();
-    const sampledEisModels = takeRandomLlmSample(allEisModels);
-    const eisCcmApiKey = process.env[EIS_CCM_API_KEY_ENV];
-
     let adminCredentials: RoleApiCredentials;
+    let selectedStaticConnectorIds: ReadonlySet<string> = new Set();
+    let selectedEisModelIds: ReadonlySet<string> = new Set();
 
-    apiTest.beforeAll(async ({ requestAuth, esClient, apiClient }) => {
+    apiTest.beforeAll(async ({ requestAuth }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
-      const warmup = await apiClient.get('/api/actions/connectors', {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-      });
-      expect(warmup).toHaveStatusCode(200);
 
-      if (allEisModels.length === 0 || !eisCcmApiKey) {
-        return;
-      }
-      await enableCcm(esClient, eisCcmApiKey);
+      const sampledStaticConnectors = takeRandomLlmSample(allStaticConnectors);
+      const sampledEisModels = takeRandomLlmSample(allEisModels);
+      selectedStaticConnectorIds = new Set(sampledStaticConnectors.map((c) => c.id));
+      selectedEisModelIds = new Set(sampledEisModels.map((m) => m.modelId));
+
+      process.stdout.write(
+        `[Scout] LLM smoke — static connectors (${sampledStaticConnectors.length}/${
+          allStaticConnectors.length
+        }): ${sampledStaticConnectors.map((c) => c.id).join(', ')}\n`
+      );
+      process.stdout.write(
+        `[Scout] LLM smoke — EIS models (${sampledEisModels.length}/${
+          allEisModels.length
+        }): ${sampledEisModels.map((m) => m.modelId).join(', ')}\n`
+      );
     });
 
-    const staticConnectorsSkippedReason =
-      staticConnectorLoadError ??
-      `No static connectors sampled (set ${AI_CONNECTORS_VAR_ENV} or config/kibana.dev.yml)`;
-
-    const eisModelsMissingReason =
-      '[EIS] No models in target/eis_models.json — run: node scripts/discover_eis_models.js';
-
-    const eisCcmKeyMissingReason = `${EIS_CCM_API_KEY_ENV} not set. For local dev: export ${EIS_CCM_API_KEY_ENV}="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"`;
-
-    if (sampledStaticConnectors.length === 0) {
-      apiTest('static preconfigured connectors — skipped', async ({ apiClient }, testInfo) => {
-        const warmup = await apiClient.get('/api/actions/connectors', {
+    for (const connector of allStaticConnectors) {
+      apiTest(`static connector ${connector.id} — simple message`, async ({ apiClient }) => {
+        // eslint-disable-next-line playwright/no-skipped-test
+        apiTest.skip(!selectedStaticConnectorIds.has(connector.id), 'not in FTR_GEN_AI_LLM_SAMPLE');
+        const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
           headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: {
+            input: 'Hello',
+            connector_id: connector.id,
+          } satisfies ChatRequestBodyPayload,
+          responseType: 'json',
         });
-        expect(warmup).toHaveStatusCode(200);
-        testInfo.skip(true, staticConnectorsSkippedReason);
+        expect(response).toHaveStatusCode(200);
+        expectNonEmptyReply(response.body as ChatResponse);
       });
-    } else {
-      for (const connector of sampledStaticConnectors) {
-        apiTest(`static connector ${connector.id} — simple message`, async ({ apiClient }) => {
-          const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-            body: {
-              input: 'Hello',
-              connector_id: connector.id,
-            } satisfies ChatRequestBodyPayload,
-            responseType: 'json',
-          });
-          expect(response).toHaveStatusCode(200);
-          expectNonEmptyReply(response.body as ChatResponse);
+
+      apiTest(`static connector ${connector.id} — tool call`, async ({ apiClient }) => {
+        // eslint-disable-next-line playwright/no-skipped-test
+        apiTest.skip(!selectedStaticConnectorIds.has(connector.id), 'not in FTR_GEN_AI_LLM_SAMPLE');
+        const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: {
+            input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
+            connector_id: connector.id,
+          } satisfies ChatRequestBodyPayload,
+          responseType: 'json',
         });
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as ChatResponse;
+        expectNonEmptyReply(body);
+        expectListIndicesToolCalled(body);
+      });
 
-        apiTest(`static connector ${connector.id} — tool call`, async ({ apiClient }) => {
-          const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-            body: {
-              input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
-              connector_id: connector.id,
-            } satisfies ChatRequestBodyPayload,
-            responseType: 'json',
-          });
-          expect(response).toHaveStatusCode(200);
-          const body = response.body as ChatResponse;
-          expectNonEmptyReply(body);
-          expectListIndicesToolCalled(body);
+      apiTest(`static connector ${connector.id} — conversation continue`, async ({ apiClient }) => {
+        // eslint-disable-next-line playwright/no-skipped-test
+        apiTest.skip(!selectedStaticConnectorIds.has(connector.id), 'not in FTR_GEN_AI_LLM_SAMPLE');
+        const id = connector.id;
+        const response1 = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: {
+            input: 'Please say "hello"',
+            connector_id: id,
+          } satisfies ChatRequestBodyPayload,
+          responseType: 'json',
         });
+        expect(response1).toHaveStatusCode(200);
+        expectNonEmptyReply(response1.body as ChatResponse);
 
-        apiTest(
-          `static connector ${connector.id} — conversation continue`,
-          async ({ apiClient }) => {
-            const id = connector.id;
-            const response1 = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-              headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-              body: {
-                input: 'Please say "hello"',
-                connector_id: id,
-              } satisfies ChatRequestBodyPayload,
-              responseType: 'json',
-            });
-            expect(response1).toHaveStatusCode(200);
-            expectNonEmptyReply(response1.body as ChatResponse);
-
-            const response2 = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-              headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-              body: {
-                conversation_id: (response1.body as ChatResponse).conversation_id,
-                input: 'Please say it again.',
-                connector_id: id,
-              } satisfies ChatRequestBodyPayload,
-              responseType: 'json',
-            });
-            expect(response2).toHaveStatusCode(200);
-            expectNonEmptyReply(response2.body as ChatResponse);
-            expect((response2.body as ChatResponse).conversation_id).toBe(
-              (response1.body as ChatResponse).conversation_id
-            );
-          }
+        const response2 = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: {
+            conversation_id: (response1.body as ChatResponse).conversation_id,
+            input: 'Please say it again.',
+            connector_id: id,
+          } satisfies ChatRequestBodyPayload,
+          responseType: 'json',
+        });
+        expect(response2).toHaveStatusCode(200);
+        expectNonEmptyReply(response2.body as ChatResponse);
+        expect((response2.body as ChatResponse).conversation_id).toBe(
+          (response1.body as ChatResponse).conversation_id
         );
-      }
+      });
     }
 
     if (allEisModels.length === 0) {
-      apiTest(
-        'EIS models — skipped (no target/eis_models.json)',
-        async ({ apiClient }, testInfo) => {
-          const warmup = await apiClient.get('/api/actions/connectors', {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-          });
-          expect(warmup).toHaveStatusCode(200);
-          testInfo.skip(true, eisModelsMissingReason);
-        }
-      );
-    } else if (!eisCcmApiKey) {
-      apiTest('EIS models — skipped (missing CCM API key)', async ({ apiClient }, testInfo) => {
-        const warmup = await apiClient.get('/api/actions/connectors', {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
-        expect(warmup).toHaveStatusCode(200);
-        testInfo.skip(true, eisCcmKeyMissingReason);
+      /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test -- FTR `index.ts`: skip-only it (log + skip, no HTTP) */
+      // eslint-disable-next-line playwright/expect-expect
+      apiTest('should skip - no EIS models discovered', async () => {
+        process.stdout.write('[EIS] No models in target/eis_models.json\n');
+        process.stdout.write('[EIS] Run: node scripts/discover_eis_models.js\n');
+        // eslint-disable-next-line playwright/no-skipped-test
+        apiTest.skip(true, 'no EIS models discovered');
       });
+      /* eslint-enable @kbn/eslint/scout_require_api_client_in_api_test */
     } else {
-      apiTest('EIS — models discovery gate', async ({ apiClient }) => {
-        const warmup = await apiClient.get('/api/actions/connectors', {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
-        expect(warmup).toHaveStatusCode(200);
-        expect(allEisModels.length).toBeGreaterThan(0);
-      });
-
-      for (const model of sampledEisModels) {
+      for (const model of allEisModels) {
         const connectorId = `eis-${model.modelId}`;
 
-        apiTest(`EIS ${model.modelId} — simple message`, async ({ apiClient }) => {
+        apiTest(`EIS ${model.modelId} — simple message`, async ({ apiClient, esClient }) => {
+          // eslint-disable-next-line playwright/no-skipped-test
+          apiTest.skip(!selectedEisModelIds.has(model.modelId), 'not in FTR_GEN_AI_LLM_SAMPLE');
+          await ensureEisCcmIfNeeded(esClient);
           const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
             headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
             body: {
@@ -266,7 +184,10 @@ apiTest.describe(
           expectNonEmptyReply(response.body as ChatResponse);
         });
 
-        apiTest(`EIS ${model.modelId} — tool call`, async ({ apiClient }) => {
+        apiTest(`EIS ${model.modelId} — tool call`, async ({ apiClient, esClient }) => {
+          // eslint-disable-next-line playwright/no-skipped-test
+          apiTest.skip(!selectedEisModelIds.has(model.modelId), 'not in FTR_GEN_AI_LLM_SAMPLE');
+          await ensureEisCcmIfNeeded(esClient);
           const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
             headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
             body: {
@@ -281,7 +202,10 @@ apiTest.describe(
           expectListIndicesToolCalled(body);
         });
 
-        apiTest(`EIS ${model.modelId} — conversation continue`, async ({ apiClient }) => {
+        apiTest(`EIS ${model.modelId} — conversation continue`, async ({ apiClient, esClient }) => {
+          // eslint-disable-next-line playwright/no-skipped-test
+          apiTest.skip(!selectedEisModelIds.has(model.modelId), 'not in FTR_GEN_AI_LLM_SAMPLE');
+          await ensureEisCcmIfNeeded(esClient);
           const response1 = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
             headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
             body: {
