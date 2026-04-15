@@ -59,7 +59,7 @@ Post one comment on the PR. Include only the `/flaky` line(s) for the runner(s) 
 Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigger_flaky_test_runner) or post this comment on the PR:
 
 ```
-/flaky <scoutConfig or ftrConfig>:<resolved-ftr-config-path>:30
+/flaky <scoutConfig or ftrConfig>:<resolved-scout-or-ftr-config-path>:30
 ```
 ````
 
