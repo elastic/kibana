@@ -9,12 +9,11 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
-import type { VersionedAttachment } from '@kbn/agent-builder-common';
+import type { UpdateOriginResponse, VersionedAttachment } from '@kbn/agent-builder-common';
 import type {
   CheckStaleAttachmentsResponse,
   CreateAttachmentResponse,
   ListAttachmentsResponse,
-  UpdateOriginResponse,
 } from '../../../../common/http_api/attachments';
 import type { ChatResponse } from '../../../../common/http_api/chat';
 import {

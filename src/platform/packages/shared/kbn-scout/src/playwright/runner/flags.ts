@@ -19,7 +19,6 @@ import { validatePlaywrightConfig } from './config_validator';
 export interface RunTestsOptions {
   testTarget: ScoutTestTarget;
   configPath: string;
-  serverConfigSet: string;
   headed: boolean;
   repeatEach: number | undefined;
   testFiles?: string[];

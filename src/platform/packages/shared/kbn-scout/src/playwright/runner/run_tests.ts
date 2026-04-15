@@ -116,11 +116,7 @@ async function runLocalServersAndTests(
   cmdArgs: string[],
   env: Record<string, string> = {}
 ) {
-  const configRootDir = getConfigRootDir(
-    options.configPath,
-    options.testTarget,
-    options.serverConfigSet === 'default' ? undefined : options.serverConfigSet
-  );
+  const configRootDir = getConfigRootDir(options.configPath, options.testTarget);
   const config = await loadServersConfig(options.testTarget, log, configRootDir);
   const abortCtrl = new AbortController();
 
