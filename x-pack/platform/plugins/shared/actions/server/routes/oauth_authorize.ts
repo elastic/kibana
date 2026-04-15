@@ -12,12 +12,12 @@ import type { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService, type OAuthConfig } from '../lib/oauth_authorization_service';
 import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import type { ActionsConfigurationUtilities } from '../actions_config';
+import { OAUTH_API_TAG } from '../feature';
 
 const paramsSchema = schema.object({
   connectorId: schema.string(),
@@ -59,7 +59,11 @@ export const oauthAuthorizeRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_start_oauth_flow`,
-      security: DEFAULT_ACTION_ROUTE_SECURITY,
+      security: {
+        authz: {
+          requiredPrivileges: [OAUTH_API_TAG],
+        },
+      },
       validate: {
         params: paramsSchema,
         body: bodySchema,
@@ -75,6 +79,10 @@ export const oauthAuthorizeRoute = (
         try {
           const core = await context.core;
           const routeLogger = logger.get('oauth_authorize');
+
+          // Verify the connector exists and the user has access via the actions client
+          const actionsClient = (await context.actions).getActionsClient();
+          await actionsClient.get({ id: connectorId });
 
           // Check rate limit
           const currentUser = core.security.authc.getCurrentUser();

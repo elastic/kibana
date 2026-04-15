@@ -70,7 +70,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule', labels: ['prod', 'infra'] },
+  metadata: { name: 'Test Signal Rule', tags: ['prod', 'infra'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   evaluation: { query: { base: 'FROM logs-* | STATS count() BY host.name' } },

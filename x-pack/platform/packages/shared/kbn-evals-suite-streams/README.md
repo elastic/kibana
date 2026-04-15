@@ -37,6 +37,21 @@ You can easily create new dataset entries from AI suggestions generated in Kiban
    - Set appropriate quality thresholds
    - Add any missing metadata
 
+## Parallel Execution
+
+Tests run in parallel across 20 Playwright workers using `fullyParallel: true`. A shared setup/teardown project handles lifecycle:
+
+- **Setup project** (runs once): enables streams, forks child streams from `logs.otel`, indexes synthtrace data
+- **Test projects** (one per connector, fully parallel): all eval tests are stateless and run concurrently
+- **Teardown project** (runs once): disables streams, deletes connectors, cleans up data streams
+
+Connector creation is idempotent (handles 409 conflicts) so multiple workers can safely set up the same connector.
+
+To run a single connector:
+```bash
+node scripts/evals run --suite streams --evaluation-connector-id bedrock-claude --project bedrock-claude
+```
+
 ## Pattern Extraction Evaluation
 
 Tests Grok and Dissect pattern generation using 21 real-world log examples with quality metrics:

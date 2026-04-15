@@ -6,58 +6,60 @@
  */
 
 import expect from '@kbn/expect';
-import type { estypes } from '@elastic/elasticsearch';
-import type { TransportResult } from '@elastic/elasticsearch';
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, estypes, TransportResult } from '@elastic/elasticsearch';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 
 import type SuperTest from 'supertest';
 import {
-  CASES_INTERNAL_URL,
-  CASES_URL,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_REPORTERS_URL,
   CASE_SAVED_OBJECT,
   CASE_TAGS_URL,
   CASE_USER_ACTION_SAVED_OBJECT,
+  CASES_INTERNAL_URL,
+  CASES_URL,
   INTERNAL_CASE_METRICS_URL,
-  INTERNAL_GET_CASE_CATEGORIES_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
-import type { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common';
+import type {
+  CaseMetricsFeature,
+  CasesMetricsResponse,
+  SingleCaseMetricsResponse,
+} from '@kbn/cases-plugin/common';
 import type { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
 import type {
-  ConnectorMappingsAttributes,
   Case,
+  CaseCustomField,
   Cases,
   CaseStatuses,
-  CaseCustomField,
+  ConnectorMappingsAttributes,
 } from '@kbn/cases-plugin/common/types/domain';
 import type {
   AddObservableRequest,
-  UpdateObservableRequest,
   CaseResolveResponse,
   CasesBulkGetResponse,
   CasesFindResponse,
   CasesPatchRequest,
+  CasesSimilarResponse,
+  CaseWithUpdateSummary,
   CustomFieldPutRequest,
+  DocumentResponse,
   GetRelatedCasesByAlertResponse,
   SimilarCasesSearchRequest,
-  CasesSimilarResponse,
+  UpdateObservableRequest,
   UserActionFindRequest,
   UserActionInternalFindResponse,
-  DocumentResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
   getCaseCreateObservableUrl,
-  getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseFindUserActionsUrl,
+  getCaseUpdateObservableUrl,
 } from '@kbn/cases-plugin/common/api';
 import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
@@ -394,7 +396,11 @@ export const updateCase = async ({
     .send(params)
     .expect(expectedHttpCode);
 
-  return cases;
+  if (expectedHttpCode !== 200) {
+    return cases;
+  }
+  // Remove stats from the patch case response
+  return cases.map(({ updateSummary, ...rest }: CaseWithUpdateSummary) => rest);
 };
 
 export const getCase = async ({

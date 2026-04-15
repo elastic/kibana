@@ -10,7 +10,6 @@ import { EuiPanel, EuiComboBox } from '@elastic/eui';
 import styled from 'styled-components';
 import type { LegacyRef } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT } from './config';
 import { useStackByFields } from './hooks';
 import * as i18n from './translations';
 
@@ -37,18 +36,7 @@ export const KpiPanel = styled(EuiPanel)<{
   position: relative;
   overflow-x: hidden;
   overflow-y: ${({ $overflowY }) => $overflowY ?? 'hidden'};
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
-    ${({ height, $toggleStatus }) =>
-      $toggleStatus &&
-      `
-      height: ${height != null ? height : PANEL_HEIGHT}px;
-  `}
-  }
-  ${({ $toggleStatus }) =>
-    $toggleStatus &&
-    `
-    height: ${MOBILE_PANEL_HEIGHT}px;
-  `}
+  ${({ height }) => height != null && `height: ${height}px;`}
 `;
 interface StackedBySelectProps {
   'aria-label'?: string;

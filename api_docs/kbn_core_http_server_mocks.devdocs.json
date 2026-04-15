@@ -571,7 +571,7 @@
             "label": "createKibanaRequest",
             "description": [],
             "signature": [
-              "<P = any, Q = any, B = any>({ path, headers, params, body, query, method, socket, routeTags, routeAuthRequired, validation, kibanaRouteOptions, kibanaRequestState, auth, }?: ",
+              "<P = any, Q = any, B = any>({ path, headers, params, body, query, method, socket, routeTags, routeAuthRequired, routePath, validation, kibanaRouteOptions, kibanaRequestState, auth, }?: ",
               "RequestFixtureOptions",
               "<P, Q, B>) => ",
               "KibanaRequest",
@@ -596,7 +596,7 @@
                   "<P, Q, B>"
                 ],
                 "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
-                "lineNumber": 67,
+                "lineNumber": 69,
                 "columnNumber": 61,
                 "deprecated": false,
                 "trackAdoption": false
@@ -633,7 +633,7 @@
                   "{ headers?: Record<string, string> | undefined; }"
                 ],
                 "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
-                "lineNumber": 123,
+                "lineNumber": 127,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false

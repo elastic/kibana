@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-export interface EpisodeAction {
+export interface EpisodeActionState {
   episodeId: string;
   ruleId: string | null;
   groupHash: string | null;
   lastAckAction: string | null;
 }
 
-export interface GroupAction {
+export interface AlertEpisodeGroupAction {
   groupHash: string;
   ruleId: string | null;
   lastDeactivateAction: string | null;

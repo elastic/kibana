@@ -7,6 +7,12 @@ description: Guide for building catalog and e-commerce search with Elasticsearch
 
 Guide developers through building product catalog and e-commerce search with Elasticsearch. Use this guide when they need product search with filtering, faceting, autocomplete, boosting by attributes, and shopping-oriented relevance.
 
+## Conversation flow — return to onboarding
+
+This skill provides deep implementation detail for catalog and e-commerce search. It is **not** the main conversation driver.
+
+After applying the guidance here, **re-read `/elasticsearch-onboarding`** to resume the structured onboarding playbook (Steps 1–7: intent → data → mapping → build → test → iterate). That playbook controls sequencing, the one-question-at-a-time rule, and the Dev Tools API-snippet workflow. If `/elasticsearch-onboarding` has not been loaded yet in this conversation, load it now — it is the primary conversation flow for all Elasticsearch search onboarding.
+
 ## 1. When to Use This Guide
 
 Apply this guide when the developer signals:
@@ -18,7 +24,7 @@ Apply this guide when the developer signals:
 - **Merchandising / boosting** — promote certain products (new arrivals, on sale, high margin)
 - **Multi-attribute filtering** — size, color, availability, shipping options
 
-Do **not** use this guide when: the developer only needs document search without structured attributes — point them to keyword or hybrid search. If they need meaning-based "find similar products," combine this with the semantic-search approach.
+Do **not** use this guide when: the developer only needs document search without structured attributes — point them to keyword-search or vector-hybrid-search. If they need meaning-based "find similar products," combine this with the vector-hybrid-search approach.
 
 ## 2. Index Mapping
 
@@ -496,6 +502,6 @@ def autocomplete():
 
 ## 8. When to Upgrade
 
-- **Semantic product search** — When "comfortable headphones for running" should match even without exact keyword overlap. Add a vector field using the semantic-search approach.
-- **Hybrid** — Combine keyword + semantic for the best of both. See the hybrid-search guide.
+- **Semantic product search** — When "comfortable headphones for running" should match even without exact keyword overlap. Add a vector field using the vector-hybrid-search approach.
+- **Hybrid** — Combine keyword + semantic for the best of both. See the vector-hybrid-search guide.
 - **Personalization** — Boost results based on user behavior (clicks, purchases). Requires a signals index and custom scoring.

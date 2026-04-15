@@ -6,31 +6,30 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { AttachmentPanel } from '../types';
-
-const LENS_EMBEDDABLE_TYPE = 'lens';
 
 export interface VisualizationContent {
   type: string;
   config: Record<string, unknown>;
 }
 
-/** Panel input that may or may not have a uid assigned yet */
-export type DashboardPanelInput = Omit<AttachmentPanel, 'uid'> & { uid?: string };
+/** Panel input that may or may not have a id assigned yet */
+export type DashboardPanelInput = Omit<AttachmentPanel, 'id'> & { id?: string };
 
 /**
  * Converts panel input to a full AttachmentPanel (embeddable format).
- * - Generates a uid if not provided
+ * - Generates a id if not provided
  * - Wraps Lens config in `attributes` if needed
  */
 export const toEmbeddablePanel = ({
-  uid,
+  id,
   grid,
   type,
   config,
 }: DashboardPanelInput): AttachmentPanel => {
   return {
-    uid: uid ?? uuidv4(),
+    id: id ?? uuidv4(),
     grid,
     type,
     config:

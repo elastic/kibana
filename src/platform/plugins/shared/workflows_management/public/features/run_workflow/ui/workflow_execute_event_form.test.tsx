@@ -126,6 +126,23 @@ describe('WorkflowExecuteEventForm', () => {
     expect(mockData.dataViews.create).not.toHaveBeenCalled();
   });
 
+  it('does not call RAC index API when racQueriesEnabled is false', async () => {
+    render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+          racQueriesEnabled={false}
+        />
+      </TestWrapper>
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockFetchAlertsIndexNames).not.toHaveBeenCalled();
+  });
+
   it('creates data view from alert indices returned by RAC API', async () => {
     mockFetchAlertsIndexNames.mockResolvedValue([
       '.alerts-observability.logs.alerts-default',

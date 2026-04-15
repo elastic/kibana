@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body, status } = await supertest
           .post(DASHBOARD_API_PATH)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             title: 'Sample dashboard',
           });
@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(DASHBOARD_API_PATH)
           .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             title: 'Sample dashboard',
           });

@@ -11,6 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { waitFor } from '@kbn/detections-response-ftr-services';
 import expect from '@kbn/expect';
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 import { dataViewRouteHelpersFactory } from './data_view';
@@ -405,7 +406,7 @@ export const readEntityStoreEntities = async (
   es: Client,
   namespace: string = 'default'
 ): Promise<Array<{ entity: { id: string; risk?: Record<string, unknown> } }>> => {
-  const index = `.entities.v2.latest.security_${namespace}`;
+  const index = getEntitiesAlias(ENTITY_LATEST, namespace);
   try {
     const results = await es.search({ index, size: 1000 });
     return results.hits.hits.map(
@@ -470,7 +471,7 @@ export const waitForEntityStoreDoc = async ({
   requiredWatchlistId?: string;
   namespace?: string;
 }): Promise<void> => {
-  const index = `.entities.v2.latest.security_${namespace}`;
+  const index = getEntitiesAlias(ENTITY_LATEST, namespace);
   await retry.waitForWithTimeout(
     `entity store doc present for ${entityId}`,
     timeoutMs,

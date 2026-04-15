@@ -79,27 +79,10 @@ function createNavTree({
       {
         link: 'workflows',
       },
-      showAlertingV2
-        ? {
-            id: 'alerting',
-            renderAs: 'panelOpener',
-            title: i18n.translate('xpack.observability.obltNav.alerts', {
-              defaultMessage: 'Alerts',
-            }),
-            icon: 'warning',
-            children: [
-              {
-                link: 'observability-overview:alerts',
-              },
-              {
-                link: 'observability-overview:alerts_v2',
-              },
-            ],
-          }
-        : {
-            link: 'observability-overview:alerts',
-            icon: 'warning',
-          },
+      {
+        link: 'observability-overview:alerts',
+        icon: 'warning',
+      },
       {
         link: 'observability-overview:cases',
         children: [
@@ -341,6 +324,15 @@ function createNavTree({
             breadcrumbStatus: 'hidden',
             children: [
               {
+                link: 'management:anomaly_detection',
+                title: i18n.translate(
+                  'xpack.observability.obltNav.ml.anomaly_detection.manage_jobs',
+                  {
+                    defaultMessage: 'Manage jobs',
+                  }
+                ),
+              },
+              {
                 link: 'ml:anomalyExplorer',
               },
               {
@@ -557,7 +549,6 @@ function createNavTree({
                       link: 'cloud_connect' as const,
                     },
                   ]),
-              { link: 'monitoring' },
             ],
           },
           ...(showAlertingV2
@@ -570,6 +561,7 @@ function createNavTree({
                   renderAs: 'panelOpener' as const,
                   children: [
                     { link: 'management:rules' as const },
+                    { link: 'management:episodes' as const },
                     { link: 'management:notification_policies' as const },
                   ],
                 },
@@ -596,6 +588,19 @@ function createNavTree({
               },
               {
                 link: 'management:maintenanceWindows',
+              },
+            ],
+          },
+          {
+            id: 'cluster_performance',
+            title: i18n.translate('xpack.observability.obltNav.clusterPerformance', {
+              defaultMessage: 'Cluster performance',
+            }),
+            children: [
+              { link: 'monitoring' },
+              {
+                link: 'management:queryActivity',
+                badgeType: 'new',
               },
             ],
           },
