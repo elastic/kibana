@@ -88,6 +88,19 @@ spaceTest.describe('GET /api/workflows/aggs', { tag: tags.deploymentAgnostic }, 
     expect(createdByBuckets.length).toBeGreaterThan(0);
   });
 
+  // 1a-single — Single field string also works
+  spaceTest('returns buckets when a single field is passed as a string', async () => {
+    const { data, status } = await workflowsApi.rawGetAggs('tags');
+
+    expect(status).toBe(200);
+    expect(data).toBeDefined();
+
+    const tagBuckets = data?.tags ?? [];
+    const tagKeys = tagBuckets.map((b) => b.key);
+    expect(tagKeys).toContain('alpha');
+    expect(tagKeys).toContain('shared');
+  });
+
   // 1b — Unmapped / non-existent field: documents current permissive behaviour
   spaceTest('returns 200 with absent or empty buckets for a non-existent field', async () => {
     const { data, status } = await workflowsApi.rawGetAggs(['totallyNonExistentField99']);
@@ -110,8 +123,6 @@ spaceTest.describe('GET /api/workflows/aggs', { tag: tags.deploymentAgnostic }, 
     const { status, data } = await workflowsApi.rawGetAggs(tooManyFields);
 
     expect(status).toBe(400);
-    expect(data?.message).toBe(
-      '[request query.fields]: array size is [26], but cannot be greater than [25]'
-    );
+    expect(data?.message).toContain('array size is [26], but cannot be greater than [25]');
   });
 });

@@ -185,14 +185,14 @@ export class WorkflowsApiService {
   }
 
   /** GET /api/workflows/workflow/aggs —  */
-  async rawGetAggs(fields: string[]): Promise<{
+  async rawGetAggs(fields: string | string[]): Promise<{
     data: WorkflowAggsDto;
     status: number;
   }> {
     const response = await this.kbnClient.request<WorkflowAggsDto>({
       method: 'GET',
       path: `/s/${this.spaceId}/api/workflows/aggs`,
-      query: { fields: JSON.stringify(fields) },
+      query: { fields },
       ignoreErrors: [400, 404], // allow 400 & 404 responses through for assertion in tests
     });
     return response;
