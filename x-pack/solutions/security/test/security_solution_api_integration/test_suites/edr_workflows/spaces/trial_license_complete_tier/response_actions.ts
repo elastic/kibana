@@ -44,8 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/249464
-  describe.skip('@ess @skipInServerless, @skipInServerlessMKI Response actions space awareness support', () => {
+  describe('@ess @skipInServerless, @skipInServerlessMKI Response actions space awareness support', () => {
     const afterEachDataCleanup: Array<{ cleanup: () => Promise<void> }> = [];
     let counter = 1;
     let spaceOneId = '';
