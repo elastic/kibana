@@ -21,6 +21,16 @@ const SEARCHABLE_TEXT_FIELD_TYPES = new Set([
   'text',
 ]);
 
+const isSearchableTextField = (field: { type: string; searchable?: boolean }): boolean =>
+  SEARCHABLE_TEXT_FIELD_TYPES.has(field.type) && field.searchable !== false;
+
+const isSearchableDenseVectorField = (field: {
+  type: string;
+  searchable?: boolean;
+  inferenceId?: string;
+}): boolean =>
+  field.type === 'dense_vector' && field.searchable !== false && field.inferenceId != null;
+
 export const relevanceSearch = async ({
   term,
   target,
@@ -41,18 +51,18 @@ export const relevanceSearch = async ({
 }): Promise<RelevanceSearchResponse> => {
   const { fields } = await resolveResource({ resourceName: target, esClient });
 
-  const selectedFields = fields.filter(
-    (field) => SEARCHABLE_TEXT_FIELD_TYPES.has(field.type) && field.searchable !== false
-  );
+  const textFields = fields.filter(isSearchableTextField);
+  const denseVectorFields = fields.filter(isSearchableDenseVectorField);
 
-  if (selectedFields.length === 0) {
-    throw new Error('No searchable text fields found, aborting search.');
+  if (textFields.length === 0 && denseVectorFields.length === 0) {
+    throw new Error('No searchable fields found, aborting search.');
   }
 
   return performMatchSearch({
     term,
     index: target,
-    fields: selectedFields,
+    fields: textFields,
+    denseVectorFields,
     size,
     esClient,
     logger,

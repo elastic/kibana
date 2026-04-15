@@ -138,7 +138,66 @@ describe('relevanceSearch', () => {
       );
     });
 
-    it('filters out non-text field types', async () => {
+    it('selects dense_vector fields with inferenceId', async () => {
+      resolveResourceMock.mockResolvedValue({
+        fields: [
+          {
+            path: 'embedding',
+            type: 'dense_vector',
+            meta: {},
+            inferenceId: '.jina-embeddings-v5-text-small',
+          },
+        ],
+      });
+
+      await relevanceSearch({
+        term: 'test',
+        target: 'my-index',
+        esClient,
+        model,
+        logger,
+      });
+
+      expect(performMatchSearchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fields: [],
+          denseVectorFields: [
+            {
+              path: 'embedding',
+              type: 'dense_vector',
+              meta: {},
+              inferenceId: '.jina-embeddings-v5-text-small',
+            },
+          ],
+        })
+      );
+    });
+
+    it('excludes dense_vector fields without inferenceId', async () => {
+      resolveResourceMock.mockResolvedValue({
+        fields: [
+          { path: 'content', type: 'text', meta: {} },
+          { path: 'embedding', type: 'dense_vector', meta: {} },
+        ],
+      });
+
+      await relevanceSearch({
+        term: 'test',
+        target: 'my-index',
+        esClient,
+        model,
+        logger,
+      });
+
+      expect(performMatchSearchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fields: [{ path: 'content', type: 'text', meta: {} }],
+          denseVectorFields: [],
+        })
+      );
+    });
+
+    it('filters out non-text and non-dense-vector field types', async () => {
       resolveResourceMock.mockResolvedValue({
         fields: [
           { path: 'content', type: 'text', meta: {} },
@@ -163,6 +222,7 @@ describe('relevanceSearch', () => {
             { path: 'content', type: 'text', meta: {} },
             { path: 'embedding', type: 'semantic_text', meta: {} },
           ],
+          denseVectorFields: [],
         })
       );
     });
@@ -191,7 +251,7 @@ describe('relevanceSearch', () => {
       );
     });
 
-    it('throws an error when no searchable text fields are found', async () => {
+    it('throws an error when no searchable fields are found', async () => {
       resolveResourceMock.mockResolvedValue({
         fields: [
           { path: 'count', type: 'integer', meta: {} },
@@ -207,7 +267,7 @@ describe('relevanceSearch', () => {
           model,
           logger,
         })
-      ).rejects.toThrow('No searchable text fields found, aborting search.');
+      ).rejects.toThrow('No searchable fields found, aborting search.');
     });
   });
 

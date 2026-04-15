@@ -24,6 +24,32 @@ export interface PerformMatchSearchResponse {
 }
 
 /**
+ * Builds a knn retriever for a dense_vector field using the query_vector_builder.
+ * The model_id corresponds to the inference_id from the field mapping.
+ */
+const buildKnnRetriever = ({
+  field,
+  term,
+  size,
+}: {
+  field: MappingField;
+  term: string;
+  size: number;
+}): Record<string, unknown> => ({
+  knn: {
+    field: field.path,
+    query_vector_builder: {
+      text_embedding: {
+        model_id: field.inferenceId!,
+        model_text: term,
+      },
+    },
+    k: size,
+    num_candidates: size * 10,
+  },
+});
+
+/**
  * Builds the search request body. For local indices, uses the RRF retriever
  * for best relevance ranking. For CCS targets, falls back to a query-based
  * approach because the simplified RRF retriever syntax does not support
@@ -36,18 +62,22 @@ const buildSearchRequest = ({
   index,
   term,
   fields,
+  denseVectorFields,
   size,
   useTopSnippets,
 }: {
   index: string;
   term: string;
   fields: MappingField[];
+  denseVectorFields: MappingField[];
   size: number;
   useTopSnippets: boolean;
 }): Record<string, any> => {
+  // Highlighting only applies to text fields, not dense_vector fields
   const highlightConfig = useTopSnippets
     ? {}
-    : {
+    : fields.length > 0
+    ? {
         highlight: {
           number_of_fragments: 5,
           fragment_size: 500,
@@ -56,10 +86,13 @@ const buildSearchRequest = ({
           order: 'score' as const,
           fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
         },
-      };
+      }
+    : {};
 
   // CCS fallback: the simplified RRF retriever syntax does not support
   // cross-cluster index patterns, so we use a query-based approach instead.
+  // NOTE: dense_vector fields with inference_id are not supported for CCS targets
+  // because the _field_caps API does not expose inference_id.
   if (isCcsTarget(index)) {
     return {
       index,
@@ -73,14 +106,27 @@ const buildSearchRequest = ({
   // TODO: once multi_match supports semantic_text (elastic/search-team#11226),
   // consider unifying local and CCS paths.
   // should replace `any` with `SearchRequest` type when the simplified retriever syntax is supported in @elastic/elasticsearch
+  const knnRetrievers = denseVectorFields.map((field) => buildKnnRetriever({ field, term, size }));
+
+  const retrievers: Array<Record<string, unknown>> = [...knnRetrievers];
+
+  // Only include the text fields retriever if there are text fields to search
+  if (fields.length > 0) {
+    retrievers.push({
+      rrf: {
+        query: term,
+        fields: fields.map((field) => field.path),
+      },
+    });
+  }
+
   return {
     index,
     size,
     retriever: {
       rrf: {
         rank_window_size: size * 2,
-        query: term,
-        fields: fields.map((field) => field.path),
+        retrievers,
       },
     },
     ...highlightConfig,
@@ -115,6 +161,7 @@ const buildCcsQuery = ({
 export const performMatchSearch = async ({
   term,
   fields,
+  denseVectorFields = [],
   index,
   size,
   esClient,
@@ -123,6 +170,7 @@ export const performMatchSearch = async ({
 }: {
   term: string;
   fields: MappingField[];
+  denseVectorFields?: MappingField[];
   index: string;
   size: number;
   esClient: ElasticsearchClient;
@@ -131,7 +179,14 @@ export const performMatchSearch = async ({
   topSnippetsConfig?: TopSnippetsConfig;
 }): Promise<PerformMatchSearchResponse> => {
   const useTopSnippets = topSnippetsConfig != null;
-  const searchRequest = buildSearchRequest({ index, term, fields, size, useTopSnippets });
+  const searchRequest = buildSearchRequest({
+    index,
+    term,
+    fields,
+    denseVectorFields,
+    size,
+    useTopSnippets,
+  });
 
   logger.debug(`Elasticsearch search request: ${JSON.stringify(searchRequest, null, 2)}`);
 
