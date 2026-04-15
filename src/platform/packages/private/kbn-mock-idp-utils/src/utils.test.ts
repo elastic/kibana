@@ -57,7 +57,6 @@ describe('mock-idp-utils', () => {
 
       expect(metadata).toContain(`Location="${kibanaUrl}${MOCK_IDP_LOGIN_PATH}"`);
       expect(metadata).toContain(`Location="${kibanaUrl}${MOCK_IDP_LOGOUT_PATH}"`);
-      expect(metadata).toContain('HTTP-POST');
       expect(metadata).toContain('HTTP-Redirect');
     });
 

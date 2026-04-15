@@ -115,6 +115,7 @@ export default function searchSolutionNavigation({
           'discover',
           'dashboards',
           'agent_builder',
+          'workflows',
           'machine_learning',
           'search_getting_started',
           'dev_tools',

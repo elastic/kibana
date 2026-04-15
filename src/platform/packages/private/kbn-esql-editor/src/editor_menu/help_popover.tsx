@@ -297,6 +297,7 @@ export const HelpPopover: React.FC<{
   return (
     <>
       <EuiPopover
+        aria-label={helpLabel}
         button={
           <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
             <EuiButtonIcon
