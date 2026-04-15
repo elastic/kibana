@@ -6,13 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useMemo } from 'react';
