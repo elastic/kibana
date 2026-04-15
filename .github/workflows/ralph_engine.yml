@@ -36,7 +36,16 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - name: Checkout Code
+      - name: Checkout upstream (new task)
+        if: inputs.command == 'new'
+        uses: actions/checkout@v4
+        with:
+          repository: elastic/kibana
+          ref: main
+          fetch-depth: 1
+
+      - name: Checkout fork (adjust task)
+        if: inputs.command == 'adjust'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -56,8 +65,18 @@ jobs:
             gh pr view ${{ inputs.pr_id }} --json comments,title,body,headRefName,headRepository > .ralph_context.json
             echo "Checked out PR #${{ inputs.pr_id }}"
           else
-            echo "New task mode — working on default branch"
+            echo "New task mode — checked out elastic/kibana:main"
           fi
+
+      - name: Configure fork remote for push
+        env:
+          GH_TOKEN: ${{ secrets.MY_PAT }}
+        run: |
+          FORK_REPO="${{ github.repository }}"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${FORK_REPO}.git"
+          git remote add upstream https://github.com/elastic/kibana.git || true
+          echo "origin  → ${FORK_REPO} (push with PAT)"
+          echo "upstream → elastic/kibana (read-only)"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -231,9 +250,10 @@ jobs:
             git checkout -b "$BRANCH_NAME"
             git push origin "$BRANCH_NAME"
 
+            FORK_REPO="${{ github.repository }}"
             gh pr create \
               --repo elastic/kibana \
-              --head "${BRANCH_NAME}" \
+              --head "${FORK_REPO}:${BRANCH_NAME}" \
               --base main \
               --title "Ralph: ${INSTRUCTION}" \
               --body "Drafted by Ralph Engine.
