@@ -3813,7 +3813,9 @@ steps:
     });
   });
 
-  describe('resolveUniqueWorkflowIds (via createWorkflow)', () => {
+  // Detailed collision/suffix/truncation/UUID-fallback tests live in workflow_id_resolver.test.ts.
+  // These smoke tests verify the service wiring (resolver is called and result is used).
+  describe('resolveUniqueWorkflowIds wiring (via createWorkflow)', () => {
     const mockRequest = {
       auth: { credentials: { username: 'test-user' } },
     } as any;
@@ -3829,31 +3831,8 @@ steps:
       message: "Hello"
 `;
 
-    /** Returns a search response containing hits for each of the given IDs. */
-    const existingWorkflowHits = (...ids: string[]) => ({
-      hits: {
-        hits: ids.map((id) => ({
-          _id: id,
-          _source: {
-            name: 'Existing',
-            enabled: true,
-            spaceId: 'default',
-            yaml: 'name: Existing',
-            valid: true,
-            created_at: '2023-01-01T00:00:00.000Z',
-            updated_at: '2023-01-01T00:00:00.000Z',
-            createdBy: 'test-user',
-            lastUpdatedBy: 'test-user',
-          },
-        })),
-      },
-    });
-
-    const noHits = { hits: { hits: [] } };
-
-    it('should return slug unchanged when no collision exists', async () => {
-      // resolveUniqueWorkflowIds: single batch search returns no hits
-      mockEsClient.search.mockResolvedValue(noHits as any);
+    it('should use base slug when no collision exists', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
       mockEsClient.index.mockResolvedValue({ _id: 'my-workflow' } as any);
 
       const result = await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
@@ -3861,66 +3840,32 @@ steps:
       expect(result.id).toBe('my-workflow');
     });
 
-    it('should append -1 suffix on single collision', async () => {
-      // resolveUniqueWorkflowIds: batch search returns "my-workflow" as existing
-      mockEsClient.search.mockResolvedValueOnce(existingWorkflowHits('my-workflow') as any);
+    it('should use suffixed ID when base slug collides', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'my-workflow',
+              _source: {
+                name: 'Existing',
+                enabled: true,
+                spaceId: 'default',
+                yaml: 'name: Existing',
+                valid: true,
+                created_at: '2023-01-01T00:00:00.000Z',
+                updated_at: '2023-01-01T00:00:00.000Z',
+                createdBy: 'test-user',
+                lastUpdatedBy: 'test-user',
+              },
+            },
+          ],
+        },
+      } as any);
       mockEsClient.index.mockResolvedValue({ _id: 'my-workflow-1' } as any);
 
       const result = await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
 
       expect(result.id).toBe('my-workflow-1');
-    });
-
-    it('should increment suffix on multiple collisions', async () => {
-      // resolveUniqueWorkflowIds: batch search returns three existing IDs
-      mockEsClient.search.mockResolvedValueOnce(
-        existingWorkflowHits('my-workflow', 'my-workflow-1', 'my-workflow-2') as any
-      );
-      mockEsClient.index.mockResolvedValue({ _id: 'my-workflow-3' } as any);
-
-      const result = await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
-
-      expect(result.id).toBe('my-workflow-3');
-    });
-
-    it('should truncate base ID to stay within max length when appending suffix', async () => {
-      const longName = 'a'.repeat(255);
-      const longYaml = `
-name: ${longName}
-triggers:
-  - type: manual
-steps:
-  - type: console
-    name: step-one
-    with:
-      message: "Hello"
-`;
-      const longSlug = 'a'.repeat(255);
-
-      // resolveUniqueWorkflowIds: batch search returns the long slug as existing
-      mockEsClient.search.mockResolvedValueOnce(existingWorkflowHits(longSlug) as any);
-      mockEsClient.index.mockResolvedValue({ _id: 'truncated' } as any);
-
-      await service.createWorkflow({ yaml: longYaml }, 'default', mockRequest);
-
-      const indexCall = mockEsClient.index.mock.calls[0][0] as { id: string };
-      expect(indexCall.id.length).toBeLessThanOrEqual(255);
-      expect(indexCall.id).toMatch(/-1$/);
-    });
-
-    it('should fall back to UUID after exhausting max collision retries', async () => {
-      // resolveUniqueWorkflowIds: batch search returns ALL 101 candidate IDs as existing
-      const allCandidates = ['my-workflow'];
-      for (let i = 1; i <= 100; i++) {
-        allCandidates.push(`my-workflow-${i}`);
-      }
-      mockEsClient.search.mockResolvedValueOnce(existingWorkflowHits(...allCandidates) as any);
-      mockEsClient.index.mockResolvedValue({ _id: 'fallback' } as any);
-
-      await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
-
-      const indexCall = mockEsClient.index.mock.calls[0][0] as { id: string };
-      expect(indexCall.id).toMatch(/^workflow-[0-9a-f-]+$/);
     });
   });
 

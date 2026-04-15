@@ -8,7 +8,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { v4 as generateUuid } from 'uuid';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
@@ -20,13 +19,11 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import { toSlugIdentifier } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   ExecutionType,
   NonTerminalExecutionStatuses,
   transformWorkflowYamlJsontoEsWorkflow,
-  WORKFLOW_ID_MAX_LENGTH,
 } from '@kbn/workflows';
 import type {
   ConnectorTypeInfo,
@@ -78,14 +75,18 @@ import type {
 } from './workflows_management_api';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
-import { WorkflowConflictError, WorkflowValidationError } from '../../common/lib/errors';
-import { isValidWorkflowId } from '../../common/lib/import';
+import { WorkflowConflictError } from '../../common/lib/errors';
 
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
+import {
+  generateWorkflowId,
+  resolveUniqueWorkflowIds,
+  validateWorkflowId,
+} from '../lib/workflow_id_resolver';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import { createStorage, workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
@@ -100,8 +101,6 @@ function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefin
 }
 
 const DEFAULT_PAGE_SIZE = 100;
-const MAX_COLLISION_RETRIES = 100;
-const ES_MAX_IDS_PER_QUERY = 10_000;
 
 type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
 
@@ -291,7 +290,7 @@ export class WorkflowsService {
       workflowToCreate.definition = undefined;
     }
 
-    const id = workflow.id || this.generateWorkflowId(workflowToCreate.name);
+    const id = workflow.id || generateWorkflowId(workflowToCreate.name);
 
     const workflowData: WorkflowProperties = {
       name: workflowToCreate.name,
@@ -351,7 +350,7 @@ export class WorkflowsService {
     await this.ensureInitialized();
 
     if (workflow.id) {
-      this.validateWorkflowId(workflow.id);
+      validateWorkflowId(workflow.id);
     }
 
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
@@ -384,7 +383,9 @@ export class WorkflowsService {
       }
     } else {
       // Server-generated ID: resolve collisions with numeric suffix
-      [id] = await this.resolveUniqueWorkflowIds([baseId], new Set(), spaceId);
+      [id] = await resolveUniqueWorkflowIds([baseId], new Set(), (candidateIds) =>
+        this.checkExistingIds(candidateIds, spaceId)
+      );
     }
 
     await this.workflowStorage.getClient().index({
@@ -440,7 +441,7 @@ export class WorkflowsService {
       try {
         const customId = workflows[i].id;
         if (customId) {
-          this.validateWorkflowId(customId);
+          validateWorkflowId(customId);
         }
         const prepared = this.prepareWorkflowDocument(
           workflows[i],
@@ -1840,24 +1841,6 @@ export class WorkflowsService {
     };
   }
 
-  private validateWorkflowId(id: string): void {
-    if (!isValidWorkflowId(id)) {
-      throw new WorkflowValidationError(
-        `Invalid workflow ID format. Expected format: lowercase alphanumeric characters with optional hyphens in the middle, received: ${id}`
-      );
-    }
-  }
-
-  private generateWorkflowId(name?: string): string {
-    if (name) {
-      const slug = toSlugIdentifier(name);
-      if (isValidWorkflowId(slug)) {
-        return slug;
-      }
-    }
-    return `workflow-${generateUuid()}`;
-  }
-
   /**
    * Phase 1.5 of bulkCreateWorkflows: resolves server-generated IDs against the
    * database and in-batch collisions, checks user-supplied IDs for conflicts,
@@ -1902,10 +1885,10 @@ export class WorkflowsService {
     // For server-generated IDs: resolve unique IDs in batch
     // (handles both in-batch dedup and database collision avoidance)
     if (serverGenWorkflows.length > 0) {
-      const resolvedIds = await this.resolveUniqueWorkflowIds(
+      const resolvedIds = await resolveUniqueWorkflowIds(
         serverGenWorkflows.map((vw) => vw.id),
         seenIds,
-        spaceId
+        (candidateIds) => this.checkExistingIds(candidateIds, spaceId)
       );
       for (let j = 0; j < serverGenWorkflows.length; j++) {
         serverGenWorkflows[j].id = resolvedIds[j];
@@ -1961,74 +1944,6 @@ export class WorkflowsService {
         bulkOperations[i] = { create: { _id: vw.id, document: vw.workflowData } };
       }
     }
-  }
-
-  /**
-   * Resolves unique workflow IDs for one or more base IDs.
-   * Generates candidate IDs for each base (baseId, baseId-1, baseId-2, ...),
-   * checks them all in a single ES query, and picks the first available candidate
-   * per base ID while also respecting the in-batch `seenIds` set to avoid
-   * collisions within the same batch.
-   */
-  private async resolveUniqueWorkflowIds(
-    baseIds: string[],
-    seenIds: Set<string>,
-    spaceId: string
-  ): Promise<string[]> {
-    // Build candidate lists per base ID.
-    // Note: truncation of near-max-length IDs could cause candidate overlap between
-    // different base IDs. The seenIds check in the resolution loop below prevents
-    // double-assignment, and the UUID fallback guarantees eventual uniqueness.
-    const candidatesByIndex: string[][] = [];
-    const allCandidates = new Set<string>();
-
-    for (const baseId of baseIds) {
-      const candidates = [baseId];
-      for (let i = 1; i <= MAX_COLLISION_RETRIES; i++) {
-        const suffix = `-${i}`;
-        candidates.push(`${baseId.slice(0, WORKFLOW_ID_MAX_LENGTH - suffix.length)}${suffix}`);
-      }
-      candidatesByIndex.push(candidates);
-      for (const c of candidates) {
-        allCandidates.add(c);
-      }
-    }
-
-    // Batch query to check which candidates already exist.
-    // Intentionally does NOT exclude soft-deleted workflows (no must_not deleted_at)
-    // to avoid reassigning an ID that belongs to a soft-deleted workflow.
-    // Chunked to stay within ES default max_result_window (10,000).
-    const candidateArray = [...allCandidates];
-    const existingIds = new Set<string>();
-
-    for (let offset = 0; offset < candidateArray.length; offset += ES_MAX_IDS_PER_QUERY) {
-      const chunk = candidateArray.slice(offset, offset + ES_MAX_IDS_PER_QUERY);
-      const response = await this.workflowStorage.getClient().search({
-        query: {
-          bool: {
-            must: [{ ids: { values: chunk } }, { term: { spaceId } }],
-          },
-        },
-        size: chunk.length,
-        track_total_hits: false,
-      });
-      for (const hit of response.hits.hits) {
-        if (hit._id) {
-          existingIds.add(hit._id);
-        }
-      }
-    }
-
-    // Resolve each base ID to the first available candidate
-    const resolvedIds: string[] = [];
-    for (const candidates of candidatesByIndex) {
-      const available = candidates.find((c) => !existingIds.has(c) && !seenIds.has(c));
-      const resolvedId = available ?? `workflow-${generateUuid()}`;
-      resolvedIds.push(resolvedId);
-      seenIds.add(resolvedId);
-    }
-
-    return resolvedIds;
   }
 
   /**
