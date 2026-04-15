@@ -60,8 +60,8 @@ export const alertActionTypeDefinitions = [
 
 That's it. Everything else is derived automatically:
 
-- The HTTP route (`POST /api/alerting/v2/alerts/{group_hash}/action/_my_action`) is registered by the alerting v2 plugin automatically.
-- The ES mapping is composed into the `.alert-actions` data stream automatically the alerting v2 plugin.
+- The HTTP route (`POST /api/alerting/v2/alerts/{group_hash}/action/_my_action`) is registered by the alerting v2 plugin.
+- The ES mapping is composed into the `.alert-actions` data stream by the alerting v2 plugin. The data stream version is **auto-bumped** when the composed mappings change. No manual version bump is needed.
 - The discriminated union in `@kbn/alerting-v2-schemas` for the schemas used in routes is built automatically from the `alertActionTypeDefinitions` array.
 
 ### 3. (Optional) Export a named per-type body schema

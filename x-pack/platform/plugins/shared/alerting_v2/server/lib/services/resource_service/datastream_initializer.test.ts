@@ -12,6 +12,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
 import { DatastreamInitializer } from './datastream_initializer';
+import { computeMappingHash } from './mapping_hash';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -119,5 +120,112 @@ describe('DatastreamInitializer', () => {
 
     const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
     await expect(initializer.initialize()).rejects.toThrow();
+  });
+
+  describe('auto-versioning via mapping hash', () => {
+    const currentHash = computeMappingHash(resourceDefinition.mappings.properties ?? {});
+
+    it('includes the computed mappingHash in _meta', async () => {
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      await initializer.initialize();
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _meta: expect.objectContaining({ mappingHash: currentHash }),
+        })
+      );
+    });
+
+    it('uses the base version when no index template exists', async () => {
+      esClient.indices.getIndexTemplate.mockResolvedValue({ index_templates: [] });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      await initializer.initialize();
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalled();
+    });
+
+    it('uses the base version when getIndexTemplate returns 404', async () => {
+      esClient.indices.getIndexTemplate.mockRejectedValueOnce(
+        new errors.ResponseError({ statusCode: 404 } as DiagnosticResult)
+      );
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      await initializer.initialize();
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalled();
+    });
+
+    it('keeps the deployed version when the mapping hash matches', async () => {
+      esClient.indices.getIndexTemplate.mockResolvedValue({
+        index_templates: [
+          {
+            name: resourceDefinition.dataStreamName,
+            index_template: {
+              index_patterns: [],
+              composed_of: [],
+              _meta: { version: 5, mappingHash: currentHash },
+              template: {},
+            },
+          },
+        ],
+      });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      await initializer.initialize();
+
+      expect(mockLogger.info).not.toHaveBeenCalled();
+    });
+
+    it('auto-increments version when the mapping hash differs', async () => {
+      esClient.indices.getIndexTemplate.mockResolvedValue({
+        index_templates: [
+          {
+            name: resourceDefinition.dataStreamName,
+            index_template: {
+              index_patterns: [],
+              composed_of: [],
+              _meta: { version: 3, mappingHash: 'stale_hash', previousVersions: [] },
+              template: {},
+            },
+          },
+        ],
+      });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+      await initializer.initialize();
+
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('bumping version from 3 to 4')
+      );
+    });
+
+    it('uses the base version when it is higher than deployedVersion + 1', async () => {
+      const resourceWithHighBase: ResourceDefinition = {
+        ...resourceDefinition,
+        version: 10,
+      };
+
+      esClient.indices.getIndexTemplate.mockResolvedValue({
+        index_templates: [
+          {
+            name: resourceWithHighBase.dataStreamName,
+            index_template: {
+              index_patterns: [],
+              composed_of: [],
+              _meta: { version: 3, mappingHash: 'stale_hash', previousVersions: [] },
+              template: {},
+            },
+          },
+        ],
+      });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceWithHighBase);
+      await initializer.initialize();
+
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('bumping version from 3 to')
+      );
+    });
   });
 });
