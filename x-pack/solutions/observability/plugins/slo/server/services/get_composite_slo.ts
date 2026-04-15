@@ -55,7 +55,13 @@ export class GetCompositeSLO {
     const memberSummaries: MemberSummaryData[] = activeMembers.map((member, i) => ({
       member,
       sloName: memberDefinitionMap.get(member.sloId)!.name,
-      summary: summaryResults[i].summary,
+      summary: {
+        sliValue: summaryResults[i].summary.sliValue,
+        status: summaryResults[i].summary.status,
+        fiveMinuteBurnRate: summaryResults[i].summary.fiveMinuteBurnRate,
+        oneHourBurnRate: summaryResults[i].summary.oneHourBurnRate,
+        oneDayBurnRate: summaryResults[i].summary.oneDayBurnRate,
+      },
       burnRateWindows: summaryResults[i].burnRateWindows,
     }));
 
