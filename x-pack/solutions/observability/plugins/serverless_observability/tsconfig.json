@@ -35,6 +35,5 @@
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
     "@kbn/scout-oblt",
-    "@kbn/scout",
   ]
 }
