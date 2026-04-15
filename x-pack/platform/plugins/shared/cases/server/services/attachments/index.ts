@@ -36,7 +36,6 @@ import {
   getAttachmentTypeTransformers,
   resolveAttachmentSavedObjectType,
 } from '../../common/attachments';
-import { passThroughTransformer } from '../../common/attachments/base';
 
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
@@ -77,7 +76,7 @@ import type {
   UnifiedAttachmentSavedObjectTransformed,
 } from '../../common/types/attachments_v2';
 import { isSOError } from '../../common/error';
-import { transformAttributesForMode } from './operations/utils';
+import { getTransformerForPatchAttributes, transformAttributesForMode } from './operations/utils';
 
 /**
  * Ensures alert attachments have rule.name, or else existing tests will fail
@@ -518,7 +517,9 @@ export class AttachmentService {
     comments,
     refresh,
     requestWithoutType = false,
-  }: BulkUpdateAttachmentArgs): Promise<SavedObjectsBulkUpdateResponse<AttachmentAttributesV2>> {
+  }: BulkUpdateAttachmentArgs): Promise<
+    SavedObjectsBulkUpdateResponse<AttachmentTransformedAttributesV2>
+  > {
     try {
       this.context.log.debug(
         `Attempting to UPDATE attachments ${comments.map((c) => c.savedObjectId).join(', ')}`
@@ -530,15 +531,13 @@ export class AttachmentService {
         const res =
           await this.context.unsecuredSavedObjectsClient.bulkUpdate<UnifiedAttachmentAttributes>(
             comments.map((c) => {
-              const decodedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+              const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
                 c.updatedAttributes
               );
-              const transformer = requestWithoutType
-                ? passThroughTransformer
-                : getAttachmentTypeTransformers(
-                    getAttachmentTypeFromAttributes(decodedAttributes),
-                    decodedAttributes.owner
-                  );
+              const transformer = getTransformerForPatchAttributes(
+                decodedAttributes,
+                requestWithoutType
+              );
               const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
 
               return {
@@ -560,12 +559,10 @@ export class AttachmentService {
               c.updatedAttributes
             );
             assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
-            const transformer = requestWithoutType
-              ? passThroughTransformer
-              : getAttachmentTypeTransformers(
-                  getAttachmentTypeFromAttributes(decodedAttributes),
-                  decodedAttributes.owner ?? ''
-                );
+            const transformer = getTransformerForPatchAttributes(
+              decodedAttributes,
+              requestWithoutType
+            );
             const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
             const {
               attributes: extractedAttributes,
@@ -624,20 +621,17 @@ export class AttachmentService {
         // TODO: we should fix the return type of this function so that it can return errors
         validatedAttachments.push(attachment as SavedObjectsUpdateResponse<AttachmentAttributesV2>);
       } else if (attachment.type === CASE_ATTACHMENT_SAVED_OBJECT) {
-        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(
-          attachment.attributes
+        // Saved Objects bulkUpdate may return only the attributes that were sent in the request, not
+        // the full merged document. Match single update(): return the validated patch from the request.
+        const validatedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
+          comments[i].updatedAttributes
         );
         validatedAttachments.push(Object.assign(attachment, { attributes: validatedAttributes }));
       } else {
         const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
           comments[i].updatedAttributes
         );
-        const transformer = requestWithoutType
-          ? passThroughTransformer
-          : getAttachmentTypeTransformers(
-              getAttachmentTypeFromAttributes(decodedAttributes),
-              decodedAttributes.owner ?? ''
-            );
+        const transformer = getTransformerForPatchAttributes(decodedAttributes, requestWithoutType);
         const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
         const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
           legacyAttributes,

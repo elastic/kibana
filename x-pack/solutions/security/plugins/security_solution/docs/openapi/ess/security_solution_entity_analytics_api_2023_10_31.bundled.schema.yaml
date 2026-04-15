@@ -1952,6 +1952,7 @@ components:
           type: string
         criticality:
           $ref: '#/components/schemas/AssetCriticalityLevel'
+          nullable: true
         environment:
           type: string
         id:
