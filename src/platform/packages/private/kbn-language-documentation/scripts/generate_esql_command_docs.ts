@@ -10,7 +10,6 @@
 /* eslint-disable no-console */
 
 import * as fs from 'fs';
-import * as path from 'path';
 import { readElasticsearchDefinitions } from '@kbn/esql-language/scripts/utils/elasticsearch_definitions';
 import {
   processingCommandsIntro,
@@ -19,17 +18,7 @@ import {
 import { sourceCommandsIntro, sourceCommandsItems } from './resources/commands/source_data';
 import type { CommandDefinition, MultipleLicenseInfo } from '../src/types';
 import { getLicenseInfoForCommand } from '../src/utils/get_license_info';
-import {
-  DEFINITION_DIR_SUFFIX,
-  ELASTISEARCH_ESQL_DOCS_BASE_PATH,
-  OUTPUT_DIR,
-} from './scripts.constants';
-
-const ELASTIC_COMMAND_DIR_PATH = path.join(
-  ELASTISEARCH_ESQL_DOCS_BASE_PATH,
-  DEFINITION_DIR_SUFFIX,
-  'commands'
-);
+import { OUTPUT_DIR } from './scripts.constants';
 
 interface CommandItemMetadata {
   name: string;
