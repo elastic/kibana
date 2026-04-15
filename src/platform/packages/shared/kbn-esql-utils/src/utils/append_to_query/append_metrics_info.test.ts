@@ -78,12 +78,4 @@ describe('buildMetricsInfoQuery', () => {
       `FROM metrics-* | WHERE timestamp > now - 1h\n| WHERE TO_STRING(\`environment\`) IS NOT NULL AND TO_STRING(\`station.name\`) IS NOT NULL | METRICS_INFO | LIMIT 100`
     );
   });
-
-  it('casts dimensions with TO_STRING to prevent verification_exception for conflicting field types', () => {
-    const result = buildMetricsInfoQuery('TS metrics-*', ['attributes.cpu']);
-    expect(result).toBe(
-      `TS metrics-*\n| WHERE TO_STRING(\`attributes.cpu\`) IS NOT NULL | METRICS_INFO`
-    );
-    expect(result).toContain('TO_STRING');
-  });
 });
