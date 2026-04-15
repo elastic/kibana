@@ -61,17 +61,7 @@ export const UpdatePacksResponse = z.object({
       updated_by: z.string().nullable().optional(),
       updated_by_profile_uid: z.string().optional(),
       policy_ids: PolicyIdsOrUndefined.optional(),
-      /**
-       * Shard configuration as an array of key-value pairs.
-       */
-      shards: z
-        .array(
-          z.object({
-            key: z.string().optional(),
-            value: z.number().optional(),
-          })
-        )
-        .optional(),
+      shards: Shards.optional(),
     })
     .optional(),
 });
