@@ -27,7 +27,7 @@ const ENTITY_MAINTAINER_LICENSE_CHECK_VALID = 'valid' as const satisfies License
 export interface ExecuteMaintainerRunParams {
   currentStatus: Partial<EntityMaintainerStatus>;
   request: KibanaRequest;
-  taskIdStr: string;
+  taskId: string;
   taskAbortController?: AbortController;
   namespace?: string;
   id: string;
@@ -90,7 +90,7 @@ export function createMaintainerStatus({
 export async function executeMaintainerRun({
   currentStatus,
   request,
-  taskIdStr,
+  taskId,
   taskAbortController,
   namespace,
   id,
@@ -126,14 +126,14 @@ export async function executeMaintainerRun({
     esClient,
     namespace: maintainerStatus.metadata.namespace,
   });
-  const taskLogger = logger.get(taskIdStr);
+  const taskLogger = logger.get(taskId);
   const abortController = taskAbortController ?? new AbortController();
 
   return await wrapTaskRun({
     spanName: 'entityStore.task.entity_maintainer.run',
     namespace: maintainerStatus.metadata.namespace,
     attributes: {
-      'entity_store.task.id': taskIdStr,
+      'entity_store.task.id': taskId,
       'entity_store.task.type': type,
       'entity_store.entity_maintainer.id': id,
     },

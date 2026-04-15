@@ -118,7 +118,7 @@ export function registerEntityMaintainerTask({
                 const result = await executeMaintainerRun({
                   currentStatus,
                   request: fakeRequest,
-                  taskIdStr: taskInstance.id,
+                  taskId: taskInstance.id,
                   taskAbortController: abortController,
                   id,
                   run,
