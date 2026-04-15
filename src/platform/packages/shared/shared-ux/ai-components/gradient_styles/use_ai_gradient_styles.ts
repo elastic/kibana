@@ -141,6 +141,10 @@ const plainLabelCss = (euiTheme: UseEuiTheme['euiTheme'], color: string) => css`
 `;
 
 // Uses ::after so it doesn't collide with EUI's ::before interaction overlay.
+// Mask order matters: Firefox treats -webkit-mask as an alias for mask; each
+// mask shorthand resets mask-composite to add. Put -webkit-* first, then
+// mask + mask-composite: exclude last so exclude wins (xor is WebKit-only and
+// ignored in Firefox).
 const outlinedBorderGradientCss = (
   borderGradient: string,
   euiTheme: UseEuiTheme['euiTheme']
@@ -157,10 +161,10 @@ const outlinedBorderGradientCss = (
     padding: 1px;
     background: ${borderGradient};
     pointer-events: none;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
   }
 
   &:disabled::after {

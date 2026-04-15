@@ -279,9 +279,9 @@ describe('BaseMonacoConnectorHandler', () => {
       expect(result).toBe('');
     });
 
-    it('should return tech preview note for undefined stability (defaults to tech_preview)', () => {
+    it('should return empty string for undefined stability', () => {
       const result = handler.exposedGetStabilityNote(undefined);
-      expect(result).toContain('Tech Preview');
+      expect(result).toBe('');
     });
   });
 
