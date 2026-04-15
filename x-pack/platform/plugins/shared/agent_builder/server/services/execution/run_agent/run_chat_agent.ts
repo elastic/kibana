@@ -43,6 +43,7 @@ import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { createSubagentTool } from './tools/start_subagent';
+import { createSleepTool } from './tools/sleep';
 import { BackgroundExecutionService } from './background_execution_service';
 import { builtinToolToExecutable } from './utils/select_tools';
 import type { StateType } from './state';
@@ -192,7 +193,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
   ]);
 
-  // Register start_subagent tool if experimental features enabled and not already a sub-agent
+  // Register sub-agent and sleep tools if experimental features enabled and not already a sub-agent
   if (experimentalFeatures.subagents && context.executionMode !== 'subagent') {
     const subagentTool = createSubagentTool({
       agentId: agentId ?? agentBuilderDefaultAgentId,
@@ -203,9 +204,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       abortSignal,
       backgroundExecutionService,
     });
+    const sleepTool = createSleepTool();
     await toolManager.addTools({
       type: ToolManagerToolType.executable,
-      tools: [builtinToolToExecutable({ tool: subagentTool, runner: context.runner })],
+      tools: [
+        builtinToolToExecutable({ tool: subagentTool, runner: context.runner }),
+        builtinToolToExecutable({ tool: sleepTool, runner: context.runner }),
+      ],
       logger,
     });
   }

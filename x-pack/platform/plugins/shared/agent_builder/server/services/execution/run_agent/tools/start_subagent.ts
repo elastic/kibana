@@ -46,7 +46,7 @@ Brief the agent like a smart colleague who just walked into the room — it hasn
 
 - The agent's outputs should generally be trusted
 
-- You can optionally run agents in the background using the run_in_background parameter. When an agent runs in the background, you (not the user) will be automatically notified when it completes — do NOT sleep, poll, or proactively check on its progress. Continue with other work or respond to the user instead.
+- You can optionally run agents in the background using the run_in_background parameter. When an agent runs in the background, you (not the user) will be **automatically** notified when it completes — do not try to proactively check on its progress. In particular, do not try to use the platform.core.get_workflow_execution_status tool. Continue with other work or respond to the user instead.
 
 - **Foreground vs background**: Use foreground (default) when you need the agent's results before you can proceed — e.g., research agents whose findings inform your next steps. Use background when you have genuinely independent work to do in parallel.
 
@@ -92,7 +92,13 @@ export const createSubagentTool = ({
           backgroundExecutionService?.registerExecution(executionId);
 
           return {
-            results: [createOtherResult({ execution_id: executionId, mode: 'background' })],
+            results: [
+              createOtherResult({
+                agent_execution_id: executionId,
+                mode: 'background',
+                status: 'queued',
+              }),
+            ],
           };
         } else {
           const response = await extractFinalResponse(events$);
