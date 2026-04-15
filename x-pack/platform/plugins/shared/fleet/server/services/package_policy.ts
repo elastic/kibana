@@ -608,10 +608,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: enrichedPackagePolicy,
     });
 
-    // Handle namespace@custom component template reference injection.
+    // Handle namespace-scoped index template creation for opted-in namespaces.
     // NOTE: This runs before the SO is persisted, consistent with
-    // handleExperimentalDatastreamFeatureOptIn above. If the SO save fails the ref
-    // remains in the ES index template but is harmless (ignore_missing_component_templates).
+    // handleExperimentalDatastreamFeatureOptIn above. If the SO save fails the
+    // namespace template remains in ES but is harmless (higher-priority duplicate).
     await handleNamespaceTemplateUpdate({
       soClient,
       esClient,
@@ -1669,7 +1669,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: restOfPackagePolicy,
     });
 
-    // Handle namespace@custom component template reference injection
+    // Handle namespace-scoped index template creation for opted-in namespaces
     await handleNamespaceTemplateUpdate({
       soClient,
       esClient,
@@ -2093,7 +2093,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (!options?.fromBulkUpgrade) {
           // Handle component template/mappings updates for experimental features, e.g. synthetic source
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
-          // Handle namespace@custom component template reference injection
+          // Handle namespace-scoped index template creation for opted-in namespaces
           await handleNamespaceTemplateUpdate({
             soClient,
             esClient,
@@ -2429,7 +2429,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    // Handle namespace@custom template cleanup before SOs are deleted so the
+    // Handle namespace-scoped index template cleanup before SOs are deleted so the
     // "is namespace still in use?" query can correctly exclude the being-deleted IDs.
     if (idsToDelete.length > 0) {
       const policiesToDelete = packagePolicies.filter((p) => idsToDelete.includes(p.id));

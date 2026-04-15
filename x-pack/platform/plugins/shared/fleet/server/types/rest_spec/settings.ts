@@ -163,6 +163,13 @@ export const SpaceSettingsResponseSchema = schema.object({
   item: schema.object({
     managed_by: schema.maybe(schema.string()),
     allowed_namespace_prefixes: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    namespace_index_templates_enabled_for: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    namespace_templates_summary: schema.maybe(
+      schema.object({
+        created: schema.recordOf(schema.string(), schema.arrayOf(schema.string())),
+        removed: schema.recordOf(schema.string(), schema.arrayOf(schema.string())),
+      })
+    ),
   }),
 });
 
@@ -226,6 +233,18 @@ export const PutSpaceSettingsRequestSchema = {
           },
         }),
         { maxSize: 10 }
+      )
+    ),
+    namespace_index_templates_enabled_for: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (v.includes('-')) {
+              return 'Must not contain -';
+            }
+          },
+        }),
+        { maxSize: 100 }
       )
     ),
   }),

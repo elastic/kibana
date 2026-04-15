@@ -15,6 +15,7 @@ import type {
 import { appContextService, settingsService } from '../../services';
 import { getSpaceSettings, saveSpaceSettings } from '../../services/spaces/space_settings';
 import { scheduleReindexIntegrationKnowledgeTask } from '../../tasks/reindex_integration_knowledge_task';
+import { syncNamespaceTemplates } from '../../services/package_policies';
 
 export const getSpaceSettingsHandler: FleetRequestHandler = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
@@ -31,15 +32,46 @@ export const putSpaceSettingsHandler: FleetRequestHandler<
   TypeOf<typeof PutSpaceSettingsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
+  const spaceId = soClient.getCurrentNamespace();
+
+  // Fetch old settings before saving to compute the diff
+  const oldSettings = await getSpaceSettings(spaceId);
+
   await saveSpaceSettings({
     settings: {
       allowed_namespace_prefixes: request.body.allowed_namespace_prefixes,
+      namespace_index_templates_enabled_for: request.body.namespace_index_templates_enabled_for,
     },
-    spaceId: soClient.getCurrentNamespace(),
+    spaceId,
   });
-  const settings = await getSpaceSettings(soClient.getCurrentNamespace());
+
+  const settings = await getSpaceSettings(spaceId);
+
+  // Compute diff for namespace index templates opt-in list
+  const oldList = oldSettings.namespace_index_templates_enabled_for;
+  const newList = settings.namespace_index_templates_enabled_for;
+  const addedNamespaces = newList.filter((ns) => !oldList.includes(ns));
+  const removedNamespaces = oldList.filter((ns) => !newList.includes(ns));
+
+  let namespaceTemplatesSummary;
+
+  if (addedNamespaces.length > 0 || removedNamespaces.length > 0) {
+    const esClient = appContextService.getInternalUserESClient();
+    namespaceTemplatesSummary = await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      addedNamespaces,
+      removedNamespaces,
+    });
+  }
+
   const body = {
-    item: settings,
+    item: {
+      ...settings,
+      ...(namespaceTemplatesSummary
+        ? { namespace_templates_summary: namespaceTemplatesSummary }
+        : {}),
+    },
   };
   return response.ok({ body });
 };

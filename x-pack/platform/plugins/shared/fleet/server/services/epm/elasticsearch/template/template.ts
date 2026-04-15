@@ -78,6 +78,10 @@ const DEFAULT_IGNORE_ABOVE = 1024;
 const DEFAULT_TEMPLATE_PRIORITY = 200;
 const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
 
+// Namespace-scoped templates get a higher priority so ES picks them over
+// the base template for data streams belonging to that namespace.
+export const NAMESPACE_TEMPLATE_PRIORITY_BOOST = 50;
+
 const META_PROP_KEYS = ['metric_type', 'unit'];
 
 /**
@@ -875,6 +879,65 @@ export function getTemplatePriority(dataStream: RegistryDataStream): number {
   } else {
     return DATASET_IS_PREFIX_TEMPLATE_PRIORITY;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Namespace-scoped index template helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the index template name for a namespace-scoped template.
+ * Example: `logs-nginx.access@namespace.production`
+ */
+export function generateNamespaceTemplateName(baseName: string, namespace: string): string {
+  return `${baseName}@namespace.${namespace}`;
+}
+
+/**
+ * Returns the index pattern for a namespace-scoped template.
+ * Example (non-prefix): `logs-nginx.access-production*`
+ * Example (dataset_is_prefix): `metrics-test.*-production*`
+ */
+export function generateNamespaceTemplateIndexPattern(
+  dataStream: RegistryDataStream,
+  namespace: string
+): string {
+  const baseName = getRegistryDataStreamAssetBaseName(dataStream);
+  if (!dataStream.dataset_is_prefix) {
+    return `${baseName}-${namespace}*`;
+  } else {
+    return `${baseName}.*-${namespace}*`;
+  }
+}
+
+/**
+ * Returns the priority for a namespace-scoped index template.
+ * Always higher than the base template so ES picks it for matching data streams.
+ */
+export function getNamespaceTemplatePriority(dataStream: RegistryDataStream): number {
+  return getTemplatePriority(dataStream) + NAMESPACE_TEMPLATE_PRIORITY_BOOST;
+}
+
+/**
+ * Returns true if the given template ID is a namespace-scoped index template,
+ * identifiable by the `@namespace.` discriminator in the name.
+ */
+export function isNamespaceTemplate(id: string): boolean {
+  return id.includes('@namespace.');
+}
+
+/**
+ * Extracts the namespace from a namespace-scoped template ID.
+ * Returns undefined if the ID is not a namespace template.
+ * Example: `logs-nginx.access@namespace.production` → `'production'`
+ */
+export function getNamespaceFromTemplateId(id: string): string | undefined {
+  const marker = '@namespace.';
+  const idx = id.indexOf(marker);
+  if (idx === -1) {
+    return undefined;
+  }
+  return id.slice(idx + marker.length);
 }
 
 /**

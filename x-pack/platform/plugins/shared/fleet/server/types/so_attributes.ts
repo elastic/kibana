@@ -301,6 +301,7 @@ export interface SettingsSOAttributes {
 
 export interface SpaceSettingsSOAttributes {
   allowed_namespace_prefixes?: string[] | null;
+  namespace_index_templates_enabled_for?: string[] | null;
   managed_by?: 'kibana_config' | null;
 }
 

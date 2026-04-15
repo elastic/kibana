@@ -13,23 +13,41 @@ import type { PackagePolicy } from '../../types';
 import { ElasticsearchAssetType } from '../../../common/types';
 import { appContextService } from '../app_context';
 import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
-import { getInstalledPackageWithAssets, getInstallation } from '../epm/packages/get';
+import {
+  getInstalledPackageWithAssets,
+  getInstallation,
+  getPackageSavedObjects,
+} from '../epm/packages/get';
 import { updateEsAssetReferences } from '../epm/packages/es_assets_reference';
+import { isNamespaceIndexTemplateEnabled } from '../spaces/space_settings';
 
 import {
   handleNamespaceTemplateDelete,
   handleNamespaceTemplateRestoreAfterPackageInstall,
   handleNamespaceTemplateUpdate,
   insertNamespaceCustomTemplate,
+  syncNamespaceTemplates,
 } from './namespace_datastream_templates';
 
 jest.mock('../epm/packages/get');
-jest.mock('../epm/elasticsearch/template/template');
+jest.mock('../epm/elasticsearch/template/template', () => {
+  const actual = jest.requireActual('../epm/elasticsearch/template/template');
+  return {
+    ...actual,
+    updateCurrentWriteIndices: jest.fn(),
+  };
+});
 jest.mock('../epm/packages/es_assets_reference');
 jest.mock('../spaces/helpers', () => ({
   isSpaceAwarenessEnabled: jest.fn().mockResolvedValue(false),
 }));
+jest.mock('../spaces/space_settings', () => ({
+  isNamespaceIndexTemplateEnabled: jest.fn().mockResolvedValue(true),
+}));
 jest.mock('../app_context');
+
+const mockedIsNamespaceIndexTemplateEnabled =
+  isNamespaceIndexTemplateEnabled as jest.MockedFunction<typeof isNamespaceIndexTemplateEnabled>;
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
@@ -46,6 +64,9 @@ const mockedGetInstalledPackageWithAssets = getInstalledPackageWithAssets as jes
   typeof getInstalledPackageWithAssets
 >;
 const mockedGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
+const mockedGetPackageSavedObjects = getPackageSavedObjects as jest.MockedFunction<
+  typeof getPackageSavedObjects
+>;
 const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
   typeof updateCurrentWriteIndices
 >;
@@ -104,10 +125,8 @@ describe('insertNamespaceCustomTemplate', () => {
   });
 
   it('does not treat hyphenated dataset-level entries as package-level entries', () => {
-    // "logs-nginx.access@custom" contains a hyphen before @custom → not package-level
     const composedOf = ['logs-nginx.access@package', 'logs@custom', 'logs-nginx.access@custom'];
     const result = insertNamespaceCustomTemplate(composedOf, 'staging', 'logs-nginx.access');
-    // Should insert before 'logs-nginx.access@custom', after 'logs@custom'
     expect(result).toEqual([
       'logs-nginx.access@package',
       'logs@custom',
@@ -156,7 +175,14 @@ function mockInstalledPackage(
   } as any);
 }
 
-function makeEsClientWithTemplate(composedOf: string[]) {
+const BASE_COMPOSED_OF = [
+  'logs-nginx.access@package',
+  'logs@custom',
+  'nginx@custom',
+  'logs-nginx.access@custom',
+];
+
+function makeEsClientWithTemplate(composedOf: string[] = BASE_COMPOSED_OF) {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.indices.getIndexTemplate.mockResolvedValue({
     index_templates: [
@@ -166,6 +192,9 @@ function makeEsClientWithTemplate(composedOf: string[]) {
           composed_of: composedOf,
           index_patterns: ['logs-nginx.access-*'],
           priority: 200,
+          template: { settings: {}, mappings: {} },
+          data_stream: {},
+          _meta: { package: { name: 'nginx' } },
         },
       },
     ],
@@ -187,8 +216,8 @@ describe('handleNamespaceTemplateUpdate', () => {
     mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
     mockedUpdateEsAssetReferences.mockResolvedValue([]);
     mockedGetInstallation.mockResolvedValue({ installed_es: [] } as any);
+    mockedIsNamespaceIndexTemplateEnabled.mockResolvedValue(true);
 
-    // By default, soClient.find returns no matching policies (safe to remove)
     soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10000 });
   });
 
@@ -215,85 +244,52 @@ describe('handleNamespaceTemplateUpdate', () => {
     expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });
 
-  it('is a no-op when namespace has not changed (empty string == default)', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    // Empty string and 'default' are both treated as the default namespace
-    const policy = makePackagePolicy({ namespace: '' });
-    const oldPolicy = makePackagePolicy({ namespace: 'default' });
-    await handleNamespaceTemplateUpdate({
-      soClient,
-      esClient,
-      packagePolicy: policy,
-      oldPackagePolicy: oldPolicy,
-    });
-    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-  });
-
-  it('treats empty string namespace as default on policy create', async () => {
+  it('is a no-op when namespace is not opted in', async () => {
+    mockedIsNamespaceIndexTemplateEnabled.mockResolvedValue(false);
     mockInstalledPackage();
-    const composedOf = [
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'logs-nginx.access@custom',
-    ];
-    const esClient = makeEsClientWithTemplate(composedOf);
-    // Fleet stores empty string when user selects "default" namespace
-    const policy = makePackagePolicy({ namespace: '' });
+    const esClient = makeEsClientWithTemplate();
+    const policy = makePackagePolicy({ namespace: 'production' });
 
     await handleNamespaceTemplateUpdate({ soClient, esClient, packagePolicy: policy });
 
-    const call = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls[0][0];
-    expect(call.composed_of).toContain('default@custom');
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });
 
-  it('inserts namespace@custom on policy create', async () => {
+  it('creates a namespace-scoped index template on policy create', async () => {
     mockInstalledPackage();
-    const composedOf = [
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'logs-nginx.access@custom',
-    ];
-    const esClient = makeEsClientWithTemplate(composedOf);
+    const esClient = makeEsClientWithTemplate();
     const policy = makePackagePolicy({ namespace: 'production' });
 
     await handleNamespaceTemplateUpdate({ soClient, esClient, packagePolicy: policy });
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'logs-nginx.access',
-        composed_of: [
-          'logs-nginx.access@package',
-          'logs@custom',
-          'nginx@custom',
-          'production@custom',
-          'logs-nginx.access@custom',
-        ],
-        ignore_missing_component_templates: [
-          'logs@custom',
-          'nginx@custom',
-          'production@custom',
-          'logs-nginx.access@custom',
-        ],
+        name: 'logs-nginx.access@namespace.production',
+        index_patterns: ['logs-nginx.access-production*'],
+        priority: 250,
+        composed_of: expect.arrayContaining(['production@custom']),
       })
     );
   });
 
-  it('swaps old namespace for new namespace when namespace changes', async () => {
+  it('does not modify the base template', async () => {
     mockInstalledPackage();
-    const composedOf = [
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'staging@custom',
-      'logs-nginx.access@custom',
-    ];
-    const esClient = makeEsClientWithTemplate(composedOf);
+    const esClient = makeEsClientWithTemplate();
+    const policy = makePackagePolicy({ namespace: 'production' });
+
+    await handleNamespaceTemplateUpdate({ soClient, esClient, packagePolicy: policy });
+
+    // putIndexTemplate should only be called with the namespace template name
+    const calls = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls;
+    expect(calls).toHaveLength(1);
+    expect(calls[0][0].name).toBe('logs-nginx.access@namespace.production');
+  });
+
+  it('deletes old namespace template when namespace changes', async () => {
+    mockInstalledPackage();
+    const esClient = makeEsClientWithTemplate();
     const policy = makePackagePolicy({ id: 'policy-1', namespace: 'production' });
     const oldPolicy = makePackagePolicy({ id: 'policy-1', namespace: 'staging' });
-    // No other policies use 'staging', so it's safe to remove
-    soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10000 });
 
     await handleNamespaceTemplateUpdate({
       soClient,
@@ -302,30 +298,30 @@ describe('handleNamespaceTemplateUpdate', () => {
       oldPackagePolicy: oldPolicy,
     });
 
-    const call = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls[0][0];
-    expect(call.composed_of).toContain('production@custom');
-    expect(call.composed_of).not.toContain('staging@custom');
+    // Should create the new namespace template
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'logs-nginx.access@namespace.production',
+      })
+    );
+
+    // Should delete the old namespace template
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledWith(
+      { name: 'logs-nginx.access@namespace.staging' },
+      { ignore: [404] }
+    );
   });
 
-  it('keeps old namespace if another policy still uses it', async () => {
+  it('keeps old namespace template if another policy still uses it', async () => {
     mockInstalledPackage();
-    const composedOf = [
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'staging@custom',
-      'logs-nginx.access@custom',
-    ];
-    const esClient = makeEsClientWithTemplate(composedOf);
+    const esClient = makeEsClientWithTemplate();
     const policy = makePackagePolicy({ id: 'policy-1', namespace: 'production' });
     const oldPolicy = makePackagePolicy({ id: 'policy-1', namespace: 'staging' });
-    // Another policy (policy-2) also uses 'staging'
+
+    // Another policy still uses 'staging'
     soClient.find.mockResolvedValue({
       saved_objects: [
-        {
-          id: 'policy-2',
-          attributes: { namespace: 'staging', package: { name: 'nginx' } },
-        },
+        { id: 'policy-2', attributes: { namespace: 'staging', package: { name: 'nginx' } } },
       ],
       total: 1,
       page: 1,
@@ -339,34 +335,15 @@ describe('handleNamespaceTemplateUpdate', () => {
       oldPackagePolicy: oldPolicy,
     });
 
-    const call = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls[0][0];
-    expect(call.composed_of).toContain('staging@custom');
-    expect(call.composed_of).toContain('production@custom');
+    // Should create new but NOT delete old
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalled();
+    expect(esClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
   });
 
-  it('does not duplicate namespace entry if already present', async () => {
+  it('tracks namespace template refs in the Installation SO', async () => {
     mockInstalledPackage();
-    const composedOf = [
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'default@custom',
-      'logs-nginx.access@custom',
-    ];
-    const esClient = makeEsClientWithTemplate(composedOf);
-    const policy = makePackagePolicy({ namespace: 'default' });
-    // No oldPackagePolicy → namespace "undefined" differs from "default", so it runs
-    await handleNamespaceTemplateUpdate({ soClient, esClient, packagePolicy: policy });
-
-    const call = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls[0][0];
-    const defaultCount = call.composed_of.filter((e: string) => e === 'default@custom').length;
-    expect(defaultCount).toBe(1);
-  });
-
-  it('updates the Installation saved object with the new namespace ref', async () => {
-    mockInstalledPackage();
-    const esClient = makeEsClientWithTemplate(['logs-nginx.access@package', 'nginx@custom']);
-    const policy = makePackagePolicy({ namespace: 'default' });
+    const esClient = makeEsClientWithTemplate();
+    const policy = makePackagePolicy({ namespace: 'production' });
 
     await handleNamespaceTemplateUpdate({ soClient, esClient, packagePolicy: policy });
 
@@ -375,7 +352,13 @@ describe('handleNamespaceTemplateUpdate', () => {
       'nginx',
       expect.any(Array),
       expect.objectContaining({
-        assetsToAdd: [{ id: 'default@custom', type: ElasticsearchAssetType.componentTemplate }],
+        assetsToAdd: expect.arrayContaining([
+          {
+            id: 'logs-nginx.access@namespace.production',
+            type: ElasticsearchAssetType.indexTemplate,
+          },
+          { id: 'production@custom', type: ElasticsearchAssetType.componentTemplate },
+        ]),
       })
     );
   });
@@ -385,8 +368,7 @@ describe('handleNamespaceTemplateUpdate', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.getIndexTemplate.mockRejectedValue(new Error('not found'));
 
-    const policy = makePackagePolicy({ namespace: 'default' });
-    // Should not throw
+    const policy = makePackagePolicy({ namespace: 'production' });
     await expect(
       handleNamespaceTemplateUpdate({ soClient, esClient, packagePolicy: policy })
     ).resolves.toBeUndefined();
@@ -414,41 +396,29 @@ describe('handleNamespaceTemplateDelete', () => {
     mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
     mockedUpdateEsAssetReferences.mockResolvedValue([]);
     mockedGetInstallation.mockResolvedValue({ installed_es: [] } as any);
+    mockedIsNamespaceIndexTemplateEnabled.mockResolvedValue(true);
 
-    // By default no remaining policies — all namespaces are safe to remove
     soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10000 });
   });
 
-  it('removes namespace@custom from the index template when the last policy for that namespace is deleted', async () => {
+  it('deletes the namespace index template when the last policy for that namespace is deleted', async () => {
     mockInstalledPackage();
-    const composedOf = [
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'staging@custom',
-      'logs-nginx.access@custom',
-    ];
-    const esClient = makeEsClientWithTemplate(composedOf);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const policy = makePackagePolicy({ id: 'policy-1', namespace: 'staging' });
 
     await handleNamespaceTemplateDelete({ soClient, esClient, packagePolicies: [policy] });
 
-    const call = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls[0][0];
-    expect(call.composed_of).not.toContain('staging@custom');
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledWith(
+      { name: 'logs-nginx.access@namespace.staging' },
+      { ignore: [404] }
+    );
   });
 
-  it('keeps namespace@custom when another policy still uses that namespace', async () => {
+  it('keeps namespace template when another policy still uses that namespace', async () => {
     mockInstalledPackage();
-    const composedOf = [
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'staging@custom',
-      'logs-nginx.access@custom',
-    ];
-    const esClient = makeEsClientWithTemplate(composedOf);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const policy = makePackagePolicy({ id: 'policy-1', namespace: 'staging' });
-    // Another policy also uses 'staging'
+
     soClient.find.mockResolvedValue({
       saved_objects: [
         { id: 'policy-2', attributes: { namespace: 'staging', package: { name: 'nginx' } } },
@@ -460,41 +430,12 @@ describe('handleNamespaceTemplateDelete', () => {
 
     await handleNamespaceTemplateDelete({ soClient, esClient, packagePolicies: [policy] });
 
-    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
   });
 
-  it('handles deleting multiple policies with different namespaces in one call', async () => {
+  it('handles deleting multiple policies with different namespaces', async () => {
     mockInstalledPackage();
-    const initialComposedOf = [
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'production@custom',
-      'staging@custom',
-      'logs-nginx.access@custom',
-    ];
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-
-    // Track latest composed_of so the second getIndexTemplate reflects the first putIndexTemplate
-    let currentComposedOf = [...initialComposedOf];
-    esClient.indices.getIndexTemplate.mockImplementation(async () => ({
-      index_templates: [
-        {
-          name: 'logs-nginx.access',
-          index_template: {
-            composed_of: currentComposedOf,
-            index_patterns: ['logs-nginx.access-*'],
-            priority: 200,
-          },
-        },
-      ],
-    }));
-    (esClient.indices.putIndexTemplate as unknown as jest.Mock).mockImplementation(
-      async (params: any) => {
-        currentComposedOf = params.composed_of;
-      }
-    );
-
     const policy1 = makePackagePolicy({ id: 'policy-1', namespace: 'production' });
     const policy2 = makePackagePolicy({ id: 'policy-2', namespace: 'staging' });
 
@@ -504,14 +445,35 @@ describe('handleNamespaceTemplateDelete', () => {
       packagePolicies: [policy1, policy2],
     });
 
-    // Each namespace triggers one putIndexTemplate call; first removes production, second removes staging
-    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
-    const firstCall = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls[0][0];
-    expect(firstCall.composed_of).not.toContain('production@custom');
-    const secondCall = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls[1][0];
-    expect(secondCall.composed_of).not.toContain('staging@custom');
-    // Verify the cumulative result: the final put should have neither namespace
-    expect(secondCall.composed_of).not.toContain('production@custom');
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledWith(
+      { name: 'logs-nginx.access@namespace.production' },
+      { ignore: [404] }
+    );
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledWith(
+      { name: 'logs-nginx.access@namespace.staging' },
+      { ignore: [404] }
+    );
+  });
+
+  it('excludes all being-deleted IDs when multiple policies share the same namespace', async () => {
+    mockInstalledPackage();
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const policy1 = makePackagePolicy({ id: 'policy-1', namespace: 'staging' });
+    const policy2 = makePackagePolicy({ id: 'policy-2', namespace: 'staging' });
+
+    soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10000 });
+
+    await handleNamespaceTemplateDelete({
+      soClient,
+      esClient,
+      packagePolicies: [policy1, policy2],
+    });
+
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledWith(
+      { name: 'logs-nginx.access@namespace.staging' },
+      { ignore: [404] }
+    );
   });
 
   it('is a no-op when policies have no package', async () => {
@@ -521,82 +483,31 @@ describe('handleNamespaceTemplateDelete', () => {
       esClient,
       packagePolicies: [{ namespace: 'default', inputs: [] } as any],
     });
-    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
   });
 
-  it('excludes all being-deleted IDs when multiple policies share the same namespace', async () => {
+  it('is a no-op when namespace is not opted in', async () => {
+    mockedIsNamespaceIndexTemplateEnabled.mockResolvedValue(false);
     mockInstalledPackage();
-    const composedOf = [
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'staging@custom',
-      'logs-nginx.access@custom',
-    ];
-    const esClient = makeEsClientWithTemplate(composedOf);
-    // Two policies both use the same namespace
-    const policy1 = makePackagePolicy({ id: 'policy-1', namespace: 'staging' });
-    const policy2 = makePackagePolicy({ id: 'policy-2', namespace: 'staging' });
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const policy = makePackagePolicy({ id: 'policy-1', namespace: 'staging' });
 
-    // No remaining policies after both are deleted → safe to remove
-    soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10000 });
+    await handleNamespaceTemplateDelete({ soClient, esClient, packagePolicies: [policy] });
 
-    await handleNamespaceTemplateDelete({
-      soClient,
-      esClient,
-      packagePolicies: [policy1, policy2],
-    });
-
-    // The find query should be called with a filter for the package name (isNamespaceSafeToRemove);
-    // we verify the namespace is removed, meaning both IDs were correctly excluded
-    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
-    const call = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls[0][0];
-    expect(call.composed_of).not.toContain('staging@custom');
+    expect(esClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
   });
 
-  it('keeps namespace when a third policy still uses it despite two being deleted', async () => {
+  it('removes namespace refs from the Installation saved object', async () => {
     mockInstalledPackage();
-    const composedOf = [
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'staging@custom',
-      'logs-nginx.access@custom',
-    ];
-    const esClient = makeEsClientWithTemplate(composedOf);
-    const policy1 = makePackagePolicy({ id: 'policy-1', namespace: 'staging' });
-    const policy2 = makePackagePolicy({ id: 'policy-2', namespace: 'staging' });
-
-    // A third policy (policy-3) also uses 'staging', so it's not safe to remove
-    soClient.find.mockResolvedValue({
-      saved_objects: [
-        { id: 'policy-3', attributes: { namespace: 'staging', package: { name: 'nginx' } } },
-      ],
-      total: 1,
-      page: 1,
-      per_page: 10000,
-    } as any);
-
-    await handleNamespaceTemplateDelete({
-      soClient,
-      esClient,
-      packagePolicies: [policy1, policy2],
-    });
-
-    // Namespace is still in use by policy-3 → no removal
-    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-  });
-
-  it('removes namespace@custom from the Installation saved object', async () => {
-    mockInstalledPackage();
-    const esClient = makeEsClientWithTemplate([
-      'logs-nginx.access@package',
-      'nginx@custom',
-      'staging@custom',
-      'logs-nginx.access@custom',
-    ]);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
     mockedGetInstallation.mockResolvedValue({
-      installed_es: [{ id: 'staging@custom', type: ElasticsearchAssetType.componentTemplate }],
+      installed_es: [
+        {
+          id: 'logs-nginx.access@namespace.staging',
+          type: ElasticsearchAssetType.indexTemplate,
+        },
+        { id: 'staging@custom', type: ElasticsearchAssetType.componentTemplate },
+      ],
     } as any);
     const policy = makePackagePolicy({ id: 'policy-1', namespace: 'staging' });
 
@@ -607,7 +518,13 @@ describe('handleNamespaceTemplateDelete', () => {
       'nginx',
       expect.any(Array),
       expect.objectContaining({
-        assetsToRemove: [{ id: 'staging@custom', type: ElasticsearchAssetType.componentTemplate }],
+        assetsToRemove: expect.arrayContaining([
+          {
+            id: 'logs-nginx.access@namespace.staging',
+            type: ElasticsearchAssetType.indexTemplate,
+          },
+          { id: 'staging@custom', type: ElasticsearchAssetType.componentTemplate },
+        ]),
       })
     );
   });
@@ -633,6 +550,7 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
     mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
     mockedUpdateEsAssetReferences.mockResolvedValue([]);
     mockedGetInstallation.mockResolvedValue({ installed_es: [] } as any);
+    mockedIsNamespaceIndexTemplateEnabled.mockResolvedValue(true);
   });
 
   it('is a no-op when there are no data streams', async () => {
@@ -659,7 +577,27 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
     expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });
 
-  it('re-injects all unique namespace refs when existing policies are found', async () => {
+  it('is a no-op when namespaces are not opted in', async () => {
+    mockedIsNamespaceIndexTemplateEnabled.mockResolvedValue(false);
+    soClient.find.mockResolvedValue({
+      saved_objects: [{ id: 'p1', attributes: { namespace: 'default' } }],
+      total: 1,
+      page: 1,
+      per_page: 10000,
+    } as any);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    await handleNamespaceTemplateRestoreAfterPackageInstall({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+      dataStreams,
+    });
+
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('rebuilds namespace templates for all opted-in namespaces', async () => {
     soClient.find.mockResolvedValue({
       saved_objects: [
         { id: 'p1', attributes: { namespace: 'default' } },
@@ -671,12 +609,7 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
       per_page: 10000,
     } as any);
 
-    const esClient = makeEsClientWithTemplate([
-      'logs-nginx.access@package',
-      'logs@custom',
-      'nginx@custom',
-      'logs-nginx.access@custom',
-    ]);
+    const esClient = makeEsClientWithTemplate();
 
     await handleNamespaceTemplateRestoreAfterPackageInstall({
       soClient,
@@ -685,12 +618,11 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
       dataStreams,
     });
 
-    const call = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls[0][0];
-    expect(call.composed_of).toContain('default@custom');
-    expect(call.composed_of).toContain('production@custom');
-    // Deduplication: each namespace appears exactly once
-    expect(call.composed_of.filter((e: string) => e === 'default@custom').length).toBe(1);
-    expect(call.composed_of.filter((e: string) => e === 'production@custom').length).toBe(1);
+    const putCalls = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls;
+    const templateNames = putCalls.map((c: any) => c[0].name);
+    expect(templateNames).toContain('logs-nginx.access@namespace.default');
+    expect(templateNames).toContain('logs-nginx.access@namespace.production');
+    expect(putCalls).toHaveLength(2); // deduped
   });
 
   it('updates installed_es with all restored namespace refs', async () => {
@@ -704,11 +636,7 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
       per_page: 10000,
     } as any);
 
-    const esClient = makeEsClientWithTemplate(['logs-nginx.access@package', 'nginx@custom']);
-
-    mockedGetInstallation.mockResolvedValue({
-      installed_es: [{ id: 'nginx@custom', type: ElasticsearchAssetType.componentTemplate }],
-    } as any);
+    const esClient = makeEsClientWithTemplate();
 
     await handleNamespaceTemplateRestoreAfterPackageInstall({
       soClient,
@@ -723,10 +651,214 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
       expect.any(Array),
       expect.objectContaining({
         assetsToAdd: expect.arrayContaining([
+          {
+            id: 'logs-nginx.access@namespace.default',
+            type: ElasticsearchAssetType.indexTemplate,
+          },
+          {
+            id: 'logs-nginx.access@namespace.staging',
+            type: ElasticsearchAssetType.indexTemplate,
+          },
           { id: 'default@custom', type: ElasticsearchAssetType.componentTemplate },
           { id: 'staging@custom', type: ElasticsearchAssetType.componentTemplate },
         ]),
       })
     );
+  });
+
+  it('cleans up stale namespace templates for namespaces no longer opted in', async () => {
+    // One opted-in namespace, but installed_es has refs for a stale namespace
+    mockedIsNamespaceIndexTemplateEnabled.mockImplementation(
+      async (ns: string) => ns === 'default'
+    );
+
+    soClient.find.mockResolvedValue({
+      saved_objects: [{ id: 'p1', attributes: { namespace: 'default' } }],
+      total: 1,
+      page: 1,
+      per_page: 10000,
+    } as any);
+
+    const esClient = makeEsClientWithTemplate();
+
+    // installed_es contains a stale ref for 'staging' which is no longer opted in
+    mockedGetInstallation.mockResolvedValue({
+      installed_es: [
+        {
+          id: 'logs-nginx.access@namespace.staging',
+          type: ElasticsearchAssetType.indexTemplate,
+        },
+        { id: 'staging@custom', type: ElasticsearchAssetType.componentTemplate },
+      ],
+    } as any);
+
+    await handleNamespaceTemplateRestoreAfterPackageInstall({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+      dataStreams,
+    });
+
+    // Should delete the stale staging namespace template
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledWith(
+      { name: 'logs-nginx.access@namespace.staging' },
+      { ignore: [404] }
+    );
+
+    // Should remove stale refs from installed_es (second updateEsAssetReferences call)
+    const updateCalls = mockedUpdateEsAssetReferences.mock.calls;
+    const lastCall = updateCalls[updateCalls.length - 1];
+    expect(lastCall[3]).toEqual(
+      expect.objectContaining({
+        assetsToRemove: expect.arrayContaining([
+          {
+            id: 'logs-nginx.access@namespace.staging',
+            type: ElasticsearchAssetType.indexTemplate,
+          },
+          { id: 'staging@custom', type: ElasticsearchAssetType.componentTemplate },
+        ]),
+      })
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// syncNamespaceTemplates — bulk create/remove on settings change
+// ---------------------------------------------------------------------------
+
+describe('syncNamespaceTemplates', () => {
+  const soClient = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedAppContextService.getLogger.mockReturnValue({
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    } as any);
+    mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
+    mockedUpdateEsAssetReferences.mockResolvedValue([]);
+    mockedGetInstallation.mockResolvedValue({ installed_es: [] } as any);
+    mockedIsNamespaceIndexTemplateEnabled.mockResolvedValue(true);
+  });
+
+  it('creates namespace templates for added namespaces', async () => {
+    // Package policies query returns a policy using 'production'
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'policy-1',
+          attributes: { namespace: 'production', package: { name: 'nginx' } },
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 10000,
+    } as any);
+
+    mockInstalledPackage();
+    const esClient = makeEsClientWithTemplate();
+
+    const summary = await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      addedNamespaces: ['production'],
+      removedNamespaces: [],
+    });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'logs-nginx.access@namespace.production',
+        priority: 250,
+      })
+    );
+    expect(summary.created).toEqual({ production: ['nginx'] });
+    expect(summary.removed).toEqual({});
+  });
+
+  it('removes namespace templates for removed namespaces', async () => {
+    // getPackageSavedObjects returns a package with namespace template refs
+    mockedGetPackageSavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'nginx',
+          attributes: {
+            name: 'nginx',
+            installed_es: [
+              {
+                id: 'logs-nginx.access@namespace.staging',
+                type: ElasticsearchAssetType.indexTemplate,
+              },
+              { id: 'staging@custom', type: ElasticsearchAssetType.componentTemplate },
+            ],
+          },
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 10000,
+    } as any);
+
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    const summary = await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      addedNamespaces: [],
+      removedNamespaces: ['staging'],
+    });
+
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledWith(
+      { name: 'logs-nginx.access@namespace.staging' },
+      { ignore: [404] }
+    );
+    expect(summary.removed).toEqual({ staging: ['nginx'] });
+    expect(summary.created).toEqual({});
+  });
+
+  it('is a no-op when there are no policies for the added namespace', async () => {
+    soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10000 });
+
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    const summary = await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      addedNamespaces: ['production'],
+      removedNamespaces: [],
+    });
+
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    expect(summary.created).toEqual({});
+  });
+
+  it('is a no-op for removal when no packages have namespace templates for the namespace', async () => {
+    mockedGetPackageSavedObjects.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'nginx',
+          attributes: {
+            name: 'nginx',
+            installed_es: [],
+          },
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 10000,
+    } as any);
+
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    const summary = await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      addedNamespaces: [],
+      removedNamespaces: ['staging'],
+    });
+
+    expect(esClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+    expect(summary.removed).toEqual({});
   });
 });
