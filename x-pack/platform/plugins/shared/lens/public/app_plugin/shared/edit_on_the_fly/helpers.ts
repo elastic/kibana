@@ -33,6 +33,10 @@ export interface ESQLDataGridAttrs {
   columns: DatatableColumn[];
 }
 
+const hasNoValueCells = (values: ESQLRow[]): boolean => {
+  return values.length === 0 || values.every((row) => Array.isArray(row) && row.length === 0);
+};
+
 const columnsMatchInOrder = (a: ESQLColumn[], b: ESQLColumn[]) => {
   return a.length === b.length && a.every((col, i) => col.name === b[i]?.name);
 };
@@ -50,11 +54,11 @@ export const expandEsqlValuesToDisplayColumns = ({
   valueColumns: ESQLColumn[];
   values: ESQLRow[];
 }): ESQLRow[] => {
-  if (displayColumns.length > 0 && valueColumns.length === 0 && values.length === 0) {
+  if (valueColumns.length === 0 || hasNoValueCells(values)) {
     return [displayColumns.map(() => null)];
   }
 
-  if (!values.length || !valueColumns.length || columnsMatchInOrder(valueColumns, displayColumns)) {
+  if (columnsMatchInOrder(valueColumns, displayColumns)) {
     return values;
   }
 

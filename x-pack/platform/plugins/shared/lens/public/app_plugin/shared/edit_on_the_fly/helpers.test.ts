@@ -77,6 +77,7 @@ describe('Lens inline editing helpers', () => {
         [1, 2],
         [3, 4],
       ];
+
       expect(
         expandEsqlValuesToDisplayColumns({
           displayColumns: valueColumns,
@@ -87,11 +88,11 @@ describe('Lens inline editing helpers', () => {
     });
 
     it('maps row cells by column name when all_columns is a superset of columns', () => {
-      const valueColumns = [{ name: 'max_value', type: 'integer' }];
       const displayColumns = [
         { name: 'count', type: 'double' },
         { name: 'max_value', type: 'integer' },
       ];
+      const valueColumns = [{ name: 'max_value', type: 'integer' }];
       const values = [[500]];
 
       expect(
@@ -103,15 +104,14 @@ describe('Lens inline editing helpers', () => {
       ).toEqual([[null, 500]]);
     });
 
-    it('does not expand when value columns are empty', () => {
-      const values = [[1, 2]];
+    it('does expand when value columns are empty', () => {
       expect(
         expandEsqlValuesToDisplayColumns({
           displayColumns: [{ name: 'a', type: 'long' }],
           valueColumns: [],
-          values,
+          values: [[1, 2]],
         })
-      ).toEqual(values);
+      ).toEqual([[null]]);
     });
 
     it('returns one null-filled row when display columns exist but value columns and values are empty', () => {
@@ -119,6 +119,7 @@ describe('Lens inline editing helpers', () => {
         { name: 'count', type: 'double' },
         { name: 'max_value', type: 'integer' },
       ];
+
       expect(
         expandEsqlValuesToDisplayColumns({
           displayColumns,
