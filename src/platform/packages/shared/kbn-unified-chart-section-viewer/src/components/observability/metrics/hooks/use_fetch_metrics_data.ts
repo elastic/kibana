@@ -8,7 +8,7 @@
  */
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
@@ -18,6 +18,7 @@ import { useChartSectionInspector } from '../../../../context/chart_section_insp
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
+import { mergeDimensions } from '../utils/merge_dimensions';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -51,6 +52,17 @@ export function useFetchMetricsData({
     () => buildMetricsInfoQuery(esql, selectedDimensions),
     [esql, selectedDimensions]
   );
+
+  // Accumulate dimensions across filtered fetches so that selecting additional
+  // breakdown dimensions does not remove previously-available dimensions from
+  // the picker. Reset when the base ES|QL query changes (new data source).
+  const accumulatedDimensionsRef = useRef<Dimension[]>([]);
+  const previousEsqlRef = useRef<string | undefined>(esql);
+
+  if (esql !== previousEsqlRef.current) {
+    accumulatedDimensionsRef.current = [];
+    previousEsqlRef.current = esql;
+  }
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (signal: AbortSignal): Promise<ParsedMetrics | null> => {
@@ -88,11 +100,20 @@ export function useFetchMetricsData({
 
       const parsed = parseMetricsWithTelemetry(documents, getFieldType);
 
+      // Merge newly-fetched dimensions with the accumulated set so that
+      // dimensions from the unfiltered response are not lost when a
+      // WHERE filter narrows the result set.
+      const mergedDimensions = mergeDimensions(
+        accumulatedDimensionsRef.current,
+        parsed.allDimensions
+      );
+      accumulatedDimensionsRef.current = mergedDimensions;
+
       const sortedMetrics: ParsedMetrics = {
         metricItems: [...parsed.metricItems].sort((a, b) =>
           a.metricName.localeCompare(b.metricName)
         ),
-        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
+        allDimensions: mergedDimensions,
       };
 
       if (!signal.aborted) {
