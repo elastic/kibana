@@ -12,6 +12,7 @@ import type { z } from '@kbn/zod/v4';
 import { isTemplateReference } from './is_template_reference';
 import { stepSchemas } from '../../../../common/step_schemas';
 import {
+  clearCache,
   getCachedOption,
   getCachedSearchOption,
   getCacheKeyForValue,
@@ -59,6 +60,7 @@ function shouldValidateProperty(item: CustomPropertyItem): boolean {
 export async function validateCustomProperties(
   customPropertyItems: CustomPropertyItem[]
 ): Promise<CustomPropertyValidationResult[]> {
+  clearCache();
   const validationResultsPromises: Promise<CustomPropertyValidationResult>[] = [];
   for (const customPropertyItem of customPropertyItems) {
     if (shouldValidateProperty(customPropertyItem)) {

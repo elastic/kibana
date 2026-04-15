@@ -22,24 +22,9 @@ export const WATCHLIST_RISK_SCORE_WEIGHTING_LABEL = i18n.translate(
   { defaultMessage: 'Risk Score Weighting' }
 );
 
-export const WATCHLIST_FILE_UPLOAD_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.watchlists.flyout.fileUploadLabel',
-  { defaultMessage: 'File upload' }
-);
-
-export const WATCHLIST_FILE_PICKER_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.watchlists.flyout.filePicker.AriaLabel',
-  { defaultMessage: 'Watchlist file picker' }
-);
-
 export const WATCHLIST_FILTER_QUERY_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlists.flyout.filterQueryLabel',
   { defaultMessage: 'Watchlist filter' }
-);
-
-export const WATCHLIST_FILTER_QUERY_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.watchlists.flyout.filterQueryHelpText',
-  { defaultMessage: 'Build a query to filter matching events for this watchlist (POC).' }
 );
 
 export const WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL = i18n.translate(
@@ -55,4 +40,24 @@ export const WATCHLIST_ENTITY_FIELD_PLACEHOLDER = i18n.translate(
 export const WATCHLIST_ENTITY_FIELD_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlists.flyout.entityFieldAriaLabel',
   { defaultMessage: 'Watchlist entity field selector' }
+);
+
+export const WATCHLIST_INDEX_PATTERN_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.indexPatternLabel',
+  { defaultMessage: 'Index pattern' }
+);
+
+export const WATCHLIST_INDEX_PATTERN_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.indexPatternPlaceholder',
+  { defaultMessage: 'Search for an index pattern' }
+);
+
+export const WATCHLIST_CSV_DATA_SOURCE_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.csvDataSourceTitle',
+  { defaultMessage: 'CSV Data Source' }
+);
+
+export const WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.csvDataSourceDescription',
+  { defaultMessage: 'Add entities to this watchlist by uploading a CSV file.' }
 );

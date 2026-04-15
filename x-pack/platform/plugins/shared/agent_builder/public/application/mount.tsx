@@ -35,6 +35,8 @@ export const mountApp = async ({
   services: AgentBuilderInternalService;
   onAppLeave: OnAppLeave;
 }) => {
+  const ApplicationUsageTrackingProvider =
+    services.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const kibanaServices = { ...core, plugins, appParams: { history } };
   const queryClient = new QueryClient();
   await services.accessChecker.initAccess();
@@ -42,21 +44,23 @@ export const mountApp = async ({
   ReactDOM.render(
     core.rendering.addContext(
       <KibanaContextProvider services={kibanaServices}>
-        <I18nProvider>
-          <QueryClientProvider client={queryClient}>
-            <AgentBuilderServicesContext.Provider value={services}>
-              <AppLeaveContext.Provider value={onAppLeave}>
-                <RedirectAppLinks coreStart={core}>
-                  <PageWrapper>
-                    <Router history={history}>
-                      <AgentBuilderRoutes />
-                    </Router>
-                  </PageWrapper>
-                </RedirectAppLinks>
-              </AppLeaveContext.Provider>
-            </AgentBuilderServicesContext.Provider>
-          </QueryClientProvider>
-        </I18nProvider>
+        <ApplicationUsageTrackingProvider>
+          <I18nProvider>
+            <QueryClientProvider client={queryClient}>
+              <AgentBuilderServicesContext.Provider value={services}>
+                <AppLeaveContext.Provider value={onAppLeave}>
+                  <RedirectAppLinks coreStart={core}>
+                    <PageWrapper>
+                      <Router history={history}>
+                        <AgentBuilderRoutes />
+                      </Router>
+                    </PageWrapper>
+                  </RedirectAppLinks>
+                </AppLeaveContext.Provider>
+              </AgentBuilderServicesContext.Provider>
+            </QueryClientProvider>
+          </I18nProvider>
+        </ApplicationUsageTrackingProvider>
       </KibanaContextProvider>
     ),
     element

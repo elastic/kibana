@@ -11,7 +11,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { UserActionActions } from '../../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import {
   alertComment,
   basicCase,
@@ -39,6 +39,8 @@ import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachm
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
+import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
+import { getCommentAttachmentType } from '../../attachments/comment';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
@@ -258,6 +260,41 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
+
+    it('renders correctly when deleting a unified event attachment', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        displayName: 'Event',
+        icon: 'bell',
+        getAttachmentViewObject: () => ({ event: 'added an event' }),
+        getAttachmentRemovalObject: () => ({ event: 'removed event' }),
+      });
+
+      const userAction = getEventUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'security.event',
+            attachmentId: 'event-id-1',
+            metadata: { index: 'event-index-1' },
+            owner: 'securitySolution',
+          },
+        },
+      });
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('removed event')).toBeInTheDocument();
+    });
   });
 
   describe('user comments', () => {
@@ -418,7 +455,7 @@ describe('createCommentUserActionBuilder', () => {
         'added an alert from Awesome rule'
       );
 
-      await deleteAttachment('minusInCircle', 'Remove');
+      await deleteAttachment('minusCircle', 'Remove');
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
@@ -506,7 +543,7 @@ describe('createCommentUserActionBuilder', () => {
         'added 2 alerts from Awesome rule'
       );
 
-      await deleteAttachment('minusInCircle', 'Remove');
+      await deleteAttachment('minusCircle', 'Remove');
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
@@ -547,74 +584,63 @@ describe('createCommentUserActionBuilder', () => {
     });
   });
 
-  describe('Single event', () => {
-    it('renders correctly a single event', async () => {
-      const userAction = getEventUserAction();
-
+  describe('Unified user comments (type comment)', () => {
+    it('renders create user action through the unified comment registry', () => {
+      const userAction = getUserAction(UserActionTypes.comment, UserActionActions.create);
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
+        attachments: [basicCommentUnified],
         userAction,
       });
 
       const createdUserAction = builder.build();
+      expect(createdUserAction.length).toBe(1);
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('added a comment')).toBeInTheDocument();
     });
+  });
 
-    it('deletes a single event correctly', async () => {
+  describe('Unified event attachments', () => {
+    it('renders create user action through the unified attachment registry', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        displayName: 'Event',
+        icon: 'bell',
+        getAttachmentViewObject: () => ({
+          event: 'added an event',
+          timelineAvatar: <span data-test-subj="event-timeline-avatar" />,
+        }),
+      });
+
       const userAction = getEventUserAction();
-
+      const unifiedEventAttachment = {
+        id: eventComment.id,
+        type: 'security.event',
+        attachmentId: eventComment.eventId,
+        metadata: { index: eventComment.index },
+        owner: eventComment.owner,
+        createdAt: eventComment.createdAt,
+        createdBy: eventComment.createdBy,
+        pushedAt: eventComment.pushedAt,
+        pushedBy: eventComment.pushedBy,
+        updatedAt: eventComment.updatedAt,
+        updatedBy: eventComment.updatedBy,
+        version: eventComment.version,
+      };
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [eventComment],
+        unifiedAttachmentTypeRegistry,
+        attachments: [unifiedEventAttachment],
         userAction,
       });
 
       const createdUserAction = builder.build();
-
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('single-event-user-action-event-action-id')).toHaveTextContent(
-        'added an event'
-      );
-
-      await deleteAttachment('minusInCircle', 'Remove');
-
-      await waitFor(() => {
-        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
-          'event-comment-id',
-          'Deleted one event'
-        );
-      });
-    });
-
-    it('views an event correctly', async () => {
-      const userAction = getEventUserAction();
-
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [eventComment],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
-
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-      expect(screen.getByTestId('comment-action-show-event-event-action-id')).toBeInTheDocument();
-      await userEvent.click(screen.getByTestId('comment-action-show-event-event-action-id'));
-
-      await waitFor(() => {
-        expect(builderArgs.onShowAlertDetails).toHaveBeenCalledWith('event-id-1', 'event-index-1');
-      });
+      expect(screen.getByText('added an event')).toBeInTheDocument();
     });
   });
 

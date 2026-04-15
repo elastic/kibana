@@ -38,11 +38,11 @@ export const registerSolutionNavigation = async (
   );
   const workflowsUiEnabled = await firstValueFrom(workflowsUiEnabled$);
 
-  const templatesEnabled = services.cases.config.templatesEnabled;
+  const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
 
   const navigationTree = shouldUseAINavigation
-    ? createAiNavigationTree(initialChatExperience, workflowsUiEnabled, templatesEnabled)
-    : await createNavigationTree(services, initialChatExperience, templatesEnabled);
+    ? createAiNavigationTree(initialChatExperience, workflowsUiEnabled, showAlertingV2)
+    : await createNavigationTree(services, initialChatExperience);
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);
 

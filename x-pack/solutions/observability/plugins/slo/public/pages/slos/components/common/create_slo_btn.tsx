@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePermissions } from '../../../../hooks/use_permissions';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { SloTemplatesFlyout } from '../../../../components/slo/slo_templates/slo_templates_flyout';
 
 export function CreateSloBtn() {
   const {
@@ -18,20 +20,95 @@ export function CreateSloBtn() {
     http: { basePath },
   } = useKibana().services;
 
+  const { experimentalFeatures } = usePluginContext();
   const { data: permissions } = usePermissions();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
-  const handleClickCreateSlo = () => {
+  const isDisabled = !permissions?.hasAllWriteRequested;
+  const isCompositeSloEnabled = experimentalFeatures?.compositeSlo?.enabled === true;
+
+  const handleClickCreateSlo = useCallback(() => {
+    setIsPopoverOpen(false);
     navigateToUrl(basePath.prepend(paths.sloCreate));
+  }, [basePath, navigateToUrl]);
+
+  const handleClickCreateFromTemplate = () => {
+    setIsPopoverOpen(false);
+    setIsFlyoutOpen(true);
   };
+
+  const handleClickCreateCompositeSlo = useCallback(() => {
+    setIsPopoverOpen(false);
+    navigateToUrl(basePath.prepend(paths.sloCompositeCreate));
+  }, [basePath, navigateToUrl]);
+
+  const menuItems = useMemo(() => {
+    const items = [
+      <EuiContextMenuItem
+        key="create"
+        icon="plus"
+        onClick={handleClickCreateSlo}
+        data-test-subj="slosPageCreateNewSloButton"
+      >
+        {i18n.translate('xpack.slo.sloList.pageHeader.create', { defaultMessage: 'Create SLO' })}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="createFromTemplate"
+        icon="document"
+        onClick={handleClickCreateFromTemplate}
+        data-test-subj="slosPageCreateFromTemplateButton"
+      >
+        {i18n.translate('xpack.slo.sloList.pageHeader.createFromTemplate', {
+          defaultMessage: 'Create from template',
+        })}
+      </EuiContextMenuItem>,
+    ];
+
+    if (isCompositeSloEnabled) {
+      items.push(
+        <EuiContextMenuItem
+          key="createComposite"
+          icon="aggregate"
+          onClick={handleClickCreateCompositeSlo}
+          data-test-subj="slosPageCreateCompositeSloButton"
+        >
+          {i18n.translate('xpack.slo.sloList.pageHeader.createComposite', {
+            defaultMessage: 'Create composite SLO',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    return items;
+  }, [handleClickCreateCompositeSlo, handleClickCreateSlo, isCompositeSloEnabled]);
+
   return (
-    <EuiButton
-      color="primary"
-      data-test-subj="slosPageCreateNewSloButton"
-      disabled={!permissions?.hasAllWriteRequested}
-      fill
-      onClick={handleClickCreateSlo}
-    >
-      {i18n.translate('xpack.slo.sloList.pageHeader.create', { defaultMessage: 'Create SLO' })}
-    </EuiButton>
+    <>
+      <EuiPopover
+        button={
+          <EuiButton
+            color="primary"
+            data-test-subj="slosPageCreateSloDropdown"
+            disabled={isDisabled}
+            fill
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          >
+            {i18n.translate('xpack.slo.sloList.pageHeader.create', {
+              defaultMessage: 'Create SLO',
+            })}
+          </EuiButton>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downRight"
+      >
+        <EuiContextMenuPanel items={menuItems} size="s" />
+      </EuiPopover>
+      {isFlyoutOpen && <SloTemplatesFlyout onClose={() => setIsFlyoutOpen(false)} />}
+    </>
   );
 }

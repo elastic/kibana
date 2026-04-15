@@ -426,7 +426,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       entityName: 'no.module.user',
     },
   },
-  // --- Non-IDP local namespace (whenConditionTrueSetFieldsPreAgg + local euid branch) ---
+  // --- Non-IDP local namespace (fieldEvaluations local + after-stats confidence) ---
   {
     id: 'non-idp-local-user-host',
     query: {
@@ -553,7 +553,7 @@ export const USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES: readonly UserScout
 /**
  * Expected number of user documents in `es_archives/updates` that pass
  * `getEuidDslDocumentsContainsIdFilter('user')` (documentsFilter ∧ postAggFilter).
- * Keep in sync: archive user docs with defined EUID = 25; this table lists 24 archive-backed
- * cases with EUID + 3 without; ingested-only case is excluded here.
+ * Keep in sync: archive user docs with defined EUID = 25; this table lists archive-backed cases with EUID + cases without; ingested-only
+ * case is excluded here.
  */
 export const USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT = 25;

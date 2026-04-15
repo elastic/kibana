@@ -67,9 +67,14 @@ export const runExecutionValidation = async (
   const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
 
   try {
-    const indexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(inputIndex);
+    const { matchedIndexPatterns, matchedIndices } = await indexPatterns.getIndexPatternMatches(
+      inputIndex
+    );
 
-    if (indexPatternsWithMatches.length === 0) {
+    // Collect rule execution metrics
+    ruleExecutionLogger.logMetric('matched_indices_count', matchedIndices?.length);
+
+    if (matchedIndexPatterns.length === 0) {
       warnings.push(
         `Unable to find matching indices for rule ${ruleName}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`
       );
@@ -81,11 +86,10 @@ export const runExecutionValidation = async (
 
   if (isThreatParams(params)) {
     try {
-      const threatIndexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(
-        params.threatIndex
-      );
+      const { matchedIndexPatterns: matchedThreatIndexPatterns } =
+        await indexPatterns.getIndexPatternMatches(params.threatIndex);
 
-      if (threatIndexPatternsWithMatches.length === 0) {
+      if (matchedThreatIndexPatterns.length === 0) {
         warnings.push(
           `Unable to find matching threat indicator indices for rule ${ruleName}. This warning will persist until one of the following occurs: a matching threat index is created or the rule is disabled.`
         );

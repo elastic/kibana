@@ -13,9 +13,16 @@ import {
 } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
+import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_API_TAG,
+} from '../../../../common/constants';
 import type { LensUpdateIn, LensSavedObject } from '../../../content_management';
-import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../../types';
+
+import type { RegisterAPIRouteFn } from '../../types';
+import type { LensUpdateResponseBody } from './types';
 import {
   lensUpdateRequestBodySchema,
   lensUpdateRequestParamsSchema,
@@ -29,12 +36,12 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const updateRoute = router.put({
     path: `${LENS_VIS_API_PATH}/{id}`,
-    access: 'internal', // to go public in 9.4
-    enableQueryVersion: true,
-    summary: 'Update Lens visualization',
-    description: 'Update an existing Lens visualization.',
+    access: LENS_API_ACCESS,
+    summary: 'Create or update visualization',
+    description:
+      'Create or update a visualization with the given id. When no visualization exists for the id, one is created.',
     options: {
-      tags: ['oas-tag:Lens'],
+      tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
       },
@@ -60,6 +67,10 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
             body: () => lensUpdateResponseBodySchema,
             description: 'Ok',
           },
+          201: {
+            body: () => lensUpdateResponseBodySchema,
+            description: 'Created',
+          },
           400: {
             description: 'Malformed request',
           },
@@ -68,9 +79,6 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
           },
           403: {
             description: 'Forbidden',
-          },
-          404: {
-            description: 'Resource not found',
           },
           500: {
             description: 'Internal Server Error',
@@ -101,29 +109,31 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       const { references, ...data } = getLensRequestConfig(builder, req.body);
       const options: LensUpdateIn['options'] = { references };
 
+      let createdNew = false;
+      try {
+        await client.get(req.params.id);
+      } catch (error) {
+        if (isBoom(error) && error.output.statusCode === 404) {
+          createdNew = true;
+        }
+      }
+
       try {
         const { result } = await client.update(req.params.id, data, options);
+        const responseItem = getLensResponseItem(builder, result.item);
 
-        if (result.item.error) {
-          throw result.item.error;
+        if (createdNew) {
+          return res.created<LensUpdateResponseBody>({
+            body: responseItem,
+          });
         }
 
-        const responseItem = getLensResponseItem(builder, result.item);
         return res.ok<LensUpdateResponseBody>({
           body: responseItem,
         });
       } catch (error) {
-        if (isBoom(error)) {
-          if (error.output.statusCode === 404) {
-            return res.notFound({
-              body: {
-                message: `A visualization with id [${req.params.id}] was not found.`,
-              },
-            });
-          }
-          if (error.output.statusCode === 403) {
-            return res.forbidden();
-          }
+        if (isBoom(error) && error.output.statusCode === 403) {
+          return res.forbidden();
         }
 
         return boomify(error); // forward unknown error

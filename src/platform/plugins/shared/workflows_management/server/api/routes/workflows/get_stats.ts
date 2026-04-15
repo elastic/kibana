@@ -8,10 +8,11 @@
  */
 
 import path from 'path';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
+import { WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies) {
@@ -19,10 +20,10 @@ export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies
     .get({
       path: '/api/workflows/stats',
       access: 'public',
-      security: WORKFLOW_READ_SECURITY,
+      security: WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY,
       summary: 'Get workflow statistics',
       description:
-        'Retrieve summary statistics about workflows, including total, enabled, and disabled counts, as well as execution history metrics for the last 30 days.',
+        'Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -38,8 +39,13 @@ export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies
       },
       withLicenseCheck(async (context, request, response) => {
         try {
+          if (request.authzResult?.[WorkflowsManagementApiActions.read] !== true) {
+            return response.forbidden();
+          }
           const spaceId = spaces.getSpaceId(request);
-          const stats = await api.getWorkflowStats(spaceId);
+          const includeExecutionStats =
+            request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true;
+          const stats = await api.getWorkflowStats(spaceId, { includeExecutionStats });
           return response.ok({ body: stats || {} });
         } catch (error) {
           return handleRouteError(response, error);

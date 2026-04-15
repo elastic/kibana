@@ -74,7 +74,7 @@ export const PanelTitle = ({
           <EuiContextMenuItem
             buttonRef={titleRef}
             className="euiContextMenuPanel__title"
-            icon="arrowLeft"
+            icon="chevronSingleLeft"
             onClick={onTitleClick}
             onKeyDown={onTitleKeyDown}
             data-test-subj="contextMenuPanelTitleButton"

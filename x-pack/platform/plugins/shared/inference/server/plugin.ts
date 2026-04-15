@@ -17,7 +17,11 @@ import type {
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { createClient as createInferenceClient, createChatModel } from './inference_client';
+import {
+  createClient as createInferenceClient,
+  createClientWithoutRequest,
+  createChatModel,
+} from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
@@ -32,7 +36,7 @@ import type {
 import { getUiSettings } from '../common/ui_settings';
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
-import { getConnectorById } from './util/get_connector_by_id';
+import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/get_connector_by_id';
 import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
@@ -102,8 +106,7 @@ export class InferencePlugin
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    const anonymizationEnabled = pluginsSetup.anonymization?.isEnabled() ?? false;
-    coreSetup.uiSettings.register(getUiSettings({ anonymizationEnabled }));
+    coreSetup.uiSettings.register(getUiSettings());
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -263,6 +266,23 @@ export class InferencePlugin
           connectorId: id,
           actions: pluginsStart.actions,
           request,
+          esClient,
+          logger: this.logger,
+        });
+      },
+      getClientWithoutRequest: (actionsClient, esClient) => {
+        return createClientWithoutRequest({
+          actionsClient,
+          logger: this.logger,
+          regexWorker: this.regexWorker!,
+          esClient,
+          endpointIdCache: this.endpointIdCache,
+        });
+      },
+      getConnectorByIdWithoutClientRequest: async (id, actionsClient, esClient) => {
+        return getConnectorByIdWithoutClientRequest({
+          connectorId: id,
+          actionsClient,
           esClient,
           logger: this.logger,
         });

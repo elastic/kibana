@@ -34,12 +34,11 @@ import { displayEntityName, displayEventName } from '../utils';
 import { EntityActionsButton } from './entity_actions_button';
 import { EventActionsButton } from './event_actions_button';
 import {
-  GENERIC_ENTITY_PREVIEW_BANNER,
   DocumentDetailsPreviewPanelKey,
-  GenericEntityPanelKey,
   ALERT_PREVIEW_BANNER,
   EVENT_PREVIEW_BANNER,
 } from '../../../constants';
+import { useOpenEntityPreviewPanel } from '../../../hooks/use_open_entity_preview_panel';
 
 const entityUnavailableTooltip = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.entityUnavailable.tooltip',
@@ -59,6 +58,7 @@ export interface HeaderRowProps {
 export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
   const { openPreviewPanel } = useExpandableFlyoutApi();
+  const openEntityPreviewPanel = useOpenEntityPreviewPanel();
 
   const title = useMemo(() => {
     switch (item.itemType) {
@@ -77,23 +77,16 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
       e.preventDefault();
 
       if (item.itemType === DOCUMENT_TYPE_ENTITY) {
-        openPreviewPanel({
-          id: GenericEntityPanelKey,
-          params: {
-            entityId: item.id,
-            scopeId,
-            isPreviewMode: true,
-            banner: GENERIC_ENTITY_PREVIEW_BANNER,
-            isEngineMetadataExist: !!item.availableInEntityStore,
-          },
-        });
+        const entityItem = item as EntityItem;
+        openEntityPreviewPanel(entityItem.id, scopeId, entityItem.entity);
       } else {
         // event or alert
+        const eventOrAlertItem = item as EventItem | AlertItem;
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
-            id: item.docId,
-            indexName: item.index,
+            id: eventOrAlertItem.docId,
+            indexName: eventOrAlertItem.index,
             scopeId,
             banner:
               item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
@@ -102,13 +95,13 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
         });
       }
     },
-    [item, openPreviewPanel, scopeId]
+    [item, openPreviewPanel, openEntityPreviewPanel, scopeId]
   );
 
   const isClickable =
     item.itemType === DOCUMENT_TYPE_EVENT ||
     item.itemType === DOCUMENT_TYPE_ALERT ||
-    (item.itemType === DOCUMENT_TYPE_ENTITY && item.availableInEntityStore);
+    (item.itemType === DOCUMENT_TYPE_ENTITY && (item as EntityItem).entity?.availableInEntityStore);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -117,10 +110,10 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
           <EuiIcon type="warningFill" size="m" color="danger" aria-hidden={true} />
         </EuiFlexItem>
       )}
-      {item.itemType === DOCUMENT_TYPE_ENTITY && item.icon && (
+      {item.itemType === DOCUMENT_TYPE_ENTITY && (item as EntityItem).icon && (
         <EuiFlexItem grow={false}>
           <EuiIcon
-            type={item.icon}
+            type={(item as EntityItem).icon as string}
             size="m"
             color="primary"
             css={css`

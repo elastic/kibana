@@ -26,7 +26,7 @@ const bodySchema = z.object({
 export function registerForceLogExtraction(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION,
+      path: ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

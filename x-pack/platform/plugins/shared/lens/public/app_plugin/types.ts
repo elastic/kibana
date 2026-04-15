@@ -86,7 +86,6 @@ export interface LensTopNavMenuProps {
   lensInspector: LensInspector;
   goBackToOriginatingApp?: () => void;
   contextOriginatingApp?: string;
-  initialContextIsEmbedded?: boolean;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: LensDocument | undefined;

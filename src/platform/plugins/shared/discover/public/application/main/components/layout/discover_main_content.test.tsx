@@ -53,8 +53,12 @@ jest.mock('../pattern_analysis/pattern_analysis_tab', () => ({
 }));
 
 jest.mock('../../../../components/panels_toggle', () => ({
-  PanelsToggle: jest.fn(({ omitChartButton }) => (
-    <div data-test-subj="panelsToggleMock" data-omit-chart-button={String(omitChartButton)} />
+  PanelsToggle: jest.fn(({ omitChartButton, omitTableButton }) => (
+    <div
+      data-test-subj="panelsToggleMock"
+      data-omit-chart-button={String(omitChartButton)}
+      data-omit-table-button={String(omitTableButton)}
+    />
   )),
 }));
 
@@ -193,6 +197,10 @@ describe('Discover main content component', () => {
 
       expect(screen.getByTestId('panelsToggleMock')).toHaveAttribute(
         'data-omit-chart-button',
+        'true'
+      );
+      expect(screen.getByTestId('panelsToggleMock')).toHaveAttribute(
+        'data-omit-table-button',
         'true'
       );
       expect(screen.queryByRole('separator')).not.toBeInTheDocument();

@@ -21,35 +21,51 @@
     "functions": [
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.isGenericAttachmentPanel",
+        "id": "def-common.attachmentDataToDashboardState",
         "type": "Function",
         "tags": [],
-        "label": "isGenericAttachmentPanel",
+        "label": "attachmentDataToDashboardState",
         "description": [
-          "\nType guard to check if a panel is a generic (non-Lens) panel."
+          "\nConverts a DashboardAttachment to a DashboardState.\nUses provided values from the attachment, falling back to defaults for missing fields."
         ],
         "signature": [
-          "(panel: z.infer<any>) => boolean"
+          "({ panels, filters, query, pinned_panels, access_control, options, ...rest }: { title: string; panels: any[]; description?: string | undefined; query?: { expression: any; language: string; } | undefined; time_range?: { from: string; to: string; mode: any; } | undefined; refresh_interval?: { pause: boolean; value: number; } | undefined; filters?: Record<string, unknown>[] | undefined; options?: { auto_apply_filters?: boolean | undefined; hide_panel_titles?: boolean | undefined; hide_panel_borders?: boolean | undefined; use_margins?: boolean | undefined; sync_colors?: boolean | undefined; sync_tooltips?: boolean | undefined; sync_cursor?: boolean | undefined; } | undefined; tags?: string[] | undefined; pinned_panels?: Record<string, unknown>[] | undefined; access_control?: { access_mode: any; } | undefined; project_routing?: string | undefined; }) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ filters?: (Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"condition\"; condition: Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"group\"; group: Readonly<{} & { operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeGroupFilterRecursive",
+            "text": "AsCodeGroupFilterRecursive"
+          },
+          ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>)[] | undefined; tags?: string[] | undefined; description?: string | undefined; query?: Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined; project_routing?: string | undefined; refresh_interval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; access_control?: Readonly<{ access_mode?: \"default\" | \"write_restricted\" | undefined; } & {}> | undefined; } & { options: Readonly<{} & { auto_apply_filters: boolean; hide_panel_titles: boolean; hide_panel_borders: boolean; use_margins: boolean; sync_colors: boolean; sync_tooltips: boolean; sync_cursor: boolean; }>; title: string; pinned_panels: (Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]; panels: (Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ id?: string | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; collapsed: boolean; }>)[]; }>>"
         ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 100,
-        "columnNumber": 1,
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/from_attachment.ts",
+        "lineNumber": 98,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.isGenericAttachmentPanel.$1",
-            "type": "Any",
+            "id": "def-common.attachmentDataToDashboardState.$1",
+            "type": "Object",
             "tags": [],
-            "label": "panel",
+            "label": "{\n  panels = [],\n  filters,\n  query,\n  pinned_panels,\n  access_control,\n  options,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "{ title: string; panels: any[]; description?: string | undefined; query?: { expression: any; language: string; } | undefined; time_range?: { from: string; to: string; mode: any; } | undefined; refresh_interval?: { pause: boolean; value: number; } | undefined; filters?: Record<string, unknown>[] | undefined; options?: { auto_apply_filters?: boolean | undefined; hide_panel_titles?: boolean | undefined; hide_panel_borders?: boolean | undefined; use_margins?: boolean | undefined; sync_colors?: boolean | undefined; sync_tooltips?: boolean | undefined; sync_cursor?: boolean | undefined; } | undefined; tags?: string[] | undefined; pinned_panels?: Record<string, unknown>[] | undefined; access_control?: { access_mode: any; } | undefined; project_routing?: string | undefined; }"
             ],
-            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 103,
-            "columnNumber": 42,
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/from_attachment.ts",
+            "lineNumber": 98,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,35 +76,262 @@
       },
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.isLensAttachmentPanel",
+        "id": "def-common.dashboardStateToAttachmentData",
         "type": "Function",
         "tags": [],
-        "label": "isLensAttachmentPanel",
+        "label": "dashboardStateToAttachmentData",
         "description": [
-          "\nType guard to check if a panel is a Lens panel."
+          "\nConverts a DashboardState to DashboardAttachmentData.\nPreserves all dashboard state fields for full round-trip support."
         ],
         "signature": [
-          "(panel: z.infer<any>) => boolean"
+          "(state: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ filters?: (Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"condition\"; condition: Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"group\"; group: Readonly<{} & { operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeGroupFilterRecursive",
+            "text": "AsCodeGroupFilterRecursive"
+          },
+          ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>)[] | undefined; tags?: string[] | undefined; description?: string | undefined; query?: Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined; project_routing?: string | undefined; refresh_interval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; access_control?: Readonly<{ access_mode?: \"default\" | \"write_restricted\" | undefined; } & {}> | undefined; } & { options: Readonly<{} & { auto_apply_filters: boolean; hide_panel_titles: boolean; hide_panel_borders: boolean; use_margins: boolean; sync_colors: boolean; sync_tooltips: boolean; sync_cursor: boolean; }>; title: string; pinned_panels: (Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]; panels: (Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ id?: string | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; collapsed: boolean; }>)[]; }>>) => { title: string; panels: any[]; description?: string | undefined; query?: { expression: any; language: string; } | undefined; time_range?: { from: string; to: string; mode: any; } | undefined; refresh_interval?: { pause: boolean; value: number; } | undefined; filters?: Record<string, unknown>[] | undefined; options?: { auto_apply_filters?: boolean | undefined; hide_panel_titles?: boolean | undefined; hide_panel_borders?: boolean | undefined; use_margins?: boolean | undefined; sync_colors?: boolean | undefined; sync_tooltips?: boolean | undefined; sync_cursor?: boolean | undefined; } | undefined; tags?: string[] | undefined; pinned_panels?: Record<string, unknown>[] | undefined; access_control?: { access_mode: any; } | undefined; project_routing?: string | undefined; }"
         ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 93,
-        "columnNumber": 1,
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/to_attachment.ts",
+        "lineNumber": 102,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.isLensAttachmentPanel.$1",
-            "type": "Any",
+            "id": "def-common.dashboardStateToAttachmentData.$1",
+            "type": "Object",
             "tags": [],
-            "label": "panel",
+            "label": "state",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Writable",
+                "text": "Writable"
+              },
+              "<Readonly<{ filters?: (Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"condition\"; condition: Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"group\"; group: Readonly<{} & { operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+              {
+                "pluginId": "@kbn/as-code-filters-schema",
+                "scope": "common",
+                "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+                "section": "def-common.AsCodeGroupFilterRecursive",
+                "text": "AsCodeGroupFilterRecursive"
+              },
+              ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>)[] | undefined; tags?: string[] | undefined; description?: string | undefined; query?: Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined; project_routing?: string | undefined; refresh_interval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; access_control?: Readonly<{ access_mode?: \"default\" | \"write_restricted\" | undefined; } & {}> | undefined; } & { options: Readonly<{} & { auto_apply_filters: boolean; hide_panel_titles: boolean; hide_panel_borders: boolean; use_margins: boolean; sync_colors: boolean; sync_tooltips: boolean; sync_cursor: boolean; }>; title: string; pinned_panels: (Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]; panels: (Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ id?: string | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ id?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; collapsed: boolean; }>)[]; }>>"
             ],
-            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 96,
-            "columnNumber": 39,
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/to_attachment.ts",
+            "lineNumber": 102,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.fromEmbeddablePanel",
+        "type": "Function",
+        "tags": [],
+        "label": "fromEmbeddablePanel",
+        "description": [
+          "\nConverts an embeddable panel back to vis input format.\n- Unwraps Lens config from `attributes` if present"
+        ],
+        "signature": [
+          "({ type, config }: { type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; }) => ",
+          {
+            "pluginId": "@kbn/dashboard-agent-common",
+            "scope": "common",
+            "docId": "kibKbnDashboardAgentCommonPluginApi",
+            "section": "def-common.VisualizationContent",
+            "text": "VisualizationContent"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/normalize_panel.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.fromEmbeddablePanel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ type, config }",
+            "description": [],
+            "signature": [
+              "{ type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; }"
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/normalize_panel.ts",
+            "lineNumber": 49,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.isDashboardAttachment",
+        "type": "Function",
+        "tags": [],
+        "label": "isDashboardAttachment",
+        "description": [],
+        "signature": [
+          "(attachment: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.VersionedAttachment",
+            "text": "VersionedAttachment"
+          },
+          "<string, unknown>) => attachment is ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.VersionedAttachment",
+            "text": "VersionedAttachment"
+          },
+          "<\"platform.dashboard.dashboard_state\", { title: string; panels: any[]; description?: string | undefined; query?: { expression: any; language: string; } | undefined; time_range?: { from: string; to: string; mode: any; } | undefined; refresh_interval?: { pause: boolean; value: number; } | undefined; filters?: Record<string, unknown>[] | undefined; options?: { auto_apply_filters?: boolean | undefined; hide_panel_titles?: boolean | undefined; hide_panel_borders?: boolean | undefined; use_margins?: boolean | undefined; sync_colors?: boolean | undefined; sync_tooltips?: boolean | undefined; sync_cursor?: boolean | undefined; } | undefined; tags?: string[] | undefined; pinned_panels?: Record<string, unknown>[] | undefined; access_control?: { access_mode: any; } | undefined; project_routing?: string | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/is_dashboard_attachment.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.isDashboardAttachment.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "attachment",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.VersionedAttachment",
+                "text": "VersionedAttachment"
+              },
+              "<string, unknown>"
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/is_dashboard_attachment.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.isSection",
+        "type": "Function",
+        "tags": [],
+        "label": "isSection",
+        "description": [],
+        "signature": [
+          "(widget: { type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; } | { id: string; title: string; collapsed: boolean; grid: { y: number; }; panels: { type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; }[]; }) => widget is { id: string; title: string; collapsed: boolean; grid: { y: number; }; panels: { type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; }[]; }"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/dashboard_schema_types.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.isSection.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "widget",
+            "description": [],
+            "signature": [
+              "{ type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; } | { id: string; title: string; collapsed: boolean; grid: { y: number; }; panels: { type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; }[]; }"
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/dashboard_schema_types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.toEmbeddablePanel",
+        "type": "Function",
+        "tags": [],
+        "label": "toEmbeddablePanel",
+        "description": [
+          "\nConverts panel input to a full AttachmentPanel (embeddable format).\n- Generates a id if not provided\n- Wraps Lens config in `attributes` if needed"
+        ],
+        "signature": [
+          "({ id, grid, type, config, }: ",
+          {
+            "pluginId": "@kbn/dashboard-agent-common",
+            "scope": "common",
+            "docId": "kibKbnDashboardAgentCommonPluginApi",
+            "section": "def-common.DashboardPanelInput",
+            "text": "DashboardPanelInput"
+          },
+          ") => { type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; }"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/normalize_panel.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.toEmbeddablePanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  id,\n  grid,\n  type,\n  config,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dashboard-agent-common",
+                "scope": "common",
+                "docId": "kibKbnDashboardAgentCommonPluginApi",
+                "section": "def-common.DashboardPanelInput",
+                "text": "DashboardPanelInput"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/normalize_panel.ts",
+            "lineNumber": 25,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -101,91 +344,42 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.PanelAddedEventData",
+        "id": "def-common.VisualizationContent",
         "type": "Interface",
         "tags": [],
-        "label": "PanelAddedEventData",
-        "description": [
-          "\nData payload for a panel added event."
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 156,
+        "label": "VisualizationContent",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/normalize_panel.ts",
+        "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.PanelAddedEventData.dashboardAttachmentId",
+            "id": "def-common.VisualizationContent.type",
             "type": "string",
             "tags": [],
-            "label": "dashboardAttachmentId",
+            "label": "type",
             "description": [],
-            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 160,
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/normalize_panel.ts",
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.PanelAddedEventData.panel",
-            "type": "Any",
+            "id": "def-common.VisualizationContent.config",
+            "type": "Object",
             "tags": [],
-            "label": "panel",
+            "label": "config",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "{ [x: string]: unknown; }"
             ],
-            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 161,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.PanelsRemovedEventData",
-        "type": "Interface",
-        "tags": [],
-        "label": "PanelsRemovedEventData",
-        "description": [
-          "\nData payload for a panel removed event."
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 164,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.PanelsRemovedEventData.dashboardAttachmentId",
-            "type": "string",
-            "tags": [],
-            "label": "dashboardAttachmentId",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 168,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.PanelsRemovedEventData.panelIds",
-            "type": "Array",
-            "tags": [],
-            "label": "panelIds",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 169,
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/normalize_panel.ts",
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -202,34 +396,13 @@
         "type": "Type",
         "tags": [],
         "label": "AttachmentPanel",
-        "description": [
-          "\nUnion type for dashboard panel entries.\n- LensAttachmentPanel: Lens visualization with config in API format (type: 'lens')\n- GenericAttachmentPanel: Non-Lens panels with raw config (type: actual embeddable type)"
-        ],
+        "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; }"
         ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 86,
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/dashboard_schema_types.ts",
+        "lineNumber": 41,
         "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.attachmentPanelSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "attachmentPanelSchema",
-        "description": [
-          "\nZod schema for dashboard panel entries."
-        ],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 81,
-        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -255,38 +428,18 @@
       },
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.DASHBOARD_PANEL_ADDED_EVENT",
-        "type": "string",
+        "id": "def-common.DashboardAttachment",
+        "type": "Type",
         "tags": [],
-        "label": "DASHBOARD_PANEL_ADDED_EVENT",
-        "description": [
-          "\nUI event type for panel added"
-        ],
+        "label": "DashboardAttachment",
+        "description": [],
         "signature": [
-          "\"dashboard:panel_added\""
+          "Attachment",
+          "<\"platform.dashboard.dashboard_state\", { title: string; panels: any[]; description?: string | undefined; query?: { expression: any; language: string; } | undefined; time_range?: { from: string; to: string; mode: any; } | undefined; refresh_interval?: { pause: boolean; value: number; } | undefined; filters?: Record<string, unknown>[] | undefined; options?: { auto_apply_filters?: boolean | undefined; hide_panel_titles?: boolean | undefined; hide_panel_borders?: boolean | undefined; use_margins?: boolean | undefined; sync_colors?: boolean | undefined; sync_tooltips?: boolean | undefined; sync_cursor?: boolean | undefined; } | undefined; tags?: string[] | undefined; pinned_panels?: Record<string, unknown>[] | undefined; access_control?: { access_mode: any; } | undefined; project_routing?: string | undefined; }>"
         ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
-        "lineNumber": 16,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.DASHBOARD_PANELS_REMOVED_EVENT",
-        "type": "string",
-        "tags": [],
-        "label": "DASHBOARD_PANELS_REMOVED_EVENT",
-        "description": [
-          "\nUI event type for panel removed"
-        ],
-        "signature": [
-          "\"dashboard:panels_removed\""
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
-        "lineNumber": 21,
-        "columnNumber": 14,
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -297,14 +450,12 @@
         "type": "Type",
         "tags": [],
         "label": "DashboardAttachmentData",
-        "description": [
-          "\nData for a dashboard attachment."
-        ],
+        "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ title: string; panels: any[]; description?: string | undefined; query?: { expression: any; language: string; } | undefined; time_range?: { from: string; to: string; mode: any; } | undefined; refresh_interval?: { pause: boolean; value: number; } | undefined; filters?: Record<string, unknown>[] | undefined; options?: { auto_apply_filters?: boolean | undefined; hide_panel_titles?: boolean | undefined; hide_panel_borders?: boolean | undefined; use_margins?: boolean | undefined; sync_colors?: boolean | undefined; sync_tooltips?: boolean | undefined; sync_cursor?: boolean | undefined; } | undefined; tags?: string[] | undefined; pinned_panels?: Record<string, unknown>[] | undefined; access_control?: { access_mode: any; } | undefined; project_routing?: string | undefined; }"
         ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 146,
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/dashboard_schema_types.ts",
+        "lineNumber": 157,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -312,37 +463,18 @@
       },
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.dashboardAttachmentDataSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "dashboardAttachmentDataSchema",
-        "description": [
-          "\nZod schema for dashboard attachment data."
-        ],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 135,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.DashboardAttachmentOrigin",
+        "id": "def-common.DashboardPanelInput",
         "type": "Type",
         "tags": [],
-        "label": "DashboardAttachmentOrigin",
+        "label": "DashboardPanelInput",
         "description": [
-          "\nOrigin payload for dashboard attachments is a saved object ID string."
+          "Panel input that may or may not have a id assigned yet"
         ],
         "signature": [
-          "string"
+          "Omit<{ type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; }, \"id\"> & { id?: string | undefined; }"
         ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 151,
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/normalize_panel.ts",
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -354,140 +486,12 @@
         "type": "Type",
         "tags": [],
         "label": "DashboardSection",
-        "description": [
-          "\nA dashboard section containing panels."
-        ],
+        "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ id: string; title: string; collapsed: boolean; grid: { y: number; }; panels: { type: string; id: string; config: Record<string, unknown>; grid: { x: number; y: number; w: number; h: number; }; }[]; }"
         ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 127,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.dashboardSectionSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "dashboardSectionSchema",
-        "description": [
-          "\nZod schema for a dashboard section containing panels."
-        ],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 114,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.DashboardUiEvent",
-        "type": "Type",
-        "tags": [],
-        "label": "DashboardUiEvent",
-        "description": [
-          "\nUnion type for dashboard UI events."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.ToolUiEvent",
-            "text": "ToolUiEvent"
-          },
-          "<\"dashboard:panel_added\", ",
-          {
-            "pluginId": "@kbn/dashboard-agent-common",
-            "scope": "common",
-            "docId": "kibKbnDashboardAgentCommonPluginApi",
-            "section": "def-common.PanelAddedEventData",
-            "text": "PanelAddedEventData"
-          },
-          "> | ",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.ToolUiEvent",
-            "text": "ToolUiEvent"
-          },
-          "<\"dashboard:panels_removed\", ",
-          {
-            "pluginId": "@kbn/dashboard-agent-common",
-            "scope": "common",
-            "docId": "kibKbnDashboardAgentCommonPluginApi",
-            "section": "def-common.PanelsRemovedEventData",
-            "text": "PanelsRemovedEventData"
-          },
-          ">"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 172,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.GenericAttachmentPanel",
-        "type": "Type",
-        "tags": [],
-        "label": "GenericAttachmentPanel",
-        "description": [
-          "\nA non-Lens panel entry containing the raw embeddable configuration.\nUsed for markdown, maps, TSVB, and other panel types, as well as\nLens panels with unsupported chart types that can't be converted to API format."
-        ],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 71,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.genericAttachmentPanelSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "genericAttachmentPanelSchema",
-        "description": [
-          "\nZod schema for generic (non-Lens) panel entries.\nThe `type` field contains the actual embeddable type."
-        ],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/dashboard_schema_types.ts",
         "lineNumber": 59,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.LensAttachmentPanel",
-        "type": "Type",
-        "tags": [],
-        "label": "LensAttachmentPanel",
-        "description": [
-          "\nA Lens panel entry containing full visualization configuration in API format.\nAll Lens panels (whether created by the agent or extracted from existing dashboards)\nare stored in this unified format using LensApiSchemaType."
-        ],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -495,18 +499,168 @@
       },
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.lensAttachmentPanelSchema",
-        "type": "Any",
+        "id": "def-common.PendingDashboardAttachment",
+        "type": "Type",
         "tags": [],
-        "label": "lensAttachmentPanelSchema",
+        "label": "PendingDashboardAttachment",
         "description": [
-          "\nZod schema for Lens panel entries."
+          "\nRepresents a pending dashboard attachment input.\nUsed when creating attachments before they're persisted to a conversation."
         ],
         "signature": [
-          "any"
+          "AttachmentInput",
+          "<\"platform.dashboard.dashboard_state\", { title: string; panels: any[]; description?: string | undefined; query?: { expression: any; language: string; } | undefined; time_range?: { from: string; to: string; mode: any; } | undefined; refresh_interval?: { pause: boolean; value: number; } | undefined; filters?: Record<string, unknown>[] | undefined; options?: { auto_apply_filters?: boolean | undefined; hide_panel_titles?: boolean | undefined; hide_panel_borders?: boolean | undefined; use_margins?: boolean | undefined; sync_colors?: boolean | undefined; sync_tooltips?: boolean | undefined; sync_cursor?: boolean | undefined; } | undefined; tags?: string[] | undefined; pinned_panels?: Record<string, unknown>[] | undefined; access_control?: { access_mode: any; } | undefined; project_routing?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 31,
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.dashboardAttachmentDataSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "dashboardAttachmentDataSchema",
+        "description": [
+          "\nZod schema for dashboard attachment data.\nThis schema matches the structure of DashboardState from @kbn/dashboard-plugin."
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ title: ",
+          "ZodString",
+          "; description: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; panels: ",
+          "ZodArray",
+          "<any>; query: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ expression: any; language: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; time_range: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ from: ",
+          "ZodString",
+          "; to: ",
+          "ZodString",
+          "; mode: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; refresh_interval: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ pause: ",
+          "ZodBoolean",
+          "; value: ",
+          "ZodNumber",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; filters: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">>>; options: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ auto_apply_filters: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; hide_panel_titles: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; hide_panel_borders: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; use_margins: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; sync_colors: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; sync_tooltips: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; sync_cursor: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; tags: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ">>; pinned_panels: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">>>; access_control: ",
+          "ZodOptional",
+          "<",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ access_mode: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>>; project_routing: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/dashboard_schema_types.ts",
+        "lineNumber": 142,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DEFAULT_TIME_RANGE",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_TIME_RANGE",
+        "description": [],
+        "signature": [
+          "{ readonly from: \"now-24h\"; readonly to: \"now\"; }"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/converters/from_attachment.ts",
+        "lineNumber": 66,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -515,17 +669,28 @@
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
         "id": "def-common.panelGridSchema",
-        "type": "Any",
+        "type": "Object",
         "tags": [],
         "label": "panelGridSchema",
         "description": [
           "\nGrid dimensions (in dashboard grid units) for layout.\nDashboard grid is 48 columns wide; height is in same units."
         ],
         "signature": [
-          "any"
+          "ZodObject",
+          "<{ x: ",
+          "ZodNumber",
+          "; y: ",
+          "ZodNumber",
+          "; w: ",
+          "ZodNumber",
+          "; h: ",
+          "ZodNumber",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
         ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 21,
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/dashboard_schema_types.ts",
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -534,21 +699,25 @@
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
         "id": "def-common.sectionGridSchema",
-        "type": "Any",
+        "type": "Object",
         "tags": [],
         "label": "sectionGridSchema",
         "description": [],
         "signature": [
-          "any"
+          "ZodObject",
+          "<{ y: ",
+          "ZodNumber",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
         ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 107,
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/dashboard_schema_types.ts",
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
-    ],
-    "objects": []
+    ]
   }
 }

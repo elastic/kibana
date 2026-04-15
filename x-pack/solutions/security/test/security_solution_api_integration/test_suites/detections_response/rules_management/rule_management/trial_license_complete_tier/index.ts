@@ -9,7 +9,6 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rules Management - Rule Management API', function () {
-    loadTestFile(require.resolve('./get_rule_execution_results'));
     loadTestFile(require.resolve('./read_rule_execution_results'));
     loadTestFile(require.resolve('./get_rule_management_filters'));
   });

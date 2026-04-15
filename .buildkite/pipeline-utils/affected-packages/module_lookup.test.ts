@@ -24,10 +24,10 @@ import {
   getModuleDependencies,
   buildModuleDownstreamGraph,
   resetModuleLookupCache,
-  UNCATEGORIZED_MODULE_ID,
 } from './module_lookup';
 import { getAffectedModulesGit } from './strategy_git';
 import { filterIgnoredFiles } from './utils';
+import { UNCATEGORIZED_MODULE_ID } from './const';
 
 function git(cwd: string, command: string): string {
   return execSync(`git ${command}`, { cwd, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });

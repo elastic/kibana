@@ -12,6 +12,9 @@ export type { QueryLink };
 export const QUERY_STATUSES = ['active', 'draft'] as const;
 export type QueryStatus = (typeof QUERY_STATUSES)[number];
 
+export const SEARCH_MODES = ['keyword', 'semantic', 'hybrid'] as const;
+export type SearchMode = (typeof SEARCH_MODES)[number];
+
 export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name'>;
 
 export type QueryUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;

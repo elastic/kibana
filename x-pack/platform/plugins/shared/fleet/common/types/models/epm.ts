@@ -293,7 +293,7 @@ export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
 }
 
 export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
-  [RegistryPolicyTemplateKeys.type]: string;
+  [RegistryPolicyTemplateKeys.type]?: string;
   [RegistryPolicyTemplateKeys.input]: string;
   [RegistryPolicyTemplateKeys.template_path]?: string;
   [RegistryPolicyTemplateKeys.template_paths]?: string[];
@@ -308,6 +308,7 @@ export type RegistryPolicyTemplate =
   | RegistryPolicyInputOnlyTemplate;
 
 export enum RegistryInputKeys {
+  name = 'name',
   type = 'type',
   title = 'title',
   description = 'description',
@@ -322,11 +323,15 @@ export enum RegistryInputKeys {
   hide_in_var_group_options = 'hide_in_var_group_options',
   deprecated = 'deprecated',
   migrate_from = 'migrate_from',
+  dynamic_signal_types = 'dynamic_signal_types',
+  show_divider = 'show_divider',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
 
 export interface RegistryInput {
+  /** Optional unique name within the policy template. When present, used as the discriminator for stream matching and keying instead of `type`. */
+  [RegistryInputKeys.name]?: string;
   [RegistryInputKeys.type]: string;
   [RegistryInputKeys.title]: string;
   [RegistryInputKeys.description]: string;
@@ -341,6 +346,10 @@ export interface RegistryInput {
   [RegistryInputKeys.hide_in_var_group_options]?: Record<string, string[]>;
   [RegistryInputKeys.deprecated]?: DeprecationInfo;
   [RegistryInputKeys.migrate_from]?: string;
+  /** When true the data stream signal type (logs/metrics/traces) is determined at runtime by the agent. Valid for OTel collector inputs in composable integrations. */
+  [RegistryInputKeys.dynamic_signal_types]?: boolean;
+  /** When false, suppresses the automatic horizontal divider rendered after the input-level config section. Defaults to true. */
+  [RegistryInputKeys.show_divider]?: boolean;
 }
 
 export enum RegistryStreamKeys {
@@ -481,6 +490,13 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.agent]?: RegistryAgent;
 }
 
+export type InputOnlyRegistryDataStream = Omit<
+  Pick<RegistryDataStream, RegistryDataStreamKeys>,
+  RegistryDataStreamKeys.type
+> & {
+  [RegistryDataStreamKeys.type]?: string;
+};
+
 export interface RegistryAgent {
   privileges?: { root?: boolean };
 }
@@ -538,7 +554,8 @@ export type RegistryVarType =
   | 'string'
   | 'textarea'
   | 'duration'
-  | 'url';
+  | 'url'
+  | 'section_header';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',

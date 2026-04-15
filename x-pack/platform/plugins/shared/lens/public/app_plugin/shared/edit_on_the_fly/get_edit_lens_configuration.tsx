@@ -43,7 +43,6 @@ import { generateId } from '../../../id_generator';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import { LensDocumentService } from '../../../persistence';
-import { DOC_TYPE } from '../../../../common/constants';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 
 export type EditLensConfigurationProps = Omit<
@@ -193,7 +192,6 @@ const EditLensConfiguration: FC<
       await lensDocumentService.save({
         ...attrs,
         savedObjectId,
-        type: DOC_TYPE,
       });
     },
     [lensServices.http, savedObjectId]

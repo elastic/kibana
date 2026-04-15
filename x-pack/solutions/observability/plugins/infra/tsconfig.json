@@ -106,6 +106,7 @@
     "@kbn/core-plugins-server",
     "@kbn/config",
     "@kbn/observability-utils-common",
+    "@kbn/observability-utils-server",
     "@kbn/charts-theme",
     "@kbn/response-ops-rule-params",
     "@kbn/core-test-helpers-model-versions",
@@ -134,7 +135,10 @@
     "@kbn/inspector-plugin",
     "@kbn/css-utils",
     "@kbn/agent-builder-plugin",
-    "@kbn/controls-constants"
+    "@kbn/controls-constants",
+    "@kbn/cps-utils",
+    "@kbn/es-query-constants",
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*"]
 }

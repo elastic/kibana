@@ -329,6 +329,7 @@ export function InternalDashboardTopNav({
               isOpen={isPopoverOpen}
               closePopover={() => setIsPopoverOpen(false)}
               panelStyle={{ maxWidth: 250 }}
+              aria-label={dashboardManagedBadge.getBadgeAriaLabel()}
             >
               <FormattedMessage
                 id="dashboard.managedContentPopoverButton"
@@ -400,6 +401,7 @@ export function InternalDashboardTopNav({
           savedQueryId={savedQueryId}
           indexPatterns={allDataViews ?? []}
           allowSavingQueries
+          enableDateRangePicker
           appName={DASHBOARD_APP_ID}
           onQuerySubmit={(_payload, isUpdate) => {
             if (isUpdate === false) {

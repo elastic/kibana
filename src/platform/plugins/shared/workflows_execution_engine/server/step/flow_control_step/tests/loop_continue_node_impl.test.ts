@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LoopContinueNode } from '@kbn/workflows/graph';
+import type { LoopContinueNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { LoopContinueNodeImpl } from '../loop_continue_node_impl';
 
@@ -20,6 +21,8 @@ describe('LoopContinueNodeImpl', () => {
   let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
   let stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
+  let workflowExecutionState: WorkflowExecutionState;
+  let workflowGraph: WorkflowGraph;
   let underTest: LoopContinueNodeImpl;
 
   beforeEach(() => {
@@ -48,12 +51,23 @@ describe('LoopContinueNodeImpl', () => {
 
     stepExecutionRuntimeFactory = {} as StepExecutionRuntimeFactory;
 
+    workflowExecutionState = {
+      evictStaleLoopOutputs: jest.fn(),
+    } as unknown as WorkflowExecutionState;
+
+    workflowGraph = {
+      getNode: jest.fn().mockReturnValue({ stepId: 'my_loop' }),
+      getInnerStepIds: jest.fn().mockReturnValue(new Set(['innerAction'])),
+    } as unknown as WorkflowGraph;
+
     underTest = new LoopContinueNodeImpl(
       node,
       stepExecutionRuntime,
       wfExecutionRuntimeManager,
       workflowLogger,
-      stepExecutionRuntimeFactory
+      stepExecutionRuntimeFactory,
+      workflowExecutionState,
+      workflowGraph
     );
   });
 
@@ -74,5 +88,15 @@ describe('LoopContinueNodeImpl', () => {
       expect.any(Function)
     );
     expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitForeach_my_loop');
+  });
+
+  it('should evict stale loop outputs before navigating to the exit node', () => {
+    underTest.run();
+
+    expect(workflowGraph.getNode).toHaveBeenCalledWith('exitForeach_my_loop');
+    expect(workflowGraph.getInnerStepIds).toHaveBeenCalledWith('my_loop');
+    expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(
+      new Set(['innerAction'])
+    );
   });
 });

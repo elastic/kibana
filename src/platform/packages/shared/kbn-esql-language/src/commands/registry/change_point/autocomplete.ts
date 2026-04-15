@@ -8,6 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { ESQL_NUMBER_TYPES } from '../../definitions/types';
 import { pipeCompleteItem } from '../complete_items';
@@ -69,7 +70,7 @@ export const onSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.onDoc', {
     defaultMessage: 'On',
   }),
-  sortText: '1',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
 });
 
 export const asSuggestion: ISuggestionItem = withAutoSuggest({
@@ -79,7 +80,7 @@ export const asSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.asDoc', {
     defaultMessage: 'As',
   }),
-  sortText: '2',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
 });
 
 export async function autocomplete(

@@ -348,23 +348,27 @@ paths:
                   description: >-
                     If this action is associated with any alerts, they can be
                     specified here. The action will be logged in any cases
-                    associated with the specified alerts.
+                    associated with the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged.
+                  description: >-
+                    The IDs of cases where the action taken will be logged. Max
+                    of 50.
                   example:
                     - case-id-1
                     - case-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 comment:
@@ -624,23 +628,27 @@ paths:
                   description: >-
                     If this action is associated with any alerts, they can be
                     specified here. The action will be logged in any cases
-                    associated with the specified alerts.
+                    associated with the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged.
+                  description: >-
+                    The IDs of cases where the action taken will be logged. Max
+                    of 50.
                   example:
                     - case-id-1
                     - case-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 comment:
@@ -814,83 +822,6 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
-  /api/endpoint/scripts_library:
-    get:
-      description: Retrieve a list of scripts
-      operationId: EndpointScriptLibraryListScripts
-      parameters:
-        - description: Page number of the results to return. Defaults to 1.
-          in: query
-          name: page
-          required: false
-          schema:
-            $ref: '#/components/schemas/Page'
-        - description: >-
-            Number of results to return per page. Defaults to 10. Max value is
-            1000.
-          in: query
-          name: pageSize
-          required: false
-          schema:
-            $ref: '#/components/schemas/ApiPageSize'
-        - description: The field to sort the results by. Defaults to name.
-          in: query
-          name: sortField
-          required: false
-          schema:
-            $ref: '#/components/schemas/ApiSortField'
-        - description: The direction to sort the results by. Defaults to asc (ascending).
-          in: query
-          name: sortDirection
-          required: false
-          schema:
-            $ref: '#/components/schemas/SortDirection'
-        - description: >
-            A KQL query string to filter the list of scripts. Nearly all fields
-            in the script object are searchable.
-          in: query
-          name: kuery
-          required: false
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/Kuery'
-              - example: platform:windows
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                response:
-                  summary: List of scripts response example
-                  value:
-                    data: []
-                    page: 1
-                    pageSize: 10
-                    sortDirection: asc
-                    sortField: name
-                    total: 100
-              schema:
-                type: object
-                properties:
-                  data:
-                    items:
-                      $ref: '#/components/schemas/EndpointScript'
-                    type: array
-                  page:
-                    $ref: '#/components/schemas/Page'
-                  pageSize:
-                    $ref: '#/components/schemas/ApiPageSize'
-                  sortDirection:
-                    $ref: '#/components/schemas/SortDirection'
-                  sortField:
-                    $ref: '#/components/schemas/ApiSortField'
-                  total:
-                    description: The total number of scripts matching the query
-                    type: integer
-          description: List of scripts response
-      summary: Get a list of scripts
-      tags:
-        - Security Endpoint Management API
 components:
   schemas:
     ActionDetailsResponse:
@@ -961,7 +892,7 @@ components:
       description: Agent ID
       type: string
     AgentIds:
-      description: A list of agent IDs. Max of 50.
+      description: A list of agent IDs. Max of 250.
       example:
         - agent-id-1
         - agent-id-2
@@ -970,7 +901,7 @@ components:
         - items:
             minLength: 1
             type: string
-          maxItems: 50
+          maxItems: 250
           minItems: 1
           type: array
         - minLength: 1
@@ -983,21 +914,6 @@ components:
         - crowdstrike
         - microsoft_defender_endpoint
       example: endpoint
-      type: string
-    ApiPageSize:
-      allOf:
-        - $ref: '#/components/schemas/PageSize'
-        - maximum: 1000
-    ApiSortField:
-      description: Determines which field is used to sort the results.
-      enum:
-        - name
-        - createdAt
-        - createdBy
-        - updatedAt
-        - updatedBy
-        - fileSize
-      example: updatedAt
       type: string
     Cancel:
       allOf:
@@ -1030,23 +946,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -1112,6 +1032,7 @@ components:
         - unisolate
       items:
         $ref: '#/components/schemas/Command'
+      maxItems: 50
       type: array
     Comment:
       description: Optional comment
@@ -1134,13 +1055,14 @@ components:
       example: '2023-10-31T23:59:59.999Z'
       type: string
     EndpointIds:
-      description: List of endpoint IDs (cannot contain empty strings)
+      description: List of endpoint IDs (cannot contain empty strings). Max of 250.
       example:
         - endpoint-id-1
         - endpoint-id-2
       items:
         minLength: 1
         type: string
+      maxItems: 250
       minItems: 1
       type: array
     EndpointMetadataResponse:
@@ -1231,97 +1153,6 @@ components:
               revision: 2
       type: object
       properties: {}
-    EndpointScript:
-      type: object
-      properties:
-        createdAt:
-          format: date-time
-          type: string
-        createdBy:
-          example: elastic
-          type: string
-        description:
-          description: Description of the script and its purpose/functionality
-          example: Collects host data for investigation
-          type: string
-        downloadUri:
-          description: >-
-            URI to download the script file. Note that this is the relative path
-            and does not include the space (if applicable)
-          example: >-
-            /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
-          type: string
-        example:
-          type: string
-        fileHash:
-          description: SHA256 hash of the script file that was uploaded
-          example: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
-          type: string
-        fileName:
-          description: Name of the script file that was uploaded
-          example: collect_host_data.sh
-          type: string
-        fileSize:
-          description: Size of the script file that was uploaded in bytes
-          example: 12345
-          type: integer
-        id:
-          example: 123e4567-e89b-12d3-a456-426655440000
-          format: uuid
-          type: string
-        instructions:
-          description: >-
-            Instructions for using the script, including details around its
-            supported input arguments
-          type: string
-        name:
-          example: Collect host data
-          type: string
-        pathToExecutable:
-          description: >
-            The relative path to the file included in the archive that should be
-            executed once its contents are extracted. Applicable only for
-            scripts uploaded as an archive (.zip file for example).
-          type: string
-        platform:
-          items:
-            $ref: '#/components/schemas/EndpointScriptPlatform'
-          type: array
-        requiresInput:
-          type: boolean
-        tags:
-          description: Tags that categorize the script
-          items:
-            $ref: '#/components/schemas/EndpointScriptTags'
-          type: array
-        updatedAt:
-          format: date-time
-          type: string
-        updatedBy:
-          example: admin
-          type: string
-        version:
-          type: string
-    EndpointScriptPlatform:
-      enum:
-        - linux
-        - macos
-        - windows
-      type: string
-    EndpointScriptTags:
-      enum:
-        - remediationAction
-        - dataCollection
-        - networkDiagnostics
-        - networkAction
-        - systemInventory
-        - forensicCollection
-        - threatHunting
-        - discovery
-        - systemManagement
-        - userManagement
-        - troubleshooting
-      type: string
     Execute:
       allOf:
         - $ref: '#/components/schemas/ResponseActionDetails'
@@ -1374,23 +1205,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -1560,23 +1395,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -1642,23 +1481,25 @@ components:
           description: >-
             If this action is associated with any alerts, they can be specified
             here. The action will be logged in any cases associated with the
-            specified alerts.
+            specified alerts. Max of 50.
           example:
             - alert-id-1
             - alert-id-2
           items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         case_ids:
-          description: The IDs of cases where the action taken will be logged.
+          description: The IDs of cases where the action taken will be logged. Max of 50.
           example:
             - case-id-1
             - case-id-2
           items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         comment:
@@ -1723,9 +1564,13 @@ components:
           - inactive
           - unenrolled
         type: string
+      maxItems: 20
       type: array
     Isolate:
-      $ref: '#/components/schemas/ResponseActionDetails'
+      allOf:
+        - $ref: '#/components/schemas/ResponseActionDetails'
+        - description: Details of an isolate action response.
+          type: object
     IsolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -1819,23 +1664,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -2015,23 +1864,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -2564,23 +2417,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -2634,23 +2491,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -2812,23 +2673,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -2907,7 +2772,10 @@ components:
       minLength: 1
       type: array
     Unisolate:
-      $ref: '#/components/schemas/ResponseActionDetails'
+      allOf:
+        - $ref: '#/components/schemas/ResponseActionDetails'
+        - description: Details of an unisolate action response.
+          type: object
     UnisolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -2979,23 +2847,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -3059,7 +2931,7 @@ components:
       type: object
       properties: {}
     UserIds:
-      description: A list of user IDs.
+      description: A list of user IDs. Max of 50.
       example:
         - user-id-1
         - user-id-2
@@ -3067,6 +2939,7 @@ components:
         - items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         - minLength: 1
@@ -3074,7 +2947,7 @@ components:
     WithOutputs:
       description: >-
         A list of action IDs that should include the complete output of the
-        action.
+        action. Max of 50.
       example:
         - action-id-1
         - action-id-2
@@ -3082,6 +2955,7 @@ components:
         - items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         - minLength: 1

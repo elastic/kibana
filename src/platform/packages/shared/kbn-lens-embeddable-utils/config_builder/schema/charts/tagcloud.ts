@@ -12,25 +12,14 @@ import { schema } from '@kbn/config-schema';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { builderEnums } from '../enums';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
-
-const tagcloudStateMetricOptionsSchema = {
-  /**
-   * Whether to show the metric label
-   */
-  show_metric_label: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Show metric label' },
-      defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
-    })
-  ),
-};
+import { objectUnion } from './utils/object_union';
 
 const tagcloudStateTagsByOptionsSchema = {
   /**
@@ -63,6 +52,25 @@ const tagcloudStateSharedOptionsSchema = {
       { meta: { description: 'Minimum and maximum font size for the tags' } }
     )
   ),
+  /**
+   * Show the metric caption
+   */
+  caption: schema.maybe(
+    schema.object(
+      {
+        visible: schema.boolean({
+          meta: { description: 'Show caption' },
+          defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
+        }),
+      },
+      {
+        meta: {
+          description:
+            'Caption configuration representing the metric and the tag_by operations labels',
+        },
+      }
+    )
+  ),
 };
 
 export const tagcloudStateSchemaNoESQL = schema.object(
@@ -71,14 +79,12 @@ export const tagcloudStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...tagcloudStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      tagcloudStateMetricOptionsSchema
-    ),
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({}),
     /**
      * Configure how to break down to tags
      */
@@ -92,12 +98,12 @@ export const tagcloudStateSchemaESQL = schema.object(
     type: schema.literal('tag_cloud'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...tagcloudStateSharedOptionsSchema,
     /**
      * Primary value configuration, must define operation.
      */
-    metric: esqlColumnWithFormatSchema.extends(tagcloudStateMetricOptionsSchema),
+    metric: esqlColumnWithFormatSchema,
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
@@ -106,7 +112,7 @@ export const tagcloudStateSchemaESQL = schema.object(
   { meta: { id: 'tagcloudESQL', title: 'Tag Cloud Chart (ES|QL)' } }
 );
 
-export const tagcloudStateSchema = schema.oneOf(
+export const tagcloudStateSchema = objectUnion(
   [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],
   {
     meta: { id: 'tagcloudChart', title: 'Tag Cloud Chart' },

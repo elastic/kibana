@@ -87,7 +87,7 @@ describe('createConnectorFixture', () => {
     delete process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP;
   });
 
-  it('deletes existing connector before creating a new one', async () => {
+  it('creates the connector without deleting first', async () => {
     await createConnectorFixture({
       predefinedConnector,
       fetch: mockFetch,
@@ -101,14 +101,8 @@ describe('createConnectorFixture', () => {
       method: 'GET',
     });
 
-    // Second call: DELETE (setup cleanup)
+    // Second call: POST (create)
     expect(mockFetch).toHaveBeenNthCalledWith(2, {
-      path: `/api/actions/connector/${expectedUuid}`,
-      method: 'DELETE',
-    });
-
-    // Third call: POST (create)
-    expect(mockFetch).toHaveBeenNthCalledWith(3, {
       path: `/api/actions/connector/${expectedUuid}`,
       method: 'POST',
       body: JSON.stringify({
@@ -150,7 +144,7 @@ describe('createConnectorFixture', () => {
     });
   });
 
-  it('deletes the connector on teardown after use()', async () => {
+  it('does not delete the connector on teardown (shared across parallel workers)', async () => {
     const callOrder: string[] = [];
 
     mockFetch.mockImplementation(async ({ method }: { method: string }) => {
@@ -168,24 +162,23 @@ describe('createConnectorFixture', () => {
       use: mockUse,
     });
 
-    // Order: GET (preconfigured check), DELETE (cleanup), POST (create), use(), DELETE (teardown)
-    expect(callOrder).toEqual(['GET', 'DELETE', 'POST', 'use', 'DELETE']);
+    // Order: GET (preconfigured check), POST (create), use() — no teardown DELETE
+    expect(callOrder).toEqual(['GET', 'POST', 'use']);
   });
 
-  it('swallows 404 errors on delete', async () => {
-    const axiosError = new AxiosError('Not Found', '404', undefined, undefined, {
-      status: 404,
+  it('handles 409 conflict on create when another worker already created the connector', async () => {
+    const conflictError = new AxiosError('Conflict', '409', undefined, undefined, {
+      status: 409,
       data: {},
       headers: {},
-      statusText: 'Not Found',
+      statusText: 'Conflict',
       config: {} as any,
     });
 
-    // First call (preconfigured check) succeeds, second call (setup delete) rejects with 404, rest succeed
+    // First call (preconfigured check) returns not preconfigured, second call (POST) returns 409
     mockFetch
       .mockResolvedValueOnce({ is_preconfigured: false })
-      .mockRejectedValueOnce(axiosError)
-      .mockResolvedValue(undefined);
+      .mockRejectedValueOnce(conflictError);
 
     await expect(
       createConnectorFixture({
@@ -196,11 +189,14 @@ describe('createConnectorFixture', () => {
       })
     ).resolves.toBeUndefined();
 
-    // Should still proceed to POST and use()
-    expect(mockUse).toHaveBeenCalled();
+    // Should still proceed to use()
+    expect(mockUse).toHaveBeenCalledWith({
+      ...predefinedConnector,
+      id: expectedUuid,
+    });
   });
 
-  it('throws non-404 errors on delete', async () => {
+  it('throws non-409 errors on create', async () => {
     const serverError = new AxiosError('Internal Server Error', '500', undefined, undefined, {
       status: 500,
       data: {},
@@ -209,7 +205,7 @@ describe('createConnectorFixture', () => {
       config: {} as any,
     });
 
-    // First call (preconfigured check) succeeds, second call (setup delete) fails hard
+    // First call (preconfigured check) succeeds, second call (POST) fails hard
     mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(serverError);
 
     await expect(
@@ -241,126 +237,6 @@ describe('createConnectorFixture', () => {
       method: 'GET',
     });
     expect(mockUse).toHaveBeenCalledWith(predefinedConnector);
-  });
-
-  describe('when connector is .inference with inferenceId', () => {
-    const inferenceConnector: AvailableConnectorWithId = {
-      id: 'elastic-llm-claude-46-opus',
-      name: 'EIS Claude 4.6 Opus',
-      actionTypeId: '.inference',
-      config: {
-        provider: 'elastic',
-        taskType: 'chat_completion',
-        inferenceId: '.anthropic-claude-4.6-opus-chat_completion',
-      },
-      secrets: {},
-    };
-
-    it('uses the inferenceId as the connector id', async () => {
-      await createConnectorFixture({
-        predefinedConnector: inferenceConnector,
-        fetch: mockFetch,
-        log: mockLog,
-        use: mockUse,
-      });
-
-      expect(mockUse).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: '.anthropic-claude-4.6-opus-chat_completion',
-        })
-      );
-    });
-
-    it('preserves other connector properties', async () => {
-      await createConnectorFixture({
-        predefinedConnector: inferenceConnector,
-        fetch: mockFetch,
-        log: mockLog,
-        use: mockUse,
-      });
-
-      expect(mockUse).toHaveBeenCalledWith({
-        ...inferenceConnector,
-        id: '.anthropic-claude-4.6-opus-chat_completion',
-      });
-    });
-
-    it('skips all fetch calls (no preconfigured check, no create/delete)', async () => {
-      await createConnectorFixture({
-        predefinedConnector: inferenceConnector,
-        fetch: mockFetch,
-        log: mockLog,
-        use: mockUse,
-      });
-
-      expect(mockFetch).not.toHaveBeenCalled();
-    });
-
-    it('logs the inference endpoint and original connector id', async () => {
-      await createConnectorFixture({
-        predefinedConnector: inferenceConnector,
-        fetch: mockFetch,
-        log: mockLog,
-        use: mockUse,
-      });
-
-      expect(mockLog.info).toHaveBeenCalledWith(
-        expect.stringContaining('.anthropic-claude-4.6-opus-chat_completion')
-      );
-      expect(mockLog.info).toHaveBeenCalledWith(
-        expect.stringContaining('elastic-llm-claude-46-opus')
-      );
-    });
-
-    it('takes priority over KBN_EVALS_SKIP_CONNECTOR_SETUP', async () => {
-      process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
-
-      await createConnectorFixture({
-        predefinedConnector: inferenceConnector,
-        fetch: mockFetch,
-        log: mockLog,
-        use: mockUse,
-      });
-
-      expect(mockUse).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: '.anthropic-claude-4.6-opus-chat_completion',
-        })
-      );
-    });
-
-    it('falls through to normal flow when inferenceId is missing', async () => {
-      const connectorWithoutInferenceId: AvailableConnectorWithId = {
-        ...inferenceConnector,
-        config: { provider: 'elastic', taskType: 'chat_completion' },
-      };
-
-      await createConnectorFixture({
-        predefinedConnector: connectorWithoutInferenceId,
-        fetch: mockFetch,
-        log: mockLog,
-        use: mockUse,
-      });
-
-      // Falls through to preconfigured check (GET) + normal create flow
-      expect(mockFetch).toHaveBeenCalled();
-    });
-
-    it('falls through to normal flow for non-.inference actionTypeId', async () => {
-      const genAiConnector: AvailableConnectorWithId = {
-        ...inferenceConnector,
-        actionTypeId: '.gen-ai',
-      };
-
-      await createConnectorFixture({
-        predefinedConnector: genAiConnector,
-        fetch: mockFetch,
-        log: mockLog,
-        use: mockUse,
-      });
-
-      expect(mockFetch).toHaveBeenCalled();
-    });
   });
 
   describe('when KBN_EVALS_SKIP_CONNECTOR_SETUP is set', () => {

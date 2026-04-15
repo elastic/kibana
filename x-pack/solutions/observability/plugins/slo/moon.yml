@@ -112,6 +112,7 @@ dependsOn:
   - '@kbn/server-route-repository-utils'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/apm-sources-access-plugin'
+  - '@kbn/apm-types'
   - '@kbn/lock-manager'
   - '@kbn/object-utils'
   - '@kbn/licensing-types'
@@ -120,6 +121,7 @@ dependsOn:
   - '@kbn/content-management-plugin'
   - '@kbn/dashboards-selector'
   - '@kbn/control-group-renderer'
+  - '@kbn/controls-constants'
   - '@kbn/react-query'
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-observability'
@@ -140,28 +142,8 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - test/scout/**/*
+    - test/scout*/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

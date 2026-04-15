@@ -1,0 +1,45 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@testing-library/jest-dom"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/esql",
+    "@kbn/esql-utils",
+    "@kbn/esql-types",
+    "@kbn/es-query",
+    "@kbn/react-query",
+    "@kbn/search-types",
+    "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-constants",
+    "@kbn/yaml-rule-editor",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/react-hooks",
+    "@kbn/field-types",
+    "@kbn/lens-plugin",
+    "@kbn/visualization-utils",
+    "@kbn/expressions-plugin",
+    "@kbn/alerting-v2-constants",
+  ]
+}
+

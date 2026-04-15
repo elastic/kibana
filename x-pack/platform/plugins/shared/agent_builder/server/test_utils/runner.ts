@@ -39,7 +39,7 @@ import type {
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentServiceStart } from '../services/attachments';
-import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/runner/runner';
+import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/execution/runner/runner';
 import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';
 import { createModelProviderMock, createModelProviderFactoryMock } from './model_provider';
 import type { ToolsServiceStartMock } from './tools';
@@ -171,7 +171,7 @@ export const createSkillServiceStartMock = (): SkillServiceStartMock => {
 
 export const createPluginsServiceStartMock = (): PluginsServiceStartMock => {
   return {
-    getScopedClient: jest.fn(),
+    getRegistry: jest.fn(),
     installPlugin: jest.fn(),
     deletePlugin: jest.fn(),
   };

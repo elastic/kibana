@@ -96,3 +96,5 @@ export {
   applyAfterToolCallResult,
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
+export type { BuiltInPluginDefinition } from './plugins';
+export { describeZodSchema, formatSchemaForLlm } from './tools';

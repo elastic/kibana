@@ -226,6 +226,135 @@ describe('Slack', () => {
     });
   });
 
+  describe('createConversation action', () => {
+    it('should create a public channel', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          channel: {
+            id: 'C123ABC',
+            name: 'incident-123',
+            is_private: false,
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.createConversation.handler(mockContext, {
+        name: 'incident-123',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/conversations.create',
+        {
+          name: 'incident-123',
+          is_private: false,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should create a private channel', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          channel: {
+            id: 'G456DEF',
+            name: 'incident-456',
+            is_private: true,
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await Slack.actions.createConversation.handler(mockContext, {
+        name: 'incident-456',
+        isPrivate: true,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/conversations.create',
+        {
+          name: 'incident-456',
+          is_private: true,
+        },
+        expect.any(Object)
+      );
+    });
+
+    it('should throw error when Slack API returns error', async () => {
+      const mockResponse = {
+        data: {
+          ok: false,
+          error: 'name_taken',
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await expect(
+        Slack.actions.createConversation.handler(mockContext, {
+          name: 'existing-channel',
+        })
+      ).rejects.toThrow('Slack createConversation error: name_taken');
+    });
+  });
+
+  describe('inviteToConversation action', () => {
+    it('should invite users to a channel', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          channel: {
+            id: 'C123ABC',
+            name: 'incident-123',
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.inviteToConversation.handler(mockContext, {
+        channel: 'C123ABC',
+        users: 'U01PWE77HD2,U02ABC1234',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/conversations.invite',
+        {
+          channel: 'C123ABC',
+          users: 'U01PWE77HD2,U02ABC1234',
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw error when Slack API returns error', async () => {
+      const mockResponse = {
+        data: {
+          ok: false,
+          error: 'channel_not_found',
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await expect(
+        Slack.actions.inviteToConversation.handler(mockContext, {
+          channel: 'INVALID',
+          users: 'U01PWE77HD2',
+        })
+      ).rejects.toThrow('Slack inviteToConversation error: channel_not_found');
+    });
+  });
+
   describe('sendMessage action', () => {
     it('should send message with required parameters', async () => {
       const mockResponse = {

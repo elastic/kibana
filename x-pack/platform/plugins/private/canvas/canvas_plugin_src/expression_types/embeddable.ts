@@ -6,10 +6,8 @@
  */
 
 import type { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
-import { EmbeddableTypes } from './embeddable_types';
 
 export const EmbeddableExpressionType = 'embeddable';
-export { EmbeddableTypes };
 
 export interface EmbeddableExpression {
   /**

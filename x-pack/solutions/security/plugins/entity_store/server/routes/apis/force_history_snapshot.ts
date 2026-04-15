@@ -14,7 +14,7 @@ import { wrapMiddlewares } from '../middleware';
 export function registerForceHistorySnapshot(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.FORCE_HISTORY_SNAPSHOT,
+      path: ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

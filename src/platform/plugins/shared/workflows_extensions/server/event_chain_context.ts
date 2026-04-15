@@ -8,6 +8,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+
+export { X_ELASTIC_INTERNAL_ORIGIN_REQUEST };
 
 /**
  * Context attached to the request when a workflow runs, so that when code
@@ -18,7 +21,7 @@ import type { KibanaRequest } from '@kbn/core/server';
  */
 export interface EventChainContext {
   depth: number;
-  sourceWorkflowId?: string;
+  sourceExecutionId?: string;
 }
 
 /**
@@ -29,10 +32,10 @@ export interface EventChainContext {
 export const EVENT_CHAIN_DEPTH_HEADER = 'x-kibana-event-chain-depth';
 
 /**
- * HTTP header name for the workflow id associated with the current chain hop. Set on outbound
- * requests so the server can restore `sourceWorkflowId` on the incoming request (logging and attribution).
+ * HTTP header for the workflow execution id associated with the current chain hop. Set on outbound
+ * requests so the server can restore `sourceExecutionId` on the incoming request.
  */
-export const EVENT_CHAIN_SOURCE_WORKFLOW_HEADER = 'x-kibana-event-chain-source-workflow';
+export const EVENT_CHAIN_SOURCE_EXECUTION_HEADER = 'x-kibana-event-chain-source-execution-id';
 
 /**
  * Symbol used to attach event-chain context to a KibanaRequest.
@@ -77,33 +80,45 @@ function parseDepthFromHeaders(headers: KibanaRequest['headers']): number | unde
   return !Number.isNaN(depth) && depth >= 0 ? depth : undefined;
 }
 
-function parseSourceWorkflowIdFromHeaders(headers: KibanaRequest['headers']): string | undefined {
-  return getHeaderValue(headers, EVENT_CHAIN_SOURCE_WORKFLOW_HEADER);
+function parseSourceExecutionIdFromHeaders(headers: KibanaRequest['headers']): string | undefined {
+  return getHeaderValue(headers, EVENT_CHAIN_SOURCE_EXECUTION_HEADER);
 }
 
 /**
- * Returns the event-chain context from the request if it was set by a workflow run.
- * Used inside emitEvent to infer depth when the emitter is in a workflow-triggered path.
- * Reads from: (1) the request's symbol (execution-engine fakeRequest path), or
- * (2) the x-kibana-event-chain-depth and x-kibana-event-chain-source-workflow headers (HTTP path).
+ * Returns the event-chain context for the request.
+ *
+ * Two trusted paths:
+ *  1. In-process (fakeRequest): the execution engine called setWorkflowEventChainContext before
+ *     any step runs, so the Symbol is present and takes precedence.
+ *  2. Inbound HTTP from kibana.request step: no Symbol exists, but the step marks its outbound
+ *     call with x-elastic-internal-origin so request.isInternalApiRequest is true. Only then are
+ *     the event-chain headers parsed.
+ *
+ * Note: isInternalApiRequest is derived from the presence of the x-elastic-internal-origin request
+ * header (see KibanaRequest constructor). It is not enforced at the network layer, so a
+ * sufficiently informed external caller could set it. This gate stops naive spoofing but should
+ * not be treated as a hard trust boundary.
  */
 export function getEventChainContext(request: KibanaRequest): EventChainContext | undefined {
   const stored = getStoredContext(request);
   if (stored !== undefined) {
     return stored;
   }
+  if (!request.isInternalApiRequest) {
+    return undefined;
+  }
   const depth = parseDepthFromHeaders(request.headers);
   if (depth === undefined) {
     return undefined;
   }
-  const sourceWorkflowId = parseSourceWorkflowIdFromHeaders(request.headers);
-  return { depth, ...(sourceWorkflowId !== undefined && { sourceWorkflowId }) };
+  const sourceExecutionId = parseSourceExecutionIdFromHeaders(request.headers);
+  return { depth, ...(sourceExecutionId !== undefined && { sourceExecutionId }) };
 }
 
 /**
  * Sets the event-chain context on the request. Called by the execution engine
  * at the start of a workflow run so that any emitEvent call using this request
- * (e.g. in-process with the fakeRequest) will have the correct depth and sourceWorkflowId.
+ * (e.g. in-process with the fakeRequest) will have the correct depth and sourceExecutionId.
  */
 export function setWorkflowEventChainContext(
   request: KibanaRequest,
@@ -119,10 +134,13 @@ export function setWorkflowEventChainContext(
  */
 export function getOutboundEventChainHeaders(request: KibanaRequest): Record<string, string> {
   const ctx = getEventChainContext(request);
-  return ctx
-    ? {
-        [EVENT_CHAIN_DEPTH_HEADER]: String(ctx.depth),
-        [EVENT_CHAIN_SOURCE_WORKFLOW_HEADER]: ctx.sourceWorkflowId ?? '',
-      }
-    : {};
+  if (!ctx) {
+    return {};
+  }
+  return {
+    [EVENT_CHAIN_DEPTH_HEADER]: String(ctx.depth),
+    ...(ctx.sourceExecutionId !== undefined && ctx.sourceExecutionId !== ''
+      ? { [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: ctx.sourceExecutionId }
+      : {}),
+  };
 }

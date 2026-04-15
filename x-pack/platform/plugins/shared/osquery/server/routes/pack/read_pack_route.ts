@@ -74,7 +74,8 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
         );
-        const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
+        const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset'])
+          .length;
 
         const data: ReadPackResponseData = {
           type: rest.type,
