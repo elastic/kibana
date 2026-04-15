@@ -1,22 +1,21 @@
+---
 title: Flaky Test Runner nudge
 model: claude-opus-4-6
 reasoning: high
 effort: high
 input: full_diff
 exclude:
-
-- 'api_docs/\*\*'
-- 'config/\*\*'
-- 'dev_docs/\*\*'
-- 'docs/\*\*'
-- 'legacy_rfcs/\*\*'
-- 'licenses/\*\*'
-- 'node_modules/\*\*'
-- 'oas_docs/\*\*'
-- 'typings/\*\*'
-- '.buildkite/\*\*'
-  conclusion: neutral
-
+  - 'api_docs/**'
+  - 'config/**'
+  - 'dev_docs/**'
+  - 'docs/**'
+  - 'legacy_rfcs/**'
+  - 'licenses/**'
+  - 'node_modules/**'
+  - 'oas_docs/**'
+  - 'typings/**'
+  - '.buildkite/**'
+conclusion: neutral
 ---
 
 Decide whether this PR needs a Flaky Test Runner nudge. If not, post nothing.
