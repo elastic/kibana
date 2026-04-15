@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -516,6 +516,8 @@ export const CompareRunsPage: React.FC = () => {
   );
 
   const [csvCopied, setCsvCopied] = useState(false);
+  const csvTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(csvTimerRef.current), []);
 
   const sortedResults = useMemo(() => {
     const results = [...(data?.results ?? [])];
@@ -572,10 +574,15 @@ export const CompareRunsPage: React.FC = () => {
       ];
     });
     const csv = [header.join(','), ...rows.map((row) => row.join(','))].join('\n');
-    navigator.clipboard.writeText(csv).then(() => {
-      setCsvCopied(true);
-      setTimeout(() => setCsvCopied(false), 2000);
-    });
+    navigator.clipboard.writeText(csv).then(
+      () => {
+        setCsvCopied(true);
+        csvTimerRef.current = setTimeout(() => setCsvCopied(false), 2000);
+      },
+      () => {
+        setCsvCopied(false);
+      }
+    );
   }, [sortedResults]);
 
   const firstRowByDataset = useMemo(() => {

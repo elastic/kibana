@@ -18,7 +18,8 @@ export function getGitMetadata(): GitMetadata {
 
   const branch =
     gitBranch && gitBranch !== 'HEAD' ? gitBranch : process.env.BUILDKITE_BRANCH ?? null;
-  const commitSha = process.env.BUILDKITE_COMMIT || gitCommit || null;
+  const bkCommit = process.env.BUILDKITE_COMMIT;
+  const commitSha = (bkCommit && bkCommit !== 'HEAD' ? bkCommit : null) ?? gitCommit ?? null;
 
   return { branch, commitSha };
 }
