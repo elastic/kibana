@@ -10,13 +10,20 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   ExecutionStatus,
-  type WorkflowDetailDto,
   type WorkflowExecutionEngineModel,
   type WorkflowExecutionListItemDto,
+  type WorkflowYaml,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
 import { StatusError } from '../streams/errors/status_error';
 import { pollUntil } from './poll_until';
+
+// Concurrency is keyed per stream (max: 1, strategy: drop), so the number of
+// non-terminal executions is bounded by the number of distinct streams. 10k is
+// a safe upper bound that avoids pagination while covering any realistic deployment.
+export const NON_TERMINAL_EXECUTIONS_PAGE_SIZE = 10_000;
+
+const COMPLETED_EXECUTIONS_PAGE_SIZE = 100;
 
 export interface WorkflowExecutionResult {
   executionId: string;
@@ -26,8 +33,9 @@ export interface WorkflowExecutionResult {
   output?: Record<string, unknown>;
 }
 
-export interface WorkflowClient<TInputs extends Record<string, unknown>> {
+export interface WorkflowClient<TInputs extends Record<string, unknown> = Record<string, never>> {
   ensureExists(request: KibanaRequest): Promise<void>;
+  ensureEnabled(enabled: boolean, request: KibanaRequest): Promise<void>;
   remove(request: KibanaRequest): Promise<void>;
 
   run(
@@ -36,6 +44,7 @@ export interface WorkflowClient<TInputs extends Record<string, unknown>> {
     executionSource?: string
   ): Promise<{ executionId: string }>;
   cancel(executionId: string): Promise<void>;
+  cancelAll(): Promise<void>;
   getStatus(executionId: string): Promise<WorkflowExecutionResult>;
 
   getNonTerminalExecutions(): Promise<{
@@ -59,18 +68,9 @@ interface WorkflowClientParams {
   managementApi: WorkflowsServerPluginSetup['management'];
 }
 
-export const getStreamNameFromExecution = (
-  exec: WorkflowExecutionListItemDto
-): string | undefined => {
-  const inputs = (exec.context as Record<string, Record<string, unknown>> | undefined)?.inputs;
-  return (inputs as Record<string, unknown> | undefined)?.streamName as string | undefined;
-};
-
-export const streamNamePredicate = (name: string) => {
-  return (exec: WorkflowExecutionListItemDto) => getStreamNameFromExecution(exec) === name;
-};
-
-export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
+export const createWorkflowClient = <
+  TInputs extends Record<string, unknown> = Record<string, never>
+>({
   workflowId,
   yaml,
   logger,
@@ -78,40 +78,33 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
 }: WorkflowClientParams): WorkflowClient<TInputs> => {
   const log = logger.get(`workflow-client:${workflowId}`);
 
-  const getWorkflowForExecution = async (): Promise<WorkflowExecutionEngineModel> => {
-    const workflow = await managementApi.getWorkflow(workflowId, DEFAULT_SPACE_ID);
-
-    if (!workflow) {
-      throw new StatusError(`Workflow ${workflowId} not found.`, 404);
-    }
-    if (!workflow.enabled) {
-      throw new StatusError(`Workflow ${workflowId} is disabled.`, 400);
-    }
-    if (!workflow.definition) {
-      throw new StatusError(`Workflow ${workflowId} definition is missing.`, 500);
-    }
-    return {
-      id: workflow.id,
-      name: workflow.name,
-      enabled: workflow.enabled,
-      definition: workflow.definition,
-      yaml: workflow.yaml,
-    };
-  };
+  const toEngineModel = (workflow: {
+    id: string;
+    name: string;
+    enabled: boolean;
+    definition: WorkflowYaml;
+    yaml: string;
+  }): WorkflowExecutionEngineModel => ({
+    id: workflow.id,
+    name: workflow.name,
+    enabled: workflow.enabled,
+    definition: workflow.definition,
+    yaml: workflow.yaml,
+  });
 
   const getNonTerminalExecutions = async () => {
     const { results, total } = await managementApi.getWorkflowExecutions(
       {
         workflowId,
         statuses: [...NonTerminalExecutionStatuses],
-        size: 10_000,
+        size: NON_TERMINAL_EXECUTIONS_PAGE_SIZE,
       },
       DEFAULT_SPACE_ID
     );
     return { results, total };
   };
 
-  const cancelAndAwaitTermination = async () => {
+  const requestCancellation = async () => {
     const { results } = await getNonTerminalExecutions();
     if (results.length === 0) return;
 
@@ -120,6 +113,10 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
     );
 
     log.debug(() => `Requested cancellation for ${results.length} running execution(s)`);
+  };
+
+  const cancelAndAwaitTermination = async () => {
+    await requestCancellation();
 
     await pollUntil(
       () => getNonTerminalExecutions(),
@@ -145,11 +142,17 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
     }
   };
 
-  const ensureWorkflow = async (request: KibanaRequest): Promise<WorkflowDetailDto> => {
+  const ensureWorkflow = async (request: KibanaRequest): Promise<WorkflowExecutionEngineModel> => {
     const existing = await managementApi.getWorkflow(workflowId, DEFAULT_SPACE_ID);
 
     if (existing?.yaml === yaml) {
-      return existing;
+      if (!existing.enabled) {
+        throw new StatusError(`Workflow ${workflowId} is disabled.`, 400);
+      }
+      if (!existing.definition) {
+        throw new StatusError(`Workflow ${workflowId} definition is missing.`, 500);
+      }
+      return toEngineModel(existing);
     }
 
     if (existing) {
@@ -166,8 +169,19 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
     if (!created) {
       throw new StatusError(`Failed to create workflow ${workflowId}.`, 500);
     }
+    if (!created.definition) {
+      throw new StatusError(`Workflow ${workflowId} definition is missing after creation.`, 500);
+    }
 
-    return created;
+    return toEngineModel(created);
+  };
+
+  const removeIfExists = async (request: KibanaRequest): Promise<boolean> => {
+    const existing = await managementApi.getWorkflow(workflowId, DEFAULT_SPACE_ID);
+    if (!existing) return false;
+
+    await hardDelete(request);
+    return true;
   };
 
   // TODO: The workflow plugin's getWorkflowExecutions strips `context` from list items,
@@ -199,20 +213,23 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
   // The cutoff check below is therefore approximate — an execution created before the
   // cutoff might have finished after it. For short-lived workflows this is acceptable;
   // callers that need exact finishedAt ordering should sort results client-side.
-  const paginateCompletedExecutions = async (
+  const forEachCompletedExecution = async <T>(
     maxAgeMs: number | undefined,
-    visitor: (exec: WorkflowExecutionListItemDto) => 'match' | 'continue'
-  ): Promise<WorkflowExecutionListItemDto | null> => {
+    reducer: {
+      init: () => T;
+      step: (acc: T, exec: WorkflowExecutionListItemDto) => { acc: T; done: boolean };
+    }
+  ): Promise<T> => {
     const cutoff = maxAgeMs ? Date.now() - maxAgeMs : undefined;
-    const pageSize = 100;
     let page = 1;
+    let acc = reducer.init();
 
     while (true) {
       const { results, total } = await managementApi.getWorkflowExecutions(
         {
           workflowId,
           statuses: [ExecutionStatus.COMPLETED],
-          size: pageSize,
+          size: COMPLETED_EXECUTIONS_PAGE_SIZE,
           page,
         },
         DEFAULT_SPACE_ID
@@ -222,16 +239,14 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
         ? results.filter((exec) => new Date(exec.finishedAt).getTime() >= cutoff)
         : results;
 
-      const enrichedPage = await enrichBatch(withinCutoff);
-      for (const enriched of enrichedPage) {
-        if (visitor(enriched) === 'match') {
-          return enriched;
-        }
+      const enriched = await enrichBatch(withinCutoff);
+      for (const e of enriched) {
+        const result = reducer.step(acc, e);
+        acc = result.acc;
+        if (result.done) return acc;
       }
 
-      if (page * pageSize >= total) {
-        return null;
-      }
+      if (page * COMPLETED_EXECUTIONS_PAGE_SIZE >= total) return acc;
       page++;
     }
   };
@@ -241,17 +256,22 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
       await ensureWorkflow(request);
     },
 
-    async remove(request) {
-      const existing = await managementApi.getWorkflow(workflowId, DEFAULT_SPACE_ID);
-      if (!existing) return;
+    async ensureEnabled(enabled, request) {
+      if (enabled) {
+        await ensureWorkflow(request);
+      } else if (await removeIfExists(request)) {
+        log.info(`Disabled and removed workflow ${workflowId}`);
+      }
+    },
 
-      await hardDelete(request);
-      log.info(`Removed workflow ${workflowId}`);
+    async remove(request) {
+      if (await removeIfExists(request)) {
+        log.info(`Removed workflow ${workflowId}`);
+      }
     },
 
     async run(inputs, request, executionSource) {
-      await ensureWorkflow(request);
-      const workflow = await getWorkflowForExecution();
+      const workflow = await ensureWorkflow(request);
 
       const filteredInputs: Record<string, unknown> = Object.fromEntries(
         Object.entries(inputs).filter(([, v]) => v !== undefined)
@@ -275,6 +295,10 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
       log.debug(() => `Cancelled workflow execution ${executionId}`);
     },
 
+    async cancelAll() {
+      await requestCancellation();
+    },
+
     async getStatus(executionId) {
       const execution = await managementApi.getWorkflowExecution(executionId, DEFAULT_SPACE_ID, {
         includeOutput: true,
@@ -284,13 +308,20 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
         throw new StatusError(`Workflow execution ${executionId} not found`, 404);
       }
 
-      const ctx = (execution.context ?? {}) as Record<string, unknown>;
+      const ctx = execution.context ?? {};
+      let output: Record<string, unknown> = {};
+      if (typeof ctx === 'object' && ctx !== null && 'output' in ctx) {
+        const raw = ctx.output;
+        if (raw != null && typeof raw === 'object' && !Array.isArray(raw)) {
+          output = raw as Record<string, unknown>;
+        }
+      }
       return {
         executionId: execution.id,
         status: execution.status,
         error: execution.error?.message,
         duration: execution.duration,
-        output: (ctx.output as Record<string, unknown>) ?? {},
+        output,
       };
     },
 
@@ -299,19 +330,23 @@ export const createWorkflowClient = <TInputs extends Record<string, unknown>>({
     // TODO: Replace with server-side filtering once the workflow plugin supports
     // concurrencyGroupKey and finishedAfter/finishedBefore filters in getWorkflowExecutions.
     async getLastCompletedExecution(predicate, options) {
-      return paginateCompletedExecutions(options?.maxAgeMs, (exec) =>
-        predicate(exec) ? 'match' : 'continue'
-      );
+      return forEachCompletedExecution(options?.maxAgeMs, {
+        init: (): WorkflowExecutionListItemDto | null => null,
+        step: (acc, exec) => {
+          const matched = predicate(exec);
+          return { acc: matched ? exec : acc, done: matched };
+        },
+      });
     },
 
     async getCompletedExecutions(options) {
-      const collected: WorkflowExecutionListItemDto[] = [];
-      await paginateCompletedExecutions(options?.maxAgeMs, (exec) => {
-        // Items are already enriched with context by paginateCompletedExecutions
-        collected.push(exec);
-        return 'continue';
+      return forEachCompletedExecution(options?.maxAgeMs, {
+        init: (): WorkflowExecutionListItemDto[] => [],
+        step: (acc, exec) => {
+          acc.push(exec);
+          return { acc, done: false };
+        },
       });
-      return collected;
     },
 
     async getActiveExecution(predicate) {
