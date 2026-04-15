@@ -28,10 +28,7 @@ import {
 } from './shared';
 import { objectUnion } from './utils/object_union';
 
-/**
- * Shared visualization options for partition charts including legend and value display
- */
-export const waffleStateSharedSchema = {
+const waffleStateSharedSchema = {
   legend: schema.maybe(
     schema.object(
       {
@@ -59,8 +56,20 @@ export const waffleStateSharedSchema = {
       }
     )
   ),
-  values: valueDisplaySchema,
 };
+
+const waffleStylingSchema = schema.object(
+  {
+    values: valueDisplaySchema,
+  },
+  {
+    meta: {
+      id: 'waffleStyling',
+      title: 'Waffle styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 /**
  * Color configuration for primary metric in waffle chart
@@ -95,7 +104,7 @@ export const waffleStateSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...waffleStateSharedSchema,
-    ...dslOnlyPanelInfoSchema,
+    styling: schema.maybe(waffleStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         partitionStatePrimaryMetricOptionsSchema
@@ -137,6 +146,7 @@ export const waffleStateSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
     ...waffleStateSharedSchema,
+    styling: schema.maybe(waffleStylingSchema),
     metrics: schema.arrayOf(
       esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
       {

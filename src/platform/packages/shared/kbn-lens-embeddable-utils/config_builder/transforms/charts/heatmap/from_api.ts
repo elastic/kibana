@@ -63,7 +63,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
     ...(layer.y ? { yAccessor: getAccessorName('y') } : {}),
     gridConfig: {
       type: HEATMAP_GRID_NAME,
-      isCellLabelVisible: layer.cells?.labels?.visible ?? false,
+      isCellLabelVisible: layer.styling?.cells?.labels?.visible ?? false,
       isXAxisLabelVisible: layer.axes?.x?.labels?.visible ?? true,
       isXAxisTitleVisible: layer.axes?.x?.title?.visible ?? false,
       isYAxisLabelVisible: layer.axes?.y?.labels?.visible ?? true,
