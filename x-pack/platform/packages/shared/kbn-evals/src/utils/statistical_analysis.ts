@@ -75,13 +75,8 @@ export function pairScores(
     }
 
     const match = referenceMap.get(buildPairKey(scoreA));
-    if (!match) {
+    if (!match || !isFiniteNumber(match.evaluator.score)) {
       skippedMissingPairs += 1;
-      continue;
-    }
-
-    if (!isFiniteNumber(match.evaluator.score)) {
-      skippedNullScores += 1;
       continue;
     }
 

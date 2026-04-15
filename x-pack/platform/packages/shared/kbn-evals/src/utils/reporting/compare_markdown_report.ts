@@ -25,16 +25,20 @@ function formatPValue(value: number | null): string {
 }
 
 function formatSig(pValue: number | null, threshold: number): string {
-  if (pValue === null) return 'n/a';
+  if (pValue === null || !Number.isFinite(pValue)) return 'n/a';
   return pValue < threshold ? 'Yes' : 'No';
+}
+
+function escapeMarkdownTableCell(value: string): string {
+  return value.replace(/\|/g, '\\|');
 }
 
 function buildMarkdownTable(headers: string[], rows: string[][]): string {
   const separator = headers.map(() => '---');
   const lines = [
-    `| ${headers.join(' | ')} |`,
+    `| ${headers.map(escapeMarkdownTableCell).join(' | ')} |`,
     `| ${separator.join(' | ')} |`,
-    ...rows.map((row) => `| ${row.join(' | ')} |`),
+    ...rows.map((row) => `| ${row.map(escapeMarkdownTableCell).join(' | ')} |`),
   ];
   return lines.join('\n');
 }
@@ -63,10 +67,11 @@ export function formatMarkdownCompareReport({
       a.datasetName.localeCompare(b.datasetName) || a.evaluatorName.localeCompare(b.evaluatorName)
   );
 
-  const significant = sorted.filter((r) => r.pValue !== null && r.pValue < significanceThreshold);
-  const nonSignificant = sorted.filter(
-    (r) => r.pValue === null || r.pValue >= significanceThreshold
-  );
+  const isSignificant = (r: PairedTTestResult): boolean =>
+    r.pValue !== null && Number.isFinite(r.pValue) && r.pValue < significanceThreshold;
+
+  const significant = sorted.filter(isSignificant);
+  const nonSignificant = sorted.filter((r) => !isSignificant(r));
 
   const lines: string[] = [];
 

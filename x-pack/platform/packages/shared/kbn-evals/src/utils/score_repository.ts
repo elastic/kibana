@@ -760,9 +760,20 @@ export class EvaluationScoreRepository {
       });
 
       const hits = response.hits?.hits || [];
+      const totalHits =
+        typeof response.hits?.total === 'number'
+          ? response.hits.total
+          : response.hits?.total?.value ?? hits.length;
       const scores = hits
         .map((hit) => hit._source)
         .filter((source): source is EvaluationScoreDocument => source !== undefined);
+
+      if (totalHits > scores.length) {
+        this.log.warning(
+          `Run ${runId} has ${totalHits} score documents but only ${scores.length} were retrieved. ` +
+            `Results may be incomplete — consider filtering by suite or model to reduce the result set.`
+        );
+      }
 
       this.log.info(`Retrieved ${scores.length} scores for run ID: ${runId}`);
       return scores;

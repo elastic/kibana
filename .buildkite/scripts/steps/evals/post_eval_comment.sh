@@ -53,13 +53,19 @@ for suite_id in "${SUITES[@]}"; do
     COMPARE_ARGS+=(--kibana-url "$KIBANA_URL")
   fi
 
-  SUITE_MD="$(node scripts/evals "${COMPARE_ARGS[@]}" 2>/dev/null || true)"
+  COMPARE_STDERR="$(mktemp)"
+  SUITE_MD="$(node scripts/evals "${COMPARE_ARGS[@]}" 2>"$COMPARE_STDERR" || true)"
 
   if [[ -n "$SUITE_MD" ]]; then
     MARKDOWN+="${SUITE_MD}"$'\n'
   else
     echo "No comparison output for suite $suite_id (no baseline or no results)."
+    if [[ -s "$COMPARE_STDERR" ]]; then
+      echo "Compare stderr:"
+      cat "$COMPARE_STDERR"
+    fi
   fi
+  rm -f "$COMPARE_STDERR"
 done
 
 if [[ -z "$MARKDOWN" ]]; then

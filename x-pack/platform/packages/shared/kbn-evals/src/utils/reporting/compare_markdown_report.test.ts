@@ -114,6 +114,19 @@ describe('formatMarkdownCompareReport', () => {
     expect(output).toContain('n/a');
   });
 
+  it('shows n/a and dash consistently for non-finite p-values', () => {
+    const output = formatMarkdownCompareReport({
+      ...baseOpts,
+      results: [makeResult({ pValue: NaN })],
+    });
+
+    const dataRow = output.split('\n').find((line) => line.includes('Dataset One'));
+    expect(dataRow).toBeDefined();
+    expect(dataRow).toContain('n/a');
+    expect(dataRow).not.toContain('Yes');
+    expect(dataRow).not.toContain('No');
+  });
+
   it('sorts results by dataset then evaluator', () => {
     const output = formatMarkdownCompareReport({
       ...baseOpts,
@@ -130,6 +143,23 @@ describe('formatMarkdownCompareReport', () => {
 
     expect(alphaAlphaIdx).toBeLessThan(alphaGammaIdx);
     expect(alphaGammaIdx).toBeLessThan(zuluBetaIdx);
+  });
+
+  it('escapes pipe characters in dataset and evaluator names', () => {
+    const output = formatMarkdownCompareReport({
+      ...baseOpts,
+      results: [
+        makeResult({
+          datasetName: 'ES|QL queries',
+          evaluatorName: 'esql|correctness',
+          pValue: 0.01,
+        }),
+      ],
+    });
+
+    expect(output).toContain('ES\\|QL queries');
+    expect(output).toContain('esql\\|correctness');
+    expect(output).not.toContain('| ES|QL');
   });
 
   it('handles empty results', () => {

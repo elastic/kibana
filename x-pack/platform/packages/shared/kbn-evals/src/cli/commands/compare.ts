@@ -11,7 +11,7 @@ import { createEsClientForTesting } from '@kbn/test-es-server';
 import { EvaluationScoreRepository } from '../../utils/score_repository';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
-import { computePairedTTestResults, pairScores } from '../../utils/statistical_analysis';
+import { computePairedTTestResults } from '../../utils/statistical_analysis';
 
 const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9200';
 
@@ -136,24 +136,15 @@ export const compareCmd: Command<void> = {
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
-    const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-      filteredFirstRunScores,
-      filteredSecondRunScores
-    );
-
-    if (pairs.length === 0) {
+    const results = computePairedTTestResults(filteredFirstRunScores, filteredSecondRunScores);
+    if (results.length === 0) {
       throw new Error('No paired scores found between the two runs.');
     }
 
+    const totalPairs = results.reduce((sum, r) => sum + r.sampleSize, 0);
     log.info(
-      `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
+      `Computed ${results.length} evaluator comparison(s) across ${totalPairs} paired scores.`
     );
-
-    const results = computePairedTTestResults(filteredFirstRunScores, filteredSecondRunScores);
-    if (results.length === 0) {
-      log.warning('No t-test results returned.');
-      return;
-    }
 
     if (format === 'markdown') {
       const markdown = formatMarkdownCompareReport({
