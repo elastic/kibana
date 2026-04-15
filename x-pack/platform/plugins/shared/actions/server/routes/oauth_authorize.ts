@@ -6,10 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  IKibanaResponse,
+  IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+  RequestHandler,
+} from '@kbn/core/server';
 import { getEarsEndpointsForProvider, resolveEarsUrl } from '../lib/ears';
 import type { ILicenseState } from '../lib';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAuthStateClient } from '../lib/oauth_state_client';
@@ -23,9 +31,12 @@ const paramsSchema = schema.object({
   connectorId: schema.string(),
 });
 
-const bodySchema = schema.object({
+const oauthStartReturnUrlFields = {
   returnUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
-});
+};
+
+const startOAuthFlowBodySchema = schema.object(oauthStartReturnUrlFields);
+const startOAuthFlowGetQuerySchema = schema.object(oauthStartReturnUrlFields);
 
 const validateOAuthUrlsAreAllowed = (
   oauthConfig: OAuthConfig,
@@ -45,8 +56,240 @@ const validateOAuthUrlsAreAllowed = (
 };
 
 /**
- * Initiates OAuth2 Authorization Code flow
- * Returns authorization URL for user to visit
+ * Shared OAuth start logic for POST /internal/.../_start_oauth_flow and
+ * GET /api/actions/connector/{connectorId}/oauth/start.
+ */
+async function startOAuthAuthorizationFlow(params: {
+  connectorId: string;
+  returnUrl: string | undefined;
+  context: ActionsRequestHandlerContext;
+  req: KibanaRequest;
+  coreSetup: CoreSetup<ActionsPluginsStart>;
+  logger: Logger;
+  oauthRateLimiter: OAuthRateLimiter;
+  actionsConfigUtils: ActionsConfigurationUtilities;
+}): Promise<{ authorizationUrl: string; state: string }> {
+  const {
+    connectorId,
+    returnUrl,
+    context,
+    req,
+    coreSetup,
+    logger,
+    oauthRateLimiter,
+    actionsConfigUtils,
+  } = params;
+  const routeLogger = logger.get('oauth_authorize');
+
+  const actionsClient = (await context.actions).getActionsClient();
+  await actionsClient.get({ id: connectorId });
+
+  const core = await context.core;
+  const currentUser = core.security.authc.getCurrentUser();
+  if (!currentUser) {
+    const err = new Error(
+      'User should be authenticated to initiate OAuth authorization.'
+    ) as Error & {
+      statusCode: number;
+    };
+    err.statusCode = 401;
+    throw err;
+  }
+  const { profile_uid } = currentUser;
+
+  if (!profile_uid) {
+    const err = new Error('Unable to retrieve Kibana user profile ID.') as Error & {
+      statusCode: number;
+    };
+    err.statusCode = 500;
+    throw err;
+  }
+
+  oauthRateLimiter.log(profile_uid, 'authorize');
+  if (oauthRateLimiter.isRateLimited(profile_uid, 'authorize')) {
+    routeLogger.warn(
+      `OAuth authorize rate limit exceeded for user: ${profile_uid}, connector: ${connectorId}`
+    );
+    const err = new Error('Too many authorization attempts. Please try again later.') as Error & {
+      statusCode: number;
+    };
+    err.statusCode = 429;
+    throw err;
+  }
+
+  const [coreStart, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
+  const kibanaUrl = coreStart.http.basePath.publicBaseUrl;
+  if (!kibanaUrl) {
+    const err = new Error(
+      'Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml'
+    ) as Error & { statusCode: number };
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const oauthService = new OAuthAuthorizationService({
+    actionsClient: (await context.actions).getActionsClient(),
+    encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
+      includedHiddenTypes: ['action'],
+    }),
+  });
+
+  const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
+  let namespace: string | undefined;
+  if (spaces && spaceId) {
+    namespace = spaces.spacesService.spaceIdToNamespace(spaceId);
+  }
+  const oauthConfig = await oauthService.getOAuthConfig(connectorId, namespace);
+
+  let earsAuthorizationUrl: string | undefined;
+  try {
+    ({ earsAuthorizationUrl } = validateOAuthUrlsAreAllowed(oauthConfig, actionsConfigUtils));
+  } catch (allowedHostsErr) {
+    const message =
+      allowedHostsErr instanceof Error ? allowedHostsErr.message : String(allowedHostsErr);
+    const err = new Error(
+      message || 'OAuth URL is not allowed by xpack.actions.allowedHosts'
+    ) as Error & {
+      statusCode: number;
+    };
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const redirectUri = OAuthAuthorizationService.getRedirectUri(kibanaUrl);
+
+  let kibanaReturnUrl: string | undefined;
+  if (returnUrl) {
+    const returnUrlObj = new URL(returnUrl);
+    const kibanaUrlObj = new URL(kibanaUrl);
+
+    if (returnUrlObj.origin !== kibanaUrlObj.origin) {
+      const err = new Error(
+        `returnUrl must be same origin as Kibana. Expected: ${kibanaUrlObj.origin}, Got: ${returnUrlObj.origin}`
+      ) as Error & { statusCode: number };
+      err.statusCode = 400;
+      throw err;
+    }
+    kibanaReturnUrl = returnUrl;
+  }
+
+  const oauthStateClient = new OAuthStateClient({
+    encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
+      includedHiddenTypes: ['oauth_state'],
+    }),
+    unsecuredSavedObjectsClient: core.savedObjects.getClient({
+      includedHiddenTypes: ['oauth_state'],
+    }),
+    logger: routeLogger,
+  });
+  const { state, codeChallenge } = await oauthStateClient.create({
+    connectorId,
+    kibanaReturnUrl,
+    spaceId,
+    createdBy: profile_uid,
+  });
+
+  let authorizationUrl: string;
+  if (oauthConfig.authTypeId === 'ears') {
+    if (!earsAuthorizationUrl) {
+      throw new Error('EARS authorization URL was not resolved');
+    }
+    authorizationUrl = oauthService.buildEarsAuthorizationUrl({
+      baseAuthorizationUrl: earsAuthorizationUrl,
+      scope: oauthConfig.scope,
+      callbackUri: redirectUri,
+      state: state.state,
+      pkceChallenge: codeChallenge,
+    });
+  } else {
+    authorizationUrl = oauthService.buildAuthorizationUrl({
+      baseAuthorizationUrl: oauthConfig.authorizationUrl,
+      clientId: oauthConfig.clientId,
+      scope: oauthConfig.scope,
+      redirectUri,
+      state: state.state,
+      codeChallenge,
+    });
+  }
+
+  return {
+    authorizationUrl,
+    state: state.state,
+  };
+}
+
+function handleOAuthStartError(
+  err: unknown,
+  logger: Logger,
+  res: KibanaResponseFactory
+): IKibanaResponse {
+  const errorMessage = err instanceof Error ? err.message : String(err);
+  const statusCode =
+    err instanceof Error && 'statusCode' in err
+      ? (err as Error & { statusCode: number }).statusCode
+      : 500;
+
+  logger.error('Failed to initiate OAuth authorization', {
+    error: err instanceof Error ? err : new Error(String(err)),
+  });
+
+  if (statusCode === 401) {
+    return res.unauthorized({
+      body: {
+        message: errorMessage || 'Failed to initiate OAuth authorization',
+      },
+    });
+  }
+
+  if (statusCode === 400) {
+    return res.badRequest({
+      body: {
+        message: errorMessage || 'Failed to initiate OAuth authorization',
+      },
+    });
+  }
+
+  return res.customError({
+    statusCode,
+    body: {
+      message: errorMessage || 'Failed to initiate OAuth authorization',
+    },
+  });
+}
+
+interface OAuthStartRouteParams {
+  connectorId: string;
+}
+interface OAuthStartPostBody {
+  returnUrl?: string;
+}
+interface OAuthStartGetQuery {
+  returnUrl?: string | string[];
+}
+
+function wrapOAuthAuthorizeRequestHandler(
+  router: IRouter<ActionsRequestHandlerContext>,
+  licenseState: ILicenseState,
+  handler: RequestHandler<
+    OAuthStartRouteParams,
+    OAuthStartGetQuery,
+    OAuthStartPostBody,
+    ActionsRequestHandlerContext
+  >
+) {
+  return router.handleLegacyErrors(verifyAccessAndContext(licenseState, handler));
+}
+
+/**
+ * Registers OAuth2 authorization start routes:
+ *
+ * - **POST** `/internal/actions/connector/{connectorId}/_start_oauth_flow` — JSON `{ authorizationUrl, state }` (internal).
+ * - **GET** `/api/actions/connector/{connectorId}/oauth/start` — **302** to the IdP (public).
+ *   Absolute link: `{server.publicBaseUrl}/api/actions/connector/{connectorId}/oauth/start`
+ *   with optional `?returnUrl=` (https, same origin as Kibana), e.g. for Slack:
+ *   `https://my.kibana.example/api/actions/connector/my-id/oauth/start?returnUrl=https://my.kibana.example/app/foo`
+ *
+ * Both require an authenticated Kibana user with `profile_uid` and the same OAuth privileges.
  */
 export const oauthAuthorizeRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -66,184 +309,89 @@ export const oauthAuthorizeRoute = (
       },
       validate: {
         params: paramsSchema,
-        body: bodySchema,
+        body: startOAuthFlowBodySchema,
       },
       options: {
         access: 'internal',
       },
     },
-    router.handleLegacyErrors(
-      verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const { connectorId } = req.params;
+    wrapOAuthAuthorizeRequestHandler(router, licenseState, async function (context, req, res) {
+      const { connectorId } = req.params;
 
-        try {
-          const core = await context.core;
-          const routeLogger = logger.get('oauth_authorize');
+      try {
+        const { authorizationUrl, state } = await startOAuthAuthorizationFlow({
+          connectorId,
+          returnUrl: req.body?.returnUrl,
+          context,
+          req,
+          coreSetup,
+          logger,
+          oauthRateLimiter,
+          actionsConfigUtils,
+        });
 
-          // Verify the connector exists and the user has access via the actions client
-          const actionsClient = (await context.actions).getActionsClient();
-          await actionsClient.get({ id: connectorId });
+        return res.ok({
+          body: {
+            authorizationUrl,
+            state,
+          },
+        });
+      } catch (err) {
+        return handleOAuthStartError(err, logger, res);
+      }
+    })
+  );
 
-          // Check rate limit
-          const currentUser = core.security.authc.getCurrentUser();
-          if (!currentUser) {
-            return res.unauthorized({
-              body: {
-                message: 'User should be authenticated to initiate OAuth authorization.',
-              },
-            });
-          }
-          const { profile_uid } = currentUser;
+  router.get(
+    {
+      path: `${BASE_ACTION_API_PATH}/connector/{connectorId}/oauth/start`,
+      security: {
+        authz: {
+          requiredPrivileges: [OAUTH_API_TAG],
+        },
+      },
+      validate: {
+        params: paramsSchema,
+        query: startOAuthFlowGetQuerySchema,
+      },
+      options: {
+        access: 'public',
+        summary: 'Start OAuth authorization (redirects to the identity provider)',
+        tags: ['oas-tag:connectors'],
+      },
+    },
+    wrapOAuthAuthorizeRequestHandler(router, licenseState, async function (context, req, res) {
+      const { connectorId } = req.params;
 
-          if (!profile_uid) {
-            return res.customError({
-              statusCode: 500,
-              body: {
-                message: 'Unable to retrieve Kibana user profile ID.',
-              },
-            });
-          }
+      try {
+        const rawReturnUrl = req.query.returnUrl;
+        const returnUrlFromQuery =
+          typeof rawReturnUrl === 'string'
+            ? rawReturnUrl
+            : Array.isArray(rawReturnUrl)
+            ? rawReturnUrl[0]
+            : undefined;
 
-          oauthRateLimiter.log(profile_uid, 'authorize');
-          if (oauthRateLimiter.isRateLimited(profile_uid, 'authorize')) {
-            routeLogger.warn(
-              `OAuth authorize rate limit exceeded for user: ${profile_uid}, connector: ${connectorId}`
-            );
-            return res.customError({
-              statusCode: 429,
-              body: {
-                message: 'Too many authorization attempts. Please try again later.',
-              },
-            });
-          }
+        const { authorizationUrl } = await startOAuthAuthorizationFlow({
+          connectorId,
+          returnUrl: returnUrlFromQuery,
+          context,
+          req,
+          coreSetup,
+          logger,
+          oauthRateLimiter,
+          actionsConfigUtils,
+        });
 
-          const [coreStart, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
-          const kibanaUrl = coreStart.http.basePath.publicBaseUrl;
-          if (!kibanaUrl) {
-            return res.badRequest({
-              body: {
-                message:
-                  'Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml',
-              },
-            });
-          }
-
-          // Get OAuth configuration (validates connector and retrieves decrypted config)
-          const oauthService = new OAuthAuthorizationService({
-            actionsClient: (await context.actions).getActionsClient(),
-            encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-              includedHiddenTypes: ['action'],
-            }),
-          });
-
-          const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
-          let namespace: string | undefined;
-          if (spaces && spaceId) {
-            namespace = spaces.spacesService.spaceIdToNamespace(spaceId);
-          }
-          const oauthConfig = await oauthService.getOAuthConfig(connectorId, namespace);
-
-          let earsAuthorizationUrl: string | undefined;
-          try {
-            ({ earsAuthorizationUrl } = validateOAuthUrlsAreAllowed(
-              oauthConfig,
-              actionsConfigUtils
-            ));
-          } catch (allowedHostsErr) {
-            const message =
-              allowedHostsErr instanceof Error ? allowedHostsErr.message : String(allowedHostsErr);
-            return res.badRequest({
-              body: {
-                message: message || 'OAuth URL is not allowed by xpack.actions.allowedHosts',
-              },
-            });
-          }
-
-          const redirectUri = OAuthAuthorizationService.getRedirectUri(kibanaUrl);
-
-          // Validate return URL for post-OAuth redirect.
-          // When not provided, the callback route will render a self-contained
-          // HTML page instead of redirecting.
-          const requestedReturnUrl = req.body?.returnUrl;
-          let kibanaReturnUrl: string | undefined;
-
-          if (requestedReturnUrl) {
-            const returnUrlObj = new URL(requestedReturnUrl);
-            const kibanaUrlObj = new URL(kibanaUrl);
-
-            if (returnUrlObj.origin !== kibanaUrlObj.origin) {
-              return res.badRequest({
-                body: {
-                  message: `returnUrl must be same origin as Kibana. Expected: ${kibanaUrlObj.origin}, Got: ${returnUrlObj.origin}`,
-                },
-              });
-            }
-            kibanaReturnUrl = requestedReturnUrl;
-          }
-
-          // Create OAuth state with PKCE
-          const oauthStateClient = new OAuthStateClient({
-            encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-              includedHiddenTypes: ['oauth_state'],
-            }),
-            unsecuredSavedObjectsClient: core.savedObjects.getClient({
-              includedHiddenTypes: ['oauth_state'],
-            }),
-            logger: routeLogger,
-          });
-          const { state, codeChallenge } = await oauthStateClient.create({
-            connectorId,
-            kibanaReturnUrl,
-            spaceId,
-            createdBy: profile_uid,
-          });
-
-          let authorizationUrl: string;
-          if (oauthConfig.authTypeId === 'ears') {
-            if (!earsAuthorizationUrl) {
-              throw new Error('EARS authorization URL was not resolved');
-            }
-            authorizationUrl = oauthService.buildEarsAuthorizationUrl({
-              baseAuthorizationUrl: earsAuthorizationUrl,
-              scope: oauthConfig.scope,
-              callbackUri: redirectUri,
-              state: state.state,
-              pkceChallenge: codeChallenge,
-            });
-          } else {
-            authorizationUrl = oauthService.buildAuthorizationUrl({
-              baseAuthorizationUrl: oauthConfig.authorizationUrl,
-              clientId: oauthConfig.clientId,
-              scope: oauthConfig.scope,
-              redirectUri,
-              state: state.state,
-              codeChallenge,
-            });
-          }
-
-          return res.ok({
-            body: {
-              authorizationUrl,
-              state: state.state,
-            },
-          });
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : String(err);
-          const statusCode =
-            err instanceof Error && 'statusCode' in err
-              ? (err as Error & { statusCode: number }).statusCode
-              : 500;
-
-          logger.error('Failed to initiate OAuth authorization', { error: err });
-
-          return res.customError({
-            statusCode,
-            body: {
-              message: errorMessage || 'Failed to initiate OAuth authorization',
-            },
-          });
-        }
-      })
-    )
+        return res.redirected({
+          body: '',
+          headers: {
+            location: authorizationUrl,
+          },
+        });
+      } catch (err) {
+        return handleOAuthStartError(err, logger, res);
+      }
+    })
   );
 };
