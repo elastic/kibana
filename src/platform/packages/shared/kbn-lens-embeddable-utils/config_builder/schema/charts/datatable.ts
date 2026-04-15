@@ -10,9 +10,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
-import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
+import {
+  applyColorToSchema,
+  colorByValueSchema,
+  colorMappingSchema,
+  autoColorSchema,
+  AUTO_COLOR,
+} from '../color';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -25,6 +31,16 @@ import {
 } from './shared';
 import { horizontalAlignmentSchema } from '../alignments';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
+import { builderEnums } from '../enums';
+import { objectUnion } from './utils/object_union';
+
+/**
+ * Datatable supports an additional "badge" mode (render colored values as badges),
+ * so it uses a datatable-specific schema rather than the shared applyColorToSchema.
+ */
+const applyColorToDatatableSchema = schema.oneOf([applyColorToSchema, schema.literal('badge')], {
+  meta: { description: 'Where to apply the color for datatable (value, background, or badge)' },
+});
 
 /**
  * Sorting configuration for the datatable. Only one column can be sorted at a time.
@@ -41,9 +57,7 @@ const sortingSchema = schema.oneOf(
           min: 0,
           meta: { description: 'Index of the column/row to sort by (0-based)' },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       { meta: { description: 'Sort by a metric or row column' } }
     ),
@@ -65,9 +79,7 @@ const sortingSchema = schema.oneOf(
             description: 'Array of pivot values, one for each split_metrics_by column in order',
           },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       {
         meta: {
@@ -184,20 +196,29 @@ const datatableStateSharedOptionsSchema = {
    */
   sort_by: schema.maybe(sortingSchema),
   /**
-   * Whether to show row numbers
+   * Show row numbers
    */
-  show_row_numbers: schema.maybe(
-    schema.boolean({ meta: { description: 'Whether to show row numbers' } })
+  row_numbers: schema.maybe(
+    schema.object(
+      {
+        visible: schema.boolean({ meta: { description: 'Show row numbers' } }),
+      },
+      {
+        meta: {
+          description: 'Configuration for row numbers',
+        },
+      }
+    )
   ),
 };
 
 const datatableStateCommonOptionsSchema = {
   /**
-   * Where to apply the color (background or value)
+   * Where to apply the color (background, value or badge)
    */
-  apply_color_to: schema.maybe(applyColorToSchema),
+  apply_color_to: schema.maybe(applyColorToDatatableSchema),
   /**
-   * Whether to show the column
+   * Show the column
    */
   visible: schema.maybe(schema.boolean({ defaultValue: true })),
   /**
@@ -225,7 +246,11 @@ const datatableStateRowsOptionsNoESQLSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(colorMappingSchema),
+  color: schema.maybe(
+    schema.oneOf([colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   /**
    * Whether to enable the one click filter
    */
@@ -249,7 +274,8 @@ const datatableStateRowsOptionsESQLSchema = {
    * Color configuration
    */
   color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
+    schema.oneOf([colorByValueSchema, colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
       meta: {
         description:
           'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
@@ -264,7 +290,8 @@ const datatableStateMetricsOptionsSchema = {
    * Color configuration
    */
   color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
+    schema.oneOf([colorByValueSchema, colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
       meta: {
         description:
           'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
@@ -361,11 +388,11 @@ function validateSortBy({
 
 export const datatableStateSchemaNoESQL = schema.object(
   {
-    type: schema.literal('datatable'),
+    type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...datatableStateSharedOptionsSchema,
     /**
      * Metric columns configuration, must define operation.
@@ -414,17 +441,17 @@ export const datatableStateSchemaNoESQL = schema.object(
 
 export const datatableStateSchemaESQL = schema.object(
   {
-    type: schema.literal('datatable'),
+    type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...datatableStateSharedOptionsSchema,
     /**
      * Metric columns configuration, must define operation.
      */
     metrics: schema.maybe(
       schema.arrayOf(
-        esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+        esqlColumnWithFormatSchema.extends(datatableStateMetricsOptionsSchema, {
           meta: { id: 'datatableESQLMetric', title: 'Datatable Metric (ES|QL)' },
         }),
         {
@@ -438,7 +465,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(datatableStateRowsOptionsESQLSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(datatableStateRowsOptionsESQLSchema), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },
@@ -448,7 +475,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Split metrics by configuration, optional operations.
      */
     split_metrics_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema, {
+      schema.arrayOf(esqlColumnWithFormatSchema, {
         minSize: 1,
         maxSize: 20,
         meta: { description: 'Array of operations to split the metric columns by' },
@@ -476,7 +503,7 @@ export const datatableStateSchemaESQL = schema.object(
   }
 );
 
-export const datatableStateSchema = schema.oneOf(
+export const datatableStateSchema = objectUnion(
   [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
   {
     meta: {

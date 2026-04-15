@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { createPrompt } from '@kbn/inference-common';
+import { z } from '@kbn/zod/v4';
+import { createPrompt, type ToolDefinition } from '@kbn/inference-common';
 import significantEventsSystemPrompt from './system_prompt.text';
 import significantEventsUserPrompt from './user_prompt.text';
 import {
@@ -20,7 +20,13 @@ import { SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES } from './tools/features_tool';
 
 export { significantEventsSystemPrompt as significantEventsPrompt };
 
-export function createGenerateSignificantEventsPrompt({ systemPrompt }: { systemPrompt: string }) {
+export function createGenerateSignificantEventsPrompt({
+  systemPrompt,
+  additionalTools,
+}: {
+  systemPrompt: string;
+  additionalTools?: Record<string, ToolDefinition>;
+}) {
   return createPrompt({
     name: 'generate_significant_events',
     input: z.object({
@@ -83,6 +89,11 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                     title: {
                       type: 'string',
                     },
+                    description: {
+                      type: 'string',
+                      description:
+                        'A semantically searchable description explaining what the query detects and why it matters. Should be 1-2 sentences that help users find this query when searching by concept or intent.',
+                    },
                     category: {
                       type: 'string',
                       enum: [
@@ -98,6 +109,12 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                       minimum: 0,
                       maximum: 100,
                     },
+                    type: {
+                      type: 'string',
+                      enum: ['match', 'stats'],
+                      description:
+                        'Hint for query type. "match" for WHERE-only filters, "stats" for aggregation queries. The system derives the authoritative type from ES|QL content.',
+                    },
                     evidence: {
                       type: 'array',
                       items: {
@@ -105,13 +122,14 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                       },
                     },
                   },
-                  required: ['esql', 'title', 'category', 'severity_score'],
+                  required: ['esql', 'title', 'description', 'category', 'severity_score'],
                 },
               },
             },
             required: ['queries'],
           },
         },
+        ...(additionalTools ?? {}),
       } as const,
     })
     .get();

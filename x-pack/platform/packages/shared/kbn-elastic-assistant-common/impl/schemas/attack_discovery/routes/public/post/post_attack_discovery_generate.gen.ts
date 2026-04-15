@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { AttackDiscoveryGenerationConfig } from '../../../common_attributes.gen';
 import { NonEmptyString } from '../../../../common_attributes.gen';

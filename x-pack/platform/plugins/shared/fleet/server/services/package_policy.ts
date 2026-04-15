@@ -26,7 +26,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import semverGt from 'semver/functions/gt';
 
 import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -36,6 +36,7 @@ import pMap from 'p-map';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 
 import { catchAndSetErrorStackTrace, rethrowIfInstanceOrWrap } from '../errors/utils';
 
@@ -50,8 +51,8 @@ import {
   getNormalizedInputs,
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
-  varsReducer,
   hasMultipleEnabledPolicyTemplates,
+  getInputEffectiveName,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -66,6 +67,7 @@ import type {
   UpgradePackagePolicyResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
+  PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
   PackagePolicyInputStream,
   PackageInfo,
@@ -84,12 +86,12 @@ import type {
   CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
-  PackagePolicyConfigRecord,
   ArchiveEntry,
 } from '../../common/types';
 import type {
   AzureCloudConnectorVars,
   CloudConnectorVar,
+  GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import {
   FleetError,
@@ -143,6 +145,12 @@ import {
   TENANT_ID_VAR_NAME,
   CLIENT_ID_VAR_NAME,
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
+  GCP_SERVICE_ACCOUNT_VAR_NAME,
+  GCP_AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
+  SERVICE_ACCOUNT_VAR_NAME,
+  AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
 } from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -154,7 +162,12 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
-import { compileTemplate, getMetaVariables } from './epm/agent/agent';
+import {
+  compileTemplate,
+  getMetaVariables,
+  mergeCompiledTemplates,
+  type MetaVariable,
+} from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService, cloudConnectorService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
@@ -218,6 +231,15 @@ import {
   hasAgentVersionConditionInInputTemplate,
 } from './utils/version_specific_policies';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
+import {
+  findInputForMigration,
+  applyInputLevelMigration,
+  migrateStreamVars,
+  applyStreamLevelMigration,
+  deepMergeVars,
+  getUpdatedGlobalVars,
+  removeStaleVars,
+} from './package_policy_migration_helpers';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -398,6 +420,42 @@ const extractPackagePolicyVars = (
       );
     }
   }
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'gcp') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
+    const serviceAccount = vars[SERVICE_ACCOUNT_VAR_NAME] || vars[GCP_SERVICE_ACCOUNT_VAR_NAME];
+    const audience = vars[AUDIENCE_VAR_NAME] || vars[GCP_AUDIENCE_VAR_NAME];
+    const gcpCredentials =
+      vars[GCP_CREDENTIALS_CLOUD_CONNECTOR_ID] || vars[GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME];
+
+    if (serviceAccount && audience && gcpCredentials) {
+      // Type assertions are needed because PackagePolicyConfigRecordEntry has loose types (type?: string, value?: any)
+      // service_account and audience are non-secret text fields (CloudConnectorVar);
+      // only gcp_credentials_cloud_connector_id is a secret (CloudConnectorSecretVar).
+      // Runtime validation occurs in cloudConnectorService.validateCloudConnectorDetails()
+      const gcpCloudConnectorVars: GcpCloudConnectorVars = {
+        service_account: serviceAccount as CloudConnectorVar,
+        audience: audience as CloudConnectorVar,
+        gcp_credentials_cloud_connector_id: gcpCredentials as CloudConnectorSecretVar,
+      };
+
+      logger.debug(
+        `Extracted GCP cloud connector vars: service_account=${!!serviceAccount}, audience=${!!audience}, gcp_credentials=[REDACTED]`
+      );
+
+      return gcpCloudConnectorVars;
+    } else {
+      logger.error(
+        `Missing required GCP vars: service_account=${!!serviceAccount}, audience=${!!audience}, gcp_credentials=[REDACTED]`
+      );
+    }
+  }
 };
 
 class PackagePolicyClientImpl implements PackagePolicyClient {
@@ -472,7 +530,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       request
     );
 
-    const agentPolicies = [];
+    const agentPolicies: AgentPolicy[] = [];
 
     for (const policyId of enrichedPackagePolicy.policy_ids) {
       const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
@@ -525,7 +583,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // Make sure the associated package is installed
     if (!enrichedPackagePolicy.package?.name) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${enrichedPackagePolicy.name}" without package are not supported`
+      );
     }
     if (!options?.skipEnsureInstalled) {
       await ensureInstalledPackage({
@@ -654,6 +714,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           created_by: options?.user?.username ?? 'system',
           updated_at: isoDate,
           updated_by: options?.user?.username ?? 'system',
+          package_agent_version_condition: pkgInfo.conditions?.agent?.version,
         },
 
         { ...options, id: packagePolicyId }
@@ -721,60 +782,66 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (!hasAgentVersionConditionInInputTemplate(assetsMap)) {
       return;
     }
-    const t = apm.startTransaction('compile-package-policy-versions', 'fleet');
+    return withActiveSpan(
+      'compile-package-policy-versions',
+      { attributes: { 'transaction.type': 'fleet' } },
+      async () => {
+        const t = apm.startTransaction('compile-package-policy-versions', 'fleet');
 
-    const savedObjectType = await getPackagePolicySavedObjectType();
+        const savedObjectType = await getPackagePolicySavedObjectType();
 
-    const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(
-      savedObjectType,
-      packagePolicy.id
-    );
+        const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(
+          savedObjectType,
+          packagePolicy.id
+        );
 
-    const existingInputsForVersions = packagePolicySO.attributes.inputs_for_versions ?? {};
+        const existingInputsForVersions = packagePolicySO.attributes.inputs_for_versions ?? {};
 
-    let versionsToCompile: string[];
-    if (agentVersions) {
-      // Async task path: skip versions already compiled to avoid unnecessary recompilation and
-      // deployment. The stored inputs are guaranteed to be current because the create/update
-      // path (below) recompiles all previously stored versions whenever the package policy changes.
-      versionsToCompile = agentVersions.filter((v) => !existingInputsForVersions[v]);
-      if (versionsToCompile.length === 0) {
+        let versionsToCompile: string[];
+        if (agentVersions) {
+          // Async task path: skip versions already compiled to avoid unnecessary recompilation and
+          // deployment. The stored inputs are guaranteed to be current because the create/update
+          // path (below) recompiles all previously stored versions whenever the package policy changes.
+          versionsToCompile = agentVersions.filter((v) => !existingInputsForVersions[v]);
+          if (versionsToCompile.length === 0) {
+            t.end();
+            return;
+          }
+        } else {
+          // Create/update path: compile default common agent versions plus any extra versions already
+          // stored in inputs_for_versions (e.g. from agents that enrolled on older versions), so
+          // that all stored inputs stay current after a package policy configuration change.
+          const defaultVersions = await getAgentVersionsForVersionSpecificPolicies();
+          const existingVersionKeys = Object.keys(existingInputsForVersions);
+          versionsToCompile = [...new Set([...defaultVersions, ...existingVersionKeys])];
+        }
+
+        const inputsForVersions: Record<string, PackagePolicyInput[]> = {};
+        for (const version of versionsToCompile) {
+          const inputs = await recompileInputsWithAgentVersion(
+            packageInfo!,
+            packagePolicy,
+            version,
+            soClient!
+          );
+          inputsForVersions[version] = inputs;
+        }
+
+        await soClient
+          .update<PackagePolicySOAttributes>(savedObjectType, packagePolicy.id, {
+            inputs_for_versions: {
+              ...existingInputsForVersions,
+              ...inputsForVersions,
+            },
+          })
+          .catch(
+            catchAndSetErrorStackTrace.withMessage(
+              `attempt to update package policy saved object with inputs_for_versions failed`
+            )
+          );
         t.end();
-        return;
       }
-    } else {
-      // Create/update path: compile default common agent versions plus any extra versions already
-      // stored in inputs_for_versions (e.g. from agents that enrolled on older versions), so
-      // that all stored inputs stay current after a package policy configuration change.
-      const defaultVersions = await getAgentVersionsForVersionSpecificPolicies();
-      const existingVersionKeys = Object.keys(existingInputsForVersions);
-      versionsToCompile = [...new Set([...defaultVersions, ...existingVersionKeys])];
-    }
-
-    const inputsForVersions: Record<string, PackagePolicyInput[]> = {};
-    for (const version of versionsToCompile) {
-      const inputs = await recompileInputsWithAgentVersion(
-        packageInfo!,
-        packagePolicy,
-        version,
-        soClient!
-      );
-      inputsForVersions[version] = inputs;
-    }
-
-    await soClient
-      .update<PackagePolicySOAttributes>(savedObjectType, packagePolicy.id, {
-        inputs_for_versions: {
-          ...existingInputsForVersions,
-          ...inputsForVersions,
-        },
-      })
-      .catch(
-        catchAndSetErrorStackTrace.withMessage(
-          `attempt to update package policy saved object with inputs_for_versions failed`
-        )
-      );
-    t.end();
+    );
   }
 
   private async bumpAgentPoliciesRevision(
@@ -908,7 +975,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
 
         if (!packagePolicy.package) {
-          throw new FleetError('Package policy without package are not supported');
+          throw new FleetError(
+            `Package policy "${packagePolicy.name}" without package are not supported`
+          );
         }
 
         const { id, ...pkgPolicyWithoutId } = packagePolicy;
@@ -1061,7 +1130,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
 
     if (!packagePolicy.package) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${packagePolicy.name}" without package are not supported`
+      );
     }
 
     const pkgInfo = packageInfos.get(
@@ -1499,7 +1570,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     let { version, ...restOfPackagePolicy } = packagePolicy;
 
     if (!packagePolicy.package?.name) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${packagePolicy.name}" without package are not supported`
+      );
     }
 
     const pkgInfo = await getPackageInfo({
@@ -1645,6 +1718,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           revision: oldPackagePolicy.revision + 1,
           updated_at: new Date().toISOString(),
           updated_by: options?.user?.username ?? 'system',
+          package_agent_version_condition: pkgInfo?.conditions?.agent?.version,
         },
         {
           version,
@@ -1918,13 +1992,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         if (!packagePolicy.package?.name) {
-          throw new FleetError('Package policies without package are not supported');
+          throw new FleetError(
+            `Package policy "${packagePolicy.name}" without package are not supported`
+          );
         }
         const pkgInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
         );
         if (!pkgInfoAndAsset) {
-          throw new FleetError('Package info and assets not found');
+          throw new FleetError(
+            `Package info and assets not found: ${packagePolicy.package.name}-${packagePolicy.package.version}`
+          );
         }
         const { pkgInfo, assetsMap } = pkgInfoAndAsset;
         let inputs = getInputsWithIds(restOfPackagePolicy, oldPackagePolicy.id, undefined, pkgInfo);
@@ -2258,7 +2336,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     ];
 
     const hostedAgentPolicies: string[] = [];
-    const agentlessAgentPolicies = [];
+    const agentlessAgentPolicies: string[] = [];
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
@@ -2307,11 +2385,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         idsToDelete.push(id);
       } catch (error) {
-        result.push({
-          id,
-          success: false,
-          ...fleetErrorToResponseOptions(error),
-        });
+        if (options?.ignoreMissing && error instanceof PackagePolicyNotFoundError) {
+          result.push({
+            id,
+            success: false,
+            statusCode: 404,
+            body: { message: error.message },
+          });
+        } else {
+          result.push({
+            id,
+            success: false,
+            ...fleetErrorToResponseOptions(error),
+          });
+        }
       }
     });
 
@@ -2533,12 +2620,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       );
       if (newPP) {
         const inputs = newPolicy.inputs.map((input) => {
+          const effectiveName = getInputEffectiveName(input);
           const defaultInput = newPP.inputs.find(
             (i) =>
-              i.type === input.type &&
+              getInputEffectiveName(i) === effectiveName &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
-
           return {
             ...defaultInput,
             enabled: input.enabled,
@@ -3432,7 +3519,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 }
 
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
-  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, load);
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, parse);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
       .map(([key, value]) => {
@@ -3511,6 +3598,19 @@ export function _compilePackagePolicyInputs(
     });
 }
 
+function _compileAndMergeTemplatePaths(
+  templates: string[],
+  templateVars: PackagePolicyConfigRecord,
+  metaVars: MetaVariable
+): Record<string, any> {
+  let compiled: Record<string, any> = {};
+  for (const templateStr of templates) {
+    const result = compileTemplate(templateVars, metaVars, templateStr);
+    compiled = mergeCompiledTemplates(compiled, result);
+  }
+  return compiled;
+}
+
 function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
@@ -3540,6 +3640,23 @@ function _compilePackagePolicyInput(
       `Input template not found, unable to find input type ${input.type}`
     );
   }
+
+  const templateVars = Object.assign({}, vars, input.vars);
+  const metaVars = getMetaVariables(pkgInfo, input, undefined, agentVersion);
+
+  if (packageInput.template_paths?.length) {
+    const templates = packageInput.template_paths.map((tp) => {
+      const [asset] = getAssetsDataFromAssetsMap(pkgInfo, assetsMap, (path: string) =>
+        path.endsWith(`/agent/input/${tp}`)
+      );
+      if (!asset || !asset.buffer) {
+        throw new InputNotFoundError(`Unable to load input template at /agent/input/${tp}`);
+      }
+      return asset.buffer.toString();
+    });
+    return _compileAndMergeTemplatePaths(templates, templateVars, metaVars);
+  }
+
   if (!packageInput.template_path) {
     return undefined;
   }
@@ -3556,8 +3673,8 @@ function _compilePackagePolicyInput(
 
   return compileTemplate(
     // Populate template variables from package- and input-level vars
-    Object.assign({}, vars, input.vars),
-    getMetaVariables(pkgInfo, input, undefined, agentVersion),
+    templateVars,
+    metaVars,
     pkgInputTemplate.buffer.toString()
   );
 }
@@ -3697,13 +3814,29 @@ function _compilePackageStream(
     );
   }
 
-  if (!streamFromPkg.template_path) {
-    throw new StreamNotFoundError(
-      `Stream template path not found for dataset ${stream.data_stream.dataset}`
-    );
+  const datasetPath = packageDataStream.path;
+  const templateVars = Object.assign({}, vars, input.vars, stream.vars);
+  const metaVars = getMetaVariables(pkgInfo, input, streamIn, agentVersion);
+
+  if (streamFromPkg.template_paths?.length) {
+    const templates = streamFromPkg.template_paths.map((tp) => {
+      const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, tp);
+      if (!asset || !asset.buffer) {
+        throw new StreamNotFoundError(
+          `Unable to load stream template ${tp} for dataset ${stream.data_stream.dataset}`
+        );
+      }
+      return asset.buffer.toString();
+    });
+    stream.compiled_stream = _compileAndMergeTemplatePaths(templates, templateVars, metaVars);
+    return { ...stream };
   }
 
-  const datasetPath = packageDataStream.path;
+  if (!streamFromPkg.template_path) {
+    throw new StreamNotFoundError(
+      `Neither template_path nor template_paths found for dataset ${stream.data_stream.dataset}`
+    );
+  }
 
   const pkgStreamTemplate = _getAssetForTemplatePath(
     pkgInfo,
@@ -3720,8 +3853,8 @@ function _compilePackageStream(
 
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
-    Object.assign({}, vars, input.vars, stream.vars),
-    getMetaVariables(pkgInfo, input, streamIn, agentVersion),
+    templateVars,
+    metaVars,
     pkgStreamTemplate.buffer.toString()
   );
 
@@ -3738,7 +3871,9 @@ function enforceFrozenInputs(
   const resultInputs = [...newInputs];
 
   for (const input of resultInputs) {
-    const oldInput = oldInputs.find((i) => i.type === input.type);
+    const oldInput = oldInputs.find(
+      (i) => getInputEffectiveName(i) === getInputEffectiveName(input)
+    );
     if (oldInput?.keep_enabled) input.enabled = oldInput.enabled;
     if (input.vars && oldInput?.vars) {
       input.vars = _enforceFrozenVars(oldInput.vars, input.vars, force);
@@ -3858,13 +3993,16 @@ export function updatePackageInputs(
         return false;
       }
 
-      // Ignore any inputs removed from this policy template in the new package version
+      // Ignore any inputs removed from this policy template in the new package version.
+      // Match by id ?? type on both sides so that inputs with explicit ids are correctly
+      // retained or pruned when the new package version changes its input list.
+      const policyInputEffectiveId = getInputEffectiveName(input);
       const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
         ? policyTemplate.input === input.type
         : policyTemplate.inputs?.some(
-            (policyTemplateInput) => policyTemplateInput.type === input.type
+            (policyTemplateInput) =>
+              getInputEffectiveName(policyTemplateInput) === policyInputEffectiveId
           ) ?? false;
-
       return policyTemplateStillIncludesInput;
     }),
   ];
@@ -3874,27 +4012,41 @@ export function updatePackageInputs(
 
     if (update.policy_template) {
       // If the updated value defines a policy template, try to find an original input
-      // with the same policy template value
+      // with the same policy template value. Match by name ?? type on both sides
+      // so that inputs with explicit ids are correctly matched during upgrade.
+      const updateEffectiveId = getInputEffectiveName(update as NewPackagePolicyInput);
       const matchingInput = inputs.find(
-        (i) => i.type === update.type && i.policy_template === update.policy_template
+        (i) =>
+          getInputEffectiveName(i) === updateEffectiveId &&
+          i.policy_template === update.policy_template
       );
 
       // If we didn't find an input with the same policy template, try to look for one
-      // with the same type, but with an undefined policy template. This ensures we catch
-      // cases where we're upgrading an older policy from before policy template was
-      // reliably define on package policy inputs.
+      // with the same effective id, but with an undefined policy template. This ensures
+      // we catch cases where we're upgrading an older policy from before policy template
+      // was reliably defined on package policy inputs.
       originalInput =
-        matchingInput || inputs.find((i) => i.type === update.type && !i.policy_template);
+        matchingInput ||
+        inputs.find((i) => getInputEffectiveName(i) === updateEffectiveId && !i.policy_template);
     } else {
       // For inputs that don't specify a policy template, just grab the first input
-      // that matches its `type`
-      originalInput = inputs.find((i) => i.type === update.type);
+      // that matches its effective id
+      originalInput = inputs.find(
+        (i) => getInputEffectiveName(i) === getInputEffectiveName(update as NewPackagePolicyInput)
+      );
     }
 
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
+      const originalInputToMigrate = applyInputLevelMigration(
+        update,
+        basePackagePolicy.inputs,
+        inputs
+      );
+      applyStreamLevelMigration(update, originalInputToMigrate, basePackagePolicy.inputs);
+
       // Do not enable new inputs for limited packages
       if (limitedPackage) {
         update.enabled = false;
@@ -3920,6 +4072,12 @@ export function updatePackageInputs(
       originalInput.policy_template = update.policy_template;
     }
 
+    // `deprecated` and `migrate_from` are package schema fields, not user-configured state.
+    // They must be unconditionally synced from the new package definition so they are cleared
+    // when the new package version no longer declares them.
+    originalInput.deprecated = update.deprecated;
+    originalInput.migrate_from = update.migrate_from;
+
     if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
       const mergedVars = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
@@ -3933,6 +4091,9 @@ export function updatePackageInputs(
         packageInfo.type === 'input' &&
         update.streams.length === 1 &&
         originalInput?.streams.length === 1;
+      // Per-source-type counters for positional stream matching when a stream declares
+      // migrate_from. Shared across iterations so each source stream is consumed once.
+      const streamMigrateFromCounters: Record<string, number> = {};
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
@@ -3949,6 +4110,26 @@ export function updatePackageInputs(
         }
 
         if (originalStream === undefined) {
+          // When a new stream declares migrate_from, carry vars and enabled state over from
+          // the positionally-matched old stream instead of pushing with package defaults.
+          // This handles partial-migration integrations where
+          // the new input type already exists in the old policy alongside the old input type.
+          if (stream.migrate_from) {
+            const counter = streamMigrateFromCounters[stream.migrate_from] ?? 0;
+            streamMigrateFromCounters[stream.migrate_from] = counter + 1;
+            const oldInputForStream = findInputForMigration(
+              basePackagePolicy.inputs,
+              stream.migrate_from,
+              update.policy_template
+            );
+            const oldStream = oldInputForStream?.streams[counter];
+            if (oldStream) {
+              originalInput.streams.push(
+                migrateStreamVars(stream as InputsOverride, oldStream, oldInputForStream?.vars)
+              );
+              continue;
+            }
+          }
           originalInput.streams.push(stream);
           continue;
         }
@@ -3956,6 +4137,9 @@ export function updatePackageInputs(
         if (originalStream?.enabled === undefined) {
           originalStream.enabled = stream.enabled;
         }
+
+        // Sync migrate_from from the new package schema — package-owned field, not user-configured.
+        originalStream.migrate_from = stream.migrate_from;
 
         if (stream.vars || originalStream.vars) {
           // streams wont match for input pkgs
@@ -3969,7 +4153,6 @@ export function updatePackageInputs(
         }
       }
     }
-
     // Filter all stream that have been removed from the input
     originalInput.streams = originalInput.streams.filter((originalStream) => {
       return (
@@ -3987,7 +4170,7 @@ export function updatePackageInputs(
     vars,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, parse);
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
@@ -4037,13 +4220,14 @@ export function preconfigurePackageInputs(
   for (const preconfiguredInput of preconfiguredInputs) {
     // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
     // policy template, so we only match on `type` in that case.
+    const preconfiguredEffectiveId = getInputEffectiveName(preconfiguredInput);
     let originalInput = preconfiguredInput.policy_template
       ? inputs.find(
           (i) =>
-            i.type === preconfiguredInput.type &&
+            getInputEffectiveName(i) === preconfiguredEffectiveId &&
             i.policy_template === preconfiguredInput.policy_template
         )
-      : inputs.find((i) => i.type === preconfiguredInput.type);
+      : inputs.find((i) => getInputEffectiveName(i) === preconfiguredEffectiveId);
 
     // If the input do not exist skip
     if (originalInput === undefined) {
@@ -4125,7 +4309,9 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
 
   if (inputs) {
     for (const input of inputs) {
-      const oldInput = oldPackagePolicy.inputs.find((i) => i.type === input.type);
+      const oldInput = oldPackagePolicy.inputs.find(
+        (i) => getInputEffectiveName(i) === getInputEffectiveName(input)
+      );
       if (oldInput) {
         for (const stream of input.streams || []) {
           const oldStream = oldInput.streams.find(
@@ -4240,83 +4426,6 @@ export function sendUpdatePackagePolicyTelemetryEvent(
       }
     }
   });
-}
-
-function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {
-  if (!override.vars) {
-    return original;
-  }
-  if (!original.vars) {
-    original.vars = { ...override.vars };
-  }
-
-  const result = { ...original };
-
-  const overrideVars = Array.isArray(override.vars)
-    ? override.vars
-    : Object.entries(override.vars!).map(([key, rest]) => ({
-        name: key,
-        ...(rest as any),
-      }));
-
-  for (const { name, ...overrideVal } of overrideVars) {
-    const originalVar = original.vars[name];
-
-    result.vars[name] = { ...originalVar, ...overrideVal };
-
-    // Ensure that any value from the original object is persisted on the newly merged resulting object,
-    // even if we merge other data about the given variable
-    if (keepOriginalValue && originalVar?.value !== undefined) {
-      result.vars[name].value = originalVar.value;
-    }
-  }
-
-  return result;
-}
-
-function getUpdatedGlobalVars(packageInfo: PackageInfo, packagePolicy: NewPackagePolicy) {
-  if (!packageInfo.vars) {
-    return undefined;
-  }
-
-  const packageInfoVars = packageInfo.vars.reduce(varsReducer, {});
-  const result = deepMergeVars(packagePolicy, { vars: packageInfoVars }, true);
-  return removeStaleVars(result, { vars: packageInfoVars }).vars;
-}
-
-interface SupportsVars {
-  vars?: PackagePolicyConfigRecord;
-}
-
-function removeStaleVars<T extends SupportsVars>(
-  currentWithVars: T,
-  expectedVars: SupportsVars
-): T {
-  if (!currentWithVars.vars) {
-    return currentWithVars;
-  }
-
-  if (!expectedVars.vars) {
-    return {
-      ...currentWithVars,
-      vars: {},
-    };
-  }
-
-  const filteredVars = Object.entries(currentWithVars.vars).reduce<PackagePolicyConfigRecord>(
-    (acc, [key, val]) => {
-      if (key in expectedVars.vars!) {
-        acc[key] = val;
-      }
-      return acc;
-    },
-    {}
-  );
-
-  return {
-    ...currentWithVars,
-    vars: filteredVars,
-  };
 }
 
 async function requireUniqueName(

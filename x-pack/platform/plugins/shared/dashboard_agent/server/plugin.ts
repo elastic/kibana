@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
 import type {
   DashboardAgentSetupDependencies,
   DashboardAgentStartDependencies,
@@ -16,6 +20,7 @@ import type {
 } from './types';
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
+import { createDashboardSmlType } from './sml_types';
 
 export class DashboardAgentPlugin
   implements
@@ -26,48 +31,30 @@ export class DashboardAgentPlugin
       DashboardAgentStartDependencies
     >
 {
-  private logger: Logger;
+  private readonly logger: Logger;
 
-  constructor(context: PluginInitializerContext) {
-    this.logger = context.logger.get();
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
   }
 
   setup(
     coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ): DashboardAgentPluginSetup {
-    this.logger.debug('Setting up Dashboard skills and tools');
-    this.registerToolsAndSkills(coreSetup, setupDeps).catch((error) => {
-      this.logger.error(`Error registering dashboard skill and tools: ${error}`);
-    });
+    const getDashboardClient = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.dashboard.client;
+    };
 
+    setupDeps.agentBuilder.attachments.registerType(
+      createDashboardAttachmentType({
+        logger: this.logger,
+        getDashboardClient,
+      }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
+    );
+    setupDeps.agentBuilder.sml.registerType(createDashboardSmlType({ getDashboardClient }));
+    registerSkills(setupDeps.agentBuilder);
     return {};
-  }
-
-  private async registerToolsAndSkills(
-    coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
-    setupDeps: DashboardAgentSetupDependencies
-  ) {
-    const [coreStart] = await coreSetup.getStartServices();
-    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
-      coreStart.savedObjects.getUnsafeInternalClient()
-    );
-    const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-    );
-
-    if (!experimentalFeaturesEnabled) {
-      this.logger.debug(
-        `Skipping dashboard skill and tools registration because ui setting "${AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID}" is set to false`
-      );
-      return;
-    }
-
-    // Register the dashboard attachment type
-    setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
-
-    // Register dashboard skills for the default agent.
-    await registerSkills(setupDeps.agentBuilder);
   }
 
   start(

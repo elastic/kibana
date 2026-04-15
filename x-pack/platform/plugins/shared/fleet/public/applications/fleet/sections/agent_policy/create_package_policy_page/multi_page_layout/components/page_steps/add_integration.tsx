@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { load } from 'js-yaml';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 
@@ -35,6 +34,7 @@ import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../../services/ensure_kibana_assets_installed';
+import { useYaml } from '../../../../../../../../services';
 
 const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -48,7 +48,7 @@ const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                iconType={isShowingAdvanced ? 'arrowUp' : 'arrowDown'}
+                iconType={isShowingAdvanced ? 'chevronSingleUp' : 'chevronSingleDown'}
                 iconSide="right"
                 onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                 flush="left"
@@ -90,6 +90,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     props;
 
   const { spaceId } = useFleetStatus();
+  const yaml = useYaml();
   const [basePolicyError, setBasePolicyError] = useState<RequestError>();
 
   const { notifications } = useStartServices();
@@ -106,13 +107,16 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     inputs: [],
   });
 
+  const yamlValidationRan = useRef(false);
+
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
+      if (!yaml) return undefined;
       const newValidationResult = validatePackagePolicy(
         { ...packagePolicy, ...newPackagePolicy },
         packageInfo,
-        load
+        yaml.parse
       );
       setValidationResults(newValidationResult);
       // eslint-disable-next-line no-console
@@ -120,7 +124,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
 
       return newValidationResult;
     },
-    [packageInfo, packagePolicy]
+    [packageInfo, packagePolicy, yaml]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(
@@ -134,18 +138,36 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       // eslint-disable-next-line no-console
       console.debug('Package policy updated', newPackagePolicy);
       const newValidationResults = updatePackagePolicyValidation(newPackagePolicy);
-      const hasPackage = newPackagePolicy.package;
-      const hasValidationErrors = newValidationResults
-        ? validationHasErrors(newValidationResults)
-        : false;
+      if (newValidationResults !== undefined) {
+        const hasPackage = newPackagePolicy.package;
+        const hasValidationErrors = validationHasErrors(newValidationResults);
+        if (hasPackage && !hasValidationErrors) {
+          setFormState('VALID');
+        } else {
+          setFormState('INVALID');
+        }
+      }
+    },
+    [packagePolicy, updatePackagePolicyValidation]
+  );
+
+  // Once yaml loads, run validation against the current package policy so formState
+  // reflects actual validity rather than the initial optimistic 'VALID' default.
+  useEffect(() => {
+    if (yaml && !yamlValidationRan.current) {
+      yamlValidationRan.current = true;
+      const newValidationResults = validatePackagePolicy(packagePolicy, packageInfo, yaml.parse);
+      setValidationResults(newValidationResults);
+      const hasPackage = packagePolicy.package;
+      const hasValidationErrors = validationHasErrors(newValidationResults);
       if (hasPackage && !hasValidationErrors) {
         setFormState('VALID');
       } else {
         setFormState('INVALID');
       }
-    },
-    [packagePolicy, updatePackagePolicyValidation]
-  );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yaml]);
 
   // Save package policy
   const savePackagePolicy = useCallback(

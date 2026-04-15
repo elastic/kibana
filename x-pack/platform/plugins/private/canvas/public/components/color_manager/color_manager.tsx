@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
@@ -64,13 +63,13 @@ export const ColorManager: FC<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           aria-label={strings.getAddAriaLabel()}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           isDisabled={!validColor || !onAddColor}
           onClick={() => onAddColor && onAddColor(value)}
         />
         <EuiButtonIcon
           aria-label={strings.getRemoveAriaLabel()}
-          iconType="minusInCircle"
+          iconType="minusCircle"
           isDisabled={!validColor || !onRemoveColor}
           onClick={() => onRemoveColor && onRemoveColor(value)}
         />
@@ -95,12 +94,4 @@ export const ColorManager: FC<Props> = ({
       {buttons}
     </EuiFlexGroup>
   );
-};
-
-ColorManager.propTypes = {
-  hasButtons: PropTypes.bool,
-  onAddColor: PropTypes.func,
-  onChange: PropTypes.func.isRequired,
-  onRemoveColor: PropTypes.func,
-  value: PropTypes.string,
 };

@@ -218,7 +218,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                       {(copy: () => void) => (
                         <EuiButtonIcon
                           onClick={copy}
-                          iconType="copyClipboard"
+                          iconType="copy"
                           aria-label={COPY_RUNTIME_FIELDS_TO_CLIPBOARD_TEXT}
                         />
                       )}

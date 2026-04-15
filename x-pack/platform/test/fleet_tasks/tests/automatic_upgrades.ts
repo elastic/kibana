@@ -27,6 +27,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
   const TASK_INTERVAL = 30000; // as set in the config
   const RETRY_DELAY = 60000; // as set in the config
   let policyId: string;
+  let secondPolicyId: string;
 
   async function waitForTask() {
     // Sleep for the duration of the task interval.
@@ -53,6 +54,11 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await supertest
         .post('/api/fleet/agent_policies/delete')
         .send({ agentPolicyId: policyId })
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      await supertest
+        .post('/api/fleet/agent_policies/delete')
+        .send({ agentPolicyId: secondPolicyId })
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
@@ -338,6 +344,55 @@ export default function (providerContext: FtrProviderContextWithServices) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(res1.body.item.upgrade_started_at).to.be(undefined);
+      });
+    });
+
+    it('should not count upgrading agents from other policies toward target percentage', async () => {
+      // Scenario: policy 1 has 1 agent on 8.17.0 that should be upgraded to 8.17.1 (100% target).
+      // A second policy has an agent already upgrading to 8.17.1.
+      // Before the fix: the second policy's upgrading agent was counted in policy 1's
+      // totalOnOrUpdatingToTargetVersionAgents (the updatingToKuery had no policy_id filter),
+      // making the count = 1 - 1 = 0 → "target percentage already reached" → agent1 never upgraded.
+      // After the fix: the count query is scoped to policy_id, so policy 2's agent is not counted.
+
+      const { body: secondPolicyBody } = await supertest
+        .post('/api/fleet/agent_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ name: 'Test policy 2', namespace: 'default', force: true })
+        .expect(200);
+      secondPolicyId = secondPolicyBody.item.id;
+
+      // agent1: in policy 1, on 8.17.0 — should be upgraded.
+      await createAgentDoc(providerContext, 'agent1', policyId, '8.17.0');
+      // agent2: in policy 2, actively upgrading to 8.17.1 (non-failed state).
+      // Before the fix this agent would contaminate policy 1's upgrading-agents count.
+      await createAgentDoc(providerContext, 'agent2', secondPolicyId, '8.17.0', true, {
+        upgrade_details: {
+          target_version: '8.17.1',
+          state: 'UPG_DOWNLOADING',
+          action_id: '456',
+        },
+      });
+
+      await supertest
+        .put(`/api/fleet/agent_policies/${policyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy',
+          namespace: 'default',
+          required_versions: [{ version: '8.17.1', percentage: 100 }],
+        })
+        .expect(200);
+
+      // agent1 must be picked up for upgrade despite agent2 (from another policy) upgrading.
+      await retry.tryForTime(60000, async () => {
+        const res = await supertest
+          .get('/api/fleet/agents/agent1')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        if (!res.body.item.upgrade_started_at || res.body.item.upgrade_attempts?.length !== 1) {
+          throw new Error('agent1 has not been upgraded yet');
+        }
       });
     });
 

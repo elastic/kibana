@@ -15,18 +15,38 @@ export {
   type DiscoverInternalState,
   type TabState,
   type TabStateGlobalState,
+  type RecentlyClosedTabState,
   type DiscoverAppState,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
+  type DefaultProfileStateField,
+  type DefaultProfileStateFields,
+  type DefaultProfileState,
+  type ProfileStateSnapshot,
+  type UpdateESQLQueryActionPayload,
+  DEFAULT_PROFILE_STATE_FIELDS,
   TabInitializationStatus,
+  TabsBarVisibility,
 } from './types';
 
-export { DEFAULT_TAB_STATE } from './constants';
+export { DEFAULT_EXPANDED_DOC_OWNER, DEFAULT_TAB_STATE } from './constants';
 
-export { type InternalStateStore, createInternalStateStore } from './internal_state';
+export {
+  type InternalStateStore,
+  type InternalStateDispatch,
+  type InternalStateDependencies,
+  createInternalStateStore,
+} from './internal_state';
 
 export const internalStateActions = {
-  ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
+  ...omit(
+    internalStateSlice.actions,
+    'setTabs',
+    'disconnectTab',
+    'setDefaultProfileAdHocDataViewIds',
+    'setAppState',
+    'syncProfileStateSnapshot'
+  ),
   ...actions,
   syncLocallyPersistedTabState,
 };
@@ -34,6 +54,8 @@ export const internalStateActions = {
 export {
   InternalStateProvider,
   useInternalStateDispatch,
+  useInternalStateGetState,
+  useInternalStateSubscribe,
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,
@@ -51,6 +73,7 @@ export {
   selectTabCombinedFilters,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
+  searchSourceComparator,
   selectTabSavedSearch,
 } from './selectors';
 
@@ -63,10 +86,14 @@ export {
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  selectDataSourceProfileId,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
+  useCurrentTabDataStateContainer,
   RuntimeStateProvider,
+  RuntimeStateManagerProvider,
+  useRuntimeStateManager,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';

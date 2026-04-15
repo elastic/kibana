@@ -193,7 +193,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
           <EuiButtonIcon
             data-test-subj={BUTTON_TEST_SUBJ}
             buttonRef={buttonRef}
-            iconType="search"
+            iconType="magnify"
             size="xs"
             color="text"
             className="dataGridInTableSearch__button"

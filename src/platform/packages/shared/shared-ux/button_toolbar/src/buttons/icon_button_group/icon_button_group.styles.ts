@@ -18,17 +18,7 @@ export const getIconButtonStyles = ({ euiTheme }: UseEuiTheme) => {
       background-color: ${euiTheme.colors.emptyShade} !important;
       border: ${border} !important;
       border-right: none !important;
-
-      &:first-of-type {
-        border-top-left-radius: ${euiTheme.border.radius.medium} !important;
-        border-bottom-left-radius: ${euiTheme.border.radius.medium} !important;
-      }
-
-      &:last-of-type {
-        border-right: ${border} !important;
-        border-top-right-radius: ${euiTheme.border.radius.medium} !important;
-        border-bottom-right-radius: ${euiTheme.border.radius.medium} !important;
-      }
+      border-radius: 0 !important;
 
       &:not(:first-child):not(.euiButtonGroupButton-isSelected):not(:disabled) {
         box-shadow: unset;
@@ -38,9 +28,24 @@ export const getIconButtonStyles = ({ euiTheme }: UseEuiTheme) => {
 };
 
 export const getIconButtonGroupStyles = ({ euiTheme }: UseEuiTheme) => {
+  const border = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
+
   return css`
     .euiButtonGroup__buttons {
       border-radius: ${euiTheme.border.radius.medium};
+
+      > :first-child > .euiButtonGroupButton,
+      > .euiButtonGroupButton:first-child {
+        border-top-left-radius: ${euiTheme.border.radius.medium} !important;
+        border-bottom-left-radius: ${euiTheme.border.radius.medium} !important;
+      }
+
+      > :last-child > .euiButtonGroupButton,
+      > .euiButtonGroupButton:last-child {
+        border-right: ${border} !important;
+        border-top-right-radius: ${euiTheme.border.radius.medium} !important;
+        border-bottom-right-radius: ${euiTheme.border.radius.medium} !important;
+      }
     }
   `;
 };

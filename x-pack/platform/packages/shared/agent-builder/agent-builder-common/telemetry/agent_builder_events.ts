@@ -18,13 +18,21 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   AgentCreated: `${TELEMETRY_PREFIX}_agent_created`,
   AgentUpdated: `${TELEMETRY_PREFIX}_agent_updated`,
   ToolCreated: `${TELEMETRY_PREFIX}_tool_created`,
+  SkillCreated: `${TELEMETRY_PREFIX}_skill_created`,
+  SkillUpdated: `${TELEMETRY_PREFIX}_skill_updated`,
+  SkillDeleted: `${TELEMETRY_PREFIX}_skill_deleted`,
   RoundComplete: `${TELEMETRY_PREFIX}_round_complete`,
   RoundError: `${TELEMETRY_PREFIX}_round_error`,
   ToolCallSuccess: `${TELEMETRY_PREFIX}_tool_call_success`,
   ToolCallError: `${TELEMETRY_PREFIX}_tool_call_error`,
 } as const;
 
-export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
+export type OptInSource =
+  | 'security_settings_menu'
+  | 'stack_management'
+  | 'security_ab_tour'
+  | 'agent_builder_nav_control';
+
 export type OptInAction =
   | 'step_reached'
   | 'confirmation_shown'
@@ -38,7 +46,7 @@ export interface ReportOptInActionParams {
 }
 
 export interface ReportOptOutParams {
-  source: 'security_settings_menu' | 'stack_management';
+  source: 'security_settings_menu' | 'stack_management' | 'agent_builder_nav_control';
 }
 
 export interface ReportAddToChatClickedParams {
@@ -94,6 +102,24 @@ export interface ReportToolCreatedParams {
   tool_type: string;
 }
 
+/** Telemetry params reported when a user-created skill is created. */
+export interface ReportSkillCreatedParams {
+  /** Identifier of the created skill. */
+  skill_id: string;
+}
+
+/** Telemetry params reported when a user-created skill is updated. */
+export interface ReportSkillUpdatedParams {
+  /** Identifier of the updated skill. */
+  skill_id: string;
+}
+
+/** Telemetry params reported when a user-created skill is deleted. */
+export interface ReportSkillDeletedParams {
+  /** Identifier of the deleted skill. */
+  skill_id: string;
+}
+
 export interface ReportToolCallSuccessParams {
   tool_id: string;
   tool_call_id: string;
@@ -126,6 +152,12 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.AgentCreated]: ReportAgentCreatedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentUpdated]: ReportAgentUpdatedParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCreated]: ReportToolCreatedParams;
+  /** Fired when a user-created skill is created. */
+  [AGENT_BUILDER_EVENT_TYPES.SkillCreated]: ReportSkillCreatedParams;
+  /** Fired when a user-created skill is updated. */
+  [AGENT_BUILDER_EVENT_TYPES.SkillUpdated]: ReportSkillUpdatedParams;
+  /** Fired when a user-created skill is deleted. */
+  [AGENT_BUILDER_EVENT_TYPES.SkillDeleted]: ReportSkillDeletedParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundComplete]: ReportRoundCompleteParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundError]: ReportRoundErrorParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess]: ReportToolCallSuccessParams;
@@ -139,6 +171,9 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportAgentCreatedParams>
   | EventTypeOpts<ReportAgentUpdatedParams>
   | EventTypeOpts<ReportToolCreatedParams>
+  | EventTypeOpts<ReportSkillCreatedParams>
+  | EventTypeOpts<ReportSkillUpdatedParams>
+  | EventTypeOpts<ReportSkillDeletedParams>
   | EventTypeOpts<ReportRoundCompleteParams>
   | EventTypeOpts<ReportRoundErrorParams>
   | EventTypeOpts<ReportToolCallSuccessParams>
@@ -151,6 +186,9 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentCreated
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentUpdated
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCreated
+  | typeof AGENT_BUILDER_EVENT_TYPES.SkillCreated
+  | typeof AGENT_BUILDER_EVENT_TYPES.SkillUpdated
+  | typeof AGENT_BUILDER_EVENT_TYPES.SkillDeleted
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundComplete
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundError
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess
@@ -171,7 +209,7 @@ const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description:
-          'Source of the opt-in action (security_settings_menu|stack_management|security_ab_tour)',
+          'Source of the opt-in action (security_settings_menu|stack_management|security_ab_tour|agent_builder_nav_control)',
         optional: false,
       },
     },
@@ -184,7 +222,8 @@ const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
     source: {
       type: 'keyword',
       _meta: {
-        description: 'Source of the opt-out action (security_settings_menu|stack_management)',
+        description:
+          'Source of the opt-out action (security_settings_menu|stack_management|agent_builder_nav_control)',
         optional: false,
       },
     },
@@ -291,6 +330,48 @@ const TOOL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Type of tool created (esql|index_search|workflow|mcp|...)',
+        optional: false,
+      },
+    },
+  },
+};
+
+const SKILL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SkillCreated,
+  schema: {
+    skill_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the created skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+  },
+};
+
+const SKILL_UPDATED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SkillUpdated,
+  schema: {
+    skill_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the updated skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+  },
+};
+
+const SKILL_DELETED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SkillDeleted,
+  schema: {
+    skill_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the deleted skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
         optional: false,
       },
     },
@@ -680,6 +761,9 @@ export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unk
   AGENT_CREATED_EVENT,
   AGENT_UPDATED_EVENT,
   TOOL_CREATED_EVENT,
+  SKILL_CREATED_EVENT,
+  SKILL_UPDATED_EVENT,
+  SKILL_DELETED_EVENT,
   ROUND_COMPLETE_EVENT,
   ROUND_ERROR_EVENT,
   TOOL_CALL_SUCCESS_EVENT,

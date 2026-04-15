@@ -13,17 +13,12 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getIsSelectedColor } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
-import type {
-  AppMenuItemType,
-  AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
-} from '../types';
+import type { AppMenuItemType, AppMenuPrimaryActionItem } from '../types';
 
 interface AppMenuShowMoreButtonProps {
   items: AppMenuItemType[];
   isPopoverOpen: boolean;
   primaryActionItem?: AppMenuPrimaryActionItem;
-  secondaryActionItem?: AppMenuSecondaryActionItem;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
 }
@@ -32,7 +27,6 @@ export const AppMenuOverflowButton = ({
   items,
   isPopoverOpen,
   primaryActionItem,
-  secondaryActionItem,
   onPopoverToggle,
   onPopoverClose,
 }: AppMenuShowMoreButtonProps) => {
@@ -58,7 +52,7 @@ export const AppMenuOverflowButton = ({
 
   const button = (
     <EuiButtonIcon
-      iconType="boxesHorizontal" // TODO: Change to "ellipsis" when it's available in EUI.
+      iconType="boxesVertical" // TODO: Change to "ellipsis" when it's available in EUI.
       size="xs"
       aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
@@ -81,8 +75,8 @@ export const AppMenuOverflowButton = ({
       })}
       isOpen={isPopoverOpen}
       primaryActionItem={primaryActionItem}
-      secondaryActionItem={secondaryActionItem}
       onClose={onPopoverClose}
+      onCloseOverflowButton={onPopoverClose}
     />
   );
 };

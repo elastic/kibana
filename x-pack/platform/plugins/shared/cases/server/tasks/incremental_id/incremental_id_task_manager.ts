@@ -158,10 +158,11 @@ export class IncrementalIdTaskManager {
             `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}`
           );
         },
-        (e) => {
+        (e: unknown) => {
           this.logger.error(
-            `Error scheduling task: ${CASES_INCREMENTAL_ID_SYNC_TASK_ID}: ${e}`,
-            e?.message ?? e
+            `Error scheduling task: ${CASES_INCREMENTAL_ID_SYNC_TASK_ID}: ${
+              e instanceof Error ? e.message : String(e)
+            }`
           );
         }
       );

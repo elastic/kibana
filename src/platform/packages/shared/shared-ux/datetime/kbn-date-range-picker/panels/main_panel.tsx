@@ -9,7 +9,15 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { EuiButtonIcon, EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiTab,
+  EuiTabs,
+  EuiToolTip,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import type { TimeRangeBoundsOption } from '../types';
 import {
@@ -20,12 +28,18 @@ import {
   PanelListItem,
   PanelNavItem,
 } from '../date_range_picker_panel_ui';
+import { DocumentationPanel } from './documentation_panel';
+import { SettingsPanel } from './settings_panel';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { mainPanelStyles } from './main_panel.styles';
 import { getOptionDisplayLabel, getOptionShorthand, getOptionInputText } from '../utils';
 import { mainPanelTexts } from '../translations';
 import { panelDividerStyles } from '../date_range_picker_panel_ui.styles';
+import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
+
+const toTestSubj = (prefix: string, label: string) =>
+  `${prefix}-${label.replace(/→/g, '-').replace(/["'&]/g, '').replace(/\s+/g, '_')}`;
 
 interface OptionsListProps {
   /** Options to render as list items. */
@@ -38,7 +52,8 @@ interface OptionsListProps {
 
 /** Renders a list of time range options as selectable `PanelListItem` entries. */
 const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListProps) => {
-  const { applyRange, onPresetDelete } = useDateRangePickerContext();
+  const { applyRange, onPresetDelete, settings } = useDateRangePickerContext();
+  const timePrecision = settings.timePrecision ?? 's';
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
 
@@ -54,6 +69,10 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
       {options.map((option, index) => (
         <PanelListItem
           key={`${option.start}-${option.end}-${index}`}
+          data-test-subj={toTestSubj(
+            'dateRangePickerPresetItem',
+            getOptionDisplayLabel(option, { timePrecision })
+          )}
           onClick={() => handleSelect(option)}
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
           extraActions={
@@ -63,12 +82,13 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
                 iconType="trash"
                 color="danger"
                 size="xs"
+                data-test-subj="dateRangePickerDeletePresetButton"
                 onClick={() => onPresetDelete(option)}
               />
             ) : undefined
           }
         >
-          {getOptionDisplayLabel(option)}
+          {getOptionDisplayLabel(option, { timePrecision })}
         </PanelListItem>
       ))}
     </ul>
@@ -89,6 +109,7 @@ const PresetsRecentTabs = () => {
         <EuiTab
           isSelected={selectedTabId === 'presets'}
           onClick={() => setSelectedTabId('presets')}
+          data-test-subj="dateRangePickerPresetsTab"
         >
           {mainPanelTexts.presetsLabel}
         </EuiTab>
@@ -96,6 +117,7 @@ const PresetsRecentTabs = () => {
           isSelected={selectedTabId === 'recent'}
           disabled={!hasRecent}
           onClick={() => setSelectedTabId('recent')}
+          data-test-subj="dateRangePickerRecentTab"
         >
           {mainPanelTexts.recentLabel}
         </EuiTab>
@@ -116,10 +138,18 @@ const SubPanelMenu = () => {
 
   return (
     <ul css={styles.list}>
-      <PanelNavItem onClick={() => navigateTo('calendar-panel')} icon="calendar">
+      <PanelNavItem
+        onClick={() => navigateTo('calendar-panel')}
+        icon="calendar"
+        data-test-subj="dateRangePickerCalendarNavItem"
+      >
         {mainPanelTexts.calendarPanelTitle}
       </PanelNavItem>
-      <PanelNavItem onClick={() => navigateTo('custom-time-range-panel')} icon="controls">
+      <PanelNavItem
+        onClick={() => navigateTo('custom-time-range-panel')}
+        icon="controls"
+        data-test-subj="dateRangePickerCustomRangeNavItem"
+      >
         {mainPanelTexts.customTimeRangePanelTitle}
       </PanelNavItem>
       {panelDescriptors.map(({ id, title, icon }) => (
@@ -131,8 +161,29 @@ const SubPanelMenu = () => {
   );
 };
 
+const DocumentationButton = () => {
+  const { navigateTo } = useDateRangePickerPanelNavigation();
+  const euiThemeContext = useEuiTheme();
+  const styles = mainPanelStyles(euiThemeContext);
+
+  return (
+    <div css={styles.documentationButtonWrapper}>
+      <EuiButton
+        size="s"
+        iconType="documentation"
+        fullWidth
+        onClick={() => navigateTo(DocumentationPanel.PANEL_ID)}
+      >
+        Discover allowed formats and shorthands
+      </EuiButton>
+    </div>
+  );
+};
+
 export function MainPanel() {
-  const { onPresetSave, timeRange, applyRange } = useDateRangePickerContext();
+  const { onPresetSave, timeRange, applyRange, timeZone } = useDateRangePickerContext();
+  const { navigateTo } = useDateRangePickerPanelNavigation();
+  const timeZoneDisplay = useTimeZoneDisplay(timeZone, timeRange.startDate);
   const euiThemeContext = useEuiTheme();
 
   const handlePresetSave = useCallback(() => {
@@ -147,14 +198,11 @@ export function MainPanel() {
   const styles = mainPanelStyles(euiThemeContext);
   const dividerStyles = panelDividerStyles(euiThemeContext);
 
-  // temporary dev-only flag to show the footer conditionally
-  // TODO remove as we make progress and add content to it
-  const _showFooter = typeof onPresetSave === 'function';
-
   return (
-    <PanelContainer>
+    <PanelContainer data-test-subj="dateRangePickerMainPanel">
       <PanelBody>
         <PanelBodySection spacingSide="none">
+          {timeRange.value === '' && <DocumentationButton />}
           <PresetsRecentTabs />
         </PanelBodySection>
         <PanelBodySection spacingSide="none" css={styles.stickyBottom}>
@@ -162,26 +210,39 @@ export function MainPanel() {
           <SubPanelMenu />
         </PanelBodySection>
       </PanelBody>
-      {_showFooter && (
-        <PanelFooter
-          primaryAction={
-            // @ts-ignore onPresetSave is optional at the consumer level (_showFooter is temporary)
-            onPresetSave ? (
-              <EuiToolTip content={mainPanelTexts.savePresetTooltip} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  aria-label={mainPanelTexts.savePresetTooltip}
-                  iconType="save"
-                  display="base"
-                  color="text"
-                  size="s"
-                  disabled={timeRange.isInvalid}
-                  onClick={handlePresetSave}
-                />
-              </EuiToolTip>
-            ) : undefined
-          }
+      <PanelFooter
+        primaryAction={
+          onPresetSave ? (
+            <EuiToolTip content={mainPanelTexts.savePresetTooltip} disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label={mainPanelTexts.savePresetTooltip}
+                iconType="save"
+                display="base"
+                color="text"
+                size="s"
+                disabled={timeRange.isInvalid}
+                data-test-subj="dateRangePickerSavePresetButton"
+                onClick={handlePresetSave}
+              />
+            </EuiToolTip>
+          ) : undefined
+        }
+      >
+        <EuiButtonIcon
+          aria-label={mainPanelTexts.settingsAriaLabel}
+          iconType="gear"
+          display="base"
+          color="text"
+          size="s"
+          data-test-subj="dateRangePickerSettingsButton"
+          onClick={() => navigateTo(SettingsPanel.PANEL_ID)}
         />
-      )}
+        {timeZoneDisplay && (
+          <EuiText color="subdued" size="xs" component="span">
+            {timeZoneDisplay}
+          </EuiText>
+        )}
+      </PanelFooter>
     </PanelContainer>
   );
 }

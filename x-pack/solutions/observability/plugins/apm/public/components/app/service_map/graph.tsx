@@ -30,8 +30,11 @@ import {
   keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import { getDagreLayoutFailureDiagnostics } from './dagre_layout_failure_diagnostics';
 import { applyDagreLayout } from './layout';
 import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
 import { ServiceNode } from './service_node';
@@ -42,6 +45,7 @@ import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
 import { MapPopover } from './popover';
+import { ServiceMapMinimap } from './service_map_minimap';
 import type { Environment } from '../../../../common/environment_rt';
 import type {
   ServiceMapNode,
@@ -70,6 +74,8 @@ interface GraphProps {
   end: string;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
+  /** When set, shows a "View full service map" button that links to the full map (focused map only) */
+  fullMapHref?: string;
 }
 
 function GraphInner({
@@ -83,7 +89,10 @@ function GraphInner({
   end,
   isFullscreen = false,
   onToggleFullscreen,
+  fullMapHref,
 }: GraphProps) {
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+  const { telemetry } = services;
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -108,9 +117,19 @@ function GraphInner({
     [getAnimationDuration]
   );
 
+  // EBT + console fire once per failed layout computation (each useMemo re-run that throws),
+  // not strictly once per page visit—intentional for measuring failure frequency.
+  const onDagreLayoutFailure = useCallback(
+    (error: unknown) => {
+      telemetry.reportServiceMapDagreLayoutFallback(getDagreLayoutFailureDiagnostics(error));
+      console.error('[APM Service map] Dagre.layout failed; using grid fallback.', error);
+    },
+    [telemetry]
+  );
+
   const layoutedNodes = useMemo(
-    () => applyDagreLayout(initialNodes, initialEdges),
-    [initialNodes, initialEdges]
+    () => applyDagreLayout(initialNodes, initialEdges, {}, onDagreLayoutFailure),
+    [initialNodes, initialEdges, onDagreLayoutFailure]
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(layoutedNodes);
@@ -136,13 +155,15 @@ function GraphInner({
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
-      const newSelectedId = selectedNodeId === node.id ? null : node.id;
+      // Use ref so toggle logic always matches last committed selection without stale closure issues,
+      // and keep this callback stable for React Flow.
+      const newSelectedId = selectedNodeIdRef.current === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
       setSelectedNodeForPopover(newSelectedId ? node : null);
       setSelectedEdgeForPopover(null);
     },
-    [selectedNodeId, setEdges, applyEdgeHighlighting]
+    [setEdges, applyEdgeHighlighting]
   );
   const handleEdgeClick: EdgeMouseHandler<ServiceMapEdgeType> = useCallback(
     (_, edge) => {
@@ -253,6 +274,10 @@ function GraphInner({
         defaultMessage: 'Enter fullscreen',
       });
 
+  const viewFullMapButtonLabel = i18n.translate('xpack.apm.serviceMap.viewFullServiceMapButton', {
+    defaultMessage: 'View full service map',
+  });
+
   const containerStyle = useMemo(
     () => ({
       height,
@@ -288,10 +313,23 @@ function GraphInner({
       position: relative;
       margin: ${euiTheme.size.s};
 
-      button {
+      button,
+      a[data-test-subj='serviceMapViewFullMapButton'] {
         background-color: ${euiTheme.colors.backgroundBasePlain};
         border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
         fill: ${euiTheme.colors.text};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: ${euiTheme.size.s};
+        cursor: pointer;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        width: 100%;
+        box-sizing: border-box;
+        color: inherit;
+        text-decoration: none;
 
         &:hover {
           background-color: ${euiTheme.colors.backgroundBaseSubdued};
@@ -382,6 +420,16 @@ function GraphInner({
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Controls showInteractive={false} position="top-left" css={controlsStyles}>
+          {fullMapHref && (
+            <a
+              href={fullMapHref}
+              title={viewFullMapButtonLabel}
+              aria-label={viewFullMapButtonLabel}
+              data-test-subj="serviceMapViewFullMapButton"
+            >
+              <EuiIcon type="apps" aria-label={viewFullMapButtonLabel} />
+            </a>
+          )}
           {onToggleFullscreen && (
             <ControlButton
               onClick={onToggleFullscreen}
@@ -396,6 +444,7 @@ function GraphInner({
             </ControlButton>
           )}
         </Controls>
+        <ServiceMapMinimap />
       </ReactFlow>
       <MapPopover
         selectedNode={selectedNodeForPopover}

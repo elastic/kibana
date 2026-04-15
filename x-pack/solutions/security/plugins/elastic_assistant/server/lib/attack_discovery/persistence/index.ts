@@ -6,13 +6,15 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type {
-  AttackDiscoveryFindResponse,
-  AttackDiscoveryApiAlert,
-  CreateAttackDiscoveryAlertsParams,
-  FindAttackDiscoveryAlertsParams,
-  GetAttackDiscoveryGenerationsResponse,
-  PostAttackDiscoveryGenerationsDismissResponse,
+import {
+  type AttackDiscoveryFindResponse,
+  type AttackDiscoveryApiAlert,
+  type CreateAttackDiscoveryAlertsParams,
+  type FindAttackDiscoveryAlertsParams,
+  type GetAttackDiscoveryGenerationsResponse,
+  type PostAttackDiscoveryGenerationsDismissResponse,
+  type AttackDiscoveryAlertDocument,
+  transformSearchResponseToAlerts,
 } from '@kbn/elastic-assistant-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -28,8 +30,6 @@ import { getAttackDiscoveryGenerationByIdQuery } from './get_attack_discovery_ge
 import { getAttackDiscoveryGenerationsQuery } from './get_attack_discovery_generations_query';
 import { getCombinedFilter } from './get_combined_filter';
 import { getFindAttackDiscoveryAlertsAggregation } from './get_find_attack_discovery_alerts_aggregation';
-import type { AttackDiscoveryAlertDocument } from '../schedules/types';
-import { transformSearchResponseToAlerts } from './transforms/transform_search_response_to_alerts';
 import { getScheduledIndexPattern } from './get_scheduled_index_pattern';
 import { getUpdateAttackDiscoveryAlertsQuery } from '../get_update_attack_discovery_alerts_query';
 

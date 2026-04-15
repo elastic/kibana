@@ -80,11 +80,19 @@ describe('Update profile routes', () => {
       expect(
         bodySchema.validate({
           avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
-          userSettings: { darkMode: 'dark', contrastMode: 'high' },
+          userSettings: {
+            darkMode: 'dark',
+            contrastMode: 'high',
+            agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
+          },
         })
       ).toEqual({
         avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
-        userSettings: { darkMode: 'dark', contrastMode: 'high' },
+        userSettings: {
+          darkMode: 'dark',
+          contrastMode: 'high',
+          agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
+        },
       });
     });
 
@@ -324,6 +332,34 @@ describe('Update profile routes', () => {
           kibanaResponseFactory
         )
       ).resolves.toEqual(expect.objectContaining({ status: 403 }));
+    });
+
+    it('allows Elastic Cloud users to update agentBuilderAnnouncementModalSeenBySpaceJson.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ elastic_cloud_user: true }));
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({
+            body: {
+              userSettings: {
+                agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
+              },
+            },
+          }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', {
+        userSettings: {
+          agentBuilderAnnouncementModalSeenBySpaceJson: '{}',
+        },
+      });
     });
 
     it('updates profile.', async () => {

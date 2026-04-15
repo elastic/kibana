@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import { getServices } from './kibana_services';
 
 const sampleDataUrl = '/api/sample_data';
@@ -30,7 +31,7 @@ export async function installSampleDataSet(id: string, sampleDataDefaultIndex: s
 }
 
 export async function uninstallSampleDataSet(id: string, sampleDataDefaultIndex: string) {
-  await getServices().http.delete(`${sampleDataUrl}/${id}`);
+  await getServices().http.delete(buildPath(`${sampleDataUrl}/{id}`, { id }));
 
   const uiSettings = getServices().uiSettings;
 

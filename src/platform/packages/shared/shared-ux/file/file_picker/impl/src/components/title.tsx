@@ -14,10 +14,11 @@ import { i18nTexts } from '../i18n_texts';
 
 interface Props {
   multiple: boolean;
+  id?: string;
 }
 
-export const Title: FunctionComponent<Props> = ({ multiple }) => (
+export const Title: FunctionComponent<Props> = ({ multiple, id }) => (
   <EuiTitle>
-    <h2>{multiple ? i18nTexts.titleMultiple : i18nTexts.title}</h2>
+    <h2 id={id}>{multiple ? i18nTexts.titleMultiple : i18nTexts.title}</h2>
   </EuiTitle>
 );

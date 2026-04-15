@@ -219,7 +219,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                         <EuiButtonIcon
                           onClick={copy}
                           color="text"
-                          iconType="copyClipboard"
+                          iconType="copy"
                           aria-label={i18n.translate(
                             'xpack.contentConnectors.connectorStats.copyConnectorIdButton',
                             {

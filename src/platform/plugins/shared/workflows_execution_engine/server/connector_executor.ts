@@ -12,6 +12,10 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 export class ConnectorExecutor {
+  // The lifespan of this cache is one workflow execution, then it gets destroyed
+  // the probability of connectors change is pretty low in this span so it should be acceptable
+  private allConnectorsCache: Map<string, ConnectorWithExtraFindData> | undefined;
+
   constructor(private actionsClient: ActionsClient) {}
 
   // Execute a regular connector with a saved object. It will resolve the connector ID from saved objects.
@@ -22,6 +26,10 @@ export class ConnectorExecutor {
     abortController: AbortController;
   }): Promise<ActionTypeExecutorResult<unknown>> {
     const { connectorType, connectorNameOrId, input, abortController } = params;
+    if (!connectorType) {
+      throw new Error('Connector type is required');
+    }
+
     const actionId = await this.resolveConnectorId(connectorNameOrId);
 
     return this.runConnector({ actionTypeId: connectorType, actionId, input, abortController });
@@ -34,6 +42,9 @@ export class ConnectorExecutor {
     abortController: AbortController;
   }): Promise<ActionTypeExecutorResult<unknown>> {
     const { connectorType, input, abortController } = params;
+    if (!connectorType) {
+      throw new Error('Connector type is required');
+    }
     // The InMemoryConnector with prefixed "system-connector-" is created by the actions framework
     const actionId = `system-connector-${connectorType}`;
 
@@ -48,37 +59,63 @@ export class ConnectorExecutor {
     abortController: AbortController;
   }): Promise<ActionTypeExecutorResult<unknown>> {
     const { actionTypeId, actionId, input, abortController } = params;
-    // Execute the connector via the actions client
-    const executeActionPromise = this.actionsClient.execute({ actionId, params: input });
 
-    const abortPromise = new Promise<void>((_resolve, reject) => {
-      abortController.signal.addEventListener('abort', () =>
-        reject(
-          new Error(`Action type "${actionTypeId}" with ID "${actionId}" execution was aborted`)
-        )
+    const executeActionPromise = this.actionsClient.execute({
+      actionId,
+      params: input,
+      signal: abortController.signal,
+    });
+
+    const abortPromise = new Promise<ActionTypeExecutorResult<unknown>>((_resolve, reject) => {
+      abortController.signal.addEventListener(
+        'abort',
+        () => reject(this.createAbortError(actionTypeId, actionId)),
+        { once: true }
       );
     });
 
     // If the abort signal is triggered, the abortPromise will reject first
     // Otherwise, the executeActionPromise will resolve first
     // This ensures that we handle cancellation properly.
-    // This is a workaround for the fact that connectors do not natively support cancellation.
-    // In the future, if connectors support cancellation, we can remove this logic.
-    await Promise.race([abortPromise, executeActionPromise]);
-    return executeActionPromise;
+    // In the future, if all connectors support cancellation, we can remove this logic.
+    return Promise.race([abortPromise, executeActionPromise]);
   }
 
-  private async resolveConnectorId(connectorName: string): Promise<string> {
-    const allConnectors = await this.actionsClient.getAll();
+  private createAbortError(actionTypeId: string, actionId: string): Error {
+    return new Error(`Action type "${actionTypeId}" with ID "${actionId}" execution was aborted`);
+  }
 
-    const connector = allConnectors.find(
-      (c: ConnectorWithExtraFindData) => c.name === connectorName || c.id === connectorName
-    );
-
-    if (!connector) {
-      throw new Error(`Connector ${connectorName} not found`);
+  private async resolveConnectorId(connectorNameOrId: string): Promise<string> {
+    if (this.allConnectorsCache) {
+      const connector = this.allConnectorsCache.get(connectorNameOrId);
+      if (connector) {
+        return connector.id;
+      }
     }
 
-    return connector.id;
+    // Prefer direct ID lookup: try to fetch by ID first, which is unambiguous
+    try {
+      const connector = await this.actionsClient.get({ id: connectorNameOrId });
+      return connector.id;
+    } catch {
+      // Not found by ID -- fall through to name-based lookup
+    }
+
+    if (!this.allConnectorsCache) {
+      const allConnectors = await this.actionsClient.getAll();
+      this.allConnectorsCache = new Map(
+        allConnectors.map((connector) => [connector.id, connector])
+      );
+    }
+    const connectors = Array.from(this.allConnectorsCache.values()).filter(
+      (c: ConnectorWithExtraFindData) => c.name === connectorNameOrId
+    );
+
+    if (connectors.length === 0) {
+      throw new Error(`Connector ${connectorNameOrId} not found`);
+    }
+    // Do not throw if multiple connectors are found. We will use the first one.
+
+    return connectors[0].id;
   }
 }

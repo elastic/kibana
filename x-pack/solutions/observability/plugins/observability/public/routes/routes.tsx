@@ -54,7 +54,7 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
       to = pathname.split('/slos')[1];
     }
     navigateToApp(redirectToApp, {
-      path: `/${to}${search ? `?${search}` : ''}${hash}`,
+      path: `/${to}${search}${hash}`,
       replace: true,
     });
   } else if (to) {
@@ -63,7 +63,15 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
   return null;
 }
 
-const completeRoutes = {
+type RoutePath = string;
+
+interface RouteDefinition {
+  handler: () => JSX.Element;
+  params: object;
+  exact: boolean;
+}
+
+const completeRoutes: Record<RoutePath, RouteDefinition> = {
   [ROOT_PATH]: {
     handler: () => {
       return <SimpleRedirect to={OVERVIEW_PATH} />;
@@ -107,7 +115,7 @@ const completeRoutes = {
   },
 };
 
-const routes = {
+const routes: Record<RoutePath, RouteDefinition> = {
   [LANDING_PATH]: {
     handler: () => {
       return (

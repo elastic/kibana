@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { ENTITY_STORE_ROUTES } from '../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
@@ -22,8 +22,8 @@ const bodySchema = z.object({
 export function registerStart(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: ENTITY_STORE_ROUTES.START,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.START,
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -31,7 +31,7 @@ export function registerStart(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
@@ -40,7 +40,7 @@ export function registerStart(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager } = entityStoreCtx;
+        const { logger, assetManagerClient: assetManager } = entityStoreCtx;
         const { entityTypes } = req.body;
         logger.debug('Start API invoked');
 
@@ -50,7 +50,8 @@ export function registerStart(router: EntityStorePluginRouter) {
         );
         const toStart = entityTypes.filter((type) => stoppedTypes.has(type));
 
-        await Promise.all(toStart.map((type) => assetManager.start(req, type)));
+        const logsExtraction = await assetManager.getLogExtractionConfig();
+        await Promise.all(toStart.map((type) => assetManager.start(req, type, logsExtraction)));
 
         return res.ok({
           body: {

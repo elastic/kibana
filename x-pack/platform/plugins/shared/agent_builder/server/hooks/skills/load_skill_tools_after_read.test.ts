@@ -12,7 +12,7 @@ import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type {
   SkillFileEntry,
   SkillReferencedContentFileEntry,
-} from '../../services/runner/store/volumes/skills/types';
+} from '../../services/execution/runner/store/volumes/skills/types';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -63,8 +63,11 @@ const createMockSkill = (
   description: 'A test skill',
   content: 'skill content',
   readonly: true,
+  basePath: 'skills/platform',
   getRegistryTools: jest.fn().mockReturnValue([]),
   getInlineTools: jest.fn().mockReturnValue([]),
+  referencedContentCount: 0,
+  experimental: false,
   ...overrides,
 });
 

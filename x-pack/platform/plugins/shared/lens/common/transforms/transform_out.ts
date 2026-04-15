@@ -20,35 +20,38 @@ import type {
   LensByValueTransformOutResult,
   LensTransformOut,
 } from './types';
-import { findLensReference, isByRefLensState } from './utils';
+import { findLensReference } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
+import { stripInheritedContext } from './helpers';
 
 /**
  * Transform from Lens Stored State to Lens API format
  */
 export const getTransformOut = (
   builder: LensConfigBuilder,
-  transformDrilldownsOut: DrilldownTransforms['transformOut']
+  transformDrilldownsOut: DrilldownTransforms['transformOut'],
+  isDashboardAppRequest: boolean
 ): LensTransformOut => {
   return function transformOut(storedState, panelReferences) {
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
       transformTimeRangeOut<LensSerializedState>,
-      (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences)
+      (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences),
+      stripInheritedContext
     );
 
-    const state = transformsFlow(storedState);
+    const { attributes, ...state } = transformsFlow(storedState);
 
     const savedObjectRef = findLensReference(panelReferences);
 
-    if (savedObjectRef && isByRefLensState(state)) {
+    if (savedObjectRef) {
       return {
         ...state,
-        savedObjectId: savedObjectRef.id,
+        ref_id: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
     }
 
-    const migratedAttributes = migrateAttributes(state.attributes);
+    const migratedAttributes = migrateAttributes(attributes);
     const injectedState = injectLensReferences(
       {
         ...state,
@@ -57,11 +60,14 @@ export const getTransformOut = (
       panelReferences
     );
 
-    const chartType = builder.getType(migratedAttributes);
-
-    if (!builder.isSupported(chartType)) {
-      // TODO: remove this once all formats are supported
+    if (isDashboardAppRequest && !builder.isEnabled) {
       return injectedState as LensByValueTransformOutResult;
+    }
+
+    const chartType = builder.getType(migratedAttributes);
+    // should be filtered out my unmapped panel check
+    if (!builder.isSupported(chartType)) {
+      throw new Error(`Lens "${chartType}" chart type is not supported`);
     }
 
     const apiConfig = builder.toAPIFormat({
@@ -71,7 +77,7 @@ export const getTransformOut = (
 
     return {
       ...state,
-      attributes: apiConfig,
+      ...apiConfig,
     } satisfies LensByValueTransformOutResult;
   };
 };

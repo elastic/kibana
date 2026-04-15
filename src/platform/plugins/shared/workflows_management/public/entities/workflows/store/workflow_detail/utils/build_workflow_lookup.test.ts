@@ -8,7 +8,12 @@
  */
 
 import { LineCounter, parseDocument } from 'yaml';
-import { buildWorkflowLookup, getValueFromValueNode, inspectStep } from './build_workflow_lookup';
+import {
+  buildStepSelectionValues,
+  buildWorkflowLookup,
+  getValueFromValueNode,
+  inspectStep,
+} from './build_workflow_lookup';
 
 describe('inspectStep', () => {
   describe('simple step parsing', () => {
@@ -103,20 +108,25 @@ steps:
       expect(getValueFromValueNode(result.step1.propInfos['with.level'].valueNode)).toBe('info');
     });
 
-    it('should exclude steps, else, and fallback from propInfos', () => {
+    it('should exclude steps, else, and on-failure from propInfos', () => {
       const yaml = `
 steps:
   - name: step1
     type: if
+    condition: "{{ true }}"
     steps:
       - name: nested_step
         type: console
     else:
       - name: else_step
         type: console
-    fallback:
-      - name: fallback_step
-        type: console
+  - name: step2
+    type: action
+    connector-id: my-connector
+    on-failure:
+      fallback:
+        - name: fallback_step
+          type: console
     message: "test"
 `;
       const lineCounter = new LineCounter();
@@ -126,8 +136,8 @@ steps:
 
       expect(result.step1.propInfos).not.toHaveProperty('steps');
       expect(result.step1.propInfos).not.toHaveProperty('else');
-      expect(result.step1.propInfos).not.toHaveProperty('fallback');
-      expect(result.step1.propInfos).toHaveProperty('message');
+      expect(result.step2.propInfos).not.toHaveProperty('on-failure');
+      expect(result.step2.propInfos).toHaveProperty('message');
     });
 
     it('should collect deeply nested properties', () => {
@@ -201,17 +211,18 @@ steps:
       expect(result.else_step.parentStepId).toBe('if_step');
     });
 
-    it('should set parentStepId for nested steps in fallback block', () => {
+    it('should set parentStepId for nested steps in on-failure fallback block', () => {
       const yaml = `
 steps:
   - name: try_step
-    type: try
+    type: action
     steps:
       - name: try_step_content
         type: console
-    fallback:
-      - name: fallback_step
-        type: console
+    on-failure:
+      fallback:
+        - name: fallback_step
+          type: console
 `;
       const lineCounter = new LineCounter();
       const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
@@ -457,7 +468,7 @@ steps:
   });
 
   describe('complex workflow structures', () => {
-    it('should handle if-else-fallback structure', () => {
+    it('should handle if-else with on-failure on connector step', () => {
       const yaml = `
 steps:
   - name: if_step
@@ -465,16 +476,18 @@ steps:
     condition: "{{ value }}"
     steps:
       - name: true_branch
-        type: console
+        type: action
+        connector-id: my-connector
         message: "true"
+        on-failure:
+          fallback:
+            - name: error_branch
+              type: console
+              message: "error"
     else:
       - name: false_branch
         type: console
         message: "false"
-    fallback:
-      - name: error_branch
-        type: console
-        message: "error"
     timeout: 5000
 `;
       const lineCounter = new LineCounter();
@@ -487,7 +500,7 @@ steps:
       expect(result.if_step.propInfos).toHaveProperty('timeout');
       expect(result.if_step.propInfos).not.toHaveProperty('steps');
       expect(result.if_step.propInfos).not.toHaveProperty('else');
-      expect(result.if_step.propInfos).not.toHaveProperty('fallback');
+      expect(result.true_branch.propInfos).not.toHaveProperty('on-failure');
 
       expect(result.true_branch).toBeDefined();
       expect(result.false_branch).toBeDefined();
@@ -579,5 +592,70 @@ steps:
     expect(result.steps).not.toHaveProperty('greeting');
     expect(result.steps.step1.stepId).toBe('step1');
     expect(result.steps.step1.stepType).toBe('console');
+  });
+});
+
+describe('buildStepSelectionValues', () => {
+  function getStep(yaml: string): ReturnType<typeof inspectStep>[string] {
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const stepsNode = (yamlDocument.contents as any).get('steps');
+    const steps = inspectStep(stepsNode, lineCounter);
+    return Object.values(steps)[0];
+  }
+
+  it('should split config and input from step properties', () => {
+    const step = getStep(`
+steps:
+  - name: s1
+    type: my.step
+    connector-id: abc
+    with:
+      owner: securitySolution
+      message: hello
+`);
+    const values = buildStepSelectionValues(step);
+    expect(values.config).toEqual({ 'connector-id': 'abc' });
+    expect(values.input).toEqual({ owner: 'securitySolution', message: 'hello' });
+  });
+
+  it('should handle nested with paths', () => {
+    const step = getStep(`
+steps:
+  - name: s1
+    type: my.step
+    with:
+      inputs:
+        field1: value1
+        field2: value2
+`);
+    const values = buildStepSelectionValues(step);
+    expect(values.config).toEqual({});
+    expect(values.input).toEqual({ inputs: { field1: 'value1', field2: 'value2' } });
+  });
+
+  it('should handle array values under with', () => {
+    const step = getStep(`
+steps:
+  - name: s1
+    type: my.step
+    with:
+      field1:
+        - value1
+        - value2
+`);
+    const values = buildStepSelectionValues(step);
+    expect(values.input).toEqual({ field1: ['value1', 'value2'] });
+  });
+
+  it('should return empty objects when step has no custom properties', () => {
+    const step = getStep(`
+steps:
+  - name: s1
+    type: my.step
+`);
+    const values = buildStepSelectionValues(step);
+    expect(values.config).toEqual({});
+    expect(values.input).toEqual({});
   });
 });

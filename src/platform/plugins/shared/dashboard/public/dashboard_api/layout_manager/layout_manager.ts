@@ -29,6 +29,7 @@ import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddab
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
+import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
 import type { SerializedTitles, PanelPackage } from '@kbn/presentation-publishing';
 import {
@@ -36,14 +37,12 @@ import {
   apiHasLibraryTransforms,
   apiHasSerializableState,
   apiPublishesTitle,
-  apiPublishesUnsavedChanges,
   getTitle,
   logStateDiff,
   shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
 import type { PanelResizeSettings } from '@kbn/presentation-util-plugin/public';
 import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
@@ -77,7 +76,7 @@ export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
-  initialPinnedPanels: DashboardState['pinned_panels'] | undefined,
+  initialPinnedPanels: DashboardState['pinned_panels'],
   trackPanel: ReturnType<typeof initializeTrackPanel>
 ) {
   // --------------------------------------------------------------------------------------
@@ -145,15 +144,24 @@ export function initializeLayoutManager(
   let lastSavedLayout = initialLayout;
 
   let lastSavedChildState = initialChildState;
-  const resetLayout = () => {
-    layout$.next({ ...lastSavedLayout });
-    currentChildState = { ...lastSavedChildState };
+  const resetLayout = (state: DashboardState) => {
+    const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
+      state.panels,
+      state.pinned_panels
+    );
+
+    layout$.next({ ...layoutToApply });
+    currentChildState = { ...childStateToApply };
+
     let childrenModified = false;
     const currentChildren = { ...children$.value };
     for (const uuid of Object.keys(currentChildren)) {
-      if (lastSavedLayout.panels[uuid] || lastSavedLayout.pinnedPanels[uuid]) {
+      if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
-        if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+        const nextChildState = childStateToApply[uuid];
+        if (apiHasSerializableState(child)) {
+          child.applySerializedState(nextChildState);
+        }
       } else {
         // if reset resulted in panel removal, we need to update the list of children
         delete currentChildren[uuid];
@@ -419,8 +427,8 @@ export function initializeLayoutManager(
     newPinnedPanels[uuid] = {
       type: panelToPin.type as PinnedControlLayoutState['type'],
       order: panelToPin.order ?? Object.keys(newPinnedPanels).length,
-      width: panelToPin.width ?? DEFAULT_CONTROL_WIDTH,
-      grow: panelToPin.grow ?? DEFAULT_CONTROL_GROW,
+      width: panelToPin.width ?? DEFAULT_PINNED_CONTROL_STATE.width,
+      grow: panelToPin.grow ?? DEFAULT_PINNED_CONTROL_STATE.grow,
     };
     const newPanels = { ...layout$.getValue().panels };
     delete newPanels[uuid];

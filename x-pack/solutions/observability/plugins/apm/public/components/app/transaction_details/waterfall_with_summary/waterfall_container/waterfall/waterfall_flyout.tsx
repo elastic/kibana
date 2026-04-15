@@ -33,10 +33,9 @@ export function WaterfallFlyout({ waterfallItemId, waterfall, toggleFlyout }: Pr
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
-  const currentItem = waterfall.items.find((item) => item.id === waterfallItemId);
+  const currentItem = waterfall.items?.find((item) => item.id === waterfallItemId);
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

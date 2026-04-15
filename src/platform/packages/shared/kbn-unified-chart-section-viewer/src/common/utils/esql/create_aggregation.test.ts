@@ -8,95 +8,100 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import {
-  replaceFunctionParams,
-  getAggregationTemplate,
-  createTimeBucketAggregation,
-} from './create_aggregation';
+import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
-describe('replaceFunctionParams', () => {
-  it('should substitute a ?? placeholder and add backticks where needed', () => {
-    const result = replaceFunctionParams('AVG(??metricField)', {
-      metricField: 'system.load.1m',
-    });
-    expect(result).toBe('AVG(system.load.`1m`)');
-  });
-
-  it('should substitute a ?? placeholder without adding backticks when not needed', () => {
-    const result = replaceFunctionParams('AVG(??metricField)', {
-      metricField: 'system.load.normal',
-    });
-    expect(result).toBe('AVG(system.load.normal)');
-  });
-
-  it('should handle a mix of ?? and ? placeholders', () => {
-    const result = replaceFunctionParams('AVG(??field) WHERE service.name == ?serviceName', {
-      field: 'system.cpu.total.norm.pct',
-      serviceName: 'auth-service',
-    });
-    expect(result).toBe('AVG(system.cpu.total.norm.pct) WHERE service.name == "auth-service"');
-  });
-
-  it('should handle nested functions like SUM(RATE(??metricField))', () => {
-    const result = replaceFunctionParams('SUM(RATE(??metricField))', {
-      metricField: 'system.network.in.bytes',
-    });
-    expect(result).toBe('SUM(RATE(system.network.`in`.bytes))');
-  });
-});
-
-describe('getAggregationTemplate', () => {
-  it('should return SUM as default', () => {
-    const result = getAggregationTemplate({
-      type: ES_FIELD_TYPES.HISTOGRAM,
-      instrument: 'counter',
-      placeholderName: 'metricName',
-    });
-    expect(result).toBe('SUM(RATE(??metricName))');
-  });
-
-  it('returns custom function template when customFunction is provided, ignoring instrument', () => {
-    const placeholderName = 'metricName';
-    const customFunction = 'custom';
-    const expectedTemplate = 'custom(??metricName)';
-
-    const instruments = ['gauge', 'counter', 'histogram'] as const;
-    instruments.forEach((instrument) => {
-      const template = getAggregationTemplate({
-        type: ES_FIELD_TYPES.HISTOGRAM,
-        instrument,
-        placeholderName,
-        customFunction,
+describe('createMetricAggregation', () => {
+  describe('with resolved metric name (column escaping)', () => {
+    it('should substitute and add backticks where needed', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.HISTOGRAM],
+        instrument: 'gauge',
+        metricName: 'system.load.1m',
       });
-      expect(template).toBe(expectedTemplate);
+      expect(result).toBe('AVG(system.load.`1m`)');
+    });
+
+    it('should substitute without adding backticks when not needed', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.HISTOGRAM],
+        instrument: 'gauge',
+        metricName: 'system.load.normal',
+      });
+      expect(result).toBe('AVG(system.load.normal)');
+    });
+
+    it('should handle nested functions like SUM(RATE(...))', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.HISTOGRAM],
+        instrument: 'counter',
+        metricName: 'system.network.in.bytes',
+      });
+      expect(result).toBe('SUM(RATE(system.network.`in`.bytes))');
     });
   });
 
-  it('should return PERCENTILE for exponential histogram instrument', () => {
-    const result = getAggregationTemplate({
-      type: ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
-      instrument: 'counter',
-      placeholderName: 'metricName',
+  describe('with placeholder (no metricName)', () => {
+    it('should return SUM(RATE(...)) for counter instrument', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.HISTOGRAM],
+        instrument: 'counter',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('SUM(RATE(??metricName))');
     });
-    expect(result).toBe('PERCENTILE(??metricName, 95)');
-  });
 
-  it('should return PERCENTILE for tdigest instrument', () => {
-    const result = getAggregationTemplate({
-      type: ES_FIELD_TYPES.TDIGEST,
-      instrument: 'counter',
-      placeholderName: 'metricName',
-    });
-    expect(result).toBe('PERCENTILE(??metricName, 95)');
-  });
+    it('returns custom function template when customFunction is provided, ignoring instrument', () => {
+      const placeholderName = 'metricName';
+      const customFunction = 'custom';
+      const expectedTemplate = 'CUSTOM(??metricName)';
 
-  it('should return PERCENTILE with to_tdigest casting for legacy histogram', () => {
-    const result = getAggregationTemplate({
-      type: ES_FIELD_TYPES.HISTOGRAM,
-      instrument: 'histogram',
-      placeholderName: 'metricName',
+      const instruments = ['gauge', 'counter', 'histogram'] as const;
+      instruments.forEach((instrument) => {
+        const template = createMetricAggregation({
+          types: [ES_FIELD_TYPES.HISTOGRAM],
+          instrument,
+          placeholderName,
+          customFunction,
+        });
+        expect(template).toBe(expectedTemplate);
+      });
     });
-    expect(result).toBe('PERCENTILE(TO_TDIGEST(??metricName), 95)');
+
+    it('should return PERCENTILE for exponential histogram type', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
+        instrument: 'counter',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('PERCENTILE(??metricName, 95)');
+    });
+
+    it('should return PERCENTILE for tdigest type', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.TDIGEST],
+        instrument: 'counter',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('PERCENTILE(??metricName, 95)');
+    });
+
+    it('should return PERCENTILE with TO_TDIGEST casting for legacy histogram', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.HISTOGRAM],
+        instrument: 'histogram',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('PERCENTILE(TO_TDIGEST(??metricName), 95)');
+    });
+
+    it('should return AVG for gauge instrument', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.HISTOGRAM],
+        instrument: 'gauge',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('AVG(??metricName)');
+    });
   });
 });
 
@@ -107,5 +112,141 @@ describe('createTimeBucketAggregation', () => {
       timestampField: '@timestamp',
     });
     expect(result).toBe('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+  });
+});
+
+describe('createMetricAggregation with conflicting types', () => {
+  describe('with resolved metric name and multiple types', () => {
+    it('should cast double+float to double', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+        instrument: 'gauge',
+        metricName: 'http.request.duration',
+      });
+      expect(result).toBe('AVG(TO_DOUBLE(http.request.duration))');
+    });
+
+    it('should cast long+integer to long', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
+        instrument: 'counter',
+        metricName: 'requests.count',
+      });
+      expect(result).toBe('SUM(RATE(TO_LONG(requests.count)))');
+    });
+
+    it('should cast float+double+half_float to double with AVG', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.HALF_FLOAT],
+        instrument: 'gauge',
+        metricName: 'system.load.1m',
+      });
+      expect(result).toBe('AVG(TO_DOUBLE(system.load.`1m`))');
+    });
+
+    it('should not cast when types are compatible duplicates', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE],
+        instrument: 'gauge',
+        metricName: 'cpu.usage',
+      });
+      expect(result).toBe('AVG(cpu.usage)');
+    });
+
+    it('should cast mixed float and integer types to double', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
+        instrument: 'gauge',
+        metricName: 'metric.value',
+      });
+      expect(result).toBe('AVG(TO_DOUBLE(metric.value))');
+    });
+
+    it('should handle field names with special chars in cast', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+        instrument: 'gauge',
+        metricName: 'system.load.1m',
+      });
+      expect(result).toBe('AVG(TO_DOUBLE(system.load.`1m`))');
+    });
+  });
+
+  describe('with placeholder and multiple types', () => {
+    it('should cast double+float with placeholder', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+        instrument: 'gauge',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('AVG(TO_DOUBLE(??metricName))');
+    });
+
+    it('should cast counter with placeholder', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
+        instrument: 'counter',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('SUM(RATE(TO_LONG(??metricName)))');
+    });
+  });
+
+  describe('incompatible types passed through for Lens to handle', () => {
+    it('should pass through keyword + double without casting', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.DOUBLE],
+        instrument: 'gauge',
+        metricName: 'field.name',
+      });
+      expect(result).toBe('AVG(field.name)');
+    });
+
+    it('should pass through text + long without casting', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.LONG],
+        instrument: 'counter',
+        metricName: 'field.name',
+      });
+      expect(result).toBe('SUM(RATE(field.name))');
+    });
+
+    it('should pass through date + double without casting', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DOUBLE],
+        instrument: 'gauge',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('AVG(??metricName)');
+    });
+  });
+
+  describe('single type in array', () => {
+    it('should work with single type in array', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.DOUBLE],
+        instrument: 'gauge',
+        metricName: 'cpu.usage',
+      });
+      expect(result).toBe('AVG(cpu.usage)');
+    });
+
+    it('should work with legacy histogram and single type', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.HISTOGRAM],
+        instrument: 'histogram',
+        metricName: 'histogram.metric',
+      });
+      expect(result).toBe('PERCENTILE(TO_TDIGEST(histogram.metric), 95)');
+    });
+
+    it('should work with counter and single type', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.HISTOGRAM],
+        instrument: 'counter',
+        metricName: 'requests.count',
+      });
+      expect(result).toBe('SUM(RATE(requests.count))');
+    });
   });
 });

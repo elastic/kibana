@@ -31,16 +31,19 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.data.title).to.be('Custom title');
     });
 
-    it('should error when updating an unknown lens visualization', async () => {
-      const id = '123'; // unknown id
+    it('should upsert when no lens visualization exists for the id', async () => {
+      const id = '123'; // id without an existing visualization
       const response = await supertest
         .put(`${LENS_VIS_API_PATH}/${id}`)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
-        .send(getExampleLensBody('Custom title'));
+        .send(getExampleLensBody('Upsert title'));
 
-      expect(response.status).to.be(404);
-      expect(response.body.message).to.be('A Lens visualization with id [123] was not found.');
+      expect(response.status).to.be(201);
+
+      const body: LensUpdateResponseBody = response.body;
+      expect(body.id).to.be(id);
+      expect(body.data.title).to.be('Upsert title');
     });
   });
 }

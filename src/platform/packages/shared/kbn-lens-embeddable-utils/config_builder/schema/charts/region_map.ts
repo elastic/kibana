@@ -12,11 +12,12 @@ import { schema } from '@kbn/config-schema';
 import {
   fieldMetricOrFormulaOperationDefinitionSchema,
   esqlColumnSchema,
-  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnWithFormatSchema,
 } from '../metric_ops';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllBucketsWithChartDimensionSchema } from './shared';
+import { objectUnion } from './utils/object_union';
 
 const regionMapStateRegionOptionsSchema = {
   ems: schema.maybe(
@@ -33,7 +34,7 @@ export const regionMapStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     /**
      * Metric configuration
      */
@@ -51,11 +52,11 @@ export const regionMapStateSchemaESQL = schema.object(
     type: schema.literal('region_map'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     /**
      * Metric configuration
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema,
+    metric: esqlColumnWithFormatSchema,
     /**
      * Configure how to break down to regions
      */
@@ -64,7 +65,7 @@ export const regionMapStateSchemaESQL = schema.object(
   { meta: { id: 'regionMapESQL', title: 'Region Map (ES|QL)' } }
 );
 
-export const regionMapStateSchema = schema.oneOf(
+export const regionMapStateSchema = objectUnion(
   [regionMapStateSchemaNoESQL, regionMapStateSchemaESQL],
   { meta: { id: 'regionMapChart', title: 'Region Map' } }
 );

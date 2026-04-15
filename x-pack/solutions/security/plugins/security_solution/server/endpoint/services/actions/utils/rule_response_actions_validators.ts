@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { isEqual, xorWith } from 'lodash';
+import { isEqual, keyBy, xorWith } from 'lodash';
 import pMap from 'p-map';
+import type { Logger } from '@kbn/core/server';
+import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
+import type { ScriptsLibraryClientInterface } from '../../scripts_library';
 import type { BulkError } from '../../../../lib/detection_engine/routes/utils';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
@@ -20,6 +23,7 @@ import type {
   RuleResponseEndpointAction,
   RuleResponseOsqueryAction,
   RuleToImport,
+  RunscriptParams,
 } from '../../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { stringify } from '../../../utils/stringify';
@@ -31,6 +35,11 @@ import {
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 
 type RuleResponseActions = Pick<RuleResponse, 'response_actions'>;
+
+export type CheckOsqueryResponseActionAuthz = (actionParams: {
+  saved_query_id?: string;
+  pack_id?: string;
+}) => Promise<void>;
 
 export interface ValidateRuleResponseActionsOptions<
   T extends RuleResponseActions = RuleResponseActions
@@ -47,6 +56,12 @@ export interface ValidateRuleResponseActionsOptions<
    * are only applied to the response actions that have changed
    */
   existingRule?: RuleAlertType | null;
+  /**
+   * Optional callback to validate osquery response action authorization.
+   * Should be bound to the current request before passing in.
+   * When provided, osquery response actions will be validated for privileges.
+   */
+  checkOsqueryResponseActionAuthz?: CheckOsqueryResponseActionAuthz;
 }
 
 /**
@@ -61,6 +76,7 @@ export const validateRuleResponseActions = async <
   spaceId,
   rulePayload: { response_actions: ruleResponseActions },
   existingRule,
+  checkOsqueryResponseActionAuthz,
 }: ValidateRuleResponseActionsOptions<T>): Promise<void> => {
   const logger = endpointService.createLogger('validateRuleResponseActions');
   const existingRuleResponseActions = existingRule?.params?.responseActions;
@@ -101,8 +117,11 @@ export const validateRuleResponseActions = async <
     () => `Response actions needing validation: ${stringify(responseActionsToValidate)}`
   );
 
+  const isRunscriptAutomatedResponseActionEnabled =
+    endpointService.experimentalFeatures.responseActionsEndpointAutomatedRunScript;
+
   for (const actionData of responseActionsToValidate) {
-    if (isEndpointResponseAction(actionData)) {
+    if (isEndpointResponseAction(actionData) && actionData.params.command) {
       validateEndpointResponseActionAuthz(endpointAuthz, actionData.params.command);
 
       // Individual response action payload validations
@@ -111,13 +130,73 @@ export const validateRuleResponseActions = async <
         case 'suspend-process':
           validateEndpointKillSuspendProcessResponseAction(actionData.params);
           break;
+
+        case 'runscript':
+          if (!isRunscriptAutomatedResponseActionEnabled) {
+            throw new CustomHttpRequestError(
+              `Endpoint runscript automated response action is not enabled`,
+              400
+            );
+          }
+
+          // validate runscript response action if it is defined in the rule update payload,
+          // OR:
+          // if the script IDs are being used in the rule update payload.
+          //
+          // Why:
+          // there is no need to validate a script (aside from Authz above) if it is being removed
+          // from the rule via the update. This will ensure that users can remove the use of a
+          // script if that script is ever updated in a way that would cause it to fail validation -
+          // example: the script is updated to require input arguments. User should not be forced to
+          // first update the rule to ensure the existing entry is valid if all they want to do is
+          // remove the use of the script from the rule.
+          if (
+            ruleResponseActions?.includes(actionData as ResponseAction) ||
+            isScriptIdReferencedInRunscriptResponseActions(
+              ruleResponseActions ?? [],
+              getScriptIdsFromRunscriptConfig(actionData.params.config)
+            )
+          ) {
+            await validateEndpointRunscriptResponseAction(
+              endpointService.getScriptsLibraryClient(spaceId, 'elastic'),
+              logger,
+              actionData.params
+            );
+          } else {
+            logger.debug(
+              () =>
+                `Skipping validation of runscript response action - script IDs [${getScriptIdsFromRunscriptConfig(
+                  (actionData.params as RunscriptParams).config ?? {}
+                ).join(', ')}] not in rulePayload`
+            );
+          }
+          break;
+      }
+    } else if (isOsqueryResponseAction(actionData)) {
+      if (checkOsqueryResponseActionAuthz) {
+        const params = actionData.params;
+        // Params may be snake_case (from API payload: OsqueryResponseAction) or
+        // camelCase (from existing rule in ES: RuleResponseOsqueryAction)
+        await checkOsqueryResponseActionAuthz({
+          saved_query_id:
+            ('saved_query_id' in params ? params.saved_query_id : undefined) ??
+            ('savedQueryId' in params ? params.savedQueryId : undefined),
+          pack_id:
+            ('pack_id' in params ? params.pack_id : undefined) ??
+            ('packId' in params ? params.packId : undefined),
+        });
+      } else {
+        logger.debug(
+          () =>
+            `Skipping osquery response action validation - no osquery authz checker provided: ${stringify(
+              actionData
+            )}`
+        );
       }
     } else {
       logger.debug(
         () =>
-          `Skipping validation of response action - action type id not '.endpoint': ${stringify(
-            actionData
-          )}`
+          `Skipping validation of response action - unknown action type: ${stringify(actionData)}`
       );
     }
   }
@@ -129,7 +208,10 @@ type ImportRuleResponseActions = Pick<RuleToImport, 'response_actions' | 'id' | 
 
 export type ValidateRuleImportResponseActionsOptions<
   T extends ImportRuleResponseActions = ImportRuleResponseActions
-> = Pick<ValidateRuleResponseActionsOptions, 'endpointAuthz' | 'endpointService' | 'spaceId'> & {
+> = Pick<
+  ValidateRuleResponseActionsOptions,
+  'endpointAuthz' | 'endpointService' | 'spaceId' | 'checkOsqueryResponseActionAuthz'
+> & {
   rulesToImport: T[];
 };
 
@@ -155,6 +237,7 @@ export const validateRuleImportResponseActions = async <
   endpointAuthz,
   spaceId,
   rulesToImport,
+  checkOsqueryResponseActionAuthz,
 }: ValidateRuleImportResponseActionsOptions<T>): Promise<
   ValidateRuleImportResponseActionsResult<T>
 > => {
@@ -172,6 +255,7 @@ export const validateRuleImportResponseActions = async <
           endpointService,
           spaceId,
           rulePayload: rule,
+          checkOsqueryResponseActionAuthz,
         });
 
         response.valid.push(rule);
@@ -232,6 +316,20 @@ const isEndpointResponseAction = (
 };
 
 /** @private */
+const isOsqueryResponseAction = (
+  ruleResponseAction:
+    | RuleResponseOsqueryAction
+    | RuleResponseEndpointAction
+    | OsqueryResponseAction
+    | EndpointResponseAction
+): ruleResponseAction is OsqueryResponseAction | RuleResponseOsqueryAction => {
+  return (
+    ('action_type_id' in ruleResponseAction && ruleResponseAction.action_type_id === '.osquery') ||
+    ('actionTypeId' in ruleResponseAction && ruleResponseAction.actionTypeId === '.osquery')
+  );
+};
+
+/** @private */
 const validateEndpointKillSuspendProcessResponseAction = ({ config, command }: ProcessesParams) => {
   if (config.overwrite && config.field) {
     throw new CustomHttpRequestError(
@@ -246,4 +344,94 @@ const validateEndpointKillSuspendProcessResponseAction = ({ config, command }: P
       400
     );
   }
+};
+
+const getScriptIdsFromRunscriptConfig = (config: RunscriptParams['config']): string[] => {
+  return Object.values(config ?? {}).reduce((acc, osConfig) => {
+    if (osConfig.scriptId && !acc.includes(osConfig.scriptId)) {
+      acc.push(osConfig.scriptId);
+    }
+
+    return acc;
+  }, [] as string[]);
+};
+
+/** @private */
+const validateEndpointRunscriptResponseAction = async (
+  scriptsClient: ScriptsLibraryClientInterface,
+  logger: Logger,
+  { config }: RunscriptParams
+): Promise<void> => {
+  if (!config) {
+    throw new CustomHttpRequestError(
+      `Invalid [runscript] response action configuration: 'config' is required`,
+      400
+    );
+  }
+
+  const scriptIds = getScriptIdsFromRunscriptConfig(config);
+
+  if (scriptIds.length === 0) {
+    throw new CustomHttpRequestError(
+      `Invalid [runscript] response action configuration: no scripts specified`,
+      400
+    );
+  }
+
+  const scripts = await scriptsClient.list({
+    kuery: `id:(${scriptIds.map((id) => `"${id}"`).join(' OR ')})`,
+  });
+
+  logger.debug(
+    () => `Found ${scripts.total} scripts for runscript response action:\n ${stringify(scripts)}`
+  );
+
+  const scriptById = keyBy(scripts.data, 'id');
+
+  for (const [osType, osRunscriptConfig] of Object.entries(config)) {
+    if (osRunscriptConfig.scriptId) {
+      const script = scriptById[osRunscriptConfig.scriptId];
+
+      if (!script) {
+        throw new CustomHttpRequestError(
+          `Invalid [${osType}] [runscript] response action configuration: script [${osRunscriptConfig.scriptId}] not found`,
+          400
+        );
+      }
+
+      if (!script.platform.includes(osType as SupportedHostOsType)) {
+        throw new CustomHttpRequestError(
+          `Invalid [${osType}] [runscript] response action configuration: script [${script.id}, ${script.name}] is not compatible with host OS '${osType}']`
+        );
+      }
+
+      if (
+        script.requiresInput &&
+        (!osRunscriptConfig.scriptInput || osRunscriptConfig.scriptInput.trim() === '')
+      ) {
+        throw new CustomHttpRequestError(
+          `Invalid [${osType}] [runscript] response action configuration: script [${script.id}, ${script.name}] requires input but no input was provided`,
+          400
+        );
+      }
+    }
+  }
+};
+const isScriptIdReferencedInRunscriptResponseActions = (
+  /** Rule actions that would be provided for a create/update type of operation */
+  ruleActions: ResponseAction[],
+  scriptId: string | string[]
+): boolean => {
+  const scriptIdList = Array.isArray(scriptId) ? scriptId : [scriptId];
+
+  return ruleActions.some((action) => {
+    return (
+      action.action_type_id === '.endpoint' &&
+      action.params.command === 'runscript' &&
+      action.params.config &&
+      Object.values(action.params.config).some((osConfig) =>
+        scriptIdList.includes(osConfig.scriptId ?? '')
+      )
+    );
+  });
 };

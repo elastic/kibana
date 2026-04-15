@@ -97,7 +97,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
           <EuiButtonEmpty
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             href={getHref('agent_list')}
             flush="left"
             size="xs"

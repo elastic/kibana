@@ -15,7 +15,6 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { hasIcon } from '@kbn/visualization-ui-components';
 import type {
   MetricVisualizationState,
-  TitleFontWeight,
   PrimaryMetricFontSize,
   IconPosition,
   Alignment,
@@ -150,20 +149,6 @@ export function MetricAppearanceSettings({
           }}
           isIconOnly
           dataTestSubj="lens-metric-appearance-title-and-subtitle-alignment-btn"
-        />
-        <AppearanceOption
-          label={i18n.translate('xpack.lens.metric.appearancePopover.fontWeight', {
-            defaultMessage: 'Font weight',
-          })}
-          value={state.titleWeight ?? LENS_METRIC_STATE_DEFAULTS.titleWeight}
-          options={fontWeightOptions}
-          onChange={(id) => {
-            setState({
-              ...state,
-              titleWeight: id,
-            });
-          }}
-          dataTestSubj="lens-metric-appearance-title-and-subtitle-font-weight-btn"
         />
       </AppearanceOptionGroup>
       <EuiHorizontalRule margin="m" />
@@ -307,21 +292,21 @@ const alignmentOptions: Array<EuiButtonGroupOptionProps & { id: Alignment }> = [
     label: i18n.translate('xpack.lens.shared.left', {
       defaultMessage: 'Left',
     }),
-    iconType: 'editorAlignLeft',
+    iconType: 'textAlignLeft',
   },
   {
     id: 'center',
     label: i18n.translate('xpack.lens.shared.center', {
       defaultMessage: 'Center',
     }),
-    iconType: 'editorAlignCenter',
+    iconType: 'textAlignCenter',
   },
   {
     id: 'right',
     label: i18n.translate('xpack.lens.shared.right', {
       defaultMessage: 'Right',
     }),
-    iconType: 'editorAlignRight',
+    iconType: 'textAlignRight',
   },
 ];
 
@@ -336,21 +321,6 @@ const iconPositionOptions: Array<EuiButtonGroupOptionProps & { id: IconPosition 
     id: 'right',
     label: i18n.translate('xpack.lens.shared.right', {
       defaultMessage: 'Right',
-    }),
-  },
-];
-
-const fontWeightOptions: Array<EuiButtonGroupOptionProps & { id: TitleFontWeight }> = [
-  {
-    id: 'normal',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.regular', {
-      defaultMessage: 'Regular',
-    }),
-  },
-  {
-    id: 'bold',
-    label: i18n.translate('xpack.lens.metric.appearancePopover.bold', {
-      defaultMessage: 'Bold',
     }),
   },
 ];
@@ -379,6 +349,12 @@ const primaryMetricPositionOptions: Array<
     id: 'top',
     label: i18n.translate('xpack.lens.metric.appearancePopover.top', {
       defaultMessage: 'Top',
+    }),
+  },
+  {
+    id: 'middle',
+    label: i18n.translate('xpack.lens.metric.appearancePopover.middle', {
+      defaultMessage: 'Middle',
     }),
   },
   {

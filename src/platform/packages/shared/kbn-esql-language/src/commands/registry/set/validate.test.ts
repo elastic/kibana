@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLMessage } from '../../definitions/types';
 import { validate } from './validate';
 import { Parser } from '@elastic/esql';
-import type { ESQLMessage } from '@elastic/esql/types';
 
 const setExpectErrors = (query: string, expectedErrors: string[]) => {
   const { root } = Parser.parse(query);
@@ -73,7 +73,7 @@ describe('SET Validation', () => {
     });
 
     test('no errors on approximation setting with map_param value and valid parameters', () => {
-      setExpectErrors('set approximation = { "num_rows": 1000, "confidence_level": 0.95 }', []);
+      setExpectErrors('set approximation = { "rows": 1000, "confidence_level": 0.95 }', []);
     });
 
     test('errors on approximation setting with map_param value and invalid parameter name', () => {
@@ -83,8 +83,8 @@ describe('SET Validation', () => {
     });
 
     test('errors on approximation setting with map_param value and invalid parameter type', () => {
-      setExpectErrors('set approximation = { "num_rows": "not_an_integer" }', [
-        'Invalid type for parameter "num_rows". Expected type: integer. Received: keyword.',
+      setExpectErrors('set approximation = { "rows": "not_an_integer" }', [
+        'Invalid type for parameter "rows". Expected type: integer. Received: keyword.',
       ]);
     });
 

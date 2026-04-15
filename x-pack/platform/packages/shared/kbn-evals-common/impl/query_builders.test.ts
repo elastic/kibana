@@ -7,6 +7,8 @@
 
 import {
   buildRunFilterQuery,
+  buildExampleScoresQuery,
+  buildDatasetExampleScoresQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
   SCORES_SORT_ORDER,
@@ -17,6 +19,29 @@ import {
 } from './query_builders';
 
 describe('query_builders', () => {
+  describe('buildExampleScoresQuery', () => {
+    it('filters by example.id', () => {
+      const query = buildExampleScoresQuery('example-123');
+      expect(query).toEqual({
+        bool: { must: [{ term: { 'example.id': 'example-123' } }] },
+      });
+    });
+  });
+
+  describe('buildDatasetExampleScoresQuery', () => {
+    it('filters by example.dataset.id and run_id', () => {
+      const query = buildDatasetExampleScoresQuery('dataset-123', 'run-123');
+      expect(query).toEqual({
+        bool: {
+          must: [
+            { term: { 'example.dataset.id': 'dataset-123' } },
+            { term: { run_id: 'run-123' } },
+          ],
+        },
+      });
+    });
+  });
+
   describe('buildRunFilterQuery', () => {
     it('filters by run_id only when no options provided', () => {
       const query = buildRunFilterQuery('run-123');
@@ -74,32 +99,67 @@ describe('query_builders', () => {
   });
 
   describe('buildRunsListingFilterQuery', () => {
-    it('returns match_all when no filters provided', () => {
-      expect(buildRunsListingFilterQuery()).toEqual({ match_all: {} });
+    const preflightExclusion = { term: { run_id: 'kbn-evals-preflight' } };
+
+    it('excludes preflight runs when no filters provided', () => {
+      expect(buildRunsListingFilterQuery()).toEqual({
+        bool: { must_not: [preflightExclusion] },
+      });
     });
 
-    it('returns match_all for empty options', () => {
-      expect(buildRunsListingFilterQuery({})).toEqual({ match_all: {} });
+    it('excludes preflight runs for empty options', () => {
+      expect(buildRunsListingFilterQuery({})).toEqual({
+        bool: { must_not: [preflightExclusion] },
+      });
     });
 
     it('filters by suiteId', () => {
       const query = buildRunsListingFilterQuery({ suiteId: 'suite-a' });
       expect(query).toEqual({
-        bool: { filter: [{ term: { 'suite.id': 'suite-a' } }] },
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [{ term: { 'suite.id': 'suite-a' } }],
+        },
       });
     });
 
     it('filters by modelId', () => {
       const query = buildRunsListingFilterQuery({ modelId: 'gpt-4' });
       expect(query).toEqual({
-        bool: { filter: [{ term: { 'task.model.id': 'gpt-4' } }] },
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [{ term: { 'task.model.id': 'gpt-4' } }],
+        },
       });
     });
 
     it('filters by branch', () => {
       const query = buildRunsListingFilterQuery({ branch: 'main' });
       expect(query).toEqual({
-        bool: { filter: [{ term: { 'run_metadata.git_branch': 'main' } }] },
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [{ term: { 'run_metadata.git_branch': 'main' } }],
+        },
+      });
+    });
+
+    it('filters by datasetId', () => {
+      const query = buildRunsListingFilterQuery({ datasetId: 'dataset-1' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [{ term: { 'example.dataset.id': 'dataset-1' } }],
+        },
+      });
+    });
+
+    it('filters by datasetName', () => {
+      const query = buildRunsListingFilterQuery({ datasetName: 'Dataset One' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [{ term: { 'example.dataset.name': 'Dataset One' } }],
+        },
       });
     });
 
@@ -108,8 +168,11 @@ describe('query_builders', () => {
         suiteId: 'suite-a',
         modelId: 'gpt-4',
         branch: 'main',
-      }) as { bool: { filter: unknown[] } };
-      expect(query.bool.filter).toHaveLength(3);
+        datasetId: 'dataset-1',
+        datasetName: 'Dataset One',
+      }) as { bool: { filter: unknown[]; must_not: unknown[] } };
+      expect(query.bool.filter).toHaveLength(5);
+      expect(query.bool.must_not).toEqual([preflightExclusion]);
     });
   });
 
@@ -136,6 +199,8 @@ describe('query_builders', () => {
         expect.arrayContaining([
           'latest_timestamp',
           'suite_id',
+          'dataset_id',
+          'dataset_name',
           'task_model_id',
           'task_model_family',
           'task_model_provider',
@@ -146,6 +211,7 @@ describe('query_builders', () => {
           'git_commit_sha',
           'total_repetitions',
           'build_url',
+          'pull_request',
         ])
       );
     });
@@ -157,6 +223,8 @@ describe('query_builders', () => {
       doc_count: 10,
       latest_timestamp: { value_as_string: '2025-01-01T00:00:00Z' },
       suite_id: { buckets: [{ key: 'suite-a' }] },
+      dataset_id: { buckets: [{ key: 'dataset-1' }] },
+      dataset_name: { buckets: [{ key: 'Dataset One' }] },
       task_model_id: { buckets: [{ key: 'gpt-4' }] },
       task_model_family: { buckets: [{ key: 'gpt-4' }] },
       task_model_provider: { buckets: [{ key: 'openai' }] },
@@ -167,6 +235,7 @@ describe('query_builders', () => {
       git_commit_sha: { buckets: [{ key: 'abc123' }] },
       total_repetitions: { value: 3 },
       build_url: { buckets: [{ key: 'https://buildkite.com/build/1' }] },
+      pull_request: { buckets: [{ key: '12345' }] },
       ...overrides,
     });
 
@@ -196,12 +265,14 @@ describe('query_builders', () => {
         run_id: 'run-1',
         timestamp: '2025-01-01T00:00:00Z',
         suite_id: 'suite-a',
+        dataset_id: 'dataset-1',
+        dataset_name: 'Dataset One',
         task_model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' },
         evaluator_model: { id: 'claude-3', family: 'claude-3', provider: 'anthropic' },
         git_branch: 'main',
         git_commit_sha: 'abc123',
         total_repetitions: 3,
-        ci: { build_url: 'https://buildkite.com/build/1' },
+        ci: { build_url: 'https://buildkite.com/build/1', pull_request: '12345' },
       });
     });
 
@@ -235,11 +306,15 @@ describe('query_builders', () => {
       const bucket = makeBucket({
         git_branch: { buckets: [] },
         git_commit_sha: undefined,
+        dataset_id: { buckets: [] },
+        dataset_name: undefined,
       });
       const aggs = { total_runs: { value: 1 }, runs: { buckets: [bucket] } };
       const result = parseRunsListingResponse(aggs, { page: 1, perPage: 25 });
       expect(result.runs[0].git_branch).toBeNull();
       expect(result.runs[0].git_commit_sha).toBeNull();
+      expect(result.runs[0].dataset_id).toBeNull();
+      expect(result.runs[0].dataset_name).toBeNull();
     });
 
     it('defaults total_repetitions to 1 when missing', () => {

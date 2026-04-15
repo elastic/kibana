@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod-helpers/v4';
 import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
 import { normalizeDateMath } from '@kbn/securitysolution-utils/date_math';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
@@ -72,6 +72,7 @@ const normalizeCommonResponseFields = (rule: RuleResponse): SharedResponseProps 
     updated_at: rule.updated_at,
     updated_by: rule.updated_by,
     revision: rule.revision,
+    meta: rule.meta ?? {},
   };
 };
 

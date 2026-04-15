@@ -191,7 +191,7 @@ export const AgentDataTimedOutBottomBar: React.FC<{
             color="text"
             size="s"
             href={troubleshootLink}
-            iconType="popout"
+            iconType="external"
             target="_blank"
           >
             <FormattedMessage

@@ -64,7 +64,8 @@ export const serverless: Command = {
                           ${SERVERLESS_RESOURCES_PATHS.map((filePath) => basename(filePath)).join(
                             ' | '
                           )}
-      --uiam              Configure ES serverless with Universal Identity and Access Management (UIAM) support.
+      --uiam              Configure ES serverless with Universal Identity and Access Management (UIAM) support [default: true].
+      --uiam-oauth        Start an additional UIAM OAuth container for OAuth flow support [default: false].
 
       -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
@@ -99,6 +100,7 @@ export const serverless: Command = {
         files: 'F',
         esProjectType: ['projectType', 'project-type'], // ensure BWC: can still run with `--projectType`
         dataPath: 'data-path',
+        uiamOAuth: 'uiam-oauth',
       },
 
       string: [
@@ -111,13 +113,24 @@ export const serverless: Command = {
         'kibanaUrl',
         'dataPath',
       ],
-      boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady', 'uiam'],
+      boolean: [
+        'clean',
+        'ssl',
+        'kill',
+        'background',
+        'skipTeardown',
+        'waitForReady',
+        'uiam',
+        'uiamOAuth',
+      ],
 
       default: {
         ...defaults,
         kibanaUrl: 'http://localhost:5601/',
         dataPath: 'stateless',
         ssl: true,
+        uiam: true,
+        uiamOAuth: false,
       },
     }) as unknown as ServerlessOptions;
 

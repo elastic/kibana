@@ -9,8 +9,11 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
+
+export type { WorkflowYaml } from '../spec/schema';
 
 export enum ExecutionStatus {
   // In progress
@@ -115,6 +118,10 @@ export interface EsWorkflowExecution {
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
   /** IDs of all step executions, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
+  /** Caller-supplied execution metadata, separate from workflow inputs */
+  metadata?: Record<string, unknown>;
+  /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
+  dispatchEventId?: string;
 }
 
 export interface ProviderInput {
@@ -140,6 +147,8 @@ export interface EsWorkflowStepExecution {
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;
+  /** Whether this step execution belongs to a test run of the workflow. */
+  isTestRun?: boolean;
   startedAt: string;
   finishedAt?: string;
   executionTimeMs?: number;
@@ -217,6 +226,13 @@ export interface WorkflowExecutionListDto {
   total: number;
 }
 
+export interface WorkflowStepExecutionListDto {
+  results: EsWorkflowStepExecution[];
+  total: number;
+  page?: number;
+  size?: number;
+}
+
 // TODO: convert to actual elastic document spec
 
 export const EsWorkflowSchema = z.object({
@@ -242,13 +258,18 @@ export type EsWorkflowCreate = Omit<
   'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
 >;
 
+export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
+const MAX_BULK_CREATE_WORKFLOWS = 500;
+export const WORKFLOW_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$/;
+
 export const CreateWorkflowCommandSchema = z.object({
-  yaml: z.string(),
-  id: z.string().optional(),
+  yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
+  id: z.string().max(255).regex(WORKFLOW_ID_PATTERN).optional(),
 });
+export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export const BulkCreateWorkflowsCommandSchema = z.object({
-  workflows: z.array(CreateWorkflowCommandSchema),
+  workflows: z.array(CreateWorkflowCommandSchema).max(MAX_BULK_CREATE_WORKFLOWS),
 });
 
 export type BulkCreateWorkflowsCommand = z.infer<typeof BulkCreateWorkflowsCommandSchema>;
@@ -280,7 +301,9 @@ export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
+  workflowId: z.string().optional(), // Optional to allow for test step runs for unsaved workflows
   stepId: z.string(),
+  executionContext: z.record(z.string(), z.unknown()).optional(),
   contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
@@ -300,8 +323,6 @@ export const TestWorkflowResponseSchema = z.object({
   workflowExecutionId: z.string(),
 });
 export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
-
-export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {
   id: string;
@@ -326,6 +347,11 @@ export interface WorkflowDetailDto {
   valid: boolean;
 }
 
+export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
+  id: string;
+}
+export type WorkflowMgetResponseDto = WorkflowPartialDetailDto[];
+
 export interface WorkflowListItemDto {
   id: string;
   name: string;
@@ -333,7 +359,7 @@ export interface WorkflowListItemDto {
   enabled: boolean;
   definition: WorkflowYaml | null;
   createdAt: string;
-  history: WorkflowExecutionHistoryModel[];
+  history?: WorkflowExecutionHistoryModel[];
   tags?: string[];
   valid: boolean;
 }
@@ -373,7 +399,7 @@ export interface WorkflowStatsDto {
     enabled: number;
     disabled: number;
   };
-  executions: WorkflowExecutionsHistoryStats[];
+  executions?: WorkflowExecutionsHistoryStats[];
 }
 
 export interface WorkflowAggsDto {
@@ -429,6 +455,8 @@ export interface BaseConnectorContract {
   documentation?: string | null;
   /** API stability level derived from the OpenAPI `x-state` field */
   stability?: StepStabilityLevel;
+  /** Deprecation metadata for this step type. */
+  deprecation?: StepDeprecationInfo;
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
   editorHandlers?: {
@@ -478,12 +506,16 @@ export interface InternalConnectorContract extends BaseConnectorContract {
   };
 }
 
-export interface StepPropertyHandler<T = unknown> {
+export interface StepPropertyHandler<
+  T = unknown,
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /**
    * Entity selection configuration for the property.
    * Provides a unified interface for search, resolution, and decoration of entity references.
    */
-  selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+  selection?: PropertySelectionHandler<Exclude<T, undefined>, TConfig, TInput>;
   /**
    * Connector ID selection configuration for the property.
    * Used to resolve connector IDs for custom steps.
@@ -493,19 +525,29 @@ export interface StepPropertyHandler<T = unknown> {
   connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
-export interface PropertySelectionHandler<T = unknown> {
+export interface PropertySelectionHandler<
+  T = unknown,
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /**
    * Search for options matching the input query.
    * Used by autocomplete dropdowns when the user types.
    */
-  search: (input: string, context: SelectionContext) => Promise<SelectionOption<T>[]>;
+  search: (
+    input: string,
+    context: SelectionContext<TConfig, TInput>
+  ) => Promise<SelectionOption<T>[]>;
 
   /**
    * Resolve an entity by its value.
    * Used when loading existing values or when a value is pasted.
    * Returns null if the entity is not found.
    */
-  resolve: (value: T, context: SelectionContext) => Promise<SelectionOption<T> | null>;
+  resolve: (
+    value: T,
+    context: SelectionContext<TConfig, TInput>
+  ) => Promise<SelectionOption<T> | null>;
 
   /**
    * Get detailed information for the current value.
@@ -514,7 +556,7 @@ export interface PropertySelectionHandler<T = unknown> {
    */
   getDetails: (
     input: string,
-    context: SelectionContext,
+    context: SelectionContext<TConfig, TInput>,
     option: SelectionOption<T> | null
   ) => Promise<SelectionDetails>;
 }
@@ -542,13 +584,35 @@ export interface SelectionDetails {
   }>;
 }
 
-export interface SelectionContext {
+/**
+ * Structured values of the current step, split by scope.
+ *
+ * Built from scalar leaf properties in the YAML step definition.
+ * Intermediate map nodes that have no scalar value are **not** represented;
+ * a missing key means "not yet defined in the YAML", not "empty object".
+ */
+export interface StepSelectionValues<
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
+  /** Root-level step properties (everything outside the `with` block). */
+  config: TConfig;
+  /** Properties nested under the `with` block. */
+  input: TInput;
+}
+
+export interface SelectionContext<
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
   /** The property path ("config" or "input") */
   scope: 'config' | 'input';
   /** The property key (e.g., "agent_id") */
   propertyKey: string;
+  /** Sibling values of the current step, keyed by scope. */
+  values: StepSelectionValues<TConfig, TInput>;
 }
 
 export interface ConnectorIdSelectionHandler {
@@ -575,8 +639,8 @@ export type ConnectorContractUnion =
   | InternalConnectorContract;
 
 export interface WorkflowsSearchParams {
-  size: number;
-  page: number;
+  size?: number;
+  page?: number;
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
@@ -591,4 +655,32 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   /** Bulk body for elasticsearch.bulk step */
   bulkBody?: Array<Record<string, unknown>>;
+}
+
+export type WorkflowDiagnosticSeverity = 'error' | 'warning' | 'info';
+
+export interface WorkflowDiagnostic {
+  severity: WorkflowDiagnosticSeverity;
+  message: string;
+  source: string;
+  path?: (string | number)[];
+}
+export interface ValidateWorkflowResponseDto {
+  valid: boolean;
+  diagnostics: WorkflowDiagnostic[];
+  parsedWorkflow?: WorkflowYaml;
+}
+
+export interface GetAvailableConnectorsResponse {
+  connectorTypes: Record<string, ConnectorTypeInfo>;
+  totalConnectors: number;
+}
+
+export interface ChildWorkflowExecutionItem {
+  parentStepExecutionId: string;
+  workflowId: string;
+  workflowName: string;
+  executionId: string;
+  status: ExecutionStatus;
+  stepExecutions: WorkflowStepExecutionDto[];
 }

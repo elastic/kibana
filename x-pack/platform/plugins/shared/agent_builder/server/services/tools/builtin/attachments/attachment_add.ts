@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -16,7 +16,9 @@ import type { AttachmentToolsOptions } from './types';
 const attachmentAddSchema = z.object({
   id: z.string().optional().describe('Optional custom ID for the attachment'),
   type: z.string().describe('Type of attachment (e.g., "text", "json", "code")'),
-  data: z.record(z.any()).describe('The attachment data/content as a JSON object, required'),
+  data: z
+    .record(z.string(), z.any())
+    .describe('The attachment data/content as a JSON object, required'),
   description: z.string().optional().describe('Human-readable description of the attachment'),
 });
 

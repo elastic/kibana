@@ -32,6 +32,7 @@ import { getRandomRequestBody } from './http_request_body_templates';
 import { applyMalformation } from './http_malformed_data_generator';
 import { getInfraPool, getRandomHost, hostToLogFields } from './http_infra_pool';
 import { getActiveSession } from './http_session_pool';
+import { random } from './http_random';
 
 /**
  * Traffic pattern types.
@@ -95,7 +96,7 @@ export function generateNormalTraffic(): Partial<LogDocument> {
   const method = getWeightedRandomItem(HTTP_METHODS).method;
   const path = getRandomItem(URL_PATHS.normal);
   const statusCode = getWeightedRandomItem(HTTP_STATUS_CODES).code;
-  const isHttps = Math.random() < 0.8; // 80% HTTPS
+  const isHttps = random() < 0.8; // 80% HTTPS
 
   const logData: Partial<LogDocument> = {
     ...baseData,
@@ -241,11 +242,11 @@ export function generateHealthCheckTraffic(): Partial<LogDocument> {
     ...baseData,
     'http.request.method': 'GET',
     'url.path': path,
-    'http.response.status_code': Math.random() < 0.99 ? 200 : 503, // 99% success
+    'http.response.status_code': random() < 0.99 ? 200 : 503, // 99% success
     'http.version': '1.1',
     'user_agent.name': 'kube-probe/1.28', // K8s probe
     'http.request.referrer': '-',
-    'http.response.bytes': Math.random() < 0.99 ? 0 : 100, // Minimal response
+    'http.response.bytes': random() < 0.99 ? 0 : 100, // Minimal response
     ...generateNetworkMetadata(false), // Health checks often use HTTP
     tags: ['health-check', 'monitoring'],
   };
@@ -454,7 +455,7 @@ export function generateWebSocketTraffic(): Partial<LogDocument> {
  * Combines all patterns with realistic distribution.
  */
 export function generateMixedTraffic(): Partial<LogDocument> {
-  const rand = Math.random();
+  const rand = random();
 
   // Traffic distribution (should sum to 100%)
   if (rand < 0.2) return generateHealthCheckTraffic(); // 20%

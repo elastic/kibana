@@ -49,7 +49,6 @@
     "@kbn/alerts-ui-shared",
     "@kbn/ui-actions-plugin",
     "@kbn/file-upload-common",
-    "@kbn/deeplinks-search",
     "@kbn/logging-mocks",
     "@kbn/inference-plugin",
     "@kbn/code-editor",
@@ -61,7 +60,8 @@
     "@kbn/search-shared-ui",
     "@kbn/license-management-plugin",
     "@kbn/connector-schemas",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/evals-plugin"
   ],
   "exclude": [
     "target/**/*"

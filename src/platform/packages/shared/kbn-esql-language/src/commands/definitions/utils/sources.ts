@@ -10,14 +10,15 @@ import type { IndexAutocompleteItem, ESQLSourceResult, EsqlView } from '@kbn/esq
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
-import { isAsExpression, Walker, LeafPrinter } from '@elastic/esql';
+import { isAsExpression, Walker, LeafPrinter, Parser } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
-import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
-import { withAutoSuggest } from './autocomplete/helpers';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
+import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
 import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
+import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
 
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -52,23 +53,40 @@ function getSafeInsertSourceText(text: string) {
 
 export const buildSourcesDefinitions = (
   sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>,
-  queryString?: string
-): ISuggestionItem[] =>
-  sources.map(({ name, isIntegration, title, type }) => {
-    let text = getSafeInsertSourceText(name);
-    const isTimeseries = type === SOURCES_TYPES.TIMESERIES;
-    let rangeToReplace: { start: number; end: number } | undefined;
-    let filterText: string | undefined;
+  sourceReplacementContext?: {
+    textBeforeCursor: string;
+    commandStart: number;
+  }
+): ISuggestionItem[] => {
+  const sourceCommandContext = sourceReplacementContext
+    ? {
+        commandStart: sourceReplacementContext.commandStart,
+        prefixRangeStart: computePrefixRange(sourceReplacementContext.textBeforeCursor).range.start,
+      }
+    : undefined;
 
-    // If this is a timeseries source we should replace FROM with TS.
-    if (isTimeseries && queryString) {
-      text = `TS ${text}`;
-      rangeToReplace = {
-        start: 0,
-        end: queryString.length + 1,
+  return sources.map(({ name, isIntegration, title, type }) => {
+    const text = getSafeInsertSourceText(name);
+    const isTimeseries = type === SOURCES_TYPES.TIMESERIES;
+    let command: ISuggestionItem['command'];
+
+    if (isTimeseries && sourceCommandContext) {
+      // The command runs after Monaco inserts `text`, so include the inserted source length.
+      const replaceEnd = sourceCommandContext.prefixRangeStart + text.length;
+
+      command = {
+        // Monaco command payloads require a title.
+        title: 'Apply text replacement',
+        id: ESQL_APPLY_TEXT_REPLACEMENT_COMMAND,
+        arguments: [
+          {
+            replacementText: `TS ${text}`,
+            // Command arguments are string maps; the editor command parses them.
+            replaceStart: String(sourceCommandContext.commandStart),
+            replaceEnd: String(replaceEnd),
+          },
+        ],
       };
-      // Keep filterText source-aware so Monaco can rank/filter by the typed source fragment.
-      filterText = `FROM ${name}`;
     }
 
     return withAutoSuggest({
@@ -86,11 +104,10 @@ export const buildSourcesDefinitions = (
               type: type ?? SOURCES_TYPES.INDEX,
             },
           }),
-      sortText: 'A',
-      ...(rangeToReplace && { rangeToReplace }),
-      ...(filterText && { filterText }),
+      ...(command && { command }),
     });
   });
+};
 
 /**
  * Builds suggestion items for ES|QL views (GET _query/view).
@@ -110,7 +127,6 @@ export const buildViewsDefinitions = (
         detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
           defaultMessage: 'View',
         }),
-        sortText: 'A-view',
       });
     });
 
@@ -159,7 +175,10 @@ export function getSourcesFromCommands(
 export function getSourceSuggestions(
   sources: ESQLSourceResult[],
   alreadyUsed: string[],
-  queryString?: string
+  sourceReplacementContext?: {
+    textBeforeCursor: string;
+    commandStart: number;
+  }
 ) {
   // hide indexes that start with .
   return buildSourcesDefinitions(
@@ -168,7 +187,7 @@ export function getSourceSuggestions(
       .map(({ name, dataStreams, title, type }) => {
         return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
       }),
-    queryString
+    sourceReplacementContext
   );
 }
 
@@ -177,72 +196,60 @@ export async function additionalSourcesSuggestions(
   sources: ESQLSourceResult[],
   ignored: string[],
   recommendedQuerySuggestions: ISuggestionItem[],
-  views: EsqlView[] = []
+  views: EsqlView[] = [],
+  sourceReplacementContext?: {
+    textBeforeCursor: string;
+    commandStart: number;
+  }
 ) {
   const sourceNames = new Set([
     ...sources.map(({ name }) => name),
     ...views.map(({ name }) => name),
   ]);
-  const suggestionsToAdd = await handleFragment(
-    queryText,
-    (fragment) => sourceExists(fragment, sourceNames),
-    (_fragment, rangeToReplace) => {
-      const sourceSuggestions = getSourceSuggestions(sources, ignored).map((suggestion) => ({
-        ...suggestion,
-        rangeToReplace,
-      }));
-      const viewSuggestions = buildViewsDefinitions(views, ignored).map((suggestion) => ({
-        ...suggestion,
-        rangeToReplace,
-      }));
-      return [...sourceSuggestions, ...viewSuggestions];
-    },
-    (fragment, rangeToReplace) => {
-      const exactMatch = sources.find(({ name: _name }) => _name === fragment);
-      if (exactMatch?.dataStreams) {
-        // this is an integration name, suggest the datastreams
-        const definitions = buildSourcesDefinitions(
-          exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
-        );
+  const prefix = findFinalWord(queryText);
+  const isComplete = prefix ? sourceExists(prefix, sourceNames) : false;
 
-        return definitions;
-      } else {
-        const _suggestions: ISuggestionItem[] = [
-          withAutoSuggest({
-            ...pipeCompleteItem,
-            filterText: fragment,
-            text: fragment + ' | ',
-            rangeToReplace,
-            sortText: '0',
-          }),
-          withAutoSuggest({
-            ...commaCompleteItem,
-            filterText: fragment,
-            text: fragment + ', ',
-            rangeToReplace,
-          }),
-          {
-            ...metadataSuggestion,
-            filterText: fragment,
-            text: fragment + ' METADATA ',
-            rangeToReplace,
-          },
-          ...recommendedQuerySuggestions.map((suggestion) =>
-            suggestion.text
-              ? {
-                  ...suggestion,
-                  rangeToReplace,
-                  filterText: fragment,
-                  text: fragment + suggestion.text,
-                }
-              : suggestion
-          ),
-        ];
-        return _suggestions;
-      }
+  if (isComplete) {
+    const exactMatch = sources.find(({ name }) => name === prefix);
+
+    if (exactMatch?.dataStreams) {
+      return buildSourcesDefinitions(
+        exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+      );
     }
-  );
-  return suggestionsToAdd;
+
+    return [
+      withAutoSuggest({
+        ...pipeCompleteItem,
+        filterText: prefix,
+        text: prefix + ' | ',
+      }),
+      withAutoSuggest({
+        ...commaCompleteItem,
+        filterText: prefix,
+        text: prefix + ', ',
+      }),
+      {
+        ...metadataSuggestion,
+        filterText: prefix,
+        text: prefix + ' METADATA ',
+      },
+      ...recommendedQuerySuggestions.map((suggestion) =>
+        suggestion.text
+          ? {
+              ...suggestion,
+              filterText: prefix,
+              text: prefix + suggestion.text,
+            }
+          : suggestion
+      ),
+    ];
+  }
+
+  const sourceSuggestions = getSourceSuggestions(sources, ignored, sourceReplacementContext);
+  const viewSuggestions = buildViewsDefinitions(views, ignored);
+
+  return [...sourceSuggestions, ...viewSuggestions];
 }
 
 // Treating lookup and time_series mode indices
@@ -264,7 +271,6 @@ export const specialIndicesToSuggestions = (
             type: index.mode ?? SOURCES_TYPES.INDEX,
           },
         }),
-        sortText: '0-INDEX-' + index.name,
       })
     );
 
@@ -282,7 +288,6 @@ export const specialIndicesToSuggestions = (
                 defaultMessage: 'Alias',
               }
             ),
-            sortText: '1-ALIAS-' + alias,
           })
         );
       }
@@ -309,3 +314,12 @@ export const getLookupJoinSource = (command: ESQLAstJoinCommand): string | undef
     return LeafPrinter.print(sourceNode);
   }
 };
+
+export function getIndexSourcesFromQuery(query: string): string[] {
+  try {
+    const { root } = Parser.parse(query);
+    return getSourcesFromCommands(root.commands, 'index').map(({ name }) => name);
+  } catch {
+    return [];
+  }
+}

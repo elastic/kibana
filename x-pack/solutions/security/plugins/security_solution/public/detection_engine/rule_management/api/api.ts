@@ -23,6 +23,8 @@ import type {
   PerformRuleInstallationResponseBody,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
+  ReviewRuleDeprecationRequestBody,
+  ReviewRuleDeprecationResponseBody,
   RevertPrebuiltRulesRequest,
   RevertPrebuiltRulesResponseBody,
   ReviewRuleInstallationRequestBody,
@@ -38,6 +40,7 @@ import {
   PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
   REVERT_PREBUILT_RULES_URL,
+  REVIEW_RULE_DEPRECATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
@@ -198,6 +201,7 @@ export const fetchRules = async ({
     perPage: 20,
   },
   signal,
+  schedulerId,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const kql = convertRulesFilterToKQL(filterOptions);
 
@@ -216,6 +220,7 @@ export const fetchRules = async ({
       ? { gaps_range_start: defaultGapsRange.start, gaps_range_end: defaultGapsRange.end }
       : {}),
     ...(kql !== '' ? { filter: kql } : {}),
+    ...(schedulerId ? { gap_auto_fill_scheduler_id: schedulerId } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
@@ -365,6 +370,7 @@ export type QueryOrIds =
       ids?: undefined;
       gapRange?: { start: string; end: string };
       gapFillStatuses?: GapFillStatus[];
+      schedulerId?: string;
     }
   | { query?: undefined; ids: string[] };
 
@@ -439,6 +445,7 @@ export async function performBulkAction({
         : undefined,
     fill_gaps:
       bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
+    gap_auto_fill_scheduler_id: 'schedulerId' in bulkAction ? bulkAction.schedulerId : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
@@ -667,6 +674,27 @@ export const getPrebuiltRulesStatus = async ({
       signal,
     }
   );
+
+/**
+ * Review deprecated prebuilt rules
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const reviewRuleDeprecation = async ({
+  signal,
+  request,
+}: {
+  signal: AbortSignal | undefined;
+  request: ReviewRuleDeprecationRequestBody;
+}): Promise<ReviewRuleDeprecationResponseBody> =>
+  KibanaServices.get().http.fetch<ReviewRuleDeprecationResponseBody>(REVIEW_RULE_DEPRECATION_URL, {
+    method: 'POST',
+    version: '1',
+    signal,
+    body: JSON.stringify(request),
+  });
 
 /**
  * Review prebuilt rules upgrade

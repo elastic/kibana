@@ -319,9 +319,8 @@ export class ExceptionsListApiClient {
       body: formData,
       headers: { 'Content-Type': undefined },
       query: {
-        // Do not overwrite the whole list, as it is space agnostic behind the scenes:
-        // validator will handle individual item overwrites instead.
         overwrite: false,
+        as_new_list: false,
       } as ImportExceptionListRequestQuery,
     });
   }

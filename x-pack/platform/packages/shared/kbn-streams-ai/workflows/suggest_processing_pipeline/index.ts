@@ -7,11 +7,16 @@
 
 import { type BoundInferenceClient, MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams, ProcessingSimulationResponse } from '@kbn/streams-schema';
+import type { FlattenRecord, ProcessingSimulationResponse, Streams } from '@kbn/streams-schema';
 import type { StreamlangDSL, GrokProcessor, DissectProcessor } from '@kbn/streamlang';
-import type { FlattenRecord } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
-import { isOtelStream } from '@kbn/streams-schema';
+import {
+  isOtelStream,
+  OTEL_CONTENT_FIELD,
+  ECS_CONTENT_FIELD,
+  OTEL_SEVERITY_FIELD,
+  ECS_SEVERITY_FIELD,
+} from '@kbn/streams-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { SuggestIngestPipelinePrompt } from './prompt';
@@ -81,6 +86,8 @@ export async function suggestProcessingPipeline({
     fields_schema: isOtel
       ? `OpenTelemetry (OTel) semantic convention for log records`
       : 'Elastic Common Schema (ECS)',
+    content_field: isOtel ? OTEL_CONTENT_FIELD : ECS_CONTENT_FIELD,
+    severity_field: isOtel ? OTEL_SEVERITY_FIELD : ECS_SEVERITY_FIELD,
     pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(pipelineDefinitionSchema)),
     initial_dataset_analysis: JSON.stringify(simulationMetrics),
     parsing_processor: parsingProcessor ? JSON.stringify(parsingProcessor) : undefined,
@@ -250,6 +257,7 @@ function validateProcessorFailureRates(simulationResult: ProcessingSimulationRes
   }
 
   for (const [processorId, metrics] of Object.entries(simulationResult.processors_metrics)) {
+    if (!metrics) continue;
     if (metrics.failed_rate > maxFailureRate) {
       const failurePercentage = (metrics.failed_rate * 100).toFixed(2);
       errors.push(
@@ -267,7 +275,7 @@ export function getUniqueDocumentErrors(simulationResult: ProcessingSimulationRe
   }
 
   // Collect all unique error messages
-  const errorMap = new Map<string, { count: number; type: string; exampleDoc?: any }>();
+  const errorMap = new Map<string, { count: number; type: string; exampleDoc?: FlattenRecord }>();
 
   for (const doc of simulationResult.documents) {
     if (doc.errors && doc.errors.length > 0) {

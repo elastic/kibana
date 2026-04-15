@@ -10,7 +10,7 @@
 import path from 'path';
 import fs from 'fs';
 
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import deepmerge from 'deepmerge';
 
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -94,6 +94,8 @@ export function regenerateMoonProjects() {
         includeDependencies,
       });
 
+      applyPackageJsonSettings(projectConfig, pathInPackage('package.json'));
+
       applyJestTaskConfig(projectConfig);
 
       projectConfig = applyDevOverrides(
@@ -138,22 +140,20 @@ function buildBaseProjectConfig(
   pkg: Package,
   kibanaJsonc: PackageManifestBaseFields
 ): MoonProjectConfig {
-  const projectConfig: MoonProjectConfig = yaml.load(projectConfigTemplate) as any;
+  const projectConfig: MoonProjectConfig = parse(projectConfigTemplate) as any;
   const mainOwner = Array.isArray(kibanaJsonc.owner) ? kibanaJsonc.owner[0] : kibanaJsonc.owner;
   projectConfig.id = pkg.name;
-  projectConfig.type = MOON_CONST.PROJECT_TYPE_UNKNOWN; // we currently don't make use of this
+  projectConfig.layer = MOON_CONST.PROJECT_LAYER_UNKNOWN; // we currently don't make use of this
   projectConfig.owners = { defaultOwner: mainOwner };
-  projectConfig.toolchain = { default: MOON_CONST.DEFAULT_TOOLCHAIN };
+  projectConfig.toolchains = { default: MOON_CONST.DEFAULT_TOOLCHAIN };
 
   projectConfig.project = {
-    name: pkg.name,
+    title: pkg.name,
     description: `Moon project for ${pkg.name}`,
     channel: '',
     owner: mainOwner,
-    metadata: {
-      // Not a Moon config field; included for convenience
-      sourceRoot: pkg.normalizedRepoRelativeDir,
-    },
+    // Custom project metadata is now defined directly on `project` in moon v2.
+    sourceRoot: pkg.normalizedRepoRelativeDir,
   };
 
   projectConfig.tags = [
@@ -177,8 +177,42 @@ interface ApplyTsConfigParams {
   allPackageIds: string[];
 }
 
-const hasSourceRoot = (obj: any): obj is { project: { metadata: { sourceRoot: string } } } =>
-  !!obj?.project?.metadata?.sourceRoot;
+const PACKAGE_JSON_DEPENDENCY_FIELDS = [
+  'dependencies',
+  'devDependencies',
+  'peerDependencies',
+  'optionalDependencies',
+] as const;
+
+const hasSourceRoot = (obj: any): obj is { project: { sourceRoot: string } } =>
+  !!obj?.project?.sourceRoot;
+
+function applyPackageJsonSettings(projectConfig: MoonProjectConfig, packageJsonPath: string) {
+  if (!fs.existsSync(packageJsonPath)) {
+    return;
+  }
+
+  const packageJson = readJsonWithComments(packageJsonPath);
+  const hasLocalDependencies = PACKAGE_JSON_DEPENDENCY_FIELDS.some((field) => {
+    const dependencies = packageJson[field];
+    return dependencies && typeof dependencies === 'object' && Object.keys(dependencies).length > 0;
+  });
+
+  if (!hasLocalDependencies) {
+    return;
+  }
+
+  const toolchains =
+    typeof projectConfig.toolchains === 'object' ? projectConfig.toolchains : undefined;
+
+  projectConfig.toolchains = {
+    ...toolchains,
+    default: toolchains?.default ?? MOON_CONST.DEFAULT_TOOLCHAIN,
+    javascript: {
+      rootPackageDependenciesOnly: false,
+    },
+  };
+}
 
 function applyTsConfigSettings(
   projectConfig: MoonProjectConfig,
@@ -190,7 +224,7 @@ function applyTsConfigSettings(
       src: compactFilePathsToGlobs(
         fs.globSync('**/{*.js,*.ts,*.jsx,*.tsx}', {
           exclude: (f) => f.includes('__fixtures__'),
-          cwd: projectConfig.project?.metadata?.sourceRoot,
+          cwd: projectConfig.project?.sourceRoot,
         })
       ),
     };
@@ -199,7 +233,7 @@ function applyTsConfigSettings(
   }
 
   if (!hasSourceRoot(projectConfig)) {
-    logger.warning('Skipping tsconfig settings - no sourceRoot found in project metadata');
+    logger.warning('Skipping tsconfig settings - no sourceRoot found in project config');
     return;
   }
 
@@ -207,7 +241,7 @@ function applyTsConfigSettings(
   const tsConfig = readJsonWithComments(tsConfigPath);
 
   const rootRelativeTypings = path.join(
-    path.relative(projectConfig.project.metadata.sourceRoot, REPO_ROOT),
+    path.relative(projectConfig.project.sourceRoot, REPO_ROOT),
     'typings'
   );
 
@@ -227,30 +261,23 @@ function applyTsConfigSettings(
 
 function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
   if (!hasSourceRoot(projectConfig)) {
-    logger.warning('Skipping jest task config - no sourceRoot found in project metadata');
+    logger.warning('Skipping jest task config - no sourceRoot found in project config');
     return;
   }
 
   const jestConfigName = resolveFirstExisting(
-    projectConfig.project.metadata.sourceRoot,
+    projectConfig.project.sourceRoot,
     MOON_CONST.JEST_CONFIG_FILES
   );
 
   if (!jestConfigName) {
     logger.warning(
-      `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.metadata.sourceRoot}`
+      `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.sourceRoot}`
     );
   } else {
     projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
-    projectConfig.tasks = projectConfig.tasks || {};
-    projectConfig.tasks[MOON_CONST.TASK_NAME_JEST] = {
-      args: ['--config', `$projectRoot/${jestConfigName}`],
-      inputs: ['@group(src)'],
-    };
-    projectConfig.tasks[MOON_CONST.TASK_NAME_JEST_CI] = {
-      args: ['--config', `$projectRoot/${jestConfigName}`],
-      inputs: ['@group(src)'],
-    };
+
+    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': [jestConfigName] };
   }
 }
 
@@ -321,7 +348,7 @@ function applyDevOverrides(projectConfig: MoonProjectConfig, devOverridesPath: s
 
   logger.info(`Applying development overrides from ${path.relative(REPO_ROOT, devOverridesPath)}`);
   try {
-    const devOverrides = yaml.load(readFile(devOverridesPath)) as Partial<MoonProjectConfig>;
+    const devOverrides = parse(readFile(devOverridesPath));
     return deepmerge(projectConfig, devOverrides, {
       arrayMerge: (target, source) => target.concat(source),
     });

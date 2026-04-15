@@ -280,7 +280,17 @@ export class ESQLService extends FtrService {
 
   public async toggleDatasourceDropdown(open: boolean) {
     if (open) {
-      await this.testSubjects.click('visorSourcesDropdownButton');
+      await this.retry.try(async () => {
+        try {
+          await this.testSubjects.click('visorSourcesDropdownButton');
+        } catch (error) {
+          if (error instanceof Error && error.message.includes('ElementClickInterceptedError')) {
+            // Monaco suggestions can overlap the visor datasource button; dismiss and retry.
+            await this.browser.pressKeys(Key.ESCAPE);
+          }
+          throw error;
+        }
+      });
     } else {
       await this.browser.pressKeys(Key.ESCAPE);
     }

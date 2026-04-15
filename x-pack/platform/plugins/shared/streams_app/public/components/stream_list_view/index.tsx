@@ -26,7 +26,6 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../hooks/use_timefilter';
-import { FeedbackButton } from '../feedback_button';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { WelcomeTourCallout } from '../streams_tour';
 import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
@@ -168,20 +167,6 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  href={router.link('/_discovery')}
-                  iconType="crosshairs"
-                  data-test-subj="streamsSignificantEventsDiscoveryButton"
-                >
-                  {i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {
-                    defaultMessage: 'SigEvents Discovery',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-            <FeedbackButton />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="gear"
@@ -207,6 +192,20 @@ export function StreamListView() {
                 })}
               </EuiButton>
             </EuiFlexItem>
+            {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  href={router.link('/_discovery')}
+                  iconType="crosshairs"
+                  size="s"
+                  data-test-subj="streamsSignificantEventsDiscoveryButton"
+                >
+                  {i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {
+                    defaultMessage: 'Significant Events',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
             {queryStreams?.enabled && (
               <EuiFlexItem grow={false}>
                 <CreateQueryStreamFlyout onQueryStreamCreated={streamsListFetch.refresh} />

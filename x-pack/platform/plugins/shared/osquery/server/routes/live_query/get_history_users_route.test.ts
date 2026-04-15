@@ -147,6 +147,24 @@ describe('getHistoryUsersRoute', () => {
     expect(filters).toContainEqual({ wildcard: { user_id: '*ali*' } });
   });
 
+  it('escapes wildcard characters in searchTerm', async () => {
+    mockEsClient.search.mockResolvedValue({ aggregations: { unique_users: { buckets: [] } } });
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      query: { searchTerm: 'al*i?ce' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    const searchCall = mockEsClient.search.mock.calls[0][0];
+    const filters = searchCall.query.bool.filter;
+
+    expect(filters).toContainEqual({ wildcard: { user_id: '*al\\*i\\?ce*' } });
+  });
+
   it('does not apply wildcard filter when searchTerm is empty', async () => {
     mockEsClient.search.mockResolvedValue({ aggregations: { unique_users: { buckets: [] } } });
 
@@ -220,7 +238,7 @@ describe('getHistoryUsersRoute', () => {
 
     expect(mockResponse.customError).toHaveBeenCalledWith({
       statusCode: 404,
-      body: { message: 'index_not_found_exception' },
+      body: { message: 'Failed to fetch history users' },
     });
   });
 });

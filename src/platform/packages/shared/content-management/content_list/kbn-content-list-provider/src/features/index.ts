@@ -13,7 +13,7 @@ export { isSortingConfig, isPaginationConfig, isSearchConfig } from './types';
 
 // Sorting feature.
 export type { SortField, SortOption, SortingConfig, UseContentListSortReturn } from './sorting';
-export { useContentListSort } from './sorting';
+export { useContentListSort, DEFAULT_SORT_FIELDS, DEFAULT_INITIAL_SORT } from './sorting';
 
 // Pagination feature.
 export type { PaginationConfig, UseContentListPaginationReturn } from './pagination';
@@ -26,6 +26,15 @@ export { useContentListSearch } from './search';
 // Selection feature.
 export type { UseContentListSelectionReturn } from './selection';
 export { useContentListSelection } from './selection';
+
+// Filtering feature.
+export type { FilterDisplayState, UseContentListFiltersReturn } from './filtering';
+export {
+  useFilterDisplay,
+  useContentListFilters,
+  useTagFilterToggle,
+  TAG_FILTER_ID,
+} from './filtering';
 
 // Delete feature.
 export type {

@@ -12,8 +12,8 @@ import { useQueryClient } from '@kbn/react-query';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import type { StepExecutionData } from './build_execution_context';
-import { useKibana } from '../../../../hooks/use_kibana';
 
 const STEP_EXECUTION_QUERY_KEY = 'stepExecution';
 
@@ -41,7 +41,7 @@ export function useLazyStepExecutionFetcher(
   executionId: string | undefined,
   stepExecutions: WorkflowStepExecutionDto[] | undefined
 ) {
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
   const queryClient = useQueryClient();
 
   const executionIdRef = useRef(executionId);
@@ -76,9 +76,10 @@ export function useLazyStepExecutionFetcher(
     }
 
     try {
-      const stepExecution = await http.get<EsWorkflowStepExecution>(
-        `/api/workflowExecutions/${currentExecutionId}/steps/${stepDocId}`
-      );
+      const stepExecution = (await api.getStepExecution(
+        currentExecutionId,
+        stepDocId
+      )) as EsWorkflowStepExecution;
       if (!stepExecution) {
         return null;
       }

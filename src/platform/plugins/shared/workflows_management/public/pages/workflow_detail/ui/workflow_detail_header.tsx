@@ -32,6 +32,7 @@ import { useParams } from 'react-router-dom';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -45,7 +46,6 @@ import {
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
-import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   useWorkflowUrlState,
@@ -53,6 +53,14 @@ import {
 } from '../../../hooks/use_workflow_url_state';
 import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
+
+const executionsTabReadExecutionDisabledTooltip = i18n.translate(
+  'workflows.workflowDetailHeader.executionsTabReadExecutionDisabledTooltip',
+  {
+    defaultMessage:
+      'You need the Workflows "Read Workflow Execution" privilege to view workflow executions.',
+  }
+);
 
 const Translations = {
   runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
@@ -100,7 +108,23 @@ export const WorkflowDetailHeader = React.memo(
     const { application } = useKibana().services;
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
-    const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow } = useCapabilities();
+    const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow, canReadWorkflowExecution } =
+      useWorkflowsCapabilities();
+
+    const workflowDetailTabButtonOptions = useMemo(
+      () =>
+        ButtonGroupOptions.map((option) =>
+          option.id === 'executions' && !canReadWorkflowExecution
+            ? {
+                ...option,
+                isDisabled: true,
+                title: '',
+                toolTipContent: executionsTabReadExecutionDisabledTooltip,
+              }
+            : option
+        ),
+      [canReadWorkflowExecution]
+    );
 
     const { activeTab, setActiveTab } = useWorkflowUrlState();
 
@@ -247,10 +271,11 @@ export const WorkflowDetailHeader = React.memo(
                     <EuiButtonGroup
                       buttonSize="compressed"
                       color="primary"
-                      options={ButtonGroupOptions}
+                      options={workflowDetailTabButtonOptions}
                       idSelected={activeTab}
                       legend="Switch between workflow and executions"
                       type="single"
+                      hasAriaDisabled={!canReadWorkflowExecution}
                       onChange={(id) => setActiveTab(id as WorkflowUrlStateTabType)}
                     />
                   </EuiFlexItem>

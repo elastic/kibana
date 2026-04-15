@@ -12,12 +12,17 @@ import type {
   TextBasedLayer,
   ColumnState,
 } from '@kbn/lens-common';
+import type { PaletteOutput } from '@kbn/coloring';
 import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
 import { isFormBasedLayer, operationFromColumn } from '../../../utils';
 import { getValueApiColumn } from '../../../columns/esql_column';
-import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '../../../coloring';
+import {
+  AUTO_COLOR,
+  fromColorByValueLensStateToAPI,
+  fromColorMappingLensStateToAPI,
+} from '../../../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
-import { isMetricColumnESQL, isMetricColumnNoESQL } from '../helpers';
+import { isMetricColumnESQL, isMetricColumnNoESQL, colorModeToApplyColorTo } from '../helpers';
 import { stripUndefined } from '../../utils';
 
 type APIMetricRowCommonProps = Partial<
@@ -43,7 +48,7 @@ function buildColorProps(
   const { colorMode, palette, colorMapping } = column;
   if (!colorMode || colorMode === 'none') return {};
 
-  const applyColorTo = colorMode === 'text' ? 'value' : 'background';
+  const applyColorTo = colorModeToApplyColorTo(colorMode);
 
   // Prefer colorMapping if present, otherwise use palette
   if (colorMapping) {
@@ -56,11 +61,13 @@ function buildColorProps(
   if (palette) {
     return {
       apply_color_to: applyColorTo,
-      color: fromColorByValueLensStateToAPI(palette),
+      color: palette.params
+        ? fromColorByValueLensStateToAPI(palette)
+        : fromColorMappingLensStateToAPI(undefined, palette as PaletteOutput), // support for legacy palettes
     };
   }
 
-  return { apply_color_to: applyColorTo };
+  return { apply_color_to: applyColorTo, color: AUTO_COLOR };
 }
 
 type APIMetricProps = APIMetricRowCommonProps &
@@ -99,13 +106,16 @@ type APIRowPropsNoESQL = APIMetricRowCommonProps &
   >;
 
 function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
-  const { colorMode, colorMapping } = column;
+  const { colorMode, colorMapping, palette } = column;
   return {
     ...buildRowCommonProps(column),
     ...(colorMode && colorMode !== 'none'
       ? {
-          apply_color_to: colorMode === 'text' ? 'value' : 'background',
-          ...(colorMapping ? { color: fromColorMappingLensStateToAPI(colorMapping) } : {}),
+          apply_color_to: colorModeToApplyColorTo(colorMode),
+          color:
+            colorMapping || palette
+              ? fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
+              : AUTO_COLOR,
         }
       : {}),
   };

@@ -20,8 +20,11 @@ import {
   calculateHighestPriorityGapFillStatus,
   type GapDurationBucket,
   RULE_GAP_AGGREGATIONS,
+  buildExhaustedRetryGapsAgg,
+  getExhaustedRetryGapsInfo,
 } from '../utils';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
+import { getSchedulerContextInternal } from '../../auto_fill_scheduler/methods/utils';
 
 export async function getGapsSummaryByRuleIds(
   context: RulesClientContext,
@@ -44,7 +47,11 @@ export async function getGapsSummaryByRuleIds(
       throw error;
     }
 
-    const { start, end, ruleIds } = params;
+    const { start, end, ruleIds, schedulerId, excludedReasons } = params;
+
+    const schedulerContext = schedulerId
+      ? await getSchedulerContextInternal(context.unsecuredSavedObjectsClient, schedulerId)
+      : null;
     const { filter: authorizationFilter } = authorizationTuple;
     const kueryNodeFilter = convertRuleIdsToKueryNode(ruleIds);
     const kueryNodeFilterWithAuth =
@@ -102,7 +109,12 @@ export async function getGapsSummaryByRuleIds(
     const filter = buildGapsFilter({
       start,
       end,
+      excludedReasons,
     });
+
+    const exhaustedRetryAgg = schedulerContext?.enabled
+      ? buildExhaustedRetryGapsAgg(schedulerContext)
+      : {};
 
     const aggs = await eventLogClient.aggregateEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
@@ -117,6 +129,7 @@ export async function getGapsSummaryByRuleIds(
             },
             aggs: {
               ...RULE_GAP_AGGREGATIONS,
+              ...exhaustedRetryAgg,
             },
           },
         },
@@ -124,7 +137,7 @@ export async function getGapsSummaryByRuleIds(
     );
 
     interface UniqueRuleIdsAgg {
-      buckets: Array<GapDurationBucket>;
+      buckets: Array<GapDurationBucket & Record<string, unknown>>;
     }
 
     const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
@@ -133,7 +146,13 @@ export async function getGapsSummaryByRuleIds(
     const result: GetGapsSummaryByRuleIdsResponse = {
       data: resultBuckets.map((bucket) => {
         const sums = extractGapDurationSums(bucket);
-        const gapFillStatus = calculateHighestPriorityGapFillStatus(sums);
+        const exhaustedInfo = schedulerContext?.enabled
+          ? getExhaustedRetryGapsInfo(bucket)
+          : { hasExhaustedRetryGaps: false, exhaustedRetryUnfilledDurationMs: 0 };
+        const gapFillStatus = calculateHighestPriorityGapFillStatus(
+          sums,
+          exhaustedInfo.hasExhaustedRetryGaps
+        );
         return {
           ruleId: bucket.key,
           totalUnfilledDurationMs: sums.totalUnfilledDurationMs,

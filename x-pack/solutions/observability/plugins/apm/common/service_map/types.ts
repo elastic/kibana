@@ -12,6 +12,7 @@ import type { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_SUBTYPE, SPAN_TYPE } from 
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import type { Coordinate } from '../../typings/timeseries';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
+import type { SloStatus } from '../service_inventory';
 
 export interface ServiceMapTelemetry {
   tracesCount: number;
@@ -179,6 +180,10 @@ export interface ServiceNodeData extends BaseNodeData {
   isService: true;
   agentName?: AgentName;
   serviceAnomalyStats?: ServiceAnomalyStats;
+  /** Active alerts count for service map badges (merged client-side). */
+  alertsCount?: number;
+  sloStatus?: SloStatus | 'noSLOs';
+  sloCount?: number;
 }
 
 export interface DependencyNodeData extends BaseNodeData {
@@ -229,6 +234,7 @@ export interface EdgeMarker extends ReactFlowEdgeMarker {
 
 export interface ServiceMapEdgeData extends Record<string, unknown> {
   isBidirectional: boolean;
+  isGrouped?: boolean;
   sourceData?: ConnectionNode;
   targetData?: ConnectionNode;
   /** Display-ready source node name for titles/aria. */

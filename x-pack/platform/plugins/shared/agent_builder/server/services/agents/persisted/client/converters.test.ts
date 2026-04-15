@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentType } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AgentType, AgentVisibility } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties } from './storage';
 import type { Document } from './converters';
@@ -27,6 +27,9 @@ describe('fromEs', () => {
         labels: ['foo', 'bar'],
         avatar_color: 'blue',
         avatar_symbol: 'star',
+        visibility: AgentVisibility.Shared,
+        created_by_id: 'user-id-1',
+        created_by_name: 'test-user',
         config: {
           instructions: 'instructions',
           tools: [{ tool_ids: ['id_1', 'id_2'] }],
@@ -58,6 +61,8 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
+      visibility: AgentVisibility.Shared,
+      created_by: { id: 'user-id-1', username: 'test-user' },
     });
   });
 
@@ -88,6 +93,8 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
+      visibility: AgentVisibility.Shared,
+      created_by: { id: 'user-id-1', username: 'test-user' },
     });
   });
 
@@ -100,6 +107,43 @@ describe('fromEs', () => {
     const definition = fromEs(document);
 
     expect(definition.id).toEqual('_id');
+  });
+
+  it('converts skill_ids and enable_elastic_capabilities from the config', () => {
+    const document = getSampleDoc();
+    document._source!.config!.skill_ids = ['skill-1', 'skill-2'];
+    document._source!.config!.enable_elastic_capabilities = true;
+
+    const definition = fromEs(document);
+
+    expect(definition.configuration.skill_ids).toEqual(['skill-1', 'skill-2']);
+    expect(definition.configuration.enable_elastic_capabilities).toBe(true);
+  });
+
+  it('defaults enable_elastic_capabilities to true for default agent when missing', () => {
+    const document = getSampleDoc();
+    document._source!.id = agentBuilderDefaultAgentId;
+    // @ts-ignore testing missing field
+    delete document._source!.config!.enable_elastic_capabilities;
+
+    const definition = fromEs(document);
+
+    expect(definition.configuration.enable_elastic_capabilities).toBe(true);
+  });
+
+  it('defaults ownership and visibility for legacy documents without new fields', () => {
+    const document = getSampleDoc();
+    // @ts-ignore simulating legacy document
+    delete document._source.visibility;
+    // @ts-ignore simulating legacy document
+    delete document._source.created_by_id;
+    // @ts-ignore simulating legacy document
+    delete document._source.created_by_name;
+
+    const definition = fromEs(document);
+
+    expect(definition.visibility).toEqual(AgentVisibility.Public);
+    expect(definition.created_by).toBeUndefined();
   });
 });
 
@@ -126,6 +170,7 @@ describe('createRequestToEs', () => {
 
     const docProperties = createRequestToEs({
       profile: createRequest,
+      user: { id: 'user-id', username: 'test-user' },
       space: 'space-2',
       creationDate: date,
     });
@@ -147,9 +192,38 @@ describe('createRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'green',
       avatar_symbol: 'circle',
+      visibility: AgentVisibility.Public,
+      created_by_id: 'user-id',
+      created_by_name: 'test-user',
       created_at: expect.any(String),
       updated_at: expect.any(String),
     });
+  });
+
+  it('persists skill_ids and enable_elastic_capabilities in the config', () => {
+    const createRequest: AgentCreateRequest = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
+      configuration: {
+        instructions: 'instructions',
+        tools: [],
+        skill_ids: ['skill-a', 'skill-b'],
+        enable_elastic_capabilities: true,
+      },
+    };
+
+    const date = new Date();
+
+    const docProperties = createRequestToEs({
+      profile: createRequest,
+      user: { id: 'user-id', username: 'test-user' },
+      space: 'space',
+      creationDate: date,
+    });
+
+    expect(docProperties.config!.skill_ids).toEqual(['skill-a', 'skill-b']);
+    expect(docProperties.config!.enable_elastic_capabilities).toBe(true);
   });
 });
 
@@ -182,6 +256,9 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'red',
       avatar_symbol: 'triangle',
+      visibility: AgentVisibility.Public,
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
       created_at: creationDate,
       updated_at: updateDate,
     };
@@ -218,6 +295,9 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'red',
       avatar_symbol: 'triangle',
+      visibility: AgentVisibility.Public,
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
       created_at: creationDate,
       updated_at: newUpdateDate.toISOString(),
     });
@@ -245,6 +325,9 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'yellow',
       avatar_symbol: 'square',
+      visibility: AgentVisibility.Public,
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
       created_at: creationDate,
       updated_at: updateDate,
     };
@@ -281,9 +364,54 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'yellow',
       avatar_symbol: 'square',
+      visibility: AgentVisibility.Public,
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
       created_at: creationDate,
       updated_at: newUpdateDate.toISOString(),
     });
     expect(docProperties.configuration).toBeUndefined();
+  });
+
+  it('updates skill_ids and enable_elastic_capabilities in the config', () => {
+    const newUpdateDate = new Date();
+
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: {
+        instructions: 'instructions',
+        tools: [],
+        skill_ids: ['old-skill'],
+        enable_elastic_capabilities: false,
+      },
+      labels: [],
+      visibility: AgentVisibility.Public,
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const updateRequest: AgentUpdateRequest = {
+      configuration: {
+        skill_ids: ['new-skill-1', 'new-skill-2'],
+        enable_elastic_capabilities: true,
+      },
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: updateRequest,
+      updateDate: newUpdateDate,
+    });
+
+    expect(docProperties.config!.skill_ids).toEqual(['new-skill-1', 'new-skill-2']);
+    expect(docProperties.config!.enable_elastic_capabilities).toBe(true);
+    expect(docProperties.config!.instructions).toBe('instructions');
   });
 });
