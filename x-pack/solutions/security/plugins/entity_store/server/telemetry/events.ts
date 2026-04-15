@@ -7,7 +7,10 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { EventTypeOpts } from '@kbn/core/server';
-import type { EntityMaintainerTelemetryEventType } from '../tasks/entity_maintainers/types';
+import type {
+  EntityMaintainerStatTelemetry,
+  EntityMaintainerTelemetryEventType,
+} from '../tasks/entity_maintainers/types';
 
 // ------------------------------------
 //  Event types
@@ -58,6 +61,7 @@ interface EntityMaintainerEvent {
   namespace?: string;
   type: EntityMaintainerTelemetryEventType;
   errorMessage?: string;
+  stats?: ReadonlyArray<EntityMaintainerStatTelemetry>;
 }
 
 // ------------------------------------
@@ -162,13 +166,21 @@ export const ENTITY_MAINTAINER_EVENT = {
       type: 'keyword',
       _meta: {
         description:
-          'Entity maintainer telemetry event type (register, abort, setup, run, error, stop, start, delete)',
+          'Entity maintainer telemetry event type (register, abort, setup, run, error, stop, start, delete, stats)',
       },
     },
     errorMessage: {
       type: 'keyword',
       _meta: {
         description: 'Optional error message for error events',
+        optional: true,
+      },
+    },
+    stats: {
+      type: 'pass_through',
+      _meta: {
+        description:
+          'Optional maintainer-supplied stats as an array of { name, values }. Prefer homogeneous values per row (all numbers or all strings) for meaningful analysis.',
         optional: true,
       },
     },

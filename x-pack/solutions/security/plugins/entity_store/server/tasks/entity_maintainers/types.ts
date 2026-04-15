@@ -28,10 +28,20 @@ export const EntityMaintainerTelemetryEventType = {
   STOP: 'stop',
   START: 'start',
   DELETE: 'delete',
+  STATS: 'stats',
 } as const;
 
 export type EntityMaintainerTelemetryEventType =
   (typeof EntityMaintainerTelemetryEventType)[keyof typeof EntityMaintainerTelemetryEventType];
+
+/**
+ * One named stat bucket reported by an entity maintainer (e.g. integration queried, counts).
+ * Prefer `values` as either all strings or all numbers within a single row so downstream analysis stays meaningful.
+ */
+export interface EntityMaintainerStatTelemetry {
+  readonly name: string;
+  readonly values: ReadonlyArray<string | number>;
+}
 
 export interface EntityMaintainerRegistryData {
   interval: string;
@@ -69,6 +79,7 @@ interface EntityMaintainerTaskMethodContext {
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
+  reportStats: (stats: ReadonlyArray<EntityMaintainerStatTelemetry>) => void;
 }
 
 export type EntityMaintainerTaskMethod = (

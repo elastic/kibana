@@ -13,6 +13,7 @@ import type { LicenseCheckState, LicenseType } from '@kbn/licensing-types';
 import {
   EntityMaintainerTaskStatus,
   EntityMaintainerTelemetryEventType,
+  type EntityMaintainerStatTelemetry,
   type EntityMaintainerStatus,
   type EntityMaintainerTaskMethod,
   type RegisterEntityMaintainerConfig,
@@ -215,6 +216,17 @@ async function runEntityMaintainerTask({
   analytics: TelemetryReporter;
 }): Promise<{ state: EntityMaintainerStatus }> {
   const namespace = currentStatus.metadata.namespace;
+  const reportStats = (stats: ReadonlyArray<EntityMaintainerStatTelemetry>) => {
+    if (stats.length === 0) {
+      return;
+    }
+    analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+      id,
+      namespace,
+      type: EntityMaintainerTelemetryEventType.STATS,
+      stats,
+    });
+  };
   const onAbort = () => {
     logger.debug(`Abort signal received, stopping Entity Maintainer`);
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
@@ -235,6 +247,7 @@ async function runEntityMaintainerTask({
         fakeRequest,
         esClient,
         crudClient,
+        reportStats,
       });
       analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
         id,
@@ -250,6 +263,7 @@ async function runEntityMaintainerTask({
       fakeRequest,
       esClient,
       crudClient,
+      reportStats,
     });
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
       id,

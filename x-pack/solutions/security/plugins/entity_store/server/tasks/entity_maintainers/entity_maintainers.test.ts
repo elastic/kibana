@@ -13,7 +13,8 @@ import {
   scheduleEntityMaintainerTask,
 } from '.';
 import type { RegisterEntityMaintainerConfig } from './types';
-import { EntityMaintainerTaskStatus } from './types';
+import { EntityMaintainerTaskStatus, EntityMaintainerTelemetryEventType } from './types';
+import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 
 const mockEnsureScheduled = jest.fn();
 const mockRegisterTaskDefinitions = jest.fn();
@@ -259,8 +260,97 @@ describe('entity_maintainer task', () => {
           logger: expect.anything(),
           fakeRequest: expect.anything(),
           esClient: expect.anything(),
+          reportStats: expect.any(Function),
         })
       );
+    });
+
+    it('should emit ENTITY_MAINTAINER_EVENT with type stats when run calls reportStats', async () => {
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
+      const statsPayload = [{ name: 'integrations_queried', values: ['logs'] as const }];
+      const run = jest.fn().mockImplementation(async ({ reportStats }) => {
+        reportStats(statsPayload);
+        return {};
+      });
+      const config = createMockConfig({ run });
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      const createTaskRunner = defs[taskType].createTaskRunner;
+      const runner = createTaskRunner({
+        taskInstance: {
+          id: 'test-maintainer:default',
+          state: {
+            namespace: 'default',
+            taskStatus: EntityMaintainerTaskStatus.STARTED,
+            metadata: { runs: 1 },
+          },
+        },
+        abortController: new AbortController(),
+        fakeRequest: { headers: {} } as KibanaRequest,
+      });
+
+      await runner.run();
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_MAINTAINER_EVENT,
+        expect.objectContaining({
+          id: 'test-maintainer',
+          namespace: 'default',
+          type: EntityMaintainerTelemetryEventType.STATS,
+          stats: statsPayload,
+        })
+      );
+    });
+
+    it('should not emit stats telemetry when reportStats is called with an empty array', async () => {
+      const { logger, taskManagerSetup, core, analytics } = createMockDeps();
+      const run = jest.fn().mockImplementation(async ({ reportStats }) => {
+        reportStats([]);
+        return {};
+      });
+      const config = createMockConfig({ run });
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      const createTaskRunner = defs[taskType].createTaskRunner;
+      const runner = createTaskRunner({
+        taskInstance: {
+          id: 'test-maintainer:default',
+          state: {
+            namespace: 'default',
+            taskStatus: EntityMaintainerTaskStatus.STARTED,
+            metadata: { runs: 1 },
+          },
+        },
+        abortController: new AbortController(),
+        fakeRequest: { headers: {} } as KibanaRequest,
+      });
+
+      await runner.run();
+
+      const statsCalls = analytics.reportEvent.mock.calls.filter(
+        (call) => call[1]?.type === EntityMaintainerTelemetryEventType.STATS
+      );
+      expect(statsCalls).toHaveLength(0);
     });
 
     it('should not call run when license check is not valid', async () => {
