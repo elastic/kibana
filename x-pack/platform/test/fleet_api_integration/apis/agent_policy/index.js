@@ -17,5 +17,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./cleanup_agent_policy_revisions'));
     loadTestFile(require.resolve('./version_specific_policies'));
     loadTestFile(require.resolve('./agent_policy_otel_routing'));
+    loadTestFile(require.resolve('./agent_policy_input_logfile_dataset'));
   });
 }

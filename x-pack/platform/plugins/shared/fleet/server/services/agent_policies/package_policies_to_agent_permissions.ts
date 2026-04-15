@@ -11,6 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import {
+  DATASET_VAR_NAME,
   FLEET_APM_PACKAGE,
   FLEET_CONNECTORS_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
@@ -232,10 +233,16 @@ export function storedPackagePoliciesToAgentPermissions(
                   dataStreams_.push(ds);
 
                   if (isOtelInput && stream.data_stream.type === 'traces') {
-                    // For traces allow to send span event to logs-generic.otel-{namespace}
+                    // Span events are logs-*-* using the same data_stream.dataset as OTTL routing
+                    // (getFullInputStreams + generateOtelTypeTransforms spanevent); include stream var override.
+                    const baseDataset =
+                      stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset;
+                    const spanEventDataset =
+                      extractOtelDatasetVarOverride(stream.vars?.[DATASET_VAR_NAME]?.value) ??
+                      baseDataset;
                     dataStreams_.push({
                       type: 'logs',
-                      dataset: 'generic.otel',
+                      dataset: spanEventDataset,
                       elasticsearch: {
                         dynamic_namespace: stream.data_stream.elasticsearch?.dynamic_namespace,
                       },
@@ -327,6 +334,26 @@ export function getDataStreamPrivileges(
     privileges,
   };
 }
+
+/** Resolves `data_stream.dataset` stream var for OTel span-event index permissions; invalid shapes fall back via undefined. */
+const extractOtelDatasetVarOverride = (raw: unknown): string | undefined => {
+  if (raw === undefined || raw === null || raw === '') {
+    return undefined;
+  }
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    return trimmed !== '' ? trimmed : undefined;
+  }
+  if (typeof raw === 'object' && raw !== null && 'dataset' in raw) {
+    const d = (raw as { dataset: unknown }).dataset;
+    if (typeof d === 'string') {
+      const trimmed = d.trim();
+      return trimmed !== '' ? trimmed : undefined;
+    }
+    return undefined;
+  }
+  return undefined;
+};
 
 function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
   const profilingIndexPattern = 'profiling-*';

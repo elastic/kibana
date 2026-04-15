@@ -27,6 +27,7 @@ export interface CompositeSLORepository {
   create(compositeSlo: CompositeSLODefinition): Promise<CompositeSLODefinition>;
   update(compositeSlo: CompositeSLODefinition): Promise<CompositeSLODefinition>;
   findById(id: string): Promise<CompositeSLODefinition>;
+  findAllByIds(ids: string[]): Promise<CompositeSLODefinition[]>;
   deleteById(id: string): Promise<void>;
   search(params: SearchParams): Promise<Paginated<CompositeSLODefinition>>;
 }
@@ -96,6 +97,23 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
     return compositeSlo;
   }
 
+  async findAllByIds(ids: string[]): Promise<CompositeSLODefinition[]> {
+    if (ids.length === 0) return [];
+
+    const response = await this.soClient.find<StoredCompositeSLODefinition>({
+      type: SO_SLO_COMPOSITE_TYPE,
+      page: 1,
+      perPage: ids.length,
+      filter: `${SO_SLO_COMPOSITE_TYPE}.attributes.id:(${ids
+        .map((id) => escapeKuery(id))
+        .join(' or ')})`,
+    });
+
+    return response.saved_objects
+      .map((so) => this.toCompositeSLO(so.attributes))
+      .filter(this.isCompositeSLO);
+  }
+
   async deleteById(id: string): Promise<void> {
     const response = await this.soClient.find<StoredCompositeSLODefinition>({
       type: SO_SLO_COMPOSITE_TYPE,
@@ -138,13 +156,15 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
       sortOrder: sortDirection,
     });
 
+    const results = response.saved_objects
+      .map((so) => this.toCompositeSLO(so.attributes))
+      .filter(this.isCompositeSLO);
+
     return {
-      total: response.total,
+      total: response.total - (response.saved_objects.length - results.length),
       perPage: response.per_page,
       page: response.page,
-      results: response.saved_objects
-        .map((so) => this.toCompositeSLO(so.attributes))
-        .filter(this.isCompositeSLO),
+      results,
     };
   }
 

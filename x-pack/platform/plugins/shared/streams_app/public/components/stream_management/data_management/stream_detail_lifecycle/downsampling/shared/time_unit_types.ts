@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamsTimeUnit } from '../../helpers/format_size_units';
+import type { StreamsTimeUnit } from '../../../../../../util/format_size_units';
 
 export const PRESERVED_TIME_UNITS = ['d', 'h', 'm', 's', 'ms', 'micros', 'nanos'] as const;
 
