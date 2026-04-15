@@ -33,6 +33,6 @@ export interface IngestHubStartDependencies {
 export type IngestHubSetup = Record<string, never>;
 
 export interface IngestHubStart {
-  registerIngestFlow: (flow: IngestFlow) => void;
+  registerIngestFlows: (flows: IngestFlow[]) => void;
   appEnabled$: Observable<boolean>;
 }

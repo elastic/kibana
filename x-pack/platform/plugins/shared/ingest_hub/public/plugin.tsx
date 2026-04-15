@@ -8,6 +8,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, AppUpdater, CoreStart } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
@@ -76,8 +77,11 @@ export class IngestHubPlugin
   implements Plugin<IngestHubSetup, IngestHubStart, object, IngestHubStartDependencies>
 {
   private readonly ingestFlows$ = new BehaviorSubject<IngestFlow[]>([]);
+  private readonly logger: Logger;
 
-  constructor(private readonly context: PluginInitializerContext) {}
+  constructor(private readonly context: PluginInitializerContext) {
+    this.logger = this.context.logger.get();
+  }
 
   setup(coreSetup: CoreSetup<IngestHubStartDependencies>): IngestHubSetup {
     const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
@@ -131,14 +135,21 @@ export class IngestHubPlugin
   start(coreStart: CoreStart, deps: IngestHubStartDependencies): IngestHubStart {
     const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
     return {
-      registerIngestFlow: (flow: IngestFlow) => {
+      registerIngestFlows: (flows: IngestFlow[]) => {
         const existing = this.ingestFlows$.value;
-        if (existing.some((f) => f.id === flow.id)) {
-          // eslint-disable-next-line no-console
-          console.warn(`[IngestHub] Duplicate flow id "${flow.id}" — skipping registration.`);
-          return;
+        const existingIds = new Set(existing.map((f) => f.id));
+        const newFlows = flows.filter((flow) => {
+          if (existingIds.has(flow.id)) {
+            // Duplicate ids might break React list rendering
+            this.logger.warn(`Duplicate flow id "${flow.id}" — skipping registration.`);
+            return false;
+          }
+          existingIds.add(flow.id);
+          return true;
+        });
+        if (newFlows.length > 0) {
+          this.ingestFlows$.next([...existing, ...newFlows]);
         }
-        this.ingestFlows$.next([...existing, flow]);
       },
       appEnabled$: getAppEnabled$(coreStart, deps, isServerless),
     };

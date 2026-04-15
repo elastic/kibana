@@ -10,18 +10,23 @@ import type { ObservabilityOnboardingPluginStartDeps } from '../plugin';
 import { PLUGIN_ID } from '../../common';
 
 export const registerIngestFlows = (plugins: ObservabilityOnboardingPluginStartDeps) => {
-  plugins.ingestHub?.registerIngestFlow({
-    id: 'kubernetes',
-    title: i18n.translate('xpack.observability_onboarding.ingestHub.kubernetes.title', {
-      defaultMessage: 'Kubernetes',
-    }),
-    description: i18n.translate('xpack.observability_onboarding.ingestHub.kubernetes.description', {
-      defaultMessage: 'Monitor your Kubernetes cluster with Elastic Agent',
-    }),
-    icon: 'logoKubernetes',
-    category: i18n.translate('xpack.observability_onboarding.ingestHub.category.containers', {
-      defaultMessage: 'Containers',
-    }),
-    navigateTo: { appId: PLUGIN_ID, path: '/kubernetes/?category=kubernetes' },
-  });
+  plugins.ingestHub?.registerIngestFlows([
+    {
+      id: 'kubernetes',
+      title: i18n.translate('xpack.observability_onboarding.ingestHub.kubernetes.title', {
+        defaultMessage: 'Kubernetes',
+      }),
+      description: i18n.translate(
+        'xpack.observability_onboarding.ingestHub.kubernetes.description',
+        {
+          defaultMessage: 'Monitor your Kubernetes cluster with Elastic Agent',
+        }
+      ),
+      icon: 'logoKubernetes',
+      category: i18n.translate('xpack.observability_onboarding.ingestHub.category.containers', {
+        defaultMessage: 'Containers',
+      }),
+      navigateTo: { appId: PLUGIN_ID, path: '/kubernetes/?category=kubernetes' },
+    },
+  ]);
 };
