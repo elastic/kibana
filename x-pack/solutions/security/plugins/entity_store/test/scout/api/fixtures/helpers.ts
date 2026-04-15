@@ -10,6 +10,7 @@ import type { apiTest } from '@kbn/scout-security';
 import type { GetStatusResult } from '../../../../server/domain/types';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
+import type { EntityStoreGlobalState } from '../../../../server/domain/saved_objects';
 
 import {
   ENTITY_STORE_ROUTES,
@@ -316,26 +317,23 @@ export const getStatus = (
  * this confirms the task finished, preventing a race with a forced snapshot.
  */
 export const waitForScheduledHistorySnapshot = async (
-  esClient: EsClient,
+  kbnClient: ApiWorkerFixtures['kbnClient'],
   timeoutMs = 60_000
 ): Promise<void> => {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      const result = await esClient.search({
-        index: '.kibana*',
-        query: { term: { type: 'entity-store-global-state' } },
-        size: 1,
-        _source: ['entity-store-global-state.historySnapshot.lastExecutionTimestamp'],
+      const result = await kbnClient.savedObjects.find<EntityStoreGlobalState>({
+        type: 'entity-store-global-state',
       });
-      const source = result.hits.hits[0]?._source as Record<string, unknown> | undefined;
-      const gs = source?.['entity-store-global-state'] as Record<string, unknown> | undefined;
-      const hs = gs?.historySnapshot as Record<string, unknown> | undefined;
-      if (hs?.lastExecutionTimestamp) {
+      if (result.saved_objects[0]?.attributes.historySnapshot.lastExecutionTimestamp) {
         return;
       }
-    } catch {
-      // index may not exist yet
+    } catch (e: unknown) {
+      const status = (e as { response?: { status?: number } })?.response?.status;
+      if (status !== 404) {
+        throw e;
+      }
     }
     await new Promise((r) => setTimeout(r, 500));
   }
