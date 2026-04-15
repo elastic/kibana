@@ -31,7 +31,7 @@ export class EmbeddableStateTransfer {
   public isTransferInProgress: boolean;
   private storage: Storage;
   private appList: ReadonlyMap<string, PublicAppInfo> | undefined;
-  private incomingPackagesState$: Subject<any>;
+  private incomingPackagesState$: Subject<unknown>;
 
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
@@ -188,7 +188,7 @@ export class EmbeddableStateTransfer {
     options?: {
       keysToRemoveAfterFetch?: string[];
     },
-    stateObject?: any
+    stateObject?: unknown
   ): IncomingStateType[] | undefined {
     const embeddableState = stateObject ?? this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY);
     if (!embeddableState) {
@@ -237,16 +237,18 @@ export class EmbeddableStateTransfer {
       openInNewTab: options?.openInNewTab,
       skipAppLeave: options?.skipAppLeave,
     });
-    // If navigateToApp ends up attempting to transfer state to the exact same page that's currently open, it will end up
-    // being a no-op. For this case, emit the incoming packages to incomingPackagesState$.
-    // If navigateToApp successfully redirects, downstream subscribers will get unsubscribed before receiving the state transfer. It will only
-    // affect them in cases where navigateToApp doesn't end up doing anything.
+    /**
+     * If navigateToApp ends up attempting to transfer state to the exact same page that's currently open, it will end up
+     * being a no-op. For this case, emit the incoming packages to incomingPackagesState$.
+     * If navigateToApp successfully redirects, downstream subscribers will get unsubscribed before receiving the state transfer. It will only
+     * affect them in cases where navigateToApp doesn't end up doing anything.
+     */
     this.incomingPackagesState$.next(stateObject);
   }
 
   public onTransferEmbeddablePackage$(appId: string, removeAfterFetch?: boolean) {
     return this.incomingPackagesState$.pipe(
-      map((stateObject: any) => {
+      map((stateObject: unknown) => {
         return this.getIncomingPackagesState<EmbeddablePackageState>(
           isEmbeddablePackageState,
           appId,
