@@ -377,7 +377,7 @@ describe('agentless_policy_helper', () => {
   });
 
   describe('getAgentlessRelease', () => {
-    it('should default to Beta when agentless is enabled but release is not specified', () => {
+    it('should return undefined for a single only-agentless template with no release field (defer to semver)', () => {
       const packageInfo = {
         policy_templates: [
           {
@@ -388,7 +388,25 @@ describe('agentless_policy_helper', () => {
           },
         ] as RegistryPolicyTemplate[],
       };
+      expect(getAgentlessRelease(packageInfo)).toBeUndefined();
+      expect(getAgentlessRelease(packageInfo, 'template1')).toBeUndefined();
+    });
+
+    it('should imply Beta for a single dual-mode template with no release field', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: { agentless: { enabled: true }, default: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
       expect(getAgentlessRelease(packageInfo)).toBe(AgentlessDeploymentReleaseStatus.Beta);
+      expect(getAgentlessRelease(packageInfo, 'template1')).toBe(
+        AgentlessDeploymentReleaseStatus.Beta
+      );
     });
 
     it('should return GA when release is explicitly set to GA', () => {
@@ -400,27 +418,12 @@ describe('agentless_policy_helper', () => {
             description: '',
             deployment_modes: {
               agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.GA },
+              default: { enabled: true },
             },
           },
         ] as RegistryPolicyTemplate[],
       };
       expect(getAgentlessRelease(packageInfo)).toBe(AgentlessDeploymentReleaseStatus.GA);
-    });
-
-    it('should return Beta for a specific integration when release is not specified', () => {
-      const packageInfo = {
-        policy_templates: [
-          {
-            name: 'template1',
-            title: 'Template 1',
-            description: '',
-            deployment_modes: { agentless: { enabled: true } },
-          },
-        ] as RegistryPolicyTemplate[],
-      };
-      expect(getAgentlessRelease(packageInfo, 'template1')).toBe(
-        AgentlessDeploymentReleaseStatus.Beta
-      );
     });
 
     it('should return undefined for a specific integration with no agentless support', () => {
@@ -437,7 +440,7 @@ describe('agentless_policy_helper', () => {
       expect(getAgentlessRelease(packageInfo, 'template1')).toBeUndefined();
     });
 
-    it('should return the least mature release across multiple agentless templates', () => {
+    it('should return the least mature release across multiple agentless templates (absent release implies Beta)', () => {
       const packageInfo = {
         policy_templates: [
           {
@@ -452,7 +455,7 @@ describe('agentless_policy_helper', () => {
             name: 'template2',
             title: 'Template 2',
             description: '',
-            deployment_modes: { agentless: { enabled: true } }, // defaults to Beta
+            deployment_modes: { agentless: { enabled: true } }, // absent release implies Beta
           },
         ] as RegistryPolicyTemplate[],
       };

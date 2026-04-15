@@ -309,28 +309,28 @@ describe('Card utils', () => {
         ],
       };
 
-      it('should use agentless release (beta) for an only-agentless package', () => {
-        const card = mapToCard({ item: agentlessOnlyItem as any, addBasePath, getHref });
-        expect(card.release).toBe('beta');
+      it('should use semver release for a single only-agentless package with no explicit release', () => {
+        const card = mapToCard({ item: agentlessOnlyItem, addBasePath, getHref } as any);
+        expect(card.release).toBe('ga'); // 1.0.0 → semver-derived 'ga'
       });
 
       it('should use agentless release for a package where agentless is the default deployment', () => {
-        const card = mapToCard({ item: dualModeDefaultAgentlessItem as any, addBasePath, getHref });
+        const card = mapToCard({ item: dualModeDefaultAgentlessItem, addBasePath, getHref } as any);
         expect(card.release).toBe('beta');
       });
 
       it('should use semver release for a dual-mode package without agentless filter', () => {
-        const card = mapToCard({ item: dualModeItem as any, addBasePath, getHref });
+        const card = mapToCard({ item: dualModeItem, addBasePath, getHref } as any);
         expect(card.release).toBe('ga'); // 1.0.0 is ga
       });
 
       it('should use agentless release for a dual-mode package when onlyAgentless filter is active', () => {
         const card = mapToCard({
-          item: dualModeItem as any,
+          item: dualModeItem,
           addBasePath,
           getHref,
           filterState: { onlyAgentless: true },
-        });
+        } as any);
         expect(card.release).toBe('beta');
       });
 
@@ -349,7 +349,7 @@ describe('Card utils', () => {
             },
           ],
         };
-        const card = mapToCard({ item: gaItem as any, addBasePath, getHref });
+        const card = mapToCard({ item: gaItem, addBasePath, getHref } as any);
         expect(card.release).toBe('ga'); // falls back to semver-derived 'ga' for 1.0.0
       });
     });

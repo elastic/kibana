@@ -184,36 +184,40 @@ export function validateDeploymentModesForInputs(
 
 /**
  * Returns the agentless-specific release status for a package or integration.
- * Returns `undefined` if agentless is not enabled for the package/integration.
+ * Returns `undefined` when agentless is not enabled, or when the package consists of a single
+ * only-agentless template (package semver is the maturity indicator in that case, per spec).
  * Returns `AgentlessDeploymentReleaseStatus.GA` as-is — callers decide whether to defer to package semver instead.
- * Defaults to `AgentlessDeploymentReleaseStatus.Beta` when agentless is enabled but no release field is specified.
+ * For multi-template packages or a single dual-mode template, an absent `release` field implies Beta.
  * When no specific integration is provided, returns the least mature release across all agentless-enabled templates.
  */
 export const getAgentlessRelease = (
   packageInfo?: Pick<PackageInfo, 'policy_templates'>,
   integrationToEnable?: string
 ): AgentlessDeploymentReleaseStatus | undefined => {
+  const templates = packageInfo?.policy_templates ?? [];
+
+  // Single only-agentless template: spec disallows the release field — defer to package semver
+  if (templates.length === 1 && isOnlyAgentlessPolicyTemplate(templates[0])) {
+    return undefined;
+  }
+
   if (integrationToEnable) {
-    const template = packageInfo?.policy_templates?.find(
-      ({ name }) => name === integrationToEnable
-    );
+    const template = templates.find(({ name }) => name === integrationToEnable);
     if (!template?.deployment_modes?.agentless?.enabled) return undefined;
     return template.deployment_modes.agentless.release ?? AgentlessDeploymentReleaseStatus.Beta;
   }
 
-  const agentlessTemplates = packageInfo?.policy_templates?.filter(
+  const agentlessTemplates = templates.filter(
     (t) => t.deployment_modes?.agentless?.enabled === true
   );
 
-  if (!agentlessTemplates?.length) return undefined;
+  if (!agentlessTemplates.length) return undefined;
 
-  // Return the least mature release across all agentless templates:
-  // any non-GA template takes precedence over GA.
-  const hasNonGA = agentlessTemplates.some(
-    (t) =>
-      (t.deployment_modes?.agentless?.release ?? AgentlessDeploymentReleaseStatus.Beta) !==
-      AgentlessDeploymentReleaseStatus.GA
+  // Multi-template or dual-mode: absent release implies Beta. Return least mature across all.
+  const releases = agentlessTemplates.map(
+    (t) => t.deployment_modes?.agentless?.release ?? AgentlessDeploymentReleaseStatus.Beta
   );
+  const hasNonGA = releases.some((r) => r !== AgentlessDeploymentReleaseStatus.GA);
   return hasNonGA ? AgentlessDeploymentReleaseStatus.Beta : AgentlessDeploymentReleaseStatus.GA;
 };
 
