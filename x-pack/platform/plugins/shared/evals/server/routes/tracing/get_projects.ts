@@ -15,8 +15,7 @@ import {
 } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-
-const escapeWildcard = (value: string): string => value.replace(/[\\*?]/g, (ch) => `\\${ch}`);
+import { escapeWildcard } from './utils';
 
 export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned

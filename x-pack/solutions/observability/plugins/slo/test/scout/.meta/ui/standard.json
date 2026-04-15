@@ -1,5 +1,5 @@
 {
-  "sha1": "497ba62263201cb3b8c52d2974e89918faf833e2",
+  "sha1": "141ee12ba7c6d8ac5dd2c654f776a257139dd4bc",
   "tests": [
     {
       "id": "b77b3725a7cda3a-a405bc5e45e74c0",
@@ -71,6 +71,22 @@
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
         "line": 73,
         "column": 7
+      }
+    },
+    {
+      "id": "d0c1f04cf9e25c8-8345f73a5865487",
+      "title": "Explore from SLO Details - APM Navigation Source panel renders with APM links for APM-based SLO",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/explore_from_slo_details.spec.ts",
+        "line": 75,
+        "column": 9
       }
     },
     {

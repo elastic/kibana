@@ -541,11 +541,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       )
     ) {
       plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
+      setApmInternalServices({
+        cpsManager: plugins.cps?.cpsManager,
+      });
+    } else {
+      setApmInternalServices({});
     }
-
-    setApmInternalServices({
-      cpsManager: plugins.cps?.cpsManager,
-    });
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
