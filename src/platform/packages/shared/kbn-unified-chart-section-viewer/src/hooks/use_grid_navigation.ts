@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { keys } from '@elastic/eui';
 
 interface GridNavigationOptions {
@@ -28,20 +28,10 @@ export const useGridNavigation = ({
     colIndex: 0,
   });
 
-  const prevLayoutRef = useRef<{ totalRows: number; gridColumns: number } | null>(null);
   useLayoutEffect(() => {
-    const prev = prevLayoutRef.current;
-    prevLayoutRef.current = { totalRows, gridColumns };
-    if (prev === null) {
-      return;
+    if (totalRows > 0) {
+      setFocusedCell({ rowIndex: 0, colIndex: 0 });
     }
-    if (prev.totalRows === totalRows && prev.gridColumns === gridColumns) {
-      return;
-    }
-    if (totalRows <= 0) {
-      return;
-    }
-    setFocusedCell({ rowIndex: 0, colIndex: 0 });
   }, [totalRows, gridColumns]);
 
   const getRowColFromIndex = useCallback(
