@@ -9,16 +9,39 @@
 
 import { schema } from '@kbn/config-schema';
 
-const absoluteTimeRangeMode = schema.literal('absolute');
-const relativeTimeRangeMode = schema.literal('relative');
+const absoluteTimeRangeMode = schema.literal('absolute', { meta: { title: 'Absolute' } });
+const relativeTimeRangeMode = schema.literal('relative', { meta: { title: 'Relative' } });
 
 export const timeRangeSchema = schema.object(
   {
-    from: schema.string(),
-    to: schema.string(),
-    mode: schema.maybe(schema.oneOf([absoluteTimeRangeMode, relativeTimeRangeMode])),
+    from: schema.string({
+      meta: {
+        description:
+          'The start of the time range. Accepts Elasticsearch date math expressions (e.g. `now-7d`) or ISO 8601 timestamps.',
+      },
+    }),
+    to: schema.string({
+      meta: {
+        description:
+          'The end of the time range. Accepts Elasticsearch date math expressions (e.g. `now`) or ISO 8601 timestamps.',
+      },
+    }),
+    mode: schema.maybe(
+      schema.oneOf([absoluteTimeRangeMode, relativeTimeRangeMode], {
+        meta: {
+          description:
+            'The time range mode. Use `absolute` for fixed start and end timestamps. Use `relative` for expressions that are re-evaluated at query time (e.g. `now-7d` to `now`).',
+        },
+      })
+    ),
   },
-  { meta: { id: 'kbn-es-query-server-timeRangeSchema' } }
+  {
+    meta: {
+      id: 'kbn-es-query-server-timeRangeSchema',
+      title: 'Time range',
+      description: 'Specifies the time range for a query.',
+    },
+  }
 );
 
 export const absoluteTimeRangeSchema = timeRangeSchema.extends(
