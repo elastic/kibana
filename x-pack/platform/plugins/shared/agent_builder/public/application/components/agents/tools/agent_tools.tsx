@@ -221,7 +221,6 @@ export const AgentTools: React.FC = () => {
       allTools={allTools}
       activeToolIdSet={libraryActiveToolIdSet}
       onToggleTool={handleToggleTool}
-      mutatingToolId={null}
       enableElasticCapabilities={enableElasticCapabilities}
       builtinToolIdSet={defaultToolIdSet}
     />
