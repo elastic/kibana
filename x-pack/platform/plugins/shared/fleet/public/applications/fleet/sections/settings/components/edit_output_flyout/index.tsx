@@ -619,7 +619,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                         <>
                           <FormattedMessage
                             id="xpack.fleet.settings.editOutputFlyout.otelDisableBeatsauthLabel"
-                            defaultMessage="Do not use beatsauth extension to translate output parameters"
+                            defaultMessage="Use exporter configuration without translating with beatsauth extension"
                           />{' '}
                           <EuiIconTip
                             type="question"
