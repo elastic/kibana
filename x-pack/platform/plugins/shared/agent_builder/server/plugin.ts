@@ -43,6 +43,8 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { createMemoryTools } from './services/memory/create_memory_tools';
+import { registerMemoryBeforeAgentHook } from './services/memory/hooks/before_agent_hook';
+import { registerMemoryAfterRoundHook } from './services/memory/hooks/after_round_hook';
 
 export class AgentBuilderPlugin
   implements
@@ -197,6 +199,19 @@ export class AgentBuilderPlugin
     });
 
     registerSkillToolsLoaderHook(serviceSetups);
+
+    // Register memory hooks: before-agent injection and after-round extraction
+    registerMemoryBeforeAgentHook(serviceSetups, {
+      logger: this.logger,
+      getInternalServices,
+    });
+
+    registerMemoryAfterRoundHook(serviceSetups, {
+      logger: this.logger,
+      inference: setupDeps.inference,
+      getStartServices: coreSetup.getStartServices,
+      getInternalServices,
+    });
 
     const smlTools = createSmlTools({
       getSmlService: () => {

@@ -12,3 +12,12 @@ export {
   formatMemoryInjection,
   injectMemoryIntoMessage,
 } from './before_agent_hook';
+
+export type {
+  RegisterMemoryAfterRoundHookDeps,
+  AfterRoundExtractionContext,
+} from './after_round_hook';
+export {
+  registerMemoryAfterRoundHook,
+  runAfterRoundExtractionPipeline,
+} from './after_round_hook';
