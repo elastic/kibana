@@ -772,7 +772,12 @@ export async function syncNamespaceTemplates({
           }
         }
 
-        // Remove refs from installed_es
+        // Remove refs from installed_es — re-fetch to avoid stale data when
+        // multiple namespaces affect the same package in successive iterations.
+        const freshInstallation = await getInstallation({
+          savedObjectsClient: soClient,
+          pkgName: packageName,
+        });
         const assetsToRemove = [
           ...nsTemplateRefs.map((ref) => ({
             id: ref.id,
@@ -781,7 +786,12 @@ export async function syncNamespaceTemplates({
           { id: `${namespace}@custom`, type: ElasticsearchAssetType.componentTemplate },
         ];
 
-        await updateEsAssetReferences(soClient, packageName, installedEs, { assetsToRemove });
+        await updateEsAssetReferences(
+          soClient,
+          packageName,
+          freshInstallation?.installed_es ?? [],
+          { assetsToRemove }
+        );
 
         affectedPackages.push(packageName);
       }
