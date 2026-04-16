@@ -180,6 +180,9 @@ export const COURIER_SET_REQUEST_PREFERENCE_ID = 'courier:setRequestPreference';
 export const SEARCH_INCLUDE_FROZEN_ID = 'search:includeFrozen';
 export const SEARCH_TIMEOUT_ID = 'search:timeout';
 
+// Query activity settings
+export const QUERY_ACTIVITY_MIN_RUNNING_TIME_ID = 'query_activity:minRunningTime';
+
 // Security solution settings
 export const SECURITY_SOLUTION_REFRESH_INTERVAL_DEFAULTS_ID =
   'securitySolution:refreshIntervalDefaults';
