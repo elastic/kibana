@@ -9,16 +9,20 @@ import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 
 import { clearCacheIndices as request } from '../../services';
-import { notificationService } from '../../services/notification';
 
 import { clearRowStatus, reloadIndices } from '.';
 import type { AppDispatch } from '../types';
 import { getHttpErrorToastMessage } from '../http_error';
+import type { AppDependencies } from '../../app_context';
 
 export const clearCacheIndicesStart = createAction('INDEX_MANAGEMENT_CLEAR_CACHE_INDICES_START');
 export const clearCacheIndices =
   ({ indexNames }: { indexNames: string[] }) =>
-  async (dispatch: AppDispatch) => {
+  async (
+    dispatch: AppDispatch,
+    _getState: () => unknown,
+    { notificationService }: AppDependencies['services']
+  ) => {
     dispatch(clearCacheIndicesStart({ indexNames }));
     try {
       await request(indexNames);
