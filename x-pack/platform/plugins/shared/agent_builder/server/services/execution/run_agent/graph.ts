@@ -47,6 +47,17 @@ import type { ProcessedConversation } from './utils/prepare_conversation';
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
 
+/**
+ * Callback to get undelivered memories from auto-retrieval.
+ * Set by plugin.ts. Returns formatted memory text or null.
+ */
+let _getUndeliveredMemoriesFn: (() => Promise<string | null>) | undefined;
+
+export const setGetUndeliveredMemoriesFn = (fn: NonNullable<typeof _getUndeliveredMemoriesFn>): void => {
+  _getUndeliveredMemoriesFn = fn;
+};
+
+
 export const createAgentGraph = ({
   chatModel,
   toolManager,
@@ -181,9 +192,27 @@ export const createAgentGraph = ({
       return {
         mainActions: [handoverAction('', true)],
       };
-    } else {
-      return {};
     }
+
+    // Inject any undelivered memories into the handover message
+    // so the answer agent has memory context when formulating the response.
+    if (_getUndeliveredMemoriesFn && isHandoverAction(lastAction)) {
+      try {
+        const memoriesText = await _getUndeliveredMemoriesFn();
+        if (memoriesText) {
+          const enrichedMessage = lastAction.message
+            ? `${lastAction.message}\n\n[Retrieved Memories]\n${memoriesText}`
+            : `[Retrieved Memories]\n${memoriesText}`;
+          return {
+            mainActions: [handoverAction(enrichedMessage, lastAction.forceful)],
+          };
+        }
+      } catch (err) {
+        logger.warn(`prepareToAnswer: memory injection failed: ${(err as Error).message}`);
+      }
+    }
+
+    return {};
   };
 
   const answeringModel = chatModel.withConfig({

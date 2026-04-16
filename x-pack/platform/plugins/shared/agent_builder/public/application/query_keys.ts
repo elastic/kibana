@@ -61,4 +61,14 @@ export const queryKeys = {
   connectors: {
     all: ['connectors'] as const,
   },
+  memory: {
+    all: ['memory'] as const,
+    list: (type?: string, status?: string, page?: number, size?: number) =>
+      ['memory', 'list', { type, status, page, size }] as const,
+    byId: (id?: string) => ['memory', 'byId', id] as const,
+    graph: (id?: string, depth?: number) => ['memory', 'graph', id, depth] as const,
+    stats: ['memory', 'stats'] as const,
+    reviewQueueAll: ['memory', 'reviewQueue'] as const,
+    reviewQueue: (limit?: number) => ['memory', 'reviewQueue', limit] as const,
+  },
 };

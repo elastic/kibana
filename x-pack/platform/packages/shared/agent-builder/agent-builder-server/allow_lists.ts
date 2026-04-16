@@ -54,6 +54,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.query_documents`,
   `${internalNamespaces.streams}.get_failed_documents`,
 
+  // Memory
+  'memory.remember',
+  'memory.reinforce',
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,

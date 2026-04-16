@@ -64,6 +64,10 @@ export interface ExperimentalFeatures {
   filestore: boolean;
   /** Whether the skills feature is enabled */
   skills: boolean;
+  /** Whether the memory system is enabled */
+  memory: boolean;
+  /** Whether memory tool calls (checkpoint, reinforce) are visible in the UI */
+  showMemoryToolCalls: boolean;
 }
 
 export interface AgentHandlerContext {

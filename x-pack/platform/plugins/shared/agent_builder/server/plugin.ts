@@ -42,6 +42,21 @@ import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './ser
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { createMemoryTools } from './services/memory/create_memory_tools';
+import { registerMemoryBeforeAgentHook } from './services/memory/hooks/before_agent_hook';
+import { createMemoryExtractionCallback } from './services/memory/hooks/after_round_hook';
+import {
+  setMemoryExtractionCallback,
+  setShowMemoryToolCalls,
+} from './services/execution/run_agent/run_chat_agent';
+import { registerMemoryAutoRetrievalHook, consumeUndeliveredMemories } from './services/memory/hooks/auto_retrieval_hook';
+import { initMemoryPreloader } from './services/memory/preload/memory_preloader';
+import { setGetUndeliveredMemoriesFn } from './services/execution/run_agent/graph';
+import { formatMemoryInjection } from './services/memory/hooks/before_agent_hook';
+import {
+  registerMemoryConsolidationTaskDefinition,
+  scheduleMemoryConsolidationTask,
+} from './services/memory/consolidation';
 
 export class AgentBuilderPlugin
   implements
@@ -197,6 +212,60 @@ export class AgentBuilderPlugin
 
     registerSkillToolsLoaderHook(serviceSetups);
 
+    if (this.config.memory.enabled) {
+      setShowMemoryToolCalls(this.config.memory.showToolCalls);
+
+      if (this.config.memory.preload.enabled) {
+        initMemoryPreloader({
+          logger: this.logger.get('memory.preload'),
+          maxMemories: this.config.memory.preload.maxMemories,
+        });
+      }
+
+      registerMemoryAutoRetrievalHook(serviceSetups, {
+        logger: this.logger,
+        config: this.config,
+        getInternalServices,
+      });
+
+      setGetUndeliveredMemoriesFn(async () => {
+        const memories = await consumeUndeliveredMemories();
+        if (memories.length === 0) return null;
+        return formatMemoryInjection(
+          memories.map((m) => ({ node: m, score: m.confidence }))
+        );
+      });
+
+      registerMemoryBeforeAgentHook(serviceSetups, {
+        logger: this.logger,
+        retrieval: this.config.memory.retrieval,
+        config: this.config,
+        getInternalServices,
+      });
+
+      setMemoryExtractionCallback(
+        createMemoryExtractionCallback({
+          logger: this.logger,
+          config: this.config,
+          getInternalServices,
+        })
+      );
+
+      registerMemoryConsolidationTaskDefinition({
+        taskManager: setupDeps.taskManager,
+        getConsolidationDeps: async () => {
+          const [coreStart] = await coreSetup.getStartServices();
+          return {
+            elasticsearch: coreStart.elasticsearch,
+            logger: this.logger.get('services.memory.consolidation'),
+            config: this.config,
+          };
+        },
+      });
+    } else {
+      this.logger.info('Memory system disabled via config');
+    }
+
     const smlTools = createSmlTools({
       getSmlService: () => {
         const services = this.serviceManager.internalStart;
@@ -219,6 +288,24 @@ export class AgentBuilderPlugin
     connectorTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
+
+    if (this.config.memory.enabled) {
+      const memoryTools = createMemoryTools({
+        getMemoryService: () => {
+          const services = this.serviceManager.internalStart;
+          if (!services) {
+            throw new Error('Memory service not available — plugin has not started');
+          }
+          return services.memory;
+        },
+        retrievalMethod: this.config.memory.retrieval.method,
+        getConfig: () => this.config,
+        getInternalServices,
+      });
+      memoryTools.forEach((tool) => {
+        serviceSetups.tools.register(tool);
+      });
+    }
 
     // Register connector lifecycle listener to index connectors into SML
     // when they are created/deleted. The handler checks the connectors-enabled
@@ -305,6 +392,15 @@ export class AgentBuilderPlugin
       logger: this.logger.get('services.sml'),
     }).catch((error) => {
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
+    });
+
+    // Schedule nightly memory consolidation task
+    scheduleMemoryConsolidationTask({
+      taskManager,
+      logger: this.logger.get('services.memory.consolidation'),
+      interval: this.config.memory.nightly.interval,
+    }).catch((error) => {
+      this.logger.error(`Failed to schedule memory consolidation task: ${error.message}`);
     });
 
     const smlService = startServices.sml;

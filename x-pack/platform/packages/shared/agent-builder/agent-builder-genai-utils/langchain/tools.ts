@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { StructuredTool } from '@langchain/core/tools';
 import { tool as toTool } from '@langchain/core/tools';
@@ -130,12 +129,11 @@ export const toolToLangchain = async ({
         };
       }
 
-      // remove internal parameters before calling tool handler.
-      const input = omit(rawInput, ['_reasoning']);
-
+      // Pass full params (including _reasoning) to execute — hooks need access to _reasoning.
+      // The _reasoning field is stripped by the tool handler's own schema validation.
       try {
         const toolReturn = await tool.execute({
-          toolParams: input,
+          toolParams: rawInput,
           onEvent,
           toolCallId,
           source: 'agent',
@@ -159,8 +157,7 @@ export const toolToLangchain = async ({
         ? z.object({
             _reasoning: z
               .string()
-              .optional()
-              .describe('Brief reasoning of why you are calling this tool'),
+              .describe('Required: explain why you are calling this tool and what you expect to learn'),
             ...schema.shape,
           })
         : schema,

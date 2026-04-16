@@ -12,6 +12,7 @@ export {
   platformStreamsSigEventsTools,
   attachmentTools,
   filestoreTools,
+  memoryTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
   editableToolTypes,

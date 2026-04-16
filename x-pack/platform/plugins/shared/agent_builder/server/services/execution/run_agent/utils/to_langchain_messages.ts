@@ -16,8 +16,10 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
+  ConversationRoundStepType,
   isReasoningStep,
   isToolCallStep,
+  memoryTools,
 } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
@@ -104,10 +106,43 @@ export const roundToLangchain = async (
   // user message
   messages.push(formatRoundInput({ input: round.input }));
 
-  // steps
+  // steps — rewrite memory tool calls for previous round context:
+  // - checkpoint/remember calls: filtered out entirely (transient retrieval noise)
+  // - reinforce calls: replaced with a synthetic remember result containing
+  //   the positively reinforced memories (preserves important context without
+  //   exposing memory system internals)
   if (!ignoreSteps) {
-    const groups = groupToolCallSteps(round.steps);
-    const reasoningSteps = round.steps.filter(isReasoningStep);
+    const memoryToolIdsToRemove = new Set([
+      memoryTools.checkpoint,
+      memoryTools.remember,
+    ]);
+    const memoryToolCallIds = new Set<string>();
+
+    for (const step of round.steps) {
+      if (isToolCallStep(step) && memoryToolIdsToRemove.has(step.tool_id)) {
+        memoryToolCallIds.add(step.tool_call_id);
+      }
+    }
+
+    const filteredSteps: ConversationRoundStep[] = [];
+    for (const step of round.steps) {
+      if (isToolCallStep(step)) {
+        if (memoryToolIdsToRemove.has(step.tool_id)) {
+          continue;
+        }
+        if (step.tool_id === memoryTools.reinforce) {
+          filteredSteps.push(convertReinforceToReasoning(step));
+          continue;
+        }
+      }
+      if (isReasoningStep(step) && step.tool_call_id && memoryToolCallIds.has(step.tool_call_id)) {
+        continue;
+      }
+      filteredSteps.push(step);
+    }
+
+    const groups = groupToolCallSteps(filteredSteps);
+    const reasoningSteps = filteredSteps.filter(isReasoningStep);
     for (const group of groups) {
       messages.push(
         ...(await createGroupedToolCallMessages(group, { resultTransformer, reasoningSteps }))
@@ -119,6 +154,36 @@ export const roundToLangchain = async (
   messages.push(formatAssistantResponse({ response: round.response }));
 
   return messages;
+};
+
+/**
+ * Convert a reinforce() tool call step into a reasoning step.
+ * Extracts positively reinforced memories and presents them as
+ * "Agent remembered: ..." so the LLM sees what context was important
+ * without any tool call machinery.
+ */
+const convertReinforceToReasoning = (step: ToolCallStep): ReasoningStep => {
+  const items = (step.params?.items as Array<{
+    memory_id: string;
+    effect: string;
+    kind: string;
+    reason?: string;
+  }>) ?? [];
+
+  const positiveItems = items.filter((item) => item.effect === 'positive');
+
+  let reasoning: string;
+  if (positiveItems.length > 0) {
+    const lines = positiveItems.map((item) => `- ${item.reason ?? item.kind}`);
+    reasoning = `Agent remembered:\n${lines.join('\n')}`;
+  } else {
+    reasoning = 'Agent had no relevant memories for this round.';
+  }
+
+  return {
+    type: ConversationRoundStepType.reasoning,
+    reasoning,
+  };
 };
 
 const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessage => {

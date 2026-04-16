@@ -42,6 +42,7 @@ import {
   SmlService,
   PluginsService,
   EventsService,
+  MemoryService,
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
@@ -156,6 +157,7 @@ export class AgentBuilderPlugin
     const skillsService = new SkillsService({ http });
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
+    const memoryService = new MemoryService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -215,6 +217,7 @@ export class AgentBuilderPlugin
       skillsService,
       smlService,
       pluginsService,
+      memoryService,
       startDependencies,
       usageCollection,
       accessChecker,

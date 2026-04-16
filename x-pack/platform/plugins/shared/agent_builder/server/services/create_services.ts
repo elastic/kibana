@@ -30,6 +30,7 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
+import { MemoryServiceImpl, type MemoryService } from './memory';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -41,6 +42,7 @@ interface ServiceInstances {
   metering: MeteringService;
   sml: SmlServiceInstance;
   consumption: ConsumptionService;
+  memory?: MemoryService;
 }
 
 export class ServiceManager {
@@ -231,6 +233,22 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
+    const memory = new MemoryServiceImpl({
+      logger: logger.get('memory'),
+      security,
+      elasticsearch,
+      spaces,
+    });
+    this.services.memory = memory;
+
+    // Best-effort index initialization: initialize in the background so it doesn't
+    // block the plugin start lifecycle.
+    memory.initialize({
+      inferenceEndpointId: this.config.memory?.retrieval?.inferenceEndpointId,
+    }).catch((err: Error) => {
+      logger.get('memory').warn(`Memory index initialization failed: ${err.message}`);
+    });
+
     this.internalStart = {
       tools,
       agents,
@@ -249,6 +267,9 @@ export class ServiceManager {
       sml,
       plugins,
       consumption,
+      memory,
+      inference,
+      elasticsearch,
     };
 
     return this.internalStart;
