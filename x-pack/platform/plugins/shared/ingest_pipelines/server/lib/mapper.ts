@@ -64,7 +64,7 @@ function parseAndValidate(file: string) {
     throw new Error(
       i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.parseErrors', {
         defaultMessage:
-          'Error reading file: An unexpected issue has occured during the processing of the file.',
+          'Error reading file: An unexpected issue has occurred during the processing of the file.',
       })
     );
   }
