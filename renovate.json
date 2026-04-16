@@ -58,7 +58,7 @@
       "groupName": "devcontainer",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
+      "addLabels": ["Team:Operations", "reviewer:claude"],
       "enabled": true,
       "matchManagers": ["devcontainer"]
     },
