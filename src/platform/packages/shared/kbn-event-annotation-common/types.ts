@@ -38,7 +38,7 @@ export type KeyType = 'point_in_time' | 'range';
 
 interface StyleSharedProps {
   label: string;
-  color?: string;
+  color?: string | 'auto';
   isHidden?: boolean;
 }
 

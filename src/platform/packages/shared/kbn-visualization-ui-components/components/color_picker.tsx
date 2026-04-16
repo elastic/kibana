@@ -52,19 +52,20 @@ export const ColorPicker = ({
   const unflushedChanges = useRef(false);
 
   const isDisabled = Boolean(disabledMessage);
+  const isCustomColor = Boolean(overwriteColor);
 
   useEffect(() => {
     //  only the changes from outside the color picker should be applied
     if (!unflushedChanges.current) {
+      const nextColor = overwriteColor || defaultColor;
       // something external changed the color that is currently selected (switching from annotation line to annotation range)
       if (
-        overwriteColor &&
-        validatedColor &&
-        overwriteColor.toUpperCase() !== validatedColor.toUpperCase()
+        nextColor &&
+        (!validatedColor || nextColor.toUpperCase() !== validatedColor.toUpperCase())
       ) {
-        setColorText(overwriteColor);
-        setValidatedColor(overwriteColor.toUpperCase());
-        setCurrentColorAlpha(getColorAlpha(overwriteColor));
+        setColorText(nextColor);
+        setValidatedColor(nextColor.toUpperCase());
+        setCurrentColorAlpha(getColorAlpha(nextColor));
       }
     }
     unflushedChanges.current = false;
@@ -122,14 +123,22 @@ export const ColorPicker = ({
         <TooltipWrapper
           delay="long"
           position="top"
-          tooltipContent={colorText && !isDisabled ? tooltipContent.custom : tooltipContent.auto}
+          tooltipContent={
+            isCustomColor && !isDisabled ? tooltipContent.custom : tooltipContent.auto
+          }
           condition={!disableHelpTooltip}
         >
           <span>
             {inputLabel}
             {!disableHelpTooltip && (
               <>
-                <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
+                <EuiIcon
+                  type="question"
+                  color="subdued"
+                  size="s"
+                  className="eui-alignTop"
+                  aria-hidden={true}
+                />
               </>
             )}
           </span>

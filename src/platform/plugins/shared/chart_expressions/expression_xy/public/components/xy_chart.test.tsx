@@ -75,10 +75,7 @@ import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { LayerCellValueActions } from '../types';
 import { EuiThemeProvider } from '@elastic/eui';
-import {
-  getDefaultAnnotationColor,
-  getDefaultAnnotationRangeColor,
-} from '@kbn/event-annotation-common';
+import { getResolvedAnnotationColor } from '@kbn/event-annotation-common';
 import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';
 import type { CoreSetup } from '@kbn/core/public';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -3170,12 +3167,12 @@ describe('XYChart component', () => {
         line: {
           dash: undefined,
           opacity: 1,
-          stroke: getDefaultAnnotationColor(true),
+          stroke: getResolvedAnnotationColor({ color: undefined, isDarkMode: true }),
           strokeWidth: 1,
         },
       });
       expect(component.find(RectAnnotation).last().prop('style')).toEqual({
-        fill: getDefaultAnnotationRangeColor(true),
+        fill: getResolvedAnnotationColor({ color: undefined, isDarkMode: true, isRange: true }),
         opacity: 1,
       });
     });

@@ -18,6 +18,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
     <Marker
       config={
         Object {
+          "color": "#2B394F",
           "customTooltip": [Function],
           "icon": "triangle",
           "id": "annotation",

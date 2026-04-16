@@ -9,11 +9,7 @@ import { uniq, mapValues } from 'lodash';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
-import {
-  getDefaultAnnotationColor,
-  getDefaultAnnotationRangeColor,
-  isRangeAnnotationConfig,
-} from '@kbn/event-annotation-common';
+import { getResolvedAnnotationColor, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { FramePublicAPI } from '@kbn/lens-common';
 import { getColumnToLabelMap } from './state_helpers';
@@ -137,9 +133,11 @@ export function getAssignedColorConfig(
     return {
       columnId: accessor,
       triggerIconType: annotation?.isHidden ? 'invisible' : 'color',
-      color: isRangeAnnotationConfig(annotation)
-        ? getDefaultAnnotationRangeColor(isDarkMode)
-        : getDefaultAnnotationColor(isDarkMode),
+      color: getResolvedAnnotationColor({
+        color: annotation?.color,
+        isDarkMode,
+        isRange: isRangeAnnotationConfig(annotation),
+      }),
     };
   }
   const layerContainsSplits =

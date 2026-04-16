@@ -611,6 +611,36 @@ describe('Event Annotation Service', () => {
         },
       });
     });
+
+    it('persists auto for annotation colors when no custom color is set', async () => {
+      await eventAnnotationService.createAnnotationGroup({
+        title: 'newGroupTitle',
+        description: 'my description',
+        tags: [],
+        indexPatternId: 'ipid',
+        ignoreGlobalFilters: false,
+        annotations: [
+          {
+            id: 'annotation1',
+            type: 'manual',
+            key: { type: 'point_in_time', timestamp: '2022-03-18T08:25:00.000Z' },
+            label: 'Event',
+          },
+        ],
+      });
+
+      expect(contentClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            annotations: [
+              expect.objectContaining({
+                color: 'auto',
+              }),
+            ],
+          }),
+        })
+      );
+    });
   });
   describe('updateAnnotationGroup', () => {
     it('updates annotation group attributes', async () => {
@@ -645,6 +675,39 @@ describe('Event Annotation Service', () => {
           ],
         },
       });
+    });
+
+    it('persists auto for updated annotation colors when no custom color is set', async () => {
+      await eventAnnotationService.updateAnnotationGroup(
+        {
+          title: 'newTitle',
+          description: '',
+          tags: [],
+          indexPatternId: 'newId',
+          ignoreGlobalFilters: false,
+          annotations: [
+            {
+              id: 'annotation1',
+              type: 'manual',
+              key: { type: 'point_in_time', timestamp: '2022-03-18T08:25:00.000Z' },
+              label: 'Event',
+            },
+          ],
+        },
+        'multiAnnotations'
+      );
+
+      expect(contentClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            annotations: [
+              expect.objectContaining({
+                color: 'auto',
+              }),
+            ],
+          }),
+        })
+      );
     });
   });
 });

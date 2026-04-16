@@ -17,6 +17,7 @@ import type {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
+import { AUTO_ANNOTATION_COLOR } from '@kbn/event-annotation-common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import moment from 'moment';
 import { act } from 'react-dom/test-utils';
@@ -216,6 +217,80 @@ describe('AnnotationsPanel', () => {
 
       expect(onAnnotationChange).toHaveBeenCalledWith({
         color: '#FF0000',
+        id: 'ann1',
+        isHidden: undefined,
+        key: {
+          timestamp: '2022-03-18T08:25:00.000Z',
+          type: 'point_in_time',
+        },
+        label: 'Event',
+        type: 'manual',
+      });
+    });
+
+    test('keeps auto color when switching annotation types without a custom color', () => {
+      const onAnnotationChange = jest.fn();
+      const rangeEndTimestamp = new Date().toISOString();
+      const autoColorAnnotation: EventAnnotationConfig = {
+        id: 'ann1',
+        type: 'manual',
+        key: { type: 'point_in_time', timestamp: '2022-03-18T08:25:00.000Z' },
+        label: 'Event',
+        icon: 'triangle',
+        color: AUTO_ANNOTATION_COLOR,
+      };
+
+      const { rerender } = render(
+        <EuiThemeProvider>
+          <AnnotationEditorControls
+            annotation={autoColorAnnotation}
+            onAnnotationChange={onAnnotationChange}
+            dataView={mockDataView}
+            getDefaultRangeEnd={() => rangeEndTimestamp}
+            queryInputServices={mockQueryInputServices}
+            appName="myApp"
+          />
+        </EuiThemeProvider>
+      );
+
+      act(() => {
+        screen.getByTestId('lns-xyAnnotation-rangeSwitch').click();
+      });
+
+      const expectedRangeAnnotation: RangeEventAnnotationConfig = {
+        color: AUTO_ANNOTATION_COLOR,
+        id: 'ann1',
+        isHidden: undefined,
+        label: 'Event range',
+        type: 'manual',
+        key: {
+          endTimestamp: rangeEndTimestamp,
+          timestamp: '2022-03-18T08:25:00.000Z',
+          type: 'range',
+        },
+      };
+
+      expect(onAnnotationChange).toHaveBeenCalledWith(expectedRangeAnnotation);
+
+      rerender(
+        <EuiThemeProvider>
+          <AnnotationEditorControls
+            annotation={expectedRangeAnnotation}
+            onAnnotationChange={onAnnotationChange}
+            dataView={mockDataView}
+            getDefaultRangeEnd={() => rangeEndTimestamp}
+            queryInputServices={mockQueryInputServices}
+            appName="myApp"
+          />
+        </EuiThemeProvider>
+      );
+
+      act(() => {
+        screen.getByTestId('lns-xyAnnotation-rangeSwitch').click();
+      });
+
+      expect(onAnnotationChange).toHaveBeenCalledWith({
+        color: AUTO_ANNOTATION_COLOR,
         id: 'ann1',
         isHidden: undefined,
         key: {

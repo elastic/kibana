@@ -40,10 +40,7 @@ import type {
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import {
-  getDefaultAnnotationColor,
-  getDefaultAnnotationRangeColor,
-} from '@kbn/event-annotation-common';
+import { getResolvedAnnotationColor, isAutoAnnotationColor } from '@kbn/event-annotation-common';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import {
   defaultAnnotationLabel,
@@ -83,9 +80,11 @@ const AnnotationEditorControls = ({
   const isQueryBased = isQueryAnnotationConfig(currentAnnotation);
   const isRange = isRangeAnnotationConfig(currentAnnotation);
   const isDarkMode = colorMode === 'DARK';
-  const defaultColor = isRange
-    ? getDefaultAnnotationRangeColor(isDarkMode)
-    : getDefaultAnnotationColor(isDarkMode);
+  const defaultColor = getResolvedAnnotationColor({
+    color: currentAnnotation.color,
+    isDarkMode,
+    isRange,
+  });
 
   const [queryInputShouldOpen, setQueryInputShouldOpen] = React.useState(false);
   useEffect(() => {
@@ -343,7 +342,11 @@ const AnnotationEditorControls = ({
         )}
 
         <ColorPicker
-          overwriteColor={currentAnnotation.color}
+          overwriteColor={
+            currentAnnotation.color && !isAutoAnnotationColor(currentAnnotation.color)
+              ? currentAnnotation.color
+              : undefined
+          }
           isClearable={false}
           defaultColor={defaultColor}
           showAlpha={isRange}

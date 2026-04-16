@@ -17,7 +17,7 @@ import type {
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
+import { AUTO_ANNOTATION_COLOR, isAutoAnnotationColor } from '@kbn/event-annotation-common';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 
 export const defaultAnnotationLabel = i18n.translate(
@@ -34,11 +34,17 @@ export const defaultRangeAnnotationLabel = i18n.translate(
   }
 );
 
-export const toRangeAnnotationColor = (color = defaultAnnotationColor) => {
+export const toRangeAnnotationColor = (color?: string) => {
+  if (!color || isAutoAnnotationColor(color)) {
+    return AUTO_ANNOTATION_COLOR;
+  }
   return chroma(transparentize(color, 0.1)).hex().toUpperCase();
 };
 
-export const toLineAnnotationColor = (color = defaultAnnotationRangeColor) => {
+export const toLineAnnotationColor = (color?: string) => {
+  if (!color || isAutoAnnotationColor(color)) {
+    return AUTO_ANNOTATION_COLOR;
+  }
   return chroma(transparentize(color, 1)).hex().toUpperCase();
 };
 

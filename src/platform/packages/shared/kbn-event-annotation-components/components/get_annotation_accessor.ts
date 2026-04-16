@@ -9,11 +9,7 @@
 
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import {
-  getDefaultAnnotationColor,
-  getDefaultAnnotationRangeColor,
-  isRangeAnnotationConfig,
-} from '@kbn/event-annotation-common';
+import { getResolvedAnnotationColor, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
 import { annotationsIconSet } from './annotation_editor_controls/icon_set';
 
 export const getAnnotationAccessor = (
@@ -29,10 +25,10 @@ export const getAnnotationAccessor = (
     columnId: annotation.id,
     triggerIconType: annotation.isHidden ? 'invisible' : icon ? 'custom' : 'color',
     customIcon: icon,
-    color:
-      annotation?.color ||
-      (isRangeAnnotationConfig(annotation)
-        ? getDefaultAnnotationRangeColor(isDarkMode)
-        : getDefaultAnnotationColor(isDarkMode)),
+    color: getResolvedAnnotationColor({
+      color: annotation?.color,
+      isDarkMode,
+      isRange: isRangeAnnotationConfig(annotation),
+    }),
   };
 };

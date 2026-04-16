@@ -18,6 +18,7 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import {
+  getPersistedAnnotationColor,
   isRangeAnnotationConfig,
   isQueryAnnotationConfig,
   defaultAnnotationLabel,
@@ -205,6 +206,10 @@ export function getEventAnnotationService(
   } => {
     const { references, dataViewSpec } = extractDataViewInformation(group);
     const { title, description, tags, ignoreGlobalFilters, annotations } = group;
+    const persistedAnnotations = annotations.map((annotation) => ({
+      ...annotation,
+      color: getPersistedAnnotationColor(annotation.color),
+    }));
 
     references.push(
       ...tags.map((tag) => ({
@@ -219,7 +224,7 @@ export function getEventAnnotationService(
         title,
         description,
         ignoreGlobalFilters,
-        annotations,
+        annotations: persistedAnnotations,
         dataViewSpec,
       },
       references,
@@ -380,7 +385,7 @@ const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
               time: [time],
               endTime: [endTime],
               label: [label || defaultAnnotationLabel],
-              color: color ? [color] : [],
+              color: [getPersistedAnnotationColor(color)],
               outside: [Boolean(outside)],
               isHidden: [Boolean(annotation.isHidden)],
             },
@@ -399,7 +404,7 @@ const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
               id: [id],
               time: [key.timestamp],
               label: [label || defaultAnnotationLabel],
-              color: color ? [color] : [],
+              color: [getPersistedAnnotationColor(color)],
               lineWidth: [lineWidth || 1],
               lineStyle: [lineStyle || 'solid'],
               icon: hasIcon(icon) ? [icon] : ['triangle'],

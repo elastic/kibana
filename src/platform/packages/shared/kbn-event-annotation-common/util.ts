@@ -15,6 +15,7 @@ import type {
   QueryPointEventAnnotationConfig,
 } from './types';
 
+export const AUTO_ANNOTATION_COLOR = 'auto';
 export const defaultAnnotationColor = '#2B394F';
 export const darkModeDefaultAnnotationColor = '#FFFFFF';
 export const defaultAnnotationRangeColor = '#2B394F1A';
@@ -25,6 +26,25 @@ export const getDefaultAnnotationColor = (isDarkMode = false) =>
 
 export const getDefaultAnnotationRangeColor = (isDarkMode = false) =>
   isDarkMode ? darkModeDefaultAnnotationRangeColor : defaultAnnotationRangeColor;
+
+export const isAutoAnnotationColor = (color?: string) => color === AUTO_ANNOTATION_COLOR;
+
+export const getResolvedAnnotationColor = ({
+  color,
+  isDarkMode = false,
+  isRange = false,
+}: {
+  color?: string;
+  isDarkMode?: boolean;
+  isRange?: boolean;
+}) =>
+  !color || isAutoAnnotationColor(color)
+    ? isRange
+      ? getDefaultAnnotationRangeColor(isDarkMode)
+      : getDefaultAnnotationColor(isDarkMode)
+    : color;
+
+export const getPersistedAnnotationColor = (color?: string) => color ?? AUTO_ANNOTATION_COLOR;
 
 export const isRangeAnnotationConfig = (
   annotation?: EventAnnotationConfig
@@ -83,6 +103,7 @@ export const getDefaultManualAnnotation = (
     timestamp,
   },
   icon: 'triangle',
+  color: 'auto',
   id,
 });
 
