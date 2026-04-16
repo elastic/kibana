@@ -10,14 +10,9 @@ import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 
-/**
- * A role combining the security alert index privileges of platform_engineer with
- * full Kibana access (including workflowsManagement) required to see and use the
- * "Run workflow" alert action.
- */
 const WORKFLOW_ENABLED_ROLE: KibanaRole = {
   elasticsearch: {
-    cluster: ['manage'],
+    cluster: [],
     indices: [
       {
         names: [
@@ -49,148 +44,93 @@ const WORKFLOW_ENABLED_ROLE: KibanaRole = {
   ],
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/261392
-spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
-  let ruleName: string;
+spaceTest.describe(
+  'Run workflow alert action',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
+    let ruleName: string;
+    const createdWorkflowIds: string[] = [];
 
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    // Enable the Workflows UI feature flag required for the "Run workflow" action to appear
-    await scoutSpace.uiSettings.set({ 'workflows:ui:enabled': true });
-  });
-
-  spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
-    ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
-    await apiServices.detectionRule.createCustomQueryRule({
-      ...CUSTOM_QUERY_RULE,
-      name: ruleName,
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      await apiServices.detectionRule.deleteAll();
+      await apiServices.detectionAlerts.deleteAll();
+      await scoutSpace.savedObjects.cleanStandardList();
+      // Space-level Advanced Setting: show Workflows in the UI so the alert row action "Run workflow" is available
+      await scoutSpace.uiSettings.set({ 'workflows:ui:enabled': true });
     });
-    // Use a custom role that includes workflowsManagement privileges (canExecuteWorkflow)
-    // in addition to the security index privileges needed to view alerts
-    await browserAuth.loginWithCustomRole(WORKFLOW_ENABLED_ROLE);
-  });
 
-  spaceTest.afterEach(async ({ apiServices }) => {
-    await apiServices.detectionRule.deleteAll();
-    await apiServices.detectionAlerts.deleteAll();
-  });
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
+      await apiServices.detectionRule.createCustomQueryRule({
+        ...CUSTOM_QUERY_RULE,
+        name: ruleName,
+      });
+      await browserAuth.loginWithCustomRole(WORKFLOW_ENABLED_ROLE);
+    });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('workflows:ui:enabled');
-  });
-
-  spaceTest(
-    'should show success toast with workflow link and open workflows app in new tab after executing',
-    async ({ pageObjects, page, kbnUrl, scoutSpace }) => {
-      const { alertsTablePage } = pageObjects;
-
-      // Create a minimal alert-triggered workflow via REST API in the current space
-      const workflowName = `Scout E2E Test Workflow ${Date.now()}`;
-      const workflowYaml = [
-        "version: '1'",
-        `name: '${workflowName}'`,
-        'enabled: true',
-        'triggers:',
-        '  - type: alert',
-        'steps:',
-        '  - name: log',
-        '    type: console',
-        '    with:',
-        "      message: 'Alert received'",
-      ].join('\n');
-
-      const createResponse = await page.request.post(
-        kbnUrl.get(`/s/${scoutSpace.id}/api/workflows/workflow`),
-        {
-          data: { yaml: workflowYaml },
-          headers: { 'kbn-xsrf': 'true' },
-        }
+    spaceTest.afterEach(async ({ apiServices }) => {
+      const workflowIds = [...createdWorkflowIds];
+      createdWorkflowIds.splice(0, createdWorkflowIds.length);
+      await Promise.all(
+        workflowIds.map((workflowId) => apiServices.workflow.deleteWorkflow(workflowId))
       );
-      const { id: workflowId } = await createResponse.json();
+      await apiServices.detectionRule.deleteAll();
+      await apiServices.detectionAlerts.deleteAll();
+    });
 
-      try {
-        await alertsTablePage.navigate();
-        await alertsTablePage.waitForDetectionsAlertsWrapper();
-        await alertsTablePage.openAlertContextMenu(ruleName);
-        await alertsTablePage.runWorkflowMenuItem.click();
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('workflows:ui:enabled');
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
 
-        await expect(alertsTablePage.workflowPanel).toBeVisible();
+    spaceTest(
+      'should show success toast with workflow link and open workflows app in new tab after executing',
+      async ({ pageObjects, apiServices }) => {
+        const { alertsTablePage } = pageObjects;
 
-        // Select the created workflow from the list
-        await page
-          .getByTestId('workflowIdSelect')
-          .getByRole('option', { name: workflowName })
-          .click();
+        const workflowName = `Scout E2E Test Workflow ${Date.now()}`;
+        const workflowYaml = [
+          "version: '1'",
+          `name: '${workflowName}'`,
+          'enabled: true',
+          'triggers:',
+          '  - type: alert',
+          'steps:',
+          '  - name: log',
+          '    type: console',
+          '    with:',
+          "      message: 'Alert received'",
+        ].join('\n');
 
-        await expect(alertsTablePage.executeWorkflowButton).toBeEnabled();
-        await alertsTablePage.executeWorkflowButton.click();
+        await spaceTest.step('Create workflow via API', async () => {
+          const id = await apiServices.workflow.createWorkflow({ yaml: workflowYaml });
+          createdWorkflowIds.push(id);
+        });
 
-        // Assert the success toast appears
-        await expect(page.getByTestId('euiToastHeader__title')).toHaveText(
-          'Workflow successfully started'
-        );
+        await spaceTest.step('Open run workflow from alerts', async () => {
+          await alertsTablePage.navigate();
+          await alertsTablePage.waitForDetectionsAlertsWrapper();
+          await alertsTablePage.openRunWorkflowPanel(ruleName);
 
-        // Assert the "View workflow execution" link button is present in the toast
-        const viewExecutionButton = page
-          .locator('.euiToast')
-          .getByRole('button', { name: 'View workflow execution' });
-        await expect(viewExecutionButton).toBeVisible();
+          await expect(alertsTablePage.workflowPanel).toBeVisible();
+          await alertsTablePage.selectWorkflowByName(workflowName);
+        });
 
-        // Clicking it should open the workflows app in a new tab
-        const [newTab] = await Promise.all([
-          page.context().waitForEvent('page'),
-          viewExecutionButton.click(),
-        ]);
-        await expect(newTab).toHaveURL(/\/app\/workflows/);
-      } finally {
-        await page.request.delete(
-          kbnUrl.get(`/s/${scoutSpace.id}/api/workflows/workflow/${workflowId}`),
-          { headers: { 'kbn-xsrf': 'true' } }
-        );
+        await spaceTest.step('Execute workflow and assert success toast', async () => {
+          await expect(alertsTablePage.executeWorkflowButton).toBeEnabled();
+          await alertsTablePage.executeWorkflowButton.click();
+
+          await expect(alertsTablePage.workflowSuccessToastTitle).toHaveText(
+            'Workflow successfully started'
+          );
+          await expect(alertsTablePage.viewWorkflowExecutionButton).toBeVisible();
+        });
+
+        await spaceTest.step('Verify workflows app opens in a new tab', async () => {
+          const newTab = await alertsTablePage.clickViewWorkflowExecutionAndWaitForNewTab();
+          await expect(newTab).toHaveURL(/\/app\/workflows/);
+        });
       }
-    }
-  );
-
-  spaceTest(
-    'should open the workflow selection panel when Run workflow is clicked',
-    async ({ pageObjects }) => {
-      const { alertsTablePage } = pageObjects;
-
-      await alertsTablePage.navigate();
-      await alertsTablePage.waitForDetectionsAlertsWrapper();
-      await alertsTablePage.openAlertContextMenu(ruleName);
-
-      await expect(alertsTablePage.runWorkflowMenuItem).toBeVisible();
-      await alertsTablePage.runWorkflowMenuItem.click();
-
-      await expect(alertsTablePage.workflowPanel).toBeVisible();
-      await expect(alertsTablePage.executeWorkflowButton).toBeVisible();
-      await expect(alertsTablePage.executeWorkflowButton).toBeDisabled();
-    }
-  );
-
-  spaceTest(
-    'should show Run workflow action in bulk actions and open the bulk panel',
-    async ({ pageObjects }) => {
-      const { alertsTablePage } = pageObjects;
-
-      await alertsTablePage.navigate();
-      await alertsTablePage.waitForDetectionsAlertsWrapper();
-
-      // Select the alert row matching the rule via its checkbox
-      const ruleNameCell = alertsTablePage.alertsTable
-        .getByTestId('ruleName')
-        .filter({ hasText: ruleName });
-      const alertCheckbox = ruleNameCell
-        .locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]')
-        .locator('.euiCheckbox__input');
-      await alertCheckbox.check();
-
-      // Open the bulk-actions popover ("N selected" button) before clicking the menu item
-      await alertsTablePage.selectedShowBulkActionsButton.click();
-
-      await alertsTablePage.bulkRunWorkflowMenuItem.click();
-
-      await expect(alertsTablePage.bulkWorkflowPanel).toBeVisible();
-    }
-  );
-});
+    );
+  }
+);

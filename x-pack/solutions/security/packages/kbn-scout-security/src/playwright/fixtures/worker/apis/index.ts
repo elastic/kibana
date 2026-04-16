@@ -18,3 +18,6 @@ export type { CloudConnectorApiService } from './cloud_connector';
 
 export { getTimelineApiService } from './timeline';
 export type { TimelineApiService } from './timeline';
+
+export { getWorkflowApiService } from './workflow';
+export type { WorkflowApiService } from './workflow';

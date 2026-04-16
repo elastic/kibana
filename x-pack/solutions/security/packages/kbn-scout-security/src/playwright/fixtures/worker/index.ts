@@ -14,6 +14,7 @@ export {
   getEntityAnalyticsApiService,
   getCloudConnectorApiService,
   getTimelineApiService,
+  getWorkflowApiService,
 } from './apis';
 export type {
   DetectionRuleApiService,
@@ -21,4 +22,5 @@ export type {
   EntityAnalyticsApiService,
   CloudConnectorApiService,
   TimelineApiService,
+  WorkflowApiService,
 } from './apis';

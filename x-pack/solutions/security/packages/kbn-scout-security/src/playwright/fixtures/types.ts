@@ -19,6 +19,7 @@ import type {
   EntityAnalyticsApiService,
   CloudConnectorApiService,
   TimelineApiService,
+  WorkflowApiService,
 } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
@@ -27,6 +28,7 @@ export interface SecurityApiServicesFixture extends ApiServicesFixture {
   entityAnalytics: EntityAnalyticsApiService;
   cloudConnectorApi: CloudConnectorApiService;
   timeline: TimelineApiService;
+  workflow: WorkflowApiService;
 }
 
 export interface SecurityTestFixtures extends ScoutTestFixtures {

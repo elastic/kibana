@@ -12,31 +12,31 @@ const PAGE_URL = 'security/alerts';
 
 export class AlertsTablePage {
   public detectionsAlertsWrapper: Locator;
-  public alertRow: Locator;
   public alertsTable: Locator;
   public contextMenuButton: Locator;
   public actionsContextMenu: Locator;
   public runWorkflowMenuItem: Locator;
   public workflowPanel: Locator;
+  public workflowIdSelect: Locator;
   public executeWorkflowButton: Locator;
-  public bulkRunWorkflowMenuItem: Locator;
-  public bulkWorkflowPanel: Locator;
-  public selectedShowBulkActionsButton: Locator;
+  public workflowSuccessToastTitle: Locator;
+  public viewWorkflowExecutionButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
-    this.alertRow = this.page.testSubj.locator('alertsTableIsLoaded').locator('div.euiDataGridRow');
     this.contextMenuButton = this.page.testSubj.locator('timeline-context-menu-button');
     this.actionsContextMenu = this.page.testSubj.locator('actions-context-menu');
     this.runWorkflowMenuItem = this.page.testSubj.locator('run-workflow-action');
     this.workflowPanel = this.page.testSubj.locator('alert-workflow-context-menu-panel');
+    this.workflowIdSelect = this.page.testSubj.locator('workflowIdSelect');
     this.executeWorkflowButton = this.page.testSubj.locator('execute-alert-workflow-button');
-    this.bulkRunWorkflowMenuItem = this.page.testSubj.locator('bulk-run-alert-workflow-action');
-    this.bulkWorkflowPanel = this.page.testSubj.locator('bulk-alert-workflow-context-menu-panel');
-    this.selectedShowBulkActionsButton = this.page.testSubj.locator(
-      'selectedShowBulkActionsButton'
-    );
+    this.workflowSuccessToastTitle = this.page.testSubj
+      .locator('globalToastList')
+      .getByText('Workflow successfully started', { exact: true });
+    this.viewWorkflowExecutionButton = this.page.getByRole('button', {
+      name: 'View workflow execution',
+    });
   }
 
   async navigate() {
@@ -44,33 +44,43 @@ export class AlertsTablePage {
   }
 
   async openAlertContextMenu(ruleName: string) {
-    await this.alertsTable.waitFor({ state: 'visible' });
-    const ruleNameCell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
-
-    await expect(
-      ruleNameCell,
-      `Alert with rule '${ruleName}' is not displayed in the alerts table`
-    ).toHaveCount(1);
-
-    const row = ruleNameCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+    const row = await this.getAlertRowByRuleName(ruleName);
     await row.getByTestId('timeline-context-menu-button').click();
   }
 
   async expandAlertDetailsFlyout(ruleName: string) {
+    const row = await this.getAlertRowByRuleName(ruleName);
+    await row.getByTestId('expand-event').click();
+  }
+
+  async openRunWorkflowPanel(ruleName: string) {
+    await this.openAlertContextMenu(ruleName);
+    await this.runWorkflowMenuItem.click();
+  }
+
+  async selectWorkflowByName(workflowName: string) {
+    await this.workflowIdSelect.getByRole('option', { name: workflowName }).click();
+  }
+
+  async clickViewWorkflowExecutionAndWaitForNewTab() {
+    const [newTab] = await Promise.all([
+      this.page.context().waitForEvent('page'),
+      this.viewWorkflowExecutionButton.click(),
+    ]);
+
+    return newTab;
+  }
+
+  private async getAlertRowByRuleName(ruleName: string): Promise<Locator> {
     await this.alertsTable.waitFor({ state: 'visible' });
-    // 1. Find the rule name cell (unique per alert)
-    const ruleNameCell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    const row = this.alertsTable.locator('div.euiDataGridRow').filter({ hasText: ruleName });
 
     await expect(
-      ruleNameCell,
+      row,
       `Alert with rule '${ruleName}' is not displayed in the alerts table`
     ).toHaveCount(1);
 
-    // 2. Climb up to the DataGrid row
-    const row = ruleNameCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
-
-    // 3. Click expand button in the row
-    await row.getByTestId('expand-event').click();
+    return row;
   }
 
   async waitForDetectionsAlertsWrapper() {
