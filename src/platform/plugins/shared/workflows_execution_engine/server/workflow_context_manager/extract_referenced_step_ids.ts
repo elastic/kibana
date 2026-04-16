@@ -7,30 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extractPropertyPathsFromKql, extractTemplateVariables } from '@kbn/workflows/common/utils';
+import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { EnterIfNode, GraphNodeUnion } from '@kbn/workflows/graph';
 
 const STEPS_PREFIX = 'steps.';
-
-/**
- * Recursively scans any value tree for Liquid template variables.
- * Mirrors the private `scanValueForVariablesRecursively` in `findInputsInGraph`.
- */
-function scanForTemplateVariables(value: unknown): string[] {
-  if (typeof value === 'string') {
-    return extractTemplateVariables(value);
-  }
-
-  if (Array.isArray(value)) {
-    return value.flatMap(scanForTemplateVariables);
-  }
-
-  if (typeof value === 'object' && value !== null) {
-    return Object.values(value as Record<string, unknown>).flatMap(scanForTemplateVariables);
-  }
-
-  return [];
-}
 
 /**
  * Extracts the set of step IDs referenced by a node's template expressions.

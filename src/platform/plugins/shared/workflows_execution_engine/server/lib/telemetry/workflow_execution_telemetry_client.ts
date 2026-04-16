@@ -24,6 +24,7 @@ import {
 } from './events/workflows_execution';
 import {
   type EventDrivenExecutionSuppressedParams,
+  type OutputSizeStats,
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
   type WorkflowExecutionFailedParams,
@@ -131,7 +132,7 @@ export class WorkflowExecutionTelemetryClient {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
     finalStatus: ExecutionStatus;
-    outputSizeStats?: { totalBytes: number; stepCount: number };
+    outputSizeStats?: OutputSizeStats;
   }): void {
     const { workflowExecution, stepExecutions, finalStatus, outputSizeStats } = params;
 
@@ -167,7 +168,7 @@ export class WorkflowExecutionTelemetryClient {
   reportWorkflowExecutionCompleted(params: {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
-    outputSizeStats?: { totalBytes: number; stepCount: number };
+    outputSizeStats?: OutputSizeStats;
   }): void {
     const { workflowExecution, stepExecutions, outputSizeStats } = params;
     const workflowMetadata = extractWorkflowMetadata(workflowExecution.workflowDefinition);
@@ -246,7 +247,7 @@ export class WorkflowExecutionTelemetryClient {
   reportWorkflowExecutionFailed(params: {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
-    outputSizeStats?: { totalBytes: number; stepCount: number };
+    outputSizeStats?: OutputSizeStats;
   }): void {
     const { workflowExecution, stepExecutions, outputSizeStats } = params;
     const workflowMetadata = extractWorkflowMetadata(workflowExecution.workflowDefinition);
@@ -337,7 +338,7 @@ export class WorkflowExecutionTelemetryClient {
   reportWorkflowExecutionCancelled(params: {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
-    outputSizeStats?: { totalBytes: number; stepCount: number };
+    outputSizeStats?: OutputSizeStats;
   }): void {
     const { workflowExecution, stepExecutions, outputSizeStats } = params;
     const workflowMetadata = extractWorkflowMetadata(workflowExecution.workflowDefinition);

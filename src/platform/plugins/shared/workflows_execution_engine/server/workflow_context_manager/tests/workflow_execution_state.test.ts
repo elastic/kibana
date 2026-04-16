@@ -1113,6 +1113,51 @@ describe('WorkflowExecutionState', () => {
         expect(stats.stepCount).toBe(2);
       });
     });
+
+    describe('interaction with evictStaleLoopOutputs', () => {
+      it('should handle both eviction systems acting on the same step', async () => {
+        // Simulate a loop step with two iterations
+        evictableState.upsertStep({
+          id: 'iter-1',
+          stepId: 'loopStep',
+          stepType: 'connector',
+          status: ExecutionStatus.COMPLETED,
+          output: { data: 'x'.repeat(200) },
+          stepExecutionIndex: 0,
+        } as Partial<EsWorkflowStepExecution>);
+        evictableState.recordOutputSize('iter-1', 250);
+
+        evictableState.upsertStep({
+          id: 'iter-2',
+          stepId: 'loopStep',
+          stepType: 'connector',
+          status: ExecutionStatus.COMPLETED,
+          output: { data: 'y'.repeat(200) },
+          stepExecutionIndex: 1,
+        } as Partial<EsWorkflowStepExecution>);
+        evictableState.recordOutputSize('iter-2', 250);
+
+        // evictStaleLoopOutputs nullifies iter-1 output (stale iteration)
+        evictableState.evictStaleLoopOutputs(['loopStep']);
+        expect(evictableState.getStepExecution('iter-1')?.output).toBeUndefined();
+        expect(evictableState.getStepExecution('iter-2')?.output).toBeDefined();
+
+        // evictCompletedStepOutputs runs on both
+        evictableState.evictCompletedStepOutputs(['iter-1', 'iter-2']);
+
+        // iter-1: already nullified by stale loop eviction, now also in evictedOutputIdsAndBytes
+        // iter-2: evicted by size threshold
+        expect(evictableState.hasEvictedOutputs()).toBe(true);
+        expect(evictableState.getStepExecution('iter-2')?.output).toBeUndefined();
+
+        // Rehydration should restore iter-2 from ES (the latest iteration)
+        (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+          { id: 'iter-2', output: { data: 'y'.repeat(200) } } as unknown as EsWorkflowStepExecution,
+        ]);
+        await evictableState.rehydrateOutputs(['iter-2']);
+        expect(evictableState.getStepExecution('iter-2')?.output).toBeDefined();
+      });
+    });
   });
   describe('evictStaleLoopOutputs', () => {
     it('should nullify output and input on non-latest executions for given stepIds', () => {
@@ -1677,6 +1722,8 @@ describe('WorkflowExecutionState', () => {
         } as unknown as EsWorkflowStepExecution);
 
         underTest.evictStaleLoopOutputs(['innerStep']);
+
+        expect(underTest.getStepExecution('exec-1')?.scopeStack).toEqual(scopeStack);
       });
     });
   });

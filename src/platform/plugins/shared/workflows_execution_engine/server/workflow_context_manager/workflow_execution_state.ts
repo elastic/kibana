@@ -10,6 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { formatBytes } from '../step/errors';
@@ -104,35 +105,38 @@ export class WorkflowExecutionState {
       ['output']
     );
     foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
-    this.buildStepIdExecutionIdIndex();
 
-    // Mark non-data.set steps as deferred so rehydrateOutputs() will fetch them on demand.
-    // data.set outputs are pinned (needed globally by getVariables()) and eagerly loaded below.
-    const dataSetIds: string[] = [];
+    // Mark non-pinned steps as deferred so rehydrateOutputs() will fetch them on demand.
+    // Pinned step types (data.set, waitForInput) are eagerly loaded below because their
+    // outputs are needed globally (getVariables reads all data.set; waitForInput answers
+    // must be preserved for downstream access across loop iterations).
+    const pinnedIds: string[] = [];
     for (const step of foundSteps) {
-      if (step.stepType === 'data.set') {
-        dataSetIds.push(step.id);
+      if (step.stepType && EVICTION_EXEMPT_STEP_TYPES.has(step.stepType)) {
+        pinnedIds.push(step.id);
       } else {
         this.evictedOutputIdsAndBytes.set(step.id, 0);
       }
     }
 
-    // Eagerly load data.set outputs so getVariables() works without rehydration
-    if (dataSetIds.length > 0) {
-      const dataSetOutputs = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
-        dataSetIds,
-        ['id', 'output']
-      );
-      for (const doc of dataSetOutputs) {
-        const existing = this.stepExecutions.get(doc.id);
-        if (existing) {
-          existing.output = doc.output;
-        }
+    // Kick off the pinned-output fetch concurrently with the synchronous index build
+    const pinnedOutputsPromise =
+      pinnedIds.length > 0
+        ? this.workflowStepExecutionRepository.getStepExecutionsByIds(pinnedIds, ['id', 'output'])
+        : Promise.resolve([]);
+
+    this.buildStepIdExecutionIdIndex();
+
+    const pinnedOutputs = await pinnedOutputsPromise;
+    for (const doc of pinnedOutputs) {
+      const existing = this.stepExecutions.get(doc.id);
+      if (existing) {
+        existing.output = doc.output;
       }
     }
 
     this.logger?.debug(
-      `Loaded ${foundSteps.length} step(s) with deferred outputs (${dataSetIds.length} data.set outputs eagerly loaded)`
+      `Loaded ${foundSteps.length} step(s) with deferred outputs (${pinnedIds.length} pinned outputs eagerly loaded)`
     );
   }
 
@@ -225,7 +229,7 @@ export class WorkflowExecutionState {
    * Returns aggregate output size statistics from both active and evicted steps.
    * Uses pre-recorded sizes (no serialization) — safe to call after eviction.
    */
-  public getOutputSizeStats(): { totalBytes: number; stepCount: number } {
+  public getOutputSizeStats(): OutputSizeStats {
     let totalBytes = 0;
     let stepCount = 0;
     for (const bytes of this.outputSizes.values()) {
@@ -300,21 +304,13 @@ export class WorkflowExecutionState {
   }
 
   /**
-   * Evicts large outputs from completed steps to reduce memory footprint.
-   * Only evicts steps that:
-   * - Are in a terminal state (COMPLETED or FAILED)
-   * - Have a recorded output size above the eviction threshold
-   * - Are not `data.set` steps (whose outputs are needed globally by `getVariables()`)
-   * - Have not already been evicted
+   * Evaluates the given step execution IDs for eviction eligibility and evicts
+   * large outputs from completed steps. Only the provided candidate IDs are
+   * checked — callers should pass only the IDs that were just flushed to ES.
    *
    * This is a memory-only operation — the output data remains in Elasticsearch.
    * It does NOT modify `stepDocumentsChanges`, so the next flush will not
    * accidentally overwrite the persisted output in ES.
-   */
-  /**
-   * Evaluates the given step execution IDs for eviction eligibility and evicts
-   * large outputs from completed steps. Only the provided candidate IDs are
-   * checked — callers should pass only the IDs that were just flushed to ES.
    */
   public evictCompletedStepOutputs(candidateIds: ReadonlyArray<string>): void {
     let evictedCount = 0;
@@ -373,8 +369,9 @@ export class WorkflowExecutionState {
       return false;
     }
 
-    // data.set outputs are pinned — getVariables() reads ALL data.set outputs globally
-    if (step.stepType === 'data.set') {
+    // Pinned step types must never be evicted (data.set: getVariables reads globally;
+    // waitForInput: user-provided answers must be preserved for downstream access)
+    if (step.stepType && EVICTION_EXEMPT_STEP_TYPES.has(step.stepType)) {
       return false;
     }
 

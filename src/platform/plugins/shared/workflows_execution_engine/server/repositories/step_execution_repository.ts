@@ -12,6 +12,8 @@ import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
+export type StepExecutionField = keyof EsWorkflowStepExecution;
+
 export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
 
@@ -64,8 +66,8 @@ export class StepExecutionRepository {
    */
   public async getStepExecutionsByIds(
     stepExecutionIds: string[],
-    sourceIncludes?: string[],
-    sourceExcludes?: string[]
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[]
   ): Promise<EsWorkflowStepExecution[]> {
     const response = await this.esClient.mget<EsWorkflowStepExecution>({
       index: this.indexName,
