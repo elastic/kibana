@@ -15,11 +15,15 @@ apiTest.describe('Maps - index feature data', { tag: [...tags.stateful.classic] 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
     cookieHeader = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
+    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
+  apiTest.afterAll(async ({ esClient, kbnClient }) => {
+    await esClient.indices.delete({
+      index: ['new-point-feature-index', 'new-shape-feature-index', 'new-feature-index2'],
+      ignore_unavailable: true,
+    });
     await kbnClient.importExport.unload(testData.KBN_ARCHIVES.maps);
   });
 

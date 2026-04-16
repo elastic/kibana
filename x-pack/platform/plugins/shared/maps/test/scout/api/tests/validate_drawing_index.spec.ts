@@ -15,11 +15,12 @@ apiTest.describe('Maps - validate drawing index', { tag: [...tags.stateful.class
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
     cookieHeader = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
+    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
+  apiTest.afterAll(async ({ esClient, kbnClient }) => {
+    await esClient.indices.delete({ index: 'valid-drawing-index', ignore_unavailable: true });
     await kbnClient.importExport.unload(testData.KBN_ARCHIVES.maps);
   });
 

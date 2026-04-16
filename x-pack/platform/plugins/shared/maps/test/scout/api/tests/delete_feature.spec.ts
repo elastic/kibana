@@ -15,8 +15,8 @@ apiTest.describe('Maps - doc feature deletion', { tag: [...tags.stateful.classic
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
     cookieHeader = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
+    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
