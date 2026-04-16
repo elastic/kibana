@@ -31,7 +31,7 @@ export const WORKFLOW_REFERENCE_KEY = 'workflow-id';
 export const isDynamicWorkflowReference = (value: string): boolean => value.includes('{{');
 
 const UNSAFE_IDS = new Set(['__proto__', 'constructor', 'prototype']);
-const RESERVED_ID_PREFIXES = ['system'];
+const RESERVED_ID_PREFIXES = ['system', 'internal', 'system--'];
 
 /** Returns true if the ID is a known prototype-pollution key or other unsupported cases and must never be used. */
 export function isUnsafeWorkflowId(id: string): boolean {
