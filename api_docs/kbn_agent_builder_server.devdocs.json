@@ -4053,7 +4053,7 @@
               "\nWhether the tool is available or not."
             ],
             "signature": [
-              "\"available\" | \"unavailable\""
+              "\"unavailable\" | \"available\""
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
             "lineNumber": 33,

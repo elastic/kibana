@@ -33,7 +33,8 @@ import {
   searchDocById,
 } from '../fixtures/helpers';
 
-apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/263539
+apiTest.describe.skip('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
