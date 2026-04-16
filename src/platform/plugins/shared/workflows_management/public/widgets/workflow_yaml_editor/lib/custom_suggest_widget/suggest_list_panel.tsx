@@ -106,7 +106,7 @@ export const SuggestListPanel: React.FC<SuggestListPanelProps> = ({
   return (
     <div css={styles.listPanel}>
       <div css={styles.listHeader}>{'Suggested'}</div>
-      <div css={styles.listScroll} ref={listRef}>
+      <div css={styles.listScroll} ref={listRef} role="listbox" aria-label="Suggestions">
         {filteredItems.map(({ item, labelHighlightIndices }, i) => {
           const isSelected = i === selectedIndex;
           const segments = highlightSegments(item.label, labelHighlightIndices);
@@ -114,6 +114,11 @@ export const SuggestListPanel: React.FC<SuggestListPanelProps> = ({
           return (
             <div
               key={`${item.label}-${i}`}
+              id={`custom-suggest-item-${i}`}
+              role="option"
+              tabIndex={-1}
+              aria-selected={isSelected}
+              aria-label={`${item.label}, ${item.category}`}
               css={[styles.listItem, isSelected && styles.listItemSelected]}
               onMouseDown={(e) => handleMouseDown(e, i)}
               onMouseEnter={() => onSelect(i)}

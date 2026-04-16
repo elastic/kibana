@@ -18,6 +18,15 @@ import { getFilteredItems } from './suggest_list_panel';
 import { type SuggestWidgetHandle, SuggestWidgetRoot } from './suggest_widget_root';
 import type { EnrichedSuggestionItem, SuggestionsPayload } from './types';
 
+const CONTEXT_KEY = 'customSuggestWidgetVisible';
+
+/**
+ * Strip snippet placeholders for plain-text insertion.
+ * ${1:default} → default, $1 → '', $0 → ''
+ */
+const stripSnippetPlaceholders = (text: string): string =>
+  text.replace(/\$\{\d+:([^}]*)\}/g, '$1').replace(/\$\d+/g, '');
+
 /**
  * Hook that manages the custom suggest widget lifecycle.
  *
@@ -31,12 +40,10 @@ export const useCustomSuggestWidget = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   isEditorMounted: boolean
 ): void => {
-  // Inherit color mode from the parent app's EUI context
   const { colorMode } = useEuiTheme();
   const colorModeRef = useRef(colorMode);
   colorModeRef.current = colorMode;
 
-  // Mutable state refs (not React state — we render imperatively via root.render)
   const widgetRef = useRef<SuggestContentWidget | null>(null);
   const rootRef = useRef<Root | null>(null);
   const handleRef = useRef<SuggestWidgetHandle | null>(null);
@@ -49,8 +56,10 @@ export const useCustomSuggestWidget = (
   const anchorPositionRef = useRef<{ lineNumber: number; column: number } | null>(null);
   const isVisibleRef = useRef(false);
   const isAcceptingRef = useRef(false);
+  const editorRef = useRef(editor);
+  editorRef.current = editor;
 
-  // ── Update widget state via imperative handle (no root.render() per keystroke) ──
+  // ── Update widget state via imperative handle ──
 
   const render = useCallback(() => {
     handleRef.current?.update({
@@ -61,8 +70,7 @@ export const useCustomSuggestWidget = (
     });
   }, []);
 
-  // ── Show / Hide ──
-  // hideWidget must be defined before showWidget (showWidget calls it)
+  // ── Hide ──
 
   const hideWidget = useCallback(() => {
     if (!ctxKeyRef.current) return;
@@ -73,19 +81,22 @@ export const useCustomSuggestWidget = (
     ctxKeyRef.current.set(false);
     clearSuggestions();
     render();
+
+    // Clear aria active descendant
+    editorRef.current?.setAriaOptions?.({ activeDescendant: undefined } as never);
   }, [render]);
+
+  // ── Show ──
 
   const showWidget = useCallback(
     (payload: SuggestionsPayload) => {
       if (!editor || !widgetRef.current || !ctxKeyRef.current) return;
       if (payload.items.length === 0) {
-        // Provider returned empty — hide if visible
         if (isVisibleRef.current) hideWidget();
         return;
       }
 
-      // If widget is already visible on the same line, just update items
-      // without resetting position/filter — prevents blinking on re-trigger
+      // If already visible on same line, update items without reset (prevents blink)
       const sameLine =
         isVisibleRef.current &&
         anchorPositionRef.current?.lineNumber === payload.anchorPosition.lineNumber;
@@ -101,23 +112,21 @@ export const useCustomSuggestWidget = (
         return;
       }
 
-      // Fresh show — new line or first trigger
+      // Fresh show
       itemsRef.current = payload.items;
       selectedIndexRef.current = 0;
       anchorPositionRef.current = payload.anchorPosition;
 
-      // Compute initial filterText: the user may have typed characters between
-      // the async provider trigger and this callback.
+      // Compute initial filterText from anchor to current cursor (async gap)
       const pos = editor.getPosition();
       const model = editor.getModel();
       if (pos && model && pos.lineNumber === payload.anchorPosition.lineNumber) {
-        const typed = model.getValueInRange({
+        filterTextRef.current = model.getValueInRange({
           startLineNumber: pos.lineNumber,
           startColumn: payload.anchorPosition.column,
           endLineNumber: pos.lineNumber,
           endColumn: pos.column,
         });
-        filterTextRef.current = typed;
       } else {
         filterTextRef.current = '';
       }
@@ -147,19 +156,54 @@ export const useCustomSuggestWidget = (
     const pos = editor.getPosition();
     if (!pos) return;
 
-    const startCol = anchorPositionRef.current?.column ?? pos.column - filterTextRef.current.length;
-    const range = new monaco.Range(pos.lineNumber, startCol, pos.lineNumber, pos.column);
-
-    // Suppress onDidChangeModelContent handler during acceptance
     isAcceptingRef.current = true;
     hideWidget();
 
-    // Strip snippet placeholders ($1, $2, ${1:default}, $0) for plain text insertion.
-    // Kibana's Monaco build doesn't include the snippetController contribution,
-    // so editor.action.insertSnippet is not available.
-    const plainText = item.insertText.replace(/\$\{\d+(?::([^}]*))?\}|\$\d+/g, '$1');
+    // Use the completion item's range for correct replacement.
+    // The range specifies what text to replace (e.g., the word being typed).
+    // Adjust endColumn to current cursor to account for typed characters.
+    const itemRange = item.range;
+    const range = new monaco.Range(
+      itemRange.startLineNumber,
+      itemRange.startColumn,
+      pos.lineNumber,
+      pos.column
+    );
 
-    editor.executeEdits('custom-suggest', [{ range, text: plainText, forceMoveMarkers: true }]);
+    // Try snippetController2 for snippet insertions (it IS loaded in Kibana,
+    // unlike the editor.action.insertSnippet action which requires a separate contribution)
+    const isSnippet =
+      item.insertTextRules !== undefined &&
+      // eslint-disable-next-line no-bitwise
+      (item.insertTextRules & monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet) !== 0;
+
+    const snippetController = editor.getContribution('snippetController2') as {
+      insert?: (
+        template: string,
+        opts?: {
+          overwriteBefore?: number;
+          overwriteAfter?: number;
+          undoStopBefore?: boolean;
+          undoStopAfter?: boolean;
+          adjustWhitespace?: boolean;
+        }
+      ) => void;
+    } | null;
+
+    if (isSnippet && snippetController?.insert) {
+      const overwriteBefore = pos.column - itemRange.startColumn;
+      snippetController.insert(item.insertText, {
+        overwriteBefore,
+        overwriteAfter: 0,
+        undoStopBefore: true,
+        undoStopAfter: true,
+        adjustWhitespace: true,
+      });
+    } else {
+      // Plain text — strip any snippet placeholders just in case
+      const plainText = isSnippet ? stripSnippetPlaceholders(item.insertText) : item.insertText;
+      editor.executeEdits('custom-suggest', [{ range, text: plainText, forceMoveMarkers: true }]);
+    }
 
     // Apply additional text edits (e.g., removing @ trigger character)
     if (item.additionalTextEdits?.length) {
@@ -190,8 +234,7 @@ export const useCustomSuggestWidget = (
     const widget = new SuggestContentWidget(editor);
     widgetRef.current = widget;
 
-    // Create React root on the inner node — render once with EuiProvider + SuggestWidgetRoot.
-    // Subsequent updates go through the imperative handle (no root.render per keystroke).
+    // Create React root — EuiProvider is created once, updates go through handle
     const root = createRoot(widget.getInnerNode());
     rootRef.current = root;
 
@@ -217,17 +260,34 @@ export const useCustomSuggestWidget = (
       )
     );
 
-    // Create context key for conditional keybindings
-    const ctxKey = editor.createContextKey('customSuggestWidgetVisible', false);
+    // Context key for conditional keybindings
+    const ctxKey = editor.createContextKey(CONTEXT_KEY, false);
     ctxKeyRef.current = ctxKey;
 
-    // ── Register keybindings via addAction (precondition-gated) ──
+    // ── Keybindings ──
+    // Use addCommand for Enter/Tab (these conflict with the `type` command path).
+    // addCommand with a context string doesn't add `editorId` scoping, making it
+    // simpler and more reliable than addAction for keys that go through the `type` path.
 
+    const enterCmdId = editor.addCommand(
+      monaco.KeyCode.Enter,
+      () => acceptSuggestion(),
+      CONTEXT_KEY
+    );
+    if (enterCmdId) disposablesRef.current.push({ dispose: () => {} });
+
+    const tabCmdId = editor.addCommand(monaco.KeyCode.Tab, () => acceptSuggestion(), CONTEXT_KEY);
+    if (tabCmdId) disposablesRef.current.push({ dispose: () => {} });
+
+    const escapeCmdId = editor.addCommand(monaco.KeyCode.Escape, () => hideWidget(), CONTEXT_KEY);
+    if (escapeCmdId) disposablesRef.current.push({ dispose: () => {} });
+
+    // Use addAction for arrow keys (these don't conflict with the `type` command)
     disposablesRef.current.push(
       editor.addAction({
         id: 'customSuggest.selectPrevious',
         label: 'Custom Suggest: Select Previous',
-        precondition: 'customSuggestWidgetVisible',
+        precondition: CONTEXT_KEY,
         keybindings: [monaco.KeyCode.UpArrow],
         run: () => {
           selectedIndexRef.current = Math.max(0, selectedIndexRef.current - 1);
@@ -240,7 +300,7 @@ export const useCustomSuggestWidget = (
       editor.addAction({
         id: 'customSuggest.selectNext',
         label: 'Custom Suggest: Select Next',
-        precondition: 'customSuggestWidgetVisible',
+        precondition: CONTEXT_KEY,
         keybindings: [monaco.KeyCode.DownArrow],
         run: () => {
           const filtered = getFilteredItems(itemsRef.current, filterTextRef.current);
@@ -252,33 +312,9 @@ export const useCustomSuggestWidget = (
 
     disposablesRef.current.push(
       editor.addAction({
-        id: 'customSuggest.accept',
-        label: 'Custom Suggest: Accept',
-        precondition: 'customSuggestWidgetVisible',
-        keybindings: [monaco.KeyCode.Enter, monaco.KeyCode.Tab],
-        run: () => {
-          acceptSuggestion();
-        },
-      })
-    );
-
-    disposablesRef.current.push(
-      editor.addAction({
-        id: 'customSuggest.dismiss',
-        label: 'Custom Suggest: Dismiss',
-        precondition: 'customSuggestWidgetVisible',
-        keybindings: [monaco.KeyCode.Escape],
-        run: () => {
-          hideWidget();
-        },
-      })
-    );
-
-    disposablesRef.current.push(
-      editor.addAction({
         id: 'customSuggest.pageUp',
         label: 'Custom Suggest: Page Up',
-        precondition: 'customSuggestWidgetVisible',
+        precondition: CONTEXT_KEY,
         keybindings: [monaco.KeyCode.PageUp],
         run: () => {
           selectedIndexRef.current = Math.max(0, selectedIndexRef.current - 8);
@@ -291,7 +327,7 @@ export const useCustomSuggestWidget = (
       editor.addAction({
         id: 'customSuggest.pageDown',
         label: 'Custom Suggest: Page Down',
-        precondition: 'customSuggestWidgetVisible',
+        precondition: CONTEXT_KEY,
         keybindings: [monaco.KeyCode.PageDown],
         run: () => {
           const filtered = getFilteredItems(itemsRef.current, filterTextRef.current);
@@ -301,27 +337,7 @@ export const useCustomSuggestWidget = (
       })
     );
 
-    // ── Suppress built-in suggest keybindings when our widget is visible ──
-
-    disposablesRef.current.push(
-      monaco.editor.addKeybindingRules([
-        {
-          keybinding: monaco.KeyCode.Enter,
-          command: null,
-          when: 'customSuggestWidgetVisible && !suggestWidgetVisible',
-        },
-        {
-          keybinding: monaco.KeyCode.Tab,
-          command: null,
-          when: 'customSuggestWidgetVisible && !suggestWidgetVisible',
-        },
-        {
-          keybinding: monaco.KeyCode.Escape,
-          command: null,
-          when: 'customSuggestWidgetVisible && !suggestWidgetVisible',
-        },
-      ])
-    );
+    // NOTE: No addKeybindingRules with command:null — they shadow the addCommand handlers
 
     // ── Filter text tracking via onDidChangeModelContent ──
 
@@ -331,16 +347,13 @@ export const useCustomSuggestWidget = (
 
         for (const change of e.changes) {
           if (change.text.length > 0 && change.rangeLength === 0) {
-            // Insertion
             filterTextRef.current += change.text;
           } else if (change.text.length === 0 && change.rangeLength > 0) {
-            // Deletion
             filterTextRef.current = filterTextRef.current.slice(
               0,
               Math.max(0, filterTextRef.current.length - change.rangeLength)
             );
           } else if (change.text.length > 0 && change.rangeLength > 0) {
-            // Replacement
             filterTextRef.current = filterTextRef.current.slice(
               0,
               Math.max(0, filterTextRef.current.length - change.rangeLength)
@@ -351,14 +364,12 @@ export const useCustomSuggestWidget = (
 
         selectedIndexRef.current = 0;
 
-        // Check if there are still matching items
         const filtered = getFilteredItems(itemsRef.current, filterTextRef.current);
         if (filtered.length === 0) {
           hideWidget();
           return;
         }
 
-        // Dismiss if filter emptied from backspace
         if (filterTextRef.current.length === 0 && e.changes.some((c) => c.rangeLength > 0)) {
           hideWidget();
           return;
@@ -382,7 +393,7 @@ export const useCustomSuggestWidget = (
       })
     );
 
-    // ── Dismiss on mouse click in editor ──
+    // ── Dismiss on mouse click in editor (but not on widget) ──
 
     disposablesRef.current.push(
       editor.onMouseDown(() => {
