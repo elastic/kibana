@@ -162,6 +162,7 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       config: this.config,
+      getToolRegistry: tools.getRegistry,
     });
 
     // Use a lazy getter to break the circular dep: runner → executionService → runner.

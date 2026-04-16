@@ -2460,7 +2460,7 @@
               "(value: string, nthIndex?: number | undefined) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 67,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2478,7 +2478,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 75,
+                "lineNumber": 81,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2497,7 +2497,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 75,
+                "lineNumber": 81,
                 "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2520,7 +2520,7 @@
               "Locator"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 105,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2538,7 +2538,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-                "lineNumber": 116,
+                "lineNumber": 122,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2561,7 +2561,7 @@
               "Locator"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
-            "lineNumber": 121,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3554,7 +3554,7 @@
           "<{}, {}>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3576,7 +3576,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -12585,7 +12585,7 @@
             "label": "esServerlessOptions",
             "description": [],
             "signature": [
-              "{ uiam: boolean; cps?: boolean | undefined; } | undefined"
+              "{ uiam: boolean; uiamOAuth?: boolean | undefined; cps?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
             "lineNumber": 29,
