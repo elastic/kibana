@@ -86,6 +86,9 @@ export interface DataStreamCreationCompletePayload {
   dataStreamId: string;
   dataStreamName: string;
   connectorId: string;
+  modelName?: string;
+  connectorType?: string;
+  connectorName?: string;
   durationMs: number;
   success: boolean;
   errorMessage?: string;
