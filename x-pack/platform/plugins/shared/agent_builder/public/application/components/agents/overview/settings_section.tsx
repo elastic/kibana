@@ -15,17 +15,19 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
-import { NightshiftCustomizationCard } from './nightshift_customization_card';
+import nightshiftIllustration from './assets/nightshift_illustration.svg';
 
 const { agentOverview: overviewLabels } = labels;
 
-/** Fixed row height for Customization cards (three columns). */
+/** Fixed row height for Customization cards (two columns). */
 const CUSTOMIZATION_CARD_HEIGHT_PX = 360;
 
 const customizationCardFixedHeightCss = css`
@@ -149,7 +151,9 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                           grow={false}
                           css={enableElasticCapabilities ? undefined : textDisabledStyles}
                         >
-                          <EuiIcon type="info" size="s" aria-hidden={true} />
+                          <EuiToolTip content={overviewLabels.autoIncludeInfoTooltip} delay="long">
+                            <EuiIcon type="info" size="s" tabIndex={0} />
+                          </EuiToolTip>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
@@ -203,6 +207,64 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                     </EuiFlexItem>
                   </>
                 )}
+
+                {showNightshiftCustomization && onObservabilityNightshiftEnabledChange ? (
+                  <>
+                    <EuiHorizontalRule margin="none" />
+
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <img
+                            src={nightshiftIllustration}
+                            alt=""
+                            width={32}
+                            height={32}
+                            css={css`
+                              display: block;
+                              flex-shrink: 0;
+                              object-fit: contain;
+                            `}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow>
+                          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                            <EuiFlexItem grow={false}>
+                              <EuiText
+                                color={
+                                  observabilityNightshiftEnabled ? 'textPrimary' : 'subdued'
+                                }
+                                size="s"
+                              >
+                                {overviewLabels.nightshiftTitle}
+                              </EuiText>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiToolTip
+                                content={overviewLabels.nightshiftDescription}
+                                delay="long"
+                              >
+                                <EuiIcon type="info" size="s" tabIndex={0} />
+                              </EuiToolTip>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiSwitch
+                            label={overviewLabels.nightshiftSwitchAriaLabel}
+                            checked={observabilityNightshiftEnabled}
+                            compressed
+                            showLabel={false}
+                            onChange={(e) =>
+                              onObservabilityNightshiftEnabledChange(e.target.checked)
+                            }
+                            data-test-subj="agentOverviewNightshiftSwitch"
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </>
+                ) : null}
               </EuiFlexGroup>
             }
             css={[
@@ -215,16 +277,6 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             ]}
           />
         </EuiFlexItem>
-
-        {showNightshiftCustomization && onObservabilityNightshiftEnabledChange ? (
-          <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
-            <NightshiftCustomizationCard
-              enabled={observabilityNightshiftEnabled}
-              onEnabledChange={onObservabilityNightshiftEnabledChange}
-              heightPx={CUSTOMIZATION_CARD_HEIGHT_PX}
-            />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
     </>
   );

@@ -21,7 +21,7 @@ import {
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, observabilityAgentId } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
 import { newConversationId } from '../../../../../utils/new_conversation';
 import {
@@ -38,6 +38,7 @@ import { useConversationList } from '../../../../../hooks/use_conversation_list'
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
+import { NightshiftModeSidebarCard } from './nightshift_mode_sidebar_card';
 import { ConversationList } from './conversation_list';
 import { ConversationSearchModal } from '../../../../conversations/conversation_search_modal';
 
@@ -241,6 +242,8 @@ export const ConversationSidebarView: React.FC = () => {
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
+
+          {agentId === observabilityAgentId ? <NightshiftModeSidebarCard /> : null}
 
           <EuiFlexItem grow={false}>
             <ConversationFooter />

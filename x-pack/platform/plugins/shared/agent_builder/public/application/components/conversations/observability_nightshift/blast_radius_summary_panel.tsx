@@ -367,14 +367,7 @@ export const BlastRadiusSummaryPanel: React.FC = () => {
             </p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiFlexGroup responsive={false} wrap gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" color="text">
-                {i18n.translate('xpack.agentBuilder.observabilityNightshift.reviewDetails', {
-                  defaultMessage: 'Review details',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
+          <EuiFlexGroup responsive={false} wrap gutterSize="xs">
             <EuiFlexItem grow={false}>
               <AiButton
                 size="s"
@@ -390,11 +383,15 @@ export const BlastRadiusSummaryPanel: React.FC = () => {
               </AiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" iconType="refresh" color="primary">
+              <EuiButtonEmpty size="s" iconType="backgroundTask" color="primary">
                 {i18n.translate('xpack.agentBuilder.observabilityNightshift.runInBackground', {
                   defaultMessage: 'Run in background',
                 })}
               </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon color="text" iconType="ellipsis" size='s'>
+              </EuiButtonIcon>
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>

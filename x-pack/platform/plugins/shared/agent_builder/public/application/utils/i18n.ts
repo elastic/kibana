@@ -41,6 +41,30 @@ export const labels = {
       }
     ),
   },
+  embeddableSidebar: {
+    nightshiftTitle: i18n.translate('xpack.agentBuilder.embeddableSidebar.nightshiftTitle', {
+      defaultMessage: 'Nightshift mode',
+    }),
+    nightshiftDescription: i18n.translate(
+      'xpack.agentBuilder.embeddableSidebar.nightshiftDescription',
+      {
+        defaultMessage:
+          'Shows, system health, blast radius summary & significant events on the main chat page for faster remediation.',
+      }
+    ),
+    nightshiftTurnOn: i18n.translate('xpack.agentBuilder.embeddableSidebar.nightshiftTurnOn', {
+      defaultMessage: 'Turn on',
+    }),
+    nightshiftEnabledBadge: i18n.translate(
+      'xpack.agentBuilder.embeddableSidebar.nightshiftEnabledBadge',
+      {
+        defaultMessage: 'On',
+      }
+    ),
+    nightshiftToastEnabled: i18n.translate('xpack.agentBuilder.embeddableSidebar.nightshiftToastEnabled', {
+      defaultMessage: 'Nightshift mode enabled',
+    }),
+  },
   tools: {
     // Landing page
     libraryTitle: i18n.translate('xpack.agentBuilder.tools.libraryTitle', {
@@ -2115,7 +2139,7 @@ export const labels = {
       }
     ),
     nightshiftTitle: i18n.translate('xpack.agentBuilder.overview.customizations.nightshiftTitle', {
-      defaultMessage: 'Nightshift',
+      defaultMessage: 'Nightshift overview',
     }),
     nightshiftDescription: i18n.translate(
       'xpack.agentBuilder.overview.customizations.nightshiftDescription',
