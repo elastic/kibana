@@ -173,7 +173,6 @@ export const MetricVis = ({
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : firstRowForNonBreakdown
   ).map((row, rowIdx) => {
-    // Investigate this, why when is form-based is null and when is tex-based is undefined
     const rowValue = row[primaryMetricColumn.id];
     const value: number | string = rowValue !== null && rowValue !== undefined ? rowValue : NaN;
 
