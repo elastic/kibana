@@ -55,17 +55,29 @@ export function useFetchMetricsData({
 
   // Accumulate dimensions across filtered fetches so that selecting additional
   // breakdown dimensions does not remove previously-available dimensions from
-  // the picker. Reset when the base ES|QL query changes (new data source).
+  // the picker. Reset when anything other than the selected dimensions changes
+  // the data context (query, time range, Discover filters, ES|QL variables),
+  // since those changes can legitimately remove dimensions from the result.
   const accumulatedDimensionsRef = useRef<Dimension[]>([]);
-  const previousEsqlRef = useRef<string | undefined>(esql);
+  const dataContextKey = useMemo(
+    () =>
+      JSON.stringify({
+        esql,
+        timeRange: fetchParams.timeRange,
+        filters: fetchParams.filters,
+        esqlVariables: fetchParams.esqlVariables,
+      }),
+    [esql, fetchParams.timeRange, fetchParams.filters, fetchParams.esqlVariables]
+  );
+  const previousDataContextKeyRef = useRef<string | undefined>(dataContextKey);
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (
       signal: AbortSignal
     ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
-      if (esql !== previousEsqlRef.current) {
+      if (dataContextKey !== previousDataContextKeyRef.current) {
         accumulatedDimensionsRef.current = [];
-        previousEsqlRef.current = esql;
+        previousDataContextKeyRef.current = dataContextKey;
       }
 
       const documents = await trackRequest(
@@ -129,6 +141,7 @@ export function useFetchMetricsData({
     },
     [
       metricsInfoQuery,
+      dataContextKey,
       trackRequest,
       fetchParams.dataView,
       fetchParams.timeRange,
