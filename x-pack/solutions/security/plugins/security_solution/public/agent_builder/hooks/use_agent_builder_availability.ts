@@ -25,10 +25,7 @@ interface UseAgentBuilderAvailability {
 }
 
 export const useAgentBuilderAvailability = (): UseAgentBuilderAvailability => {
-  const [chatExperience] = useUiSetting$<AIChatExperience>(
-    AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
-  );
+  const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const {
     services: {
       application: { capabilities },
