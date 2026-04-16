@@ -73,92 +73,128 @@ const getInter = (url: string): FontFace => {
       {
         style: 'normal',
         weight: 100,
-        sources: [`${url}/fonts/inter/Inter-Thin.woff2`],
+        sources: [`${url}/fonts/inter/Inter-Thin.woff2`, `${url}/fonts/inter/Inter-Thin.woff`],
       },
       {
         style: 'italic',
         weight: 100,
-        sources: [`${url}/fonts/inter/Inter-ThinItalic.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-ThinItalic.woff2`,
+          `${url}/fonts/inter/Inter-ThinItalic.woff`,
+        ],
       },
       {
         style: 'normal',
         weight: 200,
-        sources: [`${url}/fonts/inter/Inter-ExtraLight.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-ExtraLight.woff2`,
+          `${url}/fonts/inter/Inter-ExtraLight.woff`,
+        ],
       },
       {
         style: 'italic',
         weight: 200,
-        sources: [`${url}/fonts/inter/Inter-ExtraLightItalic.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-ExtraLightItalic.woff2`,
+          `${url}/fonts/inter/Inter-ExtraLightItalic.woff`,
+        ],
       },
       {
         style: 'normal',
         weight: 300,
-        sources: [`${url}/fonts/inter/Inter-Light.woff2`],
+        sources: [`${url}/fonts/inter/Inter-Light.woff2`, `${url}/fonts/inter/Inter-Light.woff`],
       },
       {
         style: 'italic',
         weight: 300,
-        sources: [`${url}/fonts/inter/Inter-LightItalic.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-LightItalic.woff2`,
+          `${url}/fonts/inter/Inter-LightItalic.woff`,
+        ],
       },
       {
         style: 'normal',
         weight: 400,
-        sources: [`${url}/fonts/inter/Inter-Regular.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-Regular.woff2`,
+          `${url}/fonts/inter/Inter-Regular.woff`,
+        ],
       },
       {
         style: 'italic',
         weight: 400,
-        sources: [`${url}/fonts/inter/Inter-Italic.woff2`],
+        sources: [`${url}/fonts/inter/Inter-Italic.woff2`, `${url}/fonts/inter/Inter-Italic.woff`],
       },
       {
         style: 'normal',
         weight: 500,
-        sources: [`${url}/fonts/inter/Inter-Medium.woff2`],
+        sources: [`${url}/fonts/inter/Inter-Medium.woff2`, `${url}/fonts/inter/Inter-Medium.woff`],
       },
       {
         style: 'italic',
         weight: 500,
-        sources: [`${url}/fonts/inter/Inter-MediumItalic.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-MediumItalic.woff2`,
+          `${url}/fonts/inter/Inter-MediumItalic.woff`,
+        ],
       },
       {
         style: 'normal',
         weight: 600,
-        sources: [`${url}/fonts/inter/Inter-SemiBold.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-SemiBold.woff2`,
+          `${url}/fonts/inter/Inter-SemiBold.woff`,
+        ],
       },
       {
         style: 'italic',
         weight: 600,
-        sources: [`${url}/fonts/inter/Inter-SemiBoldItalic.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-SemiBoldItalic.woff2`,
+          `${url}/fonts/inter/Inter-SemiBoldItalic.woff`,
+        ],
       },
       {
         style: 'normal',
         weight: 700,
-        sources: [`${url}/fonts/inter/Inter-Bold.woff2`],
+        sources: [`${url}/fonts/inter/Inter-Bold.woff2`, `${url}/fonts/inter/Inter-Bold.woff`],
       },
       {
         style: 'italic',
         weight: 700,
-        sources: [`${url}/fonts/inter/Inter-BoldItalic.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-BoldItalic.woff2`,
+          `${url}/fonts/inter/Inter-BoldItalic.woff`,
+        ],
       },
       {
         style: 'normal',
         weight: 800,
-        sources: [`${url}/fonts/inter/Inter-ExtraBold.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-ExtraBold.woff2`,
+          `${url}/fonts/inter/Inter-ExtraBold.woff`,
+        ],
       },
       {
         style: 'italic',
         weight: 800,
-        sources: [`${url}/fonts/inter/Inter-ExtraBoldItalic.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-ExtraBoldItalic.woff2`,
+          `${url}/fonts/inter/Inter-ExtraBoldItalic.woff`,
+        ],
       },
       {
         style: 'normal',
         weight: 900,
-        sources: [`${url}/fonts/inter/Inter-Black.woff2`],
+        sources: [`${url}/fonts/inter/Inter-Black.woff2`, `${url}/fonts/inter/Inter-Black.woff`],
       },
       {
         style: 'italic',
         weight: 900,
-        sources: [`${url}/fonts/inter/Inter-BlackItalic.woff2`],
+        sources: [
+          `${url}/fonts/inter/Inter-BlackItalic.woff2`,
+          `${url}/fonts/inter/Inter-BlackItalic.woff`,
+        ],
       },
     ],
   };
