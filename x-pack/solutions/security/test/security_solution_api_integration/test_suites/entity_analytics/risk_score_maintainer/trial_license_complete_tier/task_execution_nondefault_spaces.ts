@@ -133,6 +133,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const scores = await readRiskScores(es, [index]);
         const normalized = normalizeScores(scores);
 
+        // Deduplicate: a sync run may overlap with a scheduled run, producing
+        // duplicate score documents for the same entity in the same window.
         const idValues = Array.from(
           new Set(normalized.map(({ id_value: idValue }) => idValue).filter(Boolean))
         ).sort();

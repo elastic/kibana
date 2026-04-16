@@ -135,28 +135,39 @@ const chooseLegacyConfigurationSavedObject = ({
   return chosenConfiguration;
 };
 
-const adoptLegacyConfigurationSavedObject = async ({
-  savedObjectsClient,
-  namespace,
-  configuration,
-}: SavedObjectsClientArg & {
-  namespace: string;
-  configuration: SavedObject<RiskEngineConfiguration>;
-}): Promise<SavedObject<RiskEngineConfiguration>> => {
-  const adoptedConfiguration = await createConfigurationSavedObject({
-    savedObjectsClient,
-    namespace,
-    attributes: configuration.attributes,
-  });
-
+const deleteSavedObjectSafe = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  id: string
+): Promise<void> => {
   try {
-    await savedObjectsClient.delete(riskEngineConfigurationTypeName, configuration.id, {
+    await savedObjectsClient.delete(riskEngineConfigurationTypeName, id, {
       refresh: 'wait_for',
     });
   } catch (error) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
       throw error;
     }
+  }
+};
+
+const adoptLegacyConfigurationSavedObject = async ({
+  savedObjectsClient,
+  namespace,
+  chosenConfiguration,
+  allLegacyConfigurations,
+}: SavedObjectsClientArg & {
+  namespace: string;
+  chosenConfiguration: SavedObject<RiskEngineConfiguration>;
+  allLegacyConfigurations: Array<SavedObject<RiskEngineConfiguration>>;
+}): Promise<SavedObject<RiskEngineConfiguration>> => {
+  const adoptedConfiguration = await createConfigurationSavedObject({
+    savedObjectsClient,
+    namespace,
+    attributes: chosenConfiguration.attributes,
+  });
+
+  for (const legacy of allLegacyConfigurations) {
+    await deleteSavedObjectSafe(savedObjectsClient, legacy.id);
   }
 
   return adoptedConfiguration;
@@ -184,13 +195,13 @@ const getConfigurationSavedObject = async ({
 
   return adoptLegacyConfigurationSavedObject({
     savedObjectsClient,
-    logger,
     namespace,
-    configuration: chooseLegacyConfigurationSavedObject({
+    chosenConfiguration: chooseLegacyConfigurationSavedObject({
       legacyConfigurations,
       logger,
       namespace,
     }),
+    allLegacyConfigurations: legacyConfigurations,
   });
 };
 
@@ -247,7 +258,6 @@ export const initSavedObjects = async ({
 
 export const deleteSavedObjects = async ({
   savedObjectsClient,
-  logger,
   namespace,
 }: SavedObjectsClientArg & {
   namespace: string;
@@ -261,19 +271,13 @@ export const deleteSavedObjects = async ({
     namespace,
   });
 
-  const configuration =
-    configurationById ??
-    (legacyConfigurations.length > 0
-      ? chooseLegacyConfigurationSavedObject({
-          legacyConfigurations,
-          logger,
-          namespace,
-        })
-      : undefined);
-  if (configuration) {
-    await savedObjectsClient.delete(riskEngineConfigurationTypeName, configuration.id, {
-      refresh: 'wait_for',
-    });
+  const allToDelete = [
+    ...(configurationById ? [configurationById] : []),
+    ...legacyConfigurations,
+  ];
+
+  for (const config of allToDelete) {
+    await deleteSavedObjectSafe(savedObjectsClient, config.id);
   }
 };
 

@@ -233,12 +233,13 @@ export const readRiskScores = async (
   return results.hits.hits.map((hit) => hit._source as EcsRiskScore);
 };
 
-const isRetryableRiskScoreReadError = (error: any): boolean => {
-  if (error?.meta?.statusCode === 404) {
+const isRetryableRiskScoreReadError = (error: unknown): boolean => {
+  const err = error as { meta?: { statusCode?: number }; message?: string };
+  if (err?.meta?.statusCode === 404) {
     return true;
   }
 
-  const message = String(error?.message ?? '').toLowerCase();
+  const message = String(err?.message ?? '').toLowerCase();
   return (
     message.includes('no_shard_available_action_exception') ||
     message.includes('search_phase_execution_exception')

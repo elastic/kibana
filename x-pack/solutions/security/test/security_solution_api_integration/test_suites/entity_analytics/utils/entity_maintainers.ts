@@ -43,7 +43,9 @@ const isMaintainerStarted = (maintainer?: {
   taskStatus?: string;
   runs?: number;
 }): maintainer is { taskStatus: string; runs: number } =>
-  maintainer != null && maintainer.taskStatus.toLowerCase() === 'started';
+  maintainer != null &&
+  maintainer.taskStatus != null &&
+  maintainer.taskStatus.toLowerCase() === 'started';
 
 const isMaintainerAlreadyRunningError = (error: unknown): boolean => {
   if (!(error instanceof Error)) {
