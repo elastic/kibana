@@ -14,6 +14,7 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
+  createDeprecatedPrebuiltRuleAssetSavedObjects,
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
   reviewPrebuiltRulesToInstall,
@@ -989,6 +990,38 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(response.body.rules.length).toBe(1);
+      });
+    });
+
+    describe('Deprecated rule exclusion', () => {
+      it('does not include deprecated rule assets in the install review', async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'active-rule-1', version: 1, name: 'Active 1' }),
+          createRuleAssetSavedObject({ rule_id: 'active-rule-2', version: 1, name: 'Active 2' }),
+        ]);
+        await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+          { rule_id: 'deprecated-rule-1', version: 1, name: 'Deprecated 1' },
+        ]);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest);
+
+        const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);
+        expect(ruleIds).toContain('active-rule-1');
+        expect(ruleIds).toContain('active-rule-2');
+        expect(ruleIds).not.toContain('deprecated-rule-1');
+        expect(response.stats.num_rules_to_install).toBe(2);
+      });
+
+      it('returns empty install review when only deprecated rule assets are present', async () => {
+        await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+          { rule_id: 'deprecated-rule-1', version: 1 },
+          { rule_id: 'deprecated-rule-2', version: 1 },
+        ]);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest);
+
+        expect(response.rules).toHaveLength(0);
+        expect(response.stats.num_rules_to_install).toBe(0);
       });
     });
   });

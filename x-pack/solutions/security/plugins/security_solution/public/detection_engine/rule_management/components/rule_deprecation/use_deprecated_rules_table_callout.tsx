@@ -19,7 +19,7 @@ import { DeprecatedRulesCallout } from './deprecated_rules_callout';
 import { DeprecatedRulesModal } from './deprecated_rules_modal';
 import * as i18n from './translations';
 
-const DISMISSAL_STORAGE_KEY = 'securitySolution.deprecatedRulesCallout.dismissedAt';
+export const DISMISSAL_STORAGE_KEY = 'securitySolution.deprecatedRulesCallout.dismissedAt';
 
 export const useDeprecatedRulesTableCallout = () => {
   const isFeatureEnabled = useIsExperimentalFeatureEnabled('prebuiltRulesDeprecationUIEnabled');

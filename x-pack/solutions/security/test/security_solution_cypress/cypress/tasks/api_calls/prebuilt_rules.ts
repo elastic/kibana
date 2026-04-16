@@ -17,6 +17,7 @@ import {
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
+import type { createDeprecatedRuleAssetSavedObject } from '../../helpers/rules';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { refreshSavedObjectIndices, rootRequest } from './common';
@@ -80,6 +81,21 @@ export const getInstalledPrebuiltRulesCount = () => {
   return getPrebuiltRulesStatus().then(({ body }) => body.rules_installed);
 };
 
+/**
+ * Builds an ndjson bulk-index request body from an array of rule asset objects.
+ * Each element must expose a `'security-rule'` key with at least `rule_id` and `version`.
+ */
+const buildBulkIndexBody = <T extends { 'security-rule': { rule_id: string; version: number } }>(
+  index: string,
+  rules: T[]
+): string =>
+  rules.reduce((body, rule) => {
+    const documentId = `security-rule:${rule['security-rule'].rule_id}_${rule['security-rule'].version}`;
+    return body.concat(
+      `${JSON.stringify({ index: { _index: index, _id: documentId } })}\n${JSON.stringify(rule)}\n`
+    );
+  }, '');
+
 export const bulkCreateRuleAssets = ({
   index = '.kibana_security_solution',
   rules = [SAMPLE_PREBUILT_RULE],
@@ -92,23 +108,8 @@ export const bulkCreateRuleAssets = ({
     rules?.map((rule) => rule['security-rule'].rule_id).join(', ')
   );
 
-  const bulkIndexRequestBody = rules.reduce((body, rule) => {
-    const document = JSON.stringify(rule);
-    const documentId = `security-rule:${rule['security-rule'].rule_id}`;
-    const documentIdWithVersion = `${documentId}_${rule['security-rule'].version}`;
-
-    const indexHistoricalRuleAsset = `${JSON.stringify({
-      index: {
-        _index: index,
-        _id: documentIdWithVersion,
-      },
-    })}\n${document}\n`;
-
-    return body.concat(indexHistoricalRuleAsset);
-  }, '');
-
   cy.task('putMapping', index);
-  cy.task('bulkInsert', bulkIndexRequestBody);
+  cy.task('bulkInsert', buildBulkIndexBody(index, rules));
 };
 
 /* Prevent the installation of the `security_detection_engine` package from Fleet
@@ -234,3 +235,27 @@ const deleteFleetPackage = (
 
 export const deletePrebuiltRulesFleetPackage = (): Cypress.Chainable<Cypress.Response<unknown>> =>
   deleteFleetPackage(PREBUILT_RULES_PACKAGE_NAME);
+
+/**
+ * Bulk create deprecated rule asset saved objects in ES.
+ * These are minimal stubs with `deprecated: true` that signal a rule has been deprecated.
+ * Use `createDeprecatedRuleAssetSavedObject()` to build each rule asset.
+ *
+ * Use in combination with `preventPrebuiltRulesPackageInstallation` so that only
+ * the mocked assets are present during the test.
+ */
+export const createDeprecatedRuleAssets = ({
+  index = '.kibana_security_solution',
+  rules,
+}: {
+  index?: string;
+  rules: Array<ReturnType<typeof createDeprecatedRuleAssetSavedObject>>;
+}) => {
+  cy.log(
+    'Bulk create deprecated rule assets',
+    rules.map((rule) => rule['security-rule'].rule_id).join(', ')
+  );
+
+  cy.task('putMapping', index);
+  cy.task('bulkInsert', buildBulkIndexBody(index, rules));
+};

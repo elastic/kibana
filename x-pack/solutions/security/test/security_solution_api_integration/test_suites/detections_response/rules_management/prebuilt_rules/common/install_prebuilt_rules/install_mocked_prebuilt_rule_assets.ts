@@ -13,6 +13,7 @@ import {
   deleteAllPrebuiltRuleAssets,
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
+  createDeprecatedPrebuiltRuleAssetSavedObjects,
   installPrebuiltRulesAndTimelines,
   getPrebuiltRulesAndTimelinesStatus,
   createHistoricalPrebuiltRuleAssetSavedObjects,
@@ -292,6 +293,37 @@ export default ({ getService }: FtrProviderContext): void => {
             type: 'detection',
           }),
         ]);
+      });
+
+      describe('Deprecated rule exclusion', () => {
+        it('does not install deprecated rule assets when installing all rules', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({ rule_id: 'active-rule-1', version: 1 }),
+            createRuleAssetSavedObject({ rule_id: 'active-rule-2', version: 1 }),
+          ]);
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'deprecated-rule-1', version: 1 },
+          ]);
+
+          const body = await installPrebuiltRules(es, supertest);
+
+          const installedRuleIds = body.results.created.map((r) => r.rule_id);
+          expect(installedRuleIds).toContain('active-rule-1');
+          expect(installedRuleIds).toContain('active-rule-2');
+          expect(installedRuleIds).not.toContain('deprecated-rule-1');
+          expect(body.summary.succeeded).toBe(2);
+        });
+
+        it('installs zero rules when only deprecated rule assets are present', async () => {
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'deprecated-rule-1', version: 1 },
+          ]);
+
+          const body = await installPrebuiltRules(es, supertest);
+
+          expect(body.summary.succeeded).toBe(0);
+          expect(body.results.created).toHaveLength(0);
+        });
       });
 
       describe('legacy (PUT /api/detection_engine/rules/prepackaged)', () => {
