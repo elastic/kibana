@@ -116,6 +116,7 @@ describe('parseOasdiff', () => {
         text: 'request property removed',
         operation: 'PUT',
         path: '/api/test',
+        source: '/components/schemas/Output/properties/name',
       }),
     ]);
     expect(result).toEqual([
@@ -125,7 +126,7 @@ describe('parseOasdiff', () => {
         method: 'PUT',
         reason: 'request property removed',
         oasdiffId: 'request-property-removed',
-        source: 'test',
+        source: '/components/schemas/Output/properties/name',
       },
     ]);
   });
