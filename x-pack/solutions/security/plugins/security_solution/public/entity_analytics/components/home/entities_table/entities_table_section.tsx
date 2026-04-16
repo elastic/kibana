@@ -211,6 +211,7 @@ const GroupContent = ({
       state={state}
       currentGroupFilters={currentGroupFilters}
       parentGroupFilters={parentGroupFilters}
+      selectedGroup={selectedGroup}
     />
   );
 };
@@ -275,12 +276,14 @@ interface DataTableWithLocalPaginationProps {
   state: EntityURLStateResult;
   currentGroupFilters: Filter[];
   parentGroupFilters?: string;
+  selectedGroup?: string;
 }
 
 const DataTableWithLocalPagination = ({
   state,
   currentGroupFilters,
   parentGroupFilters,
+  selectedGroup,
 }: DataTableWithLocalPaginationProps) => {
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
@@ -308,5 +311,5 @@ const DataTableWithLocalPagination = ({
     onChangeItemsPerPage: setTablePageSize,
   };
 
-  return <EntitiesDataTable state={newState} />;
+  return <EntitiesDataTable state={newState} selectedGroup={selectedGroup} />;
 };

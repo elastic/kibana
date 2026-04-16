@@ -12,11 +12,9 @@
     "server/**/*",
     "public/**/*",
     "types/**/*",
-    "test/**/*",
+    "test/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core-pricing-common",
@@ -78,6 +76,8 @@
     "@kbn/core-http-common",
     "@kbn/scout",
     "@kbn/esql-language",
+    "@kbn/esql-types",
+    "@kbn/esql",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/logging-mocks",
@@ -88,6 +88,10 @@
     "@kbn/agent-builder-common",
     "@kbn/datemath",
     "@kbn/setup-node-env",
+    "@kbn/synthtrace",
+    "@kbn/synthtrace-client",
+    "@kbn/tooling-log",
+    "@kbn/dev-cli-runner",
     "@kbn/core-security-server",
     "@kbn/workflows-management-plugin",
     "@kbn/workflows"

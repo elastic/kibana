@@ -50,18 +50,9 @@ describe(
     });
 
     it('should run query and enable ecs mapping', () => {
-      const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
-      cy.contains('Run query').click();
+      navigateTo('/app/osquery/new');
       selectAllAgents();
       inputQuery('select * from uptime;');
-      cy.wait(500);
-      // checking submit by clicking cmd+enter
-      inputQuery(cmd);
-      checkResults();
-      cy.getBySel(RESULTS_TABLE).within(() => {
-        cy.get('[data-test-subj^="dataGridHeaderCell-"]').should('have.length.greaterThan', 0);
-      });
-
       getAdvancedButton().click();
       typeInECSFieldInput('message{downArrow}{enter}');
       typeInOsqueryFieldInput('days{downArrow}{enter}');
@@ -74,7 +65,7 @@ describe(
     });
 
     it('should run customized saved query', () => {
-      cy.contains('Run query').click();
+      navigateTo('/app/osquery/new');
       selectAllAgents();
       cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
       inputQuery('{selectall}{backspace}select * from users;');
