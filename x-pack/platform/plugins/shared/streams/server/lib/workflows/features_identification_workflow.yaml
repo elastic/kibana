@@ -123,7 +123,7 @@ steps:
       # 2d: Track whether at least one iteration succeeded.
       - name: mark_success
         type: if
-        condition: "steps.identify_inferred.output.iterationResult.state:success"
+        condition: "${{ steps.identify_inferred.output.state.iterationResults.last.state == 'success' }}"
         steps:
           - name: set_success
             type: data.set
