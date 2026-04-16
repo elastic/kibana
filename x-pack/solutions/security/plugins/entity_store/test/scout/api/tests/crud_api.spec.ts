@@ -681,13 +681,13 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       }
     );
     expect(list.statusCode).toBe(200);
-    expect(list.body.entitiesFields).toBeDefined();
-    expect(list.body.entitiesFields).toHaveLength(1);
-    expect(list.body.entitiesFields[0]['entity.id']).toContain(entityObj.entity!.id!);
+    expect(list.body.fields).toBeDefined();
+    expect(list.body.fields).toHaveLength(1);
+    expect(list.body.fields[0]['entity.id']).toContain(entityObj.entity!.id!);
   });
 
   apiTest(
-    'Should not include entitiesFields in response when fields param is omitted',
+    'Should not include fields in response when fields param is omitted',
     async ({ apiClient }) => {
       const entityObj: Entity = {
         entity: {
@@ -710,7 +710,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         }
       );
       expect(list.statusCode).toBe(200);
-      expect(list.body.entitiesFields).toBeUndefined();
+      expect(list.body.fields).toBeUndefined();
     }
   );
 
@@ -742,11 +742,44 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         }
       );
       expect(list.statusCode).toBe(200);
-      expect(list.body.entitiesFields).toBeDefined();
-      expect(list.body.entitiesFields).toHaveLength(1);
-      const fields = list.body.entitiesFields[0];
+      expect(list.body.fields).toBeDefined();
+      expect(list.body.fields).toHaveLength(1);
+      const fields = list.body.fields[0];
       expect(fields['entity.id']).toContain(entityObj.entity!.id!);
       expect(fields['host.name']).toContain('list-multi-fields');
+    }
+  );
+
+  apiTest(
+    'Should return empty fields entry when requested field does not exist on the entity',
+    async ({ apiClient }) => {
+      const entityObj: Entity = {
+        entity: {
+          id: 'list-missing-field-test',
+        },
+      };
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: entityObj,
+      });
+      expect(create.statusCode).toBe(200);
+
+      const kqlFilter = `entity.id: ${entityObj.entity!.id!}`;
+      const list = await apiClient.get(
+        ENTITY_STORE_ROUTES.public.CRUD_GET +
+          `?filter=${encodeURIComponent(kqlFilter)}&fields=entity.id,does.not.exist`,
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+        }
+      );
+      expect(list.statusCode).toBe(200);
+      expect(list.body.fields).toBeDefined();
+      expect(list.body.fields).toHaveLength(1);
+      expect(list.body.fields[0]['entity.id']).toContain(entityObj.entity!.id!);
+      // ES omits missing fields from the fields object entirely
+      expect(list.body.fields[0]['does.not.exist']).toBeUndefined();
     }
   );
 

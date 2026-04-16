@@ -178,7 +178,7 @@ export const entityDetailsHighlightsServiceFactory = ({
   };
 
   const getEntityFromEntityStore = async (entityIdentifier: string) => {
-    const { entities, entitiesFields } = await entityStoreClient.listEntities({
+    const { entities, fields: entitiesFields } = await entityStoreClient.listEntities({
       filter: { term: { 'entity.id': entityIdentifier } },
       size: 1,
       fields,

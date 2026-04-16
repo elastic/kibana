@@ -148,11 +148,9 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
             fields: req.query.fields,
           };
 
-          const { entities, nextSearchAfter, entitiesFields } = await crudClient.listEntities(
-            listParams
-          );
+          const { entities, nextSearchAfter, fields } = await crudClient.listEntities(listParams);
           return res.ok({
-            body: { entities, nextSearchAfter, ...(entitiesFields ? { entitiesFields } : {}) },
+            body: { entities, nextSearchAfter, ...(fields ? { fields } : {}) },
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

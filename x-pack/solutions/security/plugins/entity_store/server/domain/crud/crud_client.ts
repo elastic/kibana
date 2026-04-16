@@ -60,7 +60,7 @@ export interface ListEntitiesParams {
 
 export interface ListEntitiesResult {
   entities: Entity[];
-  entitiesFields?: Array<SearchHit['fields']>; // Only present if `fields` was specified in ListEntitiesParams
+  fields?: Array<SearchHit['fields']>; // Only present if `fields` was specified in ListEntitiesParams
   nextSearchAfter?: Array<string | number>;
   total?: number;
   page?: number;
@@ -434,12 +434,12 @@ export class CRUDClient {
     const hits = resp.hits.hits;
     const entities = hits.map((hit) => hit._source as Entity);
     const lastHit = hits[hits.length - 1];
-    const entitiesFields = fields && fields.length > 0 ? hits.map((hit) => hit.fields) : undefined;
+    const entityFields = fields && fields.length > 0 ? hits.map((hit) => hit.fields) : undefined;
 
     return {
       entities,
       nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
-      ...(entitiesFields ? { entitiesFields } : {}),
+      ...(entityFields ? { fields: entityFields } : {}),
     };
   }
 }
