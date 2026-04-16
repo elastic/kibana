@@ -25,7 +25,7 @@ function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
     apiServices,
     esClient,
   }: ExtendedScoutTestFixtures & ObltWorkerFixtures) => {
-    let ruleName: string;
+    let ruleName: string | undefined;
 
     try {
       let alertDocId: string;
@@ -56,7 +56,9 @@ function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
         }
       });
     } finally {
-      await cleanupApmAlerts({ apiServices, esClient, ruleName: ruleName! });
+      if (ruleName) {
+        await cleanupApmAlerts({ apiServices, esClient, ruleName });
+      }
     }
   };
 }

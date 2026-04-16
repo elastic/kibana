@@ -26,7 +26,7 @@ function createExploreInApmTest(alertIndex: string) {
     apiServices,
     esClient,
   }: ExtendedScoutTestFixtures & ObltWorkerFixtures) => {
-    let ruleName: string;
+    let ruleName: string | undefined;
 
     try {
       let alertDocId: string;
@@ -72,7 +72,9 @@ function createExploreInApmTest(alertIndex: string) {
         }).toPass({ timeout: 60_000, intervals: [2_000] });
       });
     } finally {
-      await cleanupApmAlerts({ apiServices, esClient, ruleName: ruleName! });
+      if (ruleName) {
+        await cleanupApmAlerts({ apiServices, esClient, ruleName });
+      }
     }
   };
 }
