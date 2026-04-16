@@ -8,8 +8,72 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/global.setup.ts",
-        "line": 11,
+        "line": 12,
         "column": 16
+      }
+    },
+    {
+      "id": "3c54375d81c3641-3f83d67946bbf9d",
+      "title": "Attack details flyout shows Insights (with Correlations) and Notes in attack details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
+        "line": 29,
+        "column": 14
+      }
+    },
+    {
+      "id": "97e35cdc4d140e2-503e0e64cc584ca",
+      "title": "Attacks page filters renders and opens attacks filtering controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
+        "line": 29,
+        "column": 14
+      }
+    },
+    {
+      "id": "83af64580ba0bee-6831be53f693f72",
+      "title": "Attacks page smoke renders critical attacks page components",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_page_smoke.spec.ts",
+        "line": 29,
+        "column": 14
+      }
+    },
+    {
+      "id": "f6efc9f182744e4-0cd0946b23ba6e0",
+      "title": "Attacks schedule flyout opens the schedule flyout from attacks page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_schedule.spec.ts",
+        "line": 29,
+        "column": 14
       }
     },
     {
