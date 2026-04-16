@@ -3244,6 +3244,9 @@ oas_docs/output                               @elastic/ski-docs
 docs/settings-gen                             @elastic/experience-docs
 docs/reference                                @elastic/experience-docs
 
+# Side navigation title glossary
+src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/experience-docs
+
 /x-pack/platform/test/serverless/functional/test_suites/strip_unknown_config_workaround @elastic/kibana-core
 
 # Plugin manifests for test plugins
