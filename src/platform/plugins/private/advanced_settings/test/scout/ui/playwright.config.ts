@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { createPlaywrightConfig } from '@kbn/scout-vrt';
 
 export default createPlaywrightConfig({
   testDir: './tests',

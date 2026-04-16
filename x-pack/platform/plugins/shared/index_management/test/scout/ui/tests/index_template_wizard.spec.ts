@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { test } from '../fixtures';
+import { visualTest as test } from '../fixtures';
 
 test.describe('Index template wizard - Create', { tag: tags.stateful.classic }, () => {
   test.afterEach(async ({ esClient, log }) => {

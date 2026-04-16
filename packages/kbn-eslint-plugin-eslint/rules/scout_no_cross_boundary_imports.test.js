@@ -74,6 +74,10 @@ import { expect } from '@kbn/scout-security/ui';`,
       filename: SECURITY_TEST,
       code: `import { getSynthtraceClient } from '@kbn/scout-synthtrace';`,
     },
+    {
+      filename: PLATFORM_XPACK_TEST,
+      code: `import { visualTest } from '@kbn/scout-vrt';`,
+    },
   ],
 
   invalid: [

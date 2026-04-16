@@ -29,7 +29,8 @@
     "@kbn/std",
     "@kbn/router-utils",
     "@kbn/split-button",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/scout-vrt"
   ],
   "exclude": [
     "target/**/*",

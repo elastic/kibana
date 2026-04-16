@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { test as scoutTest } from '@kbn/scout';
 import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest } from '@kbn/scout';
+import { visualTest as scoutVisualTest } from '@kbn/scout-vrt';
 import type { GlobalSearchPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
@@ -14,7 +15,7 @@ export interface GlobalSearchTestFixtures extends ScoutTestFixtures {
   pageObjects: GlobalSearchPageObjects;
 }
 
-export const test = baseTest.extend<GlobalSearchTestFixtures, ScoutWorkerFixtures>({
+const globalSearchFixtures = {
   pageObjects: async (
     {
       pageObjects,
@@ -28,4 +29,12 @@ export const test = baseTest.extend<GlobalSearchTestFixtures, ScoutWorkerFixture
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
-});
+};
+
+export const test = scoutTest.extend<GlobalSearchTestFixtures, ScoutWorkerFixtures>(
+  globalSearchFixtures
+);
+
+export const visualTest = scoutVisualTest.extend<GlobalSearchTestFixtures, ScoutWorkerFixtures>(
+  globalSearchFixtures
+);

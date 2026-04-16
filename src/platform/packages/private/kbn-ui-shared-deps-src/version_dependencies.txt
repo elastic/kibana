@@ -44,7 +44,7 @@ babel-loader@9.2.1
 baseline-browser-mapping@2.9.14
 browserslist@4.28.1
 buffer-from@1.1.1
-caniuse-lite@1.0.30001781
+caniuse-lite@1.0.30001782
 chroma-js@2.4.2
 chrome-trace-event@1.0.2
 commander@2.20.3
@@ -56,7 +56,7 @@ css-tree@1.1.3
 cssesc@3.0.0
 csstype@3.1.2
 dompurify@3.3.2
-electron-to-chromium@1.5.321
+electron-to-chromium@1.5.329
 enhanced-resolve@5.20.0
 error-stack-parser@2.0.6
 es-module-lexer@1.5.4

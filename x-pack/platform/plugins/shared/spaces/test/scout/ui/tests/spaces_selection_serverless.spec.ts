@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-import { test } from '../fixtures';
+import { visualTest as test } from '../fixtures';
 
 test.describe(
   'Spaces selection',
@@ -24,56 +24,55 @@ test.describe(
       browserAuth,
       pageObjects,
     }) => {
-      await browserAuth.loginAsViewer();
-      await pageObjects.spaces.navigateToHome();
-
-      const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
-      expect(isHeaderVisible).toBe(true);
-
-      await expect(pageObjects.spaces.spacesSelectorLocator()).toBeVisible();
+      await test.step('viewer sees the space selection menu in the header', async () => {
+        await browserAuth.loginAsViewer();
+        await pageObjects.spaces.navigateToHome();
+        const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
+        expect(isHeaderVisible).toBe(true);
+        await expect(pageObjects.spaces.spacesSelectorLocator()).toBeVisible();
+      });
     });
 
     test('as Viewer - does not display the manage button in the space selection menu', async ({
       browserAuth,
       pageObjects,
     }) => {
-      await browserAuth.loginAsViewer();
-      await pageObjects.spaces.navigateToHome();
-
-      const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
-      expect(isHeaderVisible).toBe(true);
-
-      await pageObjects.spaces.openSpacesSelector();
-
-      const isManageVisible = await pageObjects.spaces.isManageButtonVisible();
-      expect(isManageVisible).toBe(false);
+      await test.step('viewer does not see the manage button in the space selector', async () => {
+        await browserAuth.loginAsViewer();
+        await pageObjects.spaces.navigateToHome();
+        const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
+        expect(isHeaderVisible).toBe(true);
+        await pageObjects.spaces.openSpacesSelector();
+        const isManageVisible = await pageObjects.spaces.isManageButtonVisible();
+        expect(isManageVisible).toBe(false);
+      });
     });
 
     test('as Admin - displays the space selection menu in header', async ({
       browserAuth,
       pageObjects,
     }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.spaces.navigateToHome();
-
-      const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
-      expect(isHeaderVisible).toBe(true);
-
-      await expect(pageObjects.spaces.spacesSelectorLocator()).toBeVisible();
+      await test.step('admin sees the space selection menu in the header', async () => {
+        await browserAuth.loginAsAdmin();
+        await pageObjects.spaces.navigateToHome();
+        const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
+        expect(isHeaderVisible).toBe(true);
+        await expect(pageObjects.spaces.spacesSelectorLocator()).toBeVisible();
+      });
     });
 
     test('as Admin - displays the manage button in the space selection menu', async ({
       browserAuth,
       pageObjects,
     }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.spaces.navigateToHome();
-
-      const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
-      expect(isHeaderVisible).toBe(true);
-
-      await pageObjects.spaces.openSpacesSelector();
-      await pageObjects.spaces.waitForManageButton();
+      await test.step('admin sees the manage button in the space selector', async () => {
+        await browserAuth.loginAsAdmin();
+        await pageObjects.spaces.navigateToHome();
+        const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
+        expect(isHeaderVisible).toBe(true);
+        await pageObjects.spaces.openSpacesSelector();
+        await pageObjects.spaces.waitForManageButton();
+      });
     });
   }
 );

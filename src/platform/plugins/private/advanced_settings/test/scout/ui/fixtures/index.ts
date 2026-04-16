@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test as base } from '@kbn/scout';
+import { test as scoutTest } from '@kbn/scout';
 import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { visualTest as scoutVisualTest } from '@kbn/scout-vrt';
 
 import type { AdvancedSettingsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
@@ -17,7 +18,7 @@ export interface AdvancedSettingsTestFixtures extends ScoutTestFixtures {
   pageObjects: AdvancedSettingsPageObjects;
 }
 
-export const test = base.extend<AdvancedSettingsTestFixtures, ScoutWorkerFixtures>({
+const advancedSettingsFixtures = {
   pageObjects: async (
     {
       pageObjects,
@@ -31,4 +32,12 @@ export const test = base.extend<AdvancedSettingsTestFixtures, ScoutWorkerFixture
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
-});
+};
+
+export const test = scoutTest.extend<AdvancedSettingsTestFixtures, ScoutWorkerFixtures>(
+  advancedSettingsFixtures
+);
+
+export const visualTest = scoutVisualTest.extend<AdvancedSettingsTestFixtures, ScoutWorkerFixtures>(
+  advancedSettingsFixtures
+);

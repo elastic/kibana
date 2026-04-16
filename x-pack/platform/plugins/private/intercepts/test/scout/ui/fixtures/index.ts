@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { test as base } from '@kbn/scout';
+import { test as scoutTest } from '@kbn/scout';
 import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { visualTest as scoutVisualTest } from '@kbn/scout-vrt';
 import type { InterceptsExtendedPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
@@ -14,7 +15,7 @@ export interface InterceptsTestFixtures extends ScoutTestFixtures {
   pageObjects: InterceptsExtendedPageObjects;
 }
 
-export const test = base.extend<InterceptsTestFixtures, ScoutWorkerFixtures>({
+const interceptsFixtures = {
   pageObjects: async (
     {
       pageObjects,
@@ -28,4 +29,12 @@ export const test = base.extend<InterceptsTestFixtures, ScoutWorkerFixtures>({
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
-});
+};
+
+export const test = scoutTest.extend<InterceptsTestFixtures, ScoutWorkerFixtures>(
+  interceptsFixtures
+);
+
+export const visualTest = scoutVisualTest.extend<InterceptsTestFixtures, ScoutWorkerFixtures>(
+  interceptsFixtures
+);

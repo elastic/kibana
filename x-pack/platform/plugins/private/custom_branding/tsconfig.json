@@ -21,7 +21,8 @@
     "@kbn/core-ui-settings-common",
     "@kbn/config-schema",
     "@kbn/licensing-types",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/scout-vrt"
   ],
   "exclude": [
     "target/**/*",

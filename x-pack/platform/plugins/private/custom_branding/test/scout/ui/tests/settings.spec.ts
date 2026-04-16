@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { visualTest as test } from '../fixtures';
 
 test.describe('custom branding', { tag: '@local-stateful-classic' }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -20,15 +20,15 @@ test.describe('custom branding', { tag: '@local-stateful-classic' }, () => {
   }) => {
     const pageTitle = 'Custom Page Title';
 
-    await pageObjects.customBrandingSettings.setPageTitle(pageTitle);
-
-    await pageObjects.customBrandingSettings.navigateToGlobalSettings();
-
-    const value = page.testSubj.locator(
-      'management-settings-editField-xpackCustomBranding:pageTitle'
-    );
-    await value.waitFor({ state: 'visible' });
-    await expect(value).toHaveAttribute('value', pageTitle);
+    await test.step('page title persists in advanced settings', async () => {
+      await pageObjects.customBrandingSettings.setPageTitle(pageTitle);
+      await pageObjects.customBrandingSettings.navigateToGlobalSettings();
+      const value = page.testSubj.locator(
+        'management-settings-editField-xpackCustomBranding:pageTitle'
+      );
+      await value.waitFor({ state: 'visible' });
+      await expect(value).toHaveAttribute('value', pageTitle);
+    });
   });
 
   test('should allow setting custom logo through advanced settings', async ({
@@ -37,15 +37,14 @@ test.describe('custom branding', { tag: '@local-stateful-classic' }, () => {
   }) => {
     const imagePath = require.resolve('../assets/acme_logo.png');
 
-    await pageObjects.customBrandingSettings.setLogo(imagePath);
-
-    await pageObjects.customBrandingSettings.navigateToGlobalSettings();
-
-    const img = page.locator('img[alt="logo"]');
-    await img.waitFor({ state: 'visible' });
-    const imgSrc = await img.getAttribute('src');
-
-    expect(imgSrc).toMatch(/^data:image\/png/);
+    await test.step('custom logo persists in advanced settings', async () => {
+      await pageObjects.customBrandingSettings.setLogo(imagePath);
+      await pageObjects.customBrandingSettings.navigateToGlobalSettings();
+      const img = page.locator('img[alt="logo"]');
+      await img.waitFor({ state: 'visible' });
+      const imgSrc = await img.getAttribute('src');
+      expect(imgSrc).toMatch(/^data:image\/png/);
+    });
   });
 
   test('should allow setting custom logo text through advanced settings', async ({
@@ -54,14 +53,13 @@ test.describe('custom branding', { tag: '@local-stateful-classic' }, () => {
   }) => {
     const imagePath = require.resolve('../assets/acme_text.png');
 
-    await pageObjects.customBrandingSettings.setCustomizedLogo(imagePath);
-
-    await pageObjects.customBrandingSettings.navigateToGlobalSettings();
-
-    const img = page.testSubj.locator('logoMark');
-    await img.waitFor({ state: 'visible' });
-    const imgSrc = await img.getAttribute('src');
-
-    expect(imgSrc).toMatch(/^data:image\/png/);
+    await test.step('custom logo text persists in advanced settings', async () => {
+      await pageObjects.customBrandingSettings.setCustomizedLogo(imagePath);
+      await pageObjects.customBrandingSettings.navigateToGlobalSettings();
+      const img = page.testSubj.locator('logoMark');
+      await img.waitFor({ state: 'visible' });
+      const imgSrc = await img.getAttribute('src');
+      expect(imgSrc).toMatch(/^data:image\/png/);
+    });
   });
 });

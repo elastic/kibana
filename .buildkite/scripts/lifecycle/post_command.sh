@@ -11,6 +11,7 @@ IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_
 if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   echo "--- Upload Artifacts"
   buildkite-agent artifact upload '**/.scout/test-artifacts/**/*.png'
+  buildkite-agent artifact upload '**/.scout/test-artifacts/vrt/**/*.json'
   buildkite-agent artifact upload '.scout/reports/scout-playwright-test-failures-*/**/*'
   buildkite-agent artifact upload '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
   buildkite-agent artifact upload 'target/junit/**/*'

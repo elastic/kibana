@@ -7,7 +7,7 @@
 
 import { EuiFieldTextWrapper, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { visualTest as test } from '../fixtures';
 
 test.describe('Index template wizard - Preview template', { tag: tags.stateful.classic }, () => {
   test.afterEach(async ({ esClient, log }) => {

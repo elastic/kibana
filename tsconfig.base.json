@@ -2006,6 +2006,8 @@
       "@kbn/scout-security/*": ["x-pack/solutions/security/packages/kbn-scout-security/*"],
       "@kbn/scout-synthtrace": ["src/platform/packages/shared/kbn-scout-synthtrace"],
       "@kbn/scout-synthtrace/*": ["src/platform/packages/shared/kbn-scout-synthtrace/*"],
+      "@kbn/scout-vrt": ["src/platform/packages/shared/kbn-scout-vrt"],
+      "@kbn/scout-vrt/*": ["src/platform/packages/shared/kbn-scout-vrt/*"],
       "@kbn/screenshot-mode-example-plugin": ["examples/screenshot_mode_example"],
       "@kbn/screenshot-mode-example-plugin/*": ["examples/screenshot_mode_example/*"],
       "@kbn/screenshot-mode-plugin": ["src/platform/plugins/shared/screenshot_mode"],

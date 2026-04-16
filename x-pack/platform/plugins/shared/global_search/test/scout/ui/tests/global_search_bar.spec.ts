@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { visualTest as test } from '../fixtures';
 import { KBN_ARCHIVES } from '../fixtures/constants';
 
 /**
@@ -29,8 +29,10 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
   });
 
   test('shows the popover on focus', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.focus();
-    expect(await pageObjects.globalSearch.isPopoverDisplayed()).toBe(true);
+    await test.step('focusing global search opens the search popover', async () => {
+      await pageObjects.globalSearch.focus();
+      expect(await pageObjects.globalSearch.isPopoverDisplayed()).toBe(true);
+    });
 
     await pageObjects.globalSearch.blur();
     expect(await pageObjects.globalSearch.isPopoverDisplayed()).toBe(false);
@@ -45,42 +47,50 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
   });
 
   test('shows a suggestion when searching for a term matching a type', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.searchFor('dashboard');
-    await expect(
-      pageObjects.globalSearch.resultLabels.filter({ hasText: 'type: dashboard' })
-    ).toBeVisible();
+    await test.step('dashboard searches show a dashboard type suggestion', async () => {
+      await pageObjects.globalSearch.searchFor('dashboard');
+      await expect(
+        pageObjects.globalSearch.resultLabels.filter({ hasText: 'type: dashboard' })
+      ).toBeVisible();
+    });
 
     await pageObjects.globalSearch.clickOnOption(0);
 
-    const searchTerm = await pageObjects.globalSearch.getFieldValue();
-    expect(searchTerm).toBe('type:dashboard');
+    await test.step('applying the dashboard suggestion narrows results to dashboards', async () => {
+      const searchTerm = await pageObjects.globalSearch.getFieldValue();
+      expect(searchTerm).toBe('type:dashboard');
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
-      'dashboard 1 (tag-2)',
-      'dashboard 2 (tag-3)',
-      'dashboard 3 (tag-1 and tag-3)',
-      'dashboard 4 (tag-special-chars)',
-    ]);
+      await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+        'dashboard 1 (tag-2)',
+        'dashboard 2 (tag-3)',
+        'dashboard 3 (tag-1 and tag-3)',
+        'dashboard 4 (tag-special-chars)',
+      ]);
+    });
   });
 
   test('shows a suggestion when searching for a term matching a tag name', async ({
     pageObjects,
   }) => {
-    await pageObjects.globalSearch.searchFor('tag-1');
-    await expect(
-      pageObjects.globalSearch.resultLabels.filter({ hasText: 'tag: tag-1' })
-    ).toBeVisible();
+    await test.step('tag searches show a matching tag suggestion', async () => {
+      await pageObjects.globalSearch.searchFor('tag-1');
+      await expect(
+        pageObjects.globalSearch.resultLabels.filter({ hasText: 'tag: tag-1' })
+      ).toBeVisible();
+    });
 
     await pageObjects.globalSearch.clickOnOption(0);
 
-    const searchTerm = await pageObjects.globalSearch.getFieldValue();
-    expect(searchTerm).toBe('tag:tag-1');
+    await test.step('applying the tag suggestion shows matching tagged results', async () => {
+      const searchTerm = await pageObjects.globalSearch.getFieldValue();
+      expect(searchTerm).toBe('tag:tag-1');
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
-      'Visualization 1 (tag-1)',
-      'Visualization 3 (tag-1 + tag-3)',
-      'dashboard 3 (tag-1 and tag-3)',
-    ]);
+      await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+        'Visualization 1 (tag-1)',
+        'Visualization 3 (tag-1 + tag-3)',
+        'dashboard 3 (tag-1 and tag-3)',
+      ]);
+    });
   });
 
   test('allows to filter by type', async ({ pageObjects }) => {
@@ -143,16 +153,18 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
   });
 
   test('allows to filter by multiple types and tags', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.searchFor(
-      'type:(dashboard OR visualization) tag:(tag-1 OR tag-3)'
-    );
+    await test.step('combined type and tag filters narrow the search results', async () => {
+      await pageObjects.globalSearch.searchFor(
+        'type:(dashboard OR visualization) tag:(tag-1 OR tag-3)'
+      );
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
-      'Visualization 1 (tag-1)',
-      'Visualization 3 (tag-1 + tag-3)',
-      'dashboard 2 (tag-3)',
-      'dashboard 3 (tag-1 and tag-3)',
-    ]);
+      await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+        'Visualization 1 (tag-1)',
+        'Visualization 3 (tag-1 + tag-3)',
+        'dashboard 2 (tag-3)',
+        'dashboard 3 (tag-1 and tag-3)',
+      ]);
+    });
   });
 
   test('allows to filter by term and type', async ({ pageObjects }) => {
@@ -176,9 +188,10 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
   });
 
   test('returns no results when searching for an unknown tag', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.searchFor('tag:unknown');
-
-    expect(await pageObjects.globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
+    await test.step('unknown tags show the no results placeholder', async () => {
+      await pageObjects.globalSearch.searchFor('tag:unknown');
+      expect(await pageObjects.globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
+    });
   });
 
   test('returns no results when searching for an unknown type', async ({ pageObjects }) => {

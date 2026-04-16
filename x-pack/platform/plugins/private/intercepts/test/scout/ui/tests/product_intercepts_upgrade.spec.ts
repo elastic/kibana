@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { visualTest as test } from '../fixtures';
 
 const UPGRADE_TRIGGER_DEF_PREFIX_ID = 'productUpgradeInterceptTrigger';
 const CONFIGURED_UPGRADE_INTERCEPT_INTERVAL = 7 * 24 * 60 * 60 * 1000;
@@ -36,15 +36,16 @@ test.describe('Product intercept for upgrade event', { tag: '@local-stateful-cla
     // Refresh the page at this point the configured interval condition will be met
     await page.reload();
 
-    await pageObjects.intercepts.waitForInterceptDisplayed(interceptUpgradeTriggerDefId);
-
-    // Verify the intercept is visible
     const interceptLocator = pageObjects.intercepts.getInterceptLocator(
       interceptUpgradeTriggerDefId
     );
-    await expect(interceptLocator).toBeVisible();
 
-    // Dismiss the intercept
+    await test.step('the upgrade intercept is displayed on the home page', async () => {
+      await pageObjects.intercepts.waitForInterceptDisplayed(interceptUpgradeTriggerDefId);
+      await expect(interceptLocator).toBeVisible();
+    });
+
     await pageObjects.intercepts.clickDismissButton();
+    await expect(interceptLocator).toBeHidden();
   });
 });

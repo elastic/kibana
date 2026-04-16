@@ -75,6 +75,7 @@
     "@kbn/search-index-documents",
     "@kbn/cloud-connect-plugin",
     "@kbn/shared-ux-column-presets",
+    "@kbn/scout-vrt",
   ],
   "exclude": ["target/**/*"]
 }

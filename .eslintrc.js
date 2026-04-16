@@ -2682,7 +2682,7 @@ module.exports = {
                   'playwright/**',
                 ],
                 message:
-                  "Platform tests should import from '@kbn/scout' (and '@kbn/scout-synthtrace' if you need synthtrace).",
+                  "Platform tests should import from '@kbn/scout', '@kbn/scout-vrt' (and '@kbn/scout-synthtrace' if you need synthtrace).",
               },
             ],
           },

@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { visualTest as test } from '../fixtures';
 import {
   getGlobalAdvancedSettingsAllRole,
   getGlobalAdvancedSettingsReadRole,
@@ -23,11 +23,13 @@ test.describe('security feature controls', { tag: '@local-stateful-classic' }, (
     page,
     pageObjects,
   }) => {
-    await kbnClient.uiSettings.replace({});
-    await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsAllRole());
-    await page.goto(kbnUrl.app('management'));
-    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
-    expect(navLinks).toContain('Stack Management');
+    await test.step('all privileges show the management nav link', async () => {
+      await kbnClient.uiSettings.replace({});
+      await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsAllRole());
+      await page.goto(kbnUrl.app('management'));
+      const navLinks = await pageObjects.collapsibleNav.getNavLinks();
+      expect(navLinks).toContain('Stack Management');
+    });
   });
 
   test('global advanced_settings all privileges - allows settings to be changed', async ({
@@ -37,13 +39,15 @@ test.describe('security feature controls', { tag: '@local-stateful-classic' }, (
     page,
     pageObjects,
   }) => {
-    await kbnClient.uiSettings.replace({});
-    await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsAllRole());
-    await page.goto(kbnUrl.get('/app/management/kibana/settings'));
-    await pageObjects.settings.waitForPageLoad();
-    await pageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
-    const advancedSetting = await pageObjects.settings.getAdvancedSettingValue('dateFormat:tz');
-    expect(advancedSetting).toBe('America/Phoenix');
+    await test.step('all privileges allow settings to be changed', async () => {
+      await kbnClient.uiSettings.replace({});
+      await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsAllRole());
+      await page.goto(kbnUrl.get('/app/management/kibana/settings'));
+      await pageObjects.settings.waitForPageLoad();
+      await pageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
+      const advancedSetting = await pageObjects.settings.getAdvancedSettingValue('dateFormat:tz');
+      expect(advancedSetting).toBe('America/Phoenix');
+    });
   });
 
   test(`global advanced_settings all privileges - doesn't show read-only badge`, async ({
@@ -53,11 +57,13 @@ test.describe('security feature controls', { tag: '@local-stateful-classic' }, (
     page,
     pageObjects,
   }) => {
-    await kbnClient.uiSettings.replace({});
-    await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsAllRole());
-    await page.goto(kbnUrl.get('/app/management/kibana/settings'));
-    await pageObjects.settings.waitForPageLoad();
-    await expect(pageObjects.settings.headerBadge()).toBeHidden();
+    await test.step(`all privileges do not show the read-only badge`, async () => {
+      await kbnClient.uiSettings.replace({});
+      await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsAllRole());
+      await page.goto(kbnUrl.get('/app/management/kibana/settings'));
+      await pageObjects.settings.waitForPageLoad();
+      await expect(pageObjects.settings.headerBadge()).toBeHidden();
+    });
   });
 
   test('global advanced_settings read-only privileges - shows Management navlink', async ({
@@ -67,11 +73,13 @@ test.describe('security feature controls', { tag: '@local-stateful-classic' }, (
     page,
     pageObjects,
   }) => {
-    await kbnClient.uiSettings.replace({});
-    await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsReadRole());
-    await page.goto(kbnUrl.app('management'));
-    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
-    expect(navLinks).toContain('Stack Management');
+    await test.step('read-only privileges show the management nav link', async () => {
+      await kbnClient.uiSettings.replace({});
+      await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsReadRole());
+      await page.goto(kbnUrl.app('management'));
+      const navLinks = await pageObjects.collapsibleNav.getNavLinks();
+      expect(navLinks).toContain('Stack Management');
+    });
   });
 
   test('global advanced_settings read-only privileges - does not allow settings to be changed', async ({
@@ -81,12 +89,14 @@ test.describe('security feature controls', { tag: '@local-stateful-classic' }, (
     page,
     pageObjects,
   }) => {
-    await kbnClient.uiSettings.replace({});
-    await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsReadRole());
-    await page.goto(kbnUrl.get('/app/management/kibana/settings'));
-    await pageObjects.settings.waitForPageLoad();
-    const isDisabled = await pageObjects.settings.isSettingDisabled('dateFormat:tz');
-    expect(isDisabled).toBe(true);
+    await test.step('read-only privileges do not allow settings to be changed', async () => {
+      await kbnClient.uiSettings.replace({});
+      await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsReadRole());
+      await page.goto(kbnUrl.get('/app/management/kibana/settings'));
+      await pageObjects.settings.waitForPageLoad();
+      const isDisabled = await pageObjects.settings.isSettingDisabled('dateFormat:tz');
+      expect(isDisabled).toBe(true);
+    });
   });
 
   test('global advanced_settings read-only privileges - shows read-only badge', async ({
@@ -96,15 +106,17 @@ test.describe('security feature controls', { tag: '@local-stateful-classic' }, (
     page,
     pageObjects,
   }) => {
-    await kbnClient.uiSettings.replace({});
-    await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsReadRole());
-    await page.goto(kbnUrl.get('/app/management/kibana/settings'));
-    await pageObjects.settings.waitForPageLoad();
-    await expect(pageObjects.settings.headerBadge()).toBeVisible();
-    await expect(pageObjects.settings.headerBadge()).toHaveAttribute(
-      'data-test-badge-label',
-      'Read only'
-    );
+    await test.step('read-only privileges show the read-only badge', async () => {
+      await kbnClient.uiSettings.replace({});
+      await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsReadRole());
+      await page.goto(kbnUrl.get('/app/management/kibana/settings'));
+      await pageObjects.settings.waitForPageLoad();
+      await expect(pageObjects.settings.headerBadge()).toBeVisible();
+      await expect(pageObjects.settings.headerBadge()).toHaveAttribute(
+        'data-test-badge-label',
+        'Read only'
+      );
+    });
   });
 
   test('no advanced_settings privileges - does not show Management navlink', async ({
@@ -112,11 +124,13 @@ test.describe('security feature controls', { tag: '@local-stateful-classic' }, (
     page,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(getNoAdvancedSettingsPrivilegesRole());
-    await page.gotoApp('discover');
-    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
-    expect(navLinks).toContain('Discover');
-    expect(navLinks).not.toContain('Stack Management');
+    await test.step('no privileges hide the management nav link', async () => {
+      await browserAuth.loginWithCustomRole(getNoAdvancedSettingsPrivilegesRole());
+      await page.gotoApp('discover');
+      const navLinks = await pageObjects.collapsibleNav.getNavLinks();
+      expect(navLinks).toContain('Discover');
+      expect(navLinks).not.toContain('Stack Management');
+    });
   });
 
   test('no advanced_settings privileges - does not allow navigation to advanced settings; shows "not found" error', async ({
@@ -124,10 +138,12 @@ test.describe('security feature controls', { tag: '@local-stateful-classic' }, (
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginWithCustomRole(getNoAdvancedSettingsPrivilegesRole());
-    await page.goto(kbnUrl.get('/app/management/kibana/settings'));
-    const notFoundContent = page.testSubj.locator('appNotFoundPageContent');
-    await notFoundContent.waitFor({ state: 'visible' });
-    await expect(notFoundContent).toBeVisible();
+    await test.step('no privileges show the not found page', async () => {
+      await browserAuth.loginWithCustomRole(getNoAdvancedSettingsPrivilegesRole());
+      await page.goto(kbnUrl.get('/app/management/kibana/settings'));
+      const notFoundContent = page.testSubj.locator('appNotFoundPageContent');
+      await notFoundContent.waitFor({ state: 'visible' });
+      await expect(notFoundContent).toBeVisible();
+    });
   });
 });

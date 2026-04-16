@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/router-utils'
   - '@kbn/split-button'
   - '@kbn/scout'
+  - '@kbn/scout-vrt'
 tags:
   - plugin
   - prod

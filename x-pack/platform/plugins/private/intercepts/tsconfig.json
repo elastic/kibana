@@ -30,7 +30,8 @@
     "@kbn/core-http-browser",
     "@kbn/logging-mocks",
     "@kbn/core-notifications-browser-internal",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/scout-vrt"
   ],
   "exclude": ["target/**/*"]
 }

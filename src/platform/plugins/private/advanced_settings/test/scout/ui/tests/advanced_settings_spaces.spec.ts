@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { visualTest as test } from '../fixtures';
 
 test.describe('spaces feature controls', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ kbnClient }) => {
@@ -37,17 +37,19 @@ test.describe('spaces feature controls', { tag: '@local-stateful-classic' }, () 
     page,
     pageObjects,
   }) => {
-    await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.app('home', { space: 'custom_space' }));
-    await page.evaluate(() => {
-      localStorage.setItem('home:welcome:show', 'false');
+    await test.step('enabled space shows the management nav link', async () => {
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.app('home', { space: 'custom_space' }));
+      await page.evaluate(() => {
+        localStorage.setItem('home:welcome:show', 'false');
+      });
+      await page.reload();
+      await page.testSubj.locator('homeApp').waitFor({
+        state: 'visible',
+      });
+      const navLinks = await pageObjects.collapsibleNav.getNavLinks();
+      expect(navLinks).toContain('Stack Management');
     });
-    await page.reload();
-    await page.testSubj.locator('homeApp').waitFor({
-      state: 'visible',
-    });
-    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
-    expect(navLinks).toContain('Stack Management');
   });
 
   test('space with no features disabled - allows settings to be changed', async ({
@@ -56,12 +58,14 @@ test.describe('spaces feature controls', { tag: '@local-stateful-classic' }, () 
     page,
     pageObjects,
   }) => {
-    await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.app('management/kibana/settings', { space: 'custom_space' }));
-    await pageObjects.settings.waitForPageLoad();
-    await pageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
-    const advancedSetting = await pageObjects.settings.getAdvancedSettingValue('dateFormat:tz');
-    expect(advancedSetting).toBe('America/Phoenix');
+    await test.step('enabled space allows settings to be changed', async () => {
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.app('management/kibana/settings', { space: 'custom_space' }));
+      await pageObjects.settings.waitForPageLoad();
+      await pageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
+      const advancedSetting = await pageObjects.settings.getAdvancedSettingValue('dateFormat:tz');
+      expect(advancedSetting).toBe('America/Phoenix');
+    });
   });
 
   test('space with Advanced Settings disabled - redirects to management home', async ({
@@ -69,10 +73,12 @@ test.describe('spaces feature controls', { tag: '@local-stateful-classic' }, () 
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.get('/s/custom_space_disabled/app/management/kibana/settings'));
-    const managementHome = page.testSubj.locator('managementHome');
-    await managementHome.waitFor({ state: 'visible' });
-    await expect(managementHome).toBeVisible();
+    await test.step('disabled space redirects to management home', async () => {
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.get('/s/custom_space_disabled/app/management/kibana/settings'));
+      const managementHome = page.testSubj.locator('managementHome');
+      await managementHome.waitFor({ state: 'visible' });
+      await expect(managementHome).toBeVisible();
+    });
   });
 });

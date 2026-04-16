@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test as base } from '@kbn/scout';
+import { test as scoutTest } from '@kbn/scout';
 import type {
   ScoutPage,
   ScoutTestFixtures,
@@ -14,6 +14,7 @@ import type {
 } from '@kbn/scout';
 import type { PageObjects } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
+import { visualTest as scoutVisualTest } from '@kbn/scout-vrt';
 import type { AbstractPageObject } from './page_objects/index_management_page';
 import { IndexManagement } from './page_objects/index_management_page';
 import { CUSTOM_ROLES } from './custom_roles';
@@ -25,7 +26,8 @@ export interface IndexManagementBrowserAuthFixture extends BrowserAuthFixture {
 }
 
 export const createTest = function <PageObjectsExtensions = Record<string, AbstractPageObject>>(
-  pageObjectClassMap: Record<string, PageObjectClass>
+  pageObjectClassMap: Record<string, PageObjectClass>,
+  baseTest: typeof scoutTest = scoutTest
 ) {
   type PageObjectsExtended = PageObjectsExtensions & PageObjects;
 
@@ -43,7 +45,7 @@ export const createTest = function <PageObjectsExtensions = Record<string, Abstr
     } as PageObjectsExtended;
   }
 
-  return base.extend<
+  return baseTest.extend<
     ScoutTestFixtures & {
       pageObjects: PageObjectsExtended;
     },
@@ -82,3 +84,10 @@ export const createTest = function <PageObjectsExtensions = Record<string, Abstr
 export const test = createTest<{ indexManagement: IndexManagement }>({
   indexManagement: IndexManagement,
 });
+
+export const visualTest = createTest<{ indexManagement: IndexManagement }>(
+  {
+    indexManagement: IndexManagement,
+  },
+  scoutVisualTest
+);

@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/licensing-types'
   - '@kbn/scout'
+  - '@kbn/scout-vrt'
 tags:
   - plugin
   - prod
