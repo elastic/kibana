@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreSetup } from '@kbn/core/public';
 import type { PublicStepRegistry } from '../step_registry';
+import { createRerankStepDefinition } from './search/rerank_step';
 
-export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
+export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry, core: CoreSetup) => {
   stepRegistry.register(() => import('./data/data_map_step').then((m) => m.dataMapStepDefinition));
   stepRegistry.register(() =>
     import('./data/data_dedupe_step').then((m) => m.dataDedupeStepDefinition)
@@ -45,4 +47,5 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(() =>
     import('./data/data_concat_step').then((m) => m.dataConcatStepDefinition)
   );
+  stepRegistry.register(createRerankStepDefinition(core));
 };

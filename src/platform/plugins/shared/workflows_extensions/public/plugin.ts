@@ -40,7 +40,7 @@ export class WorkflowsExtensionsPublicPlugin
     _core: CoreSetup,
     _plugins: WorkflowsExtensionsPublicPluginSetupDeps
   ): WorkflowsExtensionsPublicPluginSetup {
-    registerInternalStepDefinitions(this.stepRegistry);
+    registerInternalStepDefinitions(this.stepRegistry, _core);
     registerInternalTriggerDefinitions(this.triggerRegistry);
 
     return {

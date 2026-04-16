@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './ai';
-export * from './data';
-export * from './search';
+export { RerankStepTypeId, rerankStepCommonDefinition } from './rerank_step';
+export type { RerankInput, RerankConfig, RerankOutput } from './rerank_step';

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
-import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import type { CommonStepDefinition } from '../../step_registry/types';
 import { StepCategory } from '@kbn/workflows';
 
 /**
@@ -86,15 +88,15 @@ export const rerankStepCommonDefinition: CommonStepDefinition<
 > = {
   id: RerankStepTypeId,
   category: StepCategory.Elasticsearch,
-  label: i18n.translate('xpack.workplaceai.rerankStep.label', {
+  label: i18n.translate('workflowsExtensions.rerankStep.label', {
     defaultMessage: 'Rerank Results',
   }),
-  description: i18n.translate('xpack.workplaceai.rerankStep.description', {
+  description: i18n.translate('workflowsExtensions.rerankStep.description', {
     defaultMessage:
       'Rerank documents using a rerank inference endpoint for improved relevance ordering',
   }),
   documentation: {
-    details: i18n.translate('xpack.workplaceai.rerankStep.documentation.details', {
+    details: i18n.translate('workflowsExtensions.rerankStep.documentation.details', {
       defaultMessage: `The rerank step calls a rerank inference endpoint to reorder documents based on relevance to the provided text.
 
 **How it works:**

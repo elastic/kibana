@@ -23,6 +23,7 @@ import {
   dataRegexReplaceStepDefinition,
   dataStringifyJsonStepDefinition,
 } from './data';
+import { rerankStepDefinition } from './search';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
 
@@ -43,4 +44,5 @@ export const registerInternalStepDefinitions = (
   serverStepRegistry.register(aiClassifyStepDefinition(core));
   serverStepRegistry.register(aiPromptStepDefinition(core));
   serverStepRegistry.register(aiSummarizeStepDefinition(core));
+  serverStepRegistry.register(rerankStepDefinition);
 };
