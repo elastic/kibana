@@ -27,6 +27,7 @@ describe('Stack Connectors Plugin', () => {
       context = coreMock.createPluginInitializerContext();
       mockParseExperimentalConfigValue.mockReturnValue({
         ...experimentalFeaturesMock,
+        snykConnectorOn: true,
       });
 
       plugin = new StackConnectorsPlugin(context);
@@ -45,9 +46,9 @@ describe('Stack Connectors Plugin', () => {
       const specConnectorTypes = Object.values(connectorsSpecs);
       const builtInConnectorTypesCount = 18;
 
-      expect(actionsSetup.registerType).toHaveBeenCalledTimes(
-        builtInConnectorTypesCount + specConnectorTypes.length
-      );
+      const totalConnectorTypesCount = builtInConnectorTypesCount + specConnectorTypes.length;
+
+      expect(actionsSetup.registerType).toHaveBeenCalledTimes(totalConnectorTypesCount);
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({

@@ -11,12 +11,12 @@ import { type ConnectorSpec, connectorsSpecs } from '@kbn/connector-specs';
 import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
-const GATED_CONNECTOR_SPECS: Record<string, keyof ExperimentalFeatures> = {
+const EXPERIMENTAL_CONNECTOR_SPECS: Record<string, keyof ExperimentalFeatures> = {
   '.snyk': 'snykConnectorOn',
 };
 
 function isSpecEnabled(spec: ConnectorSpec, experimentalFeatures: ExperimentalFeatures): boolean {
-  const flag = GATED_CONNECTOR_SPECS[spec.metadata.id];
+  const flag = EXPERIMENTAL_CONNECTOR_SPECS[spec.metadata.id];
   return experimentalFeatures[flag] ?? true;
 }
 
