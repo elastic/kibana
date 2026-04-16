@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../utils/with_license_check', () => ({
-  withLicenseCheck: (handler: any) => handler,
+jest.mock('../utils/with_availability_check', () => ({
+  withAvailabilityCheck: (handler: any) => handler,
 }));
 jest.mock('../utils/route_error_handlers', () => ({
   handleRouteError: jest.fn(),
@@ -486,12 +486,12 @@ describe('Route privilege/ES-operation consistency', () => {
 
     const mockLogger = loggerMock.create();
 
-    const getCoreStart = jest.fn().mockResolvedValue({
+    const mockCoreStart = {
       ...coreMock.createStart(),
       elasticsearch: { client: { asInternalUser: mockEsClient } },
-    });
+    };
 
-    const getPluginsStart = jest.fn().mockResolvedValue({
+    const mockPluginsStart = {
       workflowsExecutionEngine: mockExecutionEngineStart,
       actions: {
         getUnsecuredActionsClient: jest.fn().mockResolvedValue({
@@ -507,15 +507,15 @@ describe('Route privilege/ES-operation consistency', () => {
       workflowsExtensions: {
         getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
       },
-    });
+    };
 
-    const service = new WorkflowsService(mockLogger, getCoreStart, getPluginsStart);
+    const startServices = jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]) as any;
+    const service = new WorkflowsService(startServices, mockLogger);
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // ── WorkflowsManagementApi ──
 
-    const getExecutionEngine = jest.fn().mockResolvedValue(mockExecutionEngineStart);
-    const api = new WorkflowsManagementApi(service, getExecutionEngine);
+    const api = new WorkflowsManagementApi(service, true);
 
     // ── Capturing mock router ──
 
@@ -549,11 +549,12 @@ describe('Route privilege/ES-operation consistency', () => {
     } as unknown as jest.Mocked<WorkflowsRouter>;
 
     const mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') } as any;
-    const mockAudit = new WorkflowManagementAuditLog({ getSecurityServiceStart: () => undefined });
+    const mockAudit = new WorkflowManagementAuditLog({ service });
 
     const deps: RouteDependencies = {
       router: mockRouter,
       api: api as any,
+      service: service,
       logger: mockLogger,
       spaces: mockSpaces,
       audit: mockAudit,

@@ -1742,12 +1742,12 @@ export class WorkflowsService {
   }
 
   public async getExecutionLogs(params: ExecutionLogsParams): Promise<LogSearchResult> {
-    this.ensureInitialized();
+    await this.ensureInitialized();
     return this.workflowsExecutionEngine.workflowEventLoggerService.getExecutionLogs(params);
   }
 
   public async getStepLogs(params: StepLogsParams): Promise<LogSearchResult> {
-    this.ensureInitialized();
+    await this.ensureInitialized();
     return this.workflowsExecutionEngine.workflowEventLoggerService.getStepLogs(params);
   }
 

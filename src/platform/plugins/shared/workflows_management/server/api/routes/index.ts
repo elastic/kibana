@@ -23,9 +23,9 @@ export function defineRoutes(
   api: WorkflowsManagementApi,
   logger: Logger,
   spaces: SpacesServiceStart,
-  services: WorkflowsService
+  service: WorkflowsService
 ) {
-  const audit = new WorkflowManagementAuditLog({ services });
+  const audit = new WorkflowManagementAuditLog({ service });
 
   const deps: RouteDependencies = {
     router,
@@ -33,7 +33,7 @@ export function defineRoutes(
     logger,
     spaces,
     audit,
-    services,
+    service,
   };
 
   registerWorkflowRoutes(deps);

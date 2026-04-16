@@ -17,7 +17,7 @@ import type { WorkflowsService } from '../workflows_management_service';
 export interface RouteDependencies {
   router: WorkflowsRouter;
   api: WorkflowsManagementApi;
-  services: WorkflowsService;
+  service: WorkflowsService;
   logger: Logger;
   spaces: SpacesServiceStart;
   audit: WorkflowManagementAuditLog;

@@ -67,7 +67,7 @@ function createEvent(
 }
 
 interface WorkflowManagementAuditLogDeps {
-  services: WorkflowsService;
+  service: WorkflowsService;
 }
 
 /**
@@ -79,7 +79,7 @@ export class WorkflowManagementAuditLog {
   private security?: SecurityServiceStart;
 
   constructor(private readonly deps: WorkflowManagementAuditLogDeps) {
-    this.deps.services.getCoreStart().then((coreStart) => {
+    this.deps.service.getCoreStart().then((coreStart) => {
       this.security = coreStart.security; // security service is initialized
     });
   }

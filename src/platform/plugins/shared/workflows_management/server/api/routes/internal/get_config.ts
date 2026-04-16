@@ -12,7 +12,7 @@ import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetConfigRoute({ router, services }: RouteDependencies) {
+export function registerGetConfigRoute({ router, service }: RouteDependencies) {
   router.versioned
     .get({
       path: '/internal/workflows/config',
@@ -25,7 +25,7 @@ export function registerGetConfigRoute({ router, services }: RouteDependencies) 
         validate: false,
       },
       withAvailabilityCheck(async (_context, _request, response) => {
-        const engine = await services.getWorkflowsExecutionEngine();
+        const engine = await service.getWorkflowsExecutionEngine();
         return response.ok({
           body: {
             eventDrivenExecutionEnabled: engine.isEventDrivenExecutionEnabled(),

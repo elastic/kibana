@@ -9,12 +9,10 @@
 
 import pLimit from 'p-limit';
 import { v4 as generateUuid } from 'uuid';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowDetailDto, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import type {
-  EventChainContext,
-  TriggerEventHandlerParams,
-} from '@kbn/workflows-extensions/server';
+import type { EventChainContext } from '@kbn/workflows-extensions/server';
+import type { TriggerEventHandlerParams } from '@kbn/workflows-extensions/server/emit_event';
 import { resolveMatchingWorkflowSubscriptions } from './resolve_workflow_subscriptions';
 import {
   createEmptyTriggerScheduleStats,
@@ -92,7 +90,7 @@ async function scheduleMatchingWorkflows(
   spaceId: string,
   eventParams: ScheduleEventParams,
   maxEventChainDepth: number,
-  request: TriggerEventHandlerParams['request'],
+  request: KibanaRequest,
   logger: Logger
 ): Promise<TriggerEventScheduleStats> {
   if (workflows.length === 0) {
@@ -189,19 +187,23 @@ export function createTriggerEventHandler({
 }: CreateTriggerEventHandlerParams): (params: TriggerEventHandlerParams) => Promise<void> {
   const telemetryClient = new WorkflowsManagementTelemetryClient({ logger, workflowsService });
 
-  const triggerEventsClientPromise = new Promise<TriggerEventsDataStreamClient>(async (resolve) => {
-    try {
-      const { dataStreams } = await workflowsService.getCoreStart();
-      const client = await initializeTriggerEventsClient(dataStreams);
-      resolve(client);
-    } catch (error) {
-      logger.warn(
-        `Failed to initialize trigger events data stream client: ${
-          error instanceof Error ? error.message : String(error)
-        }. Event audit logging will be skipped.`
-      );
+  const triggerEventsClientPromise = new Promise<TriggerEventsDataStreamClient>(
+    async (resolve, reject) => {
+      try {
+        const { dataStreams } = await workflowsService.getCoreStart();
+        const client = await initializeTriggerEventsClient(dataStreams);
+        resolve(client);
+      } catch (error) {
+        reject(
+          new Error(
+            `Failed to initialize trigger events data stream client: ${
+              error instanceof Error ? error.message : String(error)
+            }. Event audit logging will be skipped.`
+          )
+        );
+      }
     }
-  });
+  );
 
   return async (params: TriggerEventHandlerParams): Promise<void> => {
     const triggerEventsClient = await triggerEventsClientPromise;

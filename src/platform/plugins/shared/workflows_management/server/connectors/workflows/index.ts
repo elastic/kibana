@@ -120,7 +120,7 @@ function getWorkflowsConnectorTypeArgs(
       inputs: Record<string, unknown>,
       triggeredBy: TriggerType
     ) => {
-      if (!api) {
+      if (!workflowsManagementApi) {
         throw new Error('Workflows management API not initialized');
       }
 
