@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { spaceTest, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { applyLensInlineEditorAndWaitClosed } from '../fixtures';
@@ -14,6 +15,14 @@ const INITIAL_ESQL_QUERY = `FROM kibana_sample_data_logs
 
 const WILDCARD_ESQL_QUERY = `FROM kibana_sample_data_log*
   | STATS count = COUNT(*) BY \`Over time\` = TBUCKET(50), agent.keyword`;
+
+async function setEsqlQueryAndRun(page: ScoutPage, query: string) {
+  const codeEditor = new KibanaCodeEditorWrapper(page);
+  await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+  await codeEditor.setCodeEditorValue(query);
+  await page.testSubj.click('ESQLEditor-run-query-button');
+  await page.locator('.echCanvasRenderer').waitFor({ state: 'visible', timeout: 30_000 });
+}
 
 spaceTest.describe(
   'Lens ES|QL filter data view selector',
@@ -55,12 +64,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('set the ESQL query and apply', async () => {
-          const codeEditor = new KibanaCodeEditorWrapper(page);
-          await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-          await codeEditor.setCodeEditorValue(WILDCARD_ESQL_QUERY);
-
-          await page.testSubj.click('ESQLEditor-run-query-button');
-          await page.locator('.echCanvasRenderer').waitFor({ state: 'visible', timeout: 30_000 });
+          await setEsqlQueryAndRun(page, WILDCARD_ESQL_QUERY);
         });
 
         await spaceTest.step('apply and close the inline editor', async () => {
@@ -137,11 +141,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('set the initial ESQL query and apply', async () => {
-          const codeEditor = new KibanaCodeEditorWrapper(page);
-          await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-          await codeEditor.setCodeEditorValue(INITIAL_ESQL_QUERY);
-          await page.testSubj.click('ESQLEditor-run-query-button');
-          await page.locator('.echCanvasRenderer').waitFor({ state: 'visible', timeout: 30_000 });
+          await setEsqlQueryAndRun(page, INITIAL_ESQL_QUERY);
         });
 
         await spaceTest.step('apply and close the inline editor', async () => {
@@ -158,11 +158,7 @@ spaceTest.describe(
           await dashboard.openInlineEditor(embeddableId);
           await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
 
-          const codeEditor = new KibanaCodeEditorWrapper(page);
-          await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-          await codeEditor.setCodeEditorValue(WILDCARD_ESQL_QUERY);
-          await page.testSubj.click('ESQLEditor-run-query-button');
-          await page.locator('.echCanvasRenderer').waitFor({ state: 'visible', timeout: 30_000 });
+          await setEsqlQueryAndRun(page, WILDCARD_ESQL_QUERY);
         });
 
         await spaceTest.step('apply and close the inline editor', async () => {
