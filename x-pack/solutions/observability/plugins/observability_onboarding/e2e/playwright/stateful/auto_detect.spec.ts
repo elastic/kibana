@@ -12,9 +12,8 @@ import { HostDetailsPage } from './pom/pages/host_details.page';
 import { assertEnv } from '../lib/assert_env';
 import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_helpers';
 
-test.beforeEach(async ({ page, onboardingHomePage }) => {
+test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
-  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
 test('Auto-detect logs and metrics', async ({

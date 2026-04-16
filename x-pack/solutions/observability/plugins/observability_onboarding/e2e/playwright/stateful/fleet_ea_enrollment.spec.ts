@@ -10,9 +10,8 @@ import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 
-test.beforeEach(async ({ page, onboardingHomePage }) => {
+test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/fleet/agents`);
-  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
 test('Fleet Elastic Agent enrollment flow', async ({ page, fleetAgentsOverviewPage }) => {

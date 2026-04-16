@@ -11,9 +11,8 @@ import { expect } from '@playwright/test';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 
-test.beforeEach(async ({ page, onboardingHomePage }) => {
+test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
-  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
 test('Firehose', async ({ page, onboardingHomePage, firehoseFlowPage }) => {

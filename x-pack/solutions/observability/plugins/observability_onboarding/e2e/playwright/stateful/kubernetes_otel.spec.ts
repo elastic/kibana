@@ -18,9 +18,8 @@ import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_he
  * to spin up a local k8s cluster with the required resources.
  */
 
-test.beforeEach(async ({ page, onboardingHomePage }) => {
+test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
-  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
 /**
