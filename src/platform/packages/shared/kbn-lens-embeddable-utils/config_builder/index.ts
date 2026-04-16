@@ -41,8 +41,11 @@ export type {
 } from './types';
 
 export {
-  lensApiConfigSchema,
-  lensApiConfigSchemaNoESQL,
-  extendLensApiConfigSchema,
-} from './schema';
-export type { LensApiConfig, LensApiConfigESQL, LensApiConfigNoESQL } from './schema';
+  isLensESQLConfig,
+  isLensDSLConfig,
+  isLensAPIFormat,
+  isLensLegacyFormat,
+  isLensLegacyAttributes,
+} from './utils';
+
+export * from './schema';

@@ -225,31 +225,12 @@ export function extendLensApiConfigSchema<T extends Props>(
   return baseSchema.extends(props, options as any).toType();
 }
 
-export type { MetricConfig, metricConfigSchemaNoESQL } from './charts/metric';
-export type { LegacyMetricConfig, legacyMetricConfigSchemaNoESQL } from './charts/legacy_metric';
-export type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from './charts/xy';
-export type { GaugeConfig, gaugeConfigSchemaNoESQL } from './charts/gauge';
-export type { HeatmapConfig, heatmapConfigSchemaNoESQL } from './charts/heatmap';
-export type { TagcloudConfig, TagcloudConfigNoESQL, TagcloudConfigESQL } from './charts/tagcloud';
-export type {
-  RegionMapConfig,
-  RegionMapConfigNoESQL,
-  RegionMapConfigESQL,
-} from './charts/region_map';
-export type {
-  DatatableConfig,
-  DatatableConfigNoESQL,
-  DatatableConfigESQL,
-} from './charts/datatable';
-export { tagcloudConfigSchema } from './charts/tagcloud';
-export { regionMapConfigSchema } from './charts/region_map';
-export { datatableConfigSchema } from './charts/datatable';
-
 export type {
   LensApiFieldMetricOrFormulaOperation,
   LensApiAllMetricOrFormulaOperations,
 } from './metric_ops';
 export type { LensApiBucketOperations } from './bucket_ops';
+export type { XYLayer } from './charts/xy';
 
 export type NarrowByType<T, U> = T extends { type?: U } ? T : never;
 
@@ -257,3 +238,83 @@ export type LensApiAllOperations =
   | LensApiAllMetricOrFormulaOperations
   | LensApiBucketOperations
   | LensApiStaticValueOperation;
+
+export {
+  // Combined schemas
+  metricConfigSchema,
+  gaugeConfigSchema,
+  tagcloudConfigSchema,
+  xyConfigSchema,
+  regionMapConfigSchema,
+  heatmapConfigSchema,
+  datatableConfigSchema,
+  pieConfigSchema,
+  treemapConfigSchema,
+  waffleConfigSchema,
+  mosaicConfigSchema,
+  // ESQL schemas
+  metricConfigSchemaESQL,
+  gaugeConfigSchemaESQL,
+  tagcloudConfigSchemaESQL,
+  xyConfigSchemaESQL,
+  regionMapConfigSchemaESQL,
+  heatmapConfigSchemaESQL,
+  datatableConfigSchemaESQL,
+  pieConfigSchemaESQL,
+  treemapConfigSchemaESQL,
+  waffleConfigSchemaESQL,
+  mosaicConfigSchemaESQL,
+  // DSL schemas
+  metricConfigSchemaNoESQL,
+  gaugeConfigSchemaNoESQL,
+  tagcloudConfigSchemaNoESQL,
+  xyConfigSchemaNoESQL,
+  regionMapConfigSchemaNoESQL,
+  heatmapConfigSchemaNoESQL,
+  datatableConfigSchemaNoESQL,
+  pieConfigSchemaNoESQL,
+  treemapConfigSchemaNoESQL,
+  waffleConfigSchemaNoESQL,
+  mosaicConfigSchemaNoESQL,
+};
+
+export type {
+  // Combined schemas
+  MetricConfig,
+  LegacyMetricConfig,
+  GaugeConfig,
+  TagcloudConfig,
+  XYConfig,
+  RegionMapConfig,
+  HeatmapConfig,
+  DatatableConfig,
+  PieConfig,
+  TreemapConfig,
+  WaffleConfig,
+  MosaicConfig,
+  // ESQL schemas
+  MetricConfigESQL,
+  GaugeConfigESQL,
+  TagcloudConfigESQL,
+  XYConfigESQL,
+  RegionMapConfigESQL,
+  HeatmapConfigESQL,
+  DatatableConfigESQL,
+  PieConfigESQL,
+  TreemapConfigESQL,
+  WaffleConfigESQL,
+  MosaicConfigESQL,
+  // DSL schemas
+  MetricConfigNoESQL,
+  LegacyMetricConfigNoESQL,
+  GaugeConfigNoESQL,
+  TagcloudConfigNoESQL,
+  XYConfigNoESQL,
+  RegionMapConfigNoESQL,
+  HeatmapConfigNoESQL,
+  DatatableConfigNoESQL,
+  PieConfigNoESQL,
+  TreemapConfigNoESQL,
+  WaffleConfigNoESQL,
+  MosaicConfigNoESQL,
+};

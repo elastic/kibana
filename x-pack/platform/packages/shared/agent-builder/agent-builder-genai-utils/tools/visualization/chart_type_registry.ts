@@ -6,17 +6,19 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { metricConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
-import { gaugeConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
-import { tagcloudConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
-import { xyConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
-import { regionMapConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
-import { heatmapConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
-import { datatableConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/datatable';
-import { pieConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/pie';
-import { treemapConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/treemap';
-import { waffleConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/waffle';
-import { mosaicConfigSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/mosaic';
+import {
+  metricConfigSchemaESQL,
+  gaugeConfigSchemaESQL,
+  tagcloudConfigSchemaESQL,
+  xyConfigSchemaESQL,
+  regionMapConfigSchemaESQL,
+  heatmapConfigSchemaESQL,
+  datatableConfigSchemaESQL,
+  pieConfigSchemaESQL,
+  treemapConfigSchemaESQL,
+  waffleConfigSchemaESQL,
+  mosaicConfigSchemaESQL,
+} from '@kbn/lens-embeddable-utils';
 
 interface ChartTypeRegistryEntry {
   schema: { validate: (config: unknown) => any; getSchema: () => any };

@@ -7,53 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  LensConfigBuilder,
-  lensApiConfigSchema,
-  lensApiConfigSchemaNoESQL,
-  extendLensApiConfigSchema,
-} from './config_builder';
-
-export type {
-  LensApiConfig,
-  LensApiConfigESQL,
-  LensApiConfigNoESQL,
-  DataViewsCommon,
-  LensAttributes,
-  ChartType,
-  TimeRange,
-  LensLayerQuery,
-  LensDataviewDataset,
-  LensDatatableDataset,
-  LensESQLDataset,
-  LensDataset,
-  LensBaseConfig,
-  LensConfig,
-  LensConfigOptions,
-  LensReferenceLineLayer,
-  LensAnnotationLayer,
-  LensGaugeConfig,
-  LensHeatmapConfig,
-  LensMetricConfig,
-  LensMosaicConfig,
-  LensPieConfig,
-  LensRegionMapConfig,
-  LensTableConfig,
-  LensTagCloudConfig,
-  LensTreeMapConfig,
-  LensXYConfig,
-  LensSeriesLayer,
-  LensBaseLayer,
-  LensXYConfigBase,
-  LensBreakdownConfig,
-  LensYBoundsConfig,
-} from './config_builder';
-export {
-  isLensESQLConfig,
-  isLensDSLConfig,
-  isLensAPIFormat,
-  isLensLegacyFormat,
-  isLensLegacyAttributes,
-} from './config_builder/utils';
+export * from './config_builder';
 
 export { stripUndefined } from './config_builder/transforms/charts/utils';
