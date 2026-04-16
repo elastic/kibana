@@ -25,7 +25,7 @@ const validationOutcomeCache = new Map<
 // However, long TTL has a bad impact on UX, showing stale data should be avoided.
 const CACHE_TTL_MS = 30 * 1000; // 30 seconds
 
-function fingerprintFromValues(values?: StepSelectionValues): string | undefined {
+function getFingerprintFromValues(values?: StepSelectionValues): string | undefined {
   if (!values) {
     return undefined;
   }
@@ -43,7 +43,7 @@ function getSearchCacheKey(
   propertyKey: string,
   values?: StepSelectionValues
 ): string {
-  const fingerprint = fingerprintFromValues(values);
+  const fingerprint = getFingerprintFromValues(values);
   if (fingerprint) {
     return `${stepType}:${scope}:${propertyKey}:search:${fingerprint}`;
   }
@@ -81,18 +81,6 @@ export function getCachedSearchOption(
   return null;
 }
 
-function selectionValuesFingerprint(values: StepSelectionValues | undefined): string {
-  if (!values) {
-    return '';
-  }
-  const hasConfig = Object.keys(values.config).length > 0;
-  const hasInput = Object.keys(values.input).length > 0;
-  if (!hasConfig && !hasInput) {
-    return '';
-  }
-  return JSON.stringify(values);
-}
-
 function stableSerializePropertyValue(value: unknown): string {
   try {
     return JSON.stringify(value);
@@ -103,7 +91,7 @@ function stableSerializePropertyValue(value: unknown): string {
 
 export function getCustomPropertyValidationOutcomeCacheKey(item: CustomPropertyItem): string {
   const { stepType, scope, propertyKey, values } = item.context;
-  const fp = selectionValuesFingerprint(values);
+  const fp = getFingerprintFromValues(values) ?? '';
   const valueKey = stableSerializePropertyValue(item.propertyValue);
   return `${item.stepId}\0${stepType}\0${scope}\0${propertyKey}\0${fp}\0${valueKey}`;
 }
