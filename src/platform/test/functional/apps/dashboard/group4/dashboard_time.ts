@@ -17,10 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
   const pieChart = getService('pieChart');
   const browser = getService('browser');
-  const retry = getService('retry');
   const logger = getService('log');
 
-  describe('dashboard time', () => {
+  describe.only('dashboard time', () => {
     before(async function () {
       await dashboard.initTests();
       await dashboard.preserveCrossAppState();
@@ -68,12 +67,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         const dashboardStateBefore = await browser.getSessionStorageItem('dashboardStateManagerPanels');
-        this.log.warn('dashboard backup session state (before)', dashboardStateBefore);
+        logger.debug('dashboard backup session state (before)', dashboardStateBefore);
 
         await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
 
         const dashboardStateAfter = await browser.getSessionStorageItem('dashboardStateManagerPanels');
-        this.log.warn('dashboard backup session state (after loading from landing page)', dashboardStateAfter);
+        logger.debug('dashboard backup session state (after loading from landing page)', dashboardStateAfter);
 
 
         await dashboard.loadSavedDashboard(dashboardName);
