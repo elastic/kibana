@@ -31,9 +31,9 @@ export enum AttackDiscoveryEventTypes {
   TroubleshootWithAiClicked = 'Attack Discovery Troubleshoot With AI Clicked',
 }
 
-export type AttackDiscoverySettingsTab = 'monitoring' | 'settings' | 'schedule';
+export type AttackDiscoverySettingsTab = 'settings' | 'schedule';
 
-export type AttackDiscoveryAlertRetrievalMode = 'custom_query' | 'disabled' | 'esql' | 'provided';
+export type AttackDiscoveryAlertRetrievalMode = 'custom_only' | 'custom_query' | 'esql';
 
 export type AttackDiscoveryQueryMode = 'custom_query' | 'esql';
 
@@ -54,8 +54,8 @@ interface AttackDiscoverySettingsTabChangedParams {
 }
 
 interface AttackDiscoveryWorkflowConfigParams {
+  alert_retrieval_mode: AttackDiscoveryAlertRetrievalMode;
   custom_retrieval_workflow_count: number;
-  default_alert_retrieval_mode: AttackDiscoveryAlertRetrievalMode;
   query_mode: AttackDiscoveryQueryMode;
   uses_default_validation: boolean;
 }

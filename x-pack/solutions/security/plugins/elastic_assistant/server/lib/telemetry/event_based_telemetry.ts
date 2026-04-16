@@ -257,7 +257,7 @@ interface AttackDiscoverySuccessTelemetryEvent {
   configuredAlertsCount: number;
   custom_retrieval_workflow_count?: number;
   dateRangeDuration: number;
-  default_alert_retrieval_mode?: string;
+  alert_retrieval_mode?: string;
   discoveriesGenerated: number;
   duplicatesDroppedCount?: number;
   durationMs: number;
@@ -320,10 +320,10 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySucces
         optional: false,
       },
     },
-    default_alert_retrieval_mode: {
+    alert_retrieval_mode: {
       type: 'keyword',
       _meta: {
-        description: 'The default alert retrieval mode (custom_query/esql/disabled)',
+        description: 'The alert retrieval mode (custom_query/esql/custom_only/provided)',
         optional: true,
       },
     },
@@ -407,7 +407,7 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySucces
     trigger: {
       type: 'keyword',
       _meta: {
-        description: 'What triggered the generation (manual/scheduled)',
+        description: 'What triggered the generation (manual/schedule/workflow/unknown)',
         optional: true,
       },
     },
@@ -503,7 +503,7 @@ export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<AttackDiscoveryErrorTel
     trigger: {
       type: 'keyword',
       _meta: {
-        description: 'What triggered the generation (manual/scheduled)',
+        description: 'What triggered the generation (manual/schedule/workflow/unknown)',
         optional: true,
       },
     },
