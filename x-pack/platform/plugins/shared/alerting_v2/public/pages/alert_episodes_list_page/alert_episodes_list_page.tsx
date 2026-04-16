@@ -50,6 +50,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 
 const PAGE_SIZE = 1000;
@@ -312,6 +313,14 @@ export const AlertEpisodesListPage = () => {
                   actions: (props) => {
                     const episodeId = props.row.flattened['episode.id'] as string;
                     const groupHash = props.row.flattened.group_hash as string;
+                    const ruleId = props.row.flattened['rule.id'] as string;
+                    const discoverHref = getDiscoverHrefForRuleAndEpisodeTimestamp({
+                      share: services.share,
+                      capabilities: services.application.capabilities,
+                      uiSettings: services.uiSettings,
+                      ruleEsql: rulesCache[ruleId]?.evaluation?.query?.base,
+                      episodeIsoTimestamp: props.row.flattened['@timestamp'] as string,
+                    });
 
                     return (
                       <AlertEpisodeActions
@@ -320,6 +329,8 @@ export const AlertEpisodesListPage = () => {
                         episodeAction={episodeActionsMap?.get(episodeId)}
                         groupAction={groupActionsMap?.get(groupHash)}
                         http={services.http}
+                        openInDiscoverHref={discoverHref}
+                        expressions={services.expressions}
                         viewDetailsHref={
                           episodeId
                             ? services.http.basePath.prepend(paths.alertEpisodeDetails(episodeId))

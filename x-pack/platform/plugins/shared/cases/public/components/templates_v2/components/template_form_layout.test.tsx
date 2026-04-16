@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import type { YamlEditorFormValues } from './template_form';
@@ -19,6 +19,25 @@ jest.mock('./template_form', () => ({
 
 jest.mock('./template_preview', () => ({
   TemplatePreview: () => <div data-test-subj="template-preview" />,
+}));
+
+const capturedEditorLayoutProps: {
+  onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+} = {};
+
+jest.mock('./template_editor_layout', () => ({
+  TemplateEditorLayout: (props: {
+    onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+    [key: string]: unknown;
+  }) => {
+    capturedEditorLayoutProps.onFieldDefaultChange = props.onFieldDefaultChange;
+    return (
+      <>
+        <div data-test-subj="template-yaml-editor" />
+        <div data-test-subj="template-preview" />
+      </>
+    );
+  },
 }));
 
 jest.mock('../../../common/navigation', () => ({
@@ -247,5 +266,202 @@ describe('TemplateFormLayout', () => {
     render(<TestWrapper onCreate={mockOnCreate} />);
 
     expect(screen.getByText(i18n.BACK_TO_TEMPLATES)).toBeInTheDocument();
+  });
+});
+
+describe('handleFieldDefaultChange', () => {
+  const mockOnCreate = jest.fn();
+  const mockHandleReset = jest.fn();
+  let onYamlChange: jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedEditorLayoutProps.onFieldDefaultChange = undefined;
+    mockOnCreate.mockResolvedValue(undefined);
+    onYamlChange = jest.fn();
+  });
+
+  const setupWithYaml = (yaml: string) => {
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: yaml,
+      onChange: onYamlChange,
+      handleReset: mockHandleReset,
+      isSaving: false,
+      isSaved: false,
+    });
+    render(<TestWrapper onCreate={mockOnCreate} />);
+  };
+
+  const checkboxYaml = `name: Test
+fields:
+  - name: systems
+    control: CHECKBOX_GROUP
+    type: keyword
+    metadata:
+      options:
+        - api
+        - ui
+        - database
+`;
+
+  it('writes a YAML array when control is CHECKBOX_GROUP', () => {
+    setupWithYaml(checkboxYaml);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.(
+        'systems',
+        '["api","database"]',
+        'CHECKBOX_GROUP'
+      );
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('- api');
+    expect(updatedYaml).toContain('- database');
+    expect(updatedYaml).not.toContain('["api","database"]');
+  });
+
+  it('writes an empty YAML sequence for an empty CHECKBOX_GROUP selection', () => {
+    setupWithYaml(checkboxYaml);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('systems', '[]', 'CHECKBOX_GROUP');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('default: []');
+  });
+
+  it('falls back to empty array when CHECKBOX_GROUP value is invalid JSON', () => {
+    setupWithYaml(checkboxYaml);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('systems', 'not-json', 'CHECKBOX_GROUP');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('default: []');
+  });
+
+  it('does not call onYamlChange when the field does not exist in the YAML', () => {
+    setupWithYaml(checkboxYaml);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('nonexistent', '["api"]', 'CHECKBOX_GROUP');
+    });
+
+    expect(onYamlChange).not.toHaveBeenCalled();
+  });
+
+  it('parses the value as a number for INPUT_NUMBER control', () => {
+    setupWithYaml(`name: Test
+fields:
+  - name: score
+    control: INPUT_NUMBER
+    type: integer
+`);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('score', '42', 'INPUT_NUMBER');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('default: 42');
+    expect(updatedYaml).not.toContain("default: '42'");
+  });
+
+  it('removes the default key when INPUT_NUMBER value is cleared to empty string', () => {
+    setupWithYaml(`name: Test
+fields:
+  - name: score
+    control: INPUT_NUMBER
+    type: integer
+    metadata:
+      default: 42
+`);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('score', '', 'INPUT_NUMBER');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).not.toContain('default');
+  });
+
+  it('trims whitespace from INPUT_NUMBER value before parsing', () => {
+    setupWithYaml(`name: Test
+fields:
+  - name: score
+    control: INPUT_NUMBER
+    type: integer
+`);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('score', '  42  ', 'INPUT_NUMBER');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('default: 42');
+  });
+
+  it('trims whitespace from INPUT_TEXT value', () => {
+    setupWithYaml(`name: Test
+fields:
+  - name: summary
+    control: INPUT_TEXT
+    type: keyword
+`);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('summary', '  hello  ', 'INPUT_TEXT');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('default: hello');
+  });
+
+  it('passes the string value unchanged for INPUT_TEXT control', () => {
+    setupWithYaml(`name: Test
+fields:
+  - name: summary
+    control: INPUT_TEXT
+    type: keyword
+`);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('summary', 'my default text', 'INPUT_TEXT');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('default: my default text');
+  });
+
+  it('passes the string value unchanged for RADIO_GROUP control', () => {
+    setupWithYaml(`name: Test
+fields:
+  - name: env
+    control: RADIO_GROUP
+    type: keyword
+    metadata:
+      options:
+        - staging
+        - production
+`);
+
+    act(() => {
+      capturedEditorLayoutProps.onFieldDefaultChange?.('env', 'production', 'RADIO_GROUP');
+    });
+
+    expect(onYamlChange).toHaveBeenCalledTimes(1);
+    const updatedYaml = onYamlChange.mock.calls[0][0] as string;
+    expect(updatedYaml).toContain('default: production');
   });
 });

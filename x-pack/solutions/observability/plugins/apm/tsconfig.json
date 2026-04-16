@@ -78,6 +78,7 @@
     "@kbn/logging-mocks",
     "@kbn/chart-icons",
     "@kbn/observability-shared-plugin",
+    "@kbn/observability-utils-server",
     "@kbn/ml-anomaly-utils",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/ui-actions-plugin",
@@ -152,6 +153,8 @@
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
     "@kbn/shared-ux-column-presets",
+    "@kbn/cps",
+    "@kbn/cps-utils",
   ],
   "exclude": ["target/**/*"]
 }

@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Update Saved Query Schema
+  title: Update Pack Schema
   version: '2023-10-31'
 paths: {}
 components:
@@ -23,10 +23,54 @@ components:
         queries:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
     UpdatePacksResponse:
+        description: 'The response for updating a pack.'
         type: object
-        properties: { }
+        properties:
+          data:
+            description: 'The updated pack.'
+            type: object
+            properties:
+              saved_object_id:
+                description: 'The saved object ID of the pack.'
+                type: string
+              name:
+                description: 'The pack name.'
+                type: string
+              description:
+                description: 'The pack description.'
+                type: string
+              queries:
+                description: 'The queries in the pack.'
+                type: object
+              version:
+                description: 'The pack version.'
+                type: integer
+              enabled:
+                description: 'Whether the pack is enabled.'
+                type: boolean
+              created_at:
+                description: 'The creation timestamp.'
+                type: string
+              created_by:
+                description: 'The user who created the pack.'
+                type: string
+              updated_at:
+                description: 'The last update timestamp.'
+                type: string
+              updated_by:
+                description: 'The user who last updated the pack.'
+                type: string
+              policy_ids:
+                description: 'A list of agent policy IDs associated with the pack.'
+                type: array
+                items:
+                  type: string
+              shards:
+                description: 'Shard configuration for the pack.'
+                type: object
         example:
           data:
+            saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"
             name: updated_my_pack_name
             description: My pack
             queries:
@@ -39,14 +83,14 @@ components:
                 ecs_mapping:
                   client.port:
                     field: port
+            version: 1
             enabled: true
             created_at: "2025-02-26T13:37:30.452Z"
             created_by: elastic
             updated_at: "2025-02-26T13:40:16.297Z"
             updated_by: elastic
+            policy_ids:
+              - "my_policy_id"
             shards:
-              - key: 47638692-7c4c-4053-aa3e-7186f28df349
-                value: 35
-              - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
-                value: 58
-            saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+              "47638692-7c4c-4053-aa3e-7186f28df349": 35
+              "5e267651-fe50-443e-8d3f-3bbc9171b618": 58

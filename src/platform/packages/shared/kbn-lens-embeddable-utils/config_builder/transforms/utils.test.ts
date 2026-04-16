@@ -83,17 +83,6 @@ describe('getDatasetIndex', () => {
       }
     `);
   });
-
-  test('returns undefined if no query or iundex provided', () => {
-    const result = getDataSourceIndex({
-      type: 'table',
-      table: {
-        columns: [],
-        rows: [],
-      },
-    });
-    expect(result).toMatchInlineSnapshot(`undefined`);
-  });
 });
 
 describe('addLayerColumn', () => {

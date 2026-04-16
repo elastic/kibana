@@ -98,6 +98,7 @@ describe('FieldDescription', () => {
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'long' },
         },
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),
@@ -121,6 +122,7 @@ describe('FieldDescription', () => {
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'long' },
         },
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),
@@ -146,6 +148,7 @@ describe('FieldDescription', () => {
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'keyword' },
         },
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),
@@ -165,6 +168,7 @@ describe('FieldDescription', () => {
     const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
       useFieldsMetadata: jest.fn(() => ({
         fieldsMetadata: {},
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),

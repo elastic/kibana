@@ -1591,7 +1591,7 @@
         "label": "CloudSetupConfig",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-        "lineNumber": 56,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1604,7 +1604,7 @@
             "label": "policyTemplate",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1617,7 +1617,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1630,7 +1630,7 @@
             "label": "shortName",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1646,7 +1646,7 @@
               "\"aws\" | \"azure\" | \"gcp\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1662,7 +1662,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1675,7 +1675,7 @@
             "label": "overviewPath",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1688,7 +1688,7 @@
             "label": "getStartedPath",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1701,7 +1701,7 @@
             "label": "showCloudTemplates",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1721,7 +1721,7 @@
               "; azure: AzureProviderConfig; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1868,7 +1868,7 @@
                 "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              "; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1876,31 +1876,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context, {}>) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",

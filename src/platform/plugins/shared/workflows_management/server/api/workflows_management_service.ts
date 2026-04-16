@@ -79,7 +79,7 @@ import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_ma
 import { WorkflowConflictError, WorkflowValidationError } from '../../common/lib/errors';
 
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
-import { updateWorkflowYamlFields } from '../../common/lib/yaml';
+import { parseYamlToJSONWithoutValidation, updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -94,6 +94,15 @@ function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefin
   return triggers
     .map((t) => (t && typeof t.type === 'string' ? t.type : null))
     .filter(<T>(v: T): v is NonNullable<T> => v != null);
+}
+
+/** True when the YAML root map includes `enabled` (before Zod defaults). */
+function workflowYamlDeclaresTopLevelEnabled(yamlString: string): boolean {
+  const parsed = parseYamlToJSONWithoutValidation(yamlString);
+  if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
+    return false;
+  }
+  return Object.prototype.hasOwnProperty.call(parsed.json, 'enabled');
 }
 
 const DEFAULT_PAGE_SIZE = 100;
@@ -674,6 +683,22 @@ export class WorkflowsService {
         updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
         validationErrors.push(...yamlResult.validationErrors);
         shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
+
+        // Zod may default `enabled` to true when YAML omits it; do not overwrite stored or request values.
+        if (
+          yamlResult.validationErrors.length === 0 &&
+          yamlResult.updatedDataPatch.valid &&
+          updatedData.definition &&
+          !workflowYamlDeclaresTopLevelEnabled(workflow.yaml)
+        ) {
+          const resolvedEnabled =
+            workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
+          updatedData.enabled = resolvedEnabled;
+          updatedData.definition = {
+            ...updatedData.definition,
+            enabled: resolvedEnabled,
+          } as WorkflowYaml;
+        }
       } else {
         updatedData = { ...updatedData, ...this.applyFieldUpdates(workflow, existingSource) };
       }
@@ -912,6 +937,137 @@ export class WorkflowsService {
         }
       });
     }
+  }
+
+  /**
+   * Disables all enabled workflows across all spaces. Sets `enabled: false`,
+   * patches YAML accordingly, and unschedules any scheduled tasks.
+   * Used when a user opts out of workflows by toggling the global UI setting off.
+   */
+  public async disableAllWorkflows(): Promise<{
+    total: number;
+    disabled: number;
+    failures: Array<{ id: string; error: string }>;
+  }> {
+    await this.ensureInitialized();
+
+    const client = this.workflowStorage.getClient();
+    const pageSize = 1000;
+    const MAX_PAGES = 50;
+    const failures: Array<{ id: string; error: string }> = [];
+    const disabledIds: string[] = [];
+    let totalHits = 0;
+
+    const query = {
+      bool: {
+        must: [{ term: { enabled: true } }],
+        must_not: [{ exists: { field: 'deleted_at' } }],
+      },
+    };
+    const sort = [{ updated_at: { order: 'desc' as const } }, '_shard_doc'];
+
+    let searchAfter: estypes.SortResults | undefined;
+    let hasMore = true;
+    let pageCount = 0;
+
+    while (hasMore && pageCount < MAX_PAGES) {
+      pageCount++;
+
+      const searchResponse = await client.search({
+        query,
+        size: pageSize,
+        sort,
+        _source: true,
+        track_total_hits: pageCount === 1,
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+      });
+
+      const hits = searchResponse.hits.hits.filter(
+        (hit): hit is typeof hit & { _id: string; _source: WorkflowProperties } =>
+          hit._id != null && hit._source != null
+      );
+
+      if (hits.length === 0) {
+        break;
+      }
+
+      totalHits += hits.length;
+
+      const bulkOperations = hits.map((hit) => {
+        const source = hit._source;
+        const updatedYaml = updateWorkflowYamlFields(source.yaml, { enabled: false }, false);
+        return {
+          index: {
+            _id: hit._id,
+            document: {
+              ...source,
+              enabled: false,
+              yaml: updatedYaml,
+            },
+          },
+        };
+      });
+
+      try {
+        const bulkResponse = await client.bulk({
+          operations: bulkOperations,
+          refresh: true,
+        });
+
+        const pageDisabledIds: string[] = [];
+        bulkResponse.items.forEach((item) => {
+          const operation = item.index;
+          if (operation?.error) {
+            failures.push({
+              id: operation._id ?? 'unknown',
+              error:
+                typeof operation.error === 'object' && 'reason' in operation.error
+                  ? operation.error.reason ?? JSON.stringify(operation.error)
+                  : JSON.stringify(operation.error),
+            });
+          } else if (operation?._id) {
+            pageDisabledIds.push(operation._id);
+          }
+        });
+
+        if (pageDisabledIds.length > 0) {
+          disabledIds.push(...pageDisabledIds);
+          await this.unscheduleDeletedWorkflowTasks(pageDisabledIds);
+        }
+      } catch (error) {
+        bulkOperations.forEach((op) => {
+          failures.push({
+            id: op.index._id ?? 'unknown',
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
+      }
+
+      hasMore = hits.length >= pageSize;
+      if (hasMore) {
+        const lastHit = hits[hits.length - 1];
+        if (!lastHit.sort) {
+          break;
+        }
+        searchAfter = lastHit.sort;
+      }
+    }
+
+    if (hasMore && pageCount >= MAX_PAGES) {
+      this.logger.warn(
+        `disableAllWorkflows truncated at ${MAX_PAGES} pages (${totalHits} workflows processed)`
+      );
+    }
+
+    this.logger.info(
+      `Disabled ${disabledIds.length} workflows across all spaces (${failures.length} failures)`
+    );
+
+    return {
+      total: totalHits,
+      disabled: disabledIds.length,
+      failures,
+    };
   }
 
   /**

@@ -20,9 +20,7 @@ export type {
   DashboardPinnedPanelsState,
   DashboardPinnedPanel,
   DashboardSection,
-  DashboardFilter,
   DashboardOptions,
-  DashboardQuery,
   GridData,
 } from './types';
 

@@ -21,9 +21,11 @@ describe('communicates_with AWS CloudTrail buildCompositeAggQuery', () => {
     });
   });
 
-  it('requires event.provider to exist', () => {
+  it('requires host.target.entity.id to exist', () => {
     const query = buildCompositeAggQuery();
-    expect(query.query.bool.filter).toContainEqual({ exists: { field: 'event.provider' } });
+    expect(query.query.bool.filter).toContainEqual({
+      exists: { field: 'host.target.entity.id' },
+    });
   });
 
   it('does not filter on event.outcome', () => {

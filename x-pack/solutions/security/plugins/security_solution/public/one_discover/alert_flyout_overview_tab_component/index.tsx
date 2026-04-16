@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useSelector } from 'react-redux';
+import { EuiSpacer } from '@elastic/eui';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
 import type { SecurityAppStore, State } from '../../common/store/types';
@@ -97,6 +98,7 @@ export const AlertFlyoutOverviewTab = ({
       <>
         <DataViewManagerBootstrap />
         {/* TODO: implement Discover cell actions - see https://github.com/elastic/kibana/issues/258858*/}
+        <EuiSpacer size="m" />
         <OverviewTab
           hit={hit}
           renderCellActions={noopCellActionRenderer}
