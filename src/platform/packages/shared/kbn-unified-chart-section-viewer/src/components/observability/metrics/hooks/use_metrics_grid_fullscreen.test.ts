@@ -11,7 +11,10 @@ import { renderHook } from '@testing-library/react';
 import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import fs from 'fs';
 import path from 'path';
-import { FULLSCREEN_BODY_STYLES_CLASS, useMetricsGridFullScreen } from './use_metrics_grid_fullscreen';
+import {
+  FULLSCREEN_BODY_STYLES_CLASS,
+  useMetricsGridFullScreen,
+} from './use_metrics_grid_fullscreen';
 
 // Mock only what's needed for the hook test
 jest.mock('@elastic/eui', () => ({
@@ -40,7 +43,9 @@ describe('useMetricsGridFullScreen', () => {
   });
 
   it('returns the generated metrics grid id and styles', () => {
-    const { result } = renderHook(() => useMetricsGridFullScreen({ prefix: 'test-metrics-grid-id' }));
+    const { result } = renderHook(() =>
+      useMetricsGridFullScreen({ prefix: 'test-metrics-grid-id' })
+    );
 
     expect(result.current.metricsGridId).toBe('test-metrics-grid-id');
     expect(result.current.styles).toHaveProperty('metricsGrid--fullScreen');
