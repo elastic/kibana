@@ -242,6 +242,7 @@ export type LensApiAllOperations =
 export {
   // Combined schemas
   metricConfigSchema,
+  legacyMetricConfigSchema,
   gaugeConfigSchema,
   tagcloudConfigSchema,
   xyConfigSchema,
@@ -266,6 +267,7 @@ export {
   mosaicConfigSchemaESQL,
   // DSL schemas
   metricConfigSchemaNoESQL,
+  legacyMetricConfigSchemaNoESQL,
   gaugeConfigSchemaNoESQL,
   tagcloudConfigSchemaNoESQL,
   xyConfigSchemaNoESQL,
