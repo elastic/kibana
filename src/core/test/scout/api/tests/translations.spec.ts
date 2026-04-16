@@ -31,7 +31,9 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.locale).toBe('en');
     expect(response).toHaveHeaders({ 'content-type': 'application/json; charset=utf-8' });
 
-    // Distributable builds serve pre-built translations with immutable caching and no etag
+    // Distributable builds serve pre-built translations with immutable caching and no etag.
+    // Local dev servers return `must-revalidate` + etag instead, so we gate on CI.
+    // TODO: Replace `process.env.CI` with a Scout config flag (e.g. isDistributable) when available.
     if (process.env.CI) {
       expect(response).toHaveHeaders({
         'cache-control': 'public, max-age=31536000, immutable',
