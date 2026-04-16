@@ -73,6 +73,27 @@ describe('getGenerationContext zodHelpersImports', () => {
     expect(ctx.zodHelpersImports).toEqual(['ArrayFromString']);
   });
 
+  it('imports BooleanFromString when object query schema has only additionalProperties', () => {
+    const ctx = getGenerationContext(
+      minimalGetOperation({
+        operationId: 'AdditionalPropsOnlyBool',
+        parameters: [
+          {
+            name: 'flags',
+            in: 'query',
+            required: false,
+            schema: {
+              type: 'object',
+              additionalProperties: { type: 'boolean' },
+            },
+          },
+        ],
+      }),
+      {}
+    );
+    expect(ctx.zodHelpersImports).toEqual(['BooleanFromString']);
+  });
+
   it('orders multiple helpers as isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString', () => {
     const ctx = getGenerationContext(
       minimalGetOperation({

@@ -95,9 +95,11 @@ function collectZodHelpersFromParamSchema(
     collectZodHelpersFromParamSchema(s.items, document, needed, visitedRefs);
     return;
   }
-  if (t === 'object' && s.properties && typeof s.properties === 'object') {
-    for (const prop of Object.values(s.properties)) {
-      collectZodHelpersFromParamSchema(prop, document, needed, visitedRefs);
+  if (t === 'object') {
+    if (s.properties && typeof s.properties === 'object') {
+      for (const prop of Object.values(s.properties)) {
+        collectZodHelpersFromParamSchema(prop, document, needed, visitedRefs);
+      }
     }
     const ap = s.additionalProperties;
     if (ap !== undefined && ap !== true && ap !== false && typeof ap === 'object' && ap !== null) {
@@ -167,9 +169,11 @@ function collectStringSuperRefineHelpersFromSchema(
     collectStringSuperRefineHelpersFromSchema(s.items, document, needed, visitedRefs);
     return;
   }
-  if (t === 'object' && s.properties && typeof s.properties === 'object') {
-    for (const prop of Object.values(s.properties)) {
-      collectStringSuperRefineHelpersFromSchema(prop, document, needed, visitedRefs);
+  if (t === 'object') {
+    if (s.properties && typeof s.properties === 'object') {
+      for (const prop of Object.values(s.properties)) {
+        collectStringSuperRefineHelpersFromSchema(prop, document, needed, visitedRefs);
+      }
     }
     const ap = s.additionalProperties;
     if (ap !== undefined && ap !== true && ap !== false && typeof ap === 'object' && ap !== null) {
