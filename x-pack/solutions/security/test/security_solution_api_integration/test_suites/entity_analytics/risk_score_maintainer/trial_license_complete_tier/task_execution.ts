@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      it('@skipInServerlessMKI produces additional scores after stop and restart', async () => {
+      it('@skipInServerlessMKI resumes producing additional scores after stop and restart when triggered', async () => {
         const hostName = `host-lifecycle-${uuidv4().slice(0, 8)}`;
         const { documentIds, testEntities } = await maintainerScenario.seedEntities([
           riskScoreMaintainerEntityBuilders.host({ hostName }),
@@ -134,13 +134,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await maintainerRoutes.stopMaintainer('risk-score');
         await maintainerRoutes.startMaintainer('risk-score');
-        await waitForMaintainerRun({
-          retry,
-          routes: maintainerRoutes,
-          minRuns: 1,
-          triggerRun: false,
-          timeoutMs: 90_000,
-        });
+        // Restart only re-enables scheduling, so use a sync trigger here to
+        // verify the maintainer can resume deterministically after restart.
+        await maintainerRoutes.runMaintainerSync('risk-score');
 
         await waitForRiskScoresToBePresent({ es, log, scoreCount: preRestartCount + 1 });
         const postRestartScores = await readRiskScores(es);

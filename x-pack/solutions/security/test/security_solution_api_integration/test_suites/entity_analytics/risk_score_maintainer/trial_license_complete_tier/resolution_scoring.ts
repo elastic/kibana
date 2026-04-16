@@ -47,6 +47,24 @@ export default ({ getService }: FtrProviderContext): void => {
     this.tags(['esGate']);
 
     context('with test log data', () => {
+      const getEntityField = (
+        entity: Record<string, unknown> | undefined,
+        field: string
+      ): unknown => {
+        if (!entity) {
+          return undefined;
+        }
+        if (field in entity) {
+          return entity[field];
+        }
+        return field.split('.').reduce<unknown>((current, key) => {
+          if (current != null && typeof current === 'object') {
+            return (current as Record<string, unknown>)[key];
+          }
+          return undefined;
+        }, entity);
+      };
+
       const indexListOfDocuments = indexListOfDocumentsFactory({ es, log, index: testLogsIndex });
       const maintainerScenario = riskScoreMaintainerScenarioFactory({
         indexListOfDocuments,
@@ -69,13 +87,33 @@ export default ({ getService }: FtrProviderContext): void => {
               size: 1,
               query: { term: { 'entity.id': aliasEuid } },
             });
-            const doc = response.hits.hits[0]?._source as
-              | { entity?: { relationships?: { resolution?: { resolved_to?: string } } } }
-              | undefined;
-            return doc?.entity?.relationships?.resolution?.resolved_to === targetEuid;
+            const doc = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+            return (
+              getEntityField(doc, 'entity.relationships.resolution.resolved_to') === targetEuid
+            );
           }
         );
       };
+
+      const refreshResolutionLookup = async (): Promise<void> => {
+        // Sync runs can read the lookup index immediately, so make the relationship visible first.
+        await es.indices.refresh({ index: entityStoreIndex });
+      };
+
+      const getBestResolutionScore = ({
+        scores,
+        entityId,
+      }: {
+        scores: ReturnType<typeof normalizeScores>;
+        entityId: string;
+      }) =>
+        scores
+          .filter((s) => s.id_value === entityId && s.score_type === 'resolution')
+          .sort(
+            (a, b) =>
+              (b.related_entities?.length ?? 0) - (a.related_entities?.length ?? 0) ||
+              String(b.calculation_run_id ?? '').localeCompare(String(a.calculation_run_id ?? ''))
+          )[0];
 
       before(async () => {
         await setupMaintainerLogsDataStream({
@@ -141,6 +179,7 @@ export default ({ getService }: FtrProviderContext): void => {
           resolvedToEntityId: targetUser.expectedEuid,
         });
         await waitForResolutionRelationship(aliasUser.expectedEuid, targetUser.expectedEuid);
+        await refreshResolutionLookup();
 
         await maintainerRoutes.runMaintainerSync('risk-score');
 
@@ -203,19 +242,17 @@ export default ({ getService }: FtrProviderContext): void => {
               size: 1,
               query: { term: { 'entity.id': targetUser.expectedEuid } },
             });
-            const doc = response.hits.hits[0]?._source as
-              | {
-                  entity?: {
-                    risk?: { calculated_score_norm?: number };
-                    relationships?: {
-                      resolution?: { risk?: { calculated_score_norm?: number } };
-                    };
-                  };
-                }
-              | undefined;
+            const doc = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+            const baseRisk = getEntityField(doc, 'entity.risk.calculated_score_norm');
+            const resolutionRisk = getEntityField(
+              doc,
+              'entity.relationships.resolution.risk.calculated_score_norm'
+            );
             return (
-              (doc?.entity?.risk?.calculated_score_norm ?? 0) > 0 &&
-              (doc?.entity?.relationships?.resolution?.risk?.calculated_score_norm ?? 0) > 0
+              typeof baseRisk === 'number' &&
+              baseRisk > 0 &&
+              typeof resolutionRisk === 'number' &&
+              resolutionRisk > 0
             );
           }
         );
@@ -225,28 +262,28 @@ export default ({ getService }: FtrProviderContext): void => {
           size: 1,
           query: { term: { 'entity.id': targetUser.expectedEuid } },
         });
-        const entityDoc = response.hits.hits[0]!._source as {
-          entity: {
-            risk: { calculated_score_norm: number; calculated_level: string };
-            relationships: {
-              resolution: {
-                risk: { calculated_score_norm: number; calculated_level: string };
-              };
-            };
-          };
-        };
+        const entityDoc = response.hits.hits[0]!._source as Record<string, unknown>;
+        const baseRisk = getEntityField(entityDoc, 'entity.risk.calculated_score_norm');
+        const baseLevel = getEntityField(entityDoc, 'entity.risk.calculated_level');
+        const resolutionRisk = getEntityField(
+          entityDoc,
+          'entity.relationships.resolution.risk.calculated_score_norm'
+        );
+        const resolutionLevel = getEntityField(
+          entityDoc,
+          'entity.relationships.resolution.risk.calculated_level'
+        );
 
-        expect(entityDoc.entity.risk.calculated_score_norm).to.be.greaterThan(0);
-        expect(entityDoc.entity.risk.calculated_level).to.be.a('string');
+        expect(baseRisk).to.be.a('number');
+        expect(baseRisk as number).to.be.greaterThan(0);
+        expect(baseLevel).to.be.a('string');
 
-        const resolutionRisk = entityDoc.entity.relationships.resolution.risk;
-        expect(resolutionRisk.calculated_score_norm).to.be.greaterThan(0);
-        expect(resolutionRisk.calculated_level).to.be.a('string');
+        expect(resolutionRisk).to.be.a('number');
+        expect(resolutionRisk as number).to.be.greaterThan(0);
+        expect(resolutionLevel).to.be.a('string');
 
         // Resolution risk aggregates more alerts, so it should be higher
-        expect(resolutionRisk.calculated_score_norm).to.be.greaterThan(
-          entityDoc.entity.risk.calculated_score_norm
-        );
+        expect(resolutionRisk as number).to.be.greaterThan(baseRisk as number);
       });
 
       it('aggregates a multi-alias group into a single resolution score', async () => {
@@ -283,6 +320,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         await waitForResolutionRelationship(alias1.expectedEuid, target.expectedEuid);
         await waitForResolutionRelationship(alias2.expectedEuid, target.expectedEuid);
+        await refreshResolutionLookup();
 
         await maintainerRoutes.runMaintainerSync('risk-score');
 
@@ -292,16 +330,18 @@ export default ({ getService }: FtrProviderContext): void => {
           60_000,
           async () => {
             allScores = normalizeScores(await readRiskScores(es));
-            const resScore = allScores.find(
-              (s) => s.id_value === target.expectedEuid && s.score_type === 'resolution'
-            );
+            const resScore = getBestResolutionScore({
+              scores: allScores,
+              entityId: target.expectedEuid,
+            });
             return resScore !== undefined && (resScore.related_entities?.length ?? 0) === 2;
           }
         );
 
-        const resolutionScore = allScores.find(
-          (s) => s.id_value === target.expectedEuid && s.score_type === 'resolution'
-        )!;
+        const resolutionScore = getBestResolutionScore({
+          scores: allScores,
+          entityId: target.expectedEuid,
+        })!;
 
         // Both aliases should appear in related_entities
         const relatedIds = resolutionScore.related_entities!.map((r) => r.entity_id).sort();
@@ -452,31 +492,27 @@ export default ({ getService }: FtrProviderContext): void => {
               ]);
 
               const targetDoc = targetResp.hits.hits[0]?._source as
-                | {
-                    asset?: { criticality?: string };
-                    entity?: { attributes?: { watchlists?: string[] } };
-                  }
+                | Record<string, unknown>
                 | undefined;
               const aliasDoc = aliasResp.hits.hits[0]?._source as
-                | {
-                    asset?: { criticality?: string };
-                    entity?: {
-                      attributes?: { watchlists?: string[] };
-                      relationships?: { resolution?: { resolved_to?: string } };
-                    };
-                  }
+                | Record<string, unknown>
                 | undefined;
 
-              const targetHasCrit = targetDoc?.asset?.criticality === 'low_impact';
-              const targetHasWl = (targetDoc?.entity?.attributes?.watchlists ?? []).includes(wlAId);
-              const aliasHasCrit = aliasDoc?.asset?.criticality === 'high_impact';
-              const aliasHasWl = (aliasDoc?.entity?.attributes?.watchlists ?? []).includes(wlBId);
+              const targetHasCrit = getEntityField(targetDoc, 'asset.criticality') === 'low_impact';
+              const targetWatchlists = getEntityField(targetDoc, 'entity.attributes.watchlists');
+              const targetHasWl =
+                Array.isArray(targetWatchlists) && targetWatchlists.includes(wlAId);
+              const aliasHasCrit = getEntityField(aliasDoc, 'asset.criticality') === 'high_impact';
+              const aliasWatchlists = getEntityField(aliasDoc, 'entity.attributes.watchlists');
+              const aliasHasWl = Array.isArray(aliasWatchlists) && aliasWatchlists.includes(wlBId);
               const aliasResolved =
-                aliasDoc?.entity?.relationships?.resolution?.resolved_to ===
+                getEntityField(aliasDoc, 'entity.relationships.resolution.resolved_to') ===
                 targetUser.expectedEuid;
               return targetHasCrit && targetHasWl && aliasHasCrit && aliasHasWl && aliasResolved;
             }
           );
+
+          await refreshResolutionLookup();
 
           // Resume the maintainer and trigger a fresh run
           await maintainerRoutes.runMaintainerSync('risk-score');
