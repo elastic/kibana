@@ -31,7 +31,7 @@ import {
 // ---------------------------------------------------------------------------
 
 const identifyInferredFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_identify/inferred',
+  endpoint: 'POST /internal/streams/{streamName}/features/_identify/inferred',
   options: {
     access: 'internal',
     summary: 'Sample documents, run LLM inference, and reconcile KI features for one iteration',
@@ -43,26 +43,29 @@ const identifyInferredFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
-    body: z.object({
-      connectorId: z.string().optional(),
-      start: z.number().optional(),
-      end: z.number().optional(),
-      runId: z.string().optional(),
-      // Caller must pass back discoveredFeatures from previous iterations so
-      // the service can distinguish intra-run features (merge semantics) from
-      // stored features (full replace). These are already persisted to ES but
-      // cannot be distinguished from pre-existing features without this context.
-      discoveredFeatures: z.array(featureSchema).optional().default([]),
-      iterationResults: z.array(iterationResultSchema).optional().default([]),
-      featureTtlDays: z.number().optional(),
-      sampleSize: z.number().optional(),
-      entityFilteredRatio: z.number().min(0).max(1).optional(),
-      diverseRatio: z.number().min(0).max(1).optional(),
-      maxEntityFilters: z.number().optional(),
-      maxExcludedFeaturesInPrompt: z.number().optional(),
-      maxPreviouslyIdentifiedFeatures: z.number().optional(),
-    }),
+    path: z.object({ streamName: z.string() }),
+    body: z
+      .object({
+        connectorId: z.string().optional(),
+        start: z.number().optional(),
+        end: z.number().optional(),
+        runId: z.string().optional(),
+        // Caller must pass back discoveredFeatures from previous iterations so
+        // the service can distinguish intra-run features (merge semantics) from
+        // stored features (full replace). These are already persisted to ES but
+        // cannot be distinguished from pre-existing features without this context.
+        discoveredFeatures: z.array(featureSchema).optional().default([]),
+        iterationResults: z.array(iterationResultSchema).optional().default([]),
+        featureTtlDays: z.number().optional(),
+        sampleSize: z.number().optional(),
+        entityFilteredRatio: z.number().min(0).max(1).optional(),
+        diverseRatio: z.number().min(0).max(1).optional(),
+        maxEntityFilters: z.number().optional(),
+        maxExcludedFeaturesInPrompt: z.number().optional(),
+        maxPreviouslyIdentifiedFeatures: z.number().optional(),
+      })
+      .nullable()
+      .optional(),
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const {
@@ -78,7 +81,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { name: streamName } = params.path;
+    const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'inferred', streamName);
     const now = Date.now();
     const {
@@ -86,8 +89,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
       end = now,
       connectorId: connectorIdOverride,
       runId = uuidv4(),
-      discoveredFeatures,
-      iterationResults,
+      discoveredFeatures = [],
+      iterationResults = [],
       featureTtlDays = tuningConfig.feature_ttl_days,
       sampleSize = tuningConfig.sample_size,
       entityFilteredRatio = tuningConfig.entity_filtered_ratio,
@@ -95,7 +98,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxEntityFilters = tuningConfig.max_entity_filters,
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
-    } = params.body;
+    } = params.body ?? {};
 
     const [connectorId, stream] = await Promise.all([
       connectorIdOverride
@@ -184,7 +187,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
 // ---------------------------------------------------------------------------
 
 const identifyComputedFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_identify/computed',
+  endpoint: 'POST /internal/streams/{streamName}/features/_identify/computed',
   options: {
     access: 'internal',
     summary: 'Generate and persist computed KI features for a stream',
@@ -195,12 +198,15 @@ const identifyComputedFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
-    body: z.object({
-      start: z.number().optional(),
-      end: z.number().optional(),
-      featureTtlDays: z.number().optional(),
-    }),
+    path: z.object({ streamName: z.string() }),
+    body: z
+      .object({
+        start: z.number().optional(),
+        end: z.number().optional(),
+        featureTtlDays: z.number().optional(),
+      })
+      .nullable()
+      .optional(),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const {
@@ -214,14 +220,14 @@ const identifyComputedFeaturesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { name: streamName } = params.path;
+    const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'computed', streamName);
     const now = Date.now();
     const {
       start = now - MS_PER_DAY,
       end = now,
       featureTtlDays = tuningConfig.feature_ttl_days,
-    } = params.body;
+    } = params.body ?? {};
 
     const [featureClient, stream] = await Promise.all([
       getFeatureClient(),
