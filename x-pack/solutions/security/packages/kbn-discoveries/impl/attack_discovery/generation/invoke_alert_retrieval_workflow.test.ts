@@ -134,7 +134,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
         startedAt: '2024-01-01T00:00:00Z',
         stepExecutionIndex: 0,
         stepId: 'retrieve_alerts',
-        stepType: 'attack-discovery.defaultAlertRetrieval',
+        stepType: 'security.attack-discovery.defaultAlertRetrieval',
         topologicalIndex: 0,
         workflowId: 'default-attack-discovery-alert-retrieval',
         workflowRunId: 'workflow-run-id',

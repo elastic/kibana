@@ -110,7 +110,7 @@ describe('invokeValidationWorkflow', () => {
     withReplacements: true,
     workflowConfig: {
       alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
-      default_alert_retrieval_mode: 'custom_query' as const,
+      alert_retrieval_mode: 'custom_query' as const,
       validation_workflow_id: 'default',
     },
     workflowsManagementApi: mockWorkflowsManagementApi,
@@ -159,7 +159,7 @@ describe('invokeValidationWorkflow', () => {
         status: ExecutionStatus.COMPLETED,
         stepExecutionIndex: 0,
         stepId: 'persist_discoveries',
-        stepType: 'attack-discovery.persistDiscoveries',
+        stepType: 'security.attack-discovery.persistDiscoveries',
         topologicalIndex: 0,
         workflowId: defaultValidationWorkflowId,
         workflowRunId: 'workflow-run-id',
@@ -398,7 +398,7 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 1,
               persisted_discoveries: [{ title: 'D1' }, { title: 'D1-duplicate' }],
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -423,11 +423,11 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 1,
               persisted_discoveries: [{ title: 'D1' }, { title: 'D1-duplicate' }],
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { filtered_count: 0, validated_discoveries: [{ title: 'D1' }] },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -457,11 +457,11 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 1,
               persisted_discoveries: [{ title: 'D1' }, { title: 'D1-duplicate' }],
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { filtered_count: 0, validated_discoveries: [{ title: 'D1' }] },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -476,48 +476,6 @@ describe('invokeValidationWorkflow', () => {
           persistedCount: 1,
         })
       );
-    });
-  });
-
-  describe('when persist is false', () => {
-    beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
-        mockCompletedExecution
-      );
-    });
-
-    it('includes persist: false in workflow inputs', async () => {
-      await invokeValidationWorkflow({ ...defaultProps, persist: false });
-
-      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.anything(),
-        'default',
-        expect.objectContaining({
-          persist: false,
-        }),
-        mockRequest
-      );
-    });
-  });
-
-  describe('when persist is undefined', () => {
-    beforeEach(() => {
-      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
-      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
-        mockCompletedExecution
-      );
-    });
-
-    it('does not include persist in workflow inputs', async () => {
-      await invokeValidationWorkflow({ ...defaultProps, persist: undefined });
-
-      const runWorkflowCall = (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mock.calls[0];
-      const workflowInputs = runWorkflowCall[2] as Record<string, unknown>;
-
-      expect(workflowInputs).not.toHaveProperty('persist');
     });
   });
 
@@ -561,11 +519,11 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 0,
               persisted_discoveries: mockDiscoveries,
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { validated_discoveries: mockDiscoveries },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -589,7 +547,7 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 0,
               persisted_discoveries: [],
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -609,11 +567,11 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 0,
               persisted_discoveries: [],
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: null,
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -633,11 +591,11 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 0,
               persisted_discoveries: [],
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { validated_discoveries: 'not-an-array' },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -661,11 +619,11 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 1,
               persisted_discoveries: stepDiscoveries,
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { validated_discoveries: stepDiscoveries },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -692,11 +650,11 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 0,
               persisted_discoveries: stepDiscoveries,
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { validated_discoveries: stepDiscoveries },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -723,11 +681,11 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 0,
               persisted_discoveries: stepDiscoveries,
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { validated_discoveries: stepDiscoveries },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -782,7 +740,7 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 0,
               some_other_output: 'value',
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { some_other_output: 'value' },
@@ -795,6 +753,47 @@ describe('invokeValidationWorkflow', () => {
 
       expect(result.duplicatesDroppedCount).toBe(0);
       expect(result.validatedDiscoveries).toBeUndefined();
+    });
+  });
+
+  describe('when validation_workflow_id is empty string', () => {
+    beforeEach(() => {
+      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        mockCompletedExecution
+      );
+    });
+
+    it('falls back to the default validation workflow ID', async () => {
+      const propsWithEmptyId = {
+        ...defaultProps,
+        workflowConfig: {
+          ...defaultProps.workflowConfig,
+          validation_workflow_id: '',
+        },
+      };
+
+      await invokeValidationWorkflow(propsWithEmptyId);
+
+      expect(mockWorkflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
+        defaultValidationWorkflowId,
+        'default'
+      );
+    });
+
+    it('returns the default workflow ID in the result', async () => {
+      const propsWithEmptyId = {
+        ...defaultProps,
+        workflowConfig: {
+          ...defaultProps.workflowConfig,
+          validation_workflow_id: '',
+        },
+      };
+
+      const result = await invokeValidationWorkflow(propsWithEmptyId);
+
+      expect(result.workflowExecution?.workflowId).toBe(defaultValidationWorkflowId);
     });
   });
 
@@ -1347,7 +1346,7 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1387,11 +1386,11 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 1,
               persisted_discoveries: allDiscoveries,
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { validated_discoveries: [{ title: 'Filtered' }] },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -1421,7 +1420,7 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 1,
               persisted_discoveries: allDiscoveries,
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1447,7 +1446,7 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 2,
               persisted_discoveries: [],
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1481,7 +1480,7 @@ describe('invokeValidationWorkflow', () => {
               duplicates_dropped_count: 5,
               persisted_discoveries: allDiscoveries,
             },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1531,7 +1530,7 @@ describe('invokeValidationWorkflow', () => {
           {
             // duplicates_dropped_count present but no persisted_discoveries
             output: { duplicates_dropped_count: 4 },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1564,11 +1563,11 @@ describe('invokeValidationWorkflow', () => {
           {
             // duplicates_dropped_count present but no persisted_discoveries
             output: { duplicates_dropped_count: 3 },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { filtered_count: 2, validated_discoveries: [] },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -1601,11 +1600,11 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { filtered_count: 3, validated_discoveries: [] },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -1622,7 +1621,7 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1638,7 +1637,7 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1654,11 +1653,11 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: null,
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -1674,11 +1673,11 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { filtered_count: 'not-a-number' },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -1701,11 +1700,11 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { filter_reason: 'hallucination detected', validated_discoveries: [] },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -1722,7 +1721,7 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1738,7 +1737,7 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1754,11 +1753,11 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
           {
             output: { filter_reason: 42 },
-            stepType: 'attack-discovery.defaultValidation',
+            stepType: 'security.attack-discovery.defaultValidation',
           },
         ],
       });
@@ -1783,7 +1782,7 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 0, persisted_discoveries: discoveries },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1835,7 +1834,7 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: { duplicates_dropped_count: 2, persisted_discoveries: [] },
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1851,7 +1850,7 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: null,
-            stepType: 'attack-discovery.persistDiscoveries',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });

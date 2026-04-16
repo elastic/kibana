@@ -48,8 +48,9 @@ jest.mock('./run_manual_orchestration', () => ({
 }));
 
 const mockReportWorkflowSuccess = jest.fn();
+const mockReportWorkflowError = jest.fn();
 jest.mock('../../lib/telemetry/report_workflow_telemetry', () => ({
-  reportWorkflowError: jest.fn(),
+  reportWorkflowError: (...args: unknown[]) => mockReportWorkflowError(...args),
   reportWorkflowSuccess: (...args: unknown[]) => mockReportWorkflowSuccess(...args),
 }));
 
@@ -143,7 +144,7 @@ describe('executeGenerationWorkflow', () => {
       type: 'attack_discovery',
       workflowConfig: {
         alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
-        default_alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
       workflowInitService: mockWorkflowInitService,
@@ -218,7 +219,7 @@ describe('executeGenerationWorkflow', () => {
       type: 'attack_discovery',
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
-        default_alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
       workflowInitService: mockWorkflowInitService,
@@ -312,7 +313,7 @@ describe('executeGenerationWorkflow', () => {
       type: 'attack_discovery',
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
-        default_alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
       workflowInitService: mockWorkflowInitService,
@@ -399,7 +400,7 @@ describe('executeGenerationWorkflow', () => {
       type: 'attack_discovery',
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
-        default_alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
       workflowInitService: mockWorkflowInitService,
@@ -486,7 +487,7 @@ describe('executeGenerationWorkflow', () => {
       type: 'attack_discovery',
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
-        default_alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
       workflowInitService: mockWorkflowInitService,
@@ -573,7 +574,7 @@ describe('executeGenerationWorkflow', () => {
       type: 'attack_discovery',
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
-        default_alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
       workflowInitService: mockWorkflowInitService,
@@ -659,7 +660,7 @@ describe('executeGenerationWorkflow', () => {
       type: 'attack_discovery',
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
-        default_alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
       workflowInitService: mockWorkflowInitService,
@@ -676,78 +677,6 @@ describe('executeGenerationWorkflow', () => {
       params: Record<string, unknown>;
     };
     expect(call.params.hallucinations_filtered_count).toBeUndefined();
-  });
-
-  it('passes persist through to runManualOrchestration', async () => {
-    const mockEventLogger: jest.Mocked<IEventLogger> = {
-      logEvent: jest.fn(),
-    } as unknown as jest.Mocked<IEventLogger>;
-
-    const coreStartMock: CoreStart = {
-      elasticsearch: {
-        client: {
-          asScoped: () => ({
-            asCurrentUser: {
-              indices: {
-                refresh: jest.fn().mockResolvedValue(undefined),
-              },
-              security: {
-                authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }),
-              },
-            },
-          }),
-        },
-      },
-      http: { basePath: { get: jest.fn().mockReturnValue('') } },
-    } as unknown as CoreStart;
-
-    const pluginsStartMock: Record<string, unknown> = {};
-
-    const mockGetStartServices: GetStartServices = async () => ({
-      coreStart: coreStartMock,
-      pluginsStart: pluginsStartMock,
-    });
-
-    await executeGenerationWorkflow({
-      alertsIndexPattern: '.alerts-security.alerts-default',
-      apiConfig: {
-        action_type_id: '.gen-ai',
-        connector_id: 'test-connector-id',
-        model: 'gpt-4',
-      },
-      executionUuid: 'test-execution-uuid',
-      getEventLogIndex: async () => '.kibana-event-log-test',
-      getEventLogger: async () => mockEventLogger,
-      getStartServices: mockGetStartServices,
-      logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-      } as unknown as Logger,
-      persist: false,
-      request: {} as unknown as KibanaRequest,
-      type: 'attack_discovery',
-      workflowConfig: {
-        alert_retrieval_workflow_ids: [],
-        default_alert_retrieval_mode: 'custom_query' as const,
-        validation_workflow_id: 'default',
-      },
-      workflowInitService: mockWorkflowInitService,
-      workflowsManagementApi: {
-        createWorkflow: jest.fn(),
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn(),
-        getWorkflows: jest.fn(),
-        runWorkflow: jest.fn(),
-      } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
-    });
-
-    expect(mockRunManualOrchestration).toHaveBeenCalledWith(
-      expect.objectContaining({
-        persist: false,
-      })
-    );
   });
 
   it('passes repaired workflow IDs (not original stale IDs) to runManualOrchestration', async () => {
@@ -797,7 +726,7 @@ describe('executeGenerationWorkflow', () => {
       type: 'attack_discovery',
       workflowConfig: {
         alert_retrieval_workflow_ids: [],
-        default_alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       },
       workflowInitService: mockWorkflowInitService,
@@ -875,7 +804,7 @@ describe('executeGenerationWorkflow', () => {
         type: 'attack_discovery',
         workflowConfig: {
           alert_retrieval_workflow_ids: [],
-          default_alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'default',
         },
         workflowInitService: mockWorkflowInitService,
@@ -897,6 +826,240 @@ describe('executeGenerationWorkflow', () => {
         action: 'generation-failed',
       })
     );
+  });
+
+  it('passes scheduleInfo to reportWorkflowSuccess when provided', async () => {
+    const mockOutcome = {
+      alertRetrievalResult: { alertsContextCount: 5 },
+      generationResult: { attackDiscoveries: [{ title: 'Test' }] },
+      outcome: 'validation_succeeded' as const,
+      validationResult: {
+        duplicatesDroppedCount: 0,
+        generatedCount: 1,
+        success: true,
+        validationSummary: {
+          generatedCount: 1,
+          persistedCount: 1,
+        },
+      },
+    };
+
+    mockRunManualOrchestration.mockResolvedValue(mockOutcome);
+
+    const mockAnalytics = { reportEvent: jest.fn() };
+    const mockEventLogger: jest.Mocked<IEventLogger> = {
+      logEvent: jest.fn(),
+    } as unknown as jest.Mocked<IEventLogger>;
+
+    const coreStartMock: CoreStart = {
+      elasticsearch: {
+        client: {
+          asScoped: () => ({
+            asCurrentUser: {
+              indices: { refresh: jest.fn().mockResolvedValue(undefined) },
+              security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+            },
+          }),
+        },
+      },
+      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+    } as unknown as CoreStart;
+
+    const scheduleInfo = { actions: ['action-type-1'], id: 'rule-id-1', interval: '1h' };
+
+    await executeGenerationWorkflow({
+      analytics: mockAnalytics as never,
+      alertsIndexPattern: '.alerts-security.alerts-default',
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector-id',
+        model: 'gpt-4',
+      },
+      executionUuid: 'test-execution-uuid',
+      getEventLogIndex: async () => '.kibana-event-log-test',
+      getEventLogger: async () => mockEventLogger,
+      getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
+      logger: {
+        debug: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+      } as unknown as Logger,
+      request: {} as unknown as KibanaRequest,
+      scheduleInfo,
+      type: 'attack_discovery',
+      workflowConfig: {
+        alert_retrieval_workflow_ids: [],
+        alert_retrieval_mode: 'custom_query' as const,
+        validation_workflow_id: 'default',
+      },
+      workflowInitService: mockWorkflowInitService,
+      workflowsManagementApi: {
+        createWorkflow: jest.fn(),
+        getWorkflow: jest.fn(),
+        getWorkflowExecution: jest.fn(),
+        getWorkflows: jest.fn(),
+        runWorkflow: jest.fn(),
+      } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+    });
+
+    expect(mockReportWorkflowSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          scheduleInfo,
+        }),
+      })
+    );
+  });
+
+  it('passes scheduleInfo to reportWorkflowError when provided', async () => {
+    const pipelineError = new Error('generation failed');
+    mockRunManualOrchestration.mockRejectedValue(pipelineError);
+
+    const mockAnalytics = { reportEvent: jest.fn() };
+    const mockEventLogger: jest.Mocked<IEventLogger> = {
+      logEvent: jest.fn(),
+    } as unknown as jest.Mocked<IEventLogger>;
+
+    const coreStartMock: CoreStart = {
+      elasticsearch: {
+        client: {
+          asScoped: () => ({
+            asCurrentUser: {
+              indices: { refresh: jest.fn().mockResolvedValue(undefined) },
+              security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+            },
+          }),
+        },
+      },
+      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+    } as unknown as CoreStart;
+
+    const scheduleInfo = { actions: ['action-type-1'], id: 'rule-id-1', interval: '1h' };
+
+    await expect(
+      executeGenerationWorkflow({
+        analytics: mockAnalytics as never,
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        apiConfig: {
+          action_type_id: '.gen-ai',
+          connector_id: 'test-connector-id',
+          model: 'gpt-4',
+        },
+        executionUuid: 'test-execution-uuid',
+        getEventLogIndex: async () => '.kibana-event-log-test',
+        getEventLogger: async () => mockEventLogger,
+        getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
+        logger: {
+          debug: jest.fn(),
+          error: jest.fn(),
+          info: jest.fn(),
+          warn: jest.fn(),
+        } as unknown as Logger,
+        request: {} as unknown as KibanaRequest,
+        scheduleInfo,
+        type: 'attack_discovery',
+        workflowConfig: {
+          alert_retrieval_workflow_ids: [],
+          alert_retrieval_mode: 'custom_query' as const,
+          validation_workflow_id: 'default',
+        },
+        workflowInitService: mockWorkflowInitService,
+        workflowsManagementApi: {
+          createWorkflow: jest.fn(),
+          getWorkflow: jest.fn(),
+          getWorkflowExecution: jest.fn(),
+          getWorkflows: jest.fn(),
+          runWorkflow: jest.fn(),
+        } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+      })
+    ).rejects.toThrow(pipelineError);
+
+    expect(mockReportWorkflowError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          scheduleInfo,
+        }),
+      })
+    );
+  });
+
+  it('omits scheduleInfo from telemetry when not provided (ad-hoc execution)', async () => {
+    const mockOutcome = {
+      alertRetrievalResult: { alertsContextCount: 5 },
+      generationResult: { attackDiscoveries: [{ title: 'Test' }] },
+      outcome: 'validation_succeeded' as const,
+      validationResult: {
+        duplicatesDroppedCount: 0,
+        generatedCount: 1,
+        success: true,
+        validationSummary: {
+          generatedCount: 1,
+          persistedCount: 1,
+        },
+      },
+    };
+
+    mockRunManualOrchestration.mockResolvedValue(mockOutcome);
+
+    const mockAnalytics = { reportEvent: jest.fn() };
+    const mockEventLogger: jest.Mocked<IEventLogger> = {
+      logEvent: jest.fn(),
+    } as unknown as jest.Mocked<IEventLogger>;
+
+    const coreStartMock: CoreStart = {
+      elasticsearch: {
+        client: {
+          asScoped: () => ({
+            asCurrentUser: {
+              indices: { refresh: jest.fn().mockResolvedValue(undefined) },
+              security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+            },
+          }),
+        },
+      },
+      http: { basePath: { get: jest.fn().mockReturnValue('') } },
+    } as unknown as CoreStart;
+
+    await executeGenerationWorkflow({
+      analytics: mockAnalytics as never,
+      alertsIndexPattern: '.alerts-security.alerts-default',
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector-id',
+        model: 'gpt-4',
+      },
+      executionUuid: 'test-execution-uuid',
+      getEventLogIndex: async () => '.kibana-event-log-test',
+      getEventLogger: async () => mockEventLogger,
+      getStartServices: async () => ({ coreStart: coreStartMock, pluginsStart: {} }),
+      logger: {
+        debug: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+      } as unknown as Logger,
+      request: {} as unknown as KibanaRequest,
+      type: 'attack_discovery',
+      workflowConfig: {
+        alert_retrieval_workflow_ids: [],
+        alert_retrieval_mode: 'custom_query' as const,
+        validation_workflow_id: 'default',
+      },
+      workflowInitService: mockWorkflowInitService,
+      workflowsManagementApi: {
+        createWorkflow: jest.fn(),
+        getWorkflow: jest.fn(),
+        getWorkflowExecution: jest.fn(),
+        getWorkflows: jest.fn(),
+        runWorkflow: jest.fn(),
+      } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+    });
+
+    const successCall = mockReportWorkflowSuccess.mock.calls[0][0] as {
+      params: Record<string, unknown>;
+    };
+    expect(successCall.params.scheduleInfo).toBeUndefined();
   });
 
   it('refreshes the event log index after writing generation-failed so the UI can immediately detect the failure', async () => {
@@ -953,7 +1116,7 @@ describe('executeGenerationWorkflow', () => {
         type: 'attack_discovery',
         workflowConfig: {
           alert_retrieval_workflow_ids: [],
-          default_alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'default',
         },
         workflowInitService: mockWorkflowInitService,

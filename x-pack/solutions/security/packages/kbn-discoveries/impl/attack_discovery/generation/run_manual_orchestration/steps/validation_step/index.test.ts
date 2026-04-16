@@ -77,8 +77,8 @@ const baseParams = {
   request: {} as never,
   spaceId: 'default',
   workflowConfig: {
+    alert_retrieval_mode: 'custom_query' as const,
     alert_retrieval_workflow_ids: [],
-    default_alert_retrieval_mode: 'custom_query' as const,
     validation_workflow_id: 'default',
   },
   workflowsManagementApi: {} as never,
@@ -96,7 +96,6 @@ describe('runValidationStep', () => {
     expect(mockLogHealthCheck).toHaveBeenCalledWith(mockLogger, 'validation', {
       defaultValidationWorkflowId: 'validate',
       discoveryCount: 1,
-      persist: undefined,
       validationWorkflowId: 'default',
     });
   });
@@ -118,30 +117,18 @@ describe('runValidationStep', () => {
     expect(mockLogger.info).toHaveBeenCalledWith('Validation completed: 1 discoveries stored');
   });
 
-  it('returns validation_failed when validation throws', async () => {
+  it('throws when validation fails', async () => {
     mockInvokeValidationWorkflow.mockRejectedValue(new Error('validation boom'));
 
-    const result = await runValidationStep(baseParams);
-
-    expect(result).toEqual({ outcome: 'validation_failed' });
+    await expect(runValidationStep(baseParams)).rejects.toThrow('validation boom');
   });
 
   it('logs the error when validation throws', async () => {
     mockInvokeValidationWorkflow.mockRejectedValue(new Error('validation boom'));
 
-    await runValidationStep(baseParams);
+    await expect(runValidationStep(baseParams)).rejects.toThrow();
 
     expect(mockLogger.error).toHaveBeenCalledWith('Validation workflow failed: validation boom');
-  });
-
-  it('passes persist to invokeValidationWorkflow', async () => {
-    await runValidationStep({ ...baseParams, persist: false });
-
-    expect(mockInvokeValidationWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({
-        persist: false,
-      })
-    );
   });
 
   it('passes enableFieldRendering and withReplacements as true', async () => {
@@ -155,12 +142,10 @@ describe('runValidationStep', () => {
     );
   });
 
-  it('handles non-Error rejection reasons', async () => {
+  it('re-throws non-Error rejection reasons', async () => {
     mockInvokeValidationWorkflow.mockRejectedValue('string-error');
 
-    const result = await runValidationStep(baseParams);
-
-    expect(result).toEqual({ outcome: 'validation_failed' });
+    await expect(runValidationStep(baseParams)).rejects.toBe('string-error');
     expect(mockLogger.error).toHaveBeenCalledWith('Validation workflow failed: string-error');
   });
 });

@@ -13,6 +13,7 @@ import type {
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
 
+import type { AttackDiscoverySource } from '../persistence/event_logging';
 import type {
   ParsedApiConfig,
   WorkflowExecutionTracking,
@@ -71,6 +72,7 @@ export interface InvokeAlertRetrievalParams {
   logger: Logger;
   request: KibanaRequest;
   size?: number;
+  source?: AttackDiscoverySource;
   spaceId: string;
   start?: string;
   workflowId: string;
@@ -120,6 +122,7 @@ export const invokeAlertRetrievalWorkflow = async ({
   logger,
   request,
   size,
+  source,
   spaceId,
   start,
   workflowId,
@@ -190,6 +193,7 @@ export const invokeAlertRetrievalWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime,
       workflowExecutions,
@@ -202,7 +206,7 @@ export const invokeAlertRetrievalWorkflow = async ({
       executionId: workflowRunId,
       isReady: (exec) =>
         exec.stepExecutions.some(
-          (step) => step.stepType === 'attack-discovery.defaultAlertRetrieval'
+          (step) => step.stepType === 'security.attack-discovery.defaultAlertRetrieval'
         ),
       logger,
       spaceId,
@@ -227,6 +231,7 @@ export const invokeAlertRetrievalWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime,
       workflowExecutions,
@@ -272,6 +277,7 @@ export const invokeAlertRetrievalWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime,
       workflowId,
