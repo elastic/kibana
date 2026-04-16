@@ -23,10 +23,9 @@ import type {
 } from '@kbn/custom-integrations-plugin/common';
 
 import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
-import { getPackageReleaseLabel } from '../../../../../../../common/services';
+import { resolveEffectiveRelease } from '../../../../../../../common/services/package_prerelease';
 
 import { installationStatuses } from '../../../../../../../common/constants';
-import { AgentlessDeploymentReleaseStatus } from '../../../../../../../common/types';
 import type {
   DeprecationInfo,
   EpmPackageInstallStatus,
@@ -34,11 +33,6 @@ import type {
   IntegrationCardReleaseLabel,
   PackageSpecIcon,
 } from '../../../../../../../common/types';
-import {
-  getAgentlessRelease,
-  isDefaultAgentlessIntegration,
-  isOnlyAgentlessIntegration,
-} from '../../../../../../../common/services/agentless_policy_helper';
 
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
@@ -147,9 +141,15 @@ export const mapToCard = ({
     uiInternalPathUrl = url;
   }
 
-  const release: IntegrationCardReleaseLabel = getPackageReleaseLabel(version);
   const integration = 'integration' in item ? item.integration || '' : '';
   const packageItem = 'policy_templates' in item ? item : undefined;
+
+  // Resolve the effective release: agentless override when relevant, semver otherwise.
+  const release: IntegrationCardReleaseLabel = resolveEffectiveRelease(
+    packageItem,
+    packageItem?.integration,
+    { isAgentlessContext: filterState?.onlyAgentless, version }
+  );
 
   let extraLabelsBadges: React.ReactNode[] | undefined;
   if (item.type === 'integration' || item.type === 'content') {
@@ -183,22 +183,6 @@ export const mapToCard = ({
 
   if ('supportsAgentless' in item && item.supportsAgentless) {
     cardResult.supportsAgentless = true;
-  }
-
-  // Use the agentless-specific release when agentless is the only or default deployment mode,
-  // or when the caller is displaying an agentless-filtered view.
-  if (
-    isOnlyAgentlessIntegration(packageItem, integration || undefined) ||
-    isDefaultAgentlessIntegration(packageItem, integration || undefined) ||
-    filterState?.onlyAgentless
-  ) {
-    const agentlessRelease = getAgentlessRelease(packageItem, integration || undefined);
-    if (
-      agentlessRelease !== undefined &&
-      agentlessRelease !== AgentlessDeploymentReleaseStatus.GA
-    ) {
-      cardResult.release = agentlessRelease;
-    }
   }
 
   if ('data_streams' in item && Array.isArray(item.data_streams)) {

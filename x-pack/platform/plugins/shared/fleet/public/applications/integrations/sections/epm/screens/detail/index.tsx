@@ -30,11 +30,11 @@ import semverLt from 'semver/functions/lt';
 import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
 
 import {
-  getPackageReleaseLabel,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
 } from '../../../../../../../common/services';
+import { resolveEffectiveRelease } from '../../../../../../../common/services/package_prerelease';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
 import {
@@ -345,6 +345,13 @@ export function Detail() {
     [packageInfo]
   );
 
+  const integrationName = integration ?? undefined;
+
+  const effectiveRelease = useMemo(
+    () => resolveEffectiveRelease(packageInfo ?? undefined, integrationName),
+    [packageInfo, integrationName]
+  );
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="headerLeft">
@@ -398,11 +405,9 @@ export function Detail() {
                           </EuiBadge>
                         </EuiFlexItem>
                       )}
-                      {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                      {effectiveRelease !== 'ga' ? (
                         <EuiFlexItem grow={false}>
-                          <HeaderReleaseBadge
-                            release={getPackageReleaseLabel(packageInfo.version)}
-                          />
+                          <HeaderReleaseBadge release={effectiveRelease} />
                         </EuiFlexItem>
                       ) : null}
                     </EuiFlexGroup>
@@ -414,7 +419,15 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams, packageInfoError]
+    [
+      integrationInfo,
+      isLoading,
+      packageInfo,
+      fromIntegrationsPath,
+      queryParams,
+      packageInfoError,
+      effectiveRelease,
+    ]
   );
 
   const handleEditIntegrationClick = useCallback<ReactEventHandler>((ev) => {
