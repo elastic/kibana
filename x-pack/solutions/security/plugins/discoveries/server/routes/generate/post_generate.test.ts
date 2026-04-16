@@ -344,7 +344,7 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: [],
-          default_alert_retrieval_mode: 'disabled' as const,
+          alert_retrieval_mode: 'custom_only' as const,
           validation_workflow_id: 'default',
         },
       };
@@ -383,7 +383,7 @@ describe('registerGenerateRoute', () => {
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: {
           message:
-            'At least one alert retrieval method must be specified: either set default_alert_retrieval_mode to a value other than "disabled", or provide alert_retrieval_workflow_ids',
+            'At least one alert retrieval method must be specified: either set alert_retrieval_mode to a value other than "custom_only", or provide alert_retrieval_workflow_ids',
         },
       });
     });
@@ -398,7 +398,7 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: [],
-          default_alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'default',
         },
       };
@@ -451,7 +451,7 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
-          default_alert_retrieval_mode: 'disabled' as const,
+          alert_retrieval_mode: 'custom_only' as const,
           validation_workflow_id: 'custom-validation',
         },
       };
@@ -504,7 +504,7 @@ describe('registerGenerateRoute', () => {
         type: 'attack_discovery',
         workflow_config: {
           alert_retrieval_workflow_ids: ['workflow-1'],
-          default_alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'custom-validation',
         },
       };
@@ -837,7 +837,7 @@ describe('registerGenerateRoute', () => {
           type: 'attack_discovery',
           workflowConfig: {
             alert_retrieval_workflow_ids: [],
-            default_alert_retrieval_mode: 'custom_query' as const,
+            alert_retrieval_mode: 'custom_query' as const,
             validation_workflow_id: 'default',
           },
         })

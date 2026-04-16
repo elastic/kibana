@@ -125,7 +125,7 @@ describe('registerUpdateScheduleRoute', () => {
   it('passes existing workflowConfig to transform when the schedule has one', async () => {
     const existingWorkflowConfig = {
       alertRetrievalWorkflowIds: ['workflow-1'],
-      defaultAlertRetrievalMode: 'custom_query' as const,
+      alertRetrievalMode: 'custom_query' as const,
       validationWorkflowId: 'default',
     };
 

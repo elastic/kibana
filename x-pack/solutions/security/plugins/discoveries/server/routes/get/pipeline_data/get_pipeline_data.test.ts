@@ -509,6 +509,7 @@ describe('registerGetPipelineDataRoute', () => {
     });
 
     expect(mockGetWorkflowExecution).toHaveBeenCalledWith('generation-run-id', 'default', {
+      includeInput: false,
       includeOutput: true,
     });
 

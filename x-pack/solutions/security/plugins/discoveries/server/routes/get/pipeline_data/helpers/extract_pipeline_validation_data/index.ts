@@ -8,13 +8,17 @@
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import type { AttackDiscoveryApiAlert } from '@kbn/discoveries-schemas';
 
-const VALIDATION_STEP_TYPE = 'attack-discovery.defaultValidation';
+import { DefaultValidationStepTypeId } from '../../../../../../common/step_types/default_validation_step';
+import { PersistDiscoveriesStepTypeId } from '../../../../../../common/step_types/persist_discoveries_step';
 
 /**
- * Extracts validated attack discoveries from a validation workflow execution.
+ * Extracts validated attack discoveries from a validation workflow execution,
+ * accounting for any duplicates dropped by the persist step.
  *
- * Finds the step with `stepType === 'attack-discovery.defaultValidation'` in the
- * execution's step list and reads its `validated_discoveries` output.
+ * Finds the step with `stepType === 'security.attack-discovery.defaultValidation'` in the
+ * execution's step list and reads its `validated_discoveries` output. If a persist step
+ * is also present with a `duplicates_dropped_count`, that count is subtracted so the
+ * returned length reflects the number of truly new discoveries persisted.
  *
  * @returns The validated discoveries as `AttackDiscoveryApiAlert[]`, or `null` if
  * the execution is not available, the validation step is missing, or the output
@@ -30,7 +34,7 @@ export const extractPipelineValidationData = ({
   }
 
   const validationStep = execution.stepExecutions.find(
-    (step) => step.stepType === VALIDATION_STEP_TYPE
+    (step) => step.stepType === DefaultValidationStepTypeId
   );
 
   if (validationStep == null) {
@@ -49,5 +53,19 @@ export const extractPipelineValidationData = ({
     return null;
   }
 
-  return output.validated_discoveries as AttackDiscoveryApiAlert[];
+  const validatedDiscoveries = output.validated_discoveries as AttackDiscoveryApiAlert[];
+
+  const persistStep = execution.stepExecutions.find(
+    (step) => step.stepType === PersistDiscoveriesStepTypeId
+  );
+
+  const persistOutput = persistStep?.output as { duplicates_dropped_count?: unknown } | undefined;
+  const duplicatesDroppedCount =
+    typeof persistOutput?.duplicates_dropped_count === 'number'
+      ? persistOutput.duplicates_dropped_count
+      : 0;
+
+  const newCount = Math.max(0, validatedDiscoveries.length - duplicatesDroppedCount);
+
+  return validatedDiscoveries.slice(0, newCount);
 };

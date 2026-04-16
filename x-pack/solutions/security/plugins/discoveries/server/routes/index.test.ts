@@ -11,7 +11,6 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { registerRoutes } from '.';
 import * as deleteScheduleModule from './delete/schedules/delete_schedule';
 import * as generateModule from './generate/post_generate';
-import * as getActionTriggeredGenerationsModule from './get/action_triggered_generations/get_action_triggered_generations';
 import * as getDefaultEsqlQueryModule from './get/default_esql_query/get_default_esql_query';
 import * as getExecutionTrackingModule from './get/execution_tracking/get_execution_tracking';
 import * as findSchedulesModule from './get/schedules/find_schedules';
@@ -27,7 +26,6 @@ import * as updateScheduleModule from './put/schedules/update_schedule';
 
 jest.mock('./delete/schedules/delete_schedule');
 jest.mock('./generate/post_generate');
-jest.mock('./get/action_triggered_generations/get_action_triggered_generations');
 jest.mock('./get/default_esql_query/get_default_esql_query');
 jest.mock('./get/execution_tracking/get_execution_tracking');
 jest.mock('./get/schedules/find_schedules');
@@ -121,27 +119,6 @@ describe('registerRoutes', () => {
 
   it('registers get execution tracking route', () => {
     const spy = jest.spyOn(getExecutionTrackingModule, 'registerGetExecutionTrackingRoute');
-
-    registerRoutes(mockRouter, mockLogger, {
-      adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
-      analytics: mockAnalytics,
-      getEventLogIndex: mockGetEventLogIndex,
-      getEventLogger: mockGetEventLogger,
-      getStartServices: mockGetStartServices,
-      workflowInitService: mockWorkflowInitService,
-    });
-
-    expect(spy).toHaveBeenCalledWith(mockRouter, mockLogger, {
-      getEventLogIndex: mockGetEventLogIndex,
-      getStartServices: mockGetStartServices,
-    });
-  });
-
-  it('registers get action triggered generations route', () => {
-    const spy = jest.spyOn(
-      getActionTriggeredGenerationsModule,
-      'registerGetActionTriggeredGenerationsRoute'
-    );
 
     registerRoutes(mockRouter, mockLogger, {
       adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,

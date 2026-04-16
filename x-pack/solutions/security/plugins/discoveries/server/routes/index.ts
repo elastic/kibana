@@ -16,7 +16,6 @@ import { registerGetDefaultEsqlQueryRoute } from './get/default_esql_query/get_d
 import { registerGetExecutionTrackingRoute } from './get/execution_tracking/get_execution_tracking';
 import { registerFindSchedulesRoute } from './get/schedules/find_schedules';
 import { registerGetScheduleRoute } from './get/schedules/get_schedule';
-import { registerGetActionTriggeredGenerationsRoute } from './get/action_triggered_generations/get_action_triggered_generations';
 import { registerGetPipelineDataRoute } from './get/pipeline_data/get_pipeline_data';
 import type { WorkflowInitializationService } from '../lib/workflow_initialization';
 import { registerGenerateWorkflowRoute } from './post/generate_workflow/post_generate_workflow';
@@ -80,11 +79,6 @@ export const registerRoutes = (
     adhocAttackDiscoveryDataClient,
     getStartServices,
     workflowInitService,
-  });
-
-  registerGetActionTriggeredGenerationsRoute(router, logger, {
-    getEventLogIndex,
-    getStartServices,
   });
 
   // Schedule routes
