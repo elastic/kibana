@@ -13,6 +13,7 @@ import { makeObservation, getEntityField, groupEntitiesByType } from './utils';
 const MODULE_ID = 'risk_analysis';
 const MODULE_NAME = 'Risk Analysis';
 const MODULE_PRIORITY = 10;
+const MODULE_WEIGHT = 0.35;
 
 const HIGH_RISK_THRESHOLD = 70;
 const ESCALATION_DELTA_24H = 10;
@@ -88,7 +89,12 @@ export const createRiskScoreModule = ({
   riskScoreDataClient,
   logger,
 }: RiskScoreModuleDeps): ObservationModule => ({
-  config: { id: MODULE_ID, name: MODULE_NAME, priority: MODULE_PRIORITY },
+  config: {
+    id: MODULE_ID,
+    name: MODULE_NAME,
+    priority: MODULE_PRIORITY,
+    weight: MODULE_WEIGHT,
+  },
 
   isEnabled: () => true,
 

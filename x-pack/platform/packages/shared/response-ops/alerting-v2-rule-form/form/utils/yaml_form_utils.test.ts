@@ -34,7 +34,7 @@ describe('yaml_form_utils', () => {
           enabled: true,
           description: 'A test rule',
           owner: 'test-owner',
-          labels: ['label1', 'label2'],
+          tags: ['label1', 'label2'],
         },
         timeField: '@timestamp',
         schedule: {
@@ -63,7 +63,7 @@ describe('yaml_form_utils', () => {
           enabled: true,
           description: 'A test rule',
           owner: 'test-owner',
-          labels: ['label1', 'label2'],
+          tags: ['label1', 'label2'],
         },
         time_field: '@timestamp',
         schedule: {
@@ -178,7 +178,7 @@ describe('yaml_form_utils', () => {
           enabled: true,
           description: 'A description',
           owner: undefined,
-          labels: undefined,
+          tags: undefined,
         },
         timeField: '@timestamp',
         schedule: {

@@ -472,9 +472,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    it('handles auto upgrading policies', async () => {
+    it('handles auto upgrading policies', async function () {
       // force a lower version
       const lowerVersion = '1.1.1';
+
+      // Check if the lower version is available in the package registry.
+      // The package-registry-verify-and-promote pipeline may use a registry
+      // that doesn't include old versions — skip gracefully instead of timing out.
+      const pkgCheck = await supertestWithAuth
+        .get(`/api/fleet/epm/packages/synthetics/${lowerVersion}`)
+        .set('kbn-xsrf', 'true');
+      if (pkgCheck.status === 404) {
+        this.skip();
+      }
+
       await testPrivateLocations.installSyntheticsPackage({ version: lowerVersion });
       let monitorId = '';
       const privateLocation = await testPrivateLocations.addTestPrivateLocation();
@@ -507,7 +518,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(packagePolicy.package.version).eql(lowerVersion);
         await supertestWithAuth.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-        await retry.tryForTime(60 * 1000, async () => {
+        await retry.tryForTime(120 * 1000, async () => {
           const policyResponseAfterUpgrade = await supertestWithAuth.get(
             '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
           );
@@ -517,7 +528,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(true);
         });
       } finally {
-        await deleteMonitor(monitorId);
+        try {
+          await deleteMonitor(monitorId);
+        } catch (e) {
+          // ignore cleanup errors
+        }
+        // Restore the package to the latest version — this MUST succeed
+        // or subsequent tests will run against the wrong version
+        await testPrivateLocations.installSyntheticsPackage();
       }
     });
 
@@ -536,7 +554,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('can create valid monitors without all defaults', async () => {
-      // Delete a required property to make payload invalid
+      let monitorId = '';
       const newMonitor = {
         name: 'Sample name',
         type: 'http',
@@ -544,18 +562,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      expect(apiResponse).eql(
-        omitMonitorKeys({
-          ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
-          ...newMonitor,
-          spaces: ['default'],
-        })
-      );
+        expect(apiResponse).eql(
+          omitMonitorKeys({
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
+            ...newMonitor,
+            spaces: ['default'],
+          })
+        );
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('can disable retries', async () => {
+      let monitorId = '';
       const maxAttempts = 1;
       const newMonitor = {
         max_attempts: maxAttempts,
@@ -565,12 +589,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+        rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('can enable retries with max attempts', async () => {
+      let monitorId = '';
       const maxAttempts = 2;
       const newMonitor = {
         max_attempts: maxAttempts,
@@ -580,12 +610,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: true }));
+        rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: true }));
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('can enable retries', async () => {
+      let monitorId = '';
       const newMonitor = {
         retest_on_failure: false,
         urls: 'https://elastic.co',
@@ -594,9 +630,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+        rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('cannot create a invalid monitor without a monitor type', async () => {

@@ -12,9 +12,9 @@ import { INTERNAL_BASE_ACTION_API_PATH, type DisconnectOAuthPathParams } from '.
 import { disconnectOAuthPathParamsSchema } from '../../common/routes/connector/apis/oauth';
 import type { ActionsRequestHandlerContext } from '../types';
 import type { ActionsPluginsStart } from '../plugin';
-import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
+import { OAUTH_API_TAG } from '../feature';
 
 export const oauthDisconnectRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -25,7 +25,11 @@ export const oauthDisconnectRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_oauth_disconnect`,
-      security: DEFAULT_ACTION_ROUTE_SECURITY,
+      security: {
+        authz: {
+          requiredPrivileges: [OAUTH_API_TAG],
+        },
+      },
       options: {
         access: 'internal',
         summary: i18n.translate('xpack.actions.oauthDisconnect.routeSummary', {

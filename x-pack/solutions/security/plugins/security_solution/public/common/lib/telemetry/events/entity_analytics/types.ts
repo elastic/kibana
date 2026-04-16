@@ -14,6 +14,7 @@ export enum EntityEventTypes {
   EntityRiskFiltered = 'Entity Risk Filtered',
   EntityStoreEnablementToggleClicked = 'Entity Store Enablement Toggle Clicked',
   EntityStoreDashboardInitButtonClicked = 'Entity Store Initialization Button Clicked',
+  EntityGraphClicked = 'Entity Graph Clicked',
   ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
   AddRiskInputToTimelineClicked = 'Add Risk Input To Timeline Clicked',
   RiskInputsExpandedFlyoutOpened = 'Risk Inputs Expanded Flyout Opened',
@@ -50,6 +51,8 @@ interface ReportToggleRiskSummaryClickedParams extends EntityParam {
 }
 
 type ReportRiskInputsExpandedFlyoutOpenedParams = EntityParam;
+
+type ReportEntityGraphViewClickedParams = EntityParam;
 
 interface ReportAddRiskInputToTimelineClickedParams {
   quantity: number;
@@ -113,6 +116,7 @@ export interface EntityAnalyticsTelemetryEventsMap {
   [EntityEventTypes.EntityRiskFiltered]: ReportEntityRiskFilteredParams;
   [EntityEventTypes.EntityStoreEnablementToggleClicked]: ReportEntityStoreEnablementParams;
   [EntityEventTypes.EntityStoreDashboardInitButtonClicked]: ReportEntityStoreInitParams;
+  [EntityEventTypes.EntityGraphClicked]: ReportEntityGraphViewClickedParams;
   [EntityEventTypes.ToggleRiskSummaryClicked]: ReportToggleRiskSummaryClickedParams;
   [EntityEventTypes.AddRiskInputToTimelineClicked]: ReportAddRiskInputToTimelineClickedParams;
   [EntityEventTypes.RiskInputsExpandedFlyoutOpened]: ReportRiskInputsExpandedFlyoutOpenedParams;

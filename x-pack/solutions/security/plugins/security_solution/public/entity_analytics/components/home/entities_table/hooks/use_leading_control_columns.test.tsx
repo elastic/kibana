@@ -6,16 +6,37 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { useLeadingControlColumns } from './use_leading_control_columns';
+
+const mockOpenChat = jest.fn();
+const mockUseAgentBuilderAvailability = jest.fn().mockReturnValue({ isAgentBuilderEnabled: false });
+const mockUseKibana = jest.fn().mockReturnValue({
+  services: { agentBuilder: undefined },
+});
+
+jest.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: (...args: unknown[]) => mockUseAgentBuilderAvailability(...args),
+}));
+
+jest.mock('../../../../../common/lib/kibana/use_kibana', () => ({
+  useKibana: (...args: unknown[]) => mockUseKibana(...args),
+}));
+
+jest.mock('../../../../../agent_builder/hooks/use_security_agent_id', () => ({
+  useSecurityAgentId: jest.fn().mockReturnValue('security.agent'),
+}));
 
 describe('useLeadingControlColumns', () => {
   const defaultArgs = {
     canUseTimeline: false,
     investigateInTimeline: jest.fn(),
-    isAgentBuilderEnabled: false,
-    agentBuilder: undefined as AgentBuilderPluginStart | undefined,
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentBuilderEnabled: false });
+    mockUseKibana.mockReturnValue({ services: { agentBuilder: undefined } });
+  });
 
   it('returns no timeline action when canUseTimeline is false', () => {
     const { result } = renderHook(() => useLeadingControlColumns(defaultArgs));
@@ -35,26 +56,22 @@ describe('useLeadingControlColumns', () => {
   });
 
   it('returns AI action when isAgentBuilderEnabled is true and agentBuilder has openChat', () => {
-    const { result } = renderHook(() =>
-      useLeadingControlColumns({
-        ...defaultArgs,
-        isAgentBuilderEnabled: true,
-        agentBuilder: {
-          openChat: jest.fn(),
-        } as unknown as AgentBuilderPluginStart,
-      })
-    );
+    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentBuilderEnabled: true });
+    mockUseKibana.mockReturnValue({
+      services: { agentBuilder: { openChat: mockOpenChat } },
+    });
+
+    const { result } = renderHook(() => useLeadingControlColumns(defaultArgs));
     expect(result.current.find((c) => c.id === 'entity-analytics-ai-action')).toBeDefined();
   });
 
   it('returns no AI action when agentBuilder is undefined even if enabled', () => {
-    const { result } = renderHook(() =>
-      useLeadingControlColumns({
-        ...defaultArgs,
-        isAgentBuilderEnabled: true,
-        agentBuilder: undefined,
-      })
-    );
+    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentBuilderEnabled: true });
+    mockUseKibana.mockReturnValue({
+      services: { agentBuilder: undefined },
+    });
+
+    const { result } = renderHook(() => useLeadingControlColumns(defaultArgs));
     expect(result.current.find((c) => c.id === 'entity-analytics-ai-action')).toBeUndefined();
   });
 });

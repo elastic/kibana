@@ -13,8 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { agentBuilder } = getPageObjects(['agentBuilder']);
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/247766
-  describe.skip('Edit agent', function () {
+  describe('Edit agent', function () {
     const { agents, agentsHooks } = setupAgents({ getPageObjects, getService });
     before(async function () {
       await agentsHooks.before();

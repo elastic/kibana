@@ -6,21 +6,16 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingElastic,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
+import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
+import { AssetImage } from '../../../../asset_image';
 import { Summary } from './summary';
 
 export function InsightsTab() {
+  const router = useStreamsAppRouter();
   const {
     dependencies: {
       start: {
@@ -53,49 +48,41 @@ export function InsightsTab() {
     0
   );
 
-  if (totalEvents === 0 || totalEvents === undefined) {
+  if (totalEvents === 0) {
     return (
-      <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiPanel color="subdued">
-            <EuiFlexGroup
-              direction="column"
-              alignItems="center"
-              justifyContent="center"
-              style={{ minHeight: '30vh', minWidth: '40vh' }}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="createAdvancedJob" size="xxl" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h2>
-                    {i18n.translate(
-                      'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundTitle',
-                      {
-                        defaultMessage: 'No events found to analyze',
-                      }
-                    )}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" textAlign="center" css={{ maxWidth: 400 }}>
-                  {i18n.translate(
-                    'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundDescription',
-                    {
-                      defaultMessage:
-                        'Newly created queries need time to collect data before analysis can begin.',
-                    }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiEmptyPrompt
+        aria-live="polite"
+        titleSize="xs"
+        icon={<AssetImage type="significantEventsDiscovery" />}
+        title={
+          <h2>
+            {i18n.translate('xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundTitle', {
+              defaultMessage: 'Significant Events',
+            })}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate(
+              'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundDescription',
+              {
+                defaultMessage:
+                  'To start discovering Significant Events, onboard your streams, extract Knowledge Indicators, and promote rules to begin detecting events.',
+              }
+            )}
+          </p>
+        }
+        actions={
+          <EuiButtonEmpty href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}>
+            {i18n.translate(
+              'xpack.streams.sigEventsDiscovery.insightsTab.noEventsFoundGoToStreamsButton',
+              { defaultMessage: 'Go to Streams tab' }
+            )}
+          </EuiButtonEmpty>
+        }
+      />
     );
   }
 
-  return <Summary count={totalEvents} />;
+  return <Summary count={totalEvents ?? 0} />;
 }

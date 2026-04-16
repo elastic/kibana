@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { PieStateESQL, PieStateNoESQL } from './pie';
 import { pieStateSchema } from './pie';
 
@@ -15,9 +16,9 @@ describe('Pie Schema', () => {
     describe('Non-ES|QL Schema', () => {
       const basePieConfig = {
         type: 'pie',
-        dataset: {
-          type: 'dataView',
-          id: 'test-data-view',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+          ref_id: 'test-data-view',
         },
         ignore_global_filters: false,
         sampling: 1,
@@ -37,7 +38,7 @@ describe('Pie Schema', () => {
         const validated = pieStateSchema.validate(input);
         expect(validated.type).toBe('pie');
         expect(validated.metrics).toHaveLength(1);
-        expect(validated.metrics[0].operation).toBe('count');
+        expect(validated.metrics[0]).toHaveProperty('operation', 'count');
       });
 
       it('validates configuration with metrics and group_by', () => {
@@ -80,11 +81,13 @@ describe('Pie Schema', () => {
               fields: ['category'],
             },
           ],
-          donut_hole: 'm',
+          styling: {
+            donut_hole: 'm',
+          },
         };
 
         const validated = pieStateSchema.validate(input);
-        expect(validated.donut_hole).toBe('m');
+        expect(validated.styling?.donut_hole).toBe('m');
       });
 
       it('validates full configuration with specific options', () => {
@@ -116,20 +119,22 @@ describe('Pie Schema', () => {
             visibility: 'visible',
             size: 'xl',
           },
-          labels: { position: 'inside' },
-          donut_hole: 's',
-          values: {
-            mode: 'percentage',
-            percent_decimals: 0,
+          styling: {
+            labels: { position: 'inside' },
+            donut_hole: 's',
+            values: {
+              mode: 'percentage',
+              percent_decimals: 0,
+            },
           },
         };
 
         const validated = pieStateSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
         expect(validated.legend?.nested).toBe(false);
-        expect(validated.donut_hole).toBe('s');
-        expect(validated.labels?.position).toBe('inside');
-        expect(validated.values?.mode).toBe('percentage');
+        expect(validated.styling?.donut_hole).toBe('s');
+        expect(validated.styling?.labels?.position).toBe('inside');
+        expect(validated.styling?.values?.mode).toBe('percentage');
       });
 
       it('validates configuration with multiple group_by dimensions', () => {
@@ -293,8 +298,10 @@ describe('Pie Schema', () => {
               fields: ['category'],
             },
           ],
-          // @ts-expect-error - invalid donut hole size
-          donut_hole: 'invalid',
+          styling: {
+            // @ts-expect-error - invalid donut hole size
+            donut_hole: 'invalid',
+          },
         };
 
         expect(() => pieStateSchema.validate(input)).toThrow();
@@ -316,9 +323,11 @@ describe('Pie Schema', () => {
               fields: ['category'],
             },
           ],
-          labels: {
-            // @ts-expect-error - invalid labels position
-            position: 'invalid',
+          styling: {
+            labels: {
+              // @ts-expect-error - invalid labels position
+              position: 'invalid',
+            },
           },
         };
 
@@ -701,7 +710,7 @@ describe('Pie Schema', () => {
     describe('ES|QL Schema', () => {
       const baseESQLPieConfig = {
         type: 'pie',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | STATS count() BY category',
         },
@@ -713,15 +722,14 @@ describe('Pie Schema', () => {
           ...baseESQLPieConfig,
           metrics: [
             {
-              operation: 'value',
               column: 'count',
             },
           ],
         };
 
         const validated = pieStateSchema.validate(input);
-        expect(validated.dataset.type).toBe('esql');
-        expect(validated.metrics[0].operation).toBe('value');
+        expect(validated.data_source.type).toBe('esql');
+        expect(validated.metrics[0]).toHaveProperty('column', 'count');
       });
 
       it('validates ES|QL configuration with group_by', () => {
@@ -729,13 +737,11 @@ describe('Pie Schema', () => {
           ...baseESQLPieConfig,
           metrics: [
             {
-              operation: 'value',
               column: 'count',
             },
           ],
           group_by: [
             {
-              operation: 'value',
               column: 'category',
             },
           ],
@@ -751,11 +757,9 @@ describe('Pie Schema', () => {
           ...baseESQLPieConfig,
           metrics: [
             {
-              operation: 'value',
               column: 'count',
             },
             {
-              operation: 'value',
               column: 'sum_sales',
             },
           ],
@@ -771,7 +775,6 @@ describe('Pie Schema', () => {
           title: 'Sales Chart',
           metrics: [
             {
-              operation: 'value',
               column: 'sum_sales',
               color: {
                 type: 'static',
@@ -781,7 +784,6 @@ describe('Pie Schema', () => {
           ],
           group_by: [
             {
-              operation: 'value',
               column: 'category',
               color: {
                 mode: 'categorical',
@@ -827,14 +829,16 @@ describe('Pie Schema', () => {
             nested: false,
             visibility: 'visible',
           },
-          labels: { position: 'outside' },
-          donut_hole: 'l',
+          styling: {
+            labels: { position: 'outside' },
+            donut_hole: 'l',
+          },
         };
 
         const validated = pieStateSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
-        expect(validated.donut_hole).toBe('l');
-        expect(validated.labels?.position).toBe('outside');
+        expect(validated.styling?.donut_hole).toBe('l');
+        expect(validated.styling?.labels?.position).toBe('outside');
       });
     });
   });

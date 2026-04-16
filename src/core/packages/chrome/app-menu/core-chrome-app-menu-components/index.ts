@@ -19,7 +19,6 @@ export type {
   AppMenuRunActionParams,
   AppMenuConfig,
   AppMenuItemType,
-  AppMenuSecondaryActionItem,
   AppMenuPrimaryActionItem,
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,

@@ -100,12 +100,12 @@ export const NotificationPolicyFormFlyout = ({
               {isEditMode ? (
                 <FormattedMessage
                   id="xpack.alertingV2.notificationPolicy.formFlyout.update"
-                  defaultMessage="Update"
+                  defaultMessage="Update policy"
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.alertingV2.notificationPolicy.formFlyout.save"
-                  defaultMessage="Save"
+                  defaultMessage="Create policy"
                 />
               )}
             </EuiButton>

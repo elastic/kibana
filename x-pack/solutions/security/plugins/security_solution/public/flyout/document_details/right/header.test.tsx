@@ -13,7 +13,14 @@ import { allThreeTabs } from './hooks/use_tabs';
 import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 
 jest.mock('../shared/context', () => ({
-  useDocumentDetailsContext: jest.fn().mockReturnValue({ dataFormattedForFieldBrowser: [] }),
+  useDocumentDetailsContext: jest.fn().mockImplementation(() => {
+    const { mockSearchHit } = jest.requireActual('../shared/mocks/mock_search_hit');
+
+    return {
+      dataFormattedForFieldBrowser: [],
+      searchHit: mockSearchHit,
+    };
+  }),
 }));
 jest.mock('../shared/hooks/use_basic_data_from_details_data', () => ({
   useBasicDataFromDetailsData: jest.fn(),

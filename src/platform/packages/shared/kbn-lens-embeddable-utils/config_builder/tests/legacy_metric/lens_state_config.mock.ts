@@ -8,6 +8,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 /**
  *  Simple legacy metric generated from kibana
@@ -62,7 +63,7 @@ export const simpleLegacyMetricAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -149,7 +150,7 @@ export const defaultColorByValueAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsLegacyMetric',
   references: [
     {
@@ -237,7 +238,7 @@ export const selectorColorByValueAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsLegacyMetric',
   references: [
     {
@@ -321,7 +322,7 @@ export const customColorByValueAttributes: LensAttributes = {
     },
     filters: [],
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',

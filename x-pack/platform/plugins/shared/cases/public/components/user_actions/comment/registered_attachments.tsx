@@ -133,6 +133,8 @@ export const createRegisteredAttachmentUserActionBuilder = <
     };
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
+    const deleteSuccessTitle =
+      attachmentViewObject.deleteSuccessTitle ?? DELETE_REGISTERED_ATTACHMENT;
 
     const renderer = getAttachmentRenderer(userAction.id);
     const actions = attachmentViewObject.getActions?.(props) ?? [];
@@ -180,7 +182,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
             )}
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
-              onDelete={() => handleDeleteComment(attachment.id, DELETE_REGISTERED_ATTACHMENT)}
+              onDelete={() => handleDeleteComment(attachment.id, deleteSuccessTitle)}
               registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
               hideDefaultActions={!!attachmentViewObject.hideDefaultActions}
             />

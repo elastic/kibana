@@ -1011,7 +1011,7 @@
           "<object>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
-        "lineNumber": 18,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1027,7 +1027,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
-            "lineNumber": 18,
+            "lineNumber": 25,
             "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
@@ -2358,7 +2358,7 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
-        "lineNumber": 18,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2374,7 +2374,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
-            "lineNumber": 18,
+            "lineNumber": 16,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -3929,7 +3929,7 @@
             "section": "def-common.StateComparators",
             "text": "StateComparators"
           },
-          "<StateType>; defaultState?: Partial<StateType> | undefined; onReset: (lastSavedPanelState?: StateType | undefined) => ",
+          "<StateType>; defaultState?: Partial<StateType> | undefined; onReset?: ((lastSavedPanelState?: StateType | undefined) => ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -3937,17 +3937,26 @@
             "section": "def-common.MaybePromise",
             "text": "MaybePromise"
           },
-          "<void>; checkRefEquality?: boolean | undefined; }) => ",
+          "<void>) | undefined; checkRefEquality?: boolean | undefined; }) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
-          }
+          },
+          " & Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasSerializableState",
+            "text": "HasSerializableState"
+          },
+          "<StateType>, \"applySerializedState\">"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3960,7 +3969,7 @@
             "label": "{\n  uuid,\n  onReset,\n  parentApi,\n  getComparators,\n  defaultState,\n  serializeState,\n  anyStateChange$,\n  checkRefEquality,\n}",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -3973,7 +3982,7 @@
                 "label": "uuid",
                 "description": [],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-                "lineNumber": 30,
+                "lineNumber": 31,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3989,7 +3998,7 @@
                   "unknown"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-                "lineNumber": 31,
+                "lineNumber": 32,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4006,7 +4015,7 @@
                   "<void>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-                "lineNumber": 32,
+                "lineNumber": 33,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4022,7 +4031,7 @@
                   "() => StateType"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-                "lineNumber": 33,
+                "lineNumber": 34,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4048,7 +4057,7 @@
                   "<StateType>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-                "lineNumber": 34,
+                "lineNumber": 35,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4066,7 +4075,7 @@
                   "Partial<StateType> | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-                "lineNumber": 35,
+                "lineNumber": 36,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4079,7 +4088,7 @@
                 "label": "onReset",
                 "description": [],
                 "signature": [
-                  "(lastSavedPanelState?: StateType | undefined) => ",
+                  "((lastSavedPanelState?: StateType | undefined) => ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -4087,10 +4096,10 @@
                     "section": "def-common.MaybePromise",
                     "text": "MaybePromise"
                   },
-                  "<void>"
+                  "<void>) | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-                "lineNumber": 36,
+                "lineNumber": 37,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4106,8 +4115,8 @@
                       "StateType | undefined"
                     ],
                     "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-                    "lineNumber": 36,
-                    "columnNumber": 13,
+                    "lineNumber": 37,
+                    "columnNumber": 14,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -4126,7 +4135,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/unsaved_changes/initialize_unsaved_changes.ts",
-                "lineNumber": 37,
+                "lineNumber": 38,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -7916,7 +7925,7 @@
           "<SerializedState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7934,11 +7943,57 @@
               "() => SerializedState"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
-            "lineNumber": 11,
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasSerializableState.applySerializedState",
+            "type": "Function",
+            "tags": [],
+            "label": "applySerializedState",
+            "description": [
+              "\nApplies a serialized state snapshot owned by the parent container."
+            ],
+            "signature": [
+              "(state?: SerializedState | undefined) => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<void>"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasSerializableState.applySerializedState.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "SerializedState | undefined"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
+                "lineNumber": 22,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -13670,7 +13725,7 @@
         "label": "PublishesUnsavedChanges",
         "description": [],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
-        "lineNumber": 13,
+        "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13687,36 +13742,10 @@
               "<boolean>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
-            "lineNumber": 14,
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.PublishesUnsavedChanges.resetUnsavedChanges",
-            "type": "Function",
-            "tags": [],
-            "label": "resetUnsavedChanges",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.MaybePromise",
-                "text": "MaybePromise"
-              },
-              "<void>"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
-            "lineNumber": 15,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false

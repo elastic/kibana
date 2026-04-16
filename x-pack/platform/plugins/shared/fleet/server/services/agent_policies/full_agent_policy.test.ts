@@ -1832,11 +1832,10 @@ describe('getFullAgentPolicy', () => {
       await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
       expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
-      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0];
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
       expect(callArgs).toBeDefined();
-      // Third argument should be the packageInfoCache Map
-      expect(callArgs[2]).toBeInstanceOf(Map);
-      const packageInfoCache = callArgs[2] as Map<string, PackageInfo>;
+      expect(callArgs.packageInfoCache).toBeInstanceOf(Map);
+      const packageInfoCache = callArgs.packageInfoCache as Map<string, PackageInfo>;
       expect(packageInfoCache.has('otelpackage-1.0.0')).toBe(true);
       expect(packageInfoCache.get('otelpackage-1.0.0')).toEqual(packageInfo);
     });
@@ -1961,6 +1960,139 @@ describe('getFullAgentPolicy', () => {
       await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
       expect(mockedGenerateOtelcolConfig).not.toHaveBeenCalled();
+    });
+
+    it('should pass the resolved proxy to generateOtelcolConfig when dataOutput has a proxy_id', async () => {
+      const proxy = {
+        id: 'proxy-1',
+        name: 'my-proxy',
+        url: 'http://proxy.example.com:3128',
+        proxy_headers: { 'X-Custom': 'value' },
+        is_preconfigured: false,
+      };
+
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'test-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'default',
+            type: 'elasticsearch',
+            hosts: ['http://127.0.0.1:9201'],
+            proxy_id: 'proxy-1',
+          },
+        ],
+        proxies: [proxy],
+        dataOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+          proxy_id: 'proxy-1',
+        },
+        monitoringOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+        downloadSourceProxy: undefined,
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be the resolved proxy
+      expect(callArgs.proxy).toEqual(proxy);
+    });
+
+    it('should pass undefined proxy to generateOtelcolConfig when dataOutput has no proxy_id', async () => {
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be undefined when no proxy_id
+      expect(callArgs.proxy).toBeUndefined();
+    });
+
+    it('should pass undefined proxy to generateOtelcolConfig when proxy_id does not match any proxy', async () => {
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'test-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'default',
+            type: 'elasticsearch',
+            hosts: ['http://127.0.0.1:9201'],
+            proxy_id: 'nonexistent-proxy',
+          },
+        ],
+        proxies: [],
+        dataOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+          proxy_id: 'nonexistent-proxy',
+        },
+        monitoringOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+        downloadSourceProxy: undefined,
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be undefined when proxy_id doesn't match
+      expect(callArgs.proxy).toBeUndefined();
     });
   });
 });

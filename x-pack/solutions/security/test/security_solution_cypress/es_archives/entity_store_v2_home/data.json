@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "user-1",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "entity": {
@@ -41,7 +41,7 @@
   "type": "doc",
   "value": {
     "id": "user-2",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T16:00:00.000Z",
       "entity": {
@@ -67,7 +67,7 @@
   "type": "doc",
   "value": {
     "id": "host-1",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "entity": {
@@ -99,7 +99,7 @@
   "type": "doc",
   "value": {
     "id": "host-2",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T15:00:00.000Z",
       "entity": {
@@ -125,7 +125,7 @@
   "type": "doc",
   "value": {
     "id": "service-1",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "entity": {
@@ -157,7 +157,7 @@
   "type": "doc",
   "value": {
     "id": "service-2",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T14:00:00.000Z",
       "entity": {
@@ -183,7 +183,7 @@
   "type": "doc",
   "value": {
     "id": "user-4",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T16:30:00.000Z",
       "entity": {
@@ -214,7 +214,7 @@
   "type": "doc",
   "value": {
     "id": "user-5",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T16:30:00.000Z",
       "entity": {

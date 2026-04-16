@@ -213,6 +213,29 @@ describe('applyFieldEvaluations', () => {
       'entity.namespace': 'unknown',
     });
   });
+
+  const nonIdpLocalDoc = {
+    user: { name: 'alice' },
+    host: { id: 'host-1' },
+    event: { module: 'winlogbeat', kind: 'event', category: 'process' },
+  };
+
+  it('should set entity.namespace to local from condition whenClause when non-IDP document matches', () => {
+    expect(applyFieldEvaluations(nonIdpLocalDoc, userEvaluations)).toEqual({
+      'entity.namespace': USER_ENTITY_NAMESPACE.Local,
+    });
+  });
+
+  it('should not override mapped namespace when IDP post-agg filter matches', () => {
+    const idpLikeDoc = {
+      user: { name: 'alice' },
+      host: { id: 'host-1' },
+      event: { module: 'okta', kind: 'asset' },
+    };
+    expect(applyFieldEvaluations(idpLikeDoc, userEvaluations)).toEqual({
+      'entity.namespace': 'okta',
+    });
+  });
 });
 
 describe('shared entity.source field evaluation', () => {
@@ -354,5 +377,19 @@ describe('getSourceMatchSpec', () => {
         userEval
       )
     ).toEqual({ type: 'values', values: ['azure', 'entityanalytics_entra_id'] });
+  });
+
+  it('should return condition spec when a condition whenClause wins', () => {
+    const nonIdpLocalDoc = {
+      user: { name: 'alice' },
+      host: { id: 'host-1' },
+      event: { module: 'winlogbeat', kind: 'event', category: 'process' },
+    };
+    expect(getSourceMatchSpec(nonIdpLocalDoc, userEval)).toEqual({
+      type: 'condition',
+      condition: expect.objectContaining({
+        and: expect.any(Array),
+      }),
+    });
   });
 });

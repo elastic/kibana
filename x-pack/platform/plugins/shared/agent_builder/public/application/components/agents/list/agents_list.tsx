@@ -22,8 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
-import { hasAgentWriteAccess, type AgentDefinition } from '@kbn/agent-builder-common';
+import { canCurrentUserEditAgent, type AgentDefinition } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
@@ -68,35 +67,6 @@ const actionLabels = {
   }),
 };
 
-const canCurrentUserEditAgent = ({
-  agent,
-  manageAgents,
-  currentUser,
-  isAdmin,
-  isCurrentUserLoading,
-}: {
-  agent: AgentDefinition;
-  manageAgents: boolean;
-  currentUser?: UserIdAndName | null;
-  isAdmin: boolean;
-  isCurrentUserLoading: boolean;
-}) => {
-  if (agent.readonly || !manageAgents) {
-    return false;
-  }
-
-  if (isCurrentUserLoading) {
-    return false;
-  }
-
-  return hasAgentWriteAccess({
-    visibility: agent.visibility,
-    owner: agent.created_by,
-    currentUser,
-    isAdmin,
-  });
-};
-
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const { createAgentBuilderUrl } = useNavigation();
@@ -129,7 +99,7 @@ export const AgentsList: React.FC = () => {
         const canEdit = canEditAgent(agent);
         const showCheckingTooltip = !canEdit && isCurrentUserLoading;
         const nameContent = !canEdit ? (
-          <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
+          <EuiText data-test-subj="agentBuilderAgentsListName" size="m">
             {name}
           </EuiText>
         ) : (
@@ -137,7 +107,7 @@ export const AgentsList: React.FC = () => {
             data-test-subj="agentBuilderAgentsListName"
             href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
           >
-            {name}
+            <EuiText size="m">{name}</EuiText>
           </EuiLink>
         );
         return (
@@ -152,7 +122,9 @@ export const AgentsList: React.FC = () => {
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s">{agent.description}</EuiText>
+              <EuiText color="subdued" size="s">
+                {agent.description}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
@@ -161,6 +133,7 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentLabels: EuiTableFieldDataColumnType<AgentDefinition> = {
+      width: '25%',
       field: 'labels',
       name: columnNames.labels,
       render: (labels?: string[]) => {
@@ -174,12 +147,14 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentVisibility: EuiTableComputedColumnType<AgentDefinition> = {
+      width: '135px',
       name: columnNames.visibility,
       render: (agent) => <AgentVisibilityBadge agent={agent} />,
       'data-test-subj': 'agentBuilderAgentsListVisibility',
     };
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
+      width: '120px',
       actions: [
         {
           type: 'icon',

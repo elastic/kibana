@@ -21,10 +21,28 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
   groupBy: schema.maybe(
     schema.nullable(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }))
   ),
+  tags: schema.maybe(schema.nullable(schema.arrayOf(schema.string(), { maxSize: 20 }))),
+  groupingMode: schema.maybe(
+    schema.nullable(
+      schema.oneOf([
+        schema.literal('per_episode'),
+        schema.literal('all'),
+        schema.literal('per_field'),
+      ])
+    )
+  ),
   throttle: schema.maybe(
     schema.nullable(
       schema.object({
-        interval: schema.string(),
+        strategy: schema.maybe(
+          schema.oneOf([
+            schema.literal('on_status_change'),
+            schema.literal('per_status_interval'),
+            schema.literal('time_interval'),
+            schema.literal('every_time'),
+          ])
+        ),
+        interval: schema.maybe(schema.string()),
       })
     )
   ),

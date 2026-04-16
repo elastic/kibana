@@ -27,6 +27,7 @@ import {
   FEATURE_PROPERTIES,
   FEATURE_SUBTYPE,
   FEATURE_FILTER,
+  FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 
 export const storedFeatureSchema = z.object({
@@ -48,6 +49,7 @@ export const storedFeatureSchema = z.object({
   [FEATURE_EXCLUDED_AT]: z.string().optional(),
   [FEATURE_TITLE]: z.string().optional(),
   [FEATURE_FILTER]: conditionSchema.optional(),
+  [FEATURE_SEARCH_EMBEDDING]: z.string().optional(),
 });
 
 export type StoredFeature = z.infer<typeof storedFeatureSchema>;

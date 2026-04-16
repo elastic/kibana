@@ -10,11 +10,7 @@
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
-import {
-  FullScreenWaterfall,
-  FULL_TRACE_WATERFALL_RENDER_DELAY_MS,
-  type FullScreenWaterfallProps,
-} from '.';
+import { FullScreenWaterfall, type FullScreenWaterfallProps } from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
 import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
@@ -35,6 +31,7 @@ jest.mock('./waterfall_flyout/logs_flyout', () => ({
 }));
 
 let capturedDocFlyoutOnClose: (() => void) | undefined;
+let capturedDocFlyoutHasAnimation: boolean | undefined;
 
 jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
   DocumentDetailFlyout: ({
@@ -43,9 +40,11 @@ jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
     traceId,
     activeSection,
     dataTestSubj,
+    hasAnimation,
     onCloseFlyout,
   }: any) => {
     capturedDocFlyoutOnClose = onCloseFlyout;
+    capturedDocFlyoutHasAnimation = hasAnimation;
     return (
       <div
         data-test-subj={type === 'spanDetailFlyout' ? 'spanFlyout' : 'logsFlyout'}
@@ -105,11 +104,11 @@ describe('FullScreenWaterfall', () => {
     jest.useFakeTimers();
     capturedWaterfallProps = {};
     capturedDocFlyoutOnClose = undefined;
+    capturedDocFlyoutHasAnimation = undefined;
   });
 
   afterEach(() => {
     jest.useRealTimers();
-    document.getElementById('flyout-skip-open-animation')?.remove();
   });
 
   it('should not display nested flyouts initially', () => {
@@ -119,62 +118,45 @@ describe('FullScreenWaterfall', () => {
     expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
   });
 
-  it('delays rendering the full trace waterfall on standard open to preserve the flyout animation', () => {
+  it('renders the full trace waterfall immediately on standard open', () => {
     renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} />);
-
-    expect(screen.queryByTestId('fullTraceWaterfall')).not.toBeInTheDocument();
-
-    act(() => {
-      jest.advanceTimersByTime(FULL_TRACE_WATERFALL_RENDER_DELAY_MS);
-    });
 
     expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
   });
 
   describe('when service name is undefined', () => {
-    it('renders the full trace waterfall after the delay', () => {
+    it('renders the full trace waterfall', () => {
       renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} serviceName={undefined} />);
-
-      act(() => {
-        jest.advanceTimersByTime(FULL_TRACE_WATERFALL_RENDER_DELAY_MS);
-      });
 
       expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
     });
   });
 
-  describe('animation suppression', () => {
-    it('renders the full trace waterfall immediately when restoring previously-open state', () => {
-      renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} skipOpenAnimation={true} />);
+  describe('hasAnimation prop', () => {
+    it('passes animation disabled to the document detail flyout when skipOpenAnimation is true', () => {
+      renderWithHistoryKey(
+        <FullScreenWaterfall
+          {...defaultProps}
+          skipOpenAnimation={true}
+          docId="transaction-doc-1"
+          activeFlyoutType="spanDetailFlyout"
+        />
+      );
 
-      expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
+      expect(capturedDocFlyoutHasAnimation).toBe(false);
     });
 
-    it('injects a style scoped to traceWaterfallFlyout when skipOpenAnimation is true', () => {
-      renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} skipOpenAnimation={true} />);
+    it('passes animation enabled to the document detail flyout when skipOpenAnimation is false', () => {
+      renderWithHistoryKey(
+        <FullScreenWaterfall
+          {...defaultProps}
+          skipOpenAnimation={false}
+          docId="transaction-doc-1"
+          activeFlyoutType="spanDetailFlyout"
+        />
+      );
 
-      const style = document.getElementById('flyout-skip-open-animation');
-      expect(style).toBeInTheDocument();
-      expect(style!.textContent).toContain('[data-test-subj="traceWaterfallFlyout"]');
-      expect(style!.textContent).toContain('[data-test-subj="traceWaterfallDocumentFlyout"]');
-    });
-
-    it('does not inject the animation-suppression style when skipOpenAnimation is false', () => {
-      renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} skipOpenAnimation={false} />);
-
-      expect(document.getElementById('flyout-skip-open-animation')).not.toBeInTheDocument();
-    });
-
-    it('removes the animation-suppression style after the timeout', () => {
-      renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} skipOpenAnimation={true} />);
-
-      expect(document.getElementById('flyout-skip-open-animation')).toBeInTheDocument();
-
-      act(() => {
-        jest.advanceTimersByTime(1000);
-      });
-
-      expect(document.getElementById('flyout-skip-open-animation')).not.toBeInTheDocument();
+      expect(capturedDocFlyoutHasAnimation).toBe(true);
     });
 
     it('passes the nested flyout test subject to the restored document flyout', () => {

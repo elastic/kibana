@@ -49,6 +49,7 @@ import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
 import { backfillScheduleIds } from './lib/backfill_schedule_ids';
+import { checkResponseActionAuthz } from './lib/check_response_action_authz';
 import { SchemaService } from './lib/schema_service';
 
 const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
@@ -148,7 +149,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     return {
       createActionService: this.createActionService,
-    };
+      checkResponseActionAuthz: (request, actionParams) =>
+        checkResponseActionAuthz(core, request, actionParams),
+    } satisfies OsqueryPluginSetup;
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {

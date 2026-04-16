@@ -137,19 +137,10 @@ export interface VisualizationAttachmentData {
  */
 export const CONNECTOR_TAG_PREFIX = 'connector:';
 
-export const connectorAttachmentToolSchema = z.object({
-  tool_id: z.string(),
-  description: z.string(),
-  configuration: z.object({
-    workflow_id: z.string(),
-  }),
-});
-
 export const connectorAttachmentDataSchema = z.object({
   connector_id: z.string(),
   connector_name: z.string(),
   connector_type: z.string(),
-  tools: z.array(connectorAttachmentToolSchema),
 });
 
 /**
@@ -162,18 +153,6 @@ export interface ConnectorAttachmentData {
   connector_name: string;
   /** Action type ID (e.g., ".slack2", ".mcp") */
   connector_type: string;
-  /** Workflow tools for this connector instance */
-  tools: Array<{
-    /** Tool ID */
-    tool_id: string;
-    /** Tool description from workflow YAML */
-    description: string;
-    /** Tool configuration */
-    configuration: {
-      /** The workflow ID */
-      workflow_id: string;
-    };
-  }>;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
