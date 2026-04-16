@@ -15,6 +15,7 @@ import { uniqBy } from 'lodash';
 import { setTestFunctions } from '../../../commands/definitions/utils/test_functions';
 import { FunctionDefinitionTypes } from '../../../commands';
 import { Location } from '../../../commands/registry/types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 const allUniqueParameterHints = uniqBy(
   getAllFunctions()
@@ -28,7 +29,10 @@ describe('function parameters autocomplete from hints', () => {
   const callbacks: ESQLCallbacks = {
     getInferenceEndpoints: async () => {
       return {
-        inferenceEndpoints: [{ inference_id: 'inference_endpoint_1', task_type: 'text_embedding' }],
+        inferenceEndpoints: [
+          { inference_id: 'inference_endpoint_1', task_type: 'text_embedding' },
+          { inference_id: 'inference_endpoint_2', task_type: 'embedding' as InferenceTaskType },
+        ],
       };
     },
   };
