@@ -985,9 +985,17 @@ paths:
       x-state: Technical Preview
   /api/entity_analytics/watchlists/{watchlist_id}/entities/assign:
     post:
-      description: |
-        Assigns the provided entities to a watchlist by their EUIDs.
+      description: >
+        Assigns the provided entities to the specified watchlist using a
+        "manual" source label.
+
         The entities must already exist in the entity store.
+
+
+        If an entity is already on the watchlist, no new document is created —
+        the "manual" label
+
+        is added to its existing source labels instead.
       operationId: AssignWatchlistEntities
       parameters:
         - description: The ID of the watchlist to add entities to
@@ -1051,13 +1059,13 @@ paths:
       summary: Manually assign entities to a watchlist
       tags:
         - Security Entity Analytics API
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.4.0
   /api/entity_analytics/watchlists/{watchlist_id}/entities/unassign:
     post:
       description: |
-        Unassigns the provided entities from a watchlist by their EUIDs.
+        Unassigns the provided entities from the specified watchlist.
         This only removes the "manual" assignment. If the entity is also
-        assigned via other sources (e.g. index or integration), it will
+        assigned via other sources (for example, index or integration), it will
         remain on the watchlist.
       operationId: UnassignWatchlistEntities
       parameters:
@@ -1124,7 +1132,7 @@ paths:
       summary: Manually unassign entities from a watchlist
       tags:
         - Security Entity Analytics API
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.4.0
   /api/entity_analytics/watchlists/list:
     get:
       operationId: ListWatchlists
