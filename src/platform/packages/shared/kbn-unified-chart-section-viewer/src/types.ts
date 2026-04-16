@@ -96,6 +96,7 @@ export interface ParsedMetrics {
 export interface MetricsInfo extends ParsedMetrics {
   loading: boolean;
   error: Error | null;
+  activeDimensions: Dimension[];
 }
 
 export interface ParsedMetricsWithTelemetry extends ParsedMetrics {

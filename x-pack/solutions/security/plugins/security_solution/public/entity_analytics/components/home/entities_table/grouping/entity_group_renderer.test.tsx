@@ -82,6 +82,37 @@ describe('createGroupPanelRenderer', () => {
       expect(getByText('bernicehuel')).toBeInTheDocument();
     });
 
+    it('renders entity id subtitle when metadata has target name', () => {
+      const metadata: TargetMetadataMap = new Map([
+        ['user:james@example.com', { name: 'james-hue', type: EntityType.user, riskScore: null }],
+      ]);
+      const bucket = createMockBucket({
+        key: 'user:james@example.com',
+        key_as_string: 'user:james@example.com',
+      });
+      const renderer = createGroupPanelRenderer(metadata);
+      const element = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      const { getByText } = render(<>{element}</>);
+
+      expect(getByText('james-hue')).toBeInTheDocument();
+      expect(getByText('Entity ID: user:james@example.com')).toBeInTheDocument();
+    });
+
+    it('does not render entity id subtitle when falling back to entity id as name', () => {
+      const bucket = createMockBucket({
+        key: 'fallback-entity-id',
+        key_as_string: 'fallback-entity-id',
+      });
+      const renderer = createGroupPanelRenderer(emptyMetadata);
+      const element = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      const { getByText, queryByText } = render(<>{element}</>);
+
+      expect(getByText('fallback-entity-id')).toBeInTheDocument();
+      expect(queryByText(/Entity ID:/)).not.toBeInTheDocument();
+    });
+
     it('falls back to bucket key when metadata is not available', () => {
       const bucket = createMockBucket({
         key: 'fallback-entity-id',
@@ -215,7 +246,7 @@ describe('createGroupStatsRenderer', () => {
       expect(screen.getByText('65.50')).toBeInTheDocument();
     });
 
-    it('risk score badge shows en-dash when both metadata and bucket score are null', () => {
+    it('risk score badge shows N/A when both metadata and bucket score are null', () => {
       const metadata: TargetMetadataMap = new Map([
         ['target-id', { name: 'test', type: EntityType.user, riskScore: null }],
       ]);
@@ -225,7 +256,7 @@ describe('createGroupStatsRenderer', () => {
 
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
-      expect(screen.getByText('—')).toBeInTheDocument();
+      expect(screen.getByText('N/A')).toBeInTheDocument();
     });
 
     it('risk score stat is present even when no metadata or bucket score exists', () => {
@@ -237,17 +268,17 @@ describe('createGroupStatsRenderer', () => {
 
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
-      expect(screen.getByText('—')).toBeInTheDocument();
+      expect(screen.getByText('N/A')).toBeInTheDocument();
     });
 
-    it('updates risk score from en-dash to actual value when metadata arrives after grouping data', () => {
+    it('updates risk score from N/A to actual value when metadata arrives after grouping data', () => {
       const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
 
-      // Phase 1: no metadata — shows en-dash
+      // Phase 1: no metadata — shows N/A
       const rendererBefore = createGroupStatsRenderer(emptyMetadata);
       const statsBefore = rendererBefore(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
       const { rerender } = render(<TestProviders>{statsBefore[1].component}</TestProviders>);
-      expect(screen.getByText('—')).toBeInTheDocument();
+      expect(screen.getByText('N/A')).toBeInTheDocument();
 
       // Phase 2: metadata arrived — shows actual risk score
       const metadata: TargetMetadataMap = new Map([

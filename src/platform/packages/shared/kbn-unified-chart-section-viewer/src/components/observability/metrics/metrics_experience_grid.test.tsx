@@ -155,6 +155,7 @@ describe('MetricsExperienceGrid', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems,
       allDimensions: dimensions,
+      activeDimensions: [],
       loading: false,
       error: null,
     });
@@ -193,6 +194,7 @@ describe('MetricsExperienceGrid', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
+      activeDimensions: [],
       loading: false,
       error: new Error('METRICS_INFO failed'),
     });
@@ -217,6 +219,7 @@ describe('MetricsExperienceGrid', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
+      activeDimensions: [],
       loading: false,
       error: abortError,
     });
@@ -234,6 +237,7 @@ describe('MetricsExperienceGrid', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
+      activeDimensions: [],
       loading: true,
       error: new Error('stale error while refetching'),
     });
