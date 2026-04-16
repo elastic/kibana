@@ -92,19 +92,6 @@ export class NamespacedCache<T = unknown> {
   }
 
   /**
-   * Wait for any in-flight read to complete, ignoring errors.
-   * Used for synchronization when writes need to wait for reads.
-   */
-  async awaitInflightRead(namespace: string): Promise<void> {
-    const promise = this.inflightReads.get(namespace);
-    if (promise) {
-      await promise.catch(() => {
-        // Ignore errors - caller just needs to wait for completion
-      });
-    }
-  }
-
-  /**
    * Set in-flight promise for a specific namespace.
    * The promise is automatically removed when it resolves or rejects.
    */
@@ -131,39 +118,5 @@ export class NamespacedCache<T = unknown> {
    */
   has(namespace: string): boolean {
     return this.entries.has(namespace);
-  }
-
-  /**
-   * Wait for any in-flight write to complete.
-   * Errors are already swallowed in setInflightWrite, so this is safe to await.
-   * Used for synchronization when reads need to wait for writes.
-   */
-  async awaitInflightWrite(namespace: string): Promise<void> {
-    const promise = this.inflightWrites.get(namespace);
-    if (promise) {
-      await promise;
-    }
-  }
-
-  /**
-   * Set in-flight write promise for a specific namespace.
-   * The promise is automatically removed when it resolves or rejects.
-   * Errors are swallowed since reads will continue from ES regardless of write success.
-   */
-  setInflightWrite(namespace: string, promise: Promise<void>): void {
-    // Wrap promise to swallow errors - callers don't need to handle them
-    const safePromise = promise.catch(() => {
-      // Error swallowed - reads waiting on this write will continue from ES anyway
-    });
-
-    // Auto-cleanup when promise settles
-    // Only delete if this promise is still the current one (prevents race conditions)
-    safePromise.finally(() => {
-      if (this.inflightWrites.get(namespace) === safePromise) {
-        this.inflightWrites.delete(namespace);
-      }
-    });
-
-    this.inflightWrites.set(namespace, safePromise);
   }
 }

@@ -54,9 +54,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
 
     // Check shared process-wide cache
     if (this.sharedUserProvidedCache) {
-      // await any in-flight write to prevent reading stale data while a write is in progress
-      await this.sharedUserProvidedCache.awaitInflightWrite(this.namespace);
-
       const sharedCached = this.sharedUserProvidedCache.get(this.namespace);
       if (sharedCached) {
         userProvided = sharedCached as UserProvided<T>;
@@ -121,7 +118,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   ) {
     // check if a read is currently in progress, wait for it to complete before proceeding
     if (this.sharedUserProvidedCache) {
-      await this.sharedUserProvidedCache.awaitInflightRead(this.namespace);
       this.log.debug(
         `[UiSettings] setMany invalidating SHARED cache for namespace=${this.namespace}`
       );
@@ -133,12 +129,8 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     this.onWriteHook(changes);
 
     // Register write operation as in-flight so concurrent reads will wait
-    const writePromise = this.write({ changes, handleWriteErrors });
-    if (this.sharedUserProvidedCache) {
-      this.sharedUserProvidedCache.setInflightWrite(this.namespace, writePromise);
-    }
+    await this.write({ changes, handleWriteErrors });
 
-    await writePromise;
     this.log.debug(`[UiSettings] setMany ES write COMPLETED for namespace=${this.namespace}`);
   }
 
