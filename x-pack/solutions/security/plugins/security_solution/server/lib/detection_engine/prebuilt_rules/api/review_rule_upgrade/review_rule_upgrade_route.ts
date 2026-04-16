@@ -7,11 +7,9 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
-import { z } from '@kbn/zod/v4';
 import {
   REVIEW_RULE_UPGRADE_URL,
   ReviewRuleUpgradeRequestBody,
-  validateReviewRuleUpgradeRequestBody,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -19,7 +17,6 @@ import {
   PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
   PREBUILT_RULES_UPGRADE_REVIEW_CONCURRENCY,
 } from '../../constants';
-import { buildSiemResponse } from '../../../routes/utils';
 import { reviewRuleUpgradeHandler } from './review_rule_upgrade_handler';
 
 export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
@@ -44,21 +41,10 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(
-              // If the request body is undefined, pass it as an empty object to the schema
-              // to let the schema add default values.
-              z.preprocess((data: unknown) => data ?? {}, ReviewRuleUpgradeRequestBody)
-            ),
+            body: buildRouteValidationWithZod(ReviewRuleUpgradeRequestBody),
           },
         },
       },
-      (context, request, response) => {
-        const validationErrors = validateReviewRuleUpgradeRequestBody(request.body);
-        if (validationErrors.length) {
-          const siemResponse = buildSiemResponse(response);
-          return siemResponse.error({ statusCode: 400, body: validationErrors });
-        }
-        return reviewRuleUpgradeHandler(context, request, response);
-      }
+      reviewRuleUpgradeHandler
     );
 };

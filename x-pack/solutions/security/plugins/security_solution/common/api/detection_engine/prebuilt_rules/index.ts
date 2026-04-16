@@ -11,10 +11,9 @@ export * from './install_prebuilt_rules_and_timelines/install_prebuilt_rules_and
 export * from './perform_rule_installation/perform_rule_installation_route';
 export * from './perform_rule_upgrade/perform_rule_upgrade_route';
 export * from './review_rule_installation/review_rule_installation_route';
-export * from './review_rule_installation/request_schema_validation';
+export * from '../../../../server/lib/detection_engine/prebuilt_rules/api/review_rule_installation/request_schema_validation';
 export * from './common/prebuilt_rule_assets_aggregations';
-export * from './review_rule_upgrade/review_rule_upgrade_route';
-export * from './review_rule_upgrade/request_schema_validation';
+export type * from './review_rule_upgrade/review_rule_upgrade_route';
 export * from './urls';
 export * from './model/aggregated_prebuilt_rules_error';
 export * from './model/diff/diffable_rule/diffable_field_types';

@@ -6,71 +6,37 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { RuleObjectId, RuleSignatureId, RuleTagArray } from '../../model';
-import { SortOrder } from '../../model';
+import { SortOrder, type RuleObjectId, type RuleSignatureId, type RuleTagArray } from '../../model';
 import type { PartialThreeWayRuleDiff } from '../model';
 import type { RuleResponse, RuleVersion } from '../../model/rule_schema';
 import { FindRulesSortField } from '../../rule_management';
-import type { FacetCounts } from '../../rule_management/granular_rules_contract.gen';
-import {
-  GranularRulesSearch,
-  SearchRulesAggregations,
-} from '../../rule_management/granular_rules_contract.gen';
-import { SearchRulesSearchAfterItem } from '../../rule_management/search_rules/search_rules_route.gen';
+import { ReviewPrebuiltRuleUpgradeFilter } from '../common/review_prebuilt_rules_upgrade_filter';
+
+export type ReviewRuleUpgradeSort = z.infer<typeof ReviewRuleUpgradeSort>;
+export const ReviewRuleUpgradeSort = z.object({
+  /**
+   * Field to sort by
+   */
+  field: FindRulesSortField.optional(),
+  /**
+   * Sort order
+   */
+  order: SortOrder.optional(),
+});
 
 export type ReviewRuleUpgradeRequestBody = z.infer<typeof ReviewRuleUpgradeRequestBody>;
-export const ReviewRuleUpgradeRequestBody = z.object({
-  /**
-   * Page number starting from 1. Ignored when `search_after` is provided.
-   */
-  page: z.number().int().min(1).default(1),
-  /**
-   * Rules per page
-   */
-  per_page: z.number().int().min(1).max(10_000).default(20),
+export const ReviewRuleUpgradeRequestBody = z
+  .object({
+    filter: ReviewPrebuiltRuleUpgradeFilter.optional(),
+    sort: ReviewRuleUpgradeSort.optional(),
 
-  /**
-   * KQL filter string applied to installed prebuilt rules. Must use the
-   * native `alert.attributes.*` field namespace (same as the `_search`
-   * endpoint).
-   */
-  filter: z.string().optional(),
-
-  /**
-   * Free-text search combined with the KQL `filter`.
-   */
-  search: GranularRulesSearch.optional(),
-
-  /**
-   * Aggregation options (facet counts) computed over the filtered set of
-   * upgradeable installed rules.
-   */
-  aggregations: SearchRulesAggregations.optional(),
-
-  /**
-   * Field to sort by.
-   */
-  sort_field: FindRulesSortField.optional(),
-
-  /**
-   * Sort order. Required when `sort_field` is set.
-   */
-  sort_order: SortOrder.optional(),
-
-  /**
-   * Elasticsearch-style `search_after` tiebreaker values. Requires
-   * `sort_field` and `sort_order`. When set, `page` is ignored.
-   */
-  search_after: z.array(SearchRulesSearchAfterItem).min(1).optional(),
-
-  /**
-   * Restrict the review to installed rules with these SO ids. Useful for
-   * checking whether a single rule has an upgrade available (e.g. the
-   * in-app update callout).
-   */
-  rule_ids: z.array(z.string()).min(1).optional(),
-});
-export type ReviewRuleUpgradeRequestBodyInput = z.input<typeof ReviewRuleUpgradeRequestBody>;
+    page: z.coerce.number().int().min(1).optional().default(1),
+    /**
+     * Rules per page
+     */
+    per_page: z.coerce.number().int().min(0).optional().default(20),
+  })
+  .nullable();
 
 export interface ReviewRuleUpgradeResponseBody {
   /**
@@ -91,18 +57,6 @@ export interface ReviewRuleUpgradeResponseBody {
 
   /** The total number of rules available for upgrade that match the filter criteria */
   total: number;
-
-  /**
-   * Facet counts per category requested in `aggregations.counts`.
-   */
-  counts?: FacetCounts;
-
-  /**
-   * Sort values of the last hit on this page, for use as `search_after` on
-   * the next request. Only included when the request used `search_after` or
-   * when deep pagination applies.
-   */
-  search_after?: Array<string | number | boolean | null>;
 }
 
 export interface RuleUpgradeStatsForReview {

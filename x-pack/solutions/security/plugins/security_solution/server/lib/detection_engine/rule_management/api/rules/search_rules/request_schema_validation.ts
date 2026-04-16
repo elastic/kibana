@@ -30,7 +30,7 @@ export const validateSearchRulesKqlFilter = (filter: string | undefined): string
   }
 };
 
-const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInput): string[] => {
+export const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInput): string[] => {
   const searchAfter = body.search_after;
   if (searchAfter == null || searchAfter.length === 0) {
     return [];
@@ -41,7 +41,7 @@ const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInput): str
   return [];
 };
 
-const validateAggregationsCountsUnique = (
+export const validateAggregationsCountsUnique = (
   aggregations: SearchRulesRequestBodyInput['aggregations']
 ): string[] => {
   const counts = aggregations?.counts;

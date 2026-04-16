@@ -18,11 +18,12 @@ import {
   EXCLUDED_GAP_REASONS_KEY,
 } from '../../../../../../../common/constants';
 import type {
+  FindRulesSortField,
   SearchRulesField,
   SearchRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../../../../../common/api/detection_engine/rule_management/urls';
-import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
+import type { SortOrder, WarningSchema } from '../../../../../../../common/api/detection_engine';
 import { SearchRulesRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
 import { validateSearchRulesRequestBody } from './request_schema_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -64,8 +65,8 @@ const resolveGapPreFilter = async ({
 }: {
   rulesClient: Parameters<typeof getGapFilteredRuleIds>[0]['rulesClient'];
   filter: string | undefined;
-  sortField: SearchRulesRequestBody['sort_field'];
-  sortOrder: SearchRulesRequestBody['sort_order'];
+  sortField?: FindRulesSortField;
+  sortOrder?: SortOrder;
   gapFillStatuses?: GapFillStatus[];
   gapsRangeStart?: string;
   gapsRangeEnd?: string;

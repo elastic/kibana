@@ -10,7 +10,6 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
 import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
-import { buildUpgradeReviewKqlFilter } from '../logic/prebuilt_rules/build_upgrade_review_kql_filter';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
 import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_packages';
@@ -89,10 +88,8 @@ export function usePrebuiltRulesUpgrade({
     {
       page: pagination.page,
       per_page: pagination.perPage,
-      filter: buildUpgradeReviewKqlFilter(filter),
-      sort_field: sort?.field,
-      sort_order: sort?.order,
-      ...(filter.rule_ids && filter.rule_ids.length > 0 ? { rule_ids: filter.rule_ids } : {}),
+      sort,
+      filter,
     },
     {
       refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,

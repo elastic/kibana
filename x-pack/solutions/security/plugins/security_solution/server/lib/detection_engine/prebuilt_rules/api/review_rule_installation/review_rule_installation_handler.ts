@@ -6,8 +6,13 @@
  */
 
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregationContainer,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { SortOrder } from '../../../../../../common/api/detection_engine/model/sorting.gen';
 import type { RuleSummary } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type {
   ReviewRuleInstallationRequestBody,
@@ -24,10 +29,9 @@ import type { BasicRuleInfo } from '../../logic/basic_rule_info';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { buildGranularRulesKql } from '../../../rule_management/logic/search/build_granular_rules_kql';
 import {
-  buildPrebuiltRuleAssetsAggregations,
-  expandPrebuiltRuleAssetsAggregationResult,
-} from '../../logic/search/prebuilt_rule_assets_aggregations';
-import { convertPrebuiltRuleAssetSearchTermToKql } from '../../logic/search/convert_prebuilt_rule_asset_search_term_to_kql';
+  expandRawAggregationResult,
+  buildAggregations,
+} from '../../../rule_management/logic/search/granular_facet_aggregations';
 
 export const reviewRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -44,11 +48,11 @@ export const reviewRuleInstallationHandler = async (
     aggregations,
     sort_field: sortField,
     sort_order: sortOrder,
-    search_after: searchAfter,
+    search_after: searchAfterParam,
   } = request.body;
 
   logger.debug(
-    `reviewRuleInstallationHandler: Executing handler with params: page=${page}, perPage=${perPage}, sort_field=${sortField}, sort_order=${sortOrder}, filter=${filter}`
+    `reviewRuleInstallationHandler: Executing handler with params: page=${page}, perPage=${perPage}, sort_field=${sortField}, sort_order=${sortOrder}, filter=${filter}, search=${search}, aggregations=${aggregations}, search_after=${searchAfterParam}`
   );
 
   try {
@@ -70,13 +74,11 @@ export const reviewRuleInstallationHandler = async (
     const combinedKql = buildGranularRulesKql({
       filter,
       search,
-      searchTermConverter: convertPrebuiltRuleAssetSearchTermToKql,
     });
+
     const categoryCounts = aggregations?.counts ?? [];
     const aggs =
-      categoryCounts.length > 0
-        ? buildPrebuiltRuleAssetsAggregations({ categories: categoryCounts })
-        : undefined;
+      categoryCounts.length > 0 ? buildAggregations({ categories: categoryCounts }) : undefined;
 
     const [rulesResult, stats] = await Promise.all([
       fetchRules({
@@ -89,14 +91,14 @@ export const reviewRuleInstallationHandler = async (
         sortOrder,
         page,
         perPage,
-        searchAfter: searchAfter as SortResults | undefined,
+        searchAfter: searchAfterParam as SortResults | undefined,
         aggs,
       }),
       fetchStats({ ruleAssetsClient, logger, mlAuthz, installedRuleVersionsMap }),
     ]);
 
     const counts = rulesResult.aggregations
-      ? expandPrebuiltRuleAssetsAggregationResult(rulesResult.aggregations, categoryCounts)
+      ? expandRawAggregationResult(rulesResult.aggregations, categoryCounts)
       : undefined;
 
     const body: ReviewRuleInstallationResponseBody = {
@@ -145,12 +147,12 @@ async function fetchRules({
   mlAuthz: MlAuthz;
   installedRuleVersionsMap: Map<string, RuleSummary>;
   filter: string | undefined;
-  sortField: ReviewRuleInstallationRequestBody['sort_field'];
-  sortOrder: ReviewRuleInstallationRequestBody['sort_order'];
+  sortField?: PrebuiltRuleAssetsSortField;
+  sortOrder?: SortOrder;
   page: number;
   perPage: number;
   searchAfter?: SortResults;
-  aggs?: Parameters<IPrebuiltRuleAssetsClient['searchRuleAssets']>[0]['aggregations'];
+  aggs?: Record<string, AggregationsAggregationContainer>;
 }) {
   const installableVersions = await getInstallableRuleVersions(
     ruleAssetsClient,

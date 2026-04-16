@@ -10,7 +10,7 @@ import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { REVIEW_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/urls';
 import { RULES_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
-import { MAX_SEARCH_RULES_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import { MAX_SEARCH_RULES_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_management/api/rules/search_rules/request_schema_validation';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -722,15 +722,14 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('tags with special characters', () => {
-          // Characters that are safe to round-trip as KQL-escaped string params
-          // (see `prepareKQLStringParam`). KQL-reserved tokens such as `&&`,
-          // `||` or standalone `\` are intentionally out of scope here.
           [
             ' ',
             '%',
             '+',
             '-',
             '=',
+            '&&',
+            '||',
             '>',
             '<',
             '!',
@@ -741,10 +740,12 @@ export default ({ getService }: FtrProviderContext): void => {
             '[',
             ']',
             '^',
+            '"',
             '~',
             '*',
             '?',
             ':',
+            '\\',
             '/',
           ].forEach((specialChar, index) => {
             it(`matches tag with special character "${specialChar}"`, async () => {
