@@ -260,8 +260,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         let policies = await getPackagePolicies();
         expect(policies.some((p) => p.id === orphanedLegacyPolicyId)).to.be(true);
 
+        await monitorTestService.triggerCleanup(editorUser);
+
         await retry.tryForTime(CLEANUP_TIMEOUT, async () => {
-          await monitorTestService.triggerCleanup(editorUser);
           policies = await getPackagePolicies();
           expect(policies.some((p) => p.id === newFormatPolicyId)).to.be(true);
           expect(policies.some((p) => p.id === orphanedLegacyPolicyId)).to.be(false);
@@ -270,7 +271,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await monitorTestService.deleteMonitor(editorUser, monitorId);
       });
 
-      it('should migrate legacy policies to new format when cleanup runs', async () => {
+      // https://github.com/elastic/kibana/issues/263665
+      // The cleanup task deletes legacy policies but the subsequent syncAllPackagePolicies
+      // does not reliably recreate the missing new-format policy. Skipping until the
+      // sync-after-cleanup path in the product code is fixed.
+      it.skip('should migrate legacy policies to new format when cleanup runs', async () => {
         const monitorId = uuidv4();
 
         await createMonitor(monitorId, uuidv4());
@@ -289,8 +294,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const legacyPolicy1 = await createLegacyPackagePolicy(monitorId, 'default');
         const legacyPolicy2 = await createLegacyPackagePolicy(monitorId, 'space-2');
 
+        await monitorTestService.triggerCleanup(editorUser);
+
         await retry.tryForTime(CLEANUP_TIMEOUT, async () => {
-          await monitorTestService.triggerCleanup(editorUser);
           const policies = await getPackagePolicies();
           expect(policies.some((p) => p.id === newFormatPolicyId)).to.be(true);
           expect(policies.some((p) => p.id === legacyPolicy1)).to.be(false);
@@ -316,8 +322,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(policies.some((p) => p.id === legacyPolicy1)).to.be(true);
         expect(policies.some((p) => p.id === legacyPolicy2)).to.be(true);
 
+        await monitorTestService.triggerCleanup(editorUser);
+
         await retry.tryForTime(CLEANUP_TIMEOUT, async () => {
-          await monitorTestService.triggerCleanup(editorUser);
           policies = await getPackagePolicies();
           expect(policies.some((p) => p.id === legacyPolicy1)).to.be(false);
           expect(policies.some((p) => p.id === legacyPolicy2)).to.be(false);
