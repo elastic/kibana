@@ -617,8 +617,6 @@ export class DashboardPageObject extends FtrService {
       await this.clickCancelOutOfEditMode();
     }
     await this.header.waitUntilLoadingHasFinished();
-    // make sure the dashboard page is shown
-    await this.waitForRenderComplete();
 
     return message;
   }
@@ -734,12 +732,10 @@ export class DashboardPageObject extends FtrService {
       } else {
         await this.listingTable.clickItemLink('dashboard', dashboardName);
       }
+      await this.header.waitUntilLoadingHasFinished();
+      // check Dashboard landing page is not present
+      await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });
-    await this.header.waitUntilLoadingHasFinished();
-    // make sure the dashboard page is shown
-    await this.waitForRenderComplete();
-    // check Dashboard landing page is not present
-    await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
   }
 
   public async loadSavedDashboard(dashboardName: string) {
