@@ -25,29 +25,13 @@ const TEST_SETTING = 'testSetting';
 apiTest.describe('ui settings CRUD', { tag: SERVERLESS_TAGS }, () => {
   let sessionCredentials: RoleSessionCredentials;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
     sessionCredentials = await samlAuth.asInteractiveUser('admin');
-
-    await apiClient.post(`/internal/kibana/settings/${TEST_SETTING}`, {
-      headers: {
-        ...INTERNAL_HEADERS,
-        ...sessionCredentials.cookieHeader,
-      },
-      body: { value: 100 },
-    });
+    await kbnClient.uiSettings.update({ [TEST_SETTING]: 100 });
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
-    try {
-      await apiClient.delete(`/internal/kibana/settings/${TEST_SETTING}`, {
-        headers: {
-          ...INTERNAL_HEADERS,
-          ...sessionCredentials.cookieHeader,
-        },
-      });
-    } catch {
-      // Setting may already be deleted by the delete test
-    }
+  apiTest.afterAll(async ({ kbnClient }) => {
+    await kbnClient.uiSettings.unset(TEST_SETTING);
   });
 
   apiTest('returns list of settings', async ({ apiClient }) => {
