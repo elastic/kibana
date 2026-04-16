@@ -20,7 +20,6 @@ import {
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
   getSourceFieldNames,
-  mergeDocumentsFilterAndPostAgg,
 } from './commons';
 import {
   applyFieldEvaluations,
@@ -54,9 +53,7 @@ export function getEuidDslDocumentsContainsIdFilter(
       isNotEmptyCondition(identityField.singleField)
     ) as QueryDslQueryContainer;
   }
-  return conditionToQueryDsl(
-    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, entityDefinition.postAggFilter)
-  ) as QueryDslQueryContainer;
+  return conditionToQueryDsl(identityField.documentsFilter) as QueryDslQueryContainer;
 }
 
 /**

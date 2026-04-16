@@ -76,6 +76,7 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
 
   const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
   const composedId = getComposedFieldValues(doc, effectiveRanking);
+
   if (composedId.length === 0) {
     return undefined;
   }
@@ -84,6 +85,7 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
   if (identityField.skipTypePrepend) {
     return rawId;
   }
+
   return `${entityType}:${rawId}`;
 }
 
