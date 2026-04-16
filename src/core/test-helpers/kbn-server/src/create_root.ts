@@ -30,6 +30,7 @@ import { loadJsonFile } from '@kbn/utils';
 
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
+import { resolveKibanaVersion } from './utils';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put' | 'patch';
 
@@ -67,6 +68,16 @@ const DEFAULTS_SETTINGS = {
   migrations: { skip: false },
 };
 
+/**
+ * Creates a test {@link Root} instance with the given configuration overrides.
+ *
+ * @param settings - Config key/value pairs merged on top of the default test settings.
+ * @param cliArgs - CLI argument overrides applied to the Kibana environment.
+ * @param customKibanaVersion - When provided, overrides the Kibana version from `package.json`.
+ *   Accepts a concrete semver string (e.g. `'9.0.0'`). Special version tokens such as
+ *   `'nextMinor'` and `'previousMinor'` must be resolved to a concrete version first
+ *   (e.g. via {@link resolveKibanaVersion} in {@link createTestServers}).
+ */
 export function createRootWithSettings(
   settings: Record<string, any>,
   cliArgs: Partial<CliArgs> = {},
@@ -331,7 +342,20 @@ export function createTestServers({
       };
     },
     startKibana: async (abortSignal?: AbortSignal) => {
-      const root = createRootWithCorePlugins(kbnSettings, cliArgs, customKibanaVersion);
+      // Only fetch the live ES version when a relative token ('nextMinor' / 'previousMinor')
+      // is used. Calling info() unconditionally breaks callers that run startES() and
+      // startKibana() concurrently with Promise.all(), because ES may not be listening yet.
+      let resolvedKibanaVersion: string | undefined;
+      if (customKibanaVersion === 'nextMinor' || customKibanaVersion === 'previousMinor') {
+        const {
+          version: { number: esVersion },
+        } = await es.getClient().info();
+        resolvedKibanaVersion = resolveKibanaVersion(customKibanaVersion, esVersion);
+      } else {
+        resolvedKibanaVersion = resolveKibanaVersion(customKibanaVersion, '');
+      }
+
+      const root = createRootWithCorePlugins(kbnSettings, cliArgs, resolvedKibanaVersion);
 
       abortSignal?.addEventListener('abort', async () => await root.shutdown());
 
