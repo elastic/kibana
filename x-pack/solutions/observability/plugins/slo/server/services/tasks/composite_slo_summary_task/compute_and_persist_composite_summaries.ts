@@ -30,6 +30,11 @@ import { DefaultBurnRatesClient } from '../../burn_rates_client';
 import { DefaultSummaryClient } from '../../summary_client';
 import { computeCompositeSummary, type MemberSummaryData } from '../../compute_composite_summary';
 
+type SpaceItems = Array<{ compositeSlo: CompositeSLODefinition }>;
+type MemberDefinitionMap = Map<string, SLODefinition>;
+type SummaryResult = Awaited<ReturnType<DefaultSummaryClient['computeSummaries']>>[number];
+type SummaryResultMap = Map<string, SummaryResult>;
+
 interface Dependencies {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
@@ -72,127 +77,15 @@ export async function computeAndPersistCompositeSummaries({
         `Processing ${response.saved_objects.length} composite SLOs (${totalProcessed} processed so far)`
       );
 
-      const bulkOps: object[] = [];
-
-      // Decode all composite SLOs on this page and group by spaceId
-      const bySpace = new Map<
-        string,
-        Array<{ compositeSlo: CompositeSLODefinition; spaceId: string }>
-      >();
-      for (const so of response.saved_objects) {
-        const spaceId = so.namespaces?.[0] ?? 'default';
-        const compositeSlo = decodeCompositeSLO(so, logger);
-        if (!compositeSlo) continue;
-        const items = bySpace.get(spaceId) ?? [];
-        items.push({ compositeSlo, spaceId });
-        bySpace.set(spaceId, items);
-      }
-
-      // Fetch member SLOs for all spaces concurrently — one soClient.find per space
-      const memberMapBySpace = new Map<string, Map<string, SLODefinition>>();
-      await Promise.allSettled(
-        [...bySpace.entries()].map(async ([spaceId, items]) => {
-          const allIds = [
-            ...new Set(
-              items.flatMap(({ compositeSlo }) => compositeSlo.members.map((m) => m.sloId))
-            ),
-          ];
-          try {
-            const slos = await findMemberSLOs(allIds, spaceId, soClient, logger);
-            memberMapBySpace.set(spaceId, new Map(slos.map((slo) => [slo.id, slo])));
-          } catch (err) {
-            logger.error(
-              `Failed to fetch member SLOs for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
-            );
-          }
-        })
+      const bySpace = groupBySpace(response.saved_objects, logger);
+      const memberMapBySpace = await fetchMemberDefinitions(bySpace, soClient, logger);
+      const summaryResultBySpace = await fetchMemberSummaries(
+        bySpace,
+        memberMapBySpace,
+        summaryClient,
+        logger
       );
-
-      // Compute all unique member summaries per space concurrently — one computeSummaries call per space
-      type SummaryResult = Awaited<ReturnType<typeof summaryClient.computeSummaries>>[number];
-      const summaryResultBySpace = new Map<string, Map<string, SummaryResult>>();
-      await Promise.allSettled(
-        [...bySpace.entries()].map(async ([spaceId, items]) => {
-          const memberDefinitionMap = memberMapBySpace.get(spaceId);
-          if (!memberDefinitionMap) return;
-
-          const seen = new Map<
-            string,
-            { slo: SLODefinition; instanceId: string; timeWindowOverride: TimeWindow }
-          >();
-          for (const { compositeSlo } of items) {
-            for (const member of compositeSlo.members) {
-              const slo = memberDefinitionMap.get(member.sloId);
-              if (!slo) continue;
-              const instanceId = member.instanceId ?? ALL_VALUE;
-              const key = buildMemberSummaryKey(member.sloId, instanceId, compositeSlo.timeWindow);
-              if (!seen.has(key)) {
-                seen.set(key, { slo, instanceId, timeWindowOverride: compositeSlo.timeWindow });
-              }
-            }
-          }
-
-          if (seen.size === 0) {
-            summaryResultBySpace.set(spaceId, new Map());
-            return;
-          }
-
-          const keys = [...seen.keys()];
-          try {
-            const results = await summaryClient.computeSummaries([...seen.values()]);
-            summaryResultBySpace.set(spaceId, new Map(keys.map((k, i) => [k, results[i]])));
-          } catch (err) {
-            logger.error(
-              `Failed to compute member summaries for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
-            );
-          }
-        })
-      );
-
-      // Build bulk ops — pure computation, no I/O
-      for (const [spaceId, items] of bySpace) {
-        const memberDefinitionMap = memberMapBySpace.get(spaceId);
-        const summaryResultMap = summaryResultBySpace.get(spaceId);
-        if (!memberDefinitionMap || !summaryResultMap) continue;
-
-        for (const { compositeSlo } of items) {
-          try {
-            const activeMembers = compositeSlo.members.filter((m) => {
-              const key = buildMemberSummaryKey(
-                m.sloId,
-                m.instanceId ?? ALL_VALUE,
-                compositeSlo.timeWindow
-              );
-              return memberDefinitionMap.has(m.sloId) && summaryResultMap.has(key);
-            });
-
-            const memberSummaries: MemberSummaryData[] = activeMembers.map((member) => {
-              const key = buildMemberSummaryKey(
-                member.sloId,
-                member.instanceId ?? ALL_VALUE,
-                compositeSlo.timeWindow
-              );
-              const result = summaryResultMap.get(key)!;
-              return {
-                member,
-                sloName: memberDefinitionMap.get(member.sloId)!.name,
-                summary: result.summary,
-                burnRateWindows: result.burnRateWindows,
-              };
-            });
-
-            const { compositeSummary } = computeCompositeSummary(compositeSlo, memberSummaries);
-            bulkOps.push({
-              index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: `${spaceId}:${compositeSlo.id}` },
-            });
-            bulkOps.push(buildSummaryDoc(compositeSlo, compositeSummary, spaceId));
-          } catch (err) {
-            logger.error(
-              `Failed to compute summary for composite SLO [${compositeSlo.id}] in space [${spaceId}]: ${err}`
-            );
-          }
-        }
-      }
+      const bulkOps = buildBulkOps(bySpace, memberMapBySpace, summaryResultBySpace, logger);
 
       if (bulkOps.length > 0) {
         const bulkResponse = await esClient.bulk(
@@ -223,6 +116,136 @@ export async function computeAndPersistCompositeSummaries({
   }
 
   logger.debug(`Composite SLO summary task completed: ${totalProcessed} processed`);
+}
+
+function groupBySpace(
+  savedObjects: SavedObject<StoredCompositeSLODefinition>[],
+  logger: Logger
+): Map<string, SpaceItems> {
+  const bySpace = new Map<string, SpaceItems>();
+  for (const so of savedObjects) {
+    const spaceId = so.namespaces?.[0] ?? 'default';
+    const compositeSlo = decodeCompositeSLO(so, logger);
+    if (!compositeSlo) continue;
+    const items = bySpace.get(spaceId) ?? [];
+    items.push({ compositeSlo });
+    bySpace.set(spaceId, items);
+  }
+  return bySpace;
+}
+
+async function fetchMemberDefinitions(
+  bySpace: Map<string, SpaceItems>,
+  soClient: SavedObjectsClientContract,
+  logger: Logger
+): Promise<Map<string, MemberDefinitionMap>> {
+  const memberMapBySpace = new Map<string, MemberDefinitionMap>();
+  await Promise.allSettled(
+    [...bySpace.entries()].map(async ([spaceId, items]) => {
+      const allIds = [
+        ...new Set(
+          items.flatMap(({ compositeSlo }) => compositeSlo.members.map((m) => m.sloId))
+        ),
+      ];
+      try {
+        const slos = await findMemberSLOs(allIds, spaceId, soClient, logger);
+        memberMapBySpace.set(spaceId, new Map(slos.map((slo) => [slo.id, slo])));
+      } catch (err) {
+        logger.error(
+          `Failed to fetch member SLOs for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
+        );
+      }
+    })
+  );
+  return memberMapBySpace;
+}
+
+async function fetchMemberSummaries(
+  bySpace: Map<string, SpaceItems>,
+  memberMapBySpace: Map<string, MemberDefinitionMap>,
+  summaryClient: DefaultSummaryClient,
+  logger: Logger
+): Promise<Map<string, SummaryResultMap>> {
+  const summaryResultBySpace = new Map<string, SummaryResultMap>();
+  await Promise.allSettled(
+    [...bySpace.entries()].map(async ([spaceId, items]) => {
+      const memberDefinitionMap = memberMapBySpace.get(spaceId);
+      if (!memberDefinitionMap) return;
+
+      const seen = new Map<
+        string,
+        { slo: SLODefinition; instanceId: string; timeWindowOverride: TimeWindow }
+      >();
+      for (const { compositeSlo } of items) {
+        for (const member of compositeSlo.members) {
+          const slo = memberDefinitionMap.get(member.sloId);
+          if (!slo) continue;
+          const instanceId = member.instanceId ?? ALL_VALUE;
+          const key = buildMemberSummaryKey(member.sloId, instanceId, compositeSlo.timeWindow);
+          if (!seen.has(key)) {
+            seen.set(key, { slo, instanceId, timeWindowOverride: compositeSlo.timeWindow });
+          }
+        }
+      }
+
+      if (seen.size === 0) {
+        summaryResultBySpace.set(spaceId, new Map());
+        return;
+      }
+
+      const keys = [...seen.keys()];
+      try {
+        const results = await summaryClient.computeSummaries([...seen.values()]);
+        summaryResultBySpace.set(spaceId, new Map(keys.map((k, i) => [k, results[i]])));
+      } catch (err) {
+        logger.error(
+          `Failed to compute member summaries for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
+        );
+      }
+    })
+  );
+  return summaryResultBySpace;
+}
+
+function buildBulkOps(
+  bySpace: Map<string, SpaceItems>,
+  memberMapBySpace: Map<string, MemberDefinitionMap>,
+  summaryResultBySpace: Map<string, SummaryResultMap>,
+  logger: Logger
+): object[] {
+  const bulkOps: object[] = [];
+  for (const [spaceId, items] of bySpace) {
+    const memberDefinitionMap = memberMapBySpace.get(spaceId);
+    const summaryResultMap = summaryResultBySpace.get(spaceId);
+    if (!memberDefinitionMap || !summaryResultMap) continue;
+
+    for (const { compositeSlo } of items) {
+      try {
+        const memberSummaries: MemberSummaryData[] = compositeSlo.members.flatMap((member) => {
+          const key = buildMemberSummaryKey(
+            member.sloId,
+            member.instanceId ?? ALL_VALUE,
+            compositeSlo.timeWindow
+          );
+          const slo = memberDefinitionMap.get(member.sloId);
+          const result = summaryResultMap.get(key);
+          if (!slo || !result) return [];
+          return [{ member, sloName: slo.name, summary: result.summary, burnRateWindows: result.burnRateWindows }];
+        });
+
+        const { compositeSummary } = computeCompositeSummary(compositeSlo, memberSummaries);
+        bulkOps.push({
+          index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: `${spaceId}:${compositeSlo.id}` },
+        });
+        bulkOps.push(buildSummaryDoc(compositeSlo, compositeSummary, spaceId));
+      } catch (err) {
+        logger.error(
+          `Failed to compute summary for composite SLO [${compositeSlo.id}] in space [${spaceId}]: ${err}`
+        );
+      }
+    }
+  }
+  return bulkOps;
 }
 
 function buildMemberSummaryKey(
