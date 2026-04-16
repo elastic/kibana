@@ -15,6 +15,9 @@ import type {
 const isGenerationStep = (step: StepExecutionWithLink): boolean =>
   step.stepId === 'generate_discoveries' || step.pipelinePhase === 'generate_discoveries';
 
+const isValidationStep = (step: StepExecutionWithLink): boolean =>
+  step.stepId === 'validate_discoveries' || step.pipelinePhase === 'validate_discoveries';
+
 /**
  * Overrides the generation step status when the event log reports a failure
  * that the Workflows API does not reflect.
@@ -29,12 +32,31 @@ const isGenerationStep = (step: StepExecutionWithLink): boolean =>
  */
 export const applyGenerationStatusOverride = ({
   aggregatedExecution,
+  eventActions,
   generationStatus,
 }: {
   aggregatedExecution: AggregatedWorkflowExecution;
+  eventActions?: string[] | null;
   generationStatus?: 'started' | 'succeeded' | 'failed' | 'canceled' | 'dismissed';
 }): AggregatedWorkflowExecution => {
   if (generationStatus !== 'failed') {
+    return aggregatedExecution;
+  }
+
+  // If a validation step already has FAILED status, the failure is attributable to
+  // validation — do not incorrectly override the generation step to FAILED.
+  const validationAlreadyFailed = aggregatedExecution.steps.some(
+    (step) => isValidationStep(step) && step.status === ExecutionStatus.FAILED
+  );
+  if (validationAlreadyFailed) {
+    return aggregatedExecution;
+  }
+
+  // If the event log contains a 'validation-failed' action, the pipeline failed
+  // in the validation phase — even if the validation workflow never started (e.g.
+  // the workflow ID was invalid). Do not override the generation step to FAILED.
+  const validationFailedInEventLog = (eventActions ?? []).includes('validation-failed');
+  if (validationFailedInEventLog) {
     return aggregatedExecution;
   }
 

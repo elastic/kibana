@@ -1222,6 +1222,7 @@ describe('WorkflowPipelineMonitor', () => {
           status: ExecutionStatus.PENDING,
           stepId: 'generate_discoveries',
           topologicalIndex: 2,
+          workflowRunId: undefined,
         }),
         createMockStep({
           id: 'step-validate',
@@ -1229,12 +1230,13 @@ describe('WorkflowPipelineMonitor', () => {
           status: ExecutionStatus.PENDING,
           stepId: 'validate_discoveries',
           topologicalIndex: 3,
+          workflowRunId: undefined,
         }),
       ];
 
       render(
         <TestProviders>
-          <WorkflowPipelineMonitor {...defaultProps} stepExecutions={steps} />
+          <WorkflowPipelineMonitor {...defaultProps} stepExecutions={steps} workflowRunId={null} />
         </TestProviders>
       );
 
@@ -1340,6 +1342,7 @@ describe('WorkflowPipelineMonitor', () => {
           status: ExecutionStatus.PENDING,
           stepId: 'generate_discoveries',
           topologicalIndex: 1,
+          workflowRunId: undefined,
         }),
         createMockStep({
           id: 'step-validate',
@@ -1347,12 +1350,13 @@ describe('WorkflowPipelineMonitor', () => {
           status: ExecutionStatus.PENDING,
           stepId: 'validate_discoveries',
           topologicalIndex: 2,
+          workflowRunId: undefined,
         }),
       ];
 
       render(
         <TestProviders>
-          <WorkflowPipelineMonitor {...defaultProps} stepExecutions={steps} />
+          <WorkflowPipelineMonitor {...defaultProps} stepExecutions={steps} workflowRunId={null} />
         </TestProviders>
       );
 
@@ -1397,12 +1401,13 @@ describe('WorkflowPipelineMonitor', () => {
           status: ExecutionStatus.PENDING,
           stepId: 'generate_discoveries',
           topologicalIndex: 2,
+          workflowRunId: undefined,
         }),
       ];
 
       render(
         <TestProviders>
-          <WorkflowPipelineMonitor {...defaultProps} stepExecutions={steps} />
+          <WorkflowPipelineMonitor {...defaultProps} stepExecutions={steps} workflowRunId={null} />
         </TestProviders>
       );
 
@@ -2533,6 +2538,7 @@ describe('WorkflowPipelineMonitor', () => {
             status: ExecutionStatus.PENDING,
             stepId: 'generate_discoveries',
             topologicalIndex: 2,
+            workflowRunId: undefined,
           }),
         ];
 
@@ -2543,6 +2549,7 @@ describe('WorkflowPipelineMonitor', () => {
               onViewData={jest.fn()}
               pipelineData={multiRetrievalPipelineData}
               stepExecutions={stepsWithPendingGeneration}
+              workflowRunId={null}
             />
           </TestProviders>
         );

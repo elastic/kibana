@@ -17,6 +17,10 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../../../common/lib/telemetry';
 import type { AggregatedWorkflowExecution } from '../../types';
 import { buildDiagnosticReport } from '../diagnostic_report/helpers/build_diagnostic_report';
+import type {
+  PerWorkflowAlertRetrieval,
+  SourceMetadata,
+} from '../diagnostic_report/helpers/build_diagnostic_report';
 import type { FailureCategory } from '../failure_actions/helpers/classify_error_category';
 import { classifyFailure } from '../failure_actions/helpers/classify_failure';
 import type { EnvironmentContext } from '../helpers/get_environment_context';
@@ -26,15 +30,27 @@ import * as i18n from './translations';
 export interface TroubleshootWithAiProps {
   aggregatedExecution: AggregatedWorkflowExecution;
   alertsContextCount?: number | null;
+  averageSuccessfulDurationMs?: number;
+  configuredMaxAlerts?: number;
+  connectorActionTypeId?: string;
+  connectorModel?: string;
   connectorName?: string;
+  dateRangeEnd?: string;
+  dateRangeStart?: string;
   diagnosticsContext?: DiagnosticsContext;
   discoveriesCount?: number | null;
+  duplicatesDroppedCount?: number;
   environmentContext?: EnvironmentContext;
   errorCategory?: FailureCategory;
   executionUuid?: string;
   failedWorkflowId?: string;
   failureReason?: string;
+  generatedCount?: number;
   generationStatus?: 'started' | 'succeeded' | 'failed' | 'canceled' | 'dismissed';
+  hallucinationsFilteredCount?: number;
+  perWorkflowAlertRetrieval?: PerWorkflowAlertRetrieval[];
+  persistedCount?: number;
+  sourceMetadata?: SourceMetadata | null;
 }
 
 const TROUBLESHOOTABLE_STATUSES = new Set(['failed', 'canceled', 'dismissed']);
@@ -42,15 +58,27 @@ const TROUBLESHOOTABLE_STATUSES = new Set(['failed', 'canceled', 'dismissed']);
 const TroubleshootWithAiComponent: React.FC<TroubleshootWithAiProps> = ({
   aggregatedExecution,
   alertsContextCount,
+  averageSuccessfulDurationMs,
+  configuredMaxAlerts,
+  connectorActionTypeId,
+  connectorModel,
   connectorName,
+  dateRangeEnd,
+  dateRangeStart,
   diagnosticsContext,
   discoveriesCount,
+  duplicatesDroppedCount,
   environmentContext,
   errorCategory,
   executionUuid,
   failedWorkflowId,
   failureReason,
+  generatedCount,
   generationStatus,
+  hallucinationsFilteredCount,
+  perWorkflowAlertRetrieval,
+  persistedCount,
+  sourceMetadata,
 }) => {
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const { agentBuilder, telemetry } = useKibana().services;
@@ -74,14 +102,26 @@ const TroubleshootWithAiComponent: React.FC<TroubleshootWithAiProps> = ({
         content: buildDiagnosticReport({
           aggregatedExecution,
           alertsContextCount,
+          averageSuccessfulDurationMs,
+          configuredMaxAlerts,
+          connectorActionTypeId,
+          connectorModel,
           connectorName,
+          dateRangeEnd,
+          dateRangeStart,
           diagnosticsContext,
           discoveriesCount,
+          duplicatesDroppedCount,
           environmentContext,
           executionUuid,
           failureClassification,
           failureReason,
+          generatedCount,
           generationStatus,
+          hallucinationsFilteredCount,
+          perWorkflowAlertRetrieval,
+          persistedCount,
+          sourceMetadata,
         }),
       },
       type: DIAGNOSTIC_REPORT_ATTACHMENT_TYPE,
@@ -89,14 +129,26 @@ const TroubleshootWithAiComponent: React.FC<TroubleshootWithAiProps> = ({
     [
       aggregatedExecution,
       alertsContextCount,
+      averageSuccessfulDurationMs,
+      configuredMaxAlerts,
+      connectorActionTypeId,
+      connectorModel,
       connectorName,
+      dateRangeEnd,
+      dateRangeStart,
       diagnosticsContext,
       discoveriesCount,
+      duplicatesDroppedCount,
       environmentContext,
       executionUuid,
       failureClassification,
       failureReason,
+      generatedCount,
       generationStatus,
+      hallucinationsFilteredCount,
+      perWorkflowAlertRetrieval,
+      persistedCount,
+      sourceMetadata,
     ]
   );
 

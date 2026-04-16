@@ -54,43 +54,56 @@ export const buildStepExecutions = (
       return stepExecutionsWithLinks;
     }
 
-    // No definition steps AND no step executions (e.g., a workflow with `steps: []`).
-    // Create a single synthetic placeholder so the workflow still appears in the UI.
-    if (isTerminalStatus(execution.status)) {
-      return [
-        attachWorkflowLink({
-          error: undefined,
-          executionTimeMs: typeof execution.duration === 'number' ? execution.duration : undefined,
-          finishedAt: execution.finishedAt ?? undefined,
-          globalExecutionIndex: 0,
-          id: `${execution.id ?? 'unknown'}-no-steps-placeholder`,
-          input: undefined,
-          output: undefined,
-          scopeStack: [],
-          startedAt: execution.startedAt ?? '',
-          state: undefined,
-          status: execution.status,
-          stepExecutionIndex: 0,
-          stepId: pipelinePhase ?? 'retrieve_alerts',
-          stepType: undefined,
-          topologicalIndex: 0,
-        }),
-      ];
-    }
-
-    return stepExecutionsWithLinks;
+    // No definition steps AND no step executions (e.g., a workflow with `steps: []`
+    // or a running workflow whose definition is not yet included in the API response).
+    // Create a single synthetic placeholder so the workflow still appears in the UI,
+    // regardless of whether the execution is actively running or has reached a terminal
+    // status. Without this, a running generation workflow with no visible step executions
+    // produces an empty steps array, causing "No execution data available" to be shown
+    // for the entire duration of the LLM call.
+    return [
+      attachWorkflowLink({
+        error: undefined,
+        executionTimeMs: typeof execution.duration === 'number' ? execution.duration : undefined,
+        finishedAt: execution.finishedAt ?? undefined,
+        globalExecutionIndex: 0,
+        id: `${execution.id ?? 'unknown'}-no-steps-placeholder`,
+        input: undefined,
+        output: undefined,
+        scopeStack: [],
+        startedAt: execution.startedAt ?? '',
+        state: undefined,
+        status: execution.status,
+        stepExecutionIndex: 0,
+        stepId: pipelinePhase ?? 'retrieve_alerts',
+        stepType: undefined,
+        topologicalIndex: 0,
+      }),
+    ];
   }
 
   /**
-   * Workflows execution details can be eventually consistent right after a workflow finishes.
-   * In rare cases we may observe a terminal workflow execution with zero step executions yet.
+   * Workflows execution details can be eventually consistent right after a workflow finishes,
+   * and also during early-running state before the workflow engine has created any step
+   * executions (e.g. while the LLM call is in-flight for the generation step).
    *
-   * When that happens, we still want the Attack Discovery pipeline UI to reflect the workflow's
-   * terminal status (e.g. show the green checkmark for Validation), rather than rendering an
-   * "incomplete" numbered step indefinitely.
+   * In both cases we still want the Attack Discovery pipeline UI to reflect the workflow's
+   * actual status rather than rendering placeholder steps as "PENDING" indefinitely.
+   *
+   * - For RUNNING executions with no step executions yet: infer RUNNING so downstream
+   *   helpers (inferRetrievalPlaceholderStatus) correctly derive "provided" retrieval
+   *   status and the "generate_discoveries" step shows as actively running.
+   * - For terminal executions with no step executions: infer the terminal status so the
+   *   pipeline immediately shows the correct final state (e.g. green checkmark).
    */
   const shouldInferStepStatusFromExecution =
-    filteredStepExecutions.length === 0 && isTerminalStatus(execution.status);
+    filteredStepExecutions.length === 0 &&
+    (isTerminalStatus(execution.status) || execution.status === ExecutionStatus.RUNNING);
+
+  // For terminal executions, propagate timing from the execution-level data to the
+  // inferred step placeholder. For RUNNING executions these are not yet available.
+  const isInferredTerminal =
+    shouldInferStepStatusFromExecution && isTerminalStatus(execution.status);
 
   // Deduplicate by `stepId` defensively (Workflows can emit multiple executions per logical step)
   // while still preserving the latest observed attempt.
@@ -122,12 +135,10 @@ export const buildStepExecutions = (
       return attachWorkflowLink({
         error: undefined,
         executionTimeMs:
-          shouldInferStepStatusFromExecution && typeof execution.duration === 'number'
+          isInferredTerminal && typeof execution.duration === 'number'
             ? execution.duration
             : undefined,
-        finishedAt: shouldInferStepStatusFromExecution
-          ? execution.finishedAt ?? undefined
-          : undefined,
+        finishedAt: isInferredTerminal ? execution.finishedAt ?? undefined : undefined,
         globalExecutionIndex: index,
         id: `${execution.id ?? 'unknown'}-${step.name}-pending`,
         input: undefined,

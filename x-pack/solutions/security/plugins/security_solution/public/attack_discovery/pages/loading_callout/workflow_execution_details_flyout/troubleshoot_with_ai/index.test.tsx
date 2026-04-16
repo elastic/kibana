@@ -21,6 +21,7 @@ import { AttackDiscoveryEventTypes } from '../../../../../common/lib/telemetry';
 import type { AggregatedWorkflowExecution } from '../../types';
 import { TroubleshootWithAi } from '.';
 import * as i18n from './translations';
+import * as buildDiagnosticReportModule from '../diagnostic_report/helpers/build_diagnostic_report';
 
 jest.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
   useAgentBuilderAvailability: jest.fn(),
@@ -245,6 +246,176 @@ describe('TroubleshootWithAi', () => {
       );
 
       expect(screen.queryByTestId('troubleshootWithAiTooltip')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('buildDiagnosticReport params forwarding', () => {
+    let buildDiagnosticReportSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      buildDiagnosticReportSpy = jest.spyOn(buildDiagnosticReportModule, 'buildDiagnosticReport');
+    });
+
+    afterEach(() => {
+      buildDiagnosticReportSpy.mockRestore();
+    });
+
+    it('passes sourceMetadata to buildDiagnosticReport', () => {
+      const sourceMetadata = { rule_id: 'rule-x', rule_name: 'Scheduled Rule' };
+
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} sourceMetadata={sourceMetadata} />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ sourceMetadata })
+      );
+    });
+
+    it('passes averageSuccessfulDurationMs to buildDiagnosticReport', () => {
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} averageSuccessfulDurationMs={4500} />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ averageSuccessfulDurationMs: 4500 })
+      );
+    });
+
+    it('passes configuredMaxAlerts to buildDiagnosticReport', () => {
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} configuredMaxAlerts={250} />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ configuredMaxAlerts: 250 })
+      );
+    });
+
+    it('passes connectorActionTypeId to buildDiagnosticReport', () => {
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} connectorActionTypeId=".bedrock" />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorActionTypeId: '.bedrock' })
+      );
+    });
+
+    it('passes connectorModel to buildDiagnosticReport', () => {
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} connectorModel="claude-3-opus" />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorModel: 'claude-3-opus' })
+      );
+    });
+
+    it('passes dateRangeEnd to buildDiagnosticReport', () => {
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} dateRangeEnd="2025-07-01T00:00:00.000Z" />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ dateRangeEnd: '2025-07-01T00:00:00.000Z' })
+      );
+    });
+
+    it('passes dateRangeStart to buildDiagnosticReport', () => {
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} dateRangeStart="2025-06-30T00:00:00.000Z" />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ dateRangeStart: '2025-06-30T00:00:00.000Z' })
+      );
+    });
+
+    it('passes duplicatesDroppedCount to buildDiagnosticReport', () => {
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} duplicatesDroppedCount={3} />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ duplicatesDroppedCount: 3 })
+      );
+    });
+
+    it('passes generatedCount to buildDiagnosticReport', () => {
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} generatedCount={20} />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ generatedCount: 20 })
+      );
+    });
+
+    it('passes hallucinationsFilteredCount to buildDiagnosticReport', () => {
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} hallucinationsFilteredCount={7} />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ hallucinationsFilteredCount: 7 })
+      );
+    });
+
+    it('passes perWorkflowAlertRetrieval to buildDiagnosticReport', () => {
+      const perWorkflowAlertRetrieval = [
+        {
+          alertsContextCount: 8,
+          extractionStrategy: 'custom_workflow',
+          workflowId: 'wf-retrieval',
+          workflowRunId: 'run-retrieval',
+        },
+      ];
+
+      render(
+        <TestProviders>
+          <TroubleshootWithAi
+            {...defaultProps}
+            perWorkflowAlertRetrieval={perWorkflowAlertRetrieval}
+          />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ perWorkflowAlertRetrieval })
+      );
+    });
+
+    it('passes persistedCount to buildDiagnosticReport', () => {
+      render(
+        <TestProviders>
+          <TroubleshootWithAi {...defaultProps} persistedCount={14} />
+        </TestProviders>
+      );
+
+      expect(buildDiagnosticReportSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ persistedCount: 14 })
+      );
     });
   });
 

@@ -311,13 +311,14 @@ describe('addAttackDiscoveryPipelinePlaceholders', () => {
       expect(retrieveStep?.status).toBe(ExecutionStatus.PENDING);
     });
 
-    it('does NOT infer status for generation placeholders', () => {
+    it('keeps generate_discoveries PENDING when a retrieve_alerts step has FAILED status', () => {
       const steps = [
         createStep({
           stepId: 'retrieve_alerts',
           stepType: 'attack-discovery.defaultAlertRetrieval',
-          status: ExecutionStatus.COMPLETED,
+          status: ExecutionStatus.FAILED,
           topologicalIndex: 0,
+          workflowRunId: 'retrieval-run-id',
         }),
       ];
 
@@ -326,6 +327,116 @@ describe('addAttackDiscoveryPipelinePlaceholders', () => {
       const genStep = result.find((s) => s.stepId === 'generate_discoveries');
 
       expect(genStep?.status).toBe(ExecutionStatus.PENDING);
+    });
+
+    it('keeps generate_discoveries PENDING when one of multiple retrieval steps failed (mixed success and failure)', () => {
+      // Scenario: two alert retrieval workflows configured; first succeeded, second failed
+      // (e.g., workflow definition was deleted). Generation must NOT show RUNNING.
+      const steps = [
+        createStep({
+          stepId: 'retrieve_alerts',
+          stepType: 'attack-discovery.defaultAlertRetrieval',
+          status: ExecutionStatus.COMPLETED,
+          topologicalIndex: 0,
+          workflowRunId: 'first-retrieval-run-id',
+        }),
+        createStep({
+          pipelinePhase: 'retrieve_alerts',
+          stepId: 'retrieve_alerts',
+          status: ExecutionStatus.FAILED,
+          topologicalIndex: 1000,
+          workflowRunId: 'second-retrieval-run-id',
+        }),
+      ];
+
+      const result = addAttackDiscoveryPipelinePlaceholders(steps);
+
+      const genStep = result.find((s) => s.stepId === 'generate_discoveries');
+
+      expect(genStep?.status).toBe(ExecutionStatus.PENDING);
+    });
+
+    it('keeps generate_discoveries PENDING when a custom retrieval step (pipelinePhase) has FAILED status', () => {
+      const steps = [
+        createStep({
+          pipelinePhase: 'retrieve_alerts',
+          stepId: 'query_alerts',
+          stepType: 'esql',
+          status: ExecutionStatus.FAILED,
+          topologicalIndex: 0,
+          workflowRunId: 'custom-retrieval-run-id',
+        }),
+      ];
+
+      const result = addAttackDiscoveryPipelinePlaceholders(steps);
+
+      const genStep = result.find((s) => s.stepId === 'generate_discoveries');
+
+      expect(genStep?.status).toBe(ExecutionStatus.PENDING);
+    });
+
+    it('keeps generate_discoveries PENDING when retrieve_alerts has no workflowRunId', () => {
+      // No workflowRunId means the retrieval step is itself a placeholder — generation
+      // is not yet in flight.
+      const steps = [
+        createStep({
+          stepId: 'retrieve_alerts',
+          stepType: 'attack-discovery.defaultAlertRetrieval',
+          status: ExecutionStatus.COMPLETED,
+          topologicalIndex: 0,
+          // workflowRunId intentionally absent
+        }),
+      ];
+
+      const result = addAttackDiscoveryPipelinePlaceholders(steps);
+
+      const genStep = result.find((s) => s.stepId === 'generate_discoveries');
+
+      expect(genStep?.status).toBe(ExecutionStatus.PENDING);
+    });
+
+    it('sets generate_discoveries to RUNNING when a real retrieve_alerts step is completed', () => {
+      // A real step has a workflowRunId; its completion means the generation workflow
+      // is actively running (but won't return a run ID until the LLM finishes).
+      const steps = [
+        createStep({
+          finishedAt: '2024-01-01T00:01:00Z',
+          startedAt: '2024-01-01T00:00:00Z',
+          stepId: 'retrieve_alerts',
+          stepType: 'attack-discovery.defaultAlertRetrieval',
+          status: ExecutionStatus.COMPLETED,
+          topologicalIndex: 0,
+          workflowRunId: 'retrieval-run-id',
+        }),
+      ];
+
+      const result = addAttackDiscoveryPipelinePlaceholders(steps);
+
+      const genStep = result.find((s) => s.stepId === 'generate_discoveries');
+
+      expect(genStep?.status).toBe(ExecutionStatus.RUNNING);
+    });
+
+    it('sets generate_discoveries startedAt to the retrieval finishedAt when RUNNING', () => {
+      // The LiveTimer uses startedAt to show elapsed time since generation began.
+      // Without this, closing and reopening the flyout resets the timer to zero.
+      const steps = [
+        createStep({
+          finishedAt: '2024-01-01T00:01:00Z',
+          startedAt: '2024-01-01T00:00:00Z',
+          stepId: 'retrieve_alerts',
+          stepType: 'attack-discovery.defaultAlertRetrieval',
+          status: ExecutionStatus.COMPLETED,
+          topologicalIndex: 0,
+          workflowRunId: 'retrieval-run-id',
+        }),
+      ];
+
+      const result = addAttackDiscoveryPipelinePlaceholders(steps);
+
+      const genStep = result.find((s) => s.stepId === 'generate_discoveries');
+
+      expect(genStep?.startedAt).toBe('2024-01-01T00:01:00Z');
     });
 
     it('does NOT infer status for validation placeholders', () => {
