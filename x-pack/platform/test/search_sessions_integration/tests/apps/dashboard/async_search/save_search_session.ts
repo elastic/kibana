@@ -119,7 +119,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('Restore session with TSVB & Timelion', async () => {
         await dashboard.loadSavedDashboard('TSVBwithTimelion + Delay 5s');
         await dashboard.waitForRenderComplete();
-        await searchSessions.save({ isSubmitButton: true, withRefresh: true });
+        await queryBar.clickQuerySubmitButton();
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
+        await searchSessions.save({ isSubmitButton: true });
 
         const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle('TSVB');
 
