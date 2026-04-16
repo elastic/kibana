@@ -72,8 +72,6 @@ export async function suggestProcessingPipeline({
   upstreamSeedParsingContextMarkdown?: string;
 }): Promise<SuggestProcessingPipelineResult> {
   const effectiveMaxSteps = maxSteps ?? 10;
-  // TODO: TEMPORARY - set super low timeout for testing
-  const effectiveMaxDurationMs = 5000; // 5 seconds for testing
 
   // No need to involve reasoning if there are no sample documents
   if (documents.length === 0) {
@@ -114,7 +112,7 @@ export async function suggestProcessingPipeline({
       prompt: SuggestIngestPipelinePrompt,
       input,
       maxSteps: effectiveMaxSteps,
-      maxDurationMs: effectiveMaxDurationMs,
+      maxDurationMs,
       // `low` skips injecting `reason` / `complete` planning tools (only `simulate_pipeline` +
       // `commit_pipeline` from the prompt). `ReasoningPower` is `'low' | 'medium' | 'high'` only.
       power: 'low',
