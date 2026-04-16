@@ -21,7 +21,6 @@ import type { RoutingStatus } from '@kbn/streams-schema';
 import {
   Streams,
   convertUpsertRequestIntoDefinition,
-  deriveQueryType,
   getAncestors,
   getParentId,
   LOGS_ROOT_STREAM_NAME,
