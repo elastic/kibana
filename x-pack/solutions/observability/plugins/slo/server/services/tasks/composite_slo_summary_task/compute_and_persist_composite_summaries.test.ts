@@ -23,7 +23,9 @@ jest.mock('../../summary_client');
 jest.mock('../../burn_rates_client');
 jest.mock('../../compute_composite_summary');
 
-const MockDefaultSummaryClient = DefaultSummaryClient as jest.MockedClass<typeof DefaultSummaryClient>;
+const MockDefaultSummaryClient = DefaultSummaryClient as jest.MockedClass<
+  typeof DefaultSummaryClient
+>;
 const mockComputeCompositeSummary = computeCompositeSummary as jest.MockedFunction<
   typeof computeCompositeSummary
 >;
@@ -192,7 +194,12 @@ describe('computeAndPersistCompositeSummaries', () => {
     it('does not call bulk when no composite SLOs exist', async () => {
       const { closeMock } = mockPointInTimeFinder([[]]);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       expect(esClient.bulk).not.toHaveBeenCalled();
       expect(closeMock).toHaveBeenCalledTimes(1);
@@ -203,7 +210,12 @@ describe('computeAndPersistCompositeSummaries', () => {
     it('processes a composite SLO and upserts a summary doc', async () => {
       const { closeMock } = mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       expect(mockComputeSummaries).toHaveBeenCalledTimes(1);
       expect(mockComputeCompositeSummary).toHaveBeenCalledTimes(1);
@@ -214,7 +226,12 @@ describe('computeAndPersistCompositeSummaries', () => {
     it('uses the correct doc ID and index', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -229,7 +246,12 @@ describe('computeAndPersistCompositeSummaries', () => {
     it('builds the summary document with correct structure', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
       const doc = bulkCall.operations[1];
@@ -271,7 +293,12 @@ describe('computeAndPersistCompositeSummaries', () => {
         page: 1,
       });
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -288,7 +315,12 @@ describe('computeAndPersistCompositeSummaries', () => {
       delete (so as any).namespaces;
       mockPointInTimeFinder([[so]]);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
       expect(bulkCall.operations[0]._id ?? bulkCall.operations[0].index._id).toContain('default:');
@@ -312,7 +344,12 @@ describe('computeAndPersistCompositeSummaries', () => {
         page: 1,
       });
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -331,21 +368,28 @@ describe('computeAndPersistCompositeSummaries', () => {
         page: 1,
       });
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       // computeSummaries is still called with empty params (returns [] immediately)
       expect(mockComputeSummaries).toHaveBeenCalledWith([]);
       // computeCompositeSummary is still called with empty member summaries
-      expect(mockComputeCompositeSummary).toHaveBeenCalledWith(
-        expect.anything(),
-        []
-      );
+      expect(mockComputeCompositeSummary).toHaveBeenCalledWith(expect.anything(), []);
     });
 
     it('passes timeWindowOverride from composite to summary client', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       expect(mockComputeSummaries).toHaveBeenCalledWith(
         expect.arrayContaining([
@@ -365,7 +409,12 @@ describe('computeAndPersistCompositeSummaries', () => {
       mockPointInTimeFinder([page1, page2]);
       mockComputeSummaries.mockResolvedValue([buildSummaryResult()]);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       expect(esClient.bulk).toHaveBeenCalledTimes(2);
     });
@@ -373,7 +422,12 @@ describe('computeAndPersistCompositeSummaries', () => {
     it('creates the point-in-time finder with correct parameters', async () => {
       mockPointInTimeFinder([[]]);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: SO_SLO_COMPOSITE_TYPE,
@@ -390,7 +444,12 @@ describe('computeAndPersistCompositeSummaries', () => {
       });
       mockPointInTimeFinder([[invalidSo]]);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       expect(mockComputeSummaries).not.toHaveBeenCalled();
       expect(esClient.bulk).not.toHaveBeenCalled();
@@ -407,7 +466,12 @@ describe('computeAndPersistCompositeSummaries', () => {
         .mockRejectedValueOnce(new Error('compute failed'))
         .mockResolvedValueOnce([buildSummaryResult()]);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       // Second SLO still processed
       expect(mockComputeSummaries).toHaveBeenCalledTimes(2);
@@ -422,25 +486,44 @@ describe('computeAndPersistCompositeSummaries', () => {
       });
 
       await expect(
-        computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController })
+        computeAndPersistCompositeSummaries({
+          esClient,
+          soClient: soClient as any,
+          logger,
+          abortController,
+        })
       ).resolves.not.toThrow();
     });
 
     it('returns gracefully on RequestAbortedError', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
-      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(new errors.RequestAbortedError('aborted'));
+      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(
+        new errors.RequestAbortedError('aborted')
+      );
 
       await expect(
-        computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController })
+        computeAndPersistCompositeSummaries({
+          esClient,
+          soClient: soClient as any,
+          logger,
+          abortController,
+        })
       ).resolves.toBeUndefined();
     });
 
     it('rethrows non-abort errors', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
-      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(new Error('ES cluster unavailable'));
+      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(
+        new Error('ES cluster unavailable')
+      );
 
       await expect(
-        computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController })
+        computeAndPersistCompositeSummaries({
+          esClient,
+          soClient: soClient as any,
+          logger,
+          abortController,
+        })
       ).rejects.toThrow('ES cluster unavailable');
     });
 
@@ -449,7 +532,12 @@ describe('computeAndPersistCompositeSummaries', () => {
       (esClient.bulk as unknown as jest.Mock).mockRejectedValue(new Error('fatal'));
 
       await expect(
-        computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController })
+        computeAndPersistCompositeSummaries({
+          esClient,
+          soClient: soClient as any,
+          logger,
+          abortController,
+        })
       ).rejects.toThrow();
 
       expect(closeMock).toHaveBeenCalledTimes(1);
@@ -473,7 +561,12 @@ describe('computeAndPersistCompositeSummaries', () => {
         },
       } as any);
 
-      await computeAndPersistCompositeSummaries({ esClient, soClient: soClient as any, logger, abortController });
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
 
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
       expect(closeMock).toHaveBeenCalledTimes(1);
