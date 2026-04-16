@@ -12,7 +12,10 @@ import { EuiFocusTrap } from '@elastic/eui';
 import { cx } from '@emotion/css';
 import { css } from '@emotion/react';
 import { ChartSectionTemplate, type ChartSectionTemplateProps } from '@kbn/unified-histogram';
-import { useMetricsGridFullScreen } from './observability/metrics/hooks';
+import {
+  FULLSCREEN_BODY_STYLES_CLASS,
+  useMetricsGridFullScreen,
+} from './observability/metrics/hooks';
 import {
   METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
   METRICS_GRID_FULL_SCREEN_CLASS,
@@ -38,7 +41,7 @@ export const ChartsGrid = ({
   isComponentVisible,
   onKeyDown,
 }: React.PropsWithChildren<ChartsGridProps>) => {
-  const { metricsGridId, setMetricsGridWrapper, styles } = useMetricsGridFullScreen({ prefix: id });
+  const { metricsGridId, styles } = useMetricsGridFullScreen({ prefix: id });
   const metricsGridRef = useRef<HTMLDivElement>(null);
 
   const restrictBodyClass = styles[METRICS_GRID_RESTRICT_BODY_CLASS];
@@ -51,10 +54,18 @@ export const ChartsGrid = ({
   useEffect(() => {
     // When the metrics grid is fullscreen, we add a class to the body to remove the extra scrollbar and stay above any fixed headers
     if (isFullscreen) {
-      document.body.classList.add(METRICS_GRID_RESTRICT_BODY_CLASS, restrictBodyClass);
+      const fullscreenBodyClasses = [
+        METRICS_GRID_RESTRICT_BODY_CLASS,
+        restrictBodyClass,
+        METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
+        FULLSCREEN_BODY_STYLES_CLASS,
+        'euiDataGrid__restrictBody',
+      ] as const;
+
+      document.body.classList.add(...fullscreenBodyClasses);
 
       return () => {
-        document.body.classList.remove(METRICS_GRID_RESTRICT_BODY_CLASS, restrictBodyClass);
+        document.body.classList.remove(...fullscreenBodyClasses);
       };
     }
   }, [isFullscreen, restrictBodyClass]);
@@ -75,7 +86,6 @@ export const ChartsGrid = ({
           [METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
         })}
         onKeyDown={onKeyDown}
-        ref={setMetricsGridWrapper}
         css={fullHeightCss}
       >
         <div
