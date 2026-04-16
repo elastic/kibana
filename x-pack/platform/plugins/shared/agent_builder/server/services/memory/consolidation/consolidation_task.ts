@@ -52,6 +52,8 @@ export interface ConsolidationDepsProvider {
   elasticsearch: ElasticsearchServiceStart;
   logger: Logger;
   config: AgentBuilderConfig;
+  inference?: import('@kbn/inference-plugin/server').InferenceServerStart;
+  conversations?: import('../../../services/conversation').ConversationService;
 }
 
 // ---------------------------------------------------------------------------
@@ -83,7 +85,8 @@ export const registerMemoryConsolidationTaskDefinition = ({
 
         return {
           run: async () => {
-            const { elasticsearch, logger, config } = await getConsolidationDeps();
+            const deps = await getConsolidationDeps();
+            const { elasticsearch, logger, config } = deps;
 
             if (abortController.signal.aborted) {
               logger.info('MemoryConsolidationTask: aborted before start');
@@ -93,7 +96,7 @@ export const registerMemoryConsolidationTaskDefinition = ({
             logger.info('MemoryConsolidationTask: starting nightly consolidation run');
 
             try {
-              await runConsolidation({ elasticsearch, logger, config, abortSignal: abortController.signal });
+              await runConsolidation({ elasticsearch, logger, config, inference: deps.inference, conversations: deps.conversations, abortSignal: abortController.signal });
               logger.info('MemoryConsolidationTask: consolidation run complete');
             } catch (err) {
               logger.error(
@@ -167,11 +170,15 @@ const runConsolidation = async ({
   elasticsearch,
   logger,
   config,
+  inference,
+  conversations,
   abortSignal,
 }: {
   elasticsearch: ElasticsearchServiceStart;
   logger: Logger;
   config: AgentBuilderConfig;
+  inference?: import('@kbn/inference-plugin/server').InferenceServerStart;
+  conversations?: import('../../../services/conversation').ConversationService;
   abortSignal: AbortSignal;
 }): Promise<void> => {
   const esClient = elasticsearch.client.asInternalUser;
@@ -201,7 +208,7 @@ const runConsolidation = async ({
     }
 
     try {
-      await consolidateForUser({ esClient, space, userName, logger, config });
+      await consolidateForUser({ esClient, space, userName, logger, config, inference, conversations });
     } catch (err) {
       logger.warn(
         `MemoryConsolidationTask: failed for space='${space}' user='${userName}' — ${
@@ -222,12 +229,16 @@ const consolidateForUser = async ({
   userName,
   logger,
   config,
+  inference,
+  conversations,
 }: {
   esClient: ElasticsearchClient;
   space: string;
   userName: string;
   logger: Logger;
   config: AgentBuilderConfig;
+  inference?: import('@kbn/inference-plugin/server').InferenceServerStart;
+  conversations?: import('../../../services/conversation').ConversationService;
 }): Promise<void> => {
   const memoryClient: MemoryClient = createMemoryClient({
     esClient,
@@ -265,9 +276,67 @@ const consolidateForUser = async ({
       logger.info(
         `consolidation[reextract]: removed ${removed} candidates from ${conversationIds.size} conversations`
       );
-      // Note: actual reextraction of full conversations would require the conversation service
-      // and inference, which are not available in the task context. This step just cleans up
-      // candidates so the next idle/after-round extraction re-creates them.
+
+      // Reextract from full conversations if inference + conversations service available
+      const connectorId = config.memory.extraction.connectorId;
+      if (inference && conversations && connectorId && conversationIds.size > 0) {
+        const { createExtractionStrategy } = await import('../extraction/extractor_factory');
+        const { buildExtractionInputFromConversation } = await import('../extraction/memory_extractor');
+        const { CandidatePipeline } = await import('../extraction/candidate_pipeline');
+        const { createEmbeddingService } = await import('../embeddings');
+
+        // We need a fake request for the scoped clients — use internal user
+        const convClient = await conversations.getScopedClient({ request: { headers: {} } as any });
+
+        let reextracted = 0;
+        for (const convId of conversationIds) {
+          try {
+            const conversation = await convClient.get(convId);
+            if (!conversation || conversation.rounds.length === 0) continue;
+
+            const extractor = createExtractionStrategy({
+              config,
+              logger: logger.get('reextract'),
+              inference,
+              connectorId,
+              request: { headers: {} } as any,
+            });
+
+            const input = buildExtractionInputFromConversation(conversation);
+            const extraction = await extractor.extract(input);
+
+            const totalCandidates = extraction.semantic.length + extraction.episodic.length + extraction.procedural.length;
+            if (totalCandidates === 0) continue;
+
+            const noopEmbedding = createEmbeddingService({
+              esClient,
+              config: { inferenceEndpointId: undefined },
+              logger: logger.get('embedding'),
+            });
+
+            const pipeline = new CandidatePipeline({
+              memoryClient,
+              esClient,
+              embeddingService: noopEmbedding,
+              logger: logger.get('pipeline'),
+            });
+
+            const result = await pipeline.run(
+              extraction,
+              { conversationId: convId, roundId: 'reextract', space, userName },
+              []
+            );
+
+            reextracted += result.created;
+          } catch (err) {
+            logger.warn(`consolidation[reextract]: failed for conversation ${convId} — ${(err as Error).message}`);
+          }
+        }
+
+        logger.info(`consolidation[reextract]: reextracted ${reextracted} memories from ${conversationIds.size} conversations`);
+      } else {
+        logger.info('consolidation[reextract]: skipping reextraction (inference/conversations/connectorId not available)');
+      }
 
       memories = await loadMemoriesBatch(memoryClient);
     } catch (err) {

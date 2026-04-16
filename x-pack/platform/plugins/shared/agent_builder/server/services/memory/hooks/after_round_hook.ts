@@ -245,17 +245,17 @@ export const createMemoryExtractionCallback = (
       return;
     }
 
+    const llmMethods = ['llm', 'cognitive'];
     let connectorId: string | undefined;
-    if (deps.config.memory.extraction.method === 'llm') {
-      // Prefer explicit config connector ID
+    if (llmMethods.includes(deps.config.memory.extraction.method)) {
       connectorId = deps.config.memory.extraction.connectorId;
 
       if (!connectorId) {
-        logger.info('afterRound: no connectorId configured for LLM extraction — skipping');
+        logger.info(`afterRound: no connectorId configured for ${deps.config.memory.extraction.method} extraction — skipping`);
         return;
       }
 
-      logger.info(`afterRound: using connector=${connectorId} for LLM extraction`);
+      logger.info(`afterRound: using connector=${connectorId} for ${deps.config.memory.extraction.method} extraction`);
     }
 
     const space = getCurrentSpaceId({ request, spaces: services.spaces });

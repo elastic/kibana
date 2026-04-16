@@ -255,10 +255,13 @@ export class AgentBuilderPlugin
         taskManager: setupDeps.taskManager,
         getConsolidationDeps: async () => {
           const [coreStart] = await coreSetup.getStartServices();
+          const services = getInternalServices();
           return {
             elasticsearch: coreStart.elasticsearch,
             logger: this.logger.get('services.memory.consolidation'),
             config: this.config,
+            inference: services.inference,
+            conversations: services.conversations,
           };
         },
       });
