@@ -106,8 +106,7 @@ const commonBasePropertiesSchema = schema.object({
   data_view_id: schema.maybe(
     schema.string({
       meta: {
-        description:
-          'Identifier of the data view used as context for this filter.',
+        description: 'Identifier of the data view used as context for this filter.',
       },
     })
   ),
@@ -192,8 +191,7 @@ const oneOfConditionSchema = baseConditionSchema.extends(
       ],
       {
         meta: {
-          description:
-            'Homogeneous array of values to match against the field.',
+          description: 'Homogeneous array of values to match against the field.',
         },
       }
     ),
