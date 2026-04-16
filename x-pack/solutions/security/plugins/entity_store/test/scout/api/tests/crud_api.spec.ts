@@ -658,6 +658,98 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(firstId).not.toBe(secondId);
   });
 
+  apiTest('Should return specific fields when fields param is provided', async ({ apiClient }) => {
+    const entityObj: Entity = {
+      entity: {
+        id: 'list-fields-test',
+      },
+    };
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: entityObj,
+    });
+    expect(create.statusCode).toBe(200);
+
+    const kqlFilter = `entity.id: ${entityObj.entity!.id!}`;
+    const list = await apiClient.get(
+      ENTITY_STORE_ROUTES.public.CRUD_GET +
+        `?filter=${encodeURIComponent(kqlFilter)}&fields=entity.id`,
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+      }
+    );
+    expect(list.statusCode).toBe(200);
+    expect(list.body.entitiesFields).toBeDefined();
+    expect(list.body.entitiesFields).toHaveLength(1);
+    expect(list.body.entitiesFields[0]['entity.id']).toContain(entityObj.entity!.id!);
+  });
+
+  apiTest(
+    'Should not include entitiesFields in response when fields param is omitted',
+    async ({ apiClient }) => {
+      const entityObj: Entity = {
+        entity: {
+          id: 'list-no-fields-test',
+        },
+      };
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: entityObj,
+      });
+      expect(create.statusCode).toBe(200);
+
+      const kqlFilter = `entity.id: ${entityObj.entity!.id!}`;
+      const list = await apiClient.get(
+        ENTITY_STORE_ROUTES.public.CRUD_GET + `?filter=${encodeURIComponent(kqlFilter)}`,
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+        }
+      );
+      expect(list.statusCode).toBe(200);
+      expect(list.body.entitiesFields).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'Should return multiple fields when multiple fields are requested',
+    async ({ apiClient }) => {
+      const entityObj: Entity = {
+        entity: {
+          id: 'host:list-multi-fields',
+        },
+        host: {
+          name: 'list-multi-fields',
+        },
+      };
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('host'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: entityObj,
+      });
+      expect(create.statusCode).toBe(200);
+
+      const kqlFilter = `entity.id: "${entityObj.entity!.id!}"`;
+      const list = await apiClient.get(
+        ENTITY_STORE_ROUTES.public.CRUD_GET +
+          `?filter=${encodeURIComponent(kqlFilter)}&fields=entity.id,host.name`,
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+        }
+      );
+      expect(list.statusCode).toBe(200);
+      expect(list.body.entitiesFields).toBeDefined();
+      expect(list.body.entitiesFields).toHaveLength(1);
+      const fields = list.body.entitiesFields[0];
+      expect(fields['entity.id']).toContain(entityObj.entity!.id!);
+      expect(fields['host.name']).toContain('list-multi-fields');
+    }
+  );
+
   apiTest('Should return 400 for invalid kql', async ({ apiClient }) => {
     const list = await apiClient.get(
       ENTITY_STORE_ROUTES.public.CRUD_GET + `?filter=${encodeURIComponent('entity.id:')}`,
