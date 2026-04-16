@@ -66,15 +66,39 @@ export const useCustomSuggestWidget = (
   const showWidget = useCallback(
     (payload: SuggestionsPayload) => {
       if (!editor || !widgetRef.current || !ctxKeyRef.current) return;
-      if (payload.items.length === 0) return;
+      if (payload.items.length === 0) {
+        // Provider returned empty — hide if visible
+        if (isVisibleRef.current) hideWidget();
+        return;
+      }
 
+      // If widget is already visible on the same line, just update items
+      // without resetting position/filter — prevents blinking on re-trigger
+      const alreadyVisible = isVisibleRef.current;
+      const sameLine =
+        alreadyVisible &&
+        anchorPositionRef.current?.lineNumber === payload.anchorPosition.lineNumber;
+
+      if (sameLine) {
+        // Update items but keep current filterText and selection
+        itemsRef.current = payload.items;
+        // Re-check filter still matches
+        const filtered = getFilteredItems(payload.items, filterTextRef.current);
+        if (filtered.length === 0) {
+          hideWidget();
+          return;
+        }
+        render();
+        return;
+      }
+
+      // Fresh show — new line or first trigger
       itemsRef.current = payload.items;
       selectedIndexRef.current = 0;
       anchorPositionRef.current = payload.anchorPosition;
 
       // Compute initial filterText: the user may have typed characters between
-      // the async provider trigger and this callback. Read the text from the
-      // anchor column to the current cursor to capture what was typed.
+      // the async provider trigger and this callback.
       const pos = editor.getPosition();
       const model = editor.getModel();
       if (pos && model && pos.lineNumber === payload.anchorPosition.lineNumber) {
@@ -89,7 +113,6 @@ export const useCustomSuggestWidget = (
         filterTextRef.current = '';
       }
 
-      // Check if any items match the initial filter — if not, don't show
       const filtered = getFilteredItems(payload.items, filterTextRef.current);
       if (filtered.length === 0) return;
 
@@ -98,7 +121,7 @@ export const useCustomSuggestWidget = (
       widgetRef.current.setAnchorPosition(payload.anchorPosition);
       render();
     },
-    [editor, render]
+    [editor, render, hideWidget]
   );
 
   const hideWidget = useCallback(() => {
@@ -133,23 +156,12 @@ export const useCustomSuggestWidget = (
     isAcceptingRef.current = true;
     hideWidget();
 
-    // Determine if we should use snippet insertion
-    const isSnippet =
-      item.insertTextRules !== undefined &&
-      // eslint-disable-next-line no-bitwise
-      (item.insertTextRules & monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet) !== 0;
+    // Strip snippet placeholders ($1, $2, ${1:default}, $0) for plain text insertion.
+    // Kibana's Monaco build doesn't include the snippetController contribution,
+    // so editor.action.insertSnippet is not available.
+    const plainText = item.insertText.replace(/\$\{\d+(?::([^}]*))?\}|\$\d+/g, '$1');
 
-    if (isSnippet) {
-      // For snippets, use Monaco's built-in snippet insertion
-      editor.executeEdits('custom-suggest', [{ range, text: '', forceMoveMarkers: true }]);
-      editor.trigger('custom-suggest', 'editor.action.insertSnippet', {
-        snippet: item.insertText,
-      });
-    } else {
-      editor.executeEdits('custom-suggest', [
-        { range, text: item.insertText, forceMoveMarkers: true },
-      ]);
-    }
+    editor.executeEdits('custom-suggest', [{ range, text: plainText, forceMoveMarkers: true }]);
 
     // Apply additional text edits (e.g., removing @ trigger character)
     if (item.additionalTextEdits?.length) {

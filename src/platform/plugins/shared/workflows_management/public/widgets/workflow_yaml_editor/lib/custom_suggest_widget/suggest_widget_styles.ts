@@ -116,11 +116,15 @@ export const getSuggestWidgetStyles = (euiThemeContext: UseEuiTheme) => {
 
   const matchHighlight = css`
     font-weight: ${euiTheme.font.weight.bold};
-    color: ${euiTheme.colors.warning};
+    color: ${euiTheme.colors.primaryText};
+    text-decoration: underline;
+    text-underline-offset: 2px;
   `;
 
   const matchHighlightSelected = css`
     color: ${euiTheme.colors.textInverse};
+    text-decoration: underline;
+    text-underline-offset: 2px;
   `;
 
   const itemKind = css`
