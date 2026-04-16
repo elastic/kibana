@@ -55,6 +55,7 @@ spaceTest.describe(
       'dashboard add filter from ES|QL panel should not show duplicate data view names',
       async ({ page, pageObjects }) => {
         const { dashboard, lens } = pageObjects;
+        let esqlEmbeddableId: string;
 
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
@@ -70,6 +71,9 @@ spaceTest.describe(
         await spaceTest.step('apply and close the inline editor', async () => {
           await applyLensInlineEditorAndWaitClosed({ lens });
           await dashboard.waitForRenderComplete();
+          // Capture the ES|QL panel ID while it's the only panel on the dashboard
+          const panelElementId = await page.testSubj.locator('dashboardPanel').getAttribute('id');
+          esqlEmbeddableId = panelElementId!.replace('panel-', '');
         });
 
         await spaceTest.step('add a Lens chart panel using flights data view', async () => {
@@ -92,12 +96,8 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click on a chart coordinate to trigger a filter', async () => {
-          const panelIds = await page.testSubj
-            .locator('dashboardPanel')
-            .evaluateAll((panels) => panels.map((p) => p.id));
-          const embeddableId = panelIds[0].replace('panel-', '');
           const canvas = page.locator(
-            `[data-test-embeddable-id="${embeddableId}"] .echCanvasRenderer`
+            `[data-test-embeddable-id="${esqlEmbeddableId}"] .echCanvasRenderer`
           );
           await canvas.waitFor({ state: 'visible' });
           const box = (await canvas.boundingBox())!;
@@ -150,10 +150,11 @@ spaceTest.describe(
         });
 
         await spaceTest.step('reopen the inline editor and change the query', async () => {
-          const panelIds = await page.testSubj
+          const esqlPanel = page.testSubj
             .locator('dashboardPanel')
-            .evaluateAll((panels) => panels.map((p) => p.id));
-          const embeddableId = panelIds[0].replace('panel-', '');
+            .filter({ has: page.locator('.echCanvasRenderer') });
+          const panelElementId = await esqlPanel.getAttribute('id');
+          const embeddableId = panelElementId!.replace('panel-', '');
 
           await dashboard.openInlineEditor(embeddableId);
           await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
