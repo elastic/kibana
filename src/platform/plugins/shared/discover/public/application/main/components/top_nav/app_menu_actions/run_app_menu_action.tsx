@@ -130,7 +130,16 @@ export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
             returnFocus: params.returnFocus,
           });
         } else {
-          (appMenuItem.run as Function)?.();
+          // Chrome-Next auto-promotes the share item from the app menu to a
+          // global action icon button. When triggered from there, no UI-context
+          // params are available (no anchor element, no return-focus callback).
+          // Stub them so the Discover run signature is satisfied — share doesn't
+          // use any of these, it opens its own modal via toggleShareContextMenu.
+          appMenuItem.run?.({
+            triggerElement: document.body,
+            returnFocus: () => {},
+            context: { onFinishAction: () => {} },
+          });
         }
       }
     : undefined;
