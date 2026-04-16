@@ -1,0 +1,15 @@
+steps:
+  - command: .buildkite/scripts/steps/scout_vrt/run_pr_vrt_compare.sh
+    label: 'Run VRT Compare'
+    agents:
+      machineType: n2-standard-8
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    depends_on:
+      - build
+    key: vrt_compare
+    timeout_in_minutes: 90
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1

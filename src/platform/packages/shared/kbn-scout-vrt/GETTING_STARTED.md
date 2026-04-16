@@ -1,13 +1,14 @@
 # Getting Started with @kbn/scout-vrt
 
-This guide covers the first two rollout stages:
+This guide covers the first three rollout stages:
 
 1. author a visual Scout suite
 2. run VRT capture locally
 3. generate local baselines
-4. inspect the resulting artifacts and manifests
+4. compare against hydrated baselines
+5. inspect the resulting artifacts and manifests
 
-This guide is still intentionally local-first. PR comparison and review-site reporting are introduced in the next stage.
+This guide focuses on the local runtime loop. CI publishing and PR reporting are documented separately.
 
 ## 1. Opt a Scout Suite into VRT
 
@@ -105,7 +106,35 @@ That writes baseline PNGs to:
 
 The run manifest for that execution will record `mode: "update-baselines"`, and each checkpoint record will use `status: "updated"`.
 
-## 5. Inspect the Output
+## 5. Compare Against Baselines
+
+Use `--compare-baselines` when the local baseline cache has already been seeded and you want to compare the current screenshots against it.
+
+Example:
+
+```bash
+node scripts/scout_vrt run-tests \
+  --location local \
+  --arch stateful \
+  --domain classic \
+  --config src/platform/plugins/private/advanced_settings/test/scout/ui/playwright.config.ts \
+  --compare-baselines
+```
+
+Expected checkpoint outcomes:
+
+- no change:
+  - `status: "passed"`
+- visual diff:
+  - `status: "failed"`
+  - `diffPath`
+  - `mismatchPercent`
+- missing local baseline:
+  - `status: "missing-baseline"`
+
+Compare mode never updates the local baseline cache. It only reads from `.scout/baselines/vrt/...` and writes actual and diff artifacts under the run output tree.
+
+## 6. Inspect the Output
 
 After a run, inspect:
 
@@ -125,12 +154,13 @@ The run manifest tells you:
 
 The package manifest tells you:
 
-- which checkpoints were captured or updated
+- which checkpoints were captured, updated, passed, failed, or missing a baseline
 - their stable `testKey`
 - their shared `imagePath`
+- any `diffPath` and `mismatchPercent` values from compare mode
 - the source file and line that created the checkpoint
 
-## 6. Publish Canonical `main` Baselines
+## 7. Publish Canonical `main` Baselines
 
 Publishing to remote storage is intentionally handled by CI, not by the local runtime. The on-merge baseline publisher reruns the same baseline-update mode on merged `main`, then packages and uploads the resulting baselines plus manifests.
 
@@ -140,7 +170,18 @@ See [CI_INTEGRATION.md](CI_INTEGRATION.md) for:
 - the published GCS layout
 - manual seeding instructions for a branch or demo environment
 
-## 7. Recommended Validation
+## 8. Run PR Compare In CI
+
+PR comparison is also handled by CI. A labeled PR run hydrates the latest published `main` baseline bundle, runs compare mode, and publishes a static review site.
+
+See [CI_INTEGRATION.md](/Users/clint/Projects/kibana.worktrees/scout-vrt/src/platform/packages/shared/kbn-scout-vrt/CI_INTEGRATION.md) for:
+
+- the `ci:vrt` PR trigger
+- archive-first baseline hydration
+- review-site publishing
+- expected PR outputs
+
+## 9. Recommended Validation
 
 Before handing work off or pushing a branch:
 
@@ -150,9 +191,8 @@ yarn test:type_check --project src/platform/packages/shared/kbn-scout-vrt/tsconf
 node scripts/check_changes.ts
 ```
 
-## 8. What Comes Next
+## 10. What Comes Next
 
 Later rollout stages add:
 
-- PR comparison against published baselines
-- static review-site generation
+- release-drift reporting against the last serverless release baseline

@@ -86,14 +86,22 @@ const summaryFromPackages = (
     (summary, currentPackage) => ({
       tests: summary.tests + currentPackage.summary.tests,
       checkpoints: summary.checkpoints + currentPackage.summary.checkpoints,
+      passed: summary.passed + currentPackage.summary.passed,
+      failed: summary.failed + currentPackage.summary.failed,
       captured: summary.captured + currentPackage.summary.captured,
       updated: summary.updated + currentPackage.summary.updated,
+      missingBaselines: summary.missingBaselines + currentPackage.summary.missingBaselines,
+      diffs: summary.diffs + currentPackage.summary.diffs,
     }),
     {
       tests: 0,
       checkpoints: 0,
+      passed: 0,
+      failed: 0,
       captured: 0,
       updated: 0,
+      missingBaselines: 0,
+      diffs: 0,
     }
   );
 

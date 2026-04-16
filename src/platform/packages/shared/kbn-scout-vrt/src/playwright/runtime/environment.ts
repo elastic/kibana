@@ -18,12 +18,17 @@ const booleanFromEnv = (varName: string, defaultValue: boolean = false): boolean
 };
 
 export const SCOUT_VISUAL_REGRESSION_ENABLED_ENV = 'SCOUT_VISUAL_REGRESSION_ENABLED';
+export const SCOUT_VISUAL_REGRESSION_COMPARE_BASELINES_ENV =
+  'SCOUT_VISUAL_REGRESSION_COMPARE_BASELINES';
 export const SCOUT_VISUAL_REGRESSION_UPDATE_BASELINES_ENV =
   'SCOUT_VISUAL_REGRESSION_UPDATE_BASELINES';
 export const SCOUT_VISUAL_REGRESSION_ATTACHMENT_NAME = 'scout-vrt-checkpoints';
 
 export const isVisualRegressionEnabled = (): boolean =>
   booleanFromEnv(SCOUT_VISUAL_REGRESSION_ENABLED_ENV);
+
+export const isCompareBaselinesEnabled = (): boolean =>
+  booleanFromEnv(SCOUT_VISUAL_REGRESSION_COMPARE_BASELINES_ENV);
 
 export const isUpdateBaselinesEnabled = (): boolean =>
   booleanFromEnv(SCOUT_VISUAL_REGRESSION_UPDATE_BASELINES_ENV);

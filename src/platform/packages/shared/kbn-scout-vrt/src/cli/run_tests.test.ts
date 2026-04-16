@@ -35,6 +35,7 @@ describe('parseVisualRunTestsArgs', () => {
     expect(
       parseVisualRunTestsArgs(['--arch', 'stateful', '--domain=classic', '--update-baselines'])
     ).toEqual({
+      compareBaselines: false,
       configPath: undefined,
       forwardedArgs: ['--arch', 'stateful', '--domain=classic'],
       helpRequested: false,
@@ -53,6 +54,7 @@ describe('parseVisualRunTestsArgs', () => {
         'src/plugin/test/scout/ui/playwright.config.ts',
       ])
     ).toEqual({
+      compareBaselines: false,
       configPath: 'src/plugin/test/scout/ui/playwright.config.ts',
       forwardedArgs: ['--arch', 'stateful', '--domain=classic'],
       helpRequested: false,
@@ -73,10 +75,32 @@ describe('parseVisualRunTestsArgs', () => {
         '--testFiles=src/plugin/test/scout/ui/tests/example.spec.ts',
       ])
     ).toEqual({
+      compareBaselines: false,
       configPath: undefined,
       forwardedArgs: ['--location', 'cloud', '--arch', 'stateful', '--domain', 'classic'],
       helpRequested: false,
       testFilesList: 'src/plugin/test/scout/ui/tests/example.spec.ts',
+      updateBaselines: false,
+    });
+  });
+
+  it('parses compare-based runs', () => {
+    expect(
+      parseVisualRunTestsArgs([
+        '--arch',
+        'stateful',
+        '--domain',
+        'classic',
+        '--compare-baselines',
+        '--config',
+        'src/plugin/test/scout/ui/playwright.config.ts',
+      ])
+    ).toEqual({
+      compareBaselines: true,
+      configPath: 'src/plugin/test/scout/ui/playwright.config.ts',
+      forwardedArgs: ['--arch', 'stateful', '--domain', 'classic'],
+      helpRequested: false,
+      testFilesList: undefined,
       updateBaselines: false,
     });
   });
@@ -90,6 +114,17 @@ describe('parseVisualRunTestsArgs', () => {
         'src/plugin/test/scout/ui/tests/example.spec.ts',
       ])
     ).toThrow(`Cannot use both '--config' and '--testFiles' at the same time`);
+  });
+
+  it('rejects combining compare and update mode', () => {
+    expect(() =>
+      parseVisualRunTestsArgs([
+        '--compare-baselines',
+        '--update-baselines',
+        '--config',
+        'src/plugin/test/scout/ui/playwright.config.ts',
+      ])
+    ).toThrow(`Cannot use both '--compare-baselines' and '--update-baselines' at the same time`);
   });
 });
 

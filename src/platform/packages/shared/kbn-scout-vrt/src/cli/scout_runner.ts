@@ -13,6 +13,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { generateTestRunId } from '@kbn/scout-reporting';
 import {
+  SCOUT_VISUAL_REGRESSION_COMPARE_BASELINES_ENV,
   ensureVisualRegressionRunId,
   SCOUT_VISUAL_REGRESSION_ENABLED_ENV,
   SCOUT_VISUAL_REGRESSION_UPDATE_BASELINES_ENV,
@@ -33,6 +34,7 @@ const createVisualRunEnvironment = (
   return {
     TEST_RUN_ID: runId,
     [SCOUT_VISUAL_REGRESSION_ENABLED_ENV]: 'true',
+    [SCOUT_VISUAL_REGRESSION_COMPARE_BASELINES_ENV]: String(parsedArgs.compareBaselines),
     [SCOUT_VISUAL_REGRESSION_UPDATE_BASELINES_ENV]: String(parsedArgs.updateBaselines),
   };
 };

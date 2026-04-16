@@ -25,6 +25,7 @@ import {
   upsertVisualRegressionRunManifest,
 } from './manifest';
 import {
+  isCompareBaselinesEnabled,
   SCOUT_VISUAL_REGRESSION_ATTACHMENT_NAME,
   isUpdateBaselinesEnabled,
 } from '../runtime/environment';
@@ -149,7 +150,11 @@ export class ScoutVisualRegressionReporter implements Reporter {
       existing: existingRunManifest,
       manifest: this.manifest,
       packageStatus: _result.status,
-      mode: isUpdateBaselinesEnabled() ? 'update-baselines' : 'capture',
+      mode: isUpdateBaselinesEnabled()
+        ? 'update-baselines'
+        : isCompareBaselinesEnabled()
+        ? 'compare'
+        : 'capture',
       startedAt: this.startedAt ?? completedAt,
       completedAt,
     });

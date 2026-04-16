@@ -63,9 +63,11 @@ Usage:
   node scripts/scout_vrt run-tests --arch stateful --domain classic --config <playwright_config_path>
   node scripts/scout_vrt run-tests --arch stateful --domain classic --testFiles <spec_path_or_directory>
   node scripts/scout_vrt run-tests --arch stateful --domain classic --config <playwright_config_path> --update-baselines
+  node scripts/scout_vrt run-tests --arch stateful --domain classic --config <playwright_config_path> --compare-baselines
 
 Options:
   --update-baselines  Refresh the local baseline cache for the selected visual suites
+  --compare-baselines Compare against the local baseline cache and fail on missing or mismatched baselines
 
 All other flags are forwarded to 'node scripts/scout run-tests'.
 Visual specs are discovered by following each spec's local imports until a dependency on '@kbn/scout-vrt' is found.

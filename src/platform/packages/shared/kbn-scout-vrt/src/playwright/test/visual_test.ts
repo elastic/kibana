@@ -154,10 +154,6 @@ const createVisualTest = <T extends typeof visualTestBase>(baseTest: T) => {
             });
 
             context.checkpoints.push(result.record);
-
-            if (result.error) {
-              throw result.error;
-            }
           },
         }),
       stepOptions

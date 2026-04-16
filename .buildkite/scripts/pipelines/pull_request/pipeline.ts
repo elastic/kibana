@@ -262,6 +262,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:vrt')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/vrt.yml'));
+    }
+
     if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml', cancelable)

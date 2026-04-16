@@ -30,7 +30,8 @@ Usage:
   node scripts/scout_vrt run-tests
   node scripts/scout_vrt run-tests --arch stateful --domain classic --config <playwright_config_path>
   node scripts/scout_vrt run-tests --arch stateful --domain classic --testFiles <spec_path_or_directory>
-  node scripts/scout_vrt run-tests --arch stateful --domain classic --config <playwright_config_path> --update-baselines`;
+  node scripts/scout_vrt run-tests --arch stateful --domain classic --config <playwright_config_path> --update-baselines
+  node scripts/scout_vrt run-tests --arch stateful --domain classic --config <playwright_config_path> --compare-baselines`;
 
 const shouldPrintHelp = (command: string | undefined, args: string[]): boolean =>
   command === undefined ||

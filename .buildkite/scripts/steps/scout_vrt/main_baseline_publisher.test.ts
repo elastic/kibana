@@ -51,8 +51,12 @@ const createRunManifest = (): VisualRegressionRunManifest => ({
   summary: {
     tests: 2,
     checkpoints: 2,
+    passed: 0,
+    failed: 0,
     captured: 0,
     updated: 2,
+    missingBaselines: 0,
+    diffs: 0,
   },
   packages: [
     {
@@ -71,8 +75,12 @@ const createRunManifest = (): VisualRegressionRunManifest => ({
       summary: {
         tests: 1,
         checkpoints: 1,
+        passed: 0,
+        failed: 0,
         captured: 0,
         updated: 1,
+        missingBaselines: 0,
+        diffs: 0,
       },
     },
     {
@@ -91,8 +99,12 @@ const createRunManifest = (): VisualRegressionRunManifest => ({
       summary: {
         tests: 1,
         checkpoints: 1,
+        passed: 0,
+        failed: 0,
         captured: 0,
         updated: 1,
+        missingBaselines: 0,
+        diffs: 0,
       },
     },
   ],

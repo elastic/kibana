@@ -43,11 +43,15 @@ export type VisualRegressionManifestSeed = Omit<
 export interface VisualRegressionManifestSummary {
   tests: number;
   checkpoints: number;
+  passed: number;
+  failed: number;
   captured: number;
   updated: number;
+  missingBaselines: number;
+  diffs: number;
 }
 
-export type VisualRegressionRunMode = 'capture' | 'update-baselines';
+export type VisualRegressionRunMode = 'capture' | 'compare' | 'update-baselines';
 export type VisualRegressionRunStatus = 'passed' | 'failed' | 'timedout' | 'interrupted';
 
 export interface VisualRegressionRunManifestPackage {
@@ -111,8 +115,12 @@ export const createVisualRegressionManifest = (
 const createEmptySummary = (): VisualRegressionManifestSummary => ({
   tests: 0,
   checkpoints: 0,
+  passed: 0,
+  failed: 0,
   captured: 0,
   updated: 0,
+  missingBaselines: 0,
+  diffs: 0,
 });
 
 const getDurationMs = (startedAt: string, completedAt: string): number => {
@@ -154,14 +162,26 @@ export const summarizeVisualRegressionManifest = (
     summary.checkpoints += 1;
 
     switch (result.status) {
+      case 'passed':
+        summary.passed += 1;
+        break;
+      case 'failed':
+        summary.failed += 1;
+        break;
       case 'captured':
         summary.captured += 1;
         break;
       case 'updated':
         summary.updated += 1;
         break;
+      case 'missing-baseline':
+        summary.missingBaselines += 1;
+        break;
     }
 
+    if (result.diffPath) {
+      summary.diffs += 1;
+    }
   }
 
   summary.tests = tests.size;
@@ -196,8 +216,12 @@ const summarizeRunPackages = (
     (summary, currentPackage) => ({
       tests: summary.tests + currentPackage.summary.tests,
       checkpoints: summary.checkpoints + currentPackage.summary.checkpoints,
+      passed: summary.passed + currentPackage.summary.passed,
+      failed: summary.failed + currentPackage.summary.failed,
       captured: summary.captured + currentPackage.summary.captured,
       updated: summary.updated + currentPackage.summary.updated,
+      missingBaselines: summary.missingBaselines + currentPackage.summary.missingBaselines,
+      diffs: summary.diffs + currentPackage.summary.diffs,
     }),
     createEmptySummary()
   );

@@ -22,8 +22,10 @@ export interface VisualCheckpointRecord {
   stepTitle: string;
   stepIndex: number;
   snapshotName: string;
-  status: 'captured' | 'updated';
+  status: 'captured' | 'updated' | 'passed' | 'failed' | 'missing-baseline';
   imagePath: string;
+  diffPath?: string;
+  mismatchPercent?: number;
   source: VisualSourceLocation;
 }
 

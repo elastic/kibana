@@ -70,7 +70,7 @@ describe('createVisualRegressionManifest', () => {
           stepTitle: 'step 1',
           stepIndex: 1,
           snapshotName: '01_step_1.png',
-          status: 'captured',
+          status: 'passed',
           imagePath: 'pkg/first-test-local/01_step_1.png',
           source: {
             file: 'a.spec.ts',
@@ -85,8 +85,9 @@ describe('createVisualRegressionManifest', () => {
           stepTitle: 'step 2',
           stepIndex: 2,
           snapshotName: '02_step_2.png',
-          status: 'captured',
+          status: 'failed',
           imagePath: 'pkg/first-test-local/02_step_2.png',
+          diffPath: 'pkg/first-test-local/02_step_2-diff.png',
           source: {
             file: 'a.spec.ts',
             line: 20,
@@ -129,8 +130,12 @@ describe('createVisualRegressionManifest', () => {
     expect(summarizeVisualRegressionManifest(manifest)).toEqual({
       tests: 2,
       checkpoints: 4,
-      captured: 2,
+      passed: 1,
+      failed: 1,
+      captured: 0,
       updated: 2,
+      missingBaselines: 0,
+      diffs: 1,
     });
   });
 
@@ -180,8 +185,9 @@ describe('createVisualRegressionManifest', () => {
             stepTitle: 'step 1',
             stepIndex: 1,
             snapshotName: '01_step_1.png',
-            status: 'captured',
+            status: 'failed',
             imagePath: 'customBranding/branding-test-local/01_step_1.png',
+            diffPath: 'customBranding/branding-test-local/01_step_1-diff.png',
             source: {
               file: 'c.spec.ts',
               line: 40,
@@ -191,7 +197,7 @@ describe('createVisualRegressionManifest', () => {
         ],
       }),
       packageStatus: 'failed',
-      mode: 'capture',
+      mode: 'compare',
       startedAt: '2026-03-20T18:01:00.000Z',
       completedAt: '2026-03-20T18:01:15.000Z',
     });
@@ -200,7 +206,7 @@ describe('createVisualRegressionManifest', () => {
       schemaVersion: 1,
       runId: 'run-id',
       status: 'failed',
-      mode: 'capture',
+      mode: 'compare',
       startedAt: '2026-03-20T18:00:00.000Z',
       completedAt: '2026-03-20T18:01:15.000Z',
       durationMs: 75000,
@@ -230,8 +236,12 @@ describe('createVisualRegressionManifest', () => {
       summary: {
         tests: 2,
         checkpoints: 2,
-        captured: 1,
+        passed: 0,
+        failed: 1,
+        captured: 0,
         updated: 1,
+        missingBaselines: 0,
+        diffs: 1,
       },
       packages: [
         {
@@ -250,8 +260,12 @@ describe('createVisualRegressionManifest', () => {
           summary: {
             tests: 1,
             checkpoints: 1,
+            passed: 0,
+            failed: 0,
             captured: 0,
             updated: 1,
+            missingBaselines: 0,
+            diffs: 0,
           },
         },
         {
@@ -270,8 +284,12 @@ describe('createVisualRegressionManifest', () => {
           summary: {
             tests: 1,
             checkpoints: 1,
-            captured: 1,
+            passed: 0,
+            failed: 1,
+            captured: 0,
             updated: 0,
+            missingBaselines: 0,
+            diffs: 1,
           },
         },
       ],

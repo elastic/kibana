@@ -4,17 +4,17 @@
 
 ## Reviewer Summary
 
-This stage extends the foundation with baseline production and publication:
+This stage extends baseline publication into a full PR review loop:
 
-- local runs can write baselines with `--update-baselines`
-- CI can publish canonical `main` baselines keyed by commit
-- consumers can resolve the latest published baseline set through `index.json`
+- local runs can compare against a seeded baseline cache with `--compare-baselines`
+- PR CI hydrates baselines from the published `main` catalog
+- labeled PRs publish a static review site with baseline, actual, and diff assets
 
-This stage still does not define:
+This stage does not add:
 
-- PR compare/reporting workflows
-- PR-side baseline hydration
-- approval flows
+- baseline mutation from PRs
+- approvals or write-back flows
+- release-drift reporting
 
 ## What You Use
 
@@ -23,7 +23,7 @@ This stage still does not define:
 - `createPlaywrightConfig`
   - a Playwright config wrapper that enables VRT artifact/report generation
 - `node scripts/scout_vrt run-tests`
-  - a helper CLI that discovers only VRT-enabled Scout suites and runs them in capture or baseline-update mode
+  - a helper CLI that discovers only VRT-enabled Scout suites and runs them in capture, baseline-update, or compare mode
 
 ## What The Runtime Produces
 
@@ -38,6 +38,10 @@ Run artifacts are written under:
 Local baselines are written under:
 
 - `.scout/baselines/vrt/<packageId>/<testKey>/<stepKey>.png`
+
+Compare-mode diff images are written alongside actuals as:
+
+- `.scout/test-artifacts/vrt/<runId>/test-artifacts/<packageId>/<testKey>/<stepKey>-diff.png`
 
 The package keeps the contract stable by writing:
 
@@ -68,6 +72,17 @@ Each bundle contains:
 
 A top-level `index.json` catalogs the published bundles for downstream consumers. Each catalog entry also advertises a sibling bundle archive at `<bundle>.tar.gz`, so CI and local tooling can download one file per baseline bundle instead of recursively transferring the full expanded directory.
 
+## PR Compare And Reporting
+
+PR compare runs hydrate the local baseline cache from the published `main` baseline catalog, then execute compare mode without mutating the baseline store.
+
+The compare/reporting flow is opt-in in PR CI and is responsible for:
+
+- hydrating `.scout/baselines/vrt/...` from the latest published bundle for the requested target
+- preferring the published bundle archive for hydration, with expanded-directory fallback
+- running compare mode and producing `passed`, `failed`, and `missing-baseline` checkpoint states
+- publishing a static review site for baseline, actual, and diff inspection
+
 For the CI details, see [CI_INTEGRATION.md](/Users/clint/Projects/kibana.worktrees/scout-vrt/src/platform/packages/shared/kbn-scout-vrt/CI_INTEGRATION.md).
 
 ## Public Contract
@@ -84,8 +99,10 @@ Stable downstream fields in `VisualCheckpointRecord`:
 - `testFile`, `testTitle`, `testKey`
 - `stepTitle`, `stepIndex`, `snapshotName`
 - `status`
-  - in this stage: `captured` or `updated`
+  - in this stage: `captured`, `updated`, `passed`, `failed`, or `missing-baseline`
 - `imagePath`
+- optional `diffPath`
+- optional `mismatchPercent`
 - `source.file`, `source.line`, `source.column`
 
 ## Scope
@@ -96,10 +113,10 @@ The package is intentionally limited to:
 - viewport screenshots
 - local artifact generation
 - main-baseline publication
-- no PR compare/reporting workflow yet
+- PR compare/reporting against hydrated baselines
 - no approval workflow
 
-## Next Docs
+## Docs
 
-- See [GETTING_STARTED.md](/Users/clint/Projects/kibana.worktrees/scout-vrt/src/platform/packages/shared/kbn-scout-vrt/GETTING_STARTED.md) for local authoring, capture, and baseline generation.
-- See [CI_INTEGRATION.md](/Users/clint/Projects/kibana.worktrees/scout-vrt/src/platform/packages/shared/kbn-scout-vrt/CI_INTEGRATION.md) for on-merge baseline publication and manual seeding.
+- See [GETTING_STARTED.md](/Users/clint/Projects/kibana.worktrees/scout-vrt/src/platform/packages/shared/kbn-scout-vrt/GETTING_STARTED.md) for local authoring, capture, baseline generation, and compare mode.
+- See [CI_INTEGRATION.md](/Users/clint/Projects/kibana.worktrees/scout-vrt/src/platform/packages/shared/kbn-scout-vrt/CI_INTEGRATION.md) for baseline publication, PR hydration, and reporting.

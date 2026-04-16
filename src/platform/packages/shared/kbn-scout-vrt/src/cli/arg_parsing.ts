@@ -16,6 +16,7 @@ export interface ParsedVisualRunTestsArgs {
   forwardedArgs: string[];
   helpRequested: boolean;
   testFilesList?: string;
+  compareBaselines: boolean;
   updateBaselines: boolean;
 }
 
@@ -31,6 +32,7 @@ export const parseVisualRunTestsArgs = (rawArgs: string[]): ParsedVisualRunTests
   const forwardedArgs: string[] = [];
   let configPath: string | undefined;
   let testFilesList: string | undefined;
+  let compareBaselines = false;
   let helpRequested = false;
   let updateBaselines = false;
 
@@ -55,6 +57,22 @@ export const parseVisualRunTestsArgs = (rawArgs: string[]): ParsedVisualRunTests
       }
 
       updateBaselines = true;
+      continue;
+    }
+
+    if (arg === '--compare-baselines') {
+      compareBaselines = true;
+      continue;
+    }
+
+    if (arg.startsWith('--compare-baselines=')) {
+      const rawValue = arg.slice('--compare-baselines='.length).trim().toLowerCase();
+
+      if (!['1', 'true', 'yes'].includes(rawValue)) {
+        throw createFlagError(`'--compare-baselines' does not take a value of '${rawValue}'`);
+      }
+
+      compareBaselines = true;
       continue;
     }
 
@@ -101,7 +119,14 @@ export const parseVisualRunTestsArgs = (rawArgs: string[]): ParsedVisualRunTests
     throw createFlagError(`Cannot use both '--config' and '--testFiles' at the same time`);
   }
 
+  if (!helpRequested && compareBaselines && updateBaselines) {
+    throw createFlagError(
+      `Cannot use both '--compare-baselines' and '--update-baselines' at the same time`
+    );
+  }
+
   return {
+    compareBaselines,
     configPath,
     forwardedArgs,
     helpRequested,
