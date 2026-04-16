@@ -51,6 +51,10 @@ export class ServerlessPlugin
     }
 
     project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
+
+    // Wraps a single Promise — emits once when privileged URLs resolve, then completes.
+    // Privileged URL visibility (e.g., Members link gated on manage_security) is evaluated
+    // once at plugin start and not re-evaluated for the lifetime of the page.
     const privilegedUrls$ = from(cloud.getPrivilegedUrls());
 
     privilegedUrls$.subscribe((privilegedUrls) => {
