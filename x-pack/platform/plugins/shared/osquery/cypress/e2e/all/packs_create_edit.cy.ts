@@ -196,9 +196,7 @@ describe(
         cy.getBySel(UPDATE_PACK_BUTTON).click();
         closeModalIfVisible();
 
-        cy.contains(
-          'Create packs to organize sets of queries and to schedule queries for agent policies.'
-        );
+        cy.contains('Create pack');
         const queries = {
           Query1: {
             interval: 3600,
