@@ -107,7 +107,11 @@ import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
 import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
+<<<<<<< service-map-skill
 import { LazyAgentServiceMap } from './agent_builder/attachment_types/lazy_agent_service_map';
+=======
+import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
+>>>>>>> main
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -512,7 +516,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     import('./components/alerting/rule_types/register_apm_rule_types').then(
       ({ registerApmRuleTypes }) => {
-        registerApmRuleTypes(observabilityRuleTypeRegistry);
+        registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup);
       }
     );
     import('./embeddable/register_embeddables').then(({ registerEmbeddables }) => {

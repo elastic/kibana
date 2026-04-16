@@ -530,34 +530,87 @@ components:
       type: object
       properties:
         data:
-          description: The live query action data.
           type: object
           properties:
-            action_id:
-              description: The ID of the live query action.
+            '@timestamp':
+              description: The timestamp when the action was created.
+              format: date-time
               type: string
+            action_id:
+              description: The ID of the action.
+              type: string
+            agent_all:
+              description: Whether the query targets all agents.
+              type: boolean
+            agent_ids:
+              description: The agent IDs targeted by the action.
+              items:
+                type: string
+              type: array
+            agent_platforms:
+              description: The agent platforms targeted.
+              items:
+                type: string
+              type: array
+            agent_policy_ids:
+              description: The agent policy IDs targeted.
+              items:
+                type: string
+              type: array
             agents:
-              description: A list of agent IDs targeted by the live query.
+              description: The resolved list of agent IDs.
               items:
                 type: string
               type: array
             expiration:
-              description: The expiration date and time of the live query.
+              description: The expiration date of the action.
+              format: date-time
               type: string
             input_type:
-              description: The input type for the action.
+              description: The input type.
+              type: string
+            metadata:
+              description: Custom metadata associated with the action.
+              type: object
+            pack_id:
+              description: The pack ID if the query was run from a pack.
               type: string
             queries:
-              description: The list of queries in the live query action.
+              description: The queries in this action.
               items:
                 type: object
+                properties:
+                  action_id:
+                    type: string
+                  agents:
+                    items:
+                      type: string
+                    type: array
+                  ecs_mapping:
+                    $ref: '#/components/schemas/ECSMappingOrUndefined'
+                  id:
+                    type: string
+                  platform:
+                    type: string
+                  query:
+                    type: string
+                  saved_query_id:
+                    type: string
+                  timeout:
+                    type: integer
+                  version:
+                    type: string
               type: array
             type:
               description: The action type.
               type: string
             user_id:
-              description: The ID of the user who created the live query.
+              description: The user who created the action.
               type: string
+          required:
+            - action_id
+      required:
+        - data
     CreatePacksRequestBody:
       example:
         description: My pack
@@ -626,47 +679,61 @@ components:
       type: object
       properties:
         data:
-          description: The created pack.
           type: object
           properties:
             created_at:
-              description: The creation timestamp.
+              description: The date and time the pack was created.
+              format: date-time
               type: string
             created_by:
               description: The user who created the pack.
+              nullable: true
+              type: string
+            created_by_profile_uid:
+              description: The profile UID of the user who created the pack.
               type: string
             description:
-              description: The pack description.
-              type: string
+              $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
-              description: Whether the pack is enabled.
-              type: boolean
+              $ref: '#/components/schemas/EnabledOrUndefined'
             name:
-              description: The pack name.
-              type: string
+              $ref: '#/components/schemas/PackName'
             policy_ids:
-              description: A list of agent policy IDs associated with the pack.
-              items:
-                type: string
-              type: array
+              $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
-              description: The queries in the pack.
-              type: object
+              $ref: '#/components/schemas/ObjectQueries'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
             shards:
-              description: Shard configuration for the pack.
-              type: object
+              description: Shard configuration as an array of key-value pairs.
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: number
+              type: array
             updated_at:
-              description: The last update timestamp.
+              description: The date and time the pack was last updated.
+              format: date-time
               type: string
             updated_by:
               description: The user who last updated the pack.
+              nullable: true
+              type: string
+            updated_by_profile_uid:
+              description: The profile UID of the user who last updated the pack.
               type: string
             version:
-              description: The pack version.
+              description: The pack version number.
               type: integer
+          required:
+            - saved_object_id
+            - name
+      required:
+        - data
     CreateSavedQueryRequestBody:
       example:
         description: Saved query description
@@ -703,7 +770,7 @@ components:
       description: The response for creating a saved query.
       example:
         data:
-          created_at: '2022-07-26T09:28:08.597Z'
+          created_at: '2025-02-26T13:37:30.452Z'
           created_by: elastic
           description: Saved query description
           ecs_mapping:
@@ -712,65 +779,74 @@ components:
           id: saved_query_id
           interval: '60'
           platform: linux,darwin
+          prebuilt: false
           query: select * from uptime;
-          removed: false
-          saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-          snapshot: true
+          saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
           timeout: 120
-          updated_at: '2022-07-26T09:28:08.597Z'
+          updated_at: '2025-02-26T13:37:30.452Z'
           updated_by: elastic
           version: 2.8.0
       type: object
       properties:
         data:
-          description: The created saved query.
           type: object
           properties:
             created_at:
-              description: The creation timestamp.
+              format: date-time
               type: string
             created_by:
-              description: The user who created the saved query.
+              nullable: true
+              type: string
+            created_by_profile_uid:
               type: string
             description:
-              description: The saved query description.
-              type: string
+              $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              description: The ECS mapping configuration.
-              type: object
+              $ref: '#/components/schemas/ECSMappingOrUndefined'
             id:
-              description: The saved query ID.
-              type: string
+              $ref: '#/components/schemas/SavedQueryId'
             interval:
-              description: The query interval in seconds.
-              type: string
+              description: >-
+                An interval, in seconds, on which to run the query. May be
+                returned as number or string.
+              oneOf:
+                - type: integer
+                - type: string
             platform:
-              description: The target platform(s).
-              type: string
-            query:
-              description: The SQL query.
-              type: string
-            removed:
-              description: Whether to include results for removed processes.
+              $ref: '#/components/schemas/PlatformOrUndefined'
+            prebuilt:
+              description: Whether the saved query is prebuilt.
               type: boolean
+            query:
+              $ref: '#/components/schemas/Query'
+            removed:
+              $ref: '#/components/schemas/RemovedOrUndefined'
             saved_object_id:
               description: The saved object ID of the saved query.
               type: string
             snapshot:
-              description: Whether the query is a snapshot query.
-              type: boolean
+              $ref: '#/components/schemas/SnapshotOrUndefined'
             timeout:
               description: The query timeout in seconds.
               type: integer
             updated_at:
-              description: The last update timestamp.
+              format: date-time
               type: string
             updated_by:
-              description: The user who last updated the saved query.
+              nullable: true
+              type: string
+            updated_by_profile_uid:
               type: string
             version:
-              description: The minimum osquery version.
-              type: string
+              description: The saved query version.
+              oneOf:
+                - type: integer
+                - type: string
+          required:
+            - saved_object_id
+            - id
+      required:
+        - data
     DefaultSuccessResponse:
       example: {}
       type: object
@@ -785,6 +861,26 @@ components:
         host.uptime:
           field: total_seconds
       type: object
+    ECSMappingArray:
+      description: >-
+        ECS mapping in saved-object storage format (array of key-value pairs).
+        The find and copy pack endpoints return this format. The read endpoint
+        returns object format (ECSMapping).
+      items:
+        $ref: '#/components/schemas/ECSMappingArrayItem'
+      type: array
+    ECSMappingArrayItem:
+      description: ECS mapping item in saved-object storage format (key-value pair).
+      type: object
+      properties:
+        key:
+          description: The ECS field name.
+          type: string
+        value:
+          $ref: '#/components/schemas/ECSMappingItem'
+    ECSMappingArrayOrUndefined:
+      $ref: '#/components/schemas/ECSMappingArray'
+      nullable: true
     ECSMappingItem:
       type: object
       properties:
@@ -811,7 +907,6 @@ components:
       $ref: '#/components/schemas/Enabled'
       nullable: true
     FindLiveQueryDetailsResponse:
-      description: The details of a live query.
       example:
         data:
           '@timestamp': '2022-07-26T09:59:32.220Z'
@@ -840,54 +935,86 @@ components:
       type: object
       properties:
         data:
-          description: The live query details.
           type: object
           properties:
             '@timestamp':
-              description: The timestamp when the live query was created.
+              format: date-time
               type: string
             action_id:
-              description: The ID of the live query action.
               type: string
-            agent_selection:
-              description: The original agent selection criteria.
-              type: object
             agents:
-              description: A list of agent IDs targeted by the live query.
               items:
                 type: string
               type: array
             expiration:
-              description: The expiration date and time of the live query.
+              format: date-time
               type: string
             pack_id:
-              description: The pack ID, if the live query was run from a pack.
               type: string
             pack_name:
-              description: The pack name, if the live query was run from a pack.
               type: string
+            prebuilt_pack:
+              type: boolean
             queries:
-              description: >-
-                The list of queries in the live query action, each with
-                aggregated result counts.
+              description: The queries with their execution status.
               items:
                 type: object
+                properties:
+                  action_id:
+                    type: string
+                  agents:
+                    items:
+                      type: string
+                    type: array
+                  docs:
+                    description: Number of result documents.
+                    type: integer
+                  ecs_mapping:
+                    $ref: '#/components/schemas/ECSMappingOrUndefined'
+                  failed:
+                    description: Number of failed queries.
+                    type: integer
+                  id:
+                    type: string
+                  pending:
+                    description: Number of pending agents.
+                    type: integer
+                  query:
+                    type: string
+                  responded:
+                    description: Total responded agents.
+                    type: integer
+                  saved_query_id:
+                    type: string
+                  status:
+                    description: Status of this individual query.
+                    enum:
+                      - completed
+                      - running
+                    type: string
+                  successful:
+                    description: Number of successful agents.
+                    type: integer
               type: array
             status:
-              description: The overall status of the live query.
+              description: Global status of the live query (completed, running).
               enum:
                 - completed
                 - running
               type: string
+            tags:
+              items:
+                type: string
+              type: array
             user_id:
-              description: The ID of the user who ran the live query.
+              type: string
+            user_profile_uid:
               type: string
     FindLiveQueryResponse:
-      description: A list of live queries.
       example:
         data:
           items:
-            - fields:
+            - _source:
                 '@timestamp': '2023-10-31T00:00:00Z'
                 action_id: 3c42c847-eb30-4452-80e0-728584042334
                 agents:
@@ -909,17 +1036,73 @@ components:
                   successful_agents: 1
                   total_rows: 42
                 user_id: elastic
+          total: 1
       type: object
       properties:
         data:
-          description: The response data wrapper.
           type: object
           properties:
             items:
-              description: The list of live queries.
+              description: An array of live query action items.
               items:
                 type: object
+                properties:
+                  _source:
+                    type: object
+                    properties:
+                      '@timestamp':
+                        format: date-time
+                        type: string
+                      action_id:
+                        type: string
+                      agents:
+                        items:
+                          type: string
+                        type: array
+                      expiration:
+                        format: date-time
+                        type: string
+                      pack_id:
+                        type: string
+                      queries:
+                        items:
+                          type: object
+                          properties:
+                            action_id:
+                              type: string
+                            agents:
+                              items:
+                                type: string
+                              type: array
+                            ecs_mapping:
+                              $ref: '#/components/schemas/ECSMappingOrUndefined'
+                            id:
+                              type: string
+                            query:
+                              type: string
+                            saved_query_id:
+                              type: string
+                        type: array
+                      result_counts:
+                        description: >-
+                          Result count statistics (present when withResultCounts
+                          is true).
+                        type: object
+                        properties:
+                          error_agents:
+                            type: integer
+                          responded_agents:
+                            type: integer
+                          successful_agents:
+                            type: integer
+                          total_rows:
+                            type: integer
+                      user_id:
+                        type: string
               type: array
+            total:
+              description: The total number of live queries.
+              type: integer
     FindPackResponse:
       description: The details of a single query pack.
       example:
@@ -929,6 +1112,8 @@ components:
           description: ''
           enabled: true
           name: test_pack
+          namespaces:
+            - default
           policy_ids: []
           queries:
             uptime:
@@ -940,6 +1125,7 @@ components:
           read_only: false
           saved_object_id: 3c42c847-eb30-4452-80e0-728584042334
           shards: {}
+          type: osquery-pack
           updated_at: '2022-07-25T20:12:01.455Z'
           updated_by: elastic
           version: 1
@@ -950,28 +1136,28 @@ components:
           type: object
           properties:
             created_at:
-              description: The creation timestamp.
+              format: date-time
               type: string
             created_by:
-              description: The user who created the pack.
+              nullable: true
+              type: string
+            created_by_profile_uid:
               type: string
             description:
-              description: The pack description.
-              type: string
+              $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
-              description: Whether the pack is enabled.
-              type: boolean
+              $ref: '#/components/schemas/EnabledOrUndefined'
             name:
-              description: The pack name.
-              type: string
-            policy_ids:
-              description: A list of agent policy IDs associated with the pack.
+              $ref: '#/components/schemas/PackName'
+            namespaces:
+              description: The namespaces the pack belongs to.
               items:
                 type: string
               type: array
+            policy_ids:
+              $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
-              description: The queries in the pack, keyed by query name.
-              type: object
+              $ref: '#/components/schemas/ObjectQueries'
             read_only:
               description: Whether the pack is read-only (true for prebuilt packs).
               type: boolean
@@ -979,34 +1165,42 @@ components:
               description: The saved object ID of the pack.
               type: string
             shards:
-              description: >-
-                Shard configuration for policies, as a map of policy ID to
-                percentage.
-              type: object
+              $ref: '#/components/schemas/Shards'
+            type:
+              description: The saved object type.
+              type: string
             updated_at:
-              description: The last update timestamp.
+              format: date-time
               type: string
             updated_by:
-              description: The user who last updated the pack.
+              nullable: true
+              type: string
+            updated_by_profile_uid:
               type: string
             version:
-              description: The pack version.
+              description: The pack version number.
               type: integer
+          required:
+            - saved_object_id
+            - name
+      required:
+        - data
     FindPacksResponse:
       description: A paginated list of query packs.
       example:
         data:
           - created_at: '2023-10-31T00:00:00Z'
             created_by: elastic
+            created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             description: My pack description
             enabled: true
             name: My Pack
-            policy_ids:
-              - policy-id-1
+            policy_ids: []
             queries:
               - ecs_mapping:
-                  host.uptime:
-                    field: total_seconds
+                  - key: host.uptime
+                    value:
+                      field: total_seconds
                 id: uptime
                 interval: 3600
                 query: select * from uptime;
@@ -1014,16 +1208,79 @@ components:
             saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             updated_at: '2023-10-31T00:00:00Z'
             updated_by: elastic
-            version: 1
+            updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         page: 1
         per_page: 10
         total: 1
       type: object
       properties:
         data:
-          description: The list of packs.
+          description: An array of pack objects.
           items:
             type: object
+            properties:
+              created_at:
+                format: date-time
+                type: string
+              created_by:
+                nullable: true
+                type: string
+              created_by_profile_uid:
+                type: string
+              description:
+                $ref: '#/components/schemas/PackDescriptionOrUndefined'
+              enabled:
+                $ref: '#/components/schemas/EnabledOrUndefined'
+              name:
+                $ref: '#/components/schemas/PackName'
+              policy_ids:
+                $ref: '#/components/schemas/PolicyIdsOrUndefined'
+              queries:
+                description: >-
+                  Pack queries in saved-object storage format (array). Note: the
+                  read endpoint returns object format.
+                items:
+                  type: object
+                  properties:
+                    ecs_mapping:
+                      $ref: '#/components/schemas/ECSMappingArrayOrUndefined'
+                    id:
+                      type: string
+                    interval:
+                      type: integer
+                    platform:
+                      type: string
+                    query:
+                      type: string
+                    removed:
+                      type: boolean
+                    snapshot:
+                      type: boolean
+                    timeout:
+                      type: integer
+                    version:
+                      type: string
+                type: array
+              read_only:
+                description: Whether the pack is read-only (true for prebuilt packs).
+                type: boolean
+              saved_object_id:
+                description: The saved object ID of the pack.
+                type: string
+              updated_at:
+                format: date-time
+                type: string
+              updated_by:
+                nullable: true
+                type: string
+              updated_by_profile_uid:
+                type: string
+              version:
+                description: The pack version number.
+                type: integer
+            required:
+              - saved_object_id
+              - name
           type: array
         page:
           description: The current page number.
@@ -1034,6 +1291,11 @@ components:
         total:
           description: The total number of packs.
           type: integer
+      required:
+        - page
+        - per_page
+        - total
+        - data
     FindSavedQueryDetailResponse:
       description: The details of a single saved query.
       example:
@@ -1049,73 +1311,71 @@ components:
           platform: linux,darwin
           prebuilt: false
           query: select * from uptime;
-          removed: false
-          saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-          snapshot: true
-          timeout: 120
+          saved_object_id: 3c42c847-eb30-4452-80e0-728584042334
           updated_at: '2022-07-26T09:28:08.597Z'
           updated_by: elastic
           version: 2.8.0
       type: object
       properties:
         data:
-          description: The saved query details.
           type: object
           properties:
             created_at:
-              description: The creation timestamp.
+              format: date-time
               type: string
             created_by:
-              description: The user who created the saved query.
+              nullable: true
+              type: string
+            created_by_profile_uid:
               type: string
             description:
-              description: The saved query description.
-              type: string
+              $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              description: The ECS mapping configuration.
-              type: object
+              $ref: '#/components/schemas/ECSMappingOrUndefined'
             id:
-              description: The saved query ID.
-              type: string
+              $ref: '#/components/schemas/SavedQueryId'
             interval:
-              description: The query interval in seconds.
-              type: string
+              oneOf:
+                - type: integer
+                - type: string
             platform:
-              description: The target platform(s).
-              type: string
+              $ref: '#/components/schemas/PlatformOrUndefined'
             prebuilt:
-              description: Whether this is a prebuilt saved query.
               type: boolean
             query:
-              description: The SQL query.
-              type: string
+              $ref: '#/components/schemas/Query'
             removed:
-              description: Whether to include results for removed processes.
-              type: boolean
+              $ref: '#/components/schemas/RemovedOrUndefined'
             saved_object_id:
-              description: The saved object ID.
               type: string
             snapshot:
-              description: Whether the query is a snapshot query.
-              type: boolean
+              $ref: '#/components/schemas/SnapshotOrUndefined'
             timeout:
-              description: The query timeout in seconds.
               type: integer
             updated_at:
-              description: The last update timestamp.
+              format: date-time
               type: string
             updated_by:
-              description: The user who last updated the saved query.
+              nullable: true
+              type: string
+            updated_by_profile_uid:
               type: string
             version:
-              description: The minimum osquery version.
-              type: string
+              oneOf:
+                - type: integer
+                - type: string
+          required:
+            - saved_object_id
+            - id
+      required:
+        - data
     FindSavedQueryResponse:
       description: A paginated list of saved queries.
       example:
         data:
           - created_at: '2022-07-26T09:28:08.597Z'
             created_by: elastic
+            created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             description: Saved query description
             ecs_mapping:
               host.uptime:
@@ -1125,12 +1385,10 @@ components:
             platform: linux,darwin
             prebuilt: false
             query: select * from uptime;
-            removed: false
             saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-            snapshot: true
-            timeout: 120
             updated_at: '2022-07-26T09:28:08.597Z'
             updated_by: elastic
+            updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             version: 2.8.0
         page: 1
         per_page: 100
@@ -1138,9 +1396,57 @@ components:
       type: object
       properties:
         data:
-          description: The list of saved queries.
+          description: An array of saved query objects.
           items:
             type: object
+            properties:
+              created_at:
+                format: date-time
+                type: string
+              created_by:
+                nullable: true
+                type: string
+              created_by_profile_uid:
+                type: string
+              description:
+                $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
+              ecs_mapping:
+                $ref: '#/components/schemas/ECSMappingOrUndefined'
+              id:
+                $ref: '#/components/schemas/SavedQueryId'
+              interval:
+                oneOf:
+                  - type: integer
+                  - type: string
+              platform:
+                $ref: '#/components/schemas/PlatformOrUndefined'
+              prebuilt:
+                type: boolean
+              query:
+                $ref: '#/components/schemas/Query'
+              removed:
+                $ref: '#/components/schemas/RemovedOrUndefined'
+              saved_object_id:
+                type: string
+              snapshot:
+                $ref: '#/components/schemas/SnapshotOrUndefined'
+              timeout:
+                type: integer
+              updated_at:
+                format: date-time
+                type: string
+              updated_by:
+                nullable: true
+                type: string
+              updated_by_profile_uid:
+                type: string
+              version:
+                oneOf:
+                  - type: integer
+                  - type: string
+            required:
+              - saved_object_id
+              - id
           type: array
         page:
           description: The current page number.
@@ -1151,30 +1457,38 @@ components:
         total:
           description: The total number of saved queries.
           type: integer
+      required:
+        - page
+        - per_page
+        - total
+        - data
     GetLiveQueryResultsResponse:
       description: The response for getting live query results.
       example:
         data:
           edges:
-            - _id: result-1
-              fields:
-                host.uptime:
-                  - '12345'
-            - _id: result-2
-              fields:
-                host.uptime:
-                  - '67890'
+            - _id: doc1
+              _source: {}
+            - _id: doc2
+              _source: {}
           total: 2
       type: object
       properties:
         data:
-          description: The query results data wrapper.
           type: object
           properties:
             edges:
-              description: The paginated list of query result rows.
+              description: The result rows from the query execution.
               items:
                 type: object
+                properties:
+                  _id:
+                    type: string
+                  _source:
+                    description: >-
+                      The Elasticsearch document source containing query
+                      results.
+                    type: object
               type: array
             total:
               description: The total number of result rows.
@@ -1374,46 +1688,41 @@ components:
       type: object
       properties:
         data:
-          description: The updated pack.
           type: object
           properties:
             created_at:
-              description: The creation timestamp.
+              format: date-time
               type: string
             created_by:
-              description: The user who created the pack.
+              nullable: true
+              type: string
+            created_by_profile_uid:
               type: string
             description:
-              description: The pack description.
-              type: string
+              $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
-              description: Whether the pack is enabled.
-              type: boolean
+              $ref: '#/components/schemas/EnabledOrUndefined'
             name:
-              description: The pack name.
-              type: string
+              $ref: '#/components/schemas/PackName'
             policy_ids:
-              description: A list of agent policy IDs associated with the pack.
-              items:
-                type: string
-              type: array
+              $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
-              description: The queries in the pack.
-              type: object
+              $ref: '#/components/schemas/ObjectQueries'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
             shards:
-              description: Shard configuration for the pack.
-              type: object
+              $ref: '#/components/schemas/Shards'
             updated_at:
-              description: The last update timestamp.
+              format: date-time
               type: string
             updated_by:
-              description: The user who last updated the pack.
+              nullable: true
+              type: string
+            updated_by_profile_uid:
               type: string
             version:
-              description: The pack version.
+              description: The pack version number.
               type: integer
     UpdateSavedQueryRequestBody:
       example:
@@ -1442,66 +1751,69 @@ components:
       description: The response for updating a saved query.
       example:
         data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
           description: Saved query description
-          ecs_mapping:
-            host.uptime:
-              field: total_seconds
           id: updated_my_saved_query_name
           interval: '60'
-          platform: linux,darwin
           query: select * from uptime;
-          removed: false
-          saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-          snapshot: true
-          timeout: 120
-          updated_at: '2022-07-26T10:15:00.000Z'
+          saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+          updated_at: '2025-02-26T13:40:16.297Z'
           updated_by: elastic
-          version: 2.8.0
+          version: WzQzMTcsMV0=
       type: object
       properties:
         data:
-          description: The updated saved query.
           type: object
           properties:
+            created_at:
+              format: date-time
+              type: string
+            created_by:
+              nullable: true
+              type: string
+            created_by_profile_uid:
+              type: string
             description:
-              description: The saved query description.
-              type: string
+              $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              description: The ECS mapping configuration.
-              type: object
+              $ref: '#/components/schemas/ECSMappingOrUndefined'
             id:
-              description: The saved query ID.
-              type: string
+              $ref: '#/components/schemas/SavedQueryId'
             interval:
-              description: The query interval in seconds.
-              type: string
+              oneOf:
+                - type: integer
+                - type: string
             platform:
-              description: The target platform(s).
-              type: string
-            query:
-              description: The SQL query.
-              type: string
-            removed:
-              description: Whether to include results for removed processes.
+              $ref: '#/components/schemas/PlatformOrUndefined'
+            prebuilt:
               type: boolean
+            query:
+              $ref: '#/components/schemas/Query'
+            removed:
+              $ref: '#/components/schemas/RemovedOrUndefined'
             saved_object_id:
-              description: The saved object ID of the saved query.
               type: string
             snapshot:
-              description: Whether the query is a snapshot query.
-              type: boolean
+              $ref: '#/components/schemas/SnapshotOrUndefined'
             timeout:
-              description: The query timeout in seconds.
               type: integer
             updated_at:
-              description: The last update timestamp.
+              format: date-time
               type: string
             updated_by:
-              description: The user who last updated the saved query.
+              nullable: true
+              type: string
+            updated_by_profile_uid:
               type: string
             version:
-              description: The minimum osquery version.
+              description: The saved query version.
               type: string
+          required:
+            - saved_object_id
+            - id
+      required:
+        - data
     Version:
       description: >-
         Uses the Osquery versions greater than or equal to the specified version
