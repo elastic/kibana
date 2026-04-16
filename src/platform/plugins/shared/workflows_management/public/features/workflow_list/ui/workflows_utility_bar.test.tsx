@@ -65,10 +65,10 @@ describe('WorkflowsUtilityBar', () => {
     expect(countElement.textContent).toBe('Showing 1-5 of 10 workflows');
   });
 
-  it('does not show bulk actions when no workflows are selected', () => {
+  it('hides bulk actions when no workflows are selected', () => {
     renderWithI18n(<WorkflowsUtilityBar {...defaultProps} />);
 
-    expect(screen.queryByTestId('workflows-table-bulk-actions-button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflows-table-utility-bar-actions')).not.toBeVisible();
   });
 
   it('shows bulk actions when workflows are selected', () => {
@@ -79,6 +79,7 @@ describe('WorkflowsUtilityBar', () => {
 
     renderWithI18n(<WorkflowsUtilityBar {...defaultProps} selectedWorkflows={selectedWorkflows} />);
 
+    expect(screen.getByTestId('workflows-table-utility-bar-actions')).toBeVisible();
     expect(screen.getByText('2 selected')).toBeInTheDocument();
     expect(screen.getByTestId('workflows-table-bulk-actions-button')).toBeInTheDocument();
   });
