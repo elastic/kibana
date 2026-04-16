@@ -107,6 +107,7 @@ export class WorkflowsApiService {
       method: 'PUT',
       path: `/s/${this.spaceId}/api/workflows/workflow/${id}`,
       body,
+      ignoreErrors: [400],
     });
     return response;
   }

@@ -85,15 +85,12 @@ spaceTest.describe('Import/Export edge cases', { tag: tags.stateful.classic }, (
     expect(fetched.name).toContain('unicode');
   });
 
-  spaceTest(
-    'workflow referencing non-existent connector can be created but is flagged',
-    async () => {
-      const created = await workflowsApi.create(WORKFLOW_WITH_CONNECTOR_REF);
+  spaceTest('workflow referencing non-existent connector can be created', async () => {
+    const created = await workflowsApi.create(WORKFLOW_WITH_CONNECTOR_REF);
 
-      expect(created).toBeDefined();
-      expect(created.id).toBeDefined();
-    }
-  );
+    expect(created.id).toBeDefined();
+    expect(created.name).toBe('Workflow With Connector Ref');
+  });
 
   spaceTest('duplicate workflow names are allowed', async () => {
     const first = await workflowsApi.create(SIMPLE_WORKFLOW_YAML);

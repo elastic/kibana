@@ -200,7 +200,6 @@ spaceTest.describe('Switch step execution', { tag: tags.stateful.classic }, () =
   let workflowsApi: WorkflowsApiService;
 
   spaceTest.beforeAll(async ({ apiServices }) => {
-    spaceTest.setTimeout(120_000);
     workflowsApi = apiServices.workflowsApi;
   });
 

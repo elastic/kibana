@@ -150,6 +150,7 @@ spaceTest.describe('Workflow management CRUD edge cases', { tag: tags.stateful.c
     });
 
     const fetched = await workflowsApi.getWorkflow(workflow.id);
-    expect(fetched).toBeDefined();
+    expect(fetched.valid).toBe(true);
+    expect(fetched.name).toBe('CRUD Edge Case Workflow');
   });
 });
