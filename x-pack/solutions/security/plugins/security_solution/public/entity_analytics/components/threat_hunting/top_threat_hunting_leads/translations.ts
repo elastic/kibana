@@ -39,7 +39,7 @@ export const GENERATING_LEADS = i18n.translate(
 
 export const GENERATING_LEADS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.generatingDescription',
-  { defaultMessage: 'Analyzing entities, risk scores, and alerts to surface hunting leads...' }
+  { defaultMessage: 'Generating threat hunting leads. It might take up to 1 min.' }
 );
 
 export const HUNT_WITH_AI = i18n.translate(

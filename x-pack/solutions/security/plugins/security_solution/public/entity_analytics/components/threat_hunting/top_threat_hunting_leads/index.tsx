@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
-  EuiLoadingSpinner,
+  EuiLoadingLogo,
   EuiPanel,
   EuiPopover,
   EuiSwitch,
@@ -209,42 +209,45 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         `}
       >
         {isLoading || isGenerating ? (
-          <EuiFlexGroup
-            direction="column"
-            justifyContent="center"
-            alignItems="center"
-            style={{ minHeight: 120 }}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" data-test-subj="leadsLoadingSpinner" />
-            </EuiFlexItem>
-            {isGenerating && (
+          <EuiPanel color="plain" hasBorder={false} hasShadow={false}>
+            <EuiFlexGroup
+              direction="column"
+              justifyContent="center"
+              alignItems="center"
+              style={{ minHeight: 120 }}
+            >
               <EuiFlexItem grow={false}>
-                <p>{i18n.GENERATING_LEADS_DESCRIPTION}</p>
+                <EuiLoadingLogo logo="logoSecurity" size="l" data-test-subj="leadsLoadingSpinner" />
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+              {isGenerating && (
+                <EuiFlexItem grow={false}>
+                  <p>{i18n.GENERATING_LEADS_DESCRIPTION}</p>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiPanel>
         ) : leads.length === 0 ? (
-          hasGenerated ? (
-            <EuiEmptyPrompt
-              iconType="inspect"
-              title={<h3>{i18n.NO_DATA_TITLE}</h3>}
-              body={<p>{i18n.NO_DATA_DESCRIPTION}</p>}
-              actions={
-                <AiButton
-                  size="s"
-                  iconType="sparkles"
-                  isLoading={isGenerating}
-                  onClick={onGenerate}
-                  data-test-subj="generateLeadsButton"
-                >
-                  {i18n.GENERATE_LEADS}
-                </AiButton>
-              }
-              data-test-subj="leadsEmptyPrompt"
-            />
-          ) : (
-            <EuiPanel color="plain" hasBorder={false} hasShadow={false}>
+          <EuiPanel color="plain" hasBorder={false} hasShadow={false}>
+            {hasGenerated ? (
+              <EuiEmptyPrompt
+                iconType="inspect"
+                color="transparent"
+                title={<h3>{i18n.NO_DATA_TITLE}</h3>}
+                body={<p>{i18n.NO_DATA_DESCRIPTION}</p>}
+                actions={
+                  <AiButton
+                    size="s"
+                    iconType="sparkles"
+                    isLoading={isGenerating}
+                    onClick={onGenerate}
+                    data-test-subj="generateLeadsButton"
+                  >
+                    {i18n.GENERATE_LEADS}
+                  </AiButton>
+                }
+                data-test-subj="leadsEmptyPrompt"
+              />
+            ) : (
               <EuiEmptyPrompt
                 layout="horizontal"
                 color="transparent"
@@ -263,8 +266,8 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                 icon={<EuiImage size={128} alt="" url={illustrationGenAi} />}
                 data-test-subj="leadsEmptyPrompt"
               />
-            </EuiPanel>
-          )
+            )}
+          </EuiPanel>
         ) : (
           <div ref={cardsRef}>
             <EuiFlexGroup gutterSize="m" responsive={false} wrap={false}>
