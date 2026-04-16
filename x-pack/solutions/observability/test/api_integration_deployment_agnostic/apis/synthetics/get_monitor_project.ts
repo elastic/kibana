@@ -106,7 +106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - fetches all monitors - browser', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const project = 'test-brower-suite';
       for (let i = 0; i < TOTAL_MONITORS; i++) {
         monitors.push({
@@ -164,7 +164,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - fetches all monitors - http', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const project = 'test-http-suite';
       for (let i = 0; i < TOTAL_MONITORS; i++) {
         monitors.push({
@@ -222,7 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - fetches all monitors - tcp', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const project = 'test-tcp-suite';
       for (let i = 0; i < TOTAL_MONITORS; i++) {
         monitors.push({
@@ -280,7 +280,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - fetches all monitors - icmp', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const project = 'test-icmp-suite';
       for (let i = 0; i < TOTAL_MONITORS; i++) {
         monitors.push({
@@ -339,7 +339,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - handles url ecoded project names', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const projectName = 'Test project';
       for (let i = 0; i < TOTAL_MONITORS; i++) {
         monitors.push({
@@ -408,7 +408,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - handles per_page parameter', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const project = 'test-suite';
       const perPage = 10;
       const totalMonitors = 25; // not evenly divisible by perPage so the last page is partial
