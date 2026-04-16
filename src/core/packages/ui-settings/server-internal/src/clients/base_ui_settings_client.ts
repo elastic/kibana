@@ -79,11 +79,9 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
     const result = { ...defaultValues };
 
     const userProvided = await this.getUserProvided();
-    const userOverrideKeys: string[] = [];
     Object.keys(userProvided).forEach((key) => {
       if (userProvided[key].userValue !== undefined) {
         result[key] = userProvided[key].userValue;
-        userOverrideKeys.push(key);
       }
     });
 

@@ -92,12 +92,13 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
 
     // write all overridden keys, dropping the userValue if override is null and
     // adding keys for overrides that are not in saved object
+    const result = { ...userProvided };
     for (const [key, value] of Object.entries(this.overrides)) {
-      userProvided[key] =
+      result[key] =
         value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
     }
 
-    return userProvided;
+    return result;
   }
 
   private async computeUserProvided<T = unknown>(): Promise<UserProvided<T>> {
@@ -108,7 +109,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
 
     // Cache at shared level (cross-request)
     if (this.sharedUserProvidedCache) {
-      this.sharedUserProvidedCache.set(this.namespace, userProvided, 60_000);
+      this.sharedUserProvidedCache.set(this.namespace, userProvided);
     }
 
     return userProvided;

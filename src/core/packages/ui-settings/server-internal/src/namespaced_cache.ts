@@ -16,6 +16,8 @@ interface NamespacedCacheEntry<T = unknown> {
   timer: NodeJS.Timeout;
 }
 
+export const NAMESPACED_CACHE_TTL = 60_000;
+
 /**
  * Shared process-wide cache for namespace-keyed data with configurable TTL.
  * Used to cache getUserProvided() results across IUiSettingsClient instances.
@@ -41,7 +43,7 @@ export class NamespacedCache<T = unknown> {
   /**
    * Set cached value with TTL
    */
-  set(namespace: string, value: T, ttl: number): void {
+  set(namespace: string, value: T, ttl: number = NAMESPACED_CACHE_TTL): void {
     this.del(namespace); // Clear existing timer
 
     const timer = setTimeout(() => {

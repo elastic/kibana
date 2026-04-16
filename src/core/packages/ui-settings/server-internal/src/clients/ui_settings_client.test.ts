@@ -19,7 +19,7 @@ import {
   ValidationBadValueError,
   ValidationSettingNotFoundError,
 } from '../ui_settings_errors';
-import { NamespacedCache } from '../namespaced_cache';
+import { NAMESPACED_CACHE_TTL, NamespacedCache } from '../namespaced_cache';
 
 const logger = loggingSystemMock.create().get();
 
@@ -1118,7 +1118,7 @@ describe('ui settings', () => {
     });
 
     describe('TTL expiry', () => {
-      it('expires shared cache after TTL (30s)', async () => {
+      it('expires shared cache after TTL', async () => {
         jest.useFakeTimers();
 
         const { uiSettings, savedObjectsClient } = setupWithSharedCache({
@@ -1128,7 +1128,7 @@ describe('ui settings', () => {
         await uiSettings.getUserProvided();
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
 
-        jest.advanceTimersByTime(29_000);
+        jest.advanceTimersByTime(NAMESPACED_CACHE_TTL - 2_000);
 
         await uiSettings.getUserProvided();
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
