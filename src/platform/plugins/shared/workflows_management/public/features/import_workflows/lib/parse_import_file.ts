@@ -148,6 +148,8 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
       );
     }
 
+    preview.id = importId;
+
     workflows.push(preview);
     workflowIds.push(importId);
     rawWorkflows.push({ id: importId, originalId, yaml });

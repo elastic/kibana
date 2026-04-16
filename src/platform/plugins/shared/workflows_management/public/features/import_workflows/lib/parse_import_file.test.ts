@@ -372,10 +372,10 @@ describe('parseImportFile', () => {
       const result = await parseImportFile(file);
 
       // The ZIP filename "w-1" is a valid ID, so it is preserved as the import ID
+      // across all three result arrays (workflowIds, rawWorkflows, and workflows)
       expect(result.workflowIds).toEqual(['w-1']);
       expect(result.rawWorkflows[0].id).toBe('w-1');
-      // The preview still uses the slug for display
-      expect(result.workflows[0].id).toBe('hello-world-2024');
+      expect(result.workflows[0].id).toBe('w-1');
       expect(result.parseErrors).toHaveLength(0);
     });
 
@@ -397,10 +397,7 @@ describe('parseImportFile', () => {
       // "w-1" is a valid ID, so it is preserved as the import ID even without a name
       expect(result.workflowIds[0]).toBe('w-1');
       expect(result.rawWorkflows[0].id).toBe('w-1');
-      // The preview falls back to UUID (no name for slugification)
-      expect(result.workflows[0].id).toMatch(
-        /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-      );
+      expect(result.workflows[0].id).toBe('w-1');
       expect(result.parseErrors).toHaveLength(0);
     });
 
@@ -421,8 +418,8 @@ describe('parseImportFile', () => {
       const file = createFile(buffer, 'numeric-name.zip');
       const result = await parseImportFile(file);
 
-      const uuidPattern = /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-      expect(result.workflows[0].id).toMatch(uuidPattern);
+      // "w-1" is the conforming filename, so it is preserved as the import ID
+      expect(result.workflows[0].id).toBe('w-1');
       // name is null because the YAML value is a number, not a string;
       // only string-typed name fields are surfaced as the display name.
       expect(result.workflows[0].name).toBeNull();
@@ -446,7 +443,8 @@ describe('parseImportFile', () => {
 
       expect(result.totalWorkflows).toBe(1);
       expect(result.workflows[0].valid).toBe(false);
-      expect(result.workflows[0].id).toMatch(/^workflow-[0-9a-f-]{36}$/);
+      // "w-1" is a conforming filename, so it is preserved as the import ID
+      expect(result.workflows[0].id).toBe('w-1');
       expect(result.parseErrors).toHaveLength(0);
     });
 
