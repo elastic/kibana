@@ -91,7 +91,30 @@ describe('createDiagnosticReportAttachmentType', () => {
   describe('getAgentDescription', () => {
     it('returns a non-empty description string', () => {
       expect(typeof attachmentType.getAgentDescription?.()).toBe('string');
+    });
+
+    it('has length greater than zero', () => {
       expect((attachmentType.getAgentDescription?.() ?? '').length).toBeGreaterThan(0);
+    });
+
+    it('mentions the Configuration section', () => {
+      expect(attachmentType.getAgentDescription?.()).toContain('Configuration');
+    });
+
+    it('mentions the Quality Metrics section', () => {
+      expect(attachmentType.getAgentDescription?.()).toContain('Quality Metrics');
+    });
+
+    it('mentions the Per-Workflow Alert Retrieval section', () => {
+      expect(attachmentType.getAgentDescription?.()).toContain('Per-Workflow Alert Retrieval');
+    });
+
+    it('mentions the Execution Trigger section', () => {
+      expect(attachmentType.getAgentDescription?.()).toContain('Execution Trigger');
+    });
+
+    it('mentions connector details', () => {
+      expect(attachmentType.getAgentDescription?.()).toContain('connector');
     });
   });
 });

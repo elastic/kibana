@@ -128,6 +128,46 @@ describe('createWorkflowTroubleshootingSkill', () => {
         'timeout` status — generation timeouts are caused by LLM latency'
       );
     });
+
+    it('provides guidance for interpreting the Quality Metrics section', () => {
+      expect(skill.content).toContain('Quality Metrics');
+    });
+
+    it('associates high hallucination count with model quality issues', () => {
+      expect(skill.content).toContain('hallucination');
+    });
+
+    it('flags all-filtered discoveries as a potential prompt problem', () => {
+      expect(skill.content).toContain('all filtered');
+    });
+
+    it('provides guidance for per-workflow alert counts to diagnose token limit errors', () => {
+      expect(skill.content).toContain('Per-Workflow Alert');
+    });
+
+    it('mentions token limits in the context of per-workflow alert counts', () => {
+      expect(skill.content).toContain('token limit');
+    });
+
+    it('provides guidance for interpreting the Execution Trigger section', () => {
+      expect(skill.content).toContain('Execution Trigger');
+    });
+
+    it('distinguishes scheduled failures from manual trigger failures', () => {
+      expect(skill.content).toContain('scheduled');
+    });
+
+    it('provides guidance for interpreting the Configuration section', () => {
+      expect(skill.content).toContain('Configuration section');
+    });
+
+    it('mentions default vs custom workflows in configuration guidance', () => {
+      expect(skill.content).toContain('default');
+    });
+
+    it('provides connector model guidance for model-specific advice', () => {
+      expect(skill.content).toContain('connector model');
+    });
   });
 
   describe('referencedContent', () => {

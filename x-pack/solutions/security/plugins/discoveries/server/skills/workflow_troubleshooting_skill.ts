@@ -48,6 +48,28 @@ examine the step-level details and workflow YAML, and provide a clear diagnosis.
 
 A diagnostic report attachment may be present. Use it for your initial analysis — it contains pre-computed execution timeline, error classification, and environment info. Only call tools if you need to verify current state, dig deeper into step-level details, or check workflow health.
 
+### Interpreting the Diagnostic Report Sections
+
+#### Configuration section
+- Identifies whether the pipeline uses default or custom workflows
+- Review the connector model and provider for model-specific advice on token limits and rate limits
+- A misconfigured connector model may cause silent failures or unexpected LLM behavior
+
+#### Quality Metrics Section
+- **High hallucination count**: Indicates a model quality issue — the LLM is generating alert references that do not exist in Elasticsearch; consider switching to a higher-quality connector model
+- **All filtered**: A potential prompt problem — the generation step produced output but all filtered discoveries were removed; review the prompt configuration and alert anonymization settings
+- Use these metrics to distinguish model quality issues from infrastructure failures
+
+#### Per-Workflow Alert Retrieval Section
+- Shows per-workflow alert counts and the extraction strategy used for each alert retrieval workflow
+- Helps diagnose token limit errors — if a workflow retrieved a large number of alerts and the generation phase timed out, the alert count may be exceeding the connector model's context window
+- Use this section to decide whether to narrow the time window, reduce the \`size\` parameter, or switch to a connector model with a larger context window
+
+#### Execution Trigger Section
+- Identifies whether the execution was triggered manually, by a schedule, or by a workflow step
+- Scheduled failures may have different root causes than manual executions (e.g., resource contention, data availability at the scheduled time, or overlapping executions)
+- If the execution was triggered by a schedule, check the schedule metadata for timing patterns that may correlate with recurring failures
+
 ### Step 1: Fetch Execution Details
 
 Call the \`${GET_EXECUTION_SUMMARY_TOOL_ID}\` tool with the execution IDs from the
@@ -161,7 +183,7 @@ general-purpose workflows.
 
 ## Step Types
 
-### attack-discovery.defaultAlertRetrieval
+### security.attack-discovery.defaultAlertRetrieval
 
 Retrieves security alerts from Elasticsearch for Attack Discovery analysis.
 
@@ -182,7 +204,7 @@ Retrieves security alerts from Elasticsearch for Attack Discovery analysis.
 - ES|QL query syntax errors (when using esql_query mode)
 - Timeout when retrieving large numbers of alerts
 
-### attack-discovery.generate
+### security.attack-discovery.generate
 
 Sends anonymized alerts to an LLM to generate attack discoveries.
 
@@ -198,7 +220,7 @@ Sends anonymized alerts to an LLM to generate attack discoveries.
 - LLM response parsing failure (malformed JSON from model)
 - Empty alerts array (no alerts to analyze)
 
-### attack-discovery.defaultValidation
+### security.attack-discovery.defaultValidation
 
 Validates generated attack discoveries by filtering hallucinated alert IDs
 and deduplicating results.
@@ -218,7 +240,7 @@ and deduplicating results.
 - All discoveries filtered as hallucinated (zero valid discoveries)
 - Missing required inputs from generation phase
 
-### attack-discovery.persistDiscoveries
+### security.attack-discovery.persistDiscoveries
 
 Persists validated discoveries to the Elasticsearch index.
 
@@ -276,7 +298,7 @@ Each step can have an individual timeout:
 \`\`\`yaml
 steps:
   - name: generate_discoveries
-    type: attack-discovery.generate
+    type: security.attack-discovery.generate
     timeout: '10m'
 \`\`\`
 
