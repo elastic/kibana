@@ -109,8 +109,8 @@ export const APM_ERROR_SCENARIOS: Record<string, ApmErrorScenario> = {
     snapshotName: 'product-catalog',
     gcs: PRODUCT_CATALOG_GCS,
     errorQuery: {
-      errorMessage: '13 INTERNAL: failed to prepare order: failed to get product #"OLJCESPC7Z"',
-      serviceName: 'frontend',
+      errorMessage: 'failed to prepare order: failed to get product #"OLJCESPC7Z"',
+      serviceName: 'checkout',
     },
     expectedOutput: PRODUCT_CATALOG_FAILURE_EXPECTED_OUTPUT,
   },
