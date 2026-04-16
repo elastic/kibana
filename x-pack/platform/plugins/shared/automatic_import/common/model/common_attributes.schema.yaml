@@ -171,6 +171,9 @@ components:
             version:
               description: The version of the integration
               type: string
+            connectorId:
+              description: The ID of the connector associated with this integration
+              type: string
             createdBy:
               description: The username of the user who created the integration
               type: string

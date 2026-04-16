@@ -14,26 +14,30 @@ paths:
         - name: page
           in: query
           required: false
+          description: 'The page number to return.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
         - name: pageSize
           in: query
           required: false
+          description: 'The number of results to return per page.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
         - name: sort
           in: query
           required: false
+          description: 'The field to sort results by.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
         - name: sortOrder
           in: query
           required: false
+          description: 'The sort order.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -52,7 +56,7 @@ paths:
               $ref: './create_pack.schema.yaml#/components/schemas/CreatePacksRequestBody'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -68,11 +72,12 @@ paths:
         - name: id
           in: path
           required: true
+          description: 'The pack ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -87,11 +92,12 @@ paths:
         - name: id
           in: path
           required: true
+          description: 'The pack ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -111,6 +117,7 @@ paths:
         - name: id
           in: path
           required: true
+          description: 'The pack ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       requestBody:
@@ -121,7 +128,7 @@ paths:
               $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestBody'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -142,11 +149,12 @@ paths:
         - name: id
           in: path
           required: true
+          description: 'The ID of the pack to copy.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:

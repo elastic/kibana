@@ -17,12 +17,15 @@ import {
   parseSearchSourceJSON,
 } from '@kbn/data-plugin/common';
 import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
+import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { DataGridDensity } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   isDiscoverSessionEmbeddableByReferenceState,
+  isDiscoverSessionEsqlTab,
   isSearchEmbeddableByValueState,
 } from './type_guards';
 import type {
@@ -205,12 +208,18 @@ export function fromStoredTab(
   const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
   const { index, query, filter } = injectReferences(searchSourceValues, references);
   return isOfAggregateQueryType(query)
-    ? { ...apiTab, query }
+    ? {
+        ...apiTab,
+        data_source: {
+          type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
+          query: query.esql,
+        },
+      }
     : {
         ...apiTab,
         ...(sampleSize && { sample_size: sampleSize }),
         ...(rowsPerPage && { rows_per_page: rowsPerPage }),
-        query,
+        ...(query && { query: toAsCodeQuery(query) }),
         filters: fromStoredFilters(filter) ?? [],
         data_source: fromStoredDataView(index),
         view_mode: viewMode ?? VIEW_MODE.DOCUMENT_LEVEL,
@@ -222,10 +231,13 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
   references: SavedObjectReference[];
 } {
   const { sort, column_order: columnOrder, column_settings: columnSettings } = apiTab;
+  const storedQuery = isDiscoverSessionEsqlTab(apiTab)
+    ? { esql: apiTab.data_source.query }
+    : toStoredQuery(apiTab.query);
   const searchSourceValues: SerializedSearchSourceFields = {
-    query: apiTab.query,
+    ...(storedQuery && { query: storedQuery }),
     ...('filters' in apiTab && { filter: toStoredFilters(apiTab.filters) }),
-    ...('data_source' in apiTab && { index: toStoredDataView(apiTab.data_source) }),
+    ...(!isDiscoverSessionEsqlTab(apiTab) && { index: toStoredDataView(apiTab.data_source) }),
   };
   const [searchSourceFields, references] = extractReferences(searchSourceValues);
   const state: DiscoverSessionTabAttributes = {
@@ -235,7 +247,7 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
     grid: toStoredGrid(columnSettings),
     hideChart: false,
     hideTable: false,
-    isTextBasedQuery: isOfAggregateQueryType(apiTab.query),
+    isTextBasedQuery: isDiscoverSessionEsqlTab(apiTab),
     kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSourceFields) },
     ...('view_mode' in apiTab && { viewMode: apiTab.view_mode }),
   };

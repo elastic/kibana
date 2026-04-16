@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import { applyDagreLayout } from './layout';
-import { NODE_WIDTH, NODE_HEIGHT } from './constants';
+import {
+  NODE_WIDTH,
+  NODE_HEIGHT,
+  GRAPH_MARGIN,
+  NODE_SEPARATION,
+  RANK_SEPARATION,
+} from './constants';
 
 interface TestNodeData extends Record<string, unknown> {
   label: string;
@@ -263,6 +270,79 @@ describe('applyDagreLayout', () => {
           (node) => Number.isInteger(node.position.x) && Number.isInteger(node.position.y)
         )
       ).toBe(true);
+    });
+  });
+
+  describe('when Dagre.layout throws', () => {
+    let layoutSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      layoutSpy = jest.spyOn(Dagre, 'layout').mockImplementation(() => {
+        throw new TypeError("Cannot read properties of undefined (reading 'weight')");
+      });
+    });
+
+    afterEach(() => {
+      layoutSpy.mockRestore();
+    });
+
+    it('invokes onDagreLayoutFailure with the error', () => {
+      const nodes = [createNode('a', 'Node A'), createNode('b', 'Node B')];
+      const onFailure = jest.fn();
+
+      applyDagreLayout(nodes, [createEdge('a', 'b')], {}, onFailure);
+
+      expect(onFailure).toHaveBeenCalledTimes(1);
+      expect(onFailure.mock.calls[0][0]).toBeInstanceOf(TypeError);
+    });
+
+    it('applies grid fallback positions for three nodes', () => {
+      const nodes = [
+        createNode('a', 'Node A'),
+        createNode('b', 'Node B'),
+        createNode('c', 'Node C'),
+      ];
+      const stepX = NODE_WIDTH + NODE_SEPARATION;
+      const stepY = NODE_HEIGHT + RANK_SEPARATION;
+
+      const result = applyDagreLayout(nodes, [], {});
+
+      expect(result).toHaveLength(3);
+      expect(result[0].position).toEqual({
+        x: GRAPH_MARGIN,
+        y: GRAPH_MARGIN,
+      });
+      expect(result[1].position).toEqual({
+        x: GRAPH_MARGIN + stepX,
+        y: GRAPH_MARGIN,
+      });
+      expect(result[2].position).toEqual({
+        x: GRAPH_MARGIN,
+        y: GRAPH_MARGIN + stepY,
+      });
+    });
+
+    it('preserves node data and type on fallback', () => {
+      const nodes: Node<TestNodeData>[] = [
+        {
+          id: 'a',
+          position: { x: 0, y: 0 },
+          type: 'service',
+          data: { label: 'Node A', customField: 'value' },
+        },
+      ];
+
+      const result = applyDagreLayout(nodes, [], {});
+
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          type: 'service',
+          data: expect.objectContaining({
+            label: 'Node A',
+            customField: 'value',
+          }),
+        })
+      );
     });
   });
 });

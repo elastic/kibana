@@ -36,6 +36,7 @@ export const groupedActorMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            engine_type: 'user',
             sourceFields: { 'user.email': 'user1@example.com' },
           },
         },
@@ -44,6 +45,7 @@ export const groupedActorMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            engine_type: 'service',
             sourceFields: { 'service.name': 'auth-service' },
           },
         },
@@ -80,7 +82,7 @@ export const groupedActorMockData = {
             name: 'Target Role',
             type: 'role',
             availableInEntityStore: true,
-            sourceFields: { 'entity.target.id': 'target-role' },
+            sourceFields: { 'entity.id': 'target-role' },
           },
         },
       ],
@@ -153,6 +155,7 @@ export const groupedTargetMockData = {
             name: 'Single Actor',
             type: 'user',
             availableInEntityStore: true,
+            engine_type: 'user',
             sourceFields: {
               'user.id': 'single-actor',
               'user.email': 'actor@example.com',
@@ -192,9 +195,10 @@ export const groupedTargetMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            engine_type: 'host',
             sourceFields: {
-              'host.target.id': 'target-host-abc',
-              'host.target.hostname': 'db-server-1',
+              'host.id': 'target-host-abc',
+              'host.hostname': 'db-server-1',
             },
           },
         },
@@ -203,7 +207,8 @@ export const groupedTargetMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
-            sourceFields: { 'entity.target.id': 'entity-target-1' },
+            engine_type: 'generic',
+            sourceFields: { 'entity.id': 'entity-target-1' },
           },
         },
       ],
@@ -274,6 +279,7 @@ export const singleActorMockData = {
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
             availableInEntityStore: false,
+            engine_type: 'user',
             sourceFields: { 'user.email': 'admin@example.com', 'user.name': 'admin' },
           },
         },
@@ -294,8 +300,9 @@ export const singleActorMockData = {
             name: 'Custom Role',
             type: 'role',
             availableInEntityStore: true,
+            engine_type: 'generic',
             sourceFields: {
-              'entity.target.id': 'projects/your-project-id/roles/customRole',
+              'entity.id': 'projects/your-project-id/roles/customRole',
             },
           },
         },

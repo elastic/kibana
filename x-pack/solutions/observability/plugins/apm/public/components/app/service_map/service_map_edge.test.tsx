@@ -68,7 +68,7 @@ describe('ServiceMapEdge', () => {
   it('renders edge path', () => {
     const { container } = renderServiceMapEdge();
     const path = container.querySelector('path');
-    expect(path).toBeInTheDocument();
+    expect(path).toHaveAttribute('data-test-subj', 'serviceMapEdge-edge-1');
   });
 
   it('renders with default stroke color when not selected', () => {

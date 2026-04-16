@@ -87,20 +87,27 @@ type InvalidateApiKeysTaskRunnerOpts = Pick<
   'logger' | 'configInterval' | 'coreStartServices' | 'invalidateApiKeyFn' | 'removalDelay'
 >;
 
+interface InvalidateApiKeysTaskState {
+  missing_api_key_retries?: Record<string, number>;
+}
+
 export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
   const { logger, configInterval, coreStartServices, invalidateApiKeyFn, removalDelay } = opts;
-  return () => {
+
+  return ({ taskInstance }: { taskInstance: { state: InvalidateApiKeysTaskState } }) => {
     return {
       async run() {
+        let missingApiKeyRetries = { ...(taskInstance.state.missing_api_key_retries ?? {}) };
         try {
           const [{ savedObjects }] = await coreStartServices();
           const savedObjectsClient = savedObjects.createInternalRepository([
             INVALIDATE_API_KEY_SO_NAME,
           ]);
 
-          const totalInvalidated = await runInvalidate({
+          const result = await runInvalidate({
             invalidateApiKeyFn,
             logger,
+            missingApiKeyRetries,
             removalDelay,
             savedObjectsClient,
             savedObjectType: INVALIDATE_API_KEY_SO_NAME,
@@ -111,11 +118,12 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
               },
             ],
           });
+          missingApiKeyRetries = result.missingApiKeyRetries;
 
-          logger.debug(`Invalidated a total of ${totalInvalidated} API keys.`);
+          logger.debug(`Invalidated a total of ${result.totalInvalidated} API keys.`);
 
           return {
-            state: {},
+            state: { missing_api_key_retries: missingApiKeyRetries },
             schedule: { interval: configInterval },
           };
         } catch (e) {
@@ -123,7 +131,7 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
             error: { stack_trace: e.stack },
           });
           return {
-            state: {},
+            state: { missing_api_key_retries: missingApiKeyRetries },
             schedule: { interval: configInterval },
           };
         }

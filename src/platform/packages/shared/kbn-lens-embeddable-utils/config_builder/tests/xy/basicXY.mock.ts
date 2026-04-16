@@ -1160,9 +1160,6 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
     position: 'top',
     layout: {
       type: 'list',
-      truncate: {
-        max_pixels: 777,
-      },
     },
   },
   axis: {
