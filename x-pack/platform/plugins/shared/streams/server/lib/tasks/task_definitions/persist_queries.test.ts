@@ -164,10 +164,9 @@ describe('persistQueries', () => {
     await persistQueries('logs.test', [replacement], { queryClient, streamsClient });
 
     expect(queryClient.bulk).toHaveBeenCalledTimes(1);
-    expect(queryClient.bulk).toHaveBeenCalledWith(
-      definition,
-      [expect.objectContaining({ index: expect.objectContaining({ id: 'q1' }) })]
-    );
+    expect(queryClient.bulk).toHaveBeenCalledWith(definition, [
+      expect.objectContaining({ index: expect.objectContaining({ id: 'q1' }) }),
+    ]);
     expect((queryClient.bulk as jest.Mock).mock.calls[0][2]).toBeUndefined();
   });
 
