@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { OsqueryResponseAction } from './osquery_response_action';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import * as useUpsellingModule from '../../../common/hooks/use_upselling';
 import type { ArrayItem } from '../../../shared_imports';
 
@@ -44,8 +45,8 @@ jest.mock('@kbn/securitysolution-hook-utils', () => ({
 
 // Mock shared_imports to avoid form context dependency
 jest.mock('../../../shared_imports', () => ({
-  UseField: ({ component: Component, ...rest }: { component: React.ComponentType; path: string }) =>
-    Component ? <Component {...rest} /> : null,
+  UseField: ({ component: Component }: { component: React.ComponentType; path: string }) =>
+    Component ? <Component /> : null,
 }));
 
 // Mock the form field to avoid deep osquery plugin dependencies
@@ -102,7 +103,7 @@ describe('OsqueryResponseAction', () => {
       renderComponent();
 
       expect(useUpsellingComponentSpy).toHaveBeenCalledWith(
-        'osquery_automated_response_actions'
+        ProductFeatureKey.osqueryAutomatedResponseActions
       );
     });
   });

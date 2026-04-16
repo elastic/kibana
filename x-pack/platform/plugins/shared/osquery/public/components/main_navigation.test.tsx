@@ -11,11 +11,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 
-// --- Feature flag mock (controllable per test) ---
-let mockHistoryEnabled = false;
+// --- Feature flag mock (controllable per test via jest.mocked) ---
+const mockUseIsExperimentalFeatureEnabled = jest.fn((flag: string) => false);
 jest.mock('../common/experimental_features_context', () => ({
-  useIsExperimentalFeatureEnabled: (flag: string) =>
-    flag === 'queryHistoryRework' ? mockHistoryEnabled : false,
+  useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
+    mockUseIsExperimentalFeatureEnabled(...(args as [string])),
 }));
 
 // --- Kibana services ---
@@ -76,11 +76,10 @@ describe('MainNavigation', () => {
   });
 
   describe('when queryHistoryRework is enabled', () => {
-    beforeEach(() => {
-      mockHistoryEnabled = true;
-    });
-
     it('should display renamed tabs: History, Packs, Queries', () => {
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        (flag: string) => flag === 'queryHistoryRework'
+      );
       renderNavigation('/history');
 
       expect(screen.getByText('History')).toBeInTheDocument();
@@ -91,6 +90,9 @@ describe('MainNavigation', () => {
     });
 
     it('should show "Run query" button', () => {
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        (flag: string) => flag === 'queryHistoryRework'
+      );
       renderNavigation('/history');
 
       expect(screen.getByText('Run query')).toBeInTheDocument();
@@ -98,11 +100,8 @@ describe('MainNavigation', () => {
   });
 
   describe('when queryHistoryRework is disabled', () => {
-    beforeEach(() => {
-      mockHistoryEnabled = false;
-    });
-
     it('should display original tabs: Live queries, Packs, Saved queries', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       renderNavigation('/live_queries');
 
       expect(screen.getByText('Live queries')).toBeInTheDocument();

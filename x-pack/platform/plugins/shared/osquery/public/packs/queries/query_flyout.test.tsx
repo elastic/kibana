@@ -110,7 +110,7 @@ describe('QueryFlyout', () => {
     it('should show "ID must be unique" when entering a duplicate ID', async () => {
       renderFlyout({ uniqueQueryIds: ['existing-query'] });
 
-      const idInput = document.querySelector('input[name="id"]') as HTMLInputElement;
+      const idInput = screen.getByRole('textbox', { name: /ID/i });
       fireEvent.change(idInput, { target: { value: 'existing-query' } });
 
       fireEvent.click(screen.getByTestId('query-flyout-save-button'));
@@ -143,7 +143,7 @@ describe('QueryFlyout', () => {
     it('should not show uniqueness error when ID is unique', async () => {
       renderFlyout({ uniqueQueryIds: ['existing-query'] });
 
-      const idInput = document.querySelector('input[name="id"]') as HTMLInputElement;
+      const idInput = screen.getByRole('textbox', { name: /ID/i });
       fireEvent.change(idInput, { target: { value: 'brand-new-query' } });
 
       fireEvent.click(screen.getByTestId('query-flyout-save-button'));

@@ -158,7 +158,7 @@ const defaultProps = {
 
 let capturedUnifiedDataTableProps: Record<string, unknown> = {};
 
-// Override the mock to also capture props
+// Mock that also captures props for assertions
 jest.mock('@kbn/unified-data-table', () => ({
   UnifiedDataTable: (props: Record<string, unknown>) => {
     capturedUnifiedDataTableProps = props;
