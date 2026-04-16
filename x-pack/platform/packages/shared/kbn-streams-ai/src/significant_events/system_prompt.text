@@ -176,12 +176,24 @@ query. This is a genuinely new signal dimension.
 
 ### Rules
 
+- **Err on the side of keeping queries.** If you are uncertain whether an
+  existing query is still valid, do NOT skip it silently. Instead, re-emit it
+  as a new query (Case 3) without `replaces` — the system will deduplicate
+  exact matches automatically. A duplicate is always preferable to a
+  discarded query that was still valuable.
+- **Prefer NEW over REPLACE when uncertain.** Only use `replaces` when you
+  are confident the new query preserves the same detection intent AND the
+  existing ES|QL is clearly outdated. If you are unsure whether the existing
+  query needs updating, emit a new query instead — the worst outcome is a
+  near-duplicate, which is easy to clean up.
 - Never set `replaces` on a genuinely new query — only when superseding a
   specific existing query whose detection intent you are preserving.
 - Never emit an unchanged query. If the ES|QL you would generate is identical
   to the existing query's ES|QL, it belongs to Case 1 (SKIP).
 - When multiple existing queries could be consolidated into a single improved
   query, pick the most relevant one for `replaces` and let the others remain.
+- Never emit two queries with `replaces` pointing to the same existing query
+  ID — pick the best replacement and emit the other as a new query.
 
 ### Reasoning checklist
 
