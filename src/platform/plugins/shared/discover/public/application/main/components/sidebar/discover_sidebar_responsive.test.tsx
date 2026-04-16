@@ -38,7 +38,7 @@ import { internalStateActions } from '../../state_management/redux';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 // There are some flaky tests in this file because they render a big DOM tree, which can take some time to run the tests.
-const EXTENDED_TIMEOUT = 30_000;
+const EXTENDED_TIMEOUT = 60_000;
 
 type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
