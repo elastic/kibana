@@ -519,11 +519,11 @@ const componentStyles = {
     const { euiTheme } = themeContext;
 
     return css({
-      padding: `${euiTheme.size.s} ${euiTheme.size.xs} 0 ${euiTheme.size.xs}`,
+      padding: `${euiTheme.size.s} ${euiTheme.size.m} 0 ${euiTheme.size.m}`,
 
       '> *, .euiAccordion__triggerWrapper, .euiAccordion__children, .unifiedFieldListItemButton': {
-        paddingLeft: euiTheme.size.xs,
-        paddingRight: euiTheme.size.xs,
+        paddingLeft: 0,
+        paddingRight: 0,
       },
 
       '.unifiedFieldListSidebar__accordionContainer': {
@@ -551,7 +551,7 @@ const componentStyles = {
     }),
   sidebarEditField: ({ euiTheme }: UseEuiTheme) =>
     css({
-      padding: euiTheme.size.s,
+      padding: euiTheme.size.m,
       borderTop: euiTheme.border.thin,
     }),
 };

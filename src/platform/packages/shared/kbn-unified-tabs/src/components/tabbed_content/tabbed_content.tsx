@@ -424,6 +424,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     margin-right: ${euiTheme.size.s};
   `;
 
+  const tabsBarStripOuterPaddingCss = css`
+    padding-inline: 2px;
+  `;
+
   const tabsBar = (
     <EuiFlexGroup
       gutterSize="xs"
@@ -482,7 +486,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   );
 
   if (!renderContent) {
-    return tabsBar;
+    return <div css={tabsBarStripOuterPaddingCss}>{tabsBar}</div>;
   }
 
   return (
@@ -492,7 +496,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       gutterSize="none"
       className="eui-fullHeight"
     >
-      {!hideTabsBar && <EuiFlexItem grow={false}>{tabsBar}</EuiFlexItem>}
+      {!hideTabsBar && (
+        <EuiFlexItem grow={false} css={tabsBarStripOuterPaddingCss}>
+          {tabsBar}
+        </EuiFlexItem>
+      )}
       {selectedItem ? (
         <EuiFlexItem
           data-test-subj="unifiedTabs_selectedTabContent"

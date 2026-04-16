@@ -14,8 +14,8 @@ export const useChartStyles = (chartVisible: boolean) => {
   const { euiTheme } = useEuiTheme();
 
   const chartToolbarCss = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.s} ${chartVisible ? 0 : euiTheme.size.s}
-      ${euiTheme.size.s};
+    padding: ${euiTheme.size.s} ${euiTheme.size.m} ${chartVisible ? 0 : euiTheme.size.s}
+      ${euiTheme.size.m};
     min-height: ${euiTheme.base * 2.5}px;
   `;
 
@@ -24,6 +24,9 @@ export const useChartStyles = (chartVisible: boolean) => {
     display: flex;
     flex-direction: column;
     position: relative;
+    /* End inset only: start (left in LTR) flush so the chart aligns with the panel edge; end keeps breathing room */
+    padding-inline-start: 0;
+    padding-inline-end: ${euiTheme.size.m};
 
     // SASSTODO: the visualizing component should have an option or a modifier
     .series > rect {

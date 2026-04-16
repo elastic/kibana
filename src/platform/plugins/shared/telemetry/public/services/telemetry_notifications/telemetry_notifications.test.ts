@@ -9,6 +9,11 @@
 
 /* eslint-disable dot-notation */
 import { mockTelemetryNotifications, mockTelemetryService } from '../../mocks';
+import { FORCE_TELEMETRY_OPT_IN_BANNER_LOCAL_STORAGE_KEY } from './force_telemetry_banner_for_testing';
+
+beforeEach(() => {
+  localStorage.removeItem(FORCE_TELEMETRY_OPT_IN_BANNER_LOCAL_STORAGE_KEY);
+});
 
 describe('setOptedInNoticeSeen', () => {
   it('sets setting successfully and removes banner', async () => {
@@ -23,6 +28,20 @@ describe('setOptedInNoticeSeen', () => {
     expect(telemetryNotifications['overlays'].banners.remove).toBeCalledTimes(1);
     expect(telemetryNotifications['overlays'].banners.remove).toBeCalledWith(bannerId);
     expect(telemetryService.setUserHasSeenNotice).toBeCalledTimes(1);
+  });
+
+  it('does not persist notice when force-testing localStorage flag is set', async () => {
+    localStorage.setItem(FORCE_TELEMETRY_OPT_IN_BANNER_LOCAL_STORAGE_KEY, 'true');
+    const bannerId = 'bruce-banner';
+
+    const telemetryService = mockTelemetryService();
+    telemetryService.setUserHasSeenNotice = jest.fn();
+    const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
+    telemetryNotifications['optInStatusNoticeBannerId'] = bannerId;
+    await telemetryNotifications.setOptInStatusNoticeSeen();
+
+    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledTimes(1);
+    expect(telemetryService.setUserHasSeenNotice).not.toHaveBeenCalled();
   });
 });
 
@@ -41,6 +60,12 @@ describe('shouldShowOptedInNoticeBanner', () => {
     it('should return false when `telemetryService.getUserShouldSeeOptInNotice returns false', () => {
       getUserShouldSeeOptInNotice.mockReturnValue(false);
       expect(telemetryNotifications.shouldShowOptInStatusNoticeBanner()).toBe(false);
+    });
+
+    it('should return true when force-testing localStorage flag is set even if notice is not needed', () => {
+      localStorage.setItem(FORCE_TELEMETRY_OPT_IN_BANNER_LOCAL_STORAGE_KEY, 'true');
+      getUserShouldSeeOptInNotice.mockReturnValue(false);
+      expect(telemetryNotifications.shouldShowOptInStatusNoticeBanner()).toBe(true);
     });
   });
 

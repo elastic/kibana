@@ -10,6 +10,7 @@
 import type { CoreStart, HttpStart, OverlayStart } from '@kbn/core/public';
 import type { TelemetryService } from '../telemetry_service';
 import type { TelemetryConstants } from '../..';
+import { isForceTelemetryOptInBannerForTesting } from './force_telemetry_banner_for_testing';
 import { renderOptInStatusNoticeBanner } from './render_opt_in_status_notice_banner';
 
 type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
@@ -48,11 +49,17 @@ export class TelemetryNotifications {
 
   /**
    * Should the opted-in banner be shown to the user?
+   * See {@link isForceTelemetryOptInBannerForTesting} to always show the banner for local UI testing.
    */
   public shouldShowOptInStatusNoticeBanner = (): boolean => {
-    const userShouldSeeOptInNotice = this.telemetryService.getUserShouldSeeOptInNotice();
     const bannerOnScreen = typeof this.optInStatusNoticeBannerId !== 'undefined';
-    return !bannerOnScreen && userShouldSeeOptInNotice;
+    if (bannerOnScreen) {
+      return false;
+    }
+    if (isForceTelemetryOptInBannerForTesting()) {
+      return true;
+    }
+    return this.telemetryService.getUserShouldSeeOptInNotice();
   };
 
   /**
@@ -80,6 +87,8 @@ export class TelemetryNotifications {
       this.optInStatusNoticeBannerId = undefined;
     }
 
-    await this.telemetryService.setUserHasSeenNotice();
+    if (!isForceTelemetryOptInBannerForTesting()) {
+      await this.telemetryService.setUserHasSeenNotice();
+    }
   };
 }

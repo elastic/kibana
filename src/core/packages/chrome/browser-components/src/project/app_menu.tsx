@@ -93,7 +93,8 @@ const useAppMenuBarStyles = (
   euiTheme: UseEuiTheme['euiTheme'],
   hasSecondaryRow: boolean,
   showBackToParent: boolean,
-  hasHeaderTabs: boolean
+  hasHeaderTabs: boolean,
+  currentAppId: string | undefined
 ) =>
   useMemo(() => {
     const root = {
@@ -104,7 +105,11 @@ const useAppMenuBarStyles = (
       gap: 0,
       paddingTop: euiTheme.size.m,
       paddingInline: euiTheme.size.m,
-      paddingBottom: hasHeaderTabs ? 0 : euiTheme.size.m,
+      paddingBottom: hasHeaderTabs
+        ? 0
+        : currentAppId === 'discover'
+          ? euiTheme.size.s
+          : euiTheme.size.m,
       background: euiTheme.colors.backgroundBasePlain,
       /* No bottom border / negative margin — avoids an extra “stripe” under the main chrome for every app */
       borderBottom: 'none',
@@ -231,7 +236,7 @@ const useAppMenuBarStyles = (
       titleEuiTitleReact,
       menuSection,
     };
-  }, [euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs]);
+  }, [euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs, currentAppId]);
 
 const AppMenuBarHeaderTabs = ({ tabs }: { tabs: AppMenuHeaderTab[] }) => (
   <EuiTabs
@@ -290,7 +295,13 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
   const showBackToParent =
     !hideBackFromAppMenu && Boolean(parentBreadcrumb) && canNavigateToParent(parentBreadcrumb);
   const currentAppId = useCurrentAppId();
-  const styles = useAppMenuBarStyles(euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs);
+  const styles = useAppMenuBarStyles(
+    euiTheme,
+    hasSecondaryRow,
+    showBackToParent,
+    hasHeaderTabs,
+    currentAppId
+  );
   const hasLegacyActionMenu = useHasLegacyActionMenu();
 
   useLayoutEffect(() => {

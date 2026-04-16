@@ -81,7 +81,7 @@ export const useTimeRange = ({
 
   const { euiTheme } = useEuiTheme();
   const timeRangeCss = css`
-    padding: 0 ${euiTheme.size.s} 0 ${euiTheme.size.s};
+    padding: 0;
   `;
 
   let timeRangeDisplay = timeRangeText ? (

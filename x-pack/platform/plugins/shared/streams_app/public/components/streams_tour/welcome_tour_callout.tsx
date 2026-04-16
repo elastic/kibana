@@ -32,7 +32,7 @@ export function WelcomeTourCallout({
   firstClassicStreamName,
 }: WelcomeTourCalloutProps) {
   const {
-    core: { docLinks, notifications },
+    core: { notifications },
   } = useKibana();
   const { isCalloutDismissed, dismissCallout, startTour, tourState } = useStreamsTour();
 
@@ -86,7 +86,7 @@ export function WelcomeTourCallout({
               <EuiSpacer size="m" />
               <EuiFlexItem>
                 <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
-                  {isTourEnabled && (
+                  {isTourEnabled ? (
                     <EuiFlexItem grow={false}>
                       <EuiButton color="primary" size="s" onClick={handleStartTour}>
                         {i18n.translate('xpack.streams.welcomeCallout.startTourButton', {
@@ -94,27 +94,16 @@ export function WelcomeTourCallout({
                         })}
                       </EuiButton>
                     </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="primary"
-                      size="s"
-                      href={docLinks.links.observability.logsStreams}
-                      target="_blank"
-                      rel="noopener"
-                      iconType="popout"
-                      iconSide="right"
-                    >
-                      {i18n.translate('xpack.streams.welcomeCallout.docsButton', {
-                        defaultMessage: 'View docs',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
+                  ) : null}
                   <EuiFlexItem
                     grow={false}
-                    css={css`
-                      margin-left: 10px;
-                    `}
+                    css={
+                      isTourEnabled
+                        ? css`
+                            margin-left: 10px;
+                          `
+                        : undefined
+                    }
                   >
                     <EuiLink
                       onClick={dismissCallout}
