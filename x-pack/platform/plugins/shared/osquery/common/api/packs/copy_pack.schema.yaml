@@ -25,7 +25,7 @@ components:
             description:
               $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackDescriptionOrUndefined'
             queries:
-              description: 'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format. Phase 2 will normalize all endpoints to object format.'
+              description: 'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
               type: array
               items:
                 type: object

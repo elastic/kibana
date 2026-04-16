@@ -170,7 +170,7 @@ export const ECSMappingArrayItem = z.object({
 });
 
 /**
- * ECS mapping in saved-object storage format (array of key-value pairs). The find and copy pack endpoints return this format. The read endpoint returns object format (ECSMapping). Phase 2 will normalize all endpoints to object format.
+ * ECS mapping in saved-object storage format (array of key-value pairs). The find and copy pack endpoints return this format. The read endpoint returns object format (ECSMapping).
  */
 export type ECSMappingArray = z.infer<typeof ECSMappingArray>;
 export const ECSMappingArray = z.array(ECSMappingArrayItem);

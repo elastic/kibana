@@ -37,7 +37,7 @@ export const CopyPacksResponse = z.object({
     name: PackName,
     description: PackDescriptionOrUndefined.optional(),
     /**
-     * Pack queries in saved-object storage format (array). Note: the read endpoint returns object format. Phase 2 will normalize all endpoints to object format.
+     * Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.
      */
     queries: z
       .array(

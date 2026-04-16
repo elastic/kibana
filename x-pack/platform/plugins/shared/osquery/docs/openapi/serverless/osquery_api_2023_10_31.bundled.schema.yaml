@@ -865,8 +865,7 @@ components:
       description: >-
         ECS mapping in saved-object storage format (array of key-value pairs).
         The find and copy pack endpoints return this format. The read endpoint
-        returns object format (ECSMapping). Phase 2 will normalize all endpoints
-        to object format.
+        returns object format (ECSMapping).
       items:
         $ref: '#/components/schemas/ECSMappingArrayItem'
       type: array
@@ -1239,8 +1238,7 @@ components:
               queries:
                 description: >-
                   Pack queries in saved-object storage format (array). Note: the
-                  read endpoint returns object format. Phase 2 will normalize
-                  all endpoints to object format.
+                  read endpoint returns object format.
                 items:
                   type: object
                   properties:
