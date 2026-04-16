@@ -53,6 +53,7 @@ import { reviewGrokFields } from '../processing/grok_suggestions_handler';
 import { reviewDissectFields } from '../processing/dissect_suggestions_handler';
 import { isNoLLMSuggestionsError } from '../processing/no_llm_suggestions_error';
 import type { IPatternExtractionService } from '../../../../lib/pattern_extraction/pattern_extraction_service';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 export interface SuggestIngestPipelineParams {
   path: { name: string };
@@ -127,15 +128,18 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           );
         }
 
-        const abortController = new AbortController();
+        // Get the request abort signal to respect client disconnections
+        const requestAbortSignal = getRequestAbortSignal(request);
 
         // Create a timeout-based AbortSignal for grok/dissect and pipeline suggestions
         // 2 minute timeout for the entire operation
         const OPERATION_TIMEOUT_MS = 2 * 60 * 1000;
         const timeoutSignal = AbortSignal.timeout(OPERATION_TIMEOUT_MS);
+
+        // Combine request abort and timeout signals
         const timeoutAbortController = new AbortController();
         const cleanup = () => timeoutAbortController.abort();
-        abortController.signal.addEventListener('abort', cleanup);
+        requestAbortSignal.addEventListener('abort', cleanup);
         timeoutSignal.addEventListener('abort', cleanup);
 
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
