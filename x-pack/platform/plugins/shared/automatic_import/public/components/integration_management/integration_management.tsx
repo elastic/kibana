@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
@@ -44,9 +44,11 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
   navigateToManage,
 }) => {
   const { integrationId } = useParams<{ integrationId?: string }>();
+  const { state: locationState } = useLocation<{ isNew?: boolean }>();
+  const isNewlyCreated = locationState?.isNew === true;
   const { integration } = useGetIntegrationById(integrationId);
   const { deleteIntegrationMutation } = useDeleteIntegration();
-  const { submit } = useIntegrationForm();
+  const { submit, isFormModified } = useIntegrationForm();
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
   const isDeletingDataStream =
     integration?.dataStreams?.some((ds) => ds.status === 'deleting') ?? false;
@@ -59,11 +61,7 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
 
   const performCancelNavigation = useCallback(() => {
     reportCancelButtonClicked();
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      navigateToManage();
-    }
+    navigateToManage();
   }, [navigateToManage, reportCancelButtonClicked]);
 
   const handleCancel = useCallback(() => {
@@ -107,7 +105,11 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
       </KibanaPageTemplate>
       <ButtonsFooter
         onAction={handleDone}
-        isActionDisabled={!hasDataStreams || isDeletingDataStream}
+        isActionDisabled={
+          !hasDataStreams ||
+          isDeletingDataStream ||
+          (Boolean(integrationId) && !isNewlyCreated && !isFormModified)
+        }
         isCancelDisabled={isDeletingDataStream}
         onCancel={handleCancel}
       />
