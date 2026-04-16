@@ -203,38 +203,23 @@ async function runWatchBuild(
     let isShuttingDown = false;
     const previousAssetSizes = new Map<string, number>();
     let previousBuildHash: string | undefined;
-    const recentHashes = new Set<string>();
     let resolveDone: () => void;
     const done = new Promise<void>((r) => {
       resolveDone = r;
     });
 
     const cleanupStaleHotUpdates = (newHash: string) => {
-      recentHashes.add(newHash);
-      if (previousBuildHash) {
-        recentHashes.add(previousBuildHash);
-      }
+      const keepHash = previousBuildHash;
       previousBuildHash = newHash;
-
+      if (!keepHash) return;
       Fs.readdir(compiler.outputPath, (err, files) => {
         if (err) return;
         for (const file of files) {
-          if (
-            /\.hot-update\.(js|json)(\.map)?$/.test(file) &&
-            ![...recentHashes].some((h) => file.includes(h))
-          ) {
+          if (/\.hot-update\.(js|json)(\.map)?$/.test(file) && !file.includes(keepHash)) {
             Fs.unlink(Path.join(compiler.outputPath, file), () => {});
           }
         }
       });
-
-      if (recentHashes.size > 3) {
-        const arr = [...recentHashes];
-        recentHashes.clear();
-        for (const h of arr.slice(-3)) {
-          recentHashes.add(h);
-        }
-      }
     };
 
     const closeWatcher = (): Promise<void> => {
@@ -341,9 +326,6 @@ async function runWatchBuild(
         const hasErrors = stats.hasErrors();
 
         if (hasErrors) {
-          if (stats.hash) {
-            recentHashes.add(stats.hash);
-          }
           const timings = stats.toJson({
             timings: true,
             assets: false,
