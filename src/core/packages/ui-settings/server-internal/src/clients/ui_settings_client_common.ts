@@ -10,7 +10,6 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
-import { Cache } from '../cache';
 import type { UiSettingsServiceOptions } from '../types';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 
@@ -33,7 +32,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private readonly id: UiSettingsServiceOptions['id'];
   private readonly buildNum: UiSettingsServiceOptions['buildNum'];
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
-  private readonly cache: Cache;
   private readonly sharedUserProvidedCache?: UiSettingsServiceOptions['sharedUserProvidedCache'];
   private readonly namespace: string;
 
@@ -44,7 +42,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     this.id = id;
     this.buildNum = buildNum;
     this.savedObjectsClient = savedObjectsClient;
-    this.cache = new Cache();
     this.sharedUserProvidedCache = sharedUserProvidedCache;
     this.namespace = namespace;
   }
@@ -64,12 +61,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
       if (inflightRead) {
         userProvided = await inflightRead;
       }
-    }
-
-    // Check per-instance cache (within same request)
-    const instanceCached = this.cache.get();
-    if (instanceCached) {
-      userProvided = instanceCached;
     }
 
     if (!userProvided) {
@@ -101,9 +92,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private async computeUserProvided<T = unknown>(): Promise<UserProvided<T>> {
     const userProvided: UserProvided<T> = this.onReadHook(await this.read());
 
-    // Cache at instance level (per-request, 5s TTL)
-    this.cache.set(userProvided);
-
     // Cache at shared level (cross-request)
     if (this.sharedUserProvidedCache) {
       this.sharedUserProvidedCache.set(this.namespace, userProvided);
@@ -123,8 +111,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
       );
       this.sharedUserProvidedCache.del(this.namespace);
     }
-
-    this.cache.del();
 
     this.onWriteHook(changes);
 
