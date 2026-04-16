@@ -74,7 +74,7 @@ export const deriveAlertDelayModeFromStateTransition = (
   stateTransition?: StateTransition | null
 ): FormValues['stateTransitionAlertDelayMode'] => {
   if (stateTransition?.pendingTimeframe != null) return 'duration';
-  if (stateTransition?.pendingCount != null) return 'breaches';
+  if (stateTransition?.pendingCount != null && stateTransition.pendingCount > 0) return 'breaches';
   return 'immediate';
 };
 
@@ -83,7 +83,8 @@ export const deriveRecoveryDelayModeFromStateTransition = (
   stateTransition?: StateTransition | null
 ): FormValues['stateTransitionRecoveryDelayMode'] => {
   if (stateTransition?.recoveringTimeframe != null) return 'duration';
-  if (stateTransition?.recoveringCount != null) return 'recoveries';
+  if (stateTransition?.recoveringCount != null && stateTransition.recoveringCount > 0)
+    return 'recoveries';
   return 'immediate';
 };
 
@@ -100,31 +101,29 @@ const mapStateTransition = (formValues: FormValues) => {
 
   const out: NonNullable<RuleRequestCommon['state_transition']> = {};
 
-  if (alertMode !== 'immediate') {
-    if (alertMode === 'breaches' && stateTransition.pendingCount != null) {
-      out.pending_count = stateTransition.pendingCount;
+  if (alertMode === 'immediate') {
+    out.pending_count = 0;
+  } else if (alertMode === 'breaches' && stateTransition.pendingCount != null) {
+    out.pending_count = stateTransition.pendingCount;
+  } else if (alertMode === 'duration') {
+    if (stateTransition.pendingTimeframe != null) {
+      out.pending_timeframe = stateTransition.pendingTimeframe;
     }
-    if (alertMode === 'duration') {
-      if (stateTransition.pendingTimeframe != null) {
-        out.pending_timeframe = stateTransition.pendingTimeframe;
-      }
-      if (stateTransition.pendingCount != null) {
-        out.pending_count = stateTransition.pendingCount;
-      }
+    if (stateTransition.pendingCount != null) {
+      out.pending_count = stateTransition.pendingCount;
     }
   }
 
-  if (recoveryMode !== 'immediate') {
-    if (recoveryMode !== 'duration' && stateTransition.recoveringCount != null) {
-      out.recovering_count = stateTransition.recoveringCount;
+  if (recoveryMode === 'immediate') {
+    out.recovering_count = 0;
+  } else if (recoveryMode !== 'duration' && stateTransition.recoveringCount != null) {
+    out.recovering_count = stateTransition.recoveringCount;
+  } else if (recoveryMode === 'duration') {
+    if (stateTransition.recoveringTimeframe != null) {
+      out.recovering_timeframe = stateTransition.recoveringTimeframe;
     }
-    if (recoveryMode === 'duration') {
-      if (stateTransition.recoveringTimeframe != null) {
-        out.recovering_timeframe = stateTransition.recoveringTimeframe;
-      }
-      if (stateTransition.recoveringCount != null) {
-        out.recovering_count = stateTransition.recoveringCount;
-      }
+    if (stateTransition.recoveringCount != null) {
+      out.recovering_count = stateTransition.recoveringCount;
     }
   }
 

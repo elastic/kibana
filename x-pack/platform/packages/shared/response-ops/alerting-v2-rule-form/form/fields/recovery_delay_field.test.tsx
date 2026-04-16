@@ -159,6 +159,7 @@ describe('RecoveryDelayField', () => {
 
     expect(mapFormValuesToUpdateRequest(values).state_transition).toEqual({
       pending_count: 2,
+      recovering_count: 0,
     });
   });
 });
