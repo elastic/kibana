@@ -55,7 +55,7 @@ describe('SavedSearchURLConflictCallout', () => {
       otherObjectId: 'aliasTargetId',
       otherObjectPath: '#/view/aliasTargetId?_g=foo',
     });
-    expect(screen.getByText('callout')).toBeInTheDocument();
+    expect(screen.getByText('callout')).toBeVisible();
   });
 
   test('should not render URLConflictCallout in case of no conflicts', () => {

@@ -61,7 +61,7 @@ describe('Document view mode toggle component', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('discoverQueryTotalHits')).toBeInTheDocument();
+      expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
     });
 
     return { setDiscoverViewMode };
@@ -70,23 +70,23 @@ describe('Document view mode toggle component', () => {
   it('should render if SHOW_FIELD_STATISTICS is true', async () => {
     await renderComponent();
 
-    expect(screen.getByTestId('dscViewModeToggle')).toBeInTheDocument();
-    expect(screen.getByTestId('discoverQueryTotalHits')).toBeInTheDocument();
+    expect(screen.getByTestId('dscViewModeToggle')).toBeVisible();
+    expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
 
-    expect(screen.getByTestId('dscViewModeDocumentButton')).toBeInTheDocument();
-    expect(screen.getByTestId('dscViewModePatternAnalysisButton')).toBeInTheDocument();
-    expect(screen.getByTestId('dscViewModeFieldStatsButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscViewModeDocumentButton')).toBeVisible();
+    expect(screen.getByTestId('dscViewModePatternAnalysisButton')).toBeVisible();
+    expect(screen.getByTestId('dscViewModeFieldStatsButton')).toBeVisible();
     expect(screen.getByTestId('dscViewModeDocumentButton')).toHaveTextContent('Documents (10)');
   });
 
   it('should not render if SHOW_FIELD_STATISTICS is false', async () => {
     await renderComponent({ showFieldStatistics: false });
 
-    expect(screen.getByTestId('dscViewModeToggle')).toBeInTheDocument();
-    expect(screen.getByTestId('discoverQueryTotalHits')).toBeInTheDocument();
+    expect(screen.getByTestId('dscViewModeToggle')).toBeVisible();
+    expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
 
-    expect(screen.getByTestId('dscViewModeDocumentButton')).toBeInTheDocument();
-    expect(screen.getByTestId('dscViewModePatternAnalysisButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscViewModeDocumentButton')).toBeVisible();
+    expect(screen.getByTestId('dscViewModePatternAnalysisButton')).toBeVisible();
     expect(screen.queryByTestId('dscViewModeFieldStatsButton')).not.toBeInTheDocument();
   });
 
@@ -94,7 +94,7 @@ describe('Document view mode toggle component', () => {
     await renderComponent({ isEsqlMode: true });
 
     expect(screen.queryByTestId('dscViewModeToggle')).not.toBeInTheDocument();
-    expect(screen.getByTestId('discoverQueryTotalHits')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
 
     expect(screen.queryByTestId('dscViewModeDocumentButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dscViewModePatternAnalysisButton')).not.toBeInTheDocument();

@@ -141,7 +141,7 @@ const renderComponent = async ({
   );
 
   await waitFor(() => {
-    expect(screen.getByTestId('dscMainContent')).toBeInTheDocument();
+    expect(screen.getByTestId('dscMainContent')).toBeVisible();
   });
 };
 
@@ -172,14 +172,14 @@ describe('Discover main content component', () => {
     it('should show DocumentViewModeToggle for Field Statistics', async () => {
       await renderComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
 
-      expect(screen.getByTestId('documentViewModeToggleMock')).toBeInTheDocument();
+      expect(screen.getByTestId('documentViewModeToggleMock')).toBeVisible();
     });
 
     it('should not include inline PanelsToggle when chart is available and visible', async () => {
       await renderComponent({ isChartAvailable: true });
 
       expect(screen.queryByTestId('panelsToggleMock')).not.toBeInTheDocument();
-      expect(screen.getByRole('separator')).toBeInTheDocument();
+      expect(screen.getByRole('separator')).toBeVisible();
     });
 
     it('should include PanelsToggle when chart is available and hidden', async () => {
@@ -211,7 +211,7 @@ describe('Discover main content component', () => {
     it('should show DiscoverDocuments when VIEW_MODE is DOCUMENT_LEVEL', async () => {
       await renderComponent();
 
-      expect(screen.getByTestId('discoverDocumentsMock')).toBeInTheDocument();
+      expect(screen.getByTestId('discoverDocumentsMock')).toBeVisible();
       expect(screen.queryByTestId('patternAnalysisTabMock')).not.toBeInTheDocument();
       expect(screen.queryByTestId('fieldStatisticsTabMock')).not.toBeInTheDocument();
     });
@@ -221,14 +221,14 @@ describe('Discover main content component', () => {
 
       expect(screen.queryByTestId('discoverDocumentsMock')).not.toBeInTheDocument();
       expect(screen.queryByTestId('patternAnalysisTabMock')).not.toBeInTheDocument();
-      expect(screen.getByTestId('fieldStatisticsTabMock')).toBeInTheDocument();
+      expect(screen.getByTestId('fieldStatisticsTabMock')).toBeVisible();
     });
 
     it('should show PatternAnalysisTab when VIEW_MODE is PATTERN_LEVEL', async () => {
       await renderComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
 
       expect(screen.queryByTestId('discoverDocumentsMock')).not.toBeInTheDocument();
-      expect(screen.getByTestId('patternAnalysisTabMock')).toBeInTheDocument();
+      expect(screen.getByTestId('patternAnalysisTabMock')).toBeVisible();
       expect(screen.queryByTestId('fieldStatisticsTabMock')).not.toBeInTheDocument();
     });
   });

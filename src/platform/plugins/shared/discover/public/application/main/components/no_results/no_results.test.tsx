@@ -61,7 +61,7 @@ async function renderAndFindSubjects(
   );
 
   await waitFor(() => {
-    expect(screen.getByTestId('discoverNoResults')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverNoResults')).toBeVisible();
   });
 
   return {

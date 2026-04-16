@@ -201,7 +201,7 @@ describe('Discover topnav component', () => {
       const { toolkit, props } = await setup();
       renderTestComponent({ toolkit, props });
 
-      expect(screen.getByTestId('custom-search-bar')).toBeInTheDocument();
+      expect(screen.getByTestId('custom-search-bar')).toBeVisible();
       expect(screen.queryByTestId('aggregate-query-top-nav-menu')).not.toBeInTheDocument();
     });
 
@@ -214,7 +214,7 @@ describe('Discover topnav component', () => {
 
       expect(topNav).toHaveAttribute('data-has-data-view-picker-component-props', 'false');
       expect(topNav).toHaveAttribute('data-has-data-view-picker-override', 'true');
-      expect(screen.getByTestId('custom-data-view-picker')).toBeInTheDocument();
+      expect(screen.getByTestId('custom-data-view-picker')).toBeVisible();
     });
 
     it('should not render the dataView picker when hideDataViewPicker is true', async () => {

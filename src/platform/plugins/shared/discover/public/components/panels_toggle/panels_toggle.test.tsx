@@ -62,13 +62,13 @@ describe('Panels toggle component', () => {
       sidebarToggleState$,
     });
 
-    expect(screen.getByTestId('dscHideSidebarButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscHideSidebarButton')).toBeVisible();
     expect(screen.queryByTestId('dscShowSidebarButton')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('dscHideHistogramButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscHideHistogramButton')).toBeVisible();
     expect(screen.queryByTestId('dscShowHistogramButton')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('dscHideTableButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscHideTableButton')).toBeVisible();
     expect(screen.queryByTestId('dscShowTableButton')).not.toBeInTheDocument();
   });
 
@@ -86,13 +86,13 @@ describe('Panels toggle component', () => {
       sidebarToggleState$,
     });
 
-    expect(screen.getByTestId('dscShowSidebarButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscShowSidebarButton')).toBeVisible();
     expect(screen.queryByTestId('dscHideSidebarButton')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('dscHideHistogramButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscHideHistogramButton')).toBeVisible();
     expect(screen.queryByTestId('dscShowHistogramButton')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('dscHideTableButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscHideTableButton')).toBeVisible();
     expect(screen.queryByTestId('dscShowTableButton')).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId('dscShowSidebarButton'));
@@ -113,7 +113,7 @@ describe('Panels toggle component', () => {
       sidebarToggleState$,
     });
 
-    expect(screen.getByTestId('dscHideSidebarButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscHideSidebarButton')).toBeVisible();
     expect(screen.queryByTestId('dscShowSidebarButton')).not.toBeInTheDocument();
 
     expect(screen.queryByTestId('dscHideHistogramButton')).not.toBeInTheDocument();
@@ -137,12 +137,12 @@ describe('Panels toggle component', () => {
     });
 
     expect(screen.queryByTestId('dscHideSidebarButton')).not.toBeInTheDocument();
-    expect(screen.getByTestId('dscShowSidebarButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscShowSidebarButton')).toBeVisible();
 
     expect(screen.queryByTestId('dscHideHistogramButton')).not.toBeInTheDocument();
-    expect(screen.getByTestId('dscShowHistogramButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscShowHistogramButton')).toBeVisible();
 
-    expect(screen.getByTestId('dscHideTableButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscHideTableButton')).toBeVisible();
     expect(screen.queryByTestId('dscShowTableButton')).not.toBeInTheDocument();
   });
 
@@ -160,7 +160,7 @@ describe('Panels toggle component', () => {
     });
 
     expect(screen.queryByTestId('dscHideSidebarButton')).not.toBeInTheDocument();
-    expect(screen.getByTestId('dscShowSidebarButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dscShowSidebarButton')).toBeVisible();
 
     expect(screen.queryByTestId('dscHideHistogramButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dscShowHistogramButton')).not.toBeInTheDocument();

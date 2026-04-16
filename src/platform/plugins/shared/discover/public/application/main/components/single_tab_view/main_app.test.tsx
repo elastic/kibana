@@ -57,6 +57,6 @@ describe('DiscoverMainApp', () => {
       </Router>
     );
 
-    expect(await screen.findByTestId('discoverTopNavMock')).toBeInTheDocument();
+    expect(await screen.findByTestId('discoverTopNavMock')).toBeVisible();
   });
 });

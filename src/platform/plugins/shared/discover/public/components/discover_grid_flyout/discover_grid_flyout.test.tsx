@@ -100,7 +100,7 @@ describe('Discover flyout', function () {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('docViewerFlyout')).toBeInTheDocument();
+      expect(screen.getByTestId('docViewerFlyout')).toBeVisible();
     });
 
     return { props, services, user };
@@ -138,7 +138,7 @@ describe('Discover flyout', function () {
   it('displays document navigation when there is more than 1 doc available', async () => {
     await renderComponent({ dataView: dataViewWithTimefieldMock });
 
-    expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
+    expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeVisible();
   });
 
   it('displays no document navigation when there are 0 docs available', async () => {

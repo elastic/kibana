@@ -137,9 +137,9 @@ describe('ContextApp test', () => {
   it('renders correctly', async () => {
     renderComponent();
 
-    expect(await screen.findByTestId('discoverDocTable')).toBeInTheDocument();
-    expect(screen.getByTestId('discoverContextAppTitle')).toBeInTheDocument();
-    expect(screen.getByTestId('contextDocumentSurroundingHeader')).toBeInTheDocument();
+    expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+    expect(screen.getByTestId('discoverContextAppTitle')).toBeVisible();
+    expect(screen.getByTestId('contextDocumentSurroundingHeader')).toBeVisible();
     expect(screen.getByTestId('discoverContextAppTitle')).toHaveTextContent(
       'Documents surrounding #mocked_anchor_id'
     );
@@ -164,7 +164,7 @@ describe('ContextApp test', () => {
 
     await user.click(await screen.findByTestId('docTableExpandToggleColumn'));
 
-    expect(await screen.findByTestId('docViewerFlyout')).toBeInTheDocument();
+    expect(await screen.findByTestId('docViewerFlyout')).toBeVisible();
 
     await user.click(await screen.findByTestId('docViewFilterButton'));
 
