@@ -11,7 +11,13 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
+import {
+  applyColorToSchema,
+  colorByValueSchema,
+  colorMappingSchema,
+  autoColorSchema,
+  AUTO_COLOR,
+} from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
@@ -91,120 +97,129 @@ const sortingSchema = schema.oneOf(
   }
 );
 
-const datatableStateSharedOptionsSchema = {
-  /**
-   * Density  configuration
-   */
-  density: schema.maybe(
-    schema.object(
-      {
-        /**
-         * Density mode
-         */
-        mode: schema.maybe(
-          schema.oneOf(
-            [schema.literal('compact'), schema.literal('default'), schema.literal('expanded')],
-            {
-              defaultValue: 'default',
-              meta: { description: 'Density mode' },
-            }
-          )
-        ),
-        /**
-         * Height configuration
-         */
-        height: schema.maybe(
-          schema.object({
-            header: schema.maybe(
-              schema.oneOf(
-                [
-                  schema.object({ type: schema.literal('auto') }),
-                  schema.object({
-                    type: schema.literal('custom'),
-                    max_lines: schema.number({
-                      defaultValue: DEFAULT_HEADER_ROW_HEIGHT_LINES,
-                      min: 1,
-                      max: 5,
+const datatableStylingSchema = schema.object(
+  {
+    /**
+     * Density  configuration
+     */
+    density: schema.maybe(
+      schema.object(
+        {
+          /**
+           * Density mode
+           */
+          mode: schema.maybe(
+            schema.oneOf(
+              [schema.literal('compact'), schema.literal('default'), schema.literal('expanded')],
+              {
+                defaultValue: 'default',
+                meta: { description: 'Density mode' },
+              }
+            )
+          ),
+          /**
+           * Height configuration
+           */
+          height: schema.maybe(
+            schema.object({
+              header: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.object({ type: schema.literal('auto') }),
+                    schema.object({
+                      type: schema.literal('custom'),
+                      max_lines: schema.number({
+                        defaultValue: DEFAULT_HEADER_ROW_HEIGHT_LINES,
+                        min: 1,
+                        max: 5,
+                      }),
                     }),
-                  }),
-                ],
-                {
-                  meta: {
-                    description: 'Maximum number of lines to use before header is truncated',
-                  },
-                }
-              )
-            ),
-            value: schema.maybe(
-              schema.oneOf(
-                [
-                  schema.object({ type: schema.literal('auto') }),
-                  schema.object({
-                    type: schema.literal('custom'),
-                    lines: schema.number({
-                      defaultValue: DEFAULT_ROW_HEIGHT_LINES,
-                      min: 1,
-                      max: 20,
+                  ],
+                  {
+                    meta: {
+                      description: 'Maximum number of lines to use before header is truncated',
+                    },
+                  }
+                )
+              ),
+              value: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.object({ type: schema.literal('auto') }),
+                    schema.object({
+                      type: schema.literal('custom'),
+                      lines: schema.number({
+                        defaultValue: DEFAULT_ROW_HEIGHT_LINES,
+                        min: 1,
+                        max: 20,
+                      }),
                     }),
-                  }),
-                ],
-                {
-                  meta: {
-                    description: 'Number of lines to display per table body cell',
-                  },
-                }
-              )
-            ),
-          })
-        ),
-      },
-      {
-        meta: {
-          id: 'datatableDensity',
-          description: 'Density configuration for the datatable',
+                  ],
+                  {
+                    meta: {
+                      description: 'Number of lines to display per table body cell',
+                    },
+                  }
+                )
+              ),
+            })
+          ),
         },
-      }
-    )
-  ),
-  /**
-   * Paging configuration
-   */
-  paging: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal(10),
-        schema.literal(20),
-        schema.literal(30),
-        schema.literal(50),
-        schema.literal(100),
-      ],
-      {
-        meta: {
-          description: 'Enables pagination and sets the number of rows to display per page',
+        {
+          meta: {
+            id: 'datatableDensity',
+            description: 'Density configuration for the datatable',
+          },
+        }
+      )
+    ),
+    /**
+     * Paging configuration
+     */
+    paging: schema.maybe(
+      schema.oneOf(
+        [
+          schema.literal(10),
+          schema.literal(20),
+          schema.literal(30),
+          schema.literal(50),
+          schema.literal(100),
+        ],
+        {
+          meta: {
+            description: 'Enables pagination and sets the number of rows to display per page',
+          },
+        }
+      )
+    ),
+    /**
+     * Sorting configuration
+     */
+    sort_by: schema.maybe(sortingSchema),
+    /**
+     * Show row numbers
+     */
+    row_numbers: schema.maybe(
+      schema.object(
+        {
+          visible: schema.boolean({ meta: { description: 'Show row numbers' } }),
         },
-      }
-    )
-  ),
-  /**
-   * Sorting configuration
-   */
-  sort_by: schema.maybe(sortingSchema),
-  /**
-   * Show row numbers
-   */
-  row_numbers: schema.maybe(
-    schema.object(
-      {
-        visible: schema.boolean({ meta: { description: 'Show row numbers' } }),
-      },
-      {
-        meta: {
-          description: 'Configuration for row numbers',
-        },
-      }
-    )
-  ),
-};
+        {
+          meta: {
+            description: 'Configuration for row numbers',
+          },
+        }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'datatableStyling',
+      title: 'Datatable styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 const datatableStateCommonOptionsSchema = {
   /**
@@ -240,7 +255,11 @@ const datatableStateRowsOptionsNoESQLSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(colorMappingSchema),
+  color: schema.maybe(
+    schema.oneOf([colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   /**
    * Whether to enable the one click filter
    */
@@ -264,7 +283,8 @@ const datatableStateRowsOptionsESQLSchema = {
    * Color configuration
    */
   color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
+    schema.oneOf([colorByValueSchema, colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
       meta: {
         description:
           'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
@@ -279,7 +299,8 @@ const datatableStateMetricsOptionsSchema = {
    * Color configuration
    */
   color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
+    schema.oneOf([colorByValueSchema, colorMappingSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
       meta: {
         description:
           'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
@@ -322,10 +343,12 @@ interface SortByValidationInput {
   metrics?: Array<{}>;
   rows?: Array<{}>;
   split_metrics_by?: Array<{}>;
-  sort_by?: {
-    column_type: 'metric' | 'row' | 'pivoted_metric';
-    index?: number;
-    values?: string[];
+  styling?: {
+    sort_by?: {
+      column_type: 'metric' | 'row' | 'pivoted_metric';
+      index?: number;
+      values?: string[];
+    };
   };
 }
 
@@ -333,13 +356,13 @@ function validateSortBy({
   metrics,
   rows,
   split_metrics_by,
-  sort_by,
+  styling,
 }: SortByValidationInput): string | undefined {
-  if (!sort_by) {
+  if (!styling?.sort_by) {
     return;
   }
 
-  const { column_type, index, values } = sort_by;
+  const { column_type, index, values } = styling.sort_by;
 
   const numberOfMetrics = metrics?.length ?? 0;
 
@@ -381,7 +404,7 @@ export const datatableStateSchemaNoESQL = schema.object(
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceSchema,
-    ...datatableStateSharedOptionsSchema,
+    styling: schema.maybe(datatableStylingSchema),
     /**
      * Metric columns configuration, must define operation.
      */
@@ -433,7 +456,7 @@ export const datatableStateSchemaESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    ...datatableStateSharedOptionsSchema,
+    styling: schema.maybe(datatableStylingSchema),
     /**
      * Metric columns configuration, must define operation.
      */
@@ -505,3 +528,4 @@ export const datatableStateSchema = objectUnion(
 export type DatatableState = TypeOf<typeof datatableStateSchema>;
 export type DatatableStateNoESQL = TypeOf<typeof datatableStateSchemaNoESQL>;
 export type DatatableStateESQL = TypeOf<typeof datatableStateSchemaESQL>;
+export type DatatableStyling = TypeOf<typeof datatableStylingSchema>;

@@ -27,10 +27,8 @@ function mockRuleSearchResponse({
     { key: '5m', doc_count: 10 },
   ],
   lookbackBuckets = [{ key: '5m', doc_count: 20 }],
-  countWithQueryCondition = 5,
   countWithRecoveryPolicy = 3,
   recoveryPolicyTypeBuckets = [{ key: 'auto', doc_count: 3 }],
-  countWithRecoveryQueryCondition = 1,
   avgPendingCount = 3.0,
   avgRecoveringCount = 2.0,
   pendingTimeframeBuckets = [{ key: '5m', doc_count: 8 }],
@@ -50,10 +48,8 @@ function mockRuleSearchResponse({
   kindBuckets?: Array<{ key: string; doc_count: number }>;
   scheduleBuckets?: Array<{ key: string; doc_count: number }>;
   lookbackBuckets?: Array<{ key: string; doc_count: number }>;
-  countWithQueryCondition?: number;
   countWithRecoveryPolicy?: number;
   recoveryPolicyTypeBuckets?: Array<{ key: string; doc_count: number }>;
-  countWithRecoveryQueryCondition?: number;
   avgPendingCount?: number | null;
   avgRecoveringCount?: number | null;
   pendingTimeframeBuckets?: Array<{ key: string; doc_count: number }>;
@@ -75,10 +71,8 @@ function mockRuleSearchResponse({
       count_by_kind: { buckets: kindBuckets },
       count_by_schedule: { buckets: scheduleBuckets },
       count_by_lookback: { buckets: lookbackBuckets },
-      count_with_query_condition: { doc_count: countWithQueryCondition },
       count_with_recovery_policy: { doc_count: countWithRecoveryPolicy },
       count_by_recovery_policy_type: { buckets: recoveryPolicyTypeBuckets },
-      count_with_recovery_query_condition: { doc_count: countWithRecoveryQueryCondition },
       avg_pending_count: { value: avgPendingCount },
       avg_recovering_count: { value: avgRecoveringCount },
       count_by_pending_timeframe: { buckets: pendingTimeframeBuckets },
@@ -111,10 +105,8 @@ describe('getRuleStats', () => {
         { name: '5m', value: 10 },
       ],
       count_by_lookback: [{ name: '5m', value: 20 }],
-      count_with_query_condition: 5,
       count_with_recovery_policy: 3,
       count_by_recovery_policy_type: { auto: 3 },
-      count_with_recovery_query_condition: 1,
       avg_pending_count: 3.0,
       avg_recovering_count: 2.0,
       count_by_pending_timeframe: [{ name: '5m', value: 8 }],
@@ -135,10 +127,8 @@ describe('getRuleStats', () => {
       kindBuckets: [],
       scheduleBuckets: [],
       lookbackBuckets: [],
-      countWithQueryCondition: 0,
       countWithRecoveryPolicy: 0,
       recoveryPolicyTypeBuckets: [],
-      countWithRecoveryQueryCondition: 0,
       avgPendingCount: null,
       avgRecoveringCount: null,
       pendingTimeframeBuckets: [],
@@ -159,10 +149,8 @@ describe('getRuleStats', () => {
       count_by_kind: {},
       count_by_schedule: [],
       count_by_lookback: [],
-      count_with_query_condition: 0,
       count_with_recovery_policy: 0,
       count_by_recovery_policy_type: {},
-      count_with_recovery_query_condition: 0,
       avg_pending_count: null,
       avg_recovering_count: null,
       count_by_pending_timeframe: [],
@@ -192,10 +180,8 @@ describe('getRuleStats', () => {
       count_by_kind: {},
       count_by_schedule: [],
       count_by_lookback: [],
-      count_with_query_condition: 0,
       count_with_recovery_policy: 0,
       count_by_recovery_policy_type: {},
-      count_with_recovery_query_condition: 0,
       avg_pending_count: null,
       avg_recovering_count: null,
       count_by_pending_timeframe: [],
@@ -220,10 +206,8 @@ describe('getRuleStats', () => {
         count_by_kind: { buckets: [] },
         count_by_schedule: { buckets: [] },
         count_by_lookback: { buckets: [] },
-        count_with_query_condition: { doc_count: 0 },
         count_with_recovery_policy: { doc_count: 0 },
         count_by_recovery_policy_type: { buckets: [] },
-        count_with_recovery_query_condition: { doc_count: 0 },
         avg_pending_count: { value: null },
         avg_recovering_count: { value: null },
         count_by_pending_timeframe: { buckets: [] },

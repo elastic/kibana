@@ -326,6 +326,87 @@ describe('AttachmentService', () => {
       );
     });
 
+    it('when enabled, bulkUpdate accepts partial attributes for push metadata only', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      const unifiedAttrs = {
+        type: 'comment',
+        data: { content: 'hello' },
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+      const pushedAt = '2024-01-02T00:00:00.000Z';
+      const pushedBy = { username: 'pusher', full_name: null, email: null };
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            attributes: { ...unifiedAttrs, pushed_at: pushedAt, pushed_by: pushedBy },
+            references: [],
+            version: 'v2',
+          },
+        ],
+      });
+
+      await expect(
+        serviceWithFlagOn.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+              updatedAttributes: { pushed_at: pushedAt, pushed_by: pushedBy },
+            },
+          ],
+          refresh: false,
+          requestWithoutType: true,
+        })
+      ).resolves.not.toThrow();
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            id: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+            attributes: { pushed_at: pushedAt, pushed_by: pushedBy },
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    it('when enabled, bulkUpdate throws for typed patches without owner when requestWithoutType is false', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+
+      await expect(
+        serviceWithFlagOn.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: 'ef2942ed-c4b6-4dd4-a85b-8ce90e8f2d47',
+              updatedAttributes: { type: 'comment', data: { content: 'hello' } },
+            },
+          ],
+          refresh: false,
+          requestWithoutType: false,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid attributes: expected owner when transforming attachment patch"`
+      );
+    });
+
     it('when disabled, bulkCreate writes to CASE_COMMENT_SAVED_OBJECT', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [createUserAttachment()],

@@ -15,6 +15,9 @@ import { Router } from '@kbn/shared-ux-router';
 import { createStore } from 'redux';
 import { AlertFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
 
 const mockDocumentHeader = jest.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
@@ -55,10 +58,16 @@ jest.mock('../../cases/components/provider/provider', () => ({
 jest.mock('../../assistant/provider', () => ({
   AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+jest.mock('../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: jest.fn(),
+}));
 
 describe('AlertFlyoutHeader', () => {
+  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseIsInSecurityApp.mockReturnValue(false);
   });
 
   const servicesMock = {
@@ -196,10 +205,42 @@ describe('AlertFlyoutHeader', () => {
     expect(servicesMock.overlays.openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
+        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
         ownFocus: false,
         resizable: true,
         size: 'm',
-        type: 'overlay',
+      })
+    );
+  });
+
+  it('uses Security history key when opened inside Security app', async () => {
+    mockUseIsInSecurityApp.mockReturnValue(true);
+
+    const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/security'] });
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MockDocumentHeader')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('MockDocumentHeader'));
+
+    expect(servicesMock.overlays.openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: alertFlyoutHistoryKey,
       })
     );
   });

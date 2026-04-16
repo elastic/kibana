@@ -9,6 +9,7 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  createReturnFocus,
   getDisplayedItemsAllowedAmount,
   getShouldOverflow,
   getAppMenuItems,
@@ -16,11 +17,62 @@ import {
   getPopoverActionItems,
   getPopoverPanels,
   getIsSelectedColor,
+  processStaticItems,
 } from './utils';
 import { APP_MENU_ITEM_LIMIT } from './constants';
-import type { AppMenuPopoverItem } from './types';
+import type { AppMenuItemType, AppMenuPopoverItem } from './types';
 
 describe('utils', () => {
+  describe('createReturnFocus', () => {
+    let triggerElement: HTMLButtonElement;
+    let overflowButton: HTMLButtonElement;
+
+    beforeEach(() => {
+      triggerElement = document.createElement('button');
+      overflowButton = document.createElement('button');
+      overflowButton.setAttribute('data-test-subj', 'app-menu-overflow-button');
+    });
+
+    afterEach(() => {
+      triggerElement.remove();
+      overflowButton.remove();
+    });
+
+    it('should focuse the trigger element when it is still in the DOM', () => {
+      document.body.appendChild(triggerElement);
+      const returnFocus = createReturnFocus(triggerElement);
+      returnFocus();
+      expect(document.activeElement).toBe(triggerElement);
+    });
+
+    it('should focuse the parent element when the trigger has been removed but the parent is still in the DOM', () => {
+      const parentElement = document.createElement('button');
+      document.body.appendChild(parentElement);
+      // triggerElement is NOT appended — simulates a popover item that was unmounted
+      const returnFocus = createReturnFocus(triggerElement, parentElement);
+      returnFocus();
+      expect(document.activeElement).toBe(parentElement);
+      parentElement.remove();
+    });
+
+    it('should focuse the overflow button when both trigger and parent element have been removed from the DOM', () => {
+      // neither triggerElement nor parentElement is appended
+      document.body.appendChild(overflowButton);
+      const parentElement = document.createElement('button');
+      const returnFocus = createReturnFocus(triggerElement, parentElement);
+      returnFocus();
+      expect(document.activeElement).toBe(overflowButton);
+    });
+
+    it('should focuse the overflow button when the trigger element has been removed from the DOM', () => {
+      // triggerElement is NOT appended — simulates a popover item that was unmounted
+      document.body.appendChild(overflowButton);
+      const returnFocus = createReturnFocus(triggerElement);
+      returnFocus();
+      expect(document.activeElement).toBe(overflowButton);
+    });
+  });
+
   describe('getDisplayedItemsAllowedAmount', () => {
     it('should return full limit when items fit within limit', () => {
       const result = getDisplayedItemsAllowedAmount({
@@ -49,6 +101,24 @@ describe('utils', () => {
       }));
 
       const result = getDisplayedItemsAllowedAmount({ items });
+
+      expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
+    });
+
+    it('should reserve one slot when any item is marked as overflow', () => {
+      const result = getDisplayedItemsAllowedAmount({
+        items: [
+          { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+          {
+            id: '2',
+            label: 'Item 2',
+            run: jest.fn(),
+            iconType: 'gear',
+            order: 2,
+            overflow: true,
+          },
+        ],
+      });
 
       expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
     });
@@ -123,6 +193,27 @@ describe('utils', () => {
 
       const result = getShouldOverflow({
         config: { items },
+        displayedItemsAllowedAmount: 5,
+      });
+
+      expect(result).toBe(true);
+    });
+
+    it('should return true when an item is marked as overflow', () => {
+      const result = getShouldOverflow({
+        config: {
+          items: [
+            { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+            {
+              id: '2',
+              label: 'Item 2',
+              run: jest.fn(),
+              iconType: 'gear',
+              order: 2,
+              overflow: true,
+            },
+          ],
+        },
         displayedItemsAllowedAmount: 5,
       });
 
@@ -220,6 +311,59 @@ describe('utils', () => {
       // Same as without primary action: limit - 1 items shown
       expect(result.displayedItems).toHaveLength(APP_MENU_ITEM_LIMIT - 1);
       expect(result.overflowItems).toHaveLength(3);
+      expect(result.shouldOverflow).toBe(true);
+    });
+
+    it('should move forced overflow items to overflow even when under limit', () => {
+      const items = [
+        {
+          id: 'hiddenUnderOverflow',
+          label: 'Hidden under overflow',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 1,
+          overflow: true,
+        },
+      ];
+
+      const result = getAppMenuItems({ config: { items } });
+
+      expect(result.displayedItems).toHaveLength(0);
+      expect(result.overflowItems).toHaveLength(1);
+      expect(result.overflowItems[0].id).toBe('hiddenUnderOverflow');
+      expect(result.shouldOverflow).toBe(true);
+    });
+
+    it('should preserve order across displayed and overflow items', () => {
+      const items = [
+        {
+          id: 'third',
+          label: 'Third',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 3,
+        },
+        {
+          id: 'firstForced',
+          label: 'First forced',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 1,
+          overflow: true,
+        },
+        {
+          id: 'second',
+          label: 'Second',
+          run: jest.fn(),
+          iconType: 'gear' as const,
+          order: 2,
+        },
+      ];
+
+      const result = getAppMenuItems({ config: { items } });
+
+      expect(result.displayedItems.map((item) => item.id)).toEqual(['second', 'third']);
+      expect(result.overflowItems.map((item) => item.id)).toEqual(['firstForced']);
       expect(result.shouldOverflow).toBe(true);
     });
   });
@@ -490,6 +634,77 @@ describe('utils', () => {
       expect(sharePanel?.['data-test-subj']).toBe('sharePopoverPanel');
       expect(mainPanel?.['data-test-subj']).toBeUndefined(); // Main panel has no test ID by default
     });
+
+    it('should append staticItems after regular items in the main panel', () => {
+      const items: AppMenuPopoverItem[] = [
+        { id: '1', label: 'Item 1', run: jest.fn(), order: 2 },
+        { id: '2', label: 'Item 2', run: jest.fn(), order: 1 },
+      ];
+      const staticItems: AppMenuPopoverItem[] = [
+        { id: 'static1', label: 'Static 1', run: jest.fn(), order: 1 },
+      ];
+
+      const panels = getPopoverPanels({ items, staticItems });
+
+      expect(panels).toHaveLength(1);
+      const panelItems = panels[0].items as Array<{ key?: string }>;
+      // Regular items sorted by order: Item 2 (order 1), Item 1 (order 2), then static
+      expect(panelItems.map((i) => i.key)).toEqual(['2', '1', 'static1']);
+    });
+
+    it('should not re-sort staticItems together with regular items', () => {
+      const items: AppMenuPopoverItem[] = [
+        { id: 'regular', label: 'Regular', run: jest.fn(), order: 10 },
+      ];
+      const staticItems: AppMenuPopoverItem[] = [
+        { id: 'static1', label: 'Static', run: jest.fn(), order: 1 },
+      ];
+
+      const panels = getPopoverPanels({ items, staticItems });
+
+      const panelItems = panels[0].items as Array<{ key?: string }>;
+      // Static item with order 1 should still come after regular item with order 10
+      expect(panelItems[0].key).toBe('regular');
+      expect(panelItems[panelItems.length - 1].key).toBe('static1');
+    });
+
+    it('should handle staticItems with nested sub-items', () => {
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const staticItems: AppMenuPopoverItem[] = [
+        {
+          id: 'static-parent',
+          label: 'Static Parent',
+          order: 1,
+          items: [{ id: 'static-child', label: 'Static Child', run: jest.fn(), order: 1 }],
+        },
+      ];
+
+      const panels = getPopoverPanels({ items, staticItems });
+
+      // Main panel + child panel for static item
+      expect(panels).toHaveLength(2);
+      const childPanel = panels.find((p) => p.title === 'Static Parent');
+      expect(childPanel).toBeDefined();
+    });
+
+    it('should place staticItems before action items', () => {
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const staticItems: AppMenuPopoverItem[] = [
+        { id: 'static1', label: 'Static', run: jest.fn(), order: 1 },
+      ];
+
+      const panels = getPopoverPanels({
+        items,
+        staticItems,
+        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+      });
+
+      const panelItems = panels[0].items as Array<{ key?: string }>;
+      // Order: regular item, separator, static, action-separator, action-items
+      const staticIndex = panelItems.findIndex((i) => i.key === 'static1');
+      const actionIndex = panelItems.findIndex((i) => i.key === 'action-items');
+      expect(staticIndex).toBeLessThan(actionIndex);
+    });
   });
 
   describe('getIsSelectedColor', () => {
@@ -545,6 +760,79 @@ describe('utils', () => {
       });
 
       expect(result).toBe('#fallback');
+    });
+  });
+
+  describe('processStaticItems', () => {
+    const createStaticItem = (overrides: Record<string, unknown> = {}): AppMenuItemType =>
+      ({
+        id: 'item1',
+        order: 1,
+        label: 'Item 1',
+        run: jest.fn(),
+        iconType: 'gear',
+        ...overrides,
+      } as AppMenuItemType);
+
+    it('should return an empty array when no items are provided', () => {
+      expect(processStaticItems()).toEqual([]);
+      expect(processStaticItems([])).toEqual([]);
+    });
+
+    it('should set overflow to true on all items', () => {
+      const items = [
+        createStaticItem({ id: 'a', order: 1 }),
+        createStaticItem({ id: 'b', order: 2 }),
+      ];
+      const result = processStaticItems(items);
+
+      expect(result.every((item) => item.overflow === true)).toBe(true);
+    });
+
+    it('should add separator "above" only to the first item', () => {
+      const items = [
+        createStaticItem({ id: 'a', order: 1 }),
+        createStaticItem({ id: 'b', order: 2 }),
+        createStaticItem({ id: 'c', order: 3 }),
+      ];
+      const result = processStaticItems(items);
+
+      expect(result[0].separator).toBe('above');
+      expect(result[1].separator).toBeUndefined();
+      expect(result[2].separator).toBeUndefined();
+    });
+
+    it('should strip existing separator values from non-first items', () => {
+      const items = [
+        createStaticItem({ id: 'a', order: 1, separator: 'below' }),
+        createStaticItem({ id: 'b', order: 2, separator: 'above' }),
+      ];
+      const result = processStaticItems(items);
+
+      expect(result[0].separator).toBe('above');
+      expect(result[1].separator).toBeUndefined();
+    });
+
+    it('should sort items by order', () => {
+      const items = [
+        createStaticItem({ id: 'c', order: 3 }),
+        createStaticItem({ id: 'a', order: 1 }),
+        createStaticItem({ id: 'b', order: 2 }),
+      ];
+      const result = processStaticItems(items);
+
+      expect(result.map((item) => item.id)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('should add separator "above" to the first item after sorting', () => {
+      const items = [
+        createStaticItem({ id: 'c', order: 3 }),
+        createStaticItem({ id: 'a', order: 1 }),
+      ];
+      const result = processStaticItems(items);
+
+      expect(result[0].id).toBe('a');
+      expect(result[0].separator).toBe('above');
     });
   });
 });
