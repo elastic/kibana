@@ -14,7 +14,7 @@ paths:
       description: |
         Unassigns the provided entities from the specified watchlist.
         This only removes the "manual" assignment. If the entity is also
-        assigned via other sources (e.g. index or integration), it will
+        assigned via other sources (for example, index or integration), it will
         remain on the watchlist.
       parameters:
         - name: watchlist_id
