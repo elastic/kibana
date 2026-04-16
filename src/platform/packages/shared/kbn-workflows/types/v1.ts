@@ -522,6 +522,7 @@ export interface StepPropertyHandler<
   connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
+type DependsOnValuePath = `config.${string}` | `input.${string}`;
 export interface PropertySelectionHandler<
   T = unknown,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
@@ -531,7 +532,7 @@ export interface PropertySelectionHandler<
    * Dot paths (e.g. `config.proxy.ssl`, `input.owner`) whose values are passed in `context.values`
    * and included in the selection cache key. If omitted or empty, `context.values` is `{ config: {}, input: {} }`.
    */
-  dependsOnValues?: string[];
+  dependsOnValues?: DependsOnValuePath[];
   /**
    * Search for options matching the input query.
    * Used by autocomplete dropdowns when the user types.
