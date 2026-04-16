@@ -9,8 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-const absoluteTimeRangeMode = schema.literal('absolute', { meta: { title: 'Absolute' } });
-const relativeTimeRangeMode = schema.literal('relative', { meta: { title: 'Relative' } });
+const absoluteTimeRangeMode = schema.literal('absolute');
+const relativeTimeRangeMode = schema.literal('relative');
 
 export const timeRangeSchema = schema.object(
   {
