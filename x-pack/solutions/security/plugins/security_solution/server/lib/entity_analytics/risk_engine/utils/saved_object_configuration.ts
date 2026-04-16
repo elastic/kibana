@@ -271,10 +271,7 @@ export const deleteSavedObjects = async ({
     namespace,
   });
 
-  const allToDelete = [
-    ...(configurationById ? [configurationById] : []),
-    ...legacyConfigurations,
-  ];
+  const allToDelete = [...(configurationById ? [configurationById] : []), ...legacyConfigurations];
 
   for (const config of allToDelete) {
     await deleteSavedObjectSafe(savedObjectsClient, config.id);

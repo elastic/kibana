@@ -213,7 +213,9 @@ export const createDataStream = async ({
         err?.meta?.body?.error?.type === 'illegal_state_exception'
       ) {
         logger.debug(
-          `Datastream ${indexPatterns.alias} creation skipped (${err?.meta?.body?.error?.type}): ${(error as Error).message}`
+          `Datastream ${indexPatterns.alias} creation skipped (${err?.meta?.body?.error?.type}): ${
+            (error as Error).message
+          }`
         );
       } else {
         logger.error(`Error creating datastream - ${(error as Error).message}`);
