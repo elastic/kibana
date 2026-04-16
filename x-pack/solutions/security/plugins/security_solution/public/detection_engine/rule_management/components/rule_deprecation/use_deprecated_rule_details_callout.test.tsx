@@ -11,13 +11,14 @@ import userEvent from '@testing-library/user-event';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
-import * as useIsExperimentalFeatureEnabledModule from '../../../../common/hooks/use_experimental_features';
-import * as useUserPrivilegesModule from '../../../../common/components/user_privileges';
-import * as useExecuteBulkActionModule from '../../logic/bulk_actions/use_execute_bulk_action';
-import * as usePrebuiltRulesDeprecationReviewModule from '../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review';
-import * as useKibanaModule from '../../../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
+import { usePrebuiltRulesDeprecationReview } from '../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review';
+import { useKibana } from '../../../../common/lib/kibana';
 import { savedRuleMock } from '../../logic/mock';
 import { useDeprecatedRuleDetailsCallout } from './use_deprecated_rule_details_callout';
+import { createDefaultExternalRuleSource } from '../../../../../server/lib/detection_engine/rule_management/logic/detection_rules_client/mergers/rule_source/create_default_external_rule_source';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/components/user_privileges');
@@ -25,13 +26,19 @@ jest.mock('../../logic/bulk_actions/use_execute_bulk_action');
 jest.mock('../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review');
 jest.mock('../../../../common/lib/kibana');
 
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseExecuteBulkAction = useExecuteBulkAction as jest.Mock;
+const mockUsePrebuiltRulesDeprecationReview = usePrebuiltRulesDeprecationReview as jest.Mock;
+const mockUseKibana = useKibana as jest.Mock;
+
 const RULE_ID = savedRuleMock.id;
 const RULE_RULE_ID = savedRuleMock.rule_id;
 
 // A prebuilt rule (external rule_source) for tests
 const mockPrebuiltRule: RuleResponse = {
   ...savedRuleMock,
-  rule_source: { type: 'external', is_customized: false },
+  rule_source: createDefaultExternalRuleSource(),
 };
 
 const mockExecuteBulkAction = jest.fn();
@@ -64,41 +71,35 @@ describe('useDeprecatedRuleDetailsCallout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    jest
-      .spyOn(useIsExperimentalFeatureEnabledModule, 'useIsExperimentalFeatureEnabled')
-      .mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
 
-    jest.spyOn(useUserPrivilegesModule, 'useUserPrivileges').mockReturnValue({
+    mockUseUserPrivileges.mockReturnValue({
       rulesPrivileges: {
         rules: { edit: true },
         exceptions: { edit: true },
       },
-    } as ReturnType<typeof useUserPrivilegesModule.useUserPrivileges>);
+    });
 
-    jest
-      .spyOn(useExecuteBulkActionModule, 'useExecuteBulkAction')
-      .mockReturnValue({ executeBulkAction: mockExecuteBulkAction });
+    mockUseExecuteBulkAction.mockReturnValue({ executeBulkAction: mockExecuteBulkAction });
 
-    jest
-      .spyOn(usePrebuiltRulesDeprecationReviewModule, 'usePrebuiltRulesDeprecationReview')
-      .mockImplementation((_request, options) => {
-        // We utilize the enabled flag in the react query call, this mimics that behavior
-        if (options?.enabled === false) {
-          return { data: undefined, isLoading: false };
-        }
-        return {
-          data: {
-            rules: [{ id: RULE_ID, rule_id: RULE_RULE_ID, name: savedRuleMock.name }],
-          },
-          isLoading: false,
-        };
-      });
+    // We utilize the enabled flag in the react query call, this mimics that behavior
+    mockUsePrebuiltRulesDeprecationReview.mockImplementation((_request, options) => {
+      if (options?.enabled === false) {
+        return { data: undefined, isLoading: false };
+      }
+      return {
+        data: {
+          rules: [{ id: RULE_ID, rule_id: RULE_RULE_ID, name: savedRuleMock.name }],
+        },
+        isLoading: false,
+      };
+    });
 
-    jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
+    mockUseKibana.mockReturnValue({
       services: {
         application: { navigateToApp: mockNavigateToApp },
       },
-    } as ReturnType<typeof useKibanaModule.useKibana>);
+    });
   });
 
   describe('Original rule is not deleted if duplication fails', () => {
@@ -148,12 +149,12 @@ describe('useDeprecatedRuleDetailsCallout', () => {
 
   describe('Action buttons are disabled for read-only users', () => {
     beforeEach(() => {
-      jest.spyOn(useUserPrivilegesModule, 'useUserPrivileges').mockReturnValue({
+      mockUseUserPrivileges.mockReturnValue({
         rulesPrivileges: {
           rules: { edit: false },
           exceptions: { edit: false },
         },
-      } as ReturnType<typeof useUserPrivilegesModule.useUserPrivileges>);
+      });
     });
 
     it('disables both delete and duplicate-and-delete buttons when user cannot edit rules', () => {
@@ -210,9 +211,7 @@ describe('useDeprecatedRuleDetailsCallout', () => {
     });
 
     it('returns null while deprecation data is loading', () => {
-      jest
-        .spyOn(usePrebuiltRulesDeprecationReviewModule, 'usePrebuiltRulesDeprecationReview')
-        .mockReturnValue({ data: undefined, isLoading: true });
+      mockUsePrebuiltRulesDeprecationReview.mockReturnValue({ data: undefined, isLoading: true });
 
       const { container } = render(<TestComponent />);
 

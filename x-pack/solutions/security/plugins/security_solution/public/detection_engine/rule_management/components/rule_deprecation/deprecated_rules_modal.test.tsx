@@ -8,13 +8,16 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import * as useUserPrivilegesModule from '../../../../common/components/user_privileges';
-import * as useExecuteBulkActionModule from '../../logic/bulk_actions/use_execute_bulk_action';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
 import { DeprecatedRulesModal } from './deprecated_rules_modal';
 import type { DeprecatedRuleForReview } from '../../../../../common/api/detection_engine/prebuilt_rules';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../logic/bulk_actions/use_execute_bulk_action');
+
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseExecuteBulkAction = useExecuteBulkAction as jest.Mock;
 
 // Simplified RuleLink component for testing.
 jest.mock('../../../rule_management_ui/components/rules_table/use_columns', () => ({
@@ -37,26 +40,24 @@ describe('DeprecatedRulesModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    jest.spyOn(useUserPrivilegesModule, 'useUserPrivileges').mockReturnValue({
+    mockUseUserPrivileges.mockReturnValue({
       rulesPrivileges: {
         rules: { edit: true },
         exceptions: { edit: true },
       },
-    } as ReturnType<typeof useUserPrivilegesModule.useUserPrivileges>);
+    });
 
-    jest
-      .spyOn(useExecuteBulkActionModule, 'useExecuteBulkAction')
-      .mockReturnValue({ executeBulkAction: mockExecuteBulkAction });
+    mockUseExecuteBulkAction.mockReturnValue({ executeBulkAction: mockExecuteBulkAction });
   });
 
   describe('Delete all button is disabled for read-only users', () => {
     it('disables the delete-all button when user cannot edit rules', () => {
-      jest.spyOn(useUserPrivilegesModule, 'useUserPrivileges').mockReturnValue({
+      mockUseUserPrivileges.mockReturnValue({
         rulesPrivileges: {
           rules: { edit: false },
           exceptions: { edit: false },
         },
-      } as ReturnType<typeof useUserPrivilegesModule.useUserPrivileges>);
+      });
 
       render(<DeprecatedRulesModal rules={MOCK_RULES} isLoading={false} onClose={mockOnClose} />);
 

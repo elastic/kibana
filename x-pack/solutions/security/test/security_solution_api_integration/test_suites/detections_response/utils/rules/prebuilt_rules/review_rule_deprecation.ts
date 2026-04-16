@@ -35,7 +35,7 @@ export const reviewRuleDeprecation = async (
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '1')
     .set('x-elastic-internal-origin', 'foo')
-    .send(body ?? null)
+    .send(body ?? undefined)
     .expect(expectedStatusCode);
 
   return response.body;
