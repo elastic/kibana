@@ -223,12 +223,14 @@ function visitStepProps(node: any, stack: string[] = []): Record<string, StepPro
   return result;
 }
 
+// Path segments come from YAML keys; use null-prototype objects so keys like "__proto__"
+// cannot resolve inherited accessors or pollute Object.prototype when nesting.
 function setNested(obj: Record<string, unknown>, segments: string[], value: unknown): void {
   let current = obj;
   for (let i = 0; i < segments.length - 1; i++) {
     const seg = segments[i];
     if (!isRecord(current[seg])) {
-      current[seg] = {};
+      current[seg] = Object.create(null) as Record<string, unknown>;
     }
     current = current[seg] as Record<string, unknown>;
   }
@@ -259,8 +261,9 @@ export function buildStepSelectionValues(
   step: StepInfo,
   valuePaths?: readonly string[]
 ): StepSelectionValues {
-  const config: RecursivePartial<Record<string, unknown>> = {};
-  const input: RecursivePartial<Record<string, unknown>> = {};
+  // Same null-prototype initialization as setNested (see comment there) — required to avoid prototype pollution.
+  const config = Object.create(null) as RecursivePartial<Record<string, unknown>>;
+  const input = Object.create(null) as RecursivePartial<Record<string, unknown>>;
   const pathsToMatch = valuePaths && valuePaths.length > 0 ? valuePaths : undefined;
 
   if (!pathsToMatch) {
