@@ -164,6 +164,17 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
     });
 
+    it('emits pending_count: 0 and recovering_count: 0 for alert kind when stateTransition is undefined', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
+    });
+
     it('emits pending_count: 0 when alert delay mode is immediate even if pendingCount is stale', () => {
       const formValues: FormValues = {
         ...baseFormValues,

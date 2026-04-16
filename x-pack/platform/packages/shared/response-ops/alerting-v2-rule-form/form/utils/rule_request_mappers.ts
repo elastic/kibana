@@ -90,7 +90,7 @@ export const deriveRecoveryDelayModeFromStateTransition = (
 
 const mapStateTransition = (formValues: FormValues) => {
   const { kind, stateTransition } = formValues;
-  if (kind !== 'alert' || stateTransition == null) return undefined;
+  if (kind !== 'alert') return undefined;
 
   const alertMode =
     formValues.stateTransitionAlertDelayMode ??
@@ -103,26 +103,26 @@ const mapStateTransition = (formValues: FormValues) => {
 
   if (alertMode === 'immediate') {
     out.pending_count = 0;
-  } else if (alertMode === 'breaches' && stateTransition.pendingCount != null) {
+  } else if (alertMode === 'breaches' && stateTransition?.pendingCount != null) {
     out.pending_count = stateTransition.pendingCount;
   } else if (alertMode === 'duration') {
-    if (stateTransition.pendingTimeframe != null) {
+    if (stateTransition?.pendingTimeframe != null) {
       out.pending_timeframe = stateTransition.pendingTimeframe;
     }
-    if (stateTransition.pendingCount != null) {
+    if (stateTransition?.pendingCount != null) {
       out.pending_count = stateTransition.pendingCount;
     }
   }
 
   if (recoveryMode === 'immediate') {
     out.recovering_count = 0;
-  } else if (recoveryMode !== 'duration' && stateTransition.recoveringCount != null) {
+  } else if (recoveryMode !== 'duration' && stateTransition?.recoveringCount != null) {
     out.recovering_count = stateTransition.recoveringCount;
   } else if (recoveryMode === 'duration') {
-    if (stateTransition.recoveringTimeframe != null) {
+    if (stateTransition?.recoveringTimeframe != null) {
       out.recovering_timeframe = stateTransition.recoveringTimeframe;
     }
-    if (stateTransition.recoveringCount != null) {
+    if (stateTransition?.recoveringCount != null) {
       out.recovering_count = stateTransition.recoveringCount;
     }
   }
