@@ -23,7 +23,7 @@ Do NOT post flaky test runner nudges. A separate agent handles this.
 
 ## Review instructions
 
-Follow the skill at `.agents/skills/scout-best-practices-reviewer/SKILL.md` for scope, checklist, reuse rules, migration parity, and output structure. The output format below applies to this agent. Ignore any output formatting instructions in the skill file.
+Follow the skill at `.agents/skills/scout-best-practices-reviewer/SKILL.md` for scope, checklist, reuse rules and migration parity. The output format below applies to this agent. Ignore any output formatting instructions in the skill file.
 
 ## Output
 
