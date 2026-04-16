@@ -35,7 +35,7 @@ describe('DocumentMatchFilterControls', () => {
     const { container } = renderWithProviders(
       <DocumentMatchFilterControls
         onFilterChange={mockOnFilterChange}
-        matchedDocumentPercentage={0.5}
+        matchedDocumentRatio={0.5}
         isDisabled={true}
       />
     );
@@ -43,11 +43,11 @@ describe('DocumentMatchFilterControls', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should render nothing when matchedDocumentPercentage is undefined', () => {
+  it('should render nothing when matchedDocumentRatio is undefined', () => {
     const { container } = renderWithProviders(
       <DocumentMatchFilterControls
         onFilterChange={mockOnFilterChange}
-        matchedDocumentPercentage={undefined}
+        matchedDocumentRatio={undefined}
       />
     );
 
@@ -58,7 +58,7 @@ describe('DocumentMatchFilterControls', () => {
     renderWithProviders(
       <DocumentMatchFilterControls
         onFilterChange={mockOnFilterChange}
-        matchedDocumentPercentage={0.5}
+        matchedDocumentRatio={0.5}
         isDisabled={false}
       />
     );
@@ -74,7 +74,7 @@ describe('DocumentMatchFilterControls', () => {
     renderWithProviders(
       <DocumentMatchFilterControls
         onFilterChange={mockOnFilterChange}
-        matchedDocumentPercentage={0.5}
+        matchedDocumentRatio={0.5}
         isDisabled={false}
       />
     );
@@ -88,10 +88,7 @@ describe('DocumentMatchFilterControls', () => {
     mockUseStreamSamplesSelector.mockReturnValue('matched' as any);
 
     renderWithProviders(
-      <DocumentMatchFilterControls
-        onFilterChange={mockOnFilterChange}
-        matchedDocumentPercentage={0.5}
-      />
+      <DocumentMatchFilterControls onFilterChange={mockOnFilterChange} matchedDocumentRatio={0.5} />
     );
 
     const unmatchedButton = screen.getByTestId('routingPreviewUnmatchedFilterButton');
@@ -104,7 +101,7 @@ describe('DocumentMatchFilterControls', () => {
     renderWithProviders(
       <DocumentMatchFilterControls
         onFilterChange={mockOnFilterChange}
-        matchedDocumentPercentage={0.75}
+        matchedDocumentRatio={0.75}
       />
     );
 

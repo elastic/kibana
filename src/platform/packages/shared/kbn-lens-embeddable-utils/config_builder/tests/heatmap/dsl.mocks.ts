@@ -9,6 +9,7 @@
 
 import type { HeatmapVisualizationState } from '@kbn/lens-common/visualizations/heatmap/types';
 
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes } from '../../types';
 
 export const simple: LensAttributes = {
@@ -90,7 +91,7 @@ export const simple: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [
     {
@@ -206,7 +207,7 @@ export const withXAndYAxes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [
     {
@@ -398,7 +399,7 @@ export const withDynamicColors = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [
     {
@@ -487,7 +488,7 @@ export const defaultColorByValueAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'testing color by value palette',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [
     {
@@ -610,7 +611,7 @@ export const selectorColorByValueAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'testing color by value palette',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [
     {

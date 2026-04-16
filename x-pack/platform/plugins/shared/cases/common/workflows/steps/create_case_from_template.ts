@@ -40,7 +40,7 @@ export const createCaseFromTemplateStepCommonDefinition: CommonStepDefinition<
   CreateCaseFromTemplateStepOutputSchema
 > = {
   id: CreateCaseFromTemplateStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.CREATE_CASE_FROM_TEMPLATE_STEP_LABEL,
   description: i18n.CREATE_CASE_FROM_TEMPLATE_STEP_DESCRIPTION,
   documentation: {

@@ -14,13 +14,13 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
 
@@ -52,9 +52,10 @@ export const ServicePanelContent = ({
   entityStoreEntityId,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   return (
-    <FlyoutBody>
+    <>
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
@@ -69,16 +70,23 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      {entityStoreEntityId && (
+      {entityStoreEntityId && hasEntityResolutionLicense && (
         <>
-          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
+          <ResolutionSection
+            entityId={entityStoreEntityId}
+            entityType={EntityType.service}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalityAccordion
-        entity={{ name: serviceName, type: EntityType.service }}
-        onChange={onAssetCriticalityChange}
-      />
+      {!entityRecord && (
+        <AssetCriticalityAccordion
+          entity={{ name: serviceName, type: EntityType.service }}
+          onChange={onAssetCriticalityChange}
+        />
+      )}
       {entityStoreEntityId && (
         <>
           <VisualizationsSection
@@ -97,6 +105,6 @@ export const ServicePanelContent = ({
         observedFields={observedFields}
       />
       <EuiHorizontalRule margin="m" />
-    </FlyoutBody>
+    </>
   );
 };

@@ -21,14 +21,14 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../shared/components/test_ids';
-import { usePaginatedAlerts } from '../../../flyout/document_details/left/hooks/use_paginated_alerts';
+import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../document/hooks/use_fetch_related_alerts_by_ancestry');
-jest.mock('../../../flyout/document_details/left/hooks/use_paginated_alerts');
+jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../data_view_manager/hooks/use_security_default_patterns');
 jest.mock('../../../common/hooks/is_in_security_app');

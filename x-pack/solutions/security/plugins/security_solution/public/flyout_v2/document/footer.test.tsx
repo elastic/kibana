@@ -31,6 +31,7 @@ const createMockHit = (): DataTableRecord =>
   } as DataTableRecord);
 
 const mockOnAlertUpdated = jest.fn();
+const mockOnShowNotes = jest.fn();
 
 describe('<Footer />', () => {
   beforeEach(() => {
@@ -40,7 +41,9 @@ describe('<Footer />', () => {
   it('renders FooterAiActions with the provided hit', () => {
     const hit = createMockHit();
 
-    const { getByTestId } = render(<Footer hit={hit} onAlertUpdated={mockOnAlertUpdated} />);
+    const { getByTestId } = render(
+      <Footer hit={hit} onAlertUpdated={mockOnAlertUpdated} onShowNotes={mockOnShowNotes} />
+    );
 
     const aiActions = getByTestId('footerAiActions');
     expect(aiActions).toBeInTheDocument();
@@ -50,7 +53,9 @@ describe('<Footer />', () => {
   it('renders TakeAction with the provided hit', () => {
     const hit = createMockHit();
 
-    const { getByTestId } = render(<Footer hit={hit} onAlertUpdated={mockOnAlertUpdated} />);
+    const { getByTestId } = render(
+      <Footer hit={hit} onAlertUpdated={mockOnAlertUpdated} onShowNotes={mockOnShowNotes} />
+    );
 
     const aiActions = getByTestId('takeAction');
     expect(aiActions).toBeInTheDocument();
@@ -61,7 +66,7 @@ describe('<Footer />', () => {
     const hit = createMockHit();
     const onAlertUpdated = jest.fn();
 
-    render(<Footer hit={hit} onAlertUpdated={onAlertUpdated} />);
+    render(<Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={mockOnShowNotes} />);
 
     expect(mockTakeAction).toHaveBeenCalledWith(expect.objectContaining({ onAlertUpdated }));
   });

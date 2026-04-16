@@ -441,6 +441,22 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.isSaasContainer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSaasContainer",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.is_elastic_staff_owned",
             "type": "CompoundType",
             "tags": [],
@@ -450,7 +466,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -466,7 +482,7 @@
               "{ default_solution?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -482,7 +498,7 @@
               "{ project_id: string; project_name?: string | undefined; project_type?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; product_tier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestrator_target?: string | undefined; in_trial?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -814,6 +830,24 @@
         },
         {
           "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.isEce",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "isEce",
+          "description": [
+            "\n`true` when running on ECE (Elastic Cloud Enterprise).\n`false` or `undefined` on ESS or self-managed."
+          ],
+          "signature": [
+            "boolean | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "lineNumber": 185,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
           "id": "def-public.CloudSetup.trialEndDate",
           "type": "Object",
           "tags": [],
@@ -825,7 +859,7 @@
             "Date | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "lineNumber": 185,
+          "lineNumber": 190,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -843,7 +877,7 @@
             "boolean | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "lineNumber": 191,
+          "lineNumber": 196,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -861,7 +895,7 @@
             "(contextProvider: React.FC<{}>) => void"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "lineNumber": 195,
+          "lineNumber": 200,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -879,7 +913,7 @@
                 "React.FC<{}>"
               ],
               "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-              "lineNumber": 200,
+              "lineNumber": 205,
               "columnNumber": 26,
               "deprecated": false,
               "trackAdoption": false,
@@ -901,7 +935,7 @@
             "{ defaultSolution?: \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "lineNumber": 201,
+          "lineNumber": 206,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -916,7 +950,7 @@
             "\n`true` when running on Serverless Elastic Cloud\nNote that `isCloudEnabled` will always be true when `isServerlessEnabled` is."
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "lineNumber": 210,
+          "lineNumber": 215,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -934,7 +968,7 @@
             "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "lineNumber": 215,
+          "lineNumber": 220,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -952,7 +986,7 @@
             "() => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
-          "lineNumber": 251,
+          "lineNumber": 256,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1567,6 +1601,24 @@
         },
         {
           "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.isEce",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "isEce",
+          "description": [
+            "\n`true` when running on ECE (Elastic Cloud Enterprise).\n`false` or `undefined` on ESS or self-managed."
+          ],
+          "signature": [
+            "boolean | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
+          "lineNumber": 124,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
           "id": "def-server.CloudSetup.isServerlessEnabled",
           "type": "boolean",
           "tags": [],
@@ -1575,7 +1627,7 @@
             "\n`true` when running on Serverless Elastic Cloud\nNote that `isCloudEnabled` will always be true when `isServerlessEnabled` is."
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
-          "lineNumber": 124,
+          "lineNumber": 129,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1595,7 +1647,7 @@
             "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
-          "lineNumber": 129,
+          "lineNumber": 134,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1613,7 +1665,7 @@
             "() => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
-          "lineNumber": 169,
+          "lineNumber": 174,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1634,7 +1686,7 @@
         "\nStart contract"
       ],
       "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
-      "lineNumber": 175,
+      "lineNumber": 180,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1649,7 +1701,7 @@
             "\nThis is set to `true` for both ESS and ECE deployments."
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
-          "lineNumber": 179,
+          "lineNumber": 184,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1667,7 +1719,7 @@
             "string | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
-          "lineNumber": 183,
+          "lineNumber": 188,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1685,7 +1737,7 @@
             "string | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
-          "lineNumber": 189,
+          "lineNumber": 194,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1703,7 +1755,7 @@
             "() => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
-          "lineNumber": 195,
+          "lineNumber": 200,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,

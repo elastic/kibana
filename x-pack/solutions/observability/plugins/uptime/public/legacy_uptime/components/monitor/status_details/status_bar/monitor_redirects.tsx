@@ -31,7 +31,7 @@ export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
         className="euiLink euiLink--primary"
         onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         data-test-subj="uptimeMonitorRedirectInfo"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
       >
         {i18n.translate('xpack.uptime.monitorList.redirects.title.number', {

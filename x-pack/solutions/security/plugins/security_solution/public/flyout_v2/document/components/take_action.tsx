@@ -32,6 +32,10 @@ export interface TakeActionProps {
    * Callback invoked after alert mutations to refresh flyout data.
    */
   onAlertUpdated: () => void;
+  /**
+   * Callback to open the notes flyout.
+   */
+  onShowNotes: () => void;
 }
 
 /**
@@ -42,7 +46,7 @@ export interface TakeActionProps {
  * We're doing all of this to avoid having to refactor all the actions that are currently using dataAsNestedObject and dataFormattedForFieldBrowser/
  * // TODO: refactor all actions to take a DataTableRecord as input.
  */
-export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated }) => {
+export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated, onShowNotes }) => {
   const eventId = hit.raw._id;
   const indexName = hit.raw._index;
 
@@ -80,6 +84,7 @@ export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated }) => {
       nonEcsData={nonEcsData}
       refetchFlyoutData={refetchFlyoutData}
       onAlertUpdated={onAlertUpdated}
+      onShowNotes={onShowNotes}
     />
   );
 };

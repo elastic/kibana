@@ -9,7 +9,10 @@ import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
 import type {
+  BulkOperationParams,
+  BulkOperationResponse,
   CreateRuleData,
+  FindRulesResponse,
   FindRulesSortField,
   RuleResponse,
   UpdateRuleData,
@@ -17,14 +20,7 @@ import type {
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package. */
-export type { RuleResponse as RuleApiResponse };
-
-export interface FindRulesResponse {
-  items: RuleResponse[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+export type { RuleResponse as RuleApiResponse, FindRulesResponse };
 
 export interface ListRulesParams {
   page?: number;
@@ -35,19 +31,7 @@ export interface ListRulesParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface BulkOperationError {
-  id: string;
-  error: { message: string; statusCode: number };
-}
-
-export interface BulkOperationResponse {
-  rules: RuleResponse[];
-  errors: BulkOperationError[];
-}
-
-export type BulkOperationParams =
-  | { ids: string[]; filter?: undefined }
-  | { filter: string; ids?: undefined };
+export type { BulkOperationParams, BulkOperationResponse };
 
 @injectable()
 export class RulesApi {

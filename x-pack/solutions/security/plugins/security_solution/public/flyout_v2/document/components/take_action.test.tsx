@@ -34,6 +34,7 @@ const createMockHit = (raw: Partial<DataTableRecord['raw']> = {}): DataTableReco
 const mockEcsData: Ecs = { _id: 'test-event-id', _index: 'test-index' };
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
 const mockOnAlertUpdated = jest.fn();
+const mockOnShowNotes = jest.fn();
 
 const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
   { field: 'host.name', values: ['test-host'], originalValue: ['test-host'], isObjectArray: false },
@@ -60,7 +61,11 @@ describe('<TakeAction />', () => {
     });
 
     const { getByTestId, queryByTestId } = render(
-      <TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />
+      <TakeAction
+        hit={createMockHit()}
+        onAlertUpdated={mockOnAlertUpdated}
+        onShowNotes={mockOnShowNotes}
+      />
     );
     const button = getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID);
 
@@ -78,7 +83,11 @@ describe('<TakeAction />', () => {
     });
 
     const { getByTestId, queryByTestId } = render(
-      <TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />
+      <TakeAction
+        hit={createMockHit()}
+        onAlertUpdated={mockOnAlertUpdated}
+        onShowNotes={mockOnShowNotes}
+      />
     );
 
     expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeDisabled();
@@ -95,7 +104,11 @@ describe('<TakeAction />', () => {
     });
 
     const { getByTestId, queryByTestId } = render(
-      <TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />
+      <TakeAction
+        hit={createMockHit()}
+        onAlertUpdated={mockOnAlertUpdated}
+        onShowNotes={mockOnShowNotes}
+      />
     );
 
     expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeDisabled();
@@ -105,7 +118,11 @@ describe('<TakeAction />', () => {
 
   it('should render TakeActionButton when data is available', () => {
     const { getByTestId, queryByTestId } = render(
-      <TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />
+      <TakeAction
+        hit={createMockHit()}
+        onAlertUpdated={mockOnAlertUpdated}
+        onShowNotes={mockOnShowNotes}
+      />
     );
 
     expect(getByTestId('take-action-button-mock')).toBeInTheDocument();
@@ -113,7 +130,13 @@ describe('<TakeAction />', () => {
   });
 
   it('should call useEventDetails with eventId and indexName from hit', () => {
-    render(<TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />);
+    render(
+      <TakeAction
+        hit={createMockHit()}
+        onAlertUpdated={mockOnAlertUpdated}
+        onShowNotes={mockOnShowNotes}
+      />
+    );
 
     expect(mockUseEventDetails).toHaveBeenCalledWith({
       eventId: 'test-event-id',
@@ -121,10 +144,10 @@ describe('<TakeAction />', () => {
     });
   });
 
-  it('should pass hit, ecsData, refetchFlyoutData and onAlertUpdated from useEventDetails to TakeActionButton', () => {
+  it('should pass hit, ecsData, refetchFlyoutData, onAlertUpdated and onShowNotes from useEventDetails to TakeActionButton', () => {
     const hit = createMockHit();
     const onAlertUpdated = jest.fn();
-    render(<TakeAction hit={hit} onAlertUpdated={onAlertUpdated} />);
+    render(<TakeAction hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={mockOnShowNotes} />);
 
     expect(mockTakeActionButton).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -132,13 +155,20 @@ describe('<TakeAction />', () => {
         ecsData: mockEcsData,
         refetchFlyoutData: mockRefetchFlyoutData,
         onAlertUpdated,
+        onShowNotes: mockOnShowNotes,
       }),
       expect.anything()
     );
   });
 
   it('should compute nonEcsData from dataFormattedForFieldBrowser and pass it to TakeActionButton', () => {
-    render(<TakeAction hit={createMockHit()} onAlertUpdated={mockOnAlertUpdated} />);
+    render(
+      <TakeAction
+        hit={createMockHit()}
+        onAlertUpdated={mockOnAlertUpdated}
+        onShowNotes={mockOnShowNotes}
+      />
+    );
 
     expect(mockTakeActionButton).toHaveBeenCalledWith(
       expect.objectContaining({

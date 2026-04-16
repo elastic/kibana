@@ -6,7 +6,11 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { integrationSchemaV1, integrationSchemaV2 } from './schemas/integration_schema';
+import {
+  integrationSchemaV1,
+  integrationSchemaV2,
+  integrationSchemaV3,
+} from './schemas/integration_schema';
 import { INTEGRATION_SAVED_OBJECT_TYPE } from './constants';
 
 export const integrationSavedObjectType: SavedObjectsType = {
@@ -21,6 +25,7 @@ export const integrationSavedObjectType: SavedObjectsType = {
       data_stream_count: { type: 'integer' },
       created_by: { type: 'keyword' },
       created_by_profile_uid: { type: 'keyword' },
+      connector_id: { type: 'keyword' },
       // Deprecated: status is now derived from data streams. Kept for backward compatibility.
       status: { type: 'keyword' },
       metadata: {
@@ -61,6 +66,20 @@ export const integrationSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: integrationSchemaV2.extends({}, { unknowns: 'ignore' }),
         create: integrationSchemaV2,
+      },
+    },
+    3: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            connector_id: { type: 'keyword' },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: integrationSchemaV3.extends({}, { unknowns: 'ignore' }),
+        create: integrationSchemaV3,
       },
     },
   },

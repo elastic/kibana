@@ -83,37 +83,7 @@ describe('applyConfigOverrides', () => {
     });
   });
 
-  it('alters config to enable SAML Mock IdP in serverless dev mode', () => {
-    expect(applyConfigOverrides({}, { dev: true, serverless: true }, {}, {})).toEqual({
-      elasticsearch: {
-        hosts: ['https://localhost:9200'],
-        serviceAccountToken: kibanaDevServiceAccount.token,
-        ssl: { certificateAuthorities: expect.stringContaining('ca.crt') },
-      },
-      plugins: { paths: [] },
-      xpack: {
-        security: {
-          authc: {
-            providers: {
-              basic: { basic: { order: Number.MAX_SAFE_INTEGER } },
-              saml: {
-                'cloud-saml-kibana': {
-                  description: 'Continue as Test User',
-                  hint: 'Allows testing serverless user roles',
-                  icon: 'user',
-                  order: 0,
-                  realm: 'cloud-saml-kibana',
-                },
-              },
-            },
-            selector: { enabled: false },
-          },
-        },
-      },
-    });
-  });
-
-  it('alters config to enable UIAM if `--uiam` flag is passed in serverless dev mode', () => {
+  it('alters config to enable SAML Mock IdP and UIAM in serverless dev mode', () => {
     expect(applyConfigOverrides({}, { dev: true, serverless: true, uiam: true }, {}, {})).toEqual({
       elasticsearch: {
         hosts: ['https://localhost:9200'],
@@ -154,6 +124,36 @@ describe('applyConfigOverrides', () => {
               key: KBN_KEY_PATH,
               verificationMode: 'none',
             },
+          },
+        },
+      },
+    });
+  });
+
+  it('omits UIAM config if `--no-uiam` flag is passed in serverless dev mode', () => {
+    expect(applyConfigOverrides({}, { dev: true, serverless: true, uiam: false }, {}, {})).toEqual({
+      elasticsearch: {
+        hosts: ['https://localhost:9200'],
+        serviceAccountToken: kibanaDevServiceAccount.token,
+        ssl: { certificateAuthorities: expect.stringContaining('ca.crt') },
+      },
+      plugins: { paths: [] },
+      xpack: {
+        security: {
+          authc: {
+            providers: {
+              basic: { basic: { order: Number.MAX_SAFE_INTEGER } },
+              saml: {
+                'cloud-saml-kibana': {
+                  description: 'Continue as Test User',
+                  hint: 'Allows testing serverless user roles',
+                  icon: 'user',
+                  order: 0,
+                  realm: 'cloud-saml-kibana',
+                },
+              },
+            },
+            selector: { enabled: false },
           },
         },
       },

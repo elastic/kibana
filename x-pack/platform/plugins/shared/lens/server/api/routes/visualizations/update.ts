@@ -7,10 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import {
-  isLensESQLConfig,
-  isLensLegacyAttributes,
-} from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
 import {
@@ -37,7 +34,6 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   const updateRoute = router.put({
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
-    enableQueryVersion: true,
     summary: 'Create or update visualization',
     description:
       'Create or update a visualization with the given id. When no visualization exists for the id, one is created.',
@@ -91,14 +87,6 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       const requestBodyData = req.body;
       if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
         throw new Error('visualizationType is required');
-      }
-
-      if (isLensESQLConfig(req.body)) {
-        return res.badRequest({
-          body: {
-            message: 'ES|QL charts are not yet supported in Lens.',
-          },
-        });
       }
 
       // TODO fix IContentClient to type this client based on the actual

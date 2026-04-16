@@ -24,6 +24,8 @@ export interface RulesListTableContainerProps {
   page: number;
   perPage: number;
   search: string;
+  /** Facet filter KQL passed to list-rules; scopes select-all bulk actions. */
+  filter?: string;
   hasActiveFilters: boolean;
   sortField?: RulesListTableSortField;
   sortDirection?: 'asc' | 'desc';
@@ -37,6 +39,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   page,
   perPage,
   search,
+  filter,
   hasActiveFilters,
   sortField,
   sortDirection,
@@ -65,7 +68,12 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     onSelectPage,
     onClearSelection,
     getBulkParams,
-  } = useBulkSelect({ totalItemCount, items });
+  } = useBulkSelect({
+    totalItemCount,
+    items,
+    filter,
+    search: search || undefined,
+  });
 
   const handleBulkDelete = () => {
     setShowBulkDeleteConfirm(true);

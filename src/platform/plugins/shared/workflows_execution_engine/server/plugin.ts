@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
@@ -47,6 +48,7 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
+  CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
@@ -71,6 +73,9 @@ import { createIndexes } from '../common';
 
 /** Max retry attempts for workflow run tasks, including final-attempt recovery handling after interrupts. */
 const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
+
+/** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
+const BULK_CANCEL_PAGE_SIZE = 10;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -882,6 +887,46 @@ export class WorkflowsExecutionEnginePlugin
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
+    const cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions = async ({
+      spaceId,
+      workflowId,
+    }) => {
+      await checkLicense(plugins.licensing);
+      await this.initialize(coreStart);
+
+      let searchAfter: estypes.SortResults | undefined;
+
+      do {
+        const page = await workflowExecutionRepository.findNonTerminalExecutionIdsByWorkflowIdPage({
+          spaceId,
+          workflowId,
+          size: BULK_CANCEL_PAGE_SIZE,
+          searchAfter,
+        });
+
+        if (page.results.length === 0) {
+          break;
+        }
+
+        const outcomes = await Promise.allSettled(
+          page.results.map((id) => cancelWorkflowExecution(id, spaceId))
+        );
+
+        outcomes.forEach((outcome, index) => {
+          if (outcome.status === 'rejected') {
+            const executionId = page.results[index];
+            const message =
+              outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
+            this.logger.warn(
+              `cancelAllActiveWorkflowExecutions: failed to cancel execution ${executionId}: ${message}`
+            );
+          }
+        });
+
+        searchAfter = page.nextSearchAfter;
+      } while (searchAfter !== undefined);
+    };
+
     const resumeWorkflowExecution: ResumeWorkflowExecution = async (
       executionId,
       spaceId,
@@ -932,6 +977,7 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflowStep,
       scheduleWorkflow,
       cancelWorkflowExecution,
+      cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
       isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),

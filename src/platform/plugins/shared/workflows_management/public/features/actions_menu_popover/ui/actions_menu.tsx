@@ -146,7 +146,8 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (_: Array<ActionOptionData>, __: any, selectedOption: ActionOptionData) => {
     if (isActionGroup(selectedOption)) {
-      setCurrentPath([...currentPath, selectedOption.id]);
+      const nextPath = selectedOption.pathIds ?? [...currentPath, selectedOption.id];
+      setCurrentPath([...nextPath]);
       setSearchTerm('');
       setOptions(selectedOption.options);
     } else {
