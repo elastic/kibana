@@ -30,6 +30,10 @@ export const dashboardCopyToDashboardActionStrings = {
     i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
       defaultMessage: 'Existing dashboard',
     }),
+  getPanelNotFoundError: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.panelNotFoundError', {
+      defaultMessage: 'Unable to find panel to copy',
+    }),
 };
 
 export const dashboardAddToLibraryActionStrings = {

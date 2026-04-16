@@ -43,7 +43,7 @@ export async function isTimeSliderControlCreationCompatible(
         ...(dashboardApi.layout$ && {
           hasTimeSliderControl: () =>
             Object.values(dashboardApi.layout$.getValue().pinnedPanels).some(
-              (control) => control.type === TIME_SLIDER_CONTROL
+              (control) => control?.type === TIME_SLIDER_CONTROL
             ),
           layoutChanged$: dashboardApi.layout$.pipe(map(() => undefined)),
         }),
