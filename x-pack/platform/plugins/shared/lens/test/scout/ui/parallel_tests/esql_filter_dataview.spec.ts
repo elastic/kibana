@@ -7,6 +7,7 @@
 
 import { spaceTest, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { applyLensInlineEditorAndWaitClosed } from '../fixtures';
 
 const INITIAL_ESQL_QUERY = `FROM kibana_sample_data_logs
   | STATS count = COUNT(*) BY \`Over time\` = TBUCKET(50), agent.keyword`;
@@ -44,7 +45,7 @@ spaceTest.describe(
     spaceTest(
       'dashboard add filter from ES|QL panel should not show duplicate data view names',
       async ({ page, pageObjects }) => {
-        const { dashboard } = pageObjects;
+        const { dashboard, lens } = pageObjects;
 
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
@@ -63,8 +64,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('apply and close the inline editor', async () => {
-          await page.testSubj.click('applyFlyoutButton');
-          await expect(page.testSubj.locator('customizeLens')).toBeHidden();
+          await applyLensInlineEditorAndWaitClosed({ lens });
           await dashboard.waitForRenderComplete();
         });
 
@@ -128,7 +128,7 @@ spaceTest.describe(
     spaceTest(
       'filter fields should be available after changing ES|QL query source',
       async ({ page, pageObjects }) => {
-        const { dashboard } = pageObjects;
+        const { dashboard, lens } = pageObjects;
 
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
@@ -145,8 +145,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('apply and close the inline editor', async () => {
-          await page.testSubj.click('applyFlyoutButton');
-          await expect(page.testSubj.locator('customizeLens')).toBeHidden();
+          await applyLensInlineEditorAndWaitClosed({ lens });
           await dashboard.waitForRenderComplete();
         });
 
@@ -167,8 +166,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('apply and close the inline editor', async () => {
-          await page.testSubj.click('applyFlyoutButton');
-          await expect(page.testSubj.locator('customizeLens')).toBeHidden();
+          await applyLensInlineEditorAndWaitClosed({ lens });
           await dashboard.waitForRenderComplete();
         });
 
