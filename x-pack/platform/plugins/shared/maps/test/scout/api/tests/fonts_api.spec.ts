@@ -33,7 +33,7 @@ apiTest.describe('Maps - fonts', { tag: [...tags.stateful.classic] }, () => {
     );
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.length).toBe(74696);
+    expect(response.body).toHaveLength(74696);
   });
 
   apiTest('should return 404 when file not found', async ({ apiClient }) => {

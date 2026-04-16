@@ -62,7 +62,7 @@ apiTest.describe('Maps - map migrations', { tag: [...tags.stateful.classic] }, (
         },
       ]);
       expect(response.body.typeMigrationVersion).toBe('8.4.0');
-      expect(response.body.attributes.layerListJSON.includes('indexPatternRefName')).toBe(true);
+      expect(response.body.attributes.layerListJSON).toContain('indexPatternRefName');
     }
   );
 
@@ -92,7 +92,7 @@ apiTest.describe('Maps - map migrations', { tag: [...tags.stateful.classic] }, (
     expect(response).toHaveStatusCode(200);
 
     const panels = JSON.parse(response.body.attributes.panelsJSON);
-    expect(panels.length).toBe(1);
+    expect(panels).toHaveLength(1);
     expect(panels[0].type).toBe('map');
     expect(semver.gte(panels[0].version, '8.4.0')).toBe(true);
   });

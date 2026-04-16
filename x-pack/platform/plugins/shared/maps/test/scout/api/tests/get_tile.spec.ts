@@ -83,7 +83,7 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
 
       const jsonTile = new VectorTile(new Protobuf(response.body));
       const layer = jsonTile.layers.hits;
-      expect(layer.length).toBe(2);
+      expect(layer).toHaveLength(2);
 
       const feature = findFeature(layer, (feat: any) => {
         return feat.properties._id === 'AU_x3_BsGFA8no6Qjjug';
@@ -139,7 +139,7 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
 
       const jsonTile = new VectorTile(new Protobuf(response.body));
       const layer = jsonTile.layers.hits;
-      expect(layer.length).toBe(4);
+      expect(layer).toHaveLength(4);
 
       const feature = findFeature(layer, (feat: any) => {
         return (
