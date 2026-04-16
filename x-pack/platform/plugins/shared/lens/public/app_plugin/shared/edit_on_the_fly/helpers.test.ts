@@ -17,7 +17,7 @@ import {
   mockAllSuggestions,
 } from '../../../mocks';
 import { suggestionsApi } from '../../../lens_suggestions_api';
-import { expandEsqlValuesToDisplayColumns, getGridAttrs, getSuggestions } from './helpers';
+import { buildDisplayRowsFromEsqlValues, getGridAttrs, getSuggestions } from './helpers';
 
 const mockSuggestionApi = suggestionsApi as jest.Mock;
 const mockFetchData = getESQLResults as jest.Mock;
@@ -67,7 +67,7 @@ jest.mock('@kbn/esql-utils', () => {
 });
 
 describe('Lens inline editing helpers', () => {
-  describe('expandEsqlValuesToDisplayColumns', () => {
+  describe('buildDisplayRowsFromEsqlValues', () => {
     it('returns values unchanged when value and display columns match in order', () => {
       const valueColumns = [
         { name: 'a', type: 'double' },
@@ -79,7 +79,7 @@ describe('Lens inline editing helpers', () => {
       ];
 
       expect(
-        expandEsqlValuesToDisplayColumns({
+        buildDisplayRowsFromEsqlValues({
           displayColumns: valueColumns,
           valueColumns,
           values,
@@ -96,37 +96,12 @@ describe('Lens inline editing helpers', () => {
       const values = [[500]];
 
       expect(
-        expandEsqlValuesToDisplayColumns({
+        buildDisplayRowsFromEsqlValues({
           displayColumns,
           valueColumns,
           values,
         })
       ).toEqual([[null, 500]]);
-    });
-
-    it('does expand when value columns are empty', () => {
-      expect(
-        expandEsqlValuesToDisplayColumns({
-          displayColumns: [{ name: 'a', type: 'long' }],
-          valueColumns: [],
-          values: [[1, 2]],
-        })
-      ).toEqual([[null]]);
-    });
-
-    it('returns one null-filled row when display columns exist but value columns and values are empty', () => {
-      const displayColumns = [
-        { name: 'count', type: 'double' },
-        { name: 'max_value', type: 'integer' },
-      ];
-
-      expect(
-        expandEsqlValuesToDisplayColumns({
-          displayColumns,
-          valueColumns: [],
-          values: [],
-        })
-      ).toEqual([[null, null]]);
     });
   });
 
@@ -323,9 +298,9 @@ describe('Lens inline editing helpers', () => {
 
       mockFetchData.mockImplementation(() => ({
         response: {
+          all_columns: allColumnsRaw,
           columns: subsetColumns,
           values: [[500]],
-          all_columns: allColumnsRaw,
         },
       }));
       mockformatESQLColumns.mockReturnValueOnce(formattedColumns);

@@ -33,19 +33,11 @@ export interface ESQLDataGridAttrs {
   columns: DatatableColumn[];
 }
 
-const hasNoValueCells = (values: ESQLRow[]): boolean => {
-  return values.length === 0 || values.every((row) => Array.isArray(row) && row.length === 0);
-};
-
 const columnsMatchInOrder = (a: ESQLColumn[], b: ESQLColumn[]) => {
   return a.length === b.length && a.every((col, i) => col.name === b[i]?.name);
 };
 
-/**
- * `values` rows align to `valueColumns`. When `displayColumns` differs (e.g. `all_columns`
- * vs `columns` with drop-null), map each cell by column name.
- */
-export const expandEsqlValuesToDisplayColumns = ({
+export const buildDisplayRowsFromEsqlValues = ({
   displayColumns,
   valueColumns,
   values,
@@ -54,10 +46,6 @@ export const expandEsqlValuesToDisplayColumns = ({
   valueColumns: ESQLColumn[];
   values: ESQLRow[];
 }): ESQLRow[] => {
-  if (valueColumns.length === 0 || hasNoValueCells(values)) {
-    return [displayColumns.map(() => null)];
-  }
-
   if (columnsMatchInOrder(valueColumns, displayColumns)) {
     return values;
   }
@@ -141,7 +129,7 @@ export const getGridAttrs = async (
   // which has all columns regardless if they have data or not
   const displayColumns = allColumns.length > 0 ? allColumns : valueColumns;
 
-  const rows = expandEsqlValuesToDisplayColumns({ displayColumns, valueColumns, values });
+  const rows = buildDisplayRowsFromEsqlValues({ displayColumns, valueColumns, values });
   const columns = formatESQLColumns(displayColumns);
 
   return {
