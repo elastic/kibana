@@ -45,6 +45,7 @@ import {
   getMetricAccessor,
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
+  stripUndefined,
 } from './utils';
 import type { GaugeStateESQL, GaugeStateNoESQL } from '../../schema/charts/gauge';
 import { fromMetricAPItoLensState } from '../columns/metric';
@@ -86,14 +87,14 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
     minAccessor: layer.metric.min ? getAccessorName('min') : undefined,
     maxAccessor: layer.metric.max ? getAccessorName('max') : undefined,
     goalAccessor: layer.metric.goal ? getAccessorName('goal') : undefined,
-    shape: layer.shape
-      ? layer.shape.type === 'bullet'
-        ? layer.shape.orientation === 'horizontal'
+    shape: layer.styling?.shape
+      ? layer.styling?.shape.type === 'bullet'
+        ? layer.styling?.shape.orientation === 'horizontal'
           ? 'horizontalBullet'
           : 'verticalBullet'
-        : layer.shape.type === 'semi_circle'
+        : layer.styling?.shape.type === 'semi_circle'
         ? 'semiCircle'
-        : layer.shape.type
+        : layer.styling?.shape.type
       : 'horizontalBullet',
     ...convertColorToLensState(layer.metric.color),
     ticksPosition:
@@ -134,14 +135,16 @@ function reverseBuildVisualizationState(
 
   const props: DeepPartial<DeepMutable<GaugeState>> = {
     ...generateApiLayer(layer),
-    shape:
-      visualization.shape === 'horizontalBullet'
-        ? { type: 'bullet', orientation: 'horizontal' }
-        : visualization.shape === 'verticalBullet'
-        ? { type: 'bullet', orientation: 'vertical' }
-        : {
-            type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
-          },
+    styling: stripUndefined({
+      shape:
+        visualization.shape === 'horizontalBullet'
+          ? { type: 'bullet', orientation: 'horizontal' }
+          : visualization.shape === 'verticalBullet'
+          ? { type: 'bullet', orientation: 'vertical' }
+          : {
+              type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
+            },
+    }),
     metric: isEsqlTableTypeDataSource(dataSource)
       ? {
           ...getValueApiColumn(metricAccessor, layer as TextBasedLayer),
