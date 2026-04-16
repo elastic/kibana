@@ -25,6 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
       refresh: 'wait_for',
       document: {
         action_id: actionId,
+        type: 'INPUT_ACTION',
+        input_type: 'osquery',
         '@timestamp': new Date().toISOString(),
         expiration: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
         agent_selection: { all: true },
