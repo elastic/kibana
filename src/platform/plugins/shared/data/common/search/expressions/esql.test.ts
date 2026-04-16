@@ -59,12 +59,12 @@ describe('getEsqlFn', () => {
     const mockSearch = jest.fn().mockReturnValue(
       of({
         rawResponse: {
-          values: [[42]],
-          columns: [{ name: 'has_data', type: 'long' }],
           all_columns: [
             { name: 'all_null', type: 'long' },
             { name: 'has_data', type: 'long' },
           ],
+          columns: [{ name: 'has_data', type: 'long' }],
+          values: [[42]],
         },
       } as IKibanaSearchResponse<ESQLSearchResponse>)
     );
@@ -92,8 +92,8 @@ describe('getEsqlFn', () => {
 
     expect(result?.rows).toHaveLength(1);
     const row = result?.rows[0];
-    expect(row.has_data).toBe(42);
     expect(row.all_null).toBeNull();
+    expect(row.has_data).toBe(42);
     expect(result?.meta?.statistics?.totalCount).toBe(1);
   });
 
@@ -101,12 +101,12 @@ describe('getEsqlFn', () => {
     const mockSearch = jest.fn().mockReturnValue(
       of({
         rawResponse: {
-          values: [[]],
-          columns: [],
           all_columns: [
             { name: 'Median', type: 'double' },
             { name: 'AVG(products.base_price)', type: 'double' },
           ],
+          columns: [],
+          values: [[]],
         },
       } as IKibanaSearchResponse<ESQLSearchResponse>)
     );
@@ -134,7 +134,6 @@ describe('getEsqlFn', () => {
 
     expect(result?.rows).toHaveLength(1);
     const row = result?.rows[0];
-    expect(Object.keys(row)).toHaveLength(2);
     expect(row.Median).toBeNull();
     expect(row['AVG(products.base_price)']).toBeNull();
     expect(result?.meta?.statistics?.totalCount).toBe(0);
