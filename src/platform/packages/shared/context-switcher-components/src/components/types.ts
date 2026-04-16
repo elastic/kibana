@@ -15,84 +15,84 @@ export const SELECTABLE_ROW_HEIGHT = 40;
 export const CONTEXT_ROW_HEIGHT = 48;
 
 export interface SpaceItem {
-  readonly id: string;
-  readonly name: string;
+  id: string;
+  name: string;
   /** Avatar or icon to display. */
-  readonly avatar?: ReactElement;
+  avatar?: ReactElement;
   /** Optional solution badge or metadata shown alongside. */
-  readonly badge?: ReactNode;
+  badge?: ReactNode;
   /** Solution name (e.g. "Security", "Observability"). Used to derive labels and icons. */
-  readonly solution?: string;
+  solution?: string;
   /** Solution icon type (e.g. "logoSecurity"). Used for trigger button and environment row avatar. */
-  readonly solutionIcon?: IconType;
+  solutionIcon?: IconType;
 }
 
 export interface ContextSwitcherSpacesConfig {
   /** The currently active space. */
-  readonly active: SpaceItem;
+  active: SpaceItem;
   /** All available spaces (including the active one). */
-  readonly items: ReadonlyArray<SpaceItem>;
+  items: SpaceItem[];
   /** Called when user selects a space. */
-  readonly onSelect: (spaceId: string) => void;
+  onSelect: (spaceId: string) => void;
   /** Optional search config. */
-  readonly search?: { readonly placeholder?: string; readonly threshold?: number };
+  search?: { placeholder?: string; threshold?: number };
   /** Header action (e.g. "Manage" button). */
-  readonly headerAction?: ReactNode;
+  headerAction?: ReactNode;
   /** Footer action (e.g. "Create space"). */
-  readonly footerAction?: FooterAction;
-  readonly isLoading?: boolean;
+  footerAction?: FooterAction;
+  isLoading?: boolean;
 }
 
 export interface ContextSwitcherEnvironmentConfig {
   /** Determines static labels (e.g. "My projects" vs "My deployments"). */
-  readonly environmentType: 'project' | 'deployment';
-  readonly name: string;
+  environmentType: 'project' | 'deployment';
+  name: string;
   /** Submenu link items (e.g. "Manage project", "View all deployments"). */
-  readonly submenuItems: ReadonlyArray<LinksListItem>;
+  submenuItems: LinksListItem[];
   /** Submenu footer action (e.g. "Create project"). */
-  readonly submenuFooterAction?: FooterAction;
+  submenuFooterAction?: FooterAction;
 }
 
 export interface ContextSwitcherProps {
   /** Active space info + full list of spaces. */
-  readonly spaces: ContextSwitcherSpacesConfig;
+  spaces: ContextSwitcherSpacesConfig;
   /**
    * If provided, enables the root menu with an environment row
    * (project or deployment) + submenu navigation.
    * When absent, the popover shows only the spaces list.
    */
-  readonly environmentContext?: ContextSwitcherEnvironmentConfig;
+  environmentContext?: ContextSwitcherEnvironmentConfig;
   /** Optional footer links (e.g. "Connection details", "Manage deployments"). */
-  readonly footerLinks?: ReadonlyArray<LinksListItem>;
+  footerLinks?: LinksListItem[];
 }
 
 export interface LinksListItem {
-  readonly id: string;
-  readonly label: ReactNode;
-  readonly href?: string;
-  readonly onClick?: () => void;
-  readonly external?: boolean;
-  readonly disabled?: boolean;
-  readonly iconType?: IconType;
-  readonly ['data-test-subj']?: string;
+  id: string;
+  label: ReactNode;
+  href?: string;
+  onClick?: () => void;
+  external?: boolean;
+  disabled?: boolean;
+  iconType?: IconType;
+  ['data-test-subj']?: string;
 }
 
 export interface FooterAction {
-  readonly id: string;
-  readonly label: string;
-  readonly href?: string;
-  readonly onClick?: () => void;
-  readonly external?: boolean;
-  readonly disabled?: boolean;
-  readonly ['data-test-subj']?: string;
+  id: string;
+  label: string;
+  href?: string;
+  onClick?: () => void;
+  external?: boolean;
+  disabled?: boolean;
+  ['data-test-subj']?: string;
 }
 
 export interface ContextRowModel {
-  readonly id: string;
-  readonly label: ReactNode;
-  readonly value?: ReactNode;
-  readonly prepend?: ReactElement;
-  readonly disabled?: boolean;
-  readonly ariaLabel?: string;
-  readonly ['data-test-subj']?: string;
+  id: string;
+  label: ReactNode;
+  value?: ReactNode;
+  prepend?: ReactElement;
+  disabled?: boolean;
+  ariaLabel?: string;
+  ['data-test-subj']?: string;
 }
