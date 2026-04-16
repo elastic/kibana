@@ -140,7 +140,12 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         featuresTaskResult = await waitForSubtask<
                           FeaturesIdentificationTaskParams,
                           IdentifyFeaturesResult
-                        >(featuresTaskId, runContext.taskInstance.id, taskClient, taskContext.logger);
+                        >(
+                          featuresTaskId,
+                          runContext.taskInstance.id,
+                          taskClient,
+                          taskContext.logger
+                        );
                       }
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
@@ -318,7 +323,9 @@ async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>
 
     if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
       logger.debug(
-        `Subtask ${subtaskId} finished with status ${result.status} after ${pollCount} polls (${Date.now() - startedAt}ms)`
+        `Subtask ${subtaskId} finished with status ${result.status} after ${pollCount} polls (${
+          Date.now() - startedAt
+        }ms)`
       );
       return result;
     }
