@@ -129,6 +129,8 @@ export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
             services,
             returnFocus: params.returnFocus,
           });
+        } else {
+          (appMenuItem.run as Function)?.();
         }
       }
     : undefined;

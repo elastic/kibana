@@ -492,13 +492,6 @@ export const useDashboardMenuItems = ({
     hasExportMenuItems,
   ]);
 
-  const chromeNextHeaderShareGlobalAction = useMemo(() => {
-    if (!shareService) {
-      return undefined;
-    }
-    return { onClick: showShare };
-  }, [showShare]);
-
   const editModeTopNavConfig = useMemo(() => {
     const { storeSearchSession } = getDashboardCapabilities();
 
@@ -546,6 +539,5 @@ export const useDashboardMenuItems = ({
   return {
     viewModeTopNavConfig,
     editModeTopNavConfig,
-    chromeNextHeaderShareGlobalAction,
   };
 };
