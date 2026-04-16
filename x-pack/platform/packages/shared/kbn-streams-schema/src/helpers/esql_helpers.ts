@@ -222,18 +222,21 @@ function flattenCommutativeChain(
 }
 
 /**
- * Collects the chain of binary-expression spine nodes for a commutative
- * operator so they can be re-wired with sorted operands.
- * Returns nodes from outermost to innermost.
+ * Collects all binary-expression nodes in a commutative AND/OR tree
+ * so they can be re-wired with sorted operands. Walks both children
+ * to handle right-nested trees (e.g. `AND(a, AND(b, c))`) in addition
+ * to the default left-associative parse trees.
  */
 function collectChainSpine(
   node: ESQLBinaryExpression<'and' | 'or'>,
   opName: string
 ): ESQLBinaryExpression<'and' | 'or'>[] {
   const spine: ESQLBinaryExpression<'and' | 'or'>[] = [node];
-  const left = Array.isArray(node.args[0]) ? node.args[0][0] : node.args[0];
-  if (isCommutativeOp(left) && left.name === opName) {
-    spine.push(...collectChainSpine(left, opName));
+  for (const arg of node.args) {
+    const child = Array.isArray(arg) ? arg[0] : arg;
+    if (isCommutativeOp(child) && child.name === opName) {
+      spine.push(...collectChainSpine(child, opName));
+    }
   }
   return spine;
 }
