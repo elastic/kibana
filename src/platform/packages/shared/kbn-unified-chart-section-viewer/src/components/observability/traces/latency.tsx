@@ -18,8 +18,16 @@ import { getLatencyChart } from './trace_charts_definition';
 type LatencyChartContentProps = NonNullable<ReturnType<typeof getLatencyChart>>;
 
 const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter, actions } =
-    useTraceMetricsContext();
+  const {
+    services,
+    fetchParams,
+    discoverFetch$,
+    indexes,
+    onBrushEnd,
+    onFilter,
+    actions,
+    profileId,
+  } = useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
     metricItem: {
@@ -36,6 +44,7 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
 
   return (
     <Chart
+      id="latency"
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -49,7 +58,7 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
       syncCursor
       syncTooltips
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
-      profileId="observability-traces-data-source-profile"
+      profileId={profileId}
     />
   );
 };

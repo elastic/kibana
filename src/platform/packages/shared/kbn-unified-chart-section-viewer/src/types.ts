@@ -23,6 +23,11 @@ interface ChartSectionActions {
 export interface UnifiedMetricsGridProps extends ChartSectionProps {
   actions: ChartSectionActions;
   /**
+   * The profile ID of the data source profile that renders this grid.
+   * Used for execution context labels in APM monitoring.
+   */
+  profileId: string;
+  /**
    * Breakdown field from Discover's app state, synced from sidebar "Add Breakdown" action
    */
   breakdownField?: string;

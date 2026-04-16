@@ -103,6 +103,7 @@ describe('useLensProps', () => {
 
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -110,6 +111,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -135,6 +137,7 @@ describe('useLensProps', () => {
 
     renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -142,6 +145,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -186,6 +190,7 @@ describe('useLensProps', () => {
     };
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -193,6 +198,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
     expect(result.current).toBeUndefined();
@@ -205,7 +211,14 @@ describe('useLensProps', () => {
       expect(result.current).toStrictEqual(
         expect.objectContaining({
           attributes: { attributes: {}, state: {}, visualizationType: 'lnsXY' },
-          executionContext: { description: 'metrics experience chart data' },
+          executionContext: {
+            description: 'metrics experience chart data',
+            meta: {
+              profile_id: 'testProfileId',
+              metric_id: 'testChartId',
+              metric_type: 'lnsXY',
+            },
+          },
           id: 'metricsExperienceLensComponent',
           noPadding: true,
           searchSessionId: fetchParams.searchSessionId,
@@ -220,6 +233,7 @@ describe('useLensProps', () => {
   it('handles chartRef as null gracefully', async () => {
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -227,6 +241,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef: undefined,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -247,6 +262,7 @@ describe('useLensProps', () => {
 
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -254,6 +270,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockEmptyChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -272,6 +289,7 @@ describe('useLensProps', () => {
 
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -280,6 +298,7 @@ describe('useLensProps', () => {
         chartRef,
         chartLayers: mockEmptyChartLayers,
         error: mockError,
+        profileId: 'testProfileId',
       })
     );
 

@@ -50,6 +50,7 @@ export type LensProps = Pick<
 >;
 
 export const useLensProps = ({
+  chartId,
   title,
   query,
   services,
@@ -62,6 +63,7 @@ export const useLensProps = ({
   userMessages,
   profileId,
 }: {
+  chartId: string;
   title: string;
   query: string;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
@@ -77,7 +79,7 @@ export const useLensProps = ({
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, chartLayers, yBounds, error, userMessages]);
+  }, [query, title, chartLayers, yBounds, error, userMessages, profileId]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
@@ -107,6 +109,7 @@ export const useLensProps = ({
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
         userMessages,
         profileId,
+        chartId,
       });
     },
     [
@@ -116,6 +119,7 @@ export const useLensProps = ({
       fetchParams.esqlVariables,
       userMessages,
       profileId,
+      chartId,
     ]
   );
 
@@ -215,6 +219,7 @@ const getLensProps = ({
   esqlVariables,
   userMessages,
   profileId,
+  chartId,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
@@ -223,23 +228,23 @@ const getLensProps = ({
   lastReloadRequestTime?: number;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
-}): LensProps => {
-  return {
-    id: 'metricsExperienceLensComponent',
-    viewMode: 'view',
-    timeRange,
-    attributes,
-    noPadding: true,
-    esqlVariables,
-    searchSessionId,
-    executionContext: {
-      description: 'metrics experience chart data',
-      meta: {
-        metric_name: attributes.title,
-        profileId,
-      },
+  chartId: string;
+}): LensProps => ({
+  id: 'metricsExperienceLensComponent',
+  viewMode: 'view',
+  timeRange,
+  attributes,
+  noPadding: true,
+  esqlVariables,
+  searchSessionId,
+  executionContext: {
+    description: 'metrics experience chart data',
+    meta: {
+      profile_id: profileId,
+      metric_id: chartId,
+      metric_type: attributes.visualizationType,
     },
-    lastReloadRequestTime,
-    userMessages,
-  };
-};
+  },
+  lastReloadRequestTime,
+  userMessages,
+});

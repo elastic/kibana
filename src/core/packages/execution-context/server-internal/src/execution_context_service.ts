@@ -165,11 +165,12 @@ export class ExecutionContextService
     if (!this.enabled) return {};
     const executionContext = this.contextStore.getStore()?.toJSON();
 
+    // meta labels are only propagated server-side for APM transaction tracing
     const metaLabels = executionContext?.meta
       ? Object.entries(executionContext.meta).reduce((acc, [key, value]) => {
-          acc[`kibana.meta.${key}`] = value;
+          acc[`kibana_meta_${key}`] = value;
           return acc;
-        }, {} as Record<string, any>)
+        }, {} as Record<string, string | number | boolean | undefined>)
       : {};
 
     return omitBy(
