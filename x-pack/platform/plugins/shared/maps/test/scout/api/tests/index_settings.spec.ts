@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expect } from '@kbn/scout/api';
+import { apiTest, testData } from '../fixtures';
+
+apiTest.describe('Maps - index settings', { tag: testData.MAPS_API_TAGS }, () => {
+  let cookieHeader: Record<string, string>;
+
+  apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
+    cookieHeader = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
+    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
+  });
+
+  apiTest.afterAll(async ({ kbnClient }) => {
+    await kbnClient.importExport.unload(testData.KBN_ARCHIVES.maps);
+  });
+
+  apiTest(
+    'should return default index settings when max_result_window and max_inner_result_window are not set',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        'internal/maps/indexSettings?indexPatternTitle=logstash*',
+        {
+          headers: { ...testData.INTERNAL_HEADERS, ...cookieHeader },
+        }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.maxResultWindow).toBe(10000);
+      expect(response.body.maxInnerResultWindow).toBe(100);
+    }
+  );
+
+  apiTest('should return index settings', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      'internal/maps/indexSettings?indexPatternTitle=geo_shape*',
+      {
+        headers: { ...testData.INTERNAL_HEADERS, ...cookieHeader },
+      }
+    );
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.maxResultWindow).toBe(10001);
+    expect(response.body.maxInnerResultWindow).toBe(101);
+  });
+});
