@@ -15,6 +15,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { formatAlertEvaluationValue, Threshold } from '@kbn/observability-plugin/public';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
@@ -49,7 +50,7 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
   const alertEvaluationValue = alert.fields[ALERT_EVALUATION_VALUE];
   const alertEvaluationThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
 
-  const chartLayout = RULE_TYPE_CHART_LAYOUTS[alertRuleTypeId] ?? DEFAULT_LAYOUT;
+  const chartLayout = RULE_TYPE_CHART_LAYOUTS[alertRuleTypeId as ApmRuleType] ?? DEFAULT_LAYOUT;
 
   const environment = alert.fields[SERVICE_ENVIRONMENT];
   const serviceName = String(alert.fields[SERVICE_NAME]);

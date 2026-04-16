@@ -12,16 +12,15 @@ import { test } from '../../fixtures';
 import type { ExtendedScoutTestFixtures } from '../../fixtures';
 import { STATEFUL_APM_ALERTS_INDEX, SERVERLESS_APM_ALERTS_INDEX } from '../../fixtures/constants';
 import {
+  type AlertTestConfig,
   LATENCY_THRESHOLD_CONFIG,
+  FAILED_TRANSACTION_RATE_CONFIG,
   setupAlertForTest,
   cleanupApmAlerts,
 } from '../../fixtures/alerts_helpers';
 
-const SERVICE_NAME = 'opbeans-java';
-
-function createExploreInApmTest(alertIndex: string) {
+function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
   return async ({
-    page,
     pageObjects: { alertDetailsPage },
     apiServices,
     esClient,
@@ -32,12 +31,7 @@ function createExploreInApmTest(alertIndex: string) {
       let alertDocId: string;
 
       await test.step('set up rule and alert document', async () => {
-        const result = await setupAlertForTest({
-          apiServices,
-          esClient,
-          alertIndex,
-          config: LATENCY_THRESHOLD_CONFIG,
-        });
+        const result = await setupAlertForTest({ apiServices, esClient, alertIndex, config });
         ruleName = result.ruleName;
         alertDocId = result.alertDocId;
       });
@@ -46,30 +40,20 @@ function createExploreInApmTest(alertIndex: string) {
         await alertDetailsPage.goto(alertDocId);
       });
 
-      await test.step('open the chart actions dropdown on the Latency chart', async () => {
+      await test.step('verify all chart panels are rendered', async () => {
         await expect(async () => {
-          await expect(alertDetailsPage.getOpenActionsButton('Latency')).toBeVisible();
-          await alertDetailsPage.openChartActions('Latency');
+          await expect(alertDetailsPage.getChartPanel(config.primaryChartTitle)).toBeVisible();
+          for (const title of config.secondaryChartTitles) {
+            await expect(alertDetailsPage.getChartPanel(title)).toBeVisible();
+          }
         }).toPass({ timeout: 60_000, intervals: [2_000] });
       });
 
-      await test.step('verify "In APM" action has a valid redirect href', async () => {
-        await expect(alertDetailsPage.viewInApmAction).toBeVisible();
-
-        const apmHref = await alertDetailsPage.getViewInApmHref();
-        expect(apmHref).toBeTruthy();
-        expect(apmHref).toContain('APM_LOCATOR');
-      });
-
-      await test.step('click "In APM" and verify APM service overview loads', async () => {
-        await alertDetailsPage.clickViewInApm();
-
-        await expect(async () => {
-          expect(page.url()).toContain(`/apm/services/${SERVICE_NAME}/overview`);
-          await expect(page.testSubj.locator('apmMainTemplateHeaderServiceName')).toHaveText(
-            SERVICE_NAME
-          );
-        }).toPass({ timeout: 60_000, intervals: [2_000] });
+      await test.step('verify chart actions are available on each chart', async () => {
+        const allChartTitles = [config.primaryChartTitle, ...config.secondaryChartTitles];
+        for (const title of allChartTitles) {
+          await expect(alertDetailsPage.getOpenActionsButton(title)).toBeVisible();
+        }
       });
     } finally {
       await cleanupApmAlerts({ apiServices, esClient, ruleName: ruleName! });
@@ -77,20 +61,32 @@ function createExploreInApmTest(alertIndex: string) {
   };
 }
 
-test.describe('Alert details - Explore in APM', () => {
+test.describe('Alert details - Chart layout', () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
 
   test(
-    'Stateful - View in APM link from alert details page',
+    'Stateful - Latency threshold renders correct chart layout',
     { tag: tags.stateful.classic },
-    createExploreInApmTest(STATEFUL_APM_ALERTS_INDEX)
+    createChartLayoutTest(STATEFUL_APM_ALERTS_INDEX, LATENCY_THRESHOLD_CONFIG)
   );
 
   test(
-    'Serverless - View in APM link from alert details page',
+    'Serverless - Latency threshold renders correct chart layout',
     { tag: tags.serverless.observability.complete },
-    createExploreInApmTest(SERVERLESS_APM_ALERTS_INDEX)
+    createChartLayoutTest(SERVERLESS_APM_ALERTS_INDEX, LATENCY_THRESHOLD_CONFIG)
+  );
+
+  test(
+    'Stateful - Failed transaction rate renders correct chart layout',
+    { tag: tags.stateful.classic },
+    createChartLayoutTest(STATEFUL_APM_ALERTS_INDEX, FAILED_TRANSACTION_RATE_CONFIG)
+  );
+
+  test(
+    'Serverless - Failed transaction rate renders correct chart layout',
+    { tag: tags.serverless.observability.complete },
+    createChartLayoutTest(SERVERLESS_APM_ALERTS_INDEX, FAILED_TRANSACTION_RATE_CONFIG)
   );
 });

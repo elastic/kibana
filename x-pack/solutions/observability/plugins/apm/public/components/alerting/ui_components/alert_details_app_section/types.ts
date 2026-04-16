@@ -28,7 +28,7 @@ export const DEFAULT_LAYOUT: ChartLayout = {
   secondary: ['throughput', 'failedTransactionRate'],
 };
 
-export const RULE_TYPE_CHART_LAYOUTS: Record<string, ChartLayout> = {
+export const RULE_TYPE_CHART_LAYOUTS: Partial<Record<ApmRuleType, ChartLayout>> = {
   [ApmRuleType.TransactionDuration]: DEFAULT_LAYOUT,
   [ApmRuleType.TransactionErrorRate]: {
     primary: 'failedTransactionRate',
