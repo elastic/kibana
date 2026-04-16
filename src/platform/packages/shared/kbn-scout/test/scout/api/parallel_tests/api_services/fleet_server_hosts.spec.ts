@@ -13,6 +13,7 @@ import { expect } from '../../../../../api';
 apiTest.describe(
   'Fleet Server Hosts Management',
   { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
+  () => {
     let hostId: string;
 
     apiTest.afterEach(async ({ apiServices }) => {
