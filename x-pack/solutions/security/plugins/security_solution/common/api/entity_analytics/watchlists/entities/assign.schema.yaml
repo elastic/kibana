@@ -12,8 +12,12 @@ paths:
       operationId: AssignWatchlistEntities
       summary: Manually assign entities to a watchlist
       description: |
-        Assigns the provided entities to the specified watchlist.
+        Assigns the provided entities to the specified watchlist using a "manual" source label.
         The entities must already exist in the entity store.
+
+        If an entity is already on the watchlist, no new document is created — the "manual" label
+        is added to its existing source labels instead.
+
       parameters:
         - name: watchlist_id
           in: path
