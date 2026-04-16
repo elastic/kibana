@@ -62,6 +62,18 @@ export const useCustomSuggestWidget = (
   }, []);
 
   // ── Show / Hide ──
+  // hideWidget must be defined before showWidget (showWidget calls it)
+
+  const hideWidget = useCallback(() => {
+    if (!ctxKeyRef.current) return;
+
+    isVisibleRef.current = false;
+    anchorPositionRef.current = null;
+    filterTextRef.current = '';
+    ctxKeyRef.current.set(false);
+    clearSuggestions();
+    render();
+  }, [render]);
 
   const showWidget = useCallback(
     (payload: SuggestionsPayload) => {
@@ -74,15 +86,12 @@ export const useCustomSuggestWidget = (
 
       // If widget is already visible on the same line, just update items
       // without resetting position/filter — prevents blinking on re-trigger
-      const alreadyVisible = isVisibleRef.current;
       const sameLine =
-        alreadyVisible &&
+        isVisibleRef.current &&
         anchorPositionRef.current?.lineNumber === payload.anchorPosition.lineNumber;
 
       if (sameLine) {
-        // Update items but keep current filterText and selection
         itemsRef.current = payload.items;
-        // Re-check filter still matches
         const filtered = getFilteredItems(payload.items, filterTextRef.current);
         if (filtered.length === 0) {
           hideWidget();
@@ -123,17 +132,6 @@ export const useCustomSuggestWidget = (
     },
     [editor, render, hideWidget]
   );
-
-  const hideWidget = useCallback(() => {
-    if (!ctxKeyRef.current) return;
-
-    isVisibleRef.current = false;
-    anchorPositionRef.current = null;
-    filterTextRef.current = '';
-    ctxKeyRef.current.set(false);
-    clearSuggestions();
-    render();
-  }, [render]);
 
   // ── Accept suggestion ──
 
