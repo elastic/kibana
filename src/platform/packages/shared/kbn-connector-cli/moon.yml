@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/connector-cli'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-extract-and-transform'
+  defaultOwner: '@elastic/workchat-eng'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/connector-cli'
   description: Moon project for @kbn/connector-cli
   channel: ''
-  owner: '@elastic/search-extract-and-transform'
+  owner: '@elastic/workchat-eng'
   sourceRoot: src/platform/packages/shared/kbn-connector-cli
 dependsOn:
   - '@kbn/dev-cli-runner'
