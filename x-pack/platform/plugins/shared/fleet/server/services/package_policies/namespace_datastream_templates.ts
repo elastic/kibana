@@ -717,9 +717,15 @@ export async function syncNamespaceTemplates({
     for (const namespace of addedNamespaces) {
       // Query only policies for this namespace rather than fetching all policies and filtering
       // in JS, to avoid scanning every policy in large deployments.
+      // For 'default' we must also match policies where the namespace attribute is absent,
+      // because those are treated as 'default' throughout the codebase.
+      const namespaceFilter =
+        namespace === 'default'
+          ? `(${savedObjectType}.attributes.namespace:default OR NOT ${savedObjectType}.attributes.namespace:*)`
+          : `${savedObjectType}.attributes.namespace:${namespace}`;
       const policiesForNamespace = await soClient.find<PackagePolicySOAttributes>({
         type: savedObjectType,
-        filter: `${savedObjectType}.attributes.namespace:${namespace}`,
+        filter: namespaceFilter,
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
       });
