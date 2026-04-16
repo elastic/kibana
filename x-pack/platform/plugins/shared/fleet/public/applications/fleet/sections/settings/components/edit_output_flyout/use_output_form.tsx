@@ -8,9 +8,10 @@
 import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { load } from 'js-yaml';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
+import { useYaml } from '../../../../../../services';
 
 import { getDefaultPresetForEsOutput } from '../../../../../../../common/services/output_helpers';
 
@@ -58,7 +59,7 @@ import {
   validateName,
   validateESHosts,
   validateLogstashHosts,
-  validateYamlConfig,
+  createValidateYamlConfig,
   validateCATrustedFingerPrint,
   validateServiceToken,
   validateServiceTokenSecret,
@@ -85,6 +86,7 @@ export interface OutputFormInputsType {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
+  remoteElasticsearchUrlInput: ReturnType<typeof useComboInput>;
   diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
   diskQueuePathInput: ReturnType<typeof useInput>;
   diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
@@ -198,6 +200,7 @@ export function extractDefaultDynamicKafkaTopics(
 export function useOutputForm(onSucess: () => void, output?: Output, defaultOutput?: Output) {
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
+  const yaml = useYaml();
 
   const { showExperimentalShipperOptions } = ExperimentalFeaturesService.get();
 
@@ -231,19 +234,21 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     return !allowEdit.includes(field);
   }
 
+  const validateYamlConfigFn = yaml ? createValidateYamlConfig(yaml.parse) : () => undefined;
+
   // Define inputs
   // Shared inputs
   const nameInput = useInput(output?.name ?? '', validateName, isDisabled('name'));
   const typeInput = useInput(output?.type ?? 'elasticsearch', undefined, isDisabled('type'));
   const additionalYamlConfigInput = useInput(
     output?.config_yaml ?? '',
-    validateYamlConfig,
+    validateYamlConfigFn,
     isDisabled('config_yaml')
   );
 
   const otelExporterConfigInput = useInput(
     (output as NewElasticsearchOutput)?.otel_exporter_config_yaml ?? '',
-    validateYamlConfig,
+    validateYamlConfigFn,
     isDisabled('otel_exporter_config_yaml')
   );
 
@@ -264,9 +269,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   );
   // ES output's host URL is restricted to default in serverless
   const isServerless = cloud?.isServerlessEnabled;
-  // Set the hosts to default for new ES output in serverless.
+  const isEditingRemoteEsOutput = output?.type === outputType.RemoteElasticsearch;
+  // When editing a remote ES output, the saved hosts belong to the remote ES input,
+  // not the regular ES input. Use the default output hosts instead.
   const elasticsearchUrlDefaultValue =
-    isServerless && !output?.hosts ? defaultOutput?.hosts || [] : output?.hosts || [];
+    isEditingRemoteEsOutput || (isServerless && !output?.hosts)
+      ? defaultOutput?.hosts || []
+      : output?.hosts || [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -275,8 +284,19 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     elasticsearchUrlDisabled
   );
 
+  // Remote ES has its own hosts input — separate from the regular ES hosts
+  const remoteEsUrlDefaultValue =
+    output?.type === outputType.RemoteElasticsearch ? output?.hosts || [] : [];
+  const remoteElasticsearchUrlInput = useComboInput(
+    'remoteEsHostsComboBox',
+    remoteEsUrlDefaultValue,
+    validateESHosts,
+    isDisabled('hosts')
+  );
+
   const presetInput = useInput(
-    output?.preset ?? getDefaultPresetForEsOutput(output?.config_yaml ?? '', load),
+    output?.preset ??
+      getDefaultPresetForEsOutput(output?.config_yaml ?? '', yaml?.parse ?? (() => ({}))),
     () => undefined,
     isDisabled('preset')
   );
@@ -333,7 +353,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   shipper:
     enabled: false
   */
-  const configJs = output?.config_yaml ? load(output?.config_yaml) : {};
+  const configJs = output?.config_yaml && yaml ? yaml.parse(output.config_yaml) : {};
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
   const diskQueueEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
@@ -605,6 +625,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     nameInput,
     typeInput,
     elasticsearchUrlInput,
+    remoteElasticsearchUrlInput,
     diskQueueEnabledInput,
     diskQueuePathInput,
     diskQueueEncryptionEnabled,
@@ -671,6 +692,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
     const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
+    const remoteElasticsearchUrlsValid = remoteElasticsearchUrlInput.validate();
     const kafkaHostsValid = kafkaHostsInput.validate();
     const kafkaUsernameValid = kafkaAuthUsernameInput.validate();
     const kafkaPasswordPlainValid = kafkaAuthPasswordInput.validate();
@@ -735,7 +757,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     }
     if (isRemoteElasticsearch) {
       return (
-        elasticsearchUrlsValid &&
+        remoteElasticsearchUrlsValid &&
         additionalYamlConfigValid &&
         nameInputValid &&
         ((serviceTokenInput.value && serviceTokenValid) ||
@@ -760,6 +782,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   }, [
     nameInput,
     elasticsearchUrlInput,
+    remoteElasticsearchUrlInput,
     kafkaHostsInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
@@ -1017,7 +1040,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
             return {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
-              hosts: elasticsearchUrlInput.value,
+              hosts: remoteElasticsearchUrlInput.value,
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
@@ -1161,6 +1184,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     serviceTokenInput.value,
     serviceTokenSecretInput.value,
     elasticsearchUrlInput.value,
+    remoteElasticsearchUrlInput.value,
     presetInput.value,
     kibanaAPIKeyInput.value,
     syncIntegrationsInput.value,
