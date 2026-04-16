@@ -52,7 +52,6 @@ export interface FindLeadsResult {
 export interface LeadDataClient {
   createLeads(params: CreateLeadsParams): Promise<void>;
   findLeads(params: FindLeadsParams): Promise<FindLeadsResult>;
-  getLeadById(id: string): Promise<Lead | null>;
   updateLead(id: string, updates: Partial<Pick<Lead, 'status'>>): Promise<boolean>;
   dismissLead(id: string): Promise<boolean>;
   bulkUpdateLeads(ids: readonly string[], updates: { status: LeadStatus }): Promise<number>;
@@ -292,27 +291,6 @@ export const createLeadDataClient = ({
   };
 
   // -----------------------------------------------------------------------
-  // getLeadById — search by doc id across both indices
-  // -----------------------------------------------------------------------
-  const getLeadById = async (id: string): Promise<Lead | null> => {
-    try {
-      const resp = await esClient.search({
-        index: allIndices,
-        size: 1,
-        query: { term: { 'id.keyword': id } },
-        ignore_unavailable: true,
-      });
-
-      const hit = resp.hits.hits[0];
-      if (!hit?._source) return null;
-      return esDocToLead(hit._source as Record<string, unknown>);
-    } catch (e) {
-      logger.debug(`[LeadGeneration] Error fetching lead ${id}: ${e}`);
-      return null;
-    }
-  };
-
-  // -----------------------------------------------------------------------
   // updateLead — partial update by doc id
   // -----------------------------------------------------------------------
   const updateLead = async (
@@ -443,7 +421,6 @@ export const createLeadDataClient = ({
   return {
     createLeads,
     findLeads,
-    getLeadById,
     updateLead,
     dismissLead,
     bulkUpdateLeads,
