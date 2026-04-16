@@ -35,6 +35,13 @@ export const RESET_FIELD = 'kibana.alert.rule.name';
 const DEFAULT_DATA_TEST_SUBJ = 'previewTab';
 const VIEW_MODE = 'view';
 
+// Matches ?_tstart / ?_tend named time params used by the default ES|QL query.
+// When the user's custom ES|QL query uses these params, the Lens timeRange is
+// needed to resolve them. When the query has its own time filter (e.g.
+// `NOW() - 30 days`), passing timeRange to Lens adds an extra restriction that
+// causes "Preview matched alerts" to diverge from the Lens table sum.
+const HAS_TIME_NAMED_PARAMS = /\?_tstart|\?_tend/i;
+
 interface Props {
   dataTestSubj?: string;
   embeddableId: string;
@@ -103,6 +110,20 @@ const PreviewTabComponent = ({
   const onSelect = useCallback((value: string) => setTableStackBy0(value), [setTableStackBy0]);
 
   const timeRange: TimeRange = useMemo(() => ({ from: start, to: end }), [end, start]);
+
+  // When the user provides a custom ES|QL query with its own time filter (e.g.
+  // `NOW() - 30 days`) rather than named time params (?_tstart / ?_tend), the
+  // Lens EmbeddableComponent would apply settings.start/end as an *additional*
+  // restrictive filter, causing the Lens sum to diverge from the ES|QL count.
+  // In that case, skip passing timeRange so the Lens uses only the query's own
+  // time clause. When the query uses ?_tstart/?_tend, timeRange IS needed for
+  // Lens to resolve those params, so we keep it.
+  const effectiveTimeRange = useMemo(() => {
+    if (esqlQueryProp != null && !HAS_TIME_NAMED_PARAMS.test(esqlQueryProp)) {
+      return undefined;
+    }
+    return timeRange;
+  }, [esqlQueryProp, timeRange]);
 
   const esqlQuery = useMemo(
     () =>
@@ -233,7 +254,7 @@ const PreviewTabComponent = ({
                 hidePanelTitles={true}
                 id={embeddableId}
                 query={query}
-                timeRange={timeRange}
+                timeRange={effectiveTimeRange}
                 viewMode={VIEW_MODE}
                 withDefaultActions={true}
               />

@@ -82,7 +82,7 @@ const mockWorkflowsWithPredefined: WorkflowItem[] = [
 
 const defaultConfig: WorkflowConfiguration = {
   alertRetrievalWorkflowIds: [],
-  defaultAlertRetrievalMode: 'custom_query',
+  alertRetrievalMode: 'custom_query',
   validationWorkflowId: 'default',
 };
 
@@ -230,7 +230,7 @@ describe('WorkflowConfigurationPanel', () => {
   it('renders selected alert retrieval workflow', () => {
     const configWithSelection: WorkflowConfiguration = {
       alertRetrievalWorkflowIds: ['alert-retrieval-1'],
-      defaultAlertRetrievalMode: 'disabled',
+      alertRetrievalMode: 'custom_only',
       validationWorkflowId: 'default',
     };
 
@@ -246,7 +246,7 @@ describe('WorkflowConfigurationPanel', () => {
   it('renders multiple selected alert retrieval workflows', () => {
     const configWithMultipleSelections: WorkflowConfiguration = {
       alertRetrievalWorkflowIds: ['alert-retrieval-1', 'alert-retrieval-2'],
-      defaultAlertRetrievalMode: 'disabled',
+      alertRetrievalMode: 'custom_only',
       validationWorkflowId: 'default',
     };
 
@@ -322,7 +322,7 @@ describe('WorkflowConfigurationPanel', () => {
     it('renders label WITH count of 1 when exactly one workflow is selected', () => {
       const configWithOne: WorkflowConfiguration = {
         alertRetrievalWorkflowIds: ['alert-retrieval-1'],
-        defaultAlertRetrievalMode: 'disabled',
+        alertRetrievalMode: 'custom_only',
         validationWorkflowId: 'default',
       };
 
@@ -338,7 +338,7 @@ describe('WorkflowConfigurationPanel', () => {
     it('renders label WITH count when more than one workflow is selected', () => {
       const configWithTwo: WorkflowConfiguration = {
         alertRetrievalWorkflowIds: ['alert-retrieval-1', 'alert-retrieval-2'],
-        defaultAlertRetrievalMode: 'disabled',
+        alertRetrievalMode: 'custom_only',
         validationWorkflowId: 'default',
       };
 
@@ -354,7 +354,7 @@ describe('WorkflowConfigurationPanel', () => {
     it('renders label WITH count of 3 when three workflows are selected', () => {
       const configWithThree: WorkflowConfiguration = {
         alertRetrievalWorkflowIds: ['alert-retrieval-1', 'alert-retrieval-2', 'validation-1'],
-        defaultAlertRetrievalMode: 'disabled',
+        alertRetrievalMode: 'custom_only',
         validationWorkflowId: 'default',
       };
 

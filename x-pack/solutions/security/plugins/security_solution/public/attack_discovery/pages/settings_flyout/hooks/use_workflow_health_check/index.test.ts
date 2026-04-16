@@ -18,7 +18,7 @@ const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useL
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
   alertRetrievalWorkflowIds: [],
-  defaultAlertRetrievalMode: 'custom_query',
+  alertRetrievalMode: 'custom_query',
   validationWorkflowId: 'default',
 };
 

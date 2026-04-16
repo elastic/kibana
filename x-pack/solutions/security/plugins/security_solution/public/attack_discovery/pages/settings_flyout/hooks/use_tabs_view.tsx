@@ -16,14 +16,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { MONITORING_TAB_ID, SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from '../constants';
+import { SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from '../constants';
 import type { SettingsOverrideOptions } from '../../results/history/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../../common/lib/telemetry';
 import type { AttackDiscoverySettingsTab } from '../../../../common/lib/telemetry';
 import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
-import { useMonitoringView } from './use_monitoring_view';
 import { useSettingsView } from './use_settings_view';
 import { useScheduleView } from './use_schedule_view';
 
@@ -92,7 +91,6 @@ export const useTabsView = ({
     settings,
     showConnectorSelector: true,
   });
-  const { monitoringView, actionButtons: monitoringTabButtons } = useMonitoringView();
   const { scheduleView, actionButtons: scheduleTabButtons } = useScheduleView();
 
   const settingsTab: EuiTabbedContentTab = useMemo(
@@ -123,23 +121,9 @@ export const useTabsView = ({
     [scheduleView]
   );
 
-  const monitoringTab: EuiTabbedContentTab = useMemo(
-    () => ({
-      id: MONITORING_TAB_ID,
-      name: i18n.MONITORING_TAB_LABEL,
-      content: (
-        <>
-          <EuiSpacer size="m" />
-          {monitoringView}
-        </>
-      ),
-    }),
-    [monitoringView]
-  );
-
   const tabs = useMemo(() => {
-    return [monitoringTab, scheduleTab, settingsTab];
-  }, [monitoringTab, scheduleTab, settingsTab]);
+    return [scheduleTab, settingsTab];
+  }, [scheduleTab, settingsTab]);
 
   const [selectedTabId, setSelectedTabId] = useState<string>(defaultSelectedTabId ?? tabs[0].id);
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
@@ -153,11 +137,7 @@ export const useTabsView = ({
 
   const onTabClick = useCallback(
     (tab: EuiTabbedContentTab) => {
-      if (
-        tab.id === MONITORING_TAB_ID ||
-        tab.id === SCHEDULE_TAB_ID ||
-        tab.id === SETTINGS_TAB_ID
-      ) {
+      if (tab.id === SCHEDULE_TAB_ID || tab.id === SETTINGS_TAB_ID) {
         telemetry.reportEvent(AttackDiscoveryEventTypes.SettingsTabChanged, {
           tab: tab.id as AttackDiscoverySettingsTab,
         });
@@ -179,16 +159,12 @@ export const useTabsView = ({
   }, [onTabClick, selectedTab, tabs]);
 
   const actionButtons = useMemo(() => {
-    if (selectedTabId === MONITORING_TAB_ID) {
-      return monitoringTabButtons;
-    }
-
     if (selectedTabId === SCHEDULE_TAB_ID) {
       return scheduleTabButtons;
     }
 
     return filterActionButtons;
-  }, [filterActionButtons, monitoringTabButtons, scheduleTabButtons, selectedTabId]);
+  }, [filterActionButtons, scheduleTabButtons, selectedTabId]);
 
   return { tabsContainer, actionButtons };
 };

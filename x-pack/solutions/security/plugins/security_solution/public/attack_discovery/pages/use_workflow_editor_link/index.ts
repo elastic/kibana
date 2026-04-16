@@ -88,8 +88,7 @@ export const useWorkflowEditorLink = ({
     }
 
     const encodedWorkflowId = encodeURIComponent(effectiveWorkflowId);
-    const executionId =
-      workflowRunId && !workflowRunId.startsWith('stub-') ? workflowRunId : undefined;
+    const executionId = workflowRunId ?? undefined;
     const path = executionId
       ? `/${encodedWorkflowId}?tab=executions&executionId=${encodeURIComponent(executionId)}`
       : `/${encodedWorkflowId}`;

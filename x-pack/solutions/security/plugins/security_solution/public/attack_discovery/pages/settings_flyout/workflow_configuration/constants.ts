@@ -16,7 +16,7 @@ export const WORKFLOW_CONFIG_LOCAL_STORAGE_KEY = 'workflowConfig';
  * Default workflow settings when feature flag is first enabled
  */
 export const DEFAULT_WORKFLOW_CONFIGURATION: WorkflowConfiguration = {
+  alertRetrievalMode: 'custom_query',
   alertRetrievalWorkflowIds: [],
-  defaultAlertRetrievalMode: 'custom_query',
   validationWorkflowId: 'default',
 };
