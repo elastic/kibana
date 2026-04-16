@@ -27,6 +27,15 @@ responses:
                     }
                   ]
                 }
+  '400':
+    content:
+      application/json:
+        examples:
+          badRequestResponse:
+            value:
+              error: Bad Request
+              message: Bad request.
+              statusCode: 400
 x-codeSamples:
 - lang: cURL
   label: Import with createNewCopies
