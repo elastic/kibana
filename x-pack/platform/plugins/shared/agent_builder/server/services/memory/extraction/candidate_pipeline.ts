@@ -132,6 +132,7 @@ export class CandidatePipeline {
                 round_id: context.roundId,
               },
             ],
+            params: (candidate as any).params,
             space: context.space,
             user_name: context.userName,
             ...(context.userId ? { user_id: context.userId } : {}),

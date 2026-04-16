@@ -12,6 +12,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AgentBuilderConfig } from '../../../config';
 import type { ExtractionInput, ExtractionResult } from './memory_extractor';
 import { MemoryExtractor } from './memory_extractor';
+import { CognitiveExtractor } from './cognitive_extractor';
 import { ChunkingExtractor } from './chunking_extractor';
 import { TurnExtractor } from './turn_extractor';
 import type { EmbedFn } from './segmentation/embedding_similarity';
@@ -40,7 +41,8 @@ export interface ExtractionStrategyOptions {
 /**
  * Create the appropriate extraction strategy based on config.
  *
- * - 'llm': Uses MemoryExtractor (requires inference + connector + request)
+ * - 'llm': Uses MemoryExtractor — flat text memories (requires inference + connector + request)
+ * - 'cognitive': Uses CognitiveExtractor — structured memories with domain-specific params (requires inference + connector + request)
  * - 'chunking': Uses ChunkingExtractor (no external dependencies)
  * - 'turn': Uses TurnExtractor (one episodic memory per round, no external dependencies)
  */
@@ -61,6 +63,23 @@ export const createExtractionStrategy = (
         });
       }
       return new MemoryExtractor({
+        inference: opts.inference,
+        connectorId: opts.connectorId,
+        request: opts.request,
+        logger: opts.logger,
+      });
+    }
+    case 'cognitive': {
+      if (!opts.inference || !opts.connectorId || !opts.request) {
+        opts.logger.warn(
+          `Memory extraction method is "cognitive" but missing: inference=${!!opts.inference}, connectorId=${!!opts.connectorId}, request=${!!opts.request}. Falling back to "chunking".`
+        );
+        return new ChunkingExtractor({
+          config: opts.config.memory.extraction.chunking,
+          logger: opts.logger,
+        });
+      }
+      return new CognitiveExtractor({
         inference: opts.inference,
         connectorId: opts.connectorId,
         request: opts.request,

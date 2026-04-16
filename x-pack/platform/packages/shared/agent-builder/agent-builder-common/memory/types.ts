@@ -152,6 +152,18 @@ export interface MemoryNode {
   /** Conversation rounds that produced or referenced this memory */
   source_refs: MemorySourceRef[];
 
+  /**
+   * Structured domain-specific properties for this memory.
+   * In cognitive extraction mode, this carries typed metadata per domain:
+   * - semantic/biography: { category, institution, degree, ... }
+   * - semantic/social: { person, relationship, closeness, trust, ... }
+   * - semantic/preference: { topic, polarity, strength, ... }
+   * - semantic/psychometric: { framework, trait, score, evidence, ... }
+   * - episodic: { emotion, intensity, people_involved, temporal_context, ... }
+   * - procedural: { trigger, action, context, frequency, ... }
+   */
+  params?: Record<string, unknown>;
+
   /** Graph edges connecting this node to related memory nodes */
   links: MemoryLink[];
 
@@ -214,6 +226,7 @@ export interface MemoryCreateRequest {
   status?: MemoryStatus;
   source_refs?: MemorySourceRef[];
   links?: MemoryLink[];
+  params?: Record<string, unknown>;
   space: string;
   user_id?: string;
   user_name: string;
@@ -241,6 +254,7 @@ export interface MemoryUpdateRequest {
   last_reinforced_at?: string;
   conflict_refs?: string[];
   retrieval_stats_by_stage?: Partial<Record<RetrievalStage, MemoryRetrievalStats>>;
+  params?: Record<string, unknown>;
 }
 
 /**

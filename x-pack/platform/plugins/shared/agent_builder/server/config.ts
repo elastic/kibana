@@ -51,7 +51,7 @@ export const configSchema = schema.object({
     }),
     extraction: schema.object({
       method: schema.oneOf(
-        [schema.literal('llm'), schema.literal('chunking'), schema.literal('turn')],
+        [schema.literal('llm'), schema.literal('cognitive'), schema.literal('chunking'), schema.literal('turn')],
         { defaultValue: 'llm' }
       ),
       connectorId: schema.maybe(schema.string()),

@@ -91,6 +91,9 @@ const storageSettings = {
       // Conflict tracking (IDs of contradicting memories)
       conflict_refs: types.keyword({}),
 
+      // Structured domain-specific properties (cognitive extraction mode)
+      params: types.flattened({}),
+
       // Per-stage retrieval statistics stored as a flat object
       retrieval_stats_by_stage: types.object({ dynamic: false, properties: {} }),
     },
@@ -130,6 +133,7 @@ export interface MemoryProperties {
     message_ids?: string[];
   }>;
   conflict_refs?: string[];
+  params?: Record<string, unknown>;
   retrieval_stats_by_stage?: Partial<Record<RetrievalStage, { count: number; used_count: number }>>;
 }
 

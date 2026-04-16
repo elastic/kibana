@@ -86,6 +86,7 @@ const fromDoc = (doc: Document): MemoryNode => {
     last_used_at: _source.last_used_at,
     last_reinforced_at: _source.last_reinforced_at,
     conflict_refs: _source.conflict_refs,
+    params: _source.params,
     retrieval_stats_by_stage: _source.retrieval_stats_by_stage,
   };
 };
@@ -204,6 +205,7 @@ class MemoryClientImpl implements MemoryClient {
       updated_at: now,
       links: req.links ? linksToStorage(req.links) : [],
       source_refs: req.source_refs ? sourceRefsToStorage(req.source_refs) : [],
+      params: req.params,
     };
 
     await this.storage.getClient().index({ id, document: doc });
@@ -239,6 +241,7 @@ class MemoryClientImpl implements MemoryClient {
     if (req.conflict_refs !== undefined) updatedDoc.conflict_refs = req.conflict_refs;
     if (req.retrieval_stats_by_stage !== undefined)
       updatedDoc.retrieval_stats_by_stage = req.retrieval_stats_by_stage;
+    if (req.params !== undefined) updatedDoc.params = req.params;
 
     // Merge the update into the existing document
     const mergedDoc: MemoryProperties = {
@@ -267,6 +270,7 @@ class MemoryClientImpl implements MemoryClient {
           ? updatedDoc.source_refs
           : sourceRefsToStorage(existing.source_refs),
       conflict_refs: updatedDoc.conflict_refs ?? existing.conflict_refs,
+      params: updatedDoc.params ?? existing.params,
       retrieval_stats_by_stage:
         updatedDoc.retrieval_stats_by_stage ?? existing.retrieval_stats_by_stage,
     };
@@ -308,6 +312,7 @@ class MemoryClientImpl implements MemoryClient {
             updated_at: now,
             links: req.links ? linksToStorage(req.links) : [],
             source_refs: req.source_refs ? sourceRefsToStorage(req.source_refs) : [],
+            params: req.params,
           },
         },
       })
