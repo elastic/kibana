@@ -339,7 +339,7 @@
 
 <div class="header">
   <h1>POC v2 — IContentWidget + Context Keys + addAction keybindings</h1>
-  <span class="hint">Press <kbd>Ctrl</kbd>+<kbd>Space</kbd> to trigger, or type after a key</span>
+  <span class="hint">Press <kbd>Cmd</kbd>+<kbd>I</kbd> to trigger, or type after a key</span>
   <div class="scenario-tabs">
     <button class="scenario-tab active" data-scenario="connector-types">Connector Types</button>
     <button class="scenario-tab" data-scenario="connector-params">Connector Params</button>
@@ -764,15 +764,48 @@ require(['vs/editor/editor.main'], function (monaco) {
     },
   });
 
-  // Trigger widget: Ctrl+Space (always available)
+  // Trigger widget: Cmd+I on Mac / Ctrl+I on Win/Linux
+  // (Cmd+Space is Spotlight on Mac, Ctrl+Space triggers Monaco's built-in suggest)
   editor.addAction({
     id: 'customSuggest.trigger',
     label: 'Custom Suggest: Trigger',
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space],
+    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI],
     run: () => {
       showWidget();
     },
   });
+
+  // Suppress Monaco's built-in suggest widget entirely.
+  // The built-in trigger is Ctrl+Space — unbind it so it doesn't conflict.
+  // Also suppress the built-in accept/navigation keybindings when our widget is open.
+  monaco.editor.addKeybindingRules([
+    // Unbind Ctrl+Space from built-in suggest (we use Cmd+I instead)
+    {
+      keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space,
+      command: null,
+    },
+    {
+      keybinding: monaco.KeyCode.Space | monaco.KeyMod.WinCtrl,
+      command: null,
+    },
+    // When our widget is visible, suppress built-in suggest navigation
+    // so our addAction handlers take priority
+    {
+      keybinding: monaco.KeyCode.Enter,
+      command: null,
+      when: 'customSuggestWidgetVisible && !suggestWidgetVisible',
+    },
+    {
+      keybinding: monaco.KeyCode.Tab,
+      command: null,
+      when: 'customSuggestWidgetVisible && !suggestWidgetVisible',
+    },
+    {
+      keybinding: monaco.KeyCode.Escape,
+      command: null,
+      when: 'customSuggestWidgetVisible && !suggestWidgetVisible',
+    },
+  ]);
 
   // ─────────────────────────────────────────────────────────────
   // Filter text tracking via onDidChangeModelContent
