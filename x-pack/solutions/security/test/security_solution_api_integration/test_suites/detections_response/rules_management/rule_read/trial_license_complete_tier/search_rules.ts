@@ -224,9 +224,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.message).to.be.an('array');
       expect(
         (body.message as string[]).some((m) =>
-          m.includes(
-            `search.term exceeds maximum length of ${MAX_SEARCH_RULES_SEARCH_TERM_LENGTH}`
-          )
+          m.includes(`search.term exceeds maximum length of ${MAX_SEARCH_RULES_SEARCH_TERM_LENGTH}`)
         )
       ).to.be(true);
     });
