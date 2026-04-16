@@ -73,4 +73,5 @@ redirects:
   'extend/building-kibana.md': 'extend/tutorials/building-a-kibana-distributable.md'
   'extend/kibana-debugging.md': 'extend/tutorials/debugging-in-development.md'
   'extend/sample-data.md': 'extend/getting-started/add-data.md'
+  'extend/tutorials/register-a-new-saved-object-type.md': 'extend/saved-objects/create.md'
   'extend/development-plugin-resources.md': 'extend/getting-started/welcome.md'

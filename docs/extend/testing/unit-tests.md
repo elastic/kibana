@@ -296,7 +296,7 @@ describe('saved query service', () => {
 
 ## Saved object model versions [unit-tests-model-versions]
 
-_Also see [Defining model versions](../tutorials/register-a-new-saved-object-type.md)._
+_Also see [Defining model versions](../saved-objects/create.md)._
 
 Model version definitions are more structured than legacy migration functions, requiring specific tooling to test. The `@kbn/core-test-helpers-model-versions` package exposes utilities for testing model version transformations.
 

@@ -1,5 +1,5 @@
 ---
-navigation_title: "Tutorials"
+navigation_title: "Build and track custom performance metrics"
 ---
 
 # Build and track custom performance metrics

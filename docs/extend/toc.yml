@@ -58,9 +58,9 @@ toc:
       - file: lens.md
   - folder: tutorials
     children:
+      - file: index.md
       - file: adding-performance-metrics.md
       - file: wsl-on-windows-development.md
-      - file: register-a-new-saved-object-type.md
       - file: saved-object-search-method.md
       - file: access-the-elasticsearch-client-in-a-plugin.md
       - file: versioning-http-apis.md
@@ -155,11 +155,6 @@ toc:
           - file: feature-flags.md
       - file: ftr.md
   - file: plugin-list.md
-    children:
-      - file: kibana-dashboard-plugin.md
-      - file: kibana-expressions-plugin.md
-      - file: uiactions-plugin.md
-      - file: translations-plugin.md
   - file: dependencies-versions.md
   - file: development-telemetry.md
   - folder: api-documentation

@@ -23,7 +23,7 @@ A few notable services are called out below.
 
 * [{{kib}} Core API](/extend/kibana-platform-api.md)
 * [Security](/extend/development-security.md)
-* [Add data tutorials](/extend/add-data-tutorials.md)
+* [Add data tutorials](/extend/tutorials/home-tutorials.md)
 * [Developing Visualizations](/extend/development-visualize-index.md)
 * [Reporting integration](/extend/reporting-integration.md)
 
