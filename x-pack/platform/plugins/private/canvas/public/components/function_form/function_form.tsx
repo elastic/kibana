@@ -48,7 +48,7 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
         context={
           context ?? {
             state: 'error',
-            error: 'Error occured',
+            error: 'Error occurred',
             value: expressionType,
           }
         }
