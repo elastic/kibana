@@ -140,9 +140,12 @@ of these three cases applies:
 ### Case 1: Query is still valid — SKIP
 
 The query's detection intent is still relevant AND its ES|QL references fields
-that are still present and meaningful in the current `dataset_analysis`. The
-query would produce the same (or functionally equivalent) ES|QL if you
-generated it fresh from the current features.
+that are still present and meaningful in the current `dataset_analysis`.
+
+Apply this case whenever your candidate ES|QL is **functionally equivalent**
+to an existing query (matches the same documents), not just when it is
+textually identical. See "Rules" below for the equivalence patterns you must
+recognize.
 
 **Action:** Do NOT re-emit this query. Do not include it in any `add_queries`
 call. It is already stored and working correctly.
@@ -176,24 +179,27 @@ query. This is a genuinely new signal dimension.
 
 ### Rules
 
-- **Err on the side of keeping queries.** If you are uncertain whether an
-  existing query is still valid, do NOT skip it silently. Instead, re-emit it
-  as a new query (Case 3) without `replaces` — the system will deduplicate
-  exact matches automatically. A duplicate is always preferable to a
-  discarded query that was still valuable.
-- **Prefer NEW over REPLACE when uncertain.** Only use `replaces` when you
+- **Functional equivalence counts as Case 1 (SKIP).** Two queries are
+  functionally equivalent when they match the same documents, regardless of
+  syntax. Treat the following as the same query and do not re-emit:
+  - `MATCH_PHRASE(f, "a b c")` vs `f:"a" AND f:"b" AND f:"c"` (same text match)
+  - `f:"x" AND f:"y"` vs `f:"y" AND f:"x"` (operand order in AND/OR)
+  - `f IN ("a", "b")` vs `f == "a" OR f == "b"` (IN vs equality OR chain)
+  - Same predicate with a redundant filter added or removed (e.g., scoping to
+    `service.name == "X"` when the stream only contains service "X")
+  - Threshold rewording that doesn't change intent (`> 50` vs `>= 50`,
+    `error_rate > 5` vs `error_rate > 5.0`)
+- **Prefer SKIP over REPLACE when uncertain.** Use `replaces` only when you
   are confident the new query preserves the same detection intent AND the
-  existing ES|QL is clearly outdated. If you are unsure whether the existing
-  query needs updating, emit a new query instead — the worst outcome is a
-  near-duplicate, which is easy to clean up.
-- Never set `replaces` on a genuinely new query — only when superseding a
-  specific existing query whose detection intent you are preserving.
-- Never emit an unchanged query. If the ES|QL you would generate is identical
-  to the existing query's ES|QL, it belongs to Case 1 (SKIP).
-- When multiple existing queries could be consolidated into a single improved
-  query, pick the most relevant one for `replaces` and let the others remain.
+  existing ES|QL is clearly outdated. When unsure, skip (Case 1) rather than
+  emit a near-duplicate.
+- Never set `replaces` on a genuinely new query.
 - Never emit two queries with `replaces` pointing to the same existing query
-  ID — pick the best replacement and emit the other as a new query.
+  ID — pick the best replacement and skip the other.
+- **Intra-batch dedup is your responsibility.** Do not emit two queries in the
+  same `add_queries` call that are functionally equivalent to each other. The
+  automatic duplicate check only rejects exact ES|QL matches after
+  normalization; near-duplicates from the patterns above slip through.
 
 ### Reasoning checklist
 
@@ -499,7 +505,7 @@ Alternatively, you can use the function form `MATCH(field, "query")` which is eq
 - **All terms required (3+ terms):** `MATCH(body.text, "connection timeout error", {"operator": "AND"})` — cleaner for many terms.
 - **Exact phrase (word order matters):** `MATCH_PHRASE(body.text, "connection timeout")` — use only for well-known phrases where word order and adjacency are semantically important (e.g., `"Failed password for"`, `"Out of memory"`, `"Started Application in"`).
 
-**Default to separate `:` terms with `AND`** for multi-term queries. Reserve `MATCH_PHRASE` for known phrases where order matters.
+**Default to separate `:` terms with `AND`** for multi-term queries. Reserve `MATCH_PHRASE` for known phrases where word order is semantic (e.g., `"Failed password for"`, `"Out of memory"`). **Pick ONE form per concept** — never emit both the `AND`-of-`:` variant and the `MATCH_PHRASE` variant as separate queries; they are functionally equivalent duplicates.
 
 **On keyword fields**, `:` performs exact matching (the field is not analyzed):
 - `log.level:"ERROR"` → exact match on keyword field
@@ -745,10 +751,10 @@ FROM <stream>
 ### Guardrails
 
 1. **Precision first:** Higher threshold is safer. Prefer zero firings over false positives.
-2. **Signal diversity:** Each STATS query covers a distinct failure dimension (error rate, latency, throughput, auth, cardinality). Consolidate overlapping signals.
+2. **Signal diversity:** Emit **at most one STATS query per distinct failure dimension** (error rate, latency, throughput, auth, cardinality). If multiple candidates target the same dimension, pick the strongest and skip the others — do not emit variants that differ only in threshold, entity scope, or aggregation shape.
 3. **Bucket sizing:** Default 5 min. Low traffic (<100/min): 10–15 min. High traffic (>1000/min): 1–2 min.
 4. **Descriptions must answer:** (1) what user-visible problem, (2) what action, (3) threshold reasoning vs baseline, (4) thresholds may need adjustment, (5) include a "can indicate..." clause naming likely root causes — investigation agents use this as the hypothesis claim.
 5. **Severity:** Weigh relative deviation AND absolute impact. 2× from 0.1%→0.2% is low (~40). 2× from 20%→40% is critical (~85).
-6. **Complementarity:** For each important signal, generate a **detection + evidence pair**: a STATS query (BY bucket) for aggregate detection and a match query for evidence retrieval. The STATS query gets higher severity (tested first by investigators). Optionally add a per-entity STATS variant (BY <entity_field>, bucket) when entity cardinality is 2–50 and isolation adds diagnostic value — this counts as a separate dimension toward the >5 cap. Do not generate entity variants for single-entity streams.
+6. **Complementarity:** For each important signal, emit **at most three queries**: one STATS query (BY bucket) for aggregate detection, one match query for evidence retrieval, and optionally one per-entity STATS variant (BY <entity_field>, bucket) when entity cardinality is 2–50 and isolation adds diagnostic value. Pick a single entity field — never emit multiple per-entity variants for the same signal. The STATS query gets higher severity (tested first by investigators). Do not generate entity variants for single-entity streams.
 7. **Forbidden:** No `CATEGORIZE`, `CHANGE_POINT`, nested `STATS`, `SORT`/`LIMIT`/`KEEP`, `EVAL` outside STATS queries, high-cardinality BY (>50 distinct).
-8. **Target:** Generate as many as the data justifies — zero is fine if no pattern has field evidence. If >5, verify each adds a distinct dimension. Quality over quantity.
+8. **Target:** Generate as many as the data justifies — **do not pad**. Zero is fine if no pattern has field evidence. Every query must cite a concrete field, value distribution, log pattern, or feature from `dataset_analysis`/`get_stream_features`. Stop as soon as every remaining candidate would restate evidence you've already used or would be functionally equivalent to another emitted query (see the Rules in "Existing Queries"). The total count is bounded by Guardrails 2 and 6 (one per dimension, at most three per signal) — there is no fixed quota. Quality over quantity.
