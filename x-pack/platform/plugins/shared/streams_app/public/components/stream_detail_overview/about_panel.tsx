@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiCodeBlock,
@@ -16,12 +17,12 @@ import {
   EuiText,
   EuiTextArea,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import React, { useCallback, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useUpdateStreams } from '../../hooks/use_update_streams';
@@ -41,13 +42,13 @@ export function AboutPanel() {
   } = useKibana();
   const updateStream = useUpdateStreams(definition.stream.name);
 
+  const { euiTheme } = useEuiTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [descriptionValue, setDescriptionValue] = useState(description ?? '');
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [showEditButton, setShowEditButton] = useState(false);
 
   const saveDescription = useCallback(
     async (newDescription: string) => {
-      setIsUpdating(true);
       const stream = Streams.ingest.all.Definition.is(definition.stream)
         ? {
             ...omit(definition.stream, ['name', 'updated_at']),
@@ -79,12 +80,24 @@ export function AboutPanel() {
           }),
         });
       } finally {
-        setIsUpdating(false);
         setIsEditing(false);
       }
     },
     [definition, updateStream, notifications, refresh]
   );
+
+  useEffect(() => {
+    const handleKeyup = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        saveDescription(descriptionValue.trim());
+      }
+      if (e.key === 'Escape') {
+        setIsEditing(false);
+      }
+    };
+    window.addEventListener('keyup', handleKeyup);
+    return () => window.removeEventListener('keyup', handleKeyup);
+  }, [saveDescription, descriptionValue]);
 
   return (
     <EuiPanel
@@ -93,14 +106,35 @@ export function AboutPanel() {
       css={css`
         overflow: hidden;
       `}
+      onMouseEnter={() => setShowEditButton(true)}
+      onMouseLeave={() => setShowEditButton(false)}
     >
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.streams.streamOverview.aboutPanel.title', {
-            defaultMessage: 'About this stream',
-          })}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup>
+        <EuiFlexItem grow>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.streams.streamOverview.aboutPanel.title', {
+                defaultMessage: 'About this stream',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          {canEditDescription && showEditButton && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="pencil"
+                onClick={() => setIsEditing(true)}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamOverview.aboutPanel.editDescriptionAriaLabel',
+                  { defaultMessage: 'Edit description' }
+                )}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
@@ -116,95 +150,75 @@ export function AboutPanel() {
 
       {/* Edit mode: textarea + save/cancel */}
       {isEditing && canEditDescription && (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiTextArea
-              fullWidth
-              placeholder={i18n.translate(
-                'xpack.streams.streamOverview.aboutPanel.descriptionPlaceholder',
-                { defaultMessage: 'Enter a description for this stream' }
-              )}
-              aria-label={i18n.translate(
-                'xpack.streams.streamOverview.aboutPanel.descriptionInputAriaLabel',
-                { defaultMessage: 'Edit stream description' }
-              )}
-              value={descriptionValue}
-              onChange={(e) => setDescriptionValue(e.target.value)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="check"
-              isLoading={isUpdating}
-              onClick={() => saveDescription(descriptionValue)}
-              aria-label={i18n.translate(
-                'xpack.streams.streamOverview.aboutPanel.saveDescriptionAriaLabel',
-                { defaultMessage: 'Save description' }
-              )}
-            />
-            <EuiButtonIcon
-              iconType="cross"
-              onClick={() => setIsEditing(false)}
-              aria-label={i18n.translate(
-                'xpack.streams.streamOverview.aboutPanel.cancelDescriptionAriaLabel',
-                { defaultMessage: 'Cancel' }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiTextArea
+            fullWidth
+            placeholder={i18n.translate(
+              'xpack.streams.streamOverview.aboutPanel.descriptionPlaceholder',
+              { defaultMessage: 'Enter a description for this stream' }
+            )}
+            aria-label={i18n.translate(
+              'xpack.streams.streamOverview.aboutPanel.descriptionInputAriaLabel',
+              { defaultMessage: 'Edit stream description' }
+            )}
+            value={descriptionValue}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+              }
+            }}
+            onChange={(e) => setDescriptionValue(e.target.value)}
+          />
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="gray">
+            <p css={css``}>
+              {i18n.translate('xpack.streams.streamOverview.aboutPanel.markdownAllowedTextLabel', {
+                defaultMessage: 'Markdown is allowed',
+              })}
+            </p>
+          </EuiText>
+        </>
       )}
 
       {/* Read mode: render saved description with an edit button */}
       {!isEditing && description && (
-        <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem>
-            <div style={{ maxHeight: 400, overflowY: 'auto' }}>
-              <EuiMarkdownFormat textSize="s" color="subdued">
-                {description}
-              </EuiMarkdownFormat>
-            </div>
-          </EuiFlexItem>
-          {canEditDescription && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="pencil"
-                onClick={() => setIsEditing(true)}
-                aria-label={i18n.translate(
-                  'xpack.streams.streamOverview.aboutPanel.editDescriptionAriaLabel',
-                  { defaultMessage: 'Edit description' }
-                )}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <EuiMarkdownFormat
+          textSize="s"
+          color="subdued"
+          onClick={() => setIsEditing(true)}
+          css={css`
+            cursor: pointer;
+          `}
+        >
+          {description}
+        </EuiMarkdownFormat>
       )}
 
       {/* Empty state: invite the user to add a description */}
       {!isEditing && !description && canEditDescription && (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText
-              size="s"
-              color="primary"
-              onClick={() => setIsEditing(true)}
-              css={css`
-                cursor: pointer;
-              `}
-            >
-              {i18n.translate('xpack.streams.streamOverview.aboutPanel.enterDescription', {
-                defaultMessage: 'Enter description',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              {i18n.translate(
-                'xpack.streams.streamOverview.aboutPanel.toHelpIdentifyThisTextLabel',
-                { defaultMessage: 'to help identify this stream' }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText size="s" color="subdued">
+          <button
+            type="button"
+            css={css`
+              color: ${euiTheme.colors.primary};
+              cursor: pointer;
+              text-decoration: underline;
+              margin-right: ${euiTheme.size.xs};
+              background: none;
+              border: none;
+              padding: 0;
+              font: inherit;
+            `}
+            onClick={() => setIsEditing(true)}
+          >
+            {i18n.translate('xpack.streams.streamOverview.aboutPanel.enterDescription', {
+              defaultMessage: 'Enter description',
+            })}
+          </button>
+          {i18n.translate('xpack.streams.streamOverview.aboutPanel.toHelpIdentifyThisTextLabel', {
+            defaultMessage: 'to help identify this stream',
+          })}
+        </EuiText>
       )}
     </EuiPanel>
   );
