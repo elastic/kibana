@@ -12,6 +12,7 @@ import {
   getFilterStore,
   destroyFilterStore,
   emitFilterToggle,
+  emitIsOneOfFilterToggle,
   emitEntityRelationshipToggle,
   emitPinnedEuidToggle,
   isFilterActiveForScope,
@@ -117,6 +118,42 @@ describe('FilterStore', () => {
       expect(store.isFilterActive('user.name', 'alice')).toBe(false);
       store.destroy();
     });
+
+    describe('multiple values', () => {
+      const values = ['alice', 'bob'];
+
+      it('should add a phrases filter with action "show"', () => {
+        const store = new FilterStore(uniqueScopeId());
+        store.setDataViewId('data-view-1');
+        store.toggleFilter('user.name', values, 'show');
+
+        expect(store.getFilters()).toHaveLength(1);
+        expect(store.isFilterActive('user.name', values)).toBe(true);
+        store.destroy();
+      });
+
+      it('should remove a phrases filter with action "hide"', () => {
+        const store = new FilterStore(uniqueScopeId());
+        store.setDataViewId('data-view-1');
+        store.toggleFilter('user.name', values, 'show');
+        expect(store.isFilterActive('user.name', values)).toBe(true);
+
+        store.toggleFilter('user.name', values, 'hide');
+        expect(store.isFilterActive('user.name', values)).toBe(false);
+        store.destroy();
+      });
+
+      it('should treat a single-element array the same as a plain string', () => {
+        const store = new FilterStore(uniqueScopeId());
+        store.setDataViewId('data-view-1');
+        store.toggleFilter('user.name', ['alice'], 'show');
+
+        expect(store.getFilters()).toHaveLength(1);
+        expect(store.isFilterActive('user.name', 'alice')).toBe(true);
+        expect(store.isFilterActive('user.name', ['alice'])).toBe(true);
+        store.destroy();
+      });
+    });
   });
 
   describe('isFilterActive', () => {
@@ -138,6 +175,32 @@ describe('FilterStore', () => {
       store.setFilters([buildPhraseFilter('user.name', 'alice')]);
       expect(store.isFilterActive('user.name', 'bob')).toBe(false);
       store.destroy();
+    });
+
+    describe('multiple values', () => {
+      const values = ['alice', 'bob'];
+
+      it('should return true when a phrases filter covering all values is active', () => {
+        const store = new FilterStore(uniqueScopeId());
+        store.setDataViewId('data-view-1');
+        store.toggleFilter('user.name', values, 'show');
+        expect(store.isFilterActive('user.name', values)).toBe(true);
+        store.destroy();
+      });
+
+      it('should return false when only a subset of the values is active', () => {
+        const store = new FilterStore(uniqueScopeId());
+        store.setDataViewId('data-view-1');
+        store.toggleFilter('user.name', ['alice'], 'show');
+        expect(store.isFilterActive('user.name', values)).toBe(false);
+        store.destroy();
+      });
+
+      it('should return false when no filters exist', () => {
+        const store = new FilterStore(uniqueScopeId());
+        expect(store.isFilterActive('user.name', values)).toBe(false);
+        store.destroy();
+      });
     });
   });
 
@@ -302,6 +365,56 @@ describe('event bus', () => {
     });
   });
 
+  describe('emitIsOneOfFilterToggle', () => {
+    const values = ['alice', 'bob'];
+
+    it('should add a phrases filter via event bus', () => {
+      const id = uniqueScopeId();
+      const store = getOrCreateFilterStore(id);
+      store.setDataViewId('dv-1');
+
+      emitIsOneOfFilterToggle(id, 'user.name', values, 'show');
+
+      expect(store.isFilterActive('user.name', values)).toBe(true);
+      destroyFilterStore(id);
+    });
+
+    it('should remove a phrases filter via event bus', () => {
+      const id = uniqueScopeId();
+      const store = getOrCreateFilterStore(id);
+      store.setDataViewId('dv-1');
+
+      emitIsOneOfFilterToggle(id, 'user.name', values, 'show');
+      expect(store.isFilterActive('user.name', values)).toBe(true);
+
+      emitIsOneOfFilterToggle(id, 'user.name', values, 'hide');
+      expect(store.isFilterActive('user.name', values)).toBe(false);
+      destroyFilterStore(id);
+    });
+
+    it('should not deliver events to a different scope', () => {
+      const idA = uniqueScopeId();
+      const idB = uniqueScopeId();
+      const storeA = getOrCreateFilterStore(idA);
+      const storeB = getOrCreateFilterStore(idB);
+      storeA.setDataViewId('dv-1');
+      storeB.setDataViewId('dv-1');
+
+      emitIsOneOfFilterToggle(idA, 'user.name', values, 'show');
+
+      expect(storeA.isFilterActive('user.name', values)).toBe(true);
+      expect(storeB.isFilterActive('user.name', values)).toBe(false);
+      destroyFilterStore(idA);
+      destroyFilterStore(idB);
+    });
+
+    it('should not throw when no store exists for the scopeId', () => {
+      expect(() => {
+        emitIsOneOfFilterToggle('non-existent', 'user.name', values, 'show');
+      }).not.toThrow();
+    });
+  });
+
   describe('emitEntityRelationshipToggle', () => {
     it('should deliver entity relationship events to the matching store', () => {
       const id = uniqueScopeId();
@@ -436,6 +549,34 @@ describe('scope helper functions', () => {
 
     it('should return false when store does not exist', () => {
       expect(isFilterActiveForScope('non-existent', 'user.name', 'alice')).toBe(false);
+    });
+
+    describe('multiple values', () => {
+      const values = ['alice', 'bob'];
+
+      it('should return true when a phrases filter covering all values is active', () => {
+        const id = uniqueScopeId();
+        const store = getOrCreateFilterStore(id);
+        store.setDataViewId('dv-1');
+        store.toggleFilter('user.name', values, 'show');
+
+        expect(isFilterActiveForScope(id, 'user.name', values)).toBe(true);
+        destroyFilterStore(id);
+      });
+
+      it('should return false when only a subset of the values is active', () => {
+        const id = uniqueScopeId();
+        const store = getOrCreateFilterStore(id);
+        store.setDataViewId('dv-1');
+        store.toggleFilter('user.name', ['alice'], 'show');
+
+        expect(isFilterActiveForScope(id, 'user.name', values)).toBe(false);
+        destroyFilterStore(id);
+      });
+
+      it('should return false when store does not exist', () => {
+        expect(isFilterActiveForScope('non-existent', 'user.name', values)).toBe(false);
+      });
     });
   });
 

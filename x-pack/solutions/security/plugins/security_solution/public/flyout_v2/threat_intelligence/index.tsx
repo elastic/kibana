@@ -7,29 +7,11 @@
 
 import { css } from '@emotion/react';
 import React, { memo } from 'react';
-import {
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { groupBy, isEmpty } from 'lodash';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
-import { EnrichmentSection } from './components/threat_details_view_enrichment_section';
-import { ENRICHMENT_TYPES } from '../../../common/cti/constants';
-import { EnrichmentRangePicker } from './components/threat_intelligence_view_enrichment_range_picker';
-import { useThreatIntelligenceDetails } from './hooks/use_threat_intelligence_details';
-import {
-  THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID,
-  THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID,
-  THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID,
-  THREAT_INTELLIGENCE_MATCHES_TEST_ID,
-} from './components/test_ids';
-import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
+import { ThreatIntelligenceDetailsView } from './components/threat_intelligence_details_view';
 
 export const THREAT_INTELLIGENCE_TAB_ID = 'threatIntelligence';
 
@@ -45,79 +27,23 @@ export interface ThreatIntelligenceDetailsProps {
 }
 
 /**
- * Threat intelligence displayed in the document details expandable flyout left section under the Insights tab
+ * Threat intelligence flyout — header + body shell wrapping ThreatIntelligenceDetailsView.
  */
 export const ThreatIntelligenceDetails = memo(({ hit }: ThreatIntelligenceDetailsProps) => {
   const { euiTheme } = useEuiTheme();
-  const {
-    enrichments,
-    eventFields,
-    isEnrichmentsLoading,
-    isEventDataLoading,
-    isLoading,
-    range,
-    setRange,
-  } = useThreatIntelligenceDetails({ hit });
-
-  const showInvestigationTimeEnrichments = !isEmpty(eventFields);
-  const {
-    [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
-    [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,
-    undefined: matchesWithNoType,
-  } = groupBy(enrichments, 'matched.type');
 
   return (
     <>
       <EuiFlyoutHeader
         hasBorder
         css={css`
-          padding-block-end: ${euiTheme.size.m} !important;
+          padding-block: ${euiTheme.size.s} !important;
         `}
       >
         <ToolsFlyoutHeader hit={hit} title={TITLE} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {isEventDataLoading ? (
-          <FlyoutLoading data-test-subj={THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID} />
-        ) : (
-          <EuiPanel hasShadow={false} hasBorder={false}>
-            <EnrichmentSection
-              dataTestSubj={THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID}
-              enrichments={indicatorMatches}
-              type={ENRICHMENT_TYPES.IndicatorMatchRule}
-            />
-
-            {showInvestigationTimeEnrichments ? (
-              <>
-                <EuiHorizontalRule />
-                <EnrichmentSection
-                  dataTestSubj={THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID}
-                  enrichments={threatIntelEnrichments}
-                  type={ENRICHMENT_TYPES.InvestigationTime}
-                  loading={isLoading}
-                >
-                  <EnrichmentRangePicker
-                    setRange={setRange}
-                    loading={isEnrichmentsLoading}
-                    range={range}
-                  />
-                  <EuiSpacer size="m" />
-                </EnrichmentSection>
-              </>
-            ) : null}
-
-            {matchesWithNoType ? (
-              <>
-                <EuiHorizontalRule />
-                {indicatorMatches && <EuiSpacer size="l" />}
-                <EnrichmentSection
-                  enrichments={matchesWithNoType}
-                  dataTestSubj={THREAT_INTELLIGENCE_MATCHES_TEST_ID}
-                />
-              </>
-            ) : null}
-          </EuiPanel>
-        )}
+        <ThreatIntelligenceDetailsView hit={hit} />
       </EuiFlyoutBody>
     </>
   );

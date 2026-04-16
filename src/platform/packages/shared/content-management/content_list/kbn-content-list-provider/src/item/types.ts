@@ -7,6 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+
+/**
+ * {@link ContentListItem} fields that contain user UIDs.
+ *
+ * Used to seed the user-profile cache from fetched items and to resolve
+ * display values typed into the query bar.
+ */
+export const USER_UID_FIELDS = ['createdBy'] as const;
+
+/**
+ * Sentinel filter key for managed items (e.g. bundled with a package).
+ *
+ * Used in `getCreatorKey`, filter facets, and field definitions to
+ * distinguish managed items from real user-authored ones.
+ */
+export const MANAGED_USER_FILTER = '__managed__';
+
+/**
+ * Sentinel filter key for items with no `createdBy` value
+ * (e.g. created via API or before Kibana 7.14).
+ */
+export const NO_CREATOR_USER_FILTER = '__no_creator__';
+
+/** Display label for the {@link MANAGED_USER_FILTER} sentinel. */
+export const MANAGED_USER_LABEL = i18n.translate(
+  'contentManagement.contentList.createdBy.managedLabel',
+  { defaultMessage: 'Managed' }
+);
+
+/** Display label for the {@link NO_CREATOR_USER_FILTER} sentinel. */
+export const NO_CREATOR_USER_LABEL = i18n.translate(
+  'contentManagement.contentList.createdBy.noCreatorLabel',
+  { defaultMessage: 'No creator' }
+);
+
+/** The set of sentinel filter keys (not real user UIDs). */
+export const SENTINEL_KEYS: ReadonlySet<string> = new Set([
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+]);
+
+/**
+ * Resolve the effective creator key for an item.
+ *
+ * Maps `managed` items to {@link MANAGED_USER_FILTER} and items without a
+ * `createdBy` to {@link NO_CREATOR_USER_FILTER}. All other items return
+ * their `createdBy` UID. Direct `ContentListProvider` consumers should use
+ * this when implementing `findItems` filtering against `createdBy` values,
+ * which may contain sentinel keys.
+ */
+export const getCreatorKey = (item: { managed?: boolean; createdBy?: string }): string => {
+  if (item.managed) {
+    return MANAGED_USER_FILTER;
+  }
+  return item.createdBy ?? NO_CREATOR_USER_FILTER;
+};
+
 /**
  * Standardized item structure for rendering components (tables, grids, etc.).
  *
