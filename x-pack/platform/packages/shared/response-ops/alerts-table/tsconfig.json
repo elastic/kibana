@@ -47,5 +47,8 @@
     "@kbn/field-types",
     "@kbn/react-query",
     "@kbn/maintenance-windows-plugin",
+    "@kbn/rison",
+    "@kbn/data-views-plugin",
+    "@kbn/core-mount-utils-browser",
   ]
 }

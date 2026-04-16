@@ -497,6 +497,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               }
               cellActionsOptions={cellActionsOptions}
               showInspectButton
+              showCsvExportButton
               services={services}
               {...tablePropsOverrides}
             />

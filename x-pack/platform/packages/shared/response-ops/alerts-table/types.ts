@@ -425,6 +425,12 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   configurationStorage?: IStorageWrapper | null;
   /**
+   * Show a CSV export button in the toolbar. The button exports all alerts matching
+   * the current filters using the reporting CSV endpoint.
+   * @default false
+   */
+  showCsvExportButton?: boolean;
+  /**
    * Dependencies
    */
   services: {
@@ -464,6 +470,23 @@ export interface AdditionalContext {}
 export type RenderContext<AC extends AdditionalContext> = {
   tableId?: string;
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
+
+  /**
+   * The rule type IDs used to filter alerts
+   */
+  ruleTypeIds: string[];
+  /**
+   * The consumers used to filter alerts
+   */
+  consumers?: string[];
+  /**
+   * The ES query used to filter alerts
+   */
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
+  /**
+   * The current sort configuration
+   */
+  sort: AlertsTableSortCombinations[];
 
   /**
    * Refetches all the queries, resetting the alerts pagination if necessary
@@ -611,6 +634,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
   showInspectButton?: boolean;
+  showCsvExportButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
    * Allows to consumers of the table to decide to highlight a row based on the current alert.

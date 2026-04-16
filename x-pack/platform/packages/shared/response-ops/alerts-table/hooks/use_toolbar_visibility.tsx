@@ -22,6 +22,7 @@ import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { BulkActionsPanelConfig, RowSelection } from '../types';
 import { LastUpdatedAt } from '../components/last_updated_at';
 import { AlertsQueryInspector } from '../components/alerts_query_inspector';
+import { CsvExportButton } from '../components/csv_export_button';
 import { ALERTS_TABLE_TITLE } from '../translations';
 
 const BulkActionsToolbar = lazy(() => import('../components/bulk_actions_toolbar_control'));
@@ -31,10 +32,12 @@ const RightControl = memo(
     additionalToolbarControls,
     alertsQuerySnapshot,
     showInspectButton,
+    showCsvExportButton,
   }: {
     additionalToolbarControls?: ReactNode;
     alertsQuerySnapshot?: EsQuerySnapshot;
     showInspectButton: boolean;
+    showCsvExportButton: boolean;
   }) => {
     const {
       bulkActionsStore: [bulkActionsState],
@@ -49,6 +52,7 @@ const RightControl = memo(
         )}
         <LastUpdatedAt updatedAt={bulkActionsState.updatedAt} />
         {additionalToolbarControls}
+        {showCsvExportButton && <CsvExportButton />}
       </>
     );
   }
@@ -117,6 +121,7 @@ const useGetDefaultVisibility = ({
   fieldsBrowserOptions,
   alertsQuerySnapshot,
   showInspectButton,
+  showCsvExportButton,
   toolbarVisibilityProp,
 }: {
   alertsCount: number;
@@ -128,6 +133,7 @@ const useGetDefaultVisibility = ({
   fieldsBrowserOptions?: FieldBrowserOptions;
   alertsQuerySnapshot?: EsQuerySnapshot;
   showInspectButton: boolean;
+  showCsvExportButton: boolean;
   toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   return useMemo(() => {
@@ -139,6 +145,7 @@ const useGetDefaultVisibility = ({
             additionalToolbarControls={additionalToolbarControls}
             alertsQuerySnapshot={alertsQuerySnapshot}
             showInspectButton={showInspectButton}
+            showCsvExportButton={showCsvExportButton}
           />
         ),
         left: {
@@ -169,6 +176,7 @@ const useGetDefaultVisibility = ({
     onResetColumns,
     onToggleColumn,
     showInspectButton,
+    showCsvExportButton,
     additionalToolbarControls,
   ]);
 };
@@ -190,6 +198,7 @@ export const useGetToolbarVisibility = ({
   fieldsBrowserOptions,
   alertsQuerySnapshot,
   showInspectButton,
+  showCsvExportButton,
   toolbarVisibilityProp,
   settings,
 }: {
@@ -209,6 +218,7 @@ export const useGetToolbarVisibility = ({
   fieldsBrowserOptions?: FieldBrowserOptions;
   alertsQuerySnapshot?: EsQuerySnapshot;
   showInspectButton: boolean;
+  showCsvExportButton: boolean;
   toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
   settings: SettingsStart;
 }): EuiDataGridToolBarVisibilityOptions => {
@@ -224,6 +234,7 @@ export const useGetToolbarVisibility = ({
       fieldsBrowserOptions,
       alertsQuerySnapshot,
       showInspectButton,
+      showCsvExportButton,
     };
   }, [
     alertsCount,
@@ -235,6 +246,7 @@ export const useGetToolbarVisibility = ({
     fieldsBrowserOptions,
     alertsQuerySnapshot,
     showInspectButton,
+    showCsvExportButton,
   ]);
   const defaultVisibility = useGetDefaultVisibility(defaultVisibilityProps);
   const options = useMemo(() => {
@@ -259,6 +271,7 @@ export const useGetToolbarVisibility = ({
               additionalToolbarControls={additionalToolbarControls}
               alertsQuerySnapshot={alertsQuerySnapshot}
               showInspectButton={showInspectButton}
+              showCsvExportButton={showCsvExportButton}
             />
           ),
           left: {
@@ -292,6 +305,7 @@ export const useGetToolbarVisibility = ({
     additionalToolbarControls,
     alertsQuerySnapshot,
     showInspectButton,
+    showCsvExportButton,
     alertsCount,
     alerts,
     setIsBulkActionsLoading,
