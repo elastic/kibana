@@ -15,7 +15,7 @@ export function ErrorStatePrompt() {
       title={
         <div>
           {i18n.translate('xpack.apm.error.prompt.title', {
-            defaultMessage: `Sorry, an error occured :(`,
+            defaultMessage: `Sorry, an error occurred :(`,
           })}
         </div>
       }
