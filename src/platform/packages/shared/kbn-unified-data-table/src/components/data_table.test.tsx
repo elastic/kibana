@@ -235,14 +235,6 @@ describe('UnifiedDataTable', () => {
       component = await getComponent();
     });
 
-    const copySelectedDocumentsAsText = async (wrapper: ReactWrapper<UnifiedDataTableProps>) => {
-      findTestSubject(wrapper, 'unifiedDataTableSelectionBtn').simulate('click');
-      findTestSubject(wrapper, 'unifiedDataTableCopyRowsAsText').simulate('click');
-      // wait for async copy action to avoid act warning
-      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-      return (navigator.clipboard.writeText as jest.Mock).mock.calls.at(-1)![0];
-    };
-
     afterEach(() => {
       component?.unmount();
     });
@@ -364,8 +356,11 @@ describe('UnifiedDataTable', () => {
       async () => {
         await toggleDocSelection(component, esHitsMock[2]);
         await toggleDocSelection(component, esHitsMock[1]);
-        const copiedText = await copySelectedDocumentsAsText(component);
-        expect(copiedText).toBe(
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
+        // wait for async copy action to avoid act warning
+        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
           '"\'@timestamp"\t"_index"\t"_score"\tbytesDisplayName\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
         );
       },
