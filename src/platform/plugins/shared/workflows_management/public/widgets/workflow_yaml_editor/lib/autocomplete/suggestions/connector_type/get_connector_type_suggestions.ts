@@ -90,10 +90,14 @@ export function getConnectorTypeSuggestions(
 
     const description = connector?.description || genericDocumentation;
 
-    const isMarkdown = description && /[\\`*_{}[\]()#+\-.!]/g.test(description);
+    // Build documentation for the suggest details panel.
+    // Monaco includes documentation text in aria-labels when details are visible,
+    // so we use a short summary and only fall back to the full description if no summary exists.
+    const docText = connector?.summary || genericDocumentation || description;
+    const isMarkdown = docText && /[\\`*_{}[\]()#+\-.!]/g.test(docText);
     const documentation = isMarkdown
-      ? { value: description, isTrusted: true, supportHtml: true }
-      : description;
+      ? { value: docText, isTrusted: true, supportHtml: true }
+      : docText;
 
     return {
       label: connectorType, // Show the actual type as label

@@ -156,16 +156,22 @@ describe('getConnectorTypeSuggestions', () => {
       const result = getConnectorTypeSuggestions('elasticsearch.', mockRange);
       expect(result).toHaveLength(2);
       expect(result[0].detail).toBe('elasticsearch.index');
-      expect(result[0].documentation).toBe('Index documents');
+      expect(result[0].documentation).toMatchObject({
+        value: 'Elasticsearch API - index',
+      });
       expect(result[1].detail).toBe('elasticsearch.search');
-      expect(result[1].documentation).toBe('Search documents');
+      expect(result[1].documentation).toMatchObject({
+        value: 'Elasticsearch API - search',
+      });
     });
 
     it('should handle kibana namespace prefix', () => {
       const result = getConnectorTypeSuggestions('kibana.', mockRange);
       expect(result).toHaveLength(1);
       expect(result[0].detail).toBe('kibana.alert');
-      expect(result[0].documentation).toBe('Create alerts');
+      expect(result[0].documentation).toMatchObject({
+        value: 'Kibana API - alert',
+      });
     });
 
     it('should match elasticsearch APIs without full prefix', () => {
