@@ -118,13 +118,8 @@ spaceTest.describe('Workflow management CRUD edge cases', { tag: tags.stateful.c
     const finalState = await workflowsApi.getWorkflow(workflow.id);
     expect(finalState.enabled).toBe(false);
 
-    let rejected = false;
-    try {
-      await workflowsApi.run(workflow.id, {});
-    } catch {
-      rejected = true;
-    }
-    expect(rejected).toBe(true);
+    const result = await workflowsApi.rawRun(workflow.id, {});
+    expect(result.status).not.toBe(200);
   });
 
   spaceTest('delete workflow then it disappears from list', async () => {
@@ -142,13 +137,8 @@ spaceTest.describe('Workflow management CRUD edge cases', { tag: tags.stateful.c
 
     await workflowsApi.bulkDelete([workflow.id]);
 
-    let rejected = false;
-    try {
-      await workflowsApi.run(workflow.id, {});
-    } catch {
-      rejected = true;
-    }
-    expect(rejected).toBe(true);
+    const result = await workflowsApi.rawRun(workflow.id, {});
+    expect(result.status).not.toBe(200);
   });
 
   spaceTest('update with invalid YAML preserves previous valid state', async () => {

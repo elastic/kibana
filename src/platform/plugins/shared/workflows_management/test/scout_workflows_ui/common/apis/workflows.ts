@@ -186,7 +186,7 @@ export class WorkflowsApiService {
       method: 'POST',
       path: `/s/${this.spaceId}/api/workflows/workflow/${id}/run`,
       body: { inputs },
-      ignoreErrors: [404],
+      ignoreErrors: [400, 404],
     });
     return response;
   }
