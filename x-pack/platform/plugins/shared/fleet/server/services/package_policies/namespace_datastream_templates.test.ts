@@ -357,7 +357,6 @@ describe('handleNamespaceTemplateUpdate', () => {
             id: 'logs-nginx.access@namespace.production',
             type: ElasticsearchAssetType.indexTemplate,
           },
-          { id: 'production@custom', type: ElasticsearchAssetType.componentTemplate },
         ]),
       })
     );
@@ -366,7 +365,7 @@ describe('handleNamespaceTemplateUpdate', () => {
   it('skips data streams whose index template does not exist in ES', async () => {
     mockInstalledPackage();
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.indices.getIndexTemplate.mockRejectedValue(new Error('not found'));
+    esClient.indices.getIndexTemplate.mockRejectedValue({ meta: { statusCode: 404 } });
 
     const policy = makePackagePolicy({ namespace: 'production' });
     await expect(
@@ -659,8 +658,6 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
             id: 'logs-nginx.access@namespace.staging',
             type: ElasticsearchAssetType.indexTemplate,
           },
-          { id: 'default@custom', type: ElasticsearchAssetType.componentTemplate },
-          { id: 'staging@custom', type: ElasticsearchAssetType.componentTemplate },
         ]),
       })
     );

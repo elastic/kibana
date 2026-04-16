@@ -41,7 +41,6 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   MAX_CONCURRENT_COMPONENT_TEMPLATES,
 } from '../../constants';
-import { PackageNotFoundError } from '../../errors';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { isNamespaceIndexTemplateEnabled } from '../spaces/space_settings';
 
@@ -71,7 +70,9 @@ async function isNamespaceSafeToRemove(
 
   return !result.saved_objects.some(
     (so) =>
-      (so.attributes.namespace || 'default') === namespace && !excludePolicyIds.includes(so.id)
+      !so.id.endsWith(':prev') &&
+      (so.attributes.namespace || 'default') === namespace &&
+      !excludePolicyIds.includes(so.id)
   );
 }
 
@@ -141,7 +142,10 @@ async function fetchBaseTemplate(
   try {
     const res = await esClient.indices.getIndexTemplate({ name: templateName });
     rawTemplate = res.index_templates[0]?.index_template;
-  } catch {
+  } catch (err: unknown) {
+    if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
+      throw err;
+    }
     logger.debug(`[${logContext}] index template ${templateName} not found, skipping`);
     return undefined;
   }
@@ -253,7 +257,12 @@ export async function handleNamespaceTemplateUpdate({
   });
 
   if (!installedPackageWithAssets) {
-    throw new PackageNotFoundError(`package not found with assets ${packagePolicy.package.name}`);
+    appContextService
+      .getLogger()
+      .debug(
+        `[handleNamespaceTemplateUpdate] Package ${packagePolicy.package.name} installation not found, skipping namespace template update`
+      );
+    return;
   }
 
   const { packageInfo } = installedPackageWithAssets;
@@ -308,9 +317,11 @@ export async function handleNamespaceTemplateUpdate({
         const oldNsName = generateNamespaceTemplateName(templateName, oldNamespace);
         try {
           await esClient.indices.deleteIndexTemplate({ name: oldNsName }, { ignore: [404] });
-        } catch (err: any) {
+        } catch (err: unknown) {
           logger.warn(
-            `[handleNamespaceTemplateUpdate] Failed to delete namespace template ${oldNsName}: ${err.message}`
+            `[handleNamespaceTemplateUpdate] Failed to delete namespace template ${oldNsName}: ${
+              err instanceof Error ? err.message : String(err)
+            }`
           );
         }
       }
@@ -333,17 +344,15 @@ export async function handleNamespaceTemplateUpdate({
   const assetsToRemove: Array<{ id: string; type: ElasticsearchAssetType }> = [];
 
   if (newNamespaceEnabled && updatedIndexTemplates.length > 0) {
-    // Derive tracked assets from the templates that were actually created
+    // Derive tracked assets from the templates that were actually created.
+    // Note: ${namespace}@custom component templates are user-created and intentionally
+    // not tracked in installed_es to avoid showing them as Fleet-managed assets.
     for (const { templateName } of updatedIndexTemplates) {
       assetsToAdd.push({
         id: templateName,
         type: ElasticsearchAssetType.indexTemplate,
       });
     }
-    assetsToAdd.push({
-      id: `${newNamespace}@custom`,
-      type: ElasticsearchAssetType.componentTemplate,
-    });
   }
 
   if (oldNamespace && oldNamespaceEnabled && oldNamespaceSafeToRemove) {
@@ -476,10 +485,6 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
         type: ElasticsearchAssetType.indexTemplate,
       });
     }
-    assetsToAdd.push({
-      id: `${namespace}@custom`,
-      type: ElasticsearchAssetType.componentTemplate,
-    });
   }
 
   await updateEsAssetReferences(soClient, packageName, currentEsRefs, { assetsToAdd });
@@ -499,9 +504,11 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
       async (ref) => {
         try {
           await esClient.indices.deleteIndexTemplate({ name: ref.id }, { ignore: [404] });
-        } catch (err: any) {
+        } catch (err: unknown) {
           logger.warn(
-            `[handleNamespaceTemplateRestoreAfterPackageInstall] Failed to delete stale namespace template ${ref.id}: ${err.message}`
+            `[handleNamespaceTemplateRestoreAfterPackageInstall] Failed to delete stale namespace template ${
+              ref.id
+            }: ${err instanceof Error ? err.message : String(err)}`
           );
         }
       },
@@ -610,9 +617,11 @@ export async function handleNamespaceTemplateDelete({
 
         try {
           await esClient.indices.deleteIndexTemplate({ name: nsName }, { ignore: [404] });
-        } catch (err: any) {
+        } catch (err: unknown) {
           logger.warn(
-            `[handleNamespaceTemplateDelete] Failed to delete namespace template ${nsName}: ${err.message}`
+            `[handleNamespaceTemplateDelete] Failed to delete namespace template ${nsName}: ${
+              err instanceof Error ? err.message : String(err)
+            }`
           );
         }
       },
@@ -748,10 +757,6 @@ export async function syncNamespaceTemplates({
               id: t.templateName,
               type: ElasticsearchAssetType.indexTemplate,
             }));
-          assetsToAdd.push({
-            id: `${namespace}@custom`,
-            type: ElasticsearchAssetType.componentTemplate,
-          });
 
           await updateEsAssetReferences(
             soClient,
@@ -797,9 +802,11 @@ export async function syncNamespaceTemplates({
           async (ref) => {
             try {
               await esClient.indices.deleteIndexTemplate({ name: ref.id }, { ignore: [404] });
-            } catch (err: any) {
+            } catch (err: unknown) {
               logger.warn(
-                `[syncNamespaceTemplates] Failed to delete namespace template ${ref.id}: ${err.message}`
+                `[syncNamespaceTemplates] Failed to delete namespace template ${ref.id}: ${
+                  err instanceof Error ? err.message : String(err)
+                }`
               );
             }
           },

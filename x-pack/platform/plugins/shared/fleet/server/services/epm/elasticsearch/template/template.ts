@@ -913,6 +913,12 @@ export function generateNamespaceTemplateIndexPattern(
 /**
  * Returns the priority for a namespace-scoped index template.
  * Always higher than the base template so ES picks it for matching data streams.
+ *
+ * Note: for data streams with `dataset_is_prefix: true`, the base template priority is 150
+ * and the namespace template priority is 200 — the same numeric value as a regular base
+ * template. This is intentional: Elasticsearch resolves priority ties by index pattern
+ * specificity, so the more specific namespace pattern (e.g. `metrics-test.*-production*`)
+ * wins over the regular base pattern (e.g. `metrics-test.*-*`) even at equal priority.
  */
 export function getNamespaceTemplatePriority(dataStream: RegistryDataStream): number {
   return getTemplatePriority(dataStream) + NAMESPACE_TEMPLATE_PRIORITY_BOOST;
