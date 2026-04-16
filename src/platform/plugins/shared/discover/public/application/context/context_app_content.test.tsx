@@ -75,22 +75,21 @@ describe('ContextAppContent test', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('unifiedDataTableToolbar')).toBeInTheDocument();
+      expect(screen.getByTestId('unifiedDataTableToolbar')).toBeVisible();
     });
   };
 
   it('should render discover grid correctly', async () => {
     await renderComponent();
 
-    expect(screen.getByRole('grid')).toBeInTheDocument();
-    expect(screen.getByTestId('discoverDocTable')).toBeInTheDocument();
-    expect(screen.getByTestId('unifiedDataTableToolbar')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+    expect(screen.getByTestId('unifiedDataTableToolbar')).toBeVisible();
   });
 
   it('should not show display options button', async () => {
     await renderComponent();
 
-    expect(screen.getByTestId('unifiedDataTableToolbar')).toBeInTheDocument();
+    expect(screen.getByTestId('unifiedDataTableToolbar')).toBeVisible();
     expect(screen.queryByTestId('dataGridDisplaySelectorButton')).not.toBeInTheDocument();
   });
 });
