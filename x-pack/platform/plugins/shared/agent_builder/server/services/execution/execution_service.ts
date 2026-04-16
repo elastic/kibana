@@ -30,7 +30,6 @@ import type {
 import { ExecutionStatus } from './types';
 import { taskTypes } from './task';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
-import type { ExecutionMode } from '@kbn/agent-builder-common';
 import {
   handleAgentExecution,
   collectAndWriteEvents,
@@ -173,7 +172,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     // Run locally — we're already on a task manager node (spawned from a parent execution)
-    return this.executeLocally({ execution, request, executionMode: 'subagent' });
+    return this.executeLocally({ execution, request });
   }
 
   async getExecution(executionId: string): Promise<AgentExecution | undefined> {
@@ -247,13 +246,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   private async executeLocally({
     execution,
     request,
-    executionMode,
   }: {
     execution: AgentExecution;
     request: ExecuteAgentParams['request'];
-    executionMode?: ExecutionMode;
   }): Promise<ExecuteAgentResult> {
-    const { executionId } = execution;
+    const { executionId, executionMode } = execution;
     const executionClient = this.createExecutionClient();
 
     // Update status to running
