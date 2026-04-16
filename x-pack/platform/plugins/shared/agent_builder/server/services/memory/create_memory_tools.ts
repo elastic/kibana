@@ -9,7 +9,6 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { MemoryService } from './memory_service';
 import { MemorySessionManager } from './memory_session_manager';
 import {
-  createCheckpointTool,
   createRememberTool,
   createReinforceTool,
 } from './tools';
@@ -42,16 +41,6 @@ export const createMemoryTools = (
   const sessionManager = new MemorySessionManager();
   const { getMemoryService, retrievalMethod, getConfig, getInternalServices } = options;
 
-  const checkpoint = createCheckpointTool({
-    getMemoryService,
-    retrievalMethod,
-    getConfig,
-    getInternalServices,
-    getActiveMemorySet: () => {
-      throw new Error('getActiveMemorySet must be resolved per-call');
-    },
-  });
-
   const remember = createRememberTool({
     getMemoryService,
     retrievalMethod,
@@ -69,21 +58,6 @@ export const createMemoryTools = (
   });
 
   // Wrap each tool handler to inject the per-run ActiveMemorySet via the session manager.
-
-  const checkpointWithSession: BuiltinToolDefinition<any> = {
-    ...checkpoint,
-    handler: async (params, context) => {
-      const activeSet = sessionManager.getOrCreate(context.runContext.runId);
-      const tool = createCheckpointTool({
-        getMemoryService,
-        retrievalMethod,
-        getConfig,
-        getInternalServices,
-        getActiveMemorySet: () => activeSet,
-      });
-      return tool.handler(params, context);
-    },
-  };
 
   const rememberWithSession: BuiltinToolDefinition<any> = {
     ...remember,
@@ -111,5 +85,5 @@ export const createMemoryTools = (
     },
   };
 
-  return [checkpointWithSession, rememberWithSession, reinforceWithSession];
+  return [rememberWithSession, reinforceWithSession];
 };

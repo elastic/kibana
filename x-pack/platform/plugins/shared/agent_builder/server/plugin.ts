@@ -49,6 +49,9 @@ import {
   setMemoryExtractionCallback,
   setShowMemoryToolCalls,
 } from './services/execution/run_agent/run_chat_agent';
+import { registerMemoryAutoRetrievalHook, consumeUndeliveredMemories } from './services/memory/hooks/auto_retrieval_hook';
+import { setGetUndeliveredMemoriesFn } from './services/execution/run_agent/graph';
+import { formatMemoryInjection } from './services/memory/hooks/before_agent_hook';
 import {
   registerMemoryConsolidationTaskDefinition,
   scheduleMemoryConsolidationTask,
@@ -210,6 +213,20 @@ export class AgentBuilderPlugin
 
     if (this.config.memory.enabled) {
       setShowMemoryToolCalls(this.config.memory.showToolCalls);
+
+      registerMemoryAutoRetrievalHook(serviceSetups, {
+        logger: this.logger,
+        config: this.config,
+        getInternalServices,
+      });
+
+      setGetUndeliveredMemoriesFn(async () => {
+        const memories = await consumeUndeliveredMemories();
+        if (memories.length === 0) return null;
+        return formatMemoryInjection(
+          memories.map((m) => ({ node: m, score: m.confidence }))
+        );
+      });
 
       registerMemoryBeforeAgentHook(serviceSetups, {
         logger: this.logger,

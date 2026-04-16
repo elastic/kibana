@@ -93,7 +93,6 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
-  memoryTools.checkpoint,
   memoryTools.remember,
   memoryTools.reinforce,
 ];

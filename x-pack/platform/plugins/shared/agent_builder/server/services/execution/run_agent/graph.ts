@@ -17,9 +17,7 @@ import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import {
   createReasoningEvent,
   createToolCallMessage,
-  sanitizeToolId,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import { memoryTools } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ResolvedConfiguration } from './types';
 import { convertError, isRecoverableError } from './utils/errors';
@@ -36,7 +34,6 @@ import {
 import { createAnswerAgentStructured } from './answer_agent_structured';
 import {
   errorAction,
-  executeToolAction,
   handoverAction,
   isAgentErrorAction,
   isAnswerAction,
@@ -49,6 +46,17 @@ import type { ProcessedConversation } from './utils/prepare_conversation';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
+
+/**
+ * Callback to get undelivered memories from auto-retrieval.
+ * Set by plugin.ts. Returns formatted memory text or null.
+ */
+let _getUndeliveredMemoriesFn: (() => Promise<string | null>) | undefined;
+
+export const setGetUndeliveredMemoriesFn = (fn: NonNullable<typeof _getUndeliveredMemoriesFn>): void => {
+  _getUndeliveredMemoriesFn = fn;
+};
+
 
 export const createAgentGraph = ({
   chatModel,
@@ -146,97 +154,8 @@ export const createAgentGraph = ({
       );
     }
 
-    const sanitizedCheckpoint = sanitizeToolId(memoryTools.checkpoint);
-    const sanitizedRemember = sanitizeToolId(memoryTools.remember);
-    const sanitizedReinforce = sanitizeToolId(memoryTools.reinforce);
-
-    // Check if memory system is enabled (tools are registered)
-    const memoryEnabled = toolManager.list().some((t) => t.name === sanitizedCheckpoint);
-
-    const isMemoryTool = (name: string) =>
-      name === sanitizedCheckpoint ||
-      name === sanitizedRemember ||
-      name === sanitizedReinforce;
-
-    const hasCheckpoint = lastAction.tool_calls.some(
-      (tc) => tc.toolName === sanitizedCheckpoint
-    );
-    const hasNonMemoryTools = lastAction.tool_calls.some((tc) => !isMemoryTool(tc.toolName));
-
-    // Guardrail: if the agent calls non-memory tools without checkpoint(),
-    // reject the call and remind it to include checkpoint.
-    // Only enforced when memory system is enabled.
-    if (memoryEnabled && hasNonMemoryTools && !hasCheckpoint) {
-      return {
-        mainActions: [
-          executeToolAction(
-            lastAction.tool_calls.map((tc) => ({
-              toolCallId: tc.toolCallId,
-              content:
-                'Error: You must call memory.checkpoint alongside any tool call. ' +
-                'Please retry by calling memory.checkpoint (with goal, missing_info, next_tool, query_hint, final=false) ' +
-                'together with your intended tool call.',
-            }))
-          ),
-        ],
-      };
-    }
-
     lastAction.tool_calls.forEach((toolCall) => toolManager.recordToolUse(toolCall.toolName));
 
-    const checkpointCalls = lastAction.tool_calls.filter(
-      (tc) => tc.toolName === sanitizedCheckpoint
-    );
-    const otherCalls = lastAction.tool_calls.filter(
-      (tc) => tc.toolName !== sanitizedCheckpoint
-    );
-
-    // When checkpoint is called alongside other tools, run them concurrently
-    // but don't block on checkpoint — if it's still running when the main tools
-    // finish, return a minimal placeholder so we add zero latency.
-    if (checkpointCalls.length > 0 && otherCalls.length > 0) {
-      const checkpointMsg = createToolCallMessage(checkpointCalls);
-      const mainMsg = createToolCallMessage(otherCalls, lastAction.message);
-
-      const checkpointPromise = toolNode
-        .invoke([checkpointMsg], {})
-        .catch((err: Error) => {
-          logger.warn(`[executeTool] checkpoint failed (non-blocking): ${err.message}`);
-          return null;
-        });
-
-      const mainResult = await toolNode.invoke([mainMsg], {});
-
-      // Check if checkpoint finished while we waited for the main tools
-      const settled = await Promise.race([
-        checkpointPromise.then((r) => ({ done: true as const, result: r })),
-        Promise.resolve({ done: false as const, result: null }),
-      ]);
-
-      const mainActions = processToolNodeResponse(mainResult);
-
-      if (settled.done && settled.result) {
-        const checkpointActions = processToolNodeResponse(settled.result);
-        return { mainActions: [...checkpointActions, ...mainActions] };
-      }
-
-      // Checkpoint still running — return a placeholder tool result so the
-      // model doesn't error on a missing response for the tool call it made.
-      // The checkpoint will continue in background and populate ActiveMemorySet.
-      // Note: content must start with "Error:" so convert_graph_events.ts
-      // handles artifact-less tool results gracefully.
-      const placeholderAction = executeToolAction(
-        checkpointCalls.map((tc) => ({
-          toolCallId: tc.toolCallId,
-          content:
-            'Error: Memory checkpoint is still retrieving — no memories available yet. ' +
-            'Proceeding without memory context for this step.',
-        }))
-      );
-      return { mainActions: [placeholderAction, ...mainActions] };
-    }
-
-    // Default path: no special handling needed
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
     const actions = processToolNodeResponse(toolNodeResult);
@@ -273,9 +192,27 @@ export const createAgentGraph = ({
       return {
         mainActions: [handoverAction('', true)],
       };
-    } else {
-      return {};
     }
+
+    // Inject any undelivered memories into the handover message
+    // so the answer agent has memory context when formulating the response.
+    if (_getUndeliveredMemoriesFn && isHandoverAction(lastAction)) {
+      try {
+        const memoriesText = await _getUndeliveredMemoriesFn();
+        if (memoriesText) {
+          const enrichedMessage = lastAction.message
+            ? `${lastAction.message}\n\n[Retrieved Memories]\n${memoriesText}`
+            : `[Retrieved Memories]\n${memoriesText}`;
+          return {
+            mainActions: [handoverAction(enrichedMessage, lastAction.forceful)],
+          };
+        }
+      } catch (err) {
+        logger.warn(`prepareToAnswer: memory injection failed: ${(err as Error).message}`);
+      }
+    }
+
+    return {};
   };
 
   const answeringModel = chatModel.withConfig({

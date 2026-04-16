@@ -55,7 +55,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.get_failed_documents`,
 
   // Memory
-  'memory.checkpoint',
   'memory.remember',
   'memory.reinforce',
 

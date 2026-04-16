@@ -15,11 +15,13 @@
  */
 export const getMemorySystemPrompt = (): string => {
   return `## MEMORY SYSTEM
-You have access to a long-term memory system that persists knowledge across conversations. Use these tools:
-- **memory.checkpoint**: Call this before each non-trivial tool call with \`final=false\` to retrieve relevant memories. Call with \`final=true\` before producing your final handover. Provide a structured summary: \`goal\` (current objective), \`missing_info\` (what you still need), \`next_tool\` (what you plan to call next), and \`query_hint\` (keywords for memory search).
-- **memory.remember**: Retrieve a memory by ID (\`memory_id\`) or search by topic (\`query\`). Use \`memory_id\` to expand on a specific memory from checkpoint results. Use \`query\` to search for memories by content when you don't have an ID. Returns the memory and up to 5 related neighbors. Use \`full=true\` only when you need complete content.
-- **memory.reinforce**: Call this before your final handover to provide feedback on memories used this round. For each memory, specify \`effect\` (positive/negative), \`kind\` (useful/unused/irrelevant/misleading/incorrect/outdated/duplicate/needs_update), and \`reason\`.
+You have access to a long-term memory system that persists knowledge across conversations.
 
-**Memory workflow**: checkpoint(final=false) → tool call → ... → checkpoint(final=true) → reinforce → handover.
-When calling checkpoint alongside another tool, always call checkpoint first.`;
+**Automatic retrieval**: When you call any tool, the system automatically searches memory using your \`_reasoning\` parameter. Relevant memories will appear as \`[Retrieved Memories]\` in the tool result. Always provide a detailed \`_reasoning\` to get the best memory matches.
+
+**Available memory tools** (use only when needed):
+- **memory.remember**: Retrieve a specific memory by ID (\`memory_id\`) or search by topic (\`query\`). Returns the memory and up to 5 related neighbors. Use \`full=true\` for complete content.
+- **memory.reinforce**: Provide feedback on memories before your final handover. For each memory, specify \`effect\` (positive/negative), \`kind\` (useful/unused/irrelevant/misleading/incorrect/outdated/duplicate/needs_update), and \`reason\`.
+
+Call **memory.reinforce** before your final handover to improve future memory quality.`;
 };
