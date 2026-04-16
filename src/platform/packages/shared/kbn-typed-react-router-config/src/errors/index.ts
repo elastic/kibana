@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('create_runtime_field', () => {
-    loadTestFile(require.resolve('./errors'));
-    loadTestFile(require.resolve('./main'));
-  });
-}
+export * from './invalid_route_params_exception';
+export * from './not_found_route_exception';
