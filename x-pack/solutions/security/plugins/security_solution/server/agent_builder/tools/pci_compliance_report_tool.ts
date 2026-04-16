@@ -163,7 +163,7 @@ async function evaluateRequirementForReport({
     const count = toNumber(coverageResult.values?.[0]?.[0]);
 
     if (count > 0) {
-      status = definition.verdict === 'rows_mean_violation' ? 'GREEN' : 'GREEN';
+      status = 'GREEN';
       confidence = definition.buildViolationEsql ? 'HIGH' : 'MEDIUM';
       evidenceCount = count;
       topFindings.push(`${count} matching events found for ${definition.name}.`);
@@ -301,7 +301,7 @@ export const pciComplianceReportTool = (
       const redCount = rows.filter((r) => r.status === 'RED').length;
       const amberCount = rows.filter((r) => r.status === 'AMBER').length;
       const greenCount = rows.filter((r) => r.status === 'GREEN').length;
-      const notAssessableCount = rows.filter((r) => r.status === 'NOT_ASSESSABLE').length;
+      const notAssessableCount = rows.filter((r) => r.confidence === 'NOT_ASSESSABLE').length;
 
       const highConfCount = rows.filter((r) => r.confidence === 'HIGH').length;
       const overallConfidence: ComplianceConfidence =

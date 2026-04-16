@@ -19,6 +19,7 @@ const pciFieldMapperSchema = z.object({
     .describe('Index pattern to inspect for field mapping (e.g. "logs-custom-myapp*").'),
   targetFields: z
     .array(z.string())
+    .min(1)
     .optional()
     .describe(
       'Optional list of ECS fields to map to. Defaults to common PCI-relevant ECS fields.'

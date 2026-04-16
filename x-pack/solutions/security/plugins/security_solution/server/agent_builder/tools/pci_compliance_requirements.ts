@@ -26,13 +26,15 @@ export interface PciRequirementDefinition {
 
 export const DEFAULT_PCI_INDEX_PATTERNS = ['logs-*', 'metrics-*', 'endgame-*'] as const;
 
+const escapeEsqlString = (s: string): string => s.replace(/"/g, '\\"');
+
 const coverageQuery = (
   indexPattern: string,
   from: string,
   to: string,
   whereClause: string
 ): string =>
-  `FROM ${indexPattern} | WHERE @timestamp >= "${from}" AND @timestamp <= "${to}" AND ${whereClause} | STATS matching_events = COUNT(*) | LIMIT 1`;
+  `FROM ${indexPattern} | WHERE @timestamp >= "${escapeEsqlString(from)}" AND @timestamp <= "${escapeEsqlString(to)}" AND ${whereClause} | STATS matching_events = COUNT(*) | LIMIT 1`;
 
 export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
   // ── Top-level coverage checks (requirements 1–12) ──────────────────────

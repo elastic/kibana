@@ -86,12 +86,13 @@ async function runWithConcurrency<T>(
   tasks: Array<() => Promise<T>>,
   limit: number
 ): Promise<T[]> {
-  const results: T[] = [];
+  const results: T[] = new Array(tasks.length);
   const executing: Set<Promise<void>> = new Set();
 
-  for (const task of tasks) {
-    const p = task().then((result) => {
-      results.push(result);
+  for (let i = 0; i < tasks.length; i++) {
+    const index = i;
+    const p = tasks[index]().then((result) => {
+      results[index] = result;
       executing.delete(p);
     });
     executing.add(p);
@@ -126,7 +127,8 @@ async function runPreflight(
       (f) => f !== '@timestamp' && !existingFields.includes(f)
     );
 
-    if (missing.length === definition.requiredFields.filter((f) => f !== '@timestamp').length) {
+    const requiredWithoutTimestamp = definition.requiredFields.filter((f) => f !== '@timestamp');
+    if (requiredWithoutTimestamp.length > 0 && missing.length === requiredWithoutTimestamp.length) {
       return { confidence: 'NOT_ASSESSABLE', missingFields: missing };
     }
     if (missing.length > 0) {
