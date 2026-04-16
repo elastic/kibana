@@ -51,6 +51,7 @@ import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
+import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
@@ -85,7 +86,7 @@ const createMockParsedMetrics = (
 });
 
 const createDefaultParams = (overrides?: Record<string, unknown>) => ({
-  fetchParams: {
+  fetchParams: getFetchParamsMock({
     query: { esql: 'TS metrics-*' },
     dataView: {
       getFieldByName: jest.fn(),
@@ -96,7 +97,7 @@ const createDefaultParams = (overrides?: Record<string, unknown>) => ({
     filters: [],
     esqlVariables: [],
     ...overrides,
-  },
+  }),
   services: {
     data: { search: { search: jest.fn() } },
     uiSettings: {},
