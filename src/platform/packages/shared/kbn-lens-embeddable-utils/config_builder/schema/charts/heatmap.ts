@@ -12,7 +12,7 @@ import { omit } from 'lodash';
 import { schema, type TypeOf } from '@kbn/config-schema';
 
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
-import { colorByValueSchema } from '../color';
+import { colorByValueSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
   sharedPanelInfoSchema,
@@ -54,6 +54,35 @@ const simpleLabelsSchema = schema.object(omit(labelsSchemaProps, 'orientation'))
 const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
   meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
 });
+
+const heatmapStylingSchema = schema.object(
+  {
+    cells: schema.maybe(
+      schema.object(
+        {
+          labels: schema.maybe(
+            schema.object({
+              visible: schema.maybe(
+                schema.boolean({
+                  defaultValue: false,
+                  meta: { description: 'Show cell labels' },
+                })
+              ),
+            })
+          ),
+        },
+        { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'heatmapStyling',
+      title: 'Heatmap styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 const heatmapSharedStateSchema = {
   type: schema.literal('heatmap'),
@@ -114,23 +143,6 @@ const heatmapSharedStateSchema = {
       }
     )
   ),
-  cells: schema.maybe(
-    schema.object(
-      {
-        labels: schema.maybe(
-          schema.object({
-            visible: schema.maybe(
-              schema.boolean({
-                defaultValue: false,
-                meta: { description: 'Show cell labels' },
-              })
-            ),
-          })
-        ),
-      },
-      { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
-    )
-  ),
 };
 
 const heatmapAxesStateSchemaProps = {
@@ -144,7 +156,11 @@ const heatmapAxesStateESQLSchemaProps = {
 };
 
 const heatmapStateMetricOptionsSchemaProps = {
-  color: schema.maybe(colorByValueSchema),
+  color: schema.maybe(
+    schema.oneOf([colorByValueSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
 };
 
 export const heatmapStateSchemaNoESQL = schema.object(
@@ -153,6 +169,7 @@ export const heatmapStateSchemaNoESQL = schema.object(
     ...heatmapAxesStateSchemaProps,
     ...dslOnlyPanelInfoSchema,
     ...dataSourceSchema,
+    styling: schema.maybe(heatmapStylingSchema),
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
       heatmapStateMetricOptionsSchemaProps
     ),
@@ -165,6 +182,7 @@ export const heatmapStateSchemaESQL = schema.object(
     ...heatmapSharedStateSchema,
     ...heatmapAxesStateESQLSchemaProps,
     ...dataSourceEsqlTableSchema,
+    styling: schema.maybe(heatmapStylingSchema),
     metric: esqlColumnWithFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }

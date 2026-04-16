@@ -47,7 +47,10 @@ export const useEditSkillService = ({ onSuccess, onError }: UseEditSkillServiceP
     mutationFn: ({ skillId, skill }) => skillsService.update({ skillId, ...skill }),
     onSuccess,
     onError,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.skills.all }),
+    onSettled: (skill) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.skills.list });
+      queryClient.invalidateQueries({ queryKey: queryKeys.skills.byId(skill?.id) });
+    },
   });
 
   return { updateSkillSync: mutate, updateSkill: mutateAsync, isLoading };
