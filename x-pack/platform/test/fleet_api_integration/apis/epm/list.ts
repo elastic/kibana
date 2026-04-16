@@ -131,15 +131,36 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
 
-        const listResponse = await supertest
-          .get('/api/fleet/epm/packages?withPackagePoliciesCount=true')
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        try {
+          const listResponse = await supertest
+            .get('/api/fleet/epm/packages?withPackagePoliciesCount=true')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
 
-        const nginxItem = listResponse.body.items.find((item: any) => item.name === 'nginx');
-        expect(nginxItem).to.be.ok();
-        // The policy with absent latest_revision must be counted (NOT false filter).
-        expect(nginxItem.packagePoliciesInfo.count).to.be.greaterThan(0);
+          const nginxItem = listResponse.body.items.find((item: any) => item.name === 'nginx');
+          expect(nginxItem).to.be.ok();
+          // The policy with absent latest_revision must be counted (NOT false filter).
+          expect(nginxItem.packagePoliciesInfo.count).to.be.greaterThan(0);
+        } finally {
+          // Restore latest_revision:true so this document does not affect other tests.
+          await es.updateByQuery({
+            index: INGEST_SAVED_OBJECT_INDEX,
+            refresh: true,
+            script: {
+              lang: 'painless',
+              source: `ctx._source['${PACKAGE_POLICY_SAVED_OBJECT_TYPE}']['latest_revision'] = true`,
+            },
+            query: {
+              bool: {
+                must: [
+                  { term: { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE } },
+                  { term: { _id: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}:${policyId}` } },
+                ],
+              },
+            },
+          });
+          await apiClient.deletePackagePolicy(policyId).catch(() => {});
+        }
       });
 
       it('does not count :prev (latest_revision:false) policies in the package policies count', async function () {
