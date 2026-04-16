@@ -9,13 +9,13 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { registerKbnClientSoRoutes } from './kbn_client_so';
-import { registerTaskManagerRoutes } from './task_manager';
+import { registerTaskManagerDeleteRoute } from './delete';
+import { registerTaskManagerScheduleRoute } from './schedule';
 
-export const registerRoutes = (
+export const registerTaskManagerRoutes = (
   router: IRouter,
-  getTaskManagerStart: () => TaskManagerStartContract | undefined
+  getStartContract: () => TaskManagerStartContract | undefined
 ) => {
-  registerKbnClientSoRoutes(router);
-  registerTaskManagerRoutes(router, getTaskManagerStart);
+  registerTaskManagerScheduleRoute(router, getStartContract);
+  registerTaskManagerDeleteRoute(router, getStartContract);
 };

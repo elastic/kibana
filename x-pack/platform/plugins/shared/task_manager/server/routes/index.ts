@@ -8,5 +8,3 @@
 export { healthRoute } from './health';
 export { backgroundTaskUtilizationRoute } from './background_task_utilization';
 export { metricsRoute } from './metrics';
-export { scheduleRoute } from './schedule';
-export { deleteRoute } from './delete';

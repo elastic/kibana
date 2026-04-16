@@ -47,13 +47,7 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import type { AggregationOpts, FetchResult, SearchOpts } from './task_store';
 import { TaskStore } from './task_store';
 import { TaskScheduling } from './task_scheduling';
-import {
-  backgroundTaskUtilizationRoute,
-  deleteRoute,
-  healthRoute,
-  metricsRoute,
-  scheduleRoute,
-} from './routes';
+import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
@@ -265,9 +259,6 @@ export class TaskManagerPlugin
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
     });
-
-    scheduleRoute(router, () => this.startContract);
-    deleteRoute(router, () => this.startContract);
 
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
