@@ -110,6 +110,7 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     usePaginationMock.mockReturnValue({
@@ -169,6 +170,7 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));
