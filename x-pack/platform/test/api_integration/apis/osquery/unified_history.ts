@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('elastic-api-version', '2023-10-31')
         .expect(200);
 
-      expect(response.body.data.length).to.be.lessThan(2);
+      expect(response.body.data.length).to.be(1);
     });
 
     it('supports sourceFilters parameter for live queries', async () => {
