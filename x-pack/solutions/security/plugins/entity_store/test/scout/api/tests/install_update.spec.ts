@@ -31,7 +31,7 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     };
   });
 
-  apiTest.only(
+  apiTest(
     'Should install the entity store happy path with feature flag enabled',
     async ({ apiClient, kbnClient }) => {
       await kbnClient.uiSettings.update({
