@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -49,7 +49,7 @@ const ALIASES_TAB_ID = 'aliases';
 const SETTINGS_TAB_ID = 'settings';
 const PREVIEW_TAB_ID = 'preview';
 
-const TABS = [
+const BASE_TABS = [
   {
     id: SUMMARY_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.summaryTabTitle', {
@@ -114,16 +114,19 @@ export const TemplateDetailsContent = ({
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
-  // only display tabs if the user has the manageIndexTemplates privilege
-  if (privs.manageIndexTemplates) {
-    TABS.push({
-      id: PREVIEW_TAB_ID,
-      name: i18n.translate('xpack.idxMgmt.templateDetails.previewTabTitle', {
-        defaultMessage: 'Preview',
-      }),
-      dataTestSubj: 'previewTabBtn',
-    });
-  }
+  const tabsToRender = useMemo(() => {
+    const tabs = [...BASE_TABS];
+    if (privs.manageIndexTemplates) {
+      tabs.push({
+        id: PREVIEW_TAB_ID,
+        name: i18n.translate('xpack.idxMgmt.templateDetails.previewTabTitle', {
+          defaultMessage: 'Preview',
+        }),
+        dataTestSubj: 'previewTabBtn',
+      });
+    }
+    return tabs;
+  }, [privs.manageIndexTemplates]);
 
   const renderHeader = () => {
     return (
@@ -213,25 +216,27 @@ export const TemplateDetailsContent = ({
           {managedTemplateCallout}
 
           <EuiTabs>
-            {TABS.filter((tab) => {
-              // Legacy index templates don't have the "simulate" template API
-              if (isLegacy && tab.id === PREVIEW_TAB_ID) {
-                return false;
-              }
-              return true;
-            }).map((tab) => (
-              <EuiTab
-                onClick={() => {
-                  uiMetricService.trackMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
-                  setActiveTab(tab.id);
-                }}
-                isSelected={tab.id === activeTab}
-                key={tab.id}
-                data-test-subj={tab.dataTestSubj}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
+            {tabsToRender
+              .filter((tab) => {
+                // Legacy index templates don't have the "simulate" template API
+                if (isLegacy && tab.id === PREVIEW_TAB_ID) {
+                  return false;
+                }
+                return true;
+              })
+              .map((tab) => (
+                <EuiTab
+                  onClick={() => {
+                    uiMetricService.trackMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
+                    setActiveTab(tab.id);
+                  }}
+                  isSelected={tab.id === activeTab}
+                  key={tab.id}
+                  data-test-subj={tab.dataTestSubj}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
           </EuiTabs>
 
           <EuiSpacer size="l" />
