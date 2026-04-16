@@ -804,61 +804,6 @@ describe('ui settings', () => {
   });
 
   describe('caching', () => {
-    describe('read operations cache user config', () => {
-      beforeEach(() => {
-        jest.useFakeTimers({ legacyFakeTimers: true });
-      });
-
-      afterEach(() => {
-        jest.clearAllTimers();
-      });
-
-      it('get', async () => {
-        const esDocSource = {};
-        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
-
-        await uiSettings.get('any');
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-
-        await uiSettings.get('foo');
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-
-        jest.advanceTimersByTime(10000);
-        await uiSettings.get('foo');
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
-      });
-
-      it('getAll', async () => {
-        const esDocSource = {};
-        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
-
-        await uiSettings.getAll();
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-
-        await uiSettings.getAll();
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-
-        jest.advanceTimersByTime(10000);
-        await uiSettings.getAll();
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
-      });
-
-      it('getUserProvided', async () => {
-        const esDocSource = {};
-        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
-
-        await uiSettings.getUserProvided();
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-
-        await uiSettings.getUserProvided();
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-
-        jest.advanceTimersByTime(10000);
-        await uiSettings.getUserProvided();
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
-      });
-    });
-
     describe('write operations invalidate user config cache', () => {
       it('set', async () => {
         const esDocSource = {};
@@ -1140,40 +1085,6 @@ describe('ui settings', () => {
       });
     });
 
-    describe('integration with per-request cache', () => {
-      it('uses per-request cache before shared cache', async () => {
-        const { uiSettings, savedObjectsClient } = setupWithSharedCache({
-          esDocSource: { foo: 'bar' },
-        });
-
-        await uiSettings.getUserProvided();
-        await uiSettings.getUserProvided();
-
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-      });
-
-      it('per-request cache expires faster than shared cache', async () => {
-        jest.useFakeTimers();
-
-        const sharedCache = new NamespacedCache<Record<string, any>>();
-
-        const { uiSettings: clientA, savedObjectsClient } = setupWithSharedCache({
-          namespace: 'default',
-          sharedCache,
-          esDocSource: { foo: 'bar' },
-        });
-
-        await clientA.getUserProvided();
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-
-        jest.advanceTimersByTime(6_000);
-
-        await clientA.getUserProvided();
-
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-      });
-    });
-
     describe('graceful degradation', () => {
       it('works without shared cache', async () => {
         const savedObjectsClient = savedObjectsClientMock.create();
@@ -1193,7 +1104,8 @@ describe('ui settings', () => {
         await uiSettings.getUserProvided();
         await uiSettings.getUserProvided();
 
-        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+        // Without shared cache, each call fetches from ES (no caching)
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
       });
 
       it('each client instance fetches independently without shared cache', async () => {
@@ -1306,6 +1218,117 @@ describe('ui settings', () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
 
         expect(sharedCache.getInflightRead('test-namespace')).toBeNull();
+      });
+    });
+
+    describe('cache bypass', () => {
+      it('bypasses shared cache when bypassCache=true', async () => {
+        const { uiSettings, savedObjectsClient } = setupWithSharedCache({
+          esDocSource: { foo: 'bar' },
+        });
+
+        // First call populates cache
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        // Second call with bypass=true should fetch fresh data
+        await uiSettings.getUserProvided(true);
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+
+        // Third call with bypass=true should also fetch fresh data
+        await uiSettings.getUserProvided(true);
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
+      });
+
+      it('still updates cache even when bypassing', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+
+        const { uiSettings: clientA, savedObjectsClient: soClientA } = setupWithSharedCache({
+          namespace: 'default',
+          sharedCache,
+          esDocSource: { foo: 'bar' },
+        });
+
+        const { uiSettings: clientB, savedObjectsClient: soClientB } = setupWithSharedCache({
+          namespace: 'default',
+          sharedCache,
+          esDocSource: { foo: 'baz' },
+        });
+
+        // First client bypasses cache but still updates it
+        await clientA.getUserProvided(true);
+        expect(soClientA.get).toHaveBeenCalledTimes(1);
+
+        // Second client benefits from updated cache
+        await clientB.getUserProvided();
+        expect(soClientB.get).toHaveBeenCalledTimes(0);
+      });
+
+      it('does not register in-flight promise when bypassing cache', async () => {
+        const { uiSettings, sharedUserProvidedCache } = setupWithSharedCache({
+          esDocSource: { foo: 'bar' },
+        });
+
+        // Start bypass operation but don't await
+        const bypassPromise = uiSettings.getUserProvided(true);
+
+        // In-flight read should be null during bypass
+        expect(sharedUserProvidedCache.getInflightRead('default')).toBeNull();
+
+        await bypassPromise;
+
+        // Still null after bypass completes
+        expect(sharedUserProvidedCache.getInflightRead('default')).toBeNull();
+      });
+
+      it('concurrent normal requests use cache while bypass is in progress', async () => {
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+
+        const { uiSettings, sharedUserProvidedCache } = setupWithSharedCache({
+          namespace: 'default',
+          sharedCache,
+          esDocSource: { foo: 'bar' },
+        });
+
+        // Manually set cache with initial value
+        sharedUserProvidedCache.set('default', { initial: { userValue: 'cached-value' } });
+
+        // Concurrent normal request should use existing cache (not wait for bypass)
+        const normalResult = await uiSettings.getUserProvided();
+        expect(normalResult.initial).toEqual({ userValue: 'cached-value' });
+
+        // Bypass operation should fetch fresh data and update cache
+        const bypassResult = await uiSettings.getUserProvided(true);
+        expect(bypassResult.foo).toEqual({ userValue: 'bar' });
+        expect(bypassResult.initial).toBeUndefined();
+      });
+
+      it('bypasses cache even if cached value exists', async () => {
+        const { uiSettings, savedObjectsClient, sharedUserProvidedCache } = setupWithSharedCache({
+          esDocSource: { foo: 'bar' },
+        });
+
+        // Manually populate cache
+        sharedUserProvidedCache.set('default', { cached: { userValue: 'old-value' } });
+
+        // Bypass should ignore cache and fetch fresh data
+        const result = await uiSettings.getUserProvided(true);
+        expect(result.foo).toEqual({ userValue: 'bar' });
+        expect(result.cached).toBeUndefined();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+      });
+
+      it('applies overrides correctly when bypassing cache', async () => {
+        const { uiSettings, savedObjectsClient } = setupWithSharedCache({
+          esDocSource: { foo: 'bar', overridden: 'original' },
+          overrides: { overridden: 'override-value' },
+        });
+
+        const result = await uiSettings.getUserProvided(true);
+
+        expect(result.foo).toEqual({ userValue: 'bar' });
+        expect(result.overridden).toEqual({ isOverridden: true, userValue: 'override-value' });
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
       });
     });
   });
