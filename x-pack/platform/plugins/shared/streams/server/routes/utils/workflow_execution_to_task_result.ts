@@ -10,7 +10,7 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { TaskStatus, baseFeatureSchema, iterationResultSchema } from '@kbn/streams-schema';
 import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import type { WorkflowExecutionResult } from '../../lib/workflows/workflow_client';
-import { deriveTotalTokensUsed } from '../../lib/sig_events/features/features_identification_service';
+import { deriveTotalTokensUsed } from '../../lib/sig_events/features';
 
 const workflowOutputSchema = z.object({
   streamName: z.string().optional(),
