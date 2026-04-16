@@ -11,10 +11,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
-import {
-  DEFAULT_MODEL_SAVE_SUCCESS,
-  DEFAULT_MODEL_SAVE_ERROR,
-} from '../../common/translations';
+import { DEFAULT_MODEL_SAVE_SUCCESS, DEFAULT_MODEL_SAVE_ERROR } from '../../common/translations';
 import { useKibana } from './use_kibana';
 
 export interface DefaultModelSettingsState {
