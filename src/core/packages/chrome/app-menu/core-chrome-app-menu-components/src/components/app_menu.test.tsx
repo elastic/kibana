@@ -160,4 +160,33 @@ describe('AppMenu', () => {
       expect(screen.getByText('Item 2')).toBeInTheDocument();
     });
   });
+
+  describe('chromeBarV2 secondaryActionAppend', () => {
+    it('should render append node before the overflow control on wide layout', () => {
+      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
+        if (breakpoints.includes('m') && breakpoints.includes('l')) return true;
+        return false;
+      });
+
+      const config: AppMenuConfig = {
+        layout: 'chromeBarV2',
+        overflowOnlyItems: [
+          {
+            id: 'doc',
+            label: 'Documentation',
+            order: 1,
+            iconType: 'documentation',
+            href: 'https://example.com',
+            target: '_blank',
+          },
+        ],
+        secondaryActionAppend: <span data-test-subj="test-append-slot">append</span>,
+      };
+
+      render(<AppMenuComponent config={config} />);
+
+      expect(screen.getByTestId('test-append-slot')).toBeInTheDocument();
+      expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
+    });
+  });
 });

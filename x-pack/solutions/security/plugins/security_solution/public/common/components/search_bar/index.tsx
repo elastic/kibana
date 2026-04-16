@@ -20,6 +20,8 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import type { OnTimeChangeProps } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
 import { inputsActions } from '../../store/inputs';
 import type { InputsRange } from '../../store/inputs/model';
 import type { InputsModelId } from '../../store/inputs/constants';
@@ -35,7 +37,7 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
-import { timelineActions } from '../../../timelines/store';
+import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useKibana } from '../../lib/kibana';
 import { usersActions } from '../../../explore/users/store';
 import { hostsActions } from '../../../explore/hosts/store';
@@ -43,6 +45,11 @@ import { networkActions } from '../../../explore/network/store';
 import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { PageScope } from '../../../data_view_manager/constants';
+import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
+import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
+import { TimelineId } from '../../../../common/types/timeline';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 
 interface SiemSearchBarProps {
   id: InputsModelId.global | InputsModelId.timeline;
@@ -57,6 +64,8 @@ interface SiemSearchBarProps {
    * Allows to hide the query menu button displayed to the left of the query input.
    */
   hideQueryMenu?: boolean;
+  /** Injected by the SiemSearchBar wrapper for data view manager scope (do not pass from pages). */
+  pathnameForPickerScope?: string;
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
@@ -70,11 +79,13 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     hideQueryMenu = false,
     id,
     isLoading = false,
+    pathnameForPickerScope = '',
     pollForSignalIndex,
     queries,
     savedQuery,
     setSavedQuery,
     setSearchBarFilter,
+    showTimeline,
     sourcererDataViewSpec,
     start,
     toStr,
@@ -305,6 +316,22 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     }, []);
 
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+    const sourcererScope = useMemo(
+      () => getScopeFromPath(pathnameForPickerScope, newDataViewPickerEnabled),
+      [pathnameForPickerScope, newDataViewPickerEnabled]
+    );
+
+    const dataViewPickerOverride = useMemo(() => {
+      if (!newDataViewPickerEnabled || showTimeline) {
+        return undefined;
+      }
+      return (
+        <EuiFlexItem grow={false} css={{ flexShrink: 0, maxWidth: 'max-content', minWidth: 0 }}>
+          <DataViewPicker scope={sourcererScope} disabled={sourcererScope === PageScope.alerts} />
+        </EuiFlexItem>
+      );
+    }, [newDataViewPickerEnabled, showTimeline, sourcererScope]);
+
     const dataViews: DataView[] | null = useMemo(() => {
       if (newDataViewPickerEnabled) {
         if (dataView != null) {
@@ -355,6 +382,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           showQueryMenu={!hideQueryMenu}
           allowSavingQueries
           dataTestSubj={dataTestSubj}
+          dataViewPickerOverride={dataViewPickerOverride}
         />
       </div>
     ) : null;
@@ -366,6 +394,8 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     deepEqual(prevProps.sourcererDataViewSpec, nextProps.sourcererDataViewSpec) &&
     prevProps.id === nextProps.id &&
     prevProps.isLoading === nextProps.isLoading &&
+    prevProps.pathnameForPickerScope === nextProps.pathnameForPickerScope &&
+    prevProps.showTimeline === nextProps.showTimeline &&
     prevProps.savedQuery === nextProps.savedQuery &&
     prevProps.setSavedQuery === nextProps.setSavedQuery &&
     prevProps.setSearchBarFilter === nextProps.setSearchBarFilter &&
@@ -385,8 +415,10 @@ const makeMapStateToProps = () => {
   const getToStrSelector = toStrSelector();
   const getFilterQuerySelector = filterQuerySelector();
   const getSavedQuerySelector = savedQuerySelector();
+  const getTimelineById = timelineSelectors.getTimelineByIdSelector();
   return (state: State, { id }: SiemSearchBarProps) => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
+    const activeTimeline = getTimelineById(state, TimelineId.active) ?? timelineDefaults;
     return {
       end: getEndSelector(inputsRange),
       fromStr: getFromStrSelector(inputsRange),
@@ -396,6 +428,7 @@ const makeMapStateToProps = () => {
       savedQuery: getSavedQuerySelector(inputsRange),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
+      showTimeline: activeTimeline.show,
     };
   };
 };
@@ -506,4 +539,10 @@ export const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const SiemSearchBar = connector(SearchBarComponent);
+const ConnectedSearchBar = connector(SearchBarComponent);
+
+export const SiemSearchBar = (props: SiemSearchBarProps) => {
+  const { pathname } = useLocation();
+  return <ConnectedSearchBar {...props} pathnameForPickerScope={pathname} />;
+};
+SiemSearchBar.displayName = 'SiemSearchBar';

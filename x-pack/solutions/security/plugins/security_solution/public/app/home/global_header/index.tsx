@@ -17,7 +17,6 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { PageScope } from '../../../data_view_manager/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
@@ -33,7 +32,6 @@ import {
   showSourcererByPath,
 } from '../../../sourcerer/containers/sourcerer_paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
-import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 import {
   SecurityProjectChromeAddIntegrationsOverflow,
   SecurityProjectChromeMlOverflow,
@@ -98,11 +96,10 @@ export const GlobalHeader = React.memo(() => {
     }
   }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
 
-  const dataViewPicker = newDataViewPickerEnabled ? (
-    <DataViewPicker scope={sourcererScope} disabled={sourcererScope === PageScope.alerts} />
-  ) : (
-    <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
-  );
+  const legacyHeaderSourcerer =
+    !newDataViewPickerEnabled && showSourcerer && !showTimeline ? (
+      <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
+    ) : null;
 
   return (
     <>
@@ -129,7 +126,7 @@ export const GlobalHeader = React.memo(() => {
                   {BUTTON_ADD_DATA}
                 </EuiHeaderLink>
               )}
-              {showSourcerer && !showTimeline && dataViewPicker}
+              {legacyHeaderSourcerer}
             </EuiHeaderLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>

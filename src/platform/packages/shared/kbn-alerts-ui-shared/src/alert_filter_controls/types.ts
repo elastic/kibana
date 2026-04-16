@@ -8,6 +8,7 @@
  */
 
 import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
+import type { ReactNode } from 'react';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -70,4 +71,9 @@ export interface FilterGroupProps {
   Storage: typeof Storage;
   storageKey?: string;
   disableLocalStorageSync?: boolean;
+  /**
+   * Optional content rendered as the last item inside the control group (same row as option-list filters),
+   * still to the left of the overflow context menu in the outer filter toolbar.
+   */
+  beforeContextMenu?: ReactNode;
 }

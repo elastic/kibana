@@ -207,19 +207,20 @@ describe('RenderingService', () => {
     });
 
     it('renders the banner UI', async () => {
+      mockChromeVisible$.next(true);
       const service = startService();
       await act(async () => {
         service.renderCore(getRenderCoreDeps(), targetDomElement);
       });
-      expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`
-                <div
-                  id="globalBannerList"
-                >
-                  <div>
-                    I'm a banner!
-                  </div>
-                </div>
-            `);
+      const bannerList = targetDomElement.querySelector('#globalBannerList') as HTMLElement | null;
+      expect(bannerList).not.toBeNull();
+      expect(bannerList).toHaveStyle({
+        paddingTop: '12px',
+        paddingBottom: '12px',
+        paddingLeft: '12px',
+        paddingRight: '12px',
+      });
+      expect(bannerList?.textContent).toMatch(/banner/i);
     });
 
     it('adds global styles via `KibanaRootRenderingContext` `globalStyles` configuration', () => {

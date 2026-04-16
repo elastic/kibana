@@ -114,6 +114,16 @@ describe(' Filter Group Component ', () => {
       expect(onInitMock.mock.calls[0][0]).toMatchObject(controlGroupMock);
     });
 
+    it('renders beforeContextMenu alongside the context menu', async () => {
+      render(
+        <TestComponent
+          beforeContextMenu={<span data-test-subj="before-context-menu-slot">slot</span>}
+        />
+      );
+      expect(screen.getByTestId('before-context-menu-slot')).toBeVisible();
+      expect(screen.getByTestId(TEST_IDS.CONTEXT_MENU.BTN)).toBeVisible();
+    });
+
     it('should have context menu open when clicked', async () => {
       render(<TestComponent />);
 

@@ -240,6 +240,7 @@
     "@kbn/management-settings-ids",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/core-ui-settings-browser",
+    "@kbn/core-chrome-app-menu",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-browser",
     "@kbn/core-chrome-browser-internal",

@@ -33,7 +33,8 @@ const hasNoItems = (config: AppMenuConfig) => {
       (config.secondaryActionItems?.length ?? 0) > 0 || Boolean(config.secondaryActionItem);
     const hasOverflow = (config.overflowOnlyItems?.length ?? 0) > 0;
     const hasPrimary = Boolean(config.primaryActionItem);
-    return !hasSecondary && !hasOverflow && !hasPrimary;
+    const hasSecondaryAppend = Boolean(config.secondaryActionAppend);
+    return !hasSecondary && !hasOverflow && !hasPrimary && !hasSecondaryAppend;
   }
   return !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
 };

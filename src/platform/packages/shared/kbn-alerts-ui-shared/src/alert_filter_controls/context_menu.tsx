@@ -134,7 +134,7 @@ export const FilterGroupContextMenu = () => {
       button={
         <EuiButtonIcon
           aria-label={FILTER_GROUP_MENU}
-          display="empty"
+          color="text"
           size="s"
           iconType="boxesHorizontal"
           onClick={toggleContextMenu}

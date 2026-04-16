@@ -8,9 +8,7 @@
 import { useState } from 'react';
 import { createHtmlPortalNode } from 'react-reverse-portal';
 
-/**
- * A singleton portal for rendering content in the global header
- */
+/** Singleton portal: sticky Security KQL band (filters + global query bar). */
 const globalKQLHeaderPortalNodeSingleton = createHtmlPortalNode();
 
 export const useGlobalHeaderPortal = () => {

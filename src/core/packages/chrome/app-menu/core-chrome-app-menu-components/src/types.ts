@@ -336,6 +336,12 @@ export interface AppMenuConfig {
    */
   secondaryActionItems?: AppMenuSecondaryActionItem[];
   /**
+   * Optional controls rendered after {@link secondaryActionItems} / {@link secondaryActionItem}
+   * and before the overflow (⋯) control. Use when an action does not fit {@link AppMenuSecondaryActionItem}
+   * (for example, a rich popover instead of a context menu).
+   */
+  secondaryActionAppend?: ReactNode;
+  /**
    * Entries shown only inside the overflow (⋯) popover, never as inline header links.
    */
   overflowOnlyItems?: AppMenuItemType[];

@@ -6,62 +6,44 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Dispatch, SetStateAction } from 'react';
-import React, { memo, useCallback } from 'react';
-import { isEqual } from 'lodash';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FilterByAssigneesPopover } from '../../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
-import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 
-const BUTTON_MANAGE_RULES = i18n.translate('xpack.securitySolution.alertsPage.buttonManageRules', {
-  defaultMessage: 'Manage rules',
-});
+export const ALERTS_PAGE_MANAGE_RULES_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsPage.buttonManageRules',
+  {
+    defaultMessage: 'Manage rules',
+  }
+);
 
 export const GO_TO_RULES_BUTTON_TEST_ID = 'alerts-page-manage-alert-detection-rules';
 
 export interface HeaderSectionProps {
   /**
-   * List of assignees retrieved from the assignees button on the alert page
+   * When false, the Manage rules control is not shown in the page header (e.g. shown in project chrome app menu).
    */
-  assignees: AssigneesIdsSelection[];
-  /**
-   * Callback to set the assignees for the alerts page as they're also used in the FilterSection component
-   */
-  setAssignees: Dispatch<SetStateAction<AssigneesIdsSelection[]>>;
+  showManageRulesButton?: boolean;
 }
 
 /**
- * UI section of the alerts page that renders the assignees button and a button to navigate to the rules page.
+ * UI section of the alerts page header (e.g. navigate to the rules page).
  */
-export const HeaderSection = memo(({ assignees, setAssignees }: HeaderSectionProps) => {
-  const handleSelectedAssignees = useCallback(
-    (newAssignees: AssigneesIdsSelection[]) => {
-      if (!isEqual(newAssignees, assignees)) {
-        setAssignees(newAssignees);
-      }
-    },
-    [assignees, setAssignees]
-  );
-
+export const HeaderSection = memo(({ showManageRulesButton = true }: HeaderSectionProps) => {
   return (
     <EuiFlexGroup gutterSize="m">
-      <EuiFlexItem>
-        <FilterByAssigneesPopover
-          selectedUserIds={assignees}
-          onSelectionChange={handleSelectedAssignees}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <SecuritySolutionLinkButton
-          deepLinkId={SecurityPageName.rules}
-          data-test-subj={GO_TO_RULES_BUTTON_TEST_ID}
-          fill
-        >
-          {BUTTON_MANAGE_RULES}
-        </SecuritySolutionLinkButton>
-      </EuiFlexItem>
+      {showManageRulesButton ? (
+        <EuiFlexItem>
+          <SecuritySolutionLinkButton
+            deepLinkId={SecurityPageName.rules}
+            data-test-subj={GO_TO_RULES_BUTTON_TEST_ID}
+            fill
+          >
+            {ALERTS_PAGE_MANAGE_RULES_LABEL}
+          </SecuritySolutionLinkButton>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 });

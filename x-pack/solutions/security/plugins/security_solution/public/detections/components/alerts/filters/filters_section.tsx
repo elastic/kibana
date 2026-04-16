@@ -6,12 +6,14 @@
  */
 
 import React, { type Dispatch, memo, type SetStateAction, useCallback, useMemo } from 'react';
+import { isEqual } from 'lodash';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { PageFilters } from './page_filters';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
+import { FilterByAssigneesPopover } from '../../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -28,6 +30,10 @@ export interface FiltersSectionProps {
    * List of assignees retrieved from the assignees button on the alert page
    */
   assignees: AssigneesIdsSelection[];
+  /**
+   * Callback to set assignees for the alerts page (shared with KPIs and table).
+   */
+  setAssignees: Dispatch<SetStateAction<AssigneesIdsSelection[]>>;
   /**
    * Data view used for the alerts page
    */
@@ -56,6 +62,7 @@ export interface FiltersSectionProps {
 export const FiltersSection = memo(
   ({
     assignees,
+    setAssignees,
     dataView,
     pageFilters,
     setPageFilterHandler,
@@ -115,6 +122,27 @@ export const FiltersSection = memo(
       [from, to]
     );
 
+    const handleSelectedAssignees = useCallback(
+      (newAssignees: AssigneesIdsSelection[]) => {
+        if (!isEqual(newAssignees, assignees)) {
+          setAssignees(newAssignees);
+        }
+      },
+      [assignees, setAssignees]
+    );
+
+    const beforeContextMenu = useMemo(
+      () => (
+        <FilterByAssigneesPopover
+          compressed
+          fillFilterCell
+          selectedUserIds={assignees}
+          onSelectionChange={handleSelectedAssignees}
+        />
+      ),
+      [assignees, handleSelectedAssignees]
+    );
+
     return (
       <PageFilters
         filters={topLevelFilters}
@@ -123,6 +151,7 @@ export const FiltersSection = memo(
         timeRange={pageFiltersTimeRange}
         onInit={setPageFilterHandler}
         dataView={dataView}
+        beforeContextMenu={beforeContextMenu}
       />
     );
   }

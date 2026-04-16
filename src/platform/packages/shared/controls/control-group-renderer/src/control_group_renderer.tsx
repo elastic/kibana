@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BehaviorSubject,
@@ -56,6 +57,10 @@ export interface ControlGroupRendererProps {
   query?: Query;
   dataLoading?: boolean;
   compressed?: boolean;
+  /**
+   * Renders after pinned controls inside the same control group list (not sortable / not a panel).
+   */
+  trailingControlSlot?: ReactNode;
 }
 
 export const ControlGroupRenderer = ({
@@ -67,6 +72,7 @@ export const ControlGroupRenderer = ({
   viewMode,
   dataLoading,
   compressed,
+  trailingControlSlot,
 }: ControlGroupRendererProps) => {
   const {
     services: { uiActions },
@@ -220,6 +226,7 @@ export const ControlGroupRenderer = ({
       onControlsChanged={(newControls) => {
         parentApi.layout$.next(newControls);
       }}
+      trailingSlot={trailingControlSlot}
     />
   );
 };

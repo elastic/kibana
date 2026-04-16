@@ -33,6 +33,7 @@ export const getMockedControlGroupRenderer = (
   const MockedControlGroupRenderer = ({
     onApiAvailable,
     getCreationOptions,
+    trailingControlSlot,
   }: ControlGroupRendererProps) => {
     const [creationOptionsCalled, setCreationOptionsCalled] = useState(false);
 
@@ -50,7 +51,7 @@ export const getMockedControlGroupRenderer = (
       onApiAvailable(controlGroupMock as unknown as ControlGroupRendererApi);
     }, [onApiAvailable]);
 
-    return <div data-test-subj={TEST_IDS.MOCKED_CONTROL} />;
+    return <div data-test-subj={TEST_IDS.MOCKED_CONTROL}>{trailingControlSlot ?? null}</div>;
   };
 
   MockedControlGroupRenderer.displayName = 'MockedControlGroup';

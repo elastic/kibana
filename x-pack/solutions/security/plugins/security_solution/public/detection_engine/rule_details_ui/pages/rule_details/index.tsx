@@ -65,6 +65,7 @@ import {
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -849,12 +850,14 @@ export const RuleDetailsPage = connector(
                     </Route>
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
-                        <SiemSearchBar
-                          dataView={experimentalDataView}
-                          pollForSignalIndex={pollForSignalIndex}
-                          id={InputsModelId.global}
-                          sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-                        />
+                        <FiltersGlobal>
+                          <SiemSearchBar
+                            dataView={experimentalDataView}
+                            pollForSignalIndex={pollForSignalIndex}
+                            id={InputsModelId.global}
+                            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+                          />
+                        </FiltersGlobal>
                         <EuiSpacer />
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                           <EuiFlexItem grow={false}>

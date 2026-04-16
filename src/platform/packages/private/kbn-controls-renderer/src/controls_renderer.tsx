@@ -8,6 +8,7 @@
  */
 
 import { css } from '@emotion/react';
+import type { ReactNode } from 'react';
 import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { distinctUntilChanged } from 'rxjs';
 
@@ -27,7 +28,7 @@ import {
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
 import { ControlClone } from './components/control_clone';
@@ -39,10 +40,15 @@ export const ControlsRenderer = ({
   controls: controlState,
   onControlsChanged,
   parentApi,
+  trailingSlot,
 }: {
   controls: ControlsLayout;
   onControlsChanged: (controls: ControlsLayout) => void;
   parentApi: ControlsRendererParentApi;
+  /**
+   * Optional content rendered as the last item inside the control group list (not a sortable control).
+   */
+  trailingSlot?: ReactNode;
 }) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
   const setControlPanelRef = useCallback((id: string, ref: HTMLElement | null) => {
@@ -97,7 +103,7 @@ export const ControlsRenderer = ({
     [onControlsChanged, controlsInOrder]
   );
 
-  if (controlsInOrder.length === 0) {
+  if (controlsInOrder.length === 0 && !trailingSlot) {
     return null;
   }
 
@@ -138,6 +144,16 @@ export const ControlsRenderer = ({
               setControlPanelRef={setControlPanelRef}
             />
           ))}
+          {trailingSlot ? (
+            <EuiFlexItem
+              component="li"
+              grow
+              style={{ minWidth: 0 }}
+              data-test-subj="controls-group-trailing-slot"
+            >
+              {trailingSlot}
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </SortableContext>
       <DragOverlay>

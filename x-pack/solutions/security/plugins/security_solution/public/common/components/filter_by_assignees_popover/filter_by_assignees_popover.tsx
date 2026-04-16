@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -38,13 +39,30 @@ export interface FilterByAssigneesPopoverProps {
    * Renders a shorter button that matches compressed form controls.
    */
   compressed?: boolean;
+  /**
+   * Stretch the control to the full width of its flex/grid cell (e.g. equal-width filter bar columns).
+   */
+  fillFilterCell?: boolean;
 }
 
 /**
  * The popover to filter alerts by assigned users
  */
+const fillFilterCellStyles = {
+  group: css({
+    width: '100%',
+    minWidth: 0,
+  }),
+  toolTip: css({
+    width: '100%',
+  }),
+  filterButton: css({
+    width: '100%',
+  }),
+};
+
 export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
-  ({ selectedUserIds, onSelectionChange, compressed = false }) => {
+  ({ selectedUserIds, onSelectionChange, compressed = false, fillFilterCell = false }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
 
@@ -55,17 +73,26 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
       prefix: 'searchInput',
     });
 
+    const tooltipContent =
+      upsellingMessage ??
+      i18n.translate('xpack.securitySolution.filtersGroup.assignees.popoverTooltip', {
+        defaultMessage: 'Filter by assignee',
+      });
+
+    const assigneesButtonLabel = i18n.translate(
+      'xpack.securitySolution.filtersGroup.assignees.buttonTitle',
+      {
+        defaultMessage: 'Assignees',
+      }
+    );
+
     const button = useMemo(
       () => (
         <EuiToolTip
           display="block"
           position="bottom"
-          content={
-            upsellingMessage ??
-            i18n.translate('xpack.securitySolution.filtersGroup.assignees.popoverTooltip', {
-              defaultMessage: 'Filter by assignee',
-            })
-          }
+          content={tooltipContent}
+          css={fillFilterCell ? fillFilterCellStyles.toolTip : undefined}
         >
           <EuiFilterButton
             data-test-subj={FILTER_BY_ASSIGNEES_BUTTON}
@@ -76,35 +103,51 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
             isSelected={isPopoverOpen}
             hasActiveFilters={selectedUserIds.length > 0}
             numActiveFilters={selectedUserIds.length}
+            size={compressed ? (fillFilterCell ? 'xs' : 's') : 'm'}
+            css={fillFilterCell ? fillFilterCellStyles.filterButton : undefined}
           >
-            {i18n.translate('xpack.securitySolution.filtersGroup.assignees.buttonTitle', {
-              defaultMessage: 'Assignees',
-            })}
+            {assigneesButtonLabel}
           </EuiFilterButton>
         </EuiToolTip>
       ),
-      [isPlatinumPlus, isPopoverOpen, selectedUserIds.length, togglePopover, upsellingMessage]
+      [
+        assigneesButtonLabel,
+        compressed,
+        fillFilterCell,
+        isPlatinumPlus,
+        isPopoverOpen,
+        selectedUserIds.length,
+        togglePopover,
+        tooltipContent,
+      ]
+    );
+
+    const popover = (
+      <EuiPopover
+        panelPaddingSize="none"
+        initialFocus={`[id="${searchInputId}"]`}
+        button={button}
+        isOpen={isPopoverOpen}
+        panelStyle={{
+          minWidth: ASSIGNEES_PANEL_WIDTH,
+        }}
+        closePopover={togglePopover}
+      >
+        <AssigneesSelectable
+          searchInputId={searchInputId}
+          assignedUserIds={selectedUserIds}
+          showUnassignedOption={true}
+          onSelectionChange={onSelectionChange}
+        />
+      </EuiPopover>
     );
 
     return (
-      <EuiFilterGroup compressed={compressed}>
-        <EuiPopover
-          panelPaddingSize="none"
-          initialFocus={`[id="${searchInputId}"]`}
-          button={button}
-          isOpen={isPopoverOpen}
-          panelStyle={{
-            minWidth: ASSIGNEES_PANEL_WIDTH,
-          }}
-          closePopover={togglePopover}
-        >
-          <AssigneesSelectable
-            searchInputId={searchInputId}
-            assignedUserIds={selectedUserIds}
-            showUnassignedOption={true}
-            onSelectionChange={onSelectionChange}
-          />
-        </EuiPopover>
+      <EuiFilterGroup
+        compressed={compressed}
+        css={fillFilterCell ? fillFilterCellStyles.group : undefined}
+      >
+        {popover}
       </EuiFilterGroup>
     );
   }

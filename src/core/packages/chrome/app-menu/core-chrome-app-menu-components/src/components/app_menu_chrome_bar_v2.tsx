@@ -95,6 +95,7 @@ export const AppMenuChromeBarV2Wide = ({
   return (
     <EuiHeaderLinks {...headerLinksProps}>
       {secondaryActionComponents}
+      {config.secondaryActionAppend}
       {overflowComponent}
       {primaryActionComponent}
     </EuiHeaderLinks>
@@ -142,12 +143,16 @@ export const AppMenuChromeBarV2Collapsed = ({
 
   if (collapsedMenuItems.length === 0) {
     return (
-      <EuiHeaderLinks {...headerLinksProps}>{primaryActionComponent}</EuiHeaderLinks>
+      <EuiHeaderLinks {...headerLinksProps}>
+        {config.secondaryActionAppend}
+        {primaryActionComponent}
+      </EuiHeaderLinks>
     );
   }
 
   return (
     <EuiHeaderLinks {...headerLinksProps}>
+      {config.secondaryActionAppend}
       <AppMenuOverflowButton
         items={collapsedMenuItems}
         isPopoverOpen={openPopoverId === showMoreButtonId}

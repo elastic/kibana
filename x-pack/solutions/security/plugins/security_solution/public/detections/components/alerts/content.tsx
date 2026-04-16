@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import { AppMenu } from '@kbn/core-chrome-app-menu';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
@@ -16,12 +20,19 @@ import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
+import { useKibana } from '../../../common/lib/kibana';
+import { SecurityPageName } from '../../../app/types';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { HeaderPage } from '../../../common/components/header_page';
 import { KPIsSection } from './kpis/kpis_section';
 import { FiltersSection } from './filters/filters_section';
-import { HeaderSection } from './header/header_section';
+import {
+  ALERTS_PAGE_MANAGE_RULES_LABEL,
+  GO_TO_RULES_BUTTON_TEST_ID,
+  HeaderSection,
+} from './header/header_section';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
@@ -70,11 +81,39 @@ export interface AlertsPageContentProps {
 export const AlertsPageContent = memo(
   ({ dataView, oldSourcererDataViewSpec, runtimeMappings }: AlertsPageContentProps) => {
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+    const { chrome } = useKibana().services;
+    const chromeStyle$ = useMemo(() => chrome.getChromeStyle$(), [chrome]);
+    const chromeStyle = useObservable(chromeStyle$, chrome.getChromeStyle());
+    const isProjectChrome = chromeStyle === 'project';
+    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+    const { navigateTo } = useNavigateTo();
+    const manageRulesLinkProps = useMemo(
+      () => getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.rules }),
+      [getSecuritySolutionLinkProps]
+    );
+
     const containerElement = useRef<HTMLDivElement | null>(null);
 
     const { globalFullScreen } = useGlobalFullScreen();
 
     const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
+
+    const alertsAppMenuConfig: AppMenuConfig = useMemo(
+      () => ({
+        layout: 'chromeBarV2',
+        primaryActionItem: {
+          id: 'alerts-manage-rules',
+          label: ALERTS_PAGE_MANAGE_RULES_LABEL,
+          iconType: 'managementApp',
+          href: manageRulesLinkProps.href,
+          testId: GO_TO_RULES_BUTTON_TEST_ID,
+          run: () => {
+            navigateTo({ url: manageRulesLinkProps.href });
+          },
+        },
+      }),
+      [manageRulesLinkProps.href, navigateTo]
+    );
     const [statusFilter, setStatusFilter] = useState<Status[]>([]);
     const [pageFilters, setPageFilters] = useState<Filter[]>();
     const [pageFilterHandler, setPageFilterHandler] = useState<FilterGroupHandler | undefined>();
@@ -119,6 +158,9 @@ export const AlertsPageContent = memo(
         onKeyDown={onKeyDown}
         ref={containerElement}
       >
+        {isProjectChrome ? (
+          <AppMenu config={alertsAppMenuConfig} setAppMenu={chrome.setAppMenu} />
+        ) : null}
         <EuiWindowEvent event="resize" handler={noop} />
         <SearchBarSection dataView={dataView} sourcererDataViewSpec={oldSourcererDataViewSpec} />
         <SecuritySolutionPageWrapper
@@ -126,26 +168,31 @@ export const AlertsPageContent = memo(
           data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
         >
           <Display show={!globalFullScreen}>
-            <HeaderPage title={PAGE_TITLE}>
-              <HeaderSection assignees={assignees} setAssignees={setAssignees} />
-            </HeaderPage>
-            <EuiHorizontalRule margin="none" />
-            <EuiSpacer size="l" />
+            {!isProjectChrome ? (
+              <>
+                <HeaderPage title={PAGE_TITLE}>
+                  <HeaderSection showManageRulesButton />
+                </HeaderPage>
+                <EuiHorizontalRule margin="none" />
+                <EuiSpacer size="l" />
+              </>
+            ) : null}
             <FiltersSection
               assignees={assignees}
+              setAssignees={setAssignees}
               dataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
               pageFilters={pageFilters}
               setStatusFilter={setStatusFilter}
               setPageFilters={setPageFilters}
               setPageFilterHandler={setPageFilterHandler}
             />
-            <EuiSpacer size="l" />
+            <EuiSpacer size={isProjectChrome ? 'm' : 'l'} />
             <KPIsSection
               assignees={assignees}
               pageFilters={pageFilters}
               runtimeMappings={runtimeMappings}
             />
-            <EuiSpacer size="l" />
+            <EuiSpacer size={isProjectChrome ? 'm' : 'l'} />
           </Display>
           <TableSection
             assignees={assignees}

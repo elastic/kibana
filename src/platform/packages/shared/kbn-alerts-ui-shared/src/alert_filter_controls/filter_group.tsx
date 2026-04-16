@@ -58,6 +58,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     ruleTypeIds,
     storageKey,
     disableLocalStorageSync = false,
+    beforeContextMenu,
   } = props;
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
   const [controlsFromUrl, setControlsFromUrl] = useState(controlsUrlState ?? []);
@@ -444,6 +445,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
                 query={validatedQuery}
                 filters={validatedFilters}
                 viewMode={filterGroupMode}
+                trailingControlSlot={beforeContextMenu}
               />
               {!controlGroup ? <FilterGroupLoading /> : null}
             </EuiFlexItem>
