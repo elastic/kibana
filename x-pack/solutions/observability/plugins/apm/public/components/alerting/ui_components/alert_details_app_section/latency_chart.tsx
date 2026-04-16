@@ -15,12 +15,7 @@ import type { BoolQuery } from '@kbn/es-query';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import { ALERT_RULE_TYPE_ID, ALERT_EVALUATION_THRESHOLD, ALERT_END } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
-import {
-  AlertActiveTimeRangeAnnotation,
-  AlertThresholdAnnotation,
-  AlertThresholdTimeRangeRect,
-  AlertAnnotation,
-} from '@kbn/observability-alert-details';
+import { AlertActiveTimeRangeAnnotation, AlertAnnotation } from '@kbn/observability-alert-details';
 import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -36,14 +31,14 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { isLatencyThresholdRuleType } from './helpers';
+import { getThresholdAnnotations, isLatencyThresholdRuleType } from './helpers';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { RedMetricsChartActions } from './red_metrics_chart_actions';
 
-function LatencyChart({
+export function LatencyChart({
   alert,
   transactionType,
   transactionTypes,
@@ -59,7 +54,7 @@ function LatencyChart({
   comparisonEnabled,
   offset,
   timeZone,
-  customAlertEvaluationThreshold,
+  alertEvalThreshold: alertEvalThresholdOverride,
   kuery = '',
   filters,
   threshold,
@@ -80,7 +75,7 @@ function LatencyChart({
   comparisonEnabled: boolean;
   offset: string;
   timeZone: string;
-  customAlertEvaluationThreshold?: number;
+  alertEvalThreshold?: number;
   threshold?: ReactElement;
   kuery?: string;
   filters?: BoolQuery;
@@ -138,32 +133,19 @@ function LatencyChart({
       filters,
     ]
   );
-  const alertEvalThreshold =
-    customAlertEvaluationThreshold || alert.fields[ALERT_EVALUATION_THRESHOLD];
+  const alertEvalThreshold = alertEvalThresholdOverride ?? alert.fields[ALERT_EVALUATION_THRESHOLD];
 
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
 
-  const alertEvalThresholdChartData = alertEvalThreshold
-    ? [
-        <AlertThresholdTimeRangeRect
-          key={'alertThresholdRect'}
-          id={'alertThresholdRect'}
-          threshold={alertEvalThreshold}
-          color={euiTheme.colors.danger}
-        />,
-        <AlertThresholdAnnotation
-          id={'alertThresholdAnnotation'}
-          key={'alertThresholdAnnotation'}
-          color={euiTheme.colors.danger}
-          threshold={alertEvalThreshold}
-        />,
-      ]
-    : [];
+  const alertEvalThresholdChartData = getThresholdAnnotations(
+    alertEvalThreshold,
+    euiTheme.colors.danger
+  );
 
   const getLatencyChartAdditionalData = () => {
     if (
       isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID]) ||
-      customAlertEvaluationThreshold
+      alertEvalThresholdOverride
     ) {
       return [
         <AlertActiveTimeRangeAnnotation
@@ -278,6 +260,3 @@ function LatencyChart({
     </EuiFlexItem>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default LatencyChart;
