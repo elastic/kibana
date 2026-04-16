@@ -595,10 +595,11 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       );
 
       const result = await runStep(kibanaStep, stepWith);
+      const output = result.output as Record<string, any>;
 
-      expect(result.output._debug).toBeDefined();
-      expect(result.output._debug.fullUrl).toBe('https://localhost:5601/api/cases');
-      expect(result.output._debug.method).toBe('POST');
+      expect(output._debug).toBeDefined();
+      expect(output._debug.fullUrl).toBe('https://localhost:5601/api/cases');
+      expect(output._debug.method).toBe('POST');
     });
 
     it('should not include _debug when debug is false or absent', async () => {
@@ -622,8 +623,9 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       );
 
       const result = await runStep(kibanaStep, stepWith);
+      const output = result.output as Record<string, any>;
 
-      expect(result.output._debug).toBeUndefined();
+      expect(output._debug).toBeUndefined();
     });
 
     it('should include _debug in error details when debug is true and request fails', async () => {
@@ -652,8 +654,9 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const result = await runStep(kibanaStep, stepWith);
 
       expect(result.error).toBeDefined();
-      expect(result.error.details._debug).toBeDefined();
-      expect(result.error.details._debug.kibanaUrl).toBe('https://localhost:5601');
+      const details = result.error!.details as Record<string, any>;
+      expect(details._debug).toBeDefined();
+      expect(details._debug.kibanaUrl).toBe('https://localhost:5601');
     });
 
     it('should include fullUrl with query params in _debug output', async () => {
@@ -680,9 +683,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const result = await runStep(kibanaStep, stepWith);
 
-      expect(result.output._debug.fullUrl).toBe(
-        'https://localhost:5601/api/cases?page=1&perPage=10'
-      );
+      const output = result.output as Record<string, any>;
+      expect(output._debug.fullUrl).toBe('https://localhost:5601/api/cases?page=1&perPage=10');
     });
   });
 
@@ -826,7 +828,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const result = await runStep(kibanaStep, stepWith);
 
       expect(result.error).toBeDefined();
-      expect(result.error.type).toBe('StepSizeLimitExceeded');
+      expect(result.error!.type).toBe('StepSizeLimitExceeded');
       expect(cancelFn).toHaveBeenCalled();
     });
 
@@ -872,8 +874,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const result = await runStep(kibanaStep, stepWith);
 
       expect(result.error).toBeDefined();
-      expect(result.error.message.length).toBeLessThan(1.5 * 1024 * 1024);
-      expect(result.error.message).toContain('... [truncated]');
+      expect(result.error!.message.length).toBeLessThan(1.5 * 1024 * 1024);
+      expect(result.error!.message).toContain('... [truncated]');
     });
   });
 
@@ -939,8 +941,9 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const result = await runStep(kibanaStep, stepWith);
 
       expect(result.error).toBeUndefined();
-      expect(result.output._debug).toBeDefined();
-      expect(result.output._debug.method).toBe('DELETE');
+      const output = result.output as Record<string, any>;
+      expect(output._debug).toBeDefined();
+      expect(output._debug.method).toBe('DELETE');
     });
 
     it('should still parse JSON normally when response body is non-empty', async () => {
@@ -1038,7 +1041,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
       });
 
-      const outputBuffer: Buffer = result.output;
+      const outputBuffer = result.output as Buffer;
       expect(outputBuffer[0]).toBe(0x89);
       expect(outputBuffer[3]).toBe(0x47);
       expect(outputBuffer[8]).toBe(0xff);
@@ -1194,7 +1197,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       });
 
       expect(result.error).toBeDefined();
-      expect(result.error.type).toBe('StepSizeLimitExceeded');
+      expect(result.error!.type).toBe('StepSizeLimitExceeded');
     });
   });
 });
