@@ -8,9 +8,10 @@
 import { SEARCH_API_BASE_URL } from '@kbn/data-plugin/server/search/routes';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 
-apiTest.describe('Maps - search ES|QL', { tag: testData.MAPS_API_TAGS }, () => {
+apiTest.describe('Maps - search ES|QL', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {

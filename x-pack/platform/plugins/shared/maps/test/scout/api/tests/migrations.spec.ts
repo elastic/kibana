@@ -7,13 +7,14 @@
 
 import semver from 'semver';
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 
 const PUBLIC_HEADERS = {
   'kbn-xsrf': 'scout',
 };
 
-apiTest.describe('Maps - map migrations', { tag: testData.MAPS_API_TAGS }, () => {
+apiTest.describe('Maps - map migrations', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {

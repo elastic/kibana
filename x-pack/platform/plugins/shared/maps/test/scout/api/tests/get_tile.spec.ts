@@ -9,10 +9,11 @@ import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 import { findFeature } from '../helpers/find_feature';
 
-apiTest.describe('Maps - getTile', { tag: testData.MAPS_API_TAGS }, () => {
+apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
 
   const defaultParams = {

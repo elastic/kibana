@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
-
-export const MAPS_API_TAGS = [...tags.stateful.classic];
-
 export const INTERNAL_HEADERS = {
   'kbn-xsrf': 'scout',
   'x-elastic-internal-origin': 'kibana',

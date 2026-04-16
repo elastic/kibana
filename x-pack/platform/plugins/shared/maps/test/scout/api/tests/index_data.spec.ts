@@ -6,9 +6,10 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 
-apiTest.describe('Maps - index feature data', { tag: testData.MAPS_API_TAGS }, () => {
+apiTest.describe('Maps - index feature data', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {

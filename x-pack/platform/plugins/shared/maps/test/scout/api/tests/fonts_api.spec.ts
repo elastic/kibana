@@ -8,9 +8,10 @@
 import path from 'path';
 import { copyFile, rm } from 'fs/promises';
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 
-apiTest.describe('Maps - fonts', { tag: testData.MAPS_API_TAGS }, () => {
+apiTest.describe('Maps - fonts', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
 
   const fontPath = path.join(
