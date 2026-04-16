@@ -143,9 +143,7 @@ async function fetchMemberDefinitions(
   await Promise.allSettled(
     [...bySpace.entries()].map(async ([spaceId, items]) => {
       const allIds = [
-        ...new Set(
-          items.flatMap(({ compositeSlo }) => compositeSlo.members.map((m) => m.sloId))
-        ),
+        ...new Set(items.flatMap(({ compositeSlo }) => compositeSlo.members.map((m) => m.sloId))),
       ];
       try {
         const slos = await findMemberSLOs(allIds, spaceId, soClient, logger);
@@ -230,7 +228,14 @@ function buildBulkOps(
           const slo = memberDefinitionMap.get(member.sloId);
           const result = summaryResultMap.get(key);
           if (!slo || !result) return [];
-          return [{ member, sloName: slo.name, summary: result.summary, burnRateWindows: result.burnRateWindows }];
+          return [
+            {
+              member,
+              sloName: slo.name,
+              summary: result.summary,
+              burnRateWindows: result.burnRateWindows,
+            },
+          ];
         });
 
         const { compositeSummary } = computeCompositeSummary(compositeSlo, memberSummaries);
@@ -248,11 +253,7 @@ function buildBulkOps(
   return bulkOps;
 }
 
-function buildMemberSummaryKey(
-  sloId: string,
-  instanceId: string,
-  timeWindow: TimeWindow
-): string {
+function buildMemberSummaryKey(sloId: string, instanceId: string, timeWindow: TimeWindow): string {
   return `${sloId}::${instanceId}::${timeWindow.duration.format()}::${timeWindow.type}`;
 }
 
