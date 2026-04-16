@@ -18,6 +18,16 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 // Output types
 // ---------------------------------------------------------------------------
 
+/** A suggested relationship between memories, extracted by the LLM */
+export interface ExtractedRelationship {
+  /** Target: either an existing memory ID or a local ref like "semantic_0", "episodic_1" for co-extracted memories */
+  target: string;
+  /** Relationship type */
+  type: string;
+  /** Confidence in this relationship */
+  weight: number;
+}
+
 /** A single extracted memory candidate from LLM extraction */
 export interface ExtractedMemoryCandidate {
   summary: string;
@@ -26,6 +36,10 @@ export interface ExtractedMemoryCandidate {
   confidence: number;
   /** IDs of existing memories this candidate should link to (suggested by the LLM) */
   suggested_links?: string[];
+  /** Structured domain-specific properties (cognitive mode) */
+  params?: Record<string, unknown>;
+  /** Typed relationships to other memories (existing IDs or local refs) */
+  relationships?: ExtractedRelationship[];
 }
 
 /** The structured output from a single extraction call */

@@ -45,6 +45,11 @@ export type MemoryEdgeType =
   | 'preference_cluster'
   | 'refines';
 
+export const VALID_EDGE_TYPES: MemoryEdgeType[] = [
+  'related_to', 'applies_to', 'derived_from', 'contradicts',
+  'same_project', 'preference_cluster', 'refines',
+];
+
 /**
  * A reference back to the conversation/round that produced or referenced this memory.
  */

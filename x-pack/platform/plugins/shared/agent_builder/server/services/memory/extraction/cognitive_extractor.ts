@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
-import type { ExtractionInput, ExtractionResult, ExtractedMemoryCandidate } from './memory_extractor';
+import type { ExtractionInput, ExtractionResult, ExtractedMemoryCandidate, ExtractedRelationship } from './memory_extractor';
 
 const MIN_CONFIDENCE = 0.4;
 const MAX_SEMANTIC = 8;
@@ -53,19 +53,27 @@ NOT conversation summaries. Each must include "params":
 Each must include "params":
 - { "trigger": string, "action": string, "context"?: string, "frequency"?: "always"|"usually"|"sometimes"|"once" }
 
+## RELATIONSHIPS — Connections between extracted memories.
+After extracting memories, identify relationships between them using local references.
+Each memory gets a local ref: "semantic_0", "semantic_1", "episodic_0", "procedural_0", etc.
+You may also reference existing memory IDs if provided.
+
+Relationship types: related_to, applies_to, derived_from, contradicts, same_project, preference_cluster, refines.
+
 Rules:
 - confidence: 0.0–1.0. Below 0.4 = do not extract.
 - summary: one concise line, max 100 tokens.
 - full: detailed version, max 500 tokens.
 - subtype: required for semantic (biography/work/preference/social/psychometric), optional for others.
 - params: REQUIRED for all memories in cognitive mode.
+- relationships: optional array of { "target": "local_ref_or_id", "type": "relationship_type", "weight": 0.0-1.0 }
 - Do NOT extract conversation summaries as episodic. Extract specific events/decisions.
 
 Respond with ONLY valid JSON:
 {
-  "semantic": [{ "summary": string, "full": string, "subtype": string, "confidence": number, "params": {...} }],
-  "episodic": [{ "summary": string, "full": string, "subtype"?: string, "confidence": number, "params": {...} }],
-  "procedural": [{ "summary": string, "full": string, "subtype"?: string, "confidence": number, "params": {...} }]
+  "semantic": [{ "summary": string, "full": string, "subtype": string, "confidence": number, "params": {...}, "relationships"?: [...] }],
+  "episodic": [{ "summary": string, "full": string, "subtype"?: string, "confidence": number, "params": {...}, "relationships"?: [...] }],
+  "procedural": [{ "summary": string, "full": string, "subtype"?: string, "confidence": number, "params": {...}, "relationships"?: [...] }]
 }
 
 If no memories in a category, use [].`;
@@ -209,7 +217,20 @@ export class CognitiveExtractor {
       }
 
       if (params && typeof params === 'object') {
-        (candidate as any).params = params;
+        candidate.params = params as Record<string, unknown>;
+      }
+
+      // Parse typed relationships
+      const relationships = (item as Record<string, unknown>).relationships;
+      if (Array.isArray(relationships)) {
+        candidate.relationships = relationships
+          .filter((r: any) => r && typeof r.target === 'string' && typeof r.type === 'string')
+          .map((r: any): ExtractedRelationship => ({
+            target: r.target,
+            type: r.type,
+            weight: typeof r.weight === 'number' ? Math.min(1, Math.max(0, r.weight)) : 0.5,
+          }))
+          .slice(0, 10);
       }
 
       if (Array.isArray(suggestedLinks)) {

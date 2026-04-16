@@ -19,6 +19,7 @@ import {
 } from './conversation_retrieval';
 import { rerank } from './reranking';
 import { applyPostRetrieval } from './post_retrieval';
+import { expandWithGraphClosure } from './graph_closure';
 
 const DEFAULT_STATUSES: MemoryStatus[] = ['candidate', 'provisional', 'established', 'consolidated'];
 
@@ -124,6 +125,16 @@ export const runRetrieval = async (
   if (opts.config) {
     const rerankMethod = opts.config.memory.retrieval.reranking;
     results = rerank(results, query, rerankMethod, { stage, logger });
+  }
+
+  // Graph closure expansion: follow links from seed results to pull in related memories
+  if (opts.config?.memory.retrieval.graphClosure?.enabled) {
+    results = await expandWithGraphClosure(
+      results,
+      memoryClient,
+      opts.config.memory.retrieval.graphClosure,
+      logger
+    );
   }
 
   // Apply post-retrieval steps

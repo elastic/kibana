@@ -136,6 +136,7 @@ export const runAfterRoundExtractionPipeline = async (
     log.debug(
       `afterRound: pipeline complete — created=${pipelineResult.created}, skipped=${pipelineResult.skipped}, derived=${pipelineResult.derived}, errors=${pipelineResult.errors}`
     );
+
   } catch (err) {
     log.warn(`afterRound: pipeline failed — ${(err as Error).message}`);
   }

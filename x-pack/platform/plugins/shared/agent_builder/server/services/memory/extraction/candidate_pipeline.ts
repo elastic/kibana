@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { MemoryCreateRequest, MemoryNode, MemoryType } from '@kbn/agent-builder-common';
+import type { MemoryCreateRequest, MemoryNode, MemoryType, MemoryEdgeType } from '@kbn/agent-builder-common';
+import { VALID_EDGE_TYPES } from '@kbn/agent-builder-common';
 import type { MemoryClient } from '../client';
 import type { EmbeddingService } from '../embeddings';
 import type { ReinforcementSignal } from '../active_memory_set';
@@ -41,6 +42,7 @@ export interface PipelineRunResult {
   skipped: number;
   derived: number;
   errors: number;
+  createdNodes: MemoryNode[];
 }
 
 // ---------------------------------------------------------------------------
@@ -84,7 +86,7 @@ export class CandidatePipeline {
     context: CandidatePipelineContext,
     reinforcementSignals: ReinforcementSignal[]
   ): Promise<PipelineRunResult> {
-    const result: PipelineRunResult = { created: 0, skipped: 0, derived: 0, errors: 0 };
+    const result: PipelineRunResult = { created: 0, skipped: 0, derived: 0, errors: 0, createdNodes: [] };
 
     const dedupChecker = new DedupChecker({
       esClient: this.esClient,
@@ -146,6 +148,7 @@ export class CandidatePipeline {
             req,
             derivedFromId: dedupResult.closestMatch?.id,
             suggestedLinks: candidate.suggested_links,
+            relationships: candidate.relationships,
           });
         } catch (err) {
           this.logger.warn(
@@ -168,6 +171,7 @@ export class CandidatePipeline {
     try {
       createdNodes = await this.memoryClient.bulkCreate(pendingRequests.map((p) => p.req));
       result.created = createdNodes.length;
+      result.createdNodes = createdNodes;
       this.logger.debug(`CandidatePipeline: created ${result.created} candidate memories`);
     } catch (err) {
       this.logger.warn(`CandidatePipeline: bulkCreate failed — ${(err as Error).message}`);
@@ -211,11 +215,63 @@ export class CandidatePipeline {
               weight: 0.5,
             });
           } catch (err) {
-            // Non-fatal — target may not exist
             this.logger.debug(
               `CandidatePipeline: could not add suggested link from ${node.id} to ${targetId} — ${(err as Error).message}`
             );
           }
+        }
+      }
+    }
+
+    // Resolve typed relationships using local refs (e.g. "semantic_0" → real ID)
+    // Build a local ref map: "type_index" → created node ID
+    const localRefMap = new Map<string, string>();
+    let semanticIdx = 0;
+    let episodicIdx = 0;
+    let proceduralIdx = 0;
+
+    for (const pending of pendingRequests) {
+      const node = createdNodes[pendingRequests.indexOf(pending)];
+      if (!node) continue;
+
+      const type = pending.req.type;
+      if (type === 'semantic') localRefMap.set(`semantic_${semanticIdx++}`, node.id);
+      else if (type === 'episodic') localRefMap.set(`episodic_${episodicIdx++}`, node.id);
+      else if (type === 'procedural') localRefMap.set(`procedural_${proceduralIdx++}`, node.id);
+    }
+
+    // Process relationships from all candidates
+    for (let i = 0; i < Math.min(createdNodes.length, pendingRequests.length); i++) {
+      const node = createdNodes[i];
+      const candidate = pendingRequests[i];
+      if (!node) continue;
+
+      const relationships = (candidate as any).relationships;
+      if (!Array.isArray(relationships)) continue;
+
+      for (const rel of relationships) {
+        if (!rel?.target || !rel?.type) continue;
+
+        // Resolve target: local ref or existing memory ID
+        const targetId = localRefMap.get(rel.target) ?? rel.target;
+        if (targetId === node.id) continue;
+
+        const edgeType: MemoryEdgeType = VALID_EDGE_TYPES.includes(rel.type)
+          ? rel.type
+          : 'related_to';
+
+        const weight = typeof rel.weight === 'number' ? Math.min(1, Math.max(0, rel.weight)) : 0.5;
+
+        try {
+          await this.memoryClient.addLink(node.id, {
+            target_id: targetId,
+            type: edgeType,
+            weight,
+          });
+        } catch (err) {
+          this.logger.debug(
+            `CandidatePipeline: could not add relationship link ${node.id} → ${targetId}: ${(err as Error).message}`
+          );
         }
       }
     }

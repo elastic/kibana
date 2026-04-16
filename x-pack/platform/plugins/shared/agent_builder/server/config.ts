@@ -41,6 +41,11 @@ export const configSchema = schema.object({
           threshold: schema.number({ defaultValue: 0.5, min: 0, max: 1 }),
         }),
       }),
+      graphClosure: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+        maxDepth: schema.number({ defaultValue: 2, min: 1, max: 5 }),
+        maxExpanded: schema.number({ defaultValue: 5, min: 1, max: 20 }),
+      }),
       conversation: schema.object({
         topK: schema.number({ defaultValue: 3, min: 1, max: 20 }),
         stage: schema.oneOf(
