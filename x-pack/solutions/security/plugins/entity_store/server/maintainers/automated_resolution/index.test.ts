@@ -11,4 +11,8 @@ describe('automatedResolutionMaintainerConfig', () => {
   it('requires enterprise license', () => {
     expect(automatedResolutionMaintainerConfig.minLicense).toBe('enterprise');
   });
+
+  it('sets a maintainer-specific timeout', () => {
+    expect(automatedResolutionMaintainerConfig.timeout).toBe('30m');
+  });
 });
