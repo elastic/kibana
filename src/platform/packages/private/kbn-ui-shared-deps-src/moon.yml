@@ -31,7 +31,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.js'
     - '!src/entry.js'
-    - '!src/set_public_path.js'
     - '!**/*.config.js'
     - '!target/**/*'
     - version_dependencies.txt
