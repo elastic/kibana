@@ -38,7 +38,7 @@ export const GET_CASE_CONTRACT: InternalConnectorContract = {
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
+Returns case details. The response does not include a comments property;  use the find case comments API to retrieve comments. The totalComment field  reflects the actual number of user comments on the case. You must have \`read\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
 `,
   methods: ['GET'],
   patterns: ['/api/cases/{caseId}'],

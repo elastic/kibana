@@ -44,7 +44,7 @@ Read the significant events<br/><br/>[Required authorization] Route required pri
   parameterTypes: {
     headerParams: [],
     pathParams: ['name'],
-    urlParams: ['from', 'to', 'bucketSize', 'query'],
+    urlParams: ['from', 'to', 'bucketSize', 'query', 'searchMode'],
     bodyParams: [],
   },
   paramsSchema: z.object({

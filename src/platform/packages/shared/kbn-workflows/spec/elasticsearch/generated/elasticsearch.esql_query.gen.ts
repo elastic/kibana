@@ -42,6 +42,7 @@ Get search results for an ES|QL (Elasticsearch query language) query.
     bodyParams: [
       'columnar',
       'filter',
+      'time_zone',
       'locale',
       'params',
       'profile',
