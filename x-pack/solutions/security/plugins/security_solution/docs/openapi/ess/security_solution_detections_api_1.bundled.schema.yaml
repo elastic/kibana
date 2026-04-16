@@ -25,24 +25,6 @@ paths:
       requestBody:
         content:
           application/json:
-            examples:
-              basicSearch:
-                summary: >-
-                  Paginated search with KQL filter, free-text term, and facet
-                  counts
-                value:
-                  aggregations:
-                    counts:
-                      - tags
-                      - enabled
-                  filter: 'alert.attributes.enabled: true'
-                  page: 1
-                  per_page: 20
-                  search:
-                    mode: legacy
-                    term: windows
-                  sort_field: enabled
-                  sort_order: desc
             schema:
               additionalProperties: false
               type: object
@@ -186,6 +168,29 @@ paths:
                   - total
                   - data
           description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                validationErrors:
+                  summary: Multiple validation failures
+                  value:
+                    message:
+                      - >-
+                        when "sort_order" and "sort_field" must exist together
+                        or not at all
+                      - >-
+                        invalid KQL filter: expected end of input, but found
+                        unexpected character
+                    status_code: 400
+              schema:
+                $ref: '#/components/schemas/SearchRulesValidationErrorResponse'
+          description: >
+            Request validation failed (for example invalid KQL, incompatible
+            sort and
+
+            `search_after`, or gap filter constraints). The response body lists
+            human-readable errors.
       summary: >-
         Search detection rules with KQL filter, facet counts, and search_after
         pagination (internal)
@@ -2433,6 +2438,21 @@ components:
           type: number
         - nullable: true
           type: boolean
+    SearchRulesValidationErrorResponse:
+      additionalProperties: false
+      type: object
+      properties:
+        message:
+          items:
+            type: string
+          type: array
+        status_code:
+          enum:
+            - 400
+          type: integer
+      required:
+        - message
+        - status_code
     SetupGuide:
       description: >-
         Populates the rule’s setup guide with instructions on rule prerequisites
