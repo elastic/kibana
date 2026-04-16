@@ -49,9 +49,11 @@ export const getSampleIndexRecordsNode = (params: TranslatePanelGraphParams): Gr
       return {
         comments: [
           generateAssistantComment(
-            `${NO_DATA_WARNING} \n\n ### Reason \n
+            `⚠️ Error fetching records from index pattern : \`${state.index_pattern}\`: ${error}.
 
-                      There was some error fetching records from index pattern : \`${state.index_pattern}\`: ${error}.`
+                      This will impact the accuracy of the generated ES|QL query, as field value formats cannot be correctly inferred and field mapping accuracy is reduced.
+
+                      **Recommendation:** Make sure this index is available and re-run the migration for more accurate field mapping and query generation.`
           ),
         ],
       };

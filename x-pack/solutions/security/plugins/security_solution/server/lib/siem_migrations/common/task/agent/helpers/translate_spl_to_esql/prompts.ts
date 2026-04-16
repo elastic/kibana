@@ -69,7 +69,7 @@ Go through each step and part of the splunk_query while following the below guid
 <guidelines>
 - Analyze the SPL query and identify the key components.
 {field_mapping_guidelines}
-- Always start the resulting ES|QL query with "FROM {index_pattern}". We will set the correct index pattern later on, so do not mention anything about index patterns in the summary.
+- Always start the resulting ES|QL query with "FROM {index_pattern}". We will set the correct index pattern later on, so do not mention anything about index patterns in the summary. DO NOT make up any other index pattern
 - Always remember to leave placeholders defined in the placeholders_syntax context as they are, don't replace them.
 - Always remember to translate any lookup (that are not inside a placeholder) using the lookup_syntax rules above.
 </guidelines>
