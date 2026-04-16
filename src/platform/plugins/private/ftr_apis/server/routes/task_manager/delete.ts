@@ -14,7 +14,7 @@ import type {
   KibanaResponseFactory,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import { ReservedPrivilegesSet, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 export const registerTaskManagerDeleteRoute = (
@@ -26,7 +26,7 @@ export const registerTaskManagerDeleteRoute = (
       path: '/internal/task_manager/tasks/{taskId}',
       security: {
         authz: {
-          requiredPrivileges: [ReservedPrivilegesSet.superuser],
+          requiredPrivileges: ['ftrApis'],
         },
       },
       validate: {

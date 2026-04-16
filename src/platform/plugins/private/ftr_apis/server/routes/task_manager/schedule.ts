@@ -14,7 +14,6 @@ import type {
   KibanaResponseFactory,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import type { InstanceTaskCost, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
@@ -71,7 +70,7 @@ export const registerTaskManagerScheduleRoute = (
       path: '/internal/task_manager/schedule',
       security: {
         authz: {
-          requiredPrivileges: [ReservedPrivilegesSet.superuser],
+          requiredPrivileges: ['ftrApis'],
         },
       },
       validate: {
