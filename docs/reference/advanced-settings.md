@@ -240,6 +240,15 @@ $$$banners-linkcolor$$$`banners:linkColor` {applies_to}`stack: ga 9.1` {applies_
 $$$banners-backgroundcolor$$$`banners:backgroundColor` {applies_to}`stack: ga` {applies_to}`serverless: ga`
 :   The color of the banner background for this space. Uses the value of the `xpack.banners.backgroundColor` configuration property by default.
 
+### Cases [kibana-cases-settings]
+
+$$$cases:maxOpenCasesPerRuleRun$$$`cases:maxOpenCasesPerRuleRun` {applies_to}`stack: ga 9.4` {applies_to}`serverless: ga`
+:   Sets the maximum number of new cases the [Cases connector](/deploy-manage/manage-connectors.md) can open in one detection rule run when the rule includes a Cases action. Values must be between 1 and 1000; very high values can add load on {{kib}} and {{es}}. `20` by default.
+
+::::{note}
+Does not apply to [Attack Discovery](/solutions/security/ai/attack-discovery.md), which uses a separate case-creation limit of `20`.
+::::
+
 
 ### Discover [kibana-discover-settings]
 
