@@ -148,7 +148,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
         snoozeSnapshot: {
           type: 'object',
-          enabled: false,
+          dynamic: false,
         },
       },
     },

@@ -290,7 +290,7 @@
             "type": "keyword"
           },
           "snoozeSnapshot": {
-            "enabled": false,
+            "dynamic": false,
             "type": "object"
           }
         },

@@ -151,7 +151,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
               },
               snoozeSnapshot: {
                 type: 'object',
-                enabled: false,
+                dynamic: false,
               },
             },
           },
