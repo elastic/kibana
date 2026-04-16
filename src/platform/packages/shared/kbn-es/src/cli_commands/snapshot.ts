@@ -117,11 +117,12 @@ export const snapshot: Command = {
       let samlResources: string[] = [];
 
       // Auto-configure SAML realm unless user has already provided SAML realm args via -E
+      // or is using a basic license (SAML requires trial or higher)
       const hasSamlConfig = userEsArgs.some((arg) =>
         arg.includes(`authc.realms.saml.${MOCK_IDP_REALM_NAME}.`)
       );
 
-      if (!hasSamlConfig) {
+      if (!hasSamlConfig && options.license !== 'basic') {
         log.info('Configuring SAML realm for Mock IdP with Kibana at %s', DEFAULT_KIBANA_URL);
 
         // Generate IDP metadata with the correct Kibana URL
@@ -153,7 +154,7 @@ export const snapshot: Command = {
       const installStartTime = Date.now();
       const { installPath } = await cluster.installSnapshot({
         version: options.version,
-        license: !hasSamlConfig ? 'trial' : options.license,
+        license: options.license,
         basePath: options.basePath,
         log,
         useCached: options.useCached,
