@@ -517,4 +517,125 @@ describe('useFetchMetricsData', () => {
       );
     });
   });
+
+  describe('dimension accumulator', () => {
+    const regionDimension = createDimension('region');
+
+    it('preserves previously-seen dimensions when a subsequent fetch drops them', async () => {
+      // First fetch: full dimension set (unfiltered)
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(
+        createMockParsedMetrics(
+          ['system.cpu.utilization'],
+          [regionDimension, hostDimension, serviceDimension]
+        )
+      );
+
+      const params = createDefaultParams();
+      const { result, rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.allDimensions.map((d) => d.name)).toEqual([
+          'host.name',
+          'region',
+          'service.name',
+        ]);
+      });
+
+      // Second fetch (user selected host.name, query narrows): region is dropped
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(
+        createMockParsedMetrics(['system.cpu.utilization'], [hostDimension, serviceDimension])
+      );
+
+      rerender({ ...params, selectedDimensionNames: [hostDimension] });
+
+      await waitFor(() => {
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      });
+
+      await waitFor(() => {
+        // Accumulator keeps region visible so the user can still pick it
+        expect(result.current.allDimensions.map((d) => d.name)).toEqual([
+          'host.name',
+          'region',
+          'service.name',
+        ]);
+      });
+    });
+
+    it('resets accumulated dimensions when the ES|QL query changes', async () => {
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(
+        createMockParsedMetrics(['system.cpu.utilization'], [hostDimension])
+      );
+
+      const params = createDefaultParams();
+      const { result, rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() => {
+        expect(result.current.allDimensions.map((d) => d.name)).toEqual(['host.name']);
+      });
+
+      // Switch data source; new query returns a different dimension set
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(
+        createMockParsedMetrics(['system.memory.utilization'], [regionDimension])
+      );
+
+      rerender({
+        ...params,
+        fetchParams: { ...params.fetchParams, query: { esql: 'TS apm-*' } },
+      });
+
+      await waitFor(() => {
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      });
+
+      await waitFor(() => {
+        // Accumulator is reset: old dimensions from the previous data source are gone
+        expect(result.current.allDimensions.map((d) => d.name)).toEqual(['region']);
+      });
+    });
+
+    it('resets accumulated dimensions when the timeRange changes', async () => {
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(
+        createMockParsedMetrics(['system.cpu.utilization'], [hostDimension, serviceDimension])
+      );
+
+      const params = createDefaultParams();
+      const { result, rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() => {
+        expect(result.current.allDimensions.map((d) => d.name)).toEqual([
+          'host.name',
+          'service.name',
+        ]);
+      });
+
+      // New time range legitimately drops service.name from the response
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(
+        createMockParsedMetrics(['system.cpu.utilization'], [hostDimension])
+      );
+
+      rerender({
+        ...params,
+        fetchParams: { ...params.fetchParams, timeRange: { from: 'now-1h', to: 'now' } },
+      });
+
+      await waitFor(() => {
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      });
+
+      await waitFor(() => {
+        expect(result.current.allDimensions.map((d) => d.name)).toEqual(['host.name']);
+      });
+    });
+  });
 });
