@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig, AppMenuSecondaryActionItem } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useStreamsFeedbackUrl } from '../../hooks/use_streams_feedback_url';
 import { useKibana } from '../../hooks/use_kibana';
 
 /**
@@ -36,16 +35,14 @@ export function useStreamsListAppMenu({
   } = useKibana();
   const chromeStyle = useObservable(chrome.getChromeStyle$(), chrome.getChromeStyle());
   const isProjectChrome = chromeStyle === 'project';
-  const feedbackUrl = useStreamsFeedbackUrl();
 
   return useMemo((): AppMenuConfig | undefined => {
     if (!isProjectChrome) {
       return undefined;
     }
 
-    const overflowOnlyItems: AppMenuItemType[] = [
+    const secondaryActionItems: AppMenuSecondaryActionItem[] = [
       {
-        order: 10,
         id: 'streams-list-settings',
         label: i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
           defaultMessage: 'Settings',
@@ -54,27 +51,12 @@ export function useStreamsListAppMenu({
         run: () => {
           onOpenSettings();
         },
-        testId: 'streamsListSettingsAppMenuItem',
+        testId: 'streamsListSettingsAppMenuButton',
       },
     ];
 
-    if (feedbackUrl) {
-      overflowOnlyItems.push({
-        order: 20,
-        id: 'streams-list-feedback',
-        label: i18n.translate('xpack.streams.streamsListView.appMenuFeedbackLabel', {
-          defaultMessage: 'Feedback',
-        }),
-        iconType: 'popout',
-        href: feedbackUrl,
-        target: '_blank',
-        testId: 'streamsListFeedbackAppMenuItem',
-      });
-    }
-
     if (sigEventsDiscovery) {
-      overflowOnlyItems.push({
-        order: 30,
+      secondaryActionItems.push({
         id: 'streams-list-sig-events-discovery',
         label: i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {
           defaultMessage: 'SigEvents Discovery',
@@ -84,22 +66,21 @@ export function useStreamsListAppMenu({
         run: () => {
           sigEventsDiscovery.onNavigate();
         },
-        testId: 'streamsSignificantEventsDiscoveryAppMenuItem',
+        testId: 'streamsSignificantEventsDiscoveryAppMenuButton',
       });
     }
 
     if (showCreateQueryStream && onOpenCreateQueryStream) {
-      overflowOnlyItems.push({
-        order: 40,
+      secondaryActionItems.push({
         id: 'streams-list-create-query-stream',
         label: i18n.translate('xpack.streams.streamsListView.createQueryStreamButtonLabel', {
           defaultMessage: 'Create Query stream',
         }),
-        iconType: 'plusInCircle',
+        iconType: 'plus',
         run: () => {
           onOpenCreateQueryStream();
         },
-        testId: 'streamsAppCreateQueryStreamAppMenuItem',
+        testId: 'streamsAppCreateQueryStreamAppMenuButton',
       });
     }
 
@@ -110,21 +91,20 @@ export function useStreamsListAppMenu({
         label: i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
           defaultMessage: 'Create classic stream',
         }),
-        iconType: 'plusInCircle',
+        iconType: 'plus',
         run: () => {
           onOpenClassicStreamCreation();
         },
         disableButton: !canCreateClassicStream,
         testId: 'streamsCreateClassicStreamAppMenuButton',
       },
-      overflowOnlyItems,
+      secondaryActionItems,
     };
   }, [
     isProjectChrome,
     canCreateClassicStream,
     onOpenSettings,
     onOpenClassicStreamCreation,
-    feedbackUrl,
     sigEventsDiscovery,
     showCreateQueryStream,
     onOpenCreateQueryStream,

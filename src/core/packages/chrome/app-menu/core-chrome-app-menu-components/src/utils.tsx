@@ -197,10 +197,7 @@ export const getPopoverActionItems = ({
     return [];
   }
 
-  const separator = createSeparatorItem('action-items-separator');
-
   return [
-    separator,
     {
       key: 'action-items',
       renderItem: () => (

@@ -319,8 +319,25 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
   const navigateToUrl = useNavigateToUrl();
   const basePath = useBasePath();
   const docLinks = useDocLinks();
-  const globalOverflowItems = useMemo(
-    (): AppMenuItemType[] => [
+  const globalOverflowItems = useMemo((): AppMenuItemType[] => {
+    const documentationItem: AppMenuItemType = {
+      id: 'global-documentation',
+      label: i18n.translate('core.ui.chrome.appMenu.documentationLabel', {
+        defaultMessage: 'Documentation',
+      }),
+      iconType: 'documentation',
+      order: 50,
+      /** Keeps Documentation + global Feedback (order 102) together below one divider in the overflow menu. */
+      separator: 'above',
+      href: docLinks.links.elasticStackGetStarted,
+      target: '_blank',
+    };
+
+    if (currentAppId === 'streams') {
+      return [documentationItem];
+    }
+
+    return [
       {
         id: 'global-add-data',
         label: i18n.translate('core.ui.chrome.appMenu.addDataLabel', {
@@ -332,18 +349,11 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
         run: () => navigateToUrl(basePath.prepend('/app/integrations')),
       },
       {
-        id: 'global-documentation',
-        label: i18n.translate('core.ui.chrome.appMenu.documentationLabel', {
-          defaultMessage: 'Documentation',
-        }),
-        iconType: 'documentation',
+        ...documentationItem,
         order: 101,
-        href: docLinks.links.elasticStackGetStarted,
-        target: '_blank',
       },
-    ],
-    [navigateToUrl, basePath, docLinks]
-  );
+    ];
+  }, [currentAppId, navigateToUrl, basePath, docLinks]);
   const navLinks = useNavLinks();
   const currentAppTitleFromNav = useMemo(() => {
     if (!currentAppId) {

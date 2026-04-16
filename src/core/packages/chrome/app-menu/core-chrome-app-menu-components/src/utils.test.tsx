@@ -268,23 +268,22 @@ describe('utils', () => {
       expect(result).toEqual([]);
     });
 
-    it('should return items with separator when primary action item is provided', () => {
+    it('should return action item row when primary action item is provided', () => {
       const result = getPopoverActionItems({
         primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
       });
 
-      expect(result).toHaveLength(2);
-      expect(result[0].isSeparator).toBe(true);
-      expect(result[1].key).toBe('action-items');
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('action-items');
     });
 
-    it('should return items with separator when secondary action item is provided', () => {
+    it('should return action item row when secondary action item is provided', () => {
       const result = getPopoverActionItems({
         secondaryActionItem: { id: 'cancel', label: 'Cancel', run: jest.fn(), iconType: 'cross' },
       });
 
-      expect(result).toHaveLength(2);
-      expect(result[0].isSeparator).toBe(true);
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('action-items');
     });
 
     it('should return empty array when both items are hidden with "all"', () => {
@@ -346,7 +345,7 @@ describe('utils', () => {
         },
       });
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(1);
     });
 
     it('should return items when hidden at non-mobile breakpoints only', () => {
@@ -360,7 +359,7 @@ describe('utils', () => {
         },
       });
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(1);
     });
   });
 
@@ -444,9 +443,9 @@ describe('utils', () => {
       const mainPanel = panels[0];
       const panelItems = mainPanel.items as Array<{ key?: string; isSeparator?: boolean }>;
 
-      expect(panelItems).toHaveLength(3);
-      expect(panelItems[1].isSeparator).toBe(true);
-      expect(panelItems[2].key).toBe('action-items');
+      expect(panelItems).toHaveLength(2);
+      expect(panelItems[0].key).toBe('1');
+      expect(panelItems[1].key).toBe('action-items');
     });
 
     it('should use custom startPanelId', () => {

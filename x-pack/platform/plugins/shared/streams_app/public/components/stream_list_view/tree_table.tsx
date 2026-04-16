@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Direction, EuiSearchBarProps, CriteriaWithPagination, Query } from '@elastic/eui';
 import {
@@ -19,6 +19,7 @@ import {
   EuiButtonIcon,
   EuiTourStep,
 } from '@elastic/eui';
+import { euiFormVariables } from '@elastic/eui/lib/components/form/form.styles';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
@@ -58,14 +59,6 @@ import {
 } from './translations';
 import { DeprecatedLogsBadge, DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
 
-const datePickerStyle = css`
-  .euiFormControlLayout,
-  .euiSuperDatePicker button,
-  .euiButton {
-    height: 40px;
-  }
-`;
-
 export function StreamsTreeTable({
   loading,
   streams = [],
@@ -81,7 +74,38 @@ export function StreamsTreeTable({
 }) {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const formVariables = useMemo(() => euiFormVariables(euiThemeContext), [euiThemeContext]);
+  const streamsSearchCompressedFiltersClassName = useMemo(
+    () =>
+      css`
+        /*
+         * EuiSearchBarFilters mounts EuiFilterGroup without compressed. Match EUI compressed
+         * filter group sizing for the Data quality control (filter_group.styles).
+         */
+        .euiSearchBar__filtersHolder .euiFilterGroup {
+          border-radius: ${euiTheme.border.radius.small};
+        }
+        .euiSearchBar__filtersHolder .euiFilterGroup .euiFilterButton__wrapper {
+          height: ${formVariables.controlCompressedHeight};
+          min-height: ${formVariables.controlCompressedHeight};
+        }
+        .euiSearchBar__filtersHolder .euiFilterGroup .euiFilterButton {
+          height: calc(
+            ${formVariables.controlCompressedHeight} - 2 * ${euiTheme.border.width.thin}
+          );
+          min-height: calc(
+            ${formVariables.controlCompressedHeight} - 2 * ${euiTheme.border.width.thin}
+          );
+        }
+        .euiSearchBar__filtersHolder .euiFilterGroup .euiFilterButton-isToggle {
+          height: calc(${formVariables.controlCompressedHeight} - 3 * ${euiTheme.size.xxs});
+          min-height: calc(${formVariables.controlCompressedHeight} - 3 * ${euiTheme.size.xxs});
+        }
+      `,
+    [euiTheme, formVariables]
+  );
   const { timeState } = useTimefilter();
   const { getStepPropsByStepId } = useStreamsTour();
 
@@ -340,10 +364,11 @@ export function StreamsTreeTable({
   );
 
   return (
-    <EuiInMemoryTable<TableRow>
-      loading={loading}
-      data-test-subj="streamsTable"
-      columns={[
+    <div className={streamsSearchCompressedFiltersClassName}>
+      <EuiInMemoryTable<TableRow>
+        loading={loading}
+        data-test-subj="streamsTable"
+        columns={[
         {
           field: 'nameSortKey',
           name: nameColumnHeader,
@@ -539,69 +564,67 @@ export function StreamsTreeTable({
             );
           },
         },
-      ]}
-      itemId="name"
-      items={items}
-      sorting={sorting}
-      noItemsMessage={NO_STREAMS_MESSAGE}
-      onTableChange={handleTableChange}
-      pagination={{
-        initialPageSize: 25,
-        pageSizeOptions: [25, 50, 100],
-        pageIndex: pagination.pageIndex,
-        pageSize: pagination.pageSize,
-      }}
-      executeQueryOptions={{ enabled: false }}
-      search={{
-        query: searchQuery,
-        onChange: handleQueryChange,
-        box: {
-          incremental: true,
-          'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
-        },
-        toolsRight: (
-          <div className={datePickerStyle}>
-            <StreamsAppSearchBar showDatePicker />
-          </div>
-        ),
-        filters:
-          qualityLoaded && canReadFailureStore
-            ? [
-                {
-                  type: 'field_value_selection',
-                  name: i18n.translate('xpack.streams.streamsTreeTable.dataQualityFilter.label', {
-                    defaultMessage: 'Data quality',
-                  }),
-                  field: 'dataQuality',
-                  multiSelect: 'or',
-                  options: [
-                    {
-                      value: 'good',
-                      name: i18n.translate(
-                        'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
-                        { defaultMessage: 'Good' }
-                      ),
-                    },
-                    {
-                      value: 'degraded',
-                      name: i18n.translate(
-                        'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
-                        { defaultMessage: 'Degraded' }
-                      ),
-                    },
-                    {
-                      value: 'poor',
-                      name: i18n.translate(
-                        'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
-                        { defaultMessage: 'Poor' }
-                      ),
-                    },
-                  ],
-                },
-              ]
-            : [],
-      }}
-      tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
-    />
+        ]}
+        itemId="name"
+        items={items}
+        sorting={sorting}
+        noItemsMessage={NO_STREAMS_MESSAGE}
+        onTableChange={handleTableChange}
+        pagination={{
+          initialPageSize: 25,
+          pageSizeOptions: [25, 50, 100],
+          pageIndex: pagination.pageIndex,
+          pageSize: pagination.pageSize,
+        }}
+        executeQueryOptions={{ enabled: false }}
+        search={{
+          query: searchQuery,
+          onChange: handleQueryChange,
+          box: {
+            incremental: true,
+            compressed: true,
+            'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
+          },
+          toolsRight: <StreamsAppSearchBar showDatePicker />,
+          filters:
+            qualityLoaded && canReadFailureStore
+              ? [
+                  {
+                    type: 'field_value_selection',
+                    name: i18n.translate('xpack.streams.streamsTreeTable.dataQualityFilter.label', {
+                      defaultMessage: 'Data quality',
+                    }),
+                    field: 'dataQuality',
+                    multiSelect: 'or',
+                    options: [
+                      {
+                        value: 'good',
+                        name: i18n.translate(
+                          'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
+                          { defaultMessage: 'Good' }
+                        ),
+                      },
+                      {
+                        value: 'degraded',
+                        name: i18n.translate(
+                          'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
+                          { defaultMessage: 'Degraded' }
+                        ),
+                      },
+                      {
+                        value: 'poor',
+                        name: i18n.translate(
+                          'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
+                          { defaultMessage: 'Poor' }
+                        ),
+                      },
+                    ],
+                  },
+                ]
+              : [],
+        }}
+        tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
+      />
+    </div>
   );
 }

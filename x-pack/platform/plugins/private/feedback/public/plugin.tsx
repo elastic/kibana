@@ -118,7 +118,6 @@ export class FeedbackPlugin implements Plugin {
       label: i18n.translate('feedback.appMenu.feedbackLabel', { defaultMessage: 'Feedback' }),
       iconType: 'editorComment',
       order: 102,
-      separator: 'above',
       run: () => openFeedback$.next(),
     });
 
