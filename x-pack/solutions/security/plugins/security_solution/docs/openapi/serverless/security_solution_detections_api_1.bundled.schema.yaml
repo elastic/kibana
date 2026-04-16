@@ -25,6 +25,24 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              basicSearch:
+                summary: >-
+                  Paginated search with KQL filter, free-text term, and facet
+                  counts
+                value:
+                  aggregations:
+                    counts:
+                      - tags
+                      - enabled
+                  filter: 'alert.attributes.enabled: true'
+                  page: 1
+                  per_page: 20
+                  search:
+                    mode: legacy
+                    term: windows
+                  sort_field: enabled
+                  sort_order: desc
             schema:
               additionalProperties: false
               type: object
@@ -109,6 +127,26 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                basicSearch:
+                  summary: >-
+                    Paginated response with facet counts and a search_after
+                    cursor
+                  value:
+                    counts:
+                      enabled:
+                        'false': 12
+                        'true': 30
+                      tags:
+                        Linux: 7
+                        Windows: 12
+                    data: []
+                    page: 1
+                    perPage: 20
+                    search_after:
+                      - 1700000000000
+                      - abcd
+                    total: 42
               schema:
                 additionalProperties: false
                 type: object
