@@ -65,6 +65,7 @@ export const searchResponseBodySchema = schema.object({
         ),
         tags: schema.maybe(
           schema.arrayOf(schema.string(), {
+            maxSize: 100,
             meta: { description: 'Tag IDs associated with this dashboard.' },
           })
         ),
