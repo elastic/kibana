@@ -45,6 +45,7 @@ toc:
       - file: data-views.md
       - file: routing-navigation-and-url.md
       - file: embeddables.md
+      - file: lens.md
   - folder: tutorials
     children:
       - file: adding-performance-metrics.md
@@ -72,23 +73,7 @@ toc:
       - file: kibana-page-template.md
       - file: how-to-register-a-new-advanced-setting.md
       - file: local-cross-cluster-search-setup.md
-  - folder: lens
-    children:
-      - file: lens-documentation.md
-      - folder: lens-config-api
-        children:
-          - file: lens-config-builder-api-documentation.md
-          - file: lens-config-builder-api-examples.md
-          - file: lens-config-builder-api-metric.md
-          - file: lens-config-builder-api-gauge.md
-          - file: lens-config-builder-api-pie.md
-          - file: lens-config-builder-api-mosaic.md
-          - file: lens-config-builder-api-treemap.md
-          - file: lens-config-builder-api-tag-cloud.md
-          - file: lens-config-builder-api-region-map.md
-          - file: lens-config-builder-api-table.md
-          - file: lens-config-builder-api-heatmap.md
-          - file: lens-config-builder-api-xy-chart.md
+      - file: lens-config-builder-api-examples.md
   - file: external-plugin-development.md
     children:
       - file: plugin-tooling.md
@@ -122,6 +107,19 @@ toc:
       - file: development-security.md
       - file: development-visualize-index.md
       - file: reporting-integration.md
+      - folder: lens-config-api
+        children:
+          - file: lens-config-builder-api-documentation.md
+          - file: lens-config-builder-api-metric.md
+          - file: lens-config-builder-api-gauge.md
+          - file: lens-config-builder-api-pie.md
+          - file: lens-config-builder-api-mosaic.md
+          - file: lens-config-builder-api-treemap.md
+          - file: lens-config-builder-api-tag-cloud.md
+          - file: lens-config-builder-api-region-map.md
+          - file: lens-config-builder-api-table.md
+          - file: lens-config-builder-api-heatmap.md
+          - file: lens-config-builder-api-xy-chart.md
   - file: development-best-practices.md
     children:
       - file: plugin-performance.md
