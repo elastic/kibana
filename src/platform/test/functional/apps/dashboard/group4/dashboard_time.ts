@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const browser = getService('browser');
   const retry = getService('retry');
+  const logger = getService('log');
 
   describe('dashboard time', () => {
     before(async function () {
@@ -65,6 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Jan 1, 2019 @ 00:00:00.000',
           'Jan 2, 2019 @ 00:00:00.000'
         );
+
+        const dashboardState = await browser.getSessionStorageItem('dashboardStateManagerPanels');
+        this.log.debug('dashboard backup session state', dashboardState);
+
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
 
         await dashboard.loadSavedDashboard(dashboardName);
 
