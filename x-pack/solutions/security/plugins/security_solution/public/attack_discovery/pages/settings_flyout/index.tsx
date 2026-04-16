@@ -26,7 +26,7 @@ import { Footer } from './footer';
 import * as i18n from './translations';
 import { useTabsView } from './hooks/use_tabs_view';
 import type { AlertsSelectionSettings } from './types';
-import { MIN_FLYOUT_WIDTH, MONITORING_TAB_ID, SCHEDULE_TAB_ID } from './constants';
+import { MIN_FLYOUT_WIDTH, SCHEDULE_TAB_ID } from './constants';
 import { getMaxAlerts } from './alert_selection/helpers/get_max_alerts';
 import { getDefaultQuery } from '../helpers';
 import type { SettingsOverrideOptions } from '../results/history/types';
@@ -115,7 +115,6 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
 
   useEffect(() => {
     const tabMap: Record<string, AttackDiscoverySettingsTab> = {
-      [MONITORING_TAB_ID]: 'monitoring',
       [SCHEDULE_TAB_ID]: 'schedule',
     };
     const tab: AttackDiscoverySettingsTab = tabMap[defaultSelectedTabId ?? ''] ?? 'settings';
@@ -135,16 +134,11 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
   });
 
   const title =
-    defaultSelectedTabId === MONITORING_TAB_ID
-      ? i18n.ACTION_TRIGGERED_RUNS
-      : defaultSelectedTabId === SCHEDULE_TAB_ID
+    defaultSelectedTabId === SCHEDULE_TAB_ID
       ? i18n.ATTACK_DISCOVERY_SCHEDULE
       : i18n.ATTACK_DISCOVERY_SETTINGS;
 
-  const closeButtonText =
-    defaultSelectedTabId !== MONITORING_TAB_ID && defaultSelectedTabId !== SCHEDULE_TAB_ID
-      ? i18n.CANCEL
-      : undefined;
+  const closeButtonText = defaultSelectedTabId !== SCHEDULE_TAB_ID ? i18n.CANCEL : undefined;
 
   return (
     <EuiFlyoutResizable

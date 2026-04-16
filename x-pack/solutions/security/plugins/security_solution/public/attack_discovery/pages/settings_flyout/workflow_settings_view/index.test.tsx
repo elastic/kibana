@@ -42,7 +42,7 @@ jest.mock('../workflow_configuration', () => ({
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
   alertRetrievalWorkflowIds: [],
-  defaultAlertRetrievalMode: 'custom_query',
+  alertRetrievalMode: 'custom_query',
   validationWorkflowId: 'default',
 };
 

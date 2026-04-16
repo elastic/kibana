@@ -92,7 +92,7 @@ describe('convertFormDataInBaseSchedule', () => {
         actions: [],
         workflowConfig: {
           alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
-          defaultAlertRetrievalMode: 'disabled' as const,
+          alertRetrievalMode: 'custom_only' as const,
           validationWorkflowId: 'custom-validation',
         },
       },
@@ -107,7 +107,7 @@ describe('convertFormDataInBaseSchedule', () => {
       expect.objectContaining({
         workflowConfig: {
           alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
-          default_alert_retrieval_mode: 'disabled',
+          alert_retrieval_mode: 'custom_only',
           validation_workflow_id: 'custom-validation',
         },
       })
@@ -211,7 +211,7 @@ describe('convertFormDataInBaseSchedule', () => {
         type: 'attack_discovery',
         workflowConfig: {
           alertRetrievalWorkflowIds: ['wf-1'],
-          defaultAlertRetrievalMode: 'custom_query' as const,
+          alertRetrievalMode: 'custom_query' as const,
           validationWorkflowId: 'default',
         },
       },
@@ -227,7 +227,7 @@ describe('convertFormDataInBaseSchedule', () => {
         type: 'attack_discovery',
         workflowConfig: {
           alert_retrieval_workflow_ids: ['wf-1'],
-          default_alert_retrieval_mode: 'custom_query',
+          alert_retrieval_mode: 'custom_query',
           validation_workflow_id: 'default',
         },
       })

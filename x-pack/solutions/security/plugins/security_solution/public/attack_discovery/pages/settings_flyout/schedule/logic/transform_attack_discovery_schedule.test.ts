@@ -69,7 +69,7 @@ describe('transformAttackDiscoveryScheduleToAttackDiscoverySchedule', () => {
         ...baseAttackDiscoverySchedule.params,
         workflow_config: {
           alert_retrieval_workflow_ids: ['wf-1', 'wf-2'],
-          default_alert_retrieval_mode: 'disabled',
+          alert_retrieval_mode: 'custom_only',
           validation_workflow_id: 'custom-validate',
         },
       },
@@ -81,7 +81,7 @@ describe('transformAttackDiscoveryScheduleToAttackDiscoverySchedule', () => {
 
     expect(result.params.workflowConfig).toEqual({
       alertRetrievalWorkflowIds: ['wf-1', 'wf-2'],
-      defaultAlertRetrievalMode: 'disabled',
+      alertRetrievalMode: 'custom_only',
       validationWorkflowId: 'custom-validate',
     });
   });
@@ -101,7 +101,7 @@ describe('transformAttackDiscoveryScheduleToAttackDiscoverySchedule', () => {
         ...baseAttackDiscoverySchedule.params,
         workflow_config: {
           alert_retrieval_workflow_ids: [],
-          default_alert_retrieval_mode: 'custom_query',
+          alert_retrieval_mode: 'custom_query',
           validation_workflow_id: 'default',
         },
       },
@@ -111,7 +111,7 @@ describe('transformAttackDiscoveryScheduleToAttackDiscoverySchedule', () => {
 
     expect(result.params.workflowConfig).toEqual({
       alertRetrievalWorkflowIds: [],
-      defaultAlertRetrievalMode: 'custom_query',
+      alertRetrievalMode: 'custom_query',
       validationWorkflowId: 'default',
     });
   });

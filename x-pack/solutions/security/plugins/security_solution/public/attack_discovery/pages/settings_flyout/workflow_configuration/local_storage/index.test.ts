@@ -18,7 +18,7 @@ describe('workflow configuration local storage', () => {
   const testSpaceId = 'test-space';
   const testConfig: WorkflowConfiguration = {
     alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
-    defaultAlertRetrievalMode: 'disabled',
+    alertRetrievalMode: 'custom_only',
     validationWorkflowId: 'custom-validation',
   };
 
@@ -88,7 +88,7 @@ describe('workflow configuration local storage', () => {
       const key = getWorkflowConfigStorageKey(testSpaceId);
       const invalidConfig = {
         alertRetrievalWorkflowIds: 'not-an-array',
-        defaultAlertRetrievalMode: 'custom_query',
+        alertRetrievalMode: 'custom_query',
         validationWorkflowId: 'default',
       };
       localStorage.setItem(key, JSON.stringify(invalidConfig));
@@ -102,11 +102,11 @@ describe('workflow configuration local storage', () => {
       consoleWarnSpy.mockRestore();
     });
 
-    it('returns default configuration when stored data has invalid defaultAlertRetrievalMode', () => {
+    it('returns default configuration when stored data has invalid alertRetrievalMode', () => {
       const key = getWorkflowConfigStorageKey(testSpaceId);
       const invalidConfig = {
         alertRetrievalWorkflowIds: [],
-        defaultAlertRetrievalMode: 'invalid_mode',
+        alertRetrievalMode: 'invalid_mode',
         validationWorkflowId: 'default',
       };
       localStorage.setItem(key, JSON.stringify(invalidConfig));
@@ -124,7 +124,7 @@ describe('workflow configuration local storage', () => {
       const key = getWorkflowConfigStorageKey(testSpaceId);
       const configWithEsql: WorkflowConfiguration = {
         alertRetrievalWorkflowIds: [],
-        defaultAlertRetrievalMode: 'esql',
+        alertRetrievalMode: 'esql',
         esqlQuery: 'FROM .alerts-security.alerts-default | WHERE kibana.alert.severity == "high"',
         validationWorkflowId: 'default',
       };
@@ -146,7 +146,7 @@ describe('workflow configuration local storage', () => {
 
       const result = getWorkflowSettings(testSpaceId);
 
-      expect(result.defaultAlertRetrievalMode).toBe('custom_query');
+      expect(result.alertRetrievalMode).toBe('custom_query');
     });
 
     it('migrates legacy defaultAlertRetrievalEnabled false to disabled', () => {
@@ -160,7 +160,7 @@ describe('workflow configuration local storage', () => {
 
       const result = getWorkflowSettings(testSpaceId);
 
-      expect(result.defaultAlertRetrievalMode).toBe('disabled');
+      expect(result.alertRetrievalMode).toBe('custom_only');
     });
   });
 

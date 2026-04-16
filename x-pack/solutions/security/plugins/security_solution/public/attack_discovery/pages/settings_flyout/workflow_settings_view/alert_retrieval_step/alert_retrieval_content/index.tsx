@@ -82,7 +82,7 @@ const AlertRetrievalContentComponent: React.FC<AlertRetrievalContentProps> = ({
 
   const handleDefaultToggle = useCallback(
     (enabled: boolean) => {
-      const newMode = enabled ? 'custom_query' : 'disabled';
+      const newMode = enabled ? 'custom_query' : 'custom_only';
 
       telemetry.reportEvent(AttackDiscoveryEventTypes.AlertRetrievalModeChanged, {
         mode: newMode,
@@ -90,7 +90,7 @@ const AlertRetrievalContentComponent: React.FC<AlertRetrievalContentProps> = ({
 
       onWorkflowConfigurationChange({
         ...workflowConfiguration,
-        defaultAlertRetrievalMode: newMode,
+        alertRetrievalMode: newMode,
       });
     },
     [onWorkflowConfigurationChange, telemetry, workflowConfiguration]
@@ -105,13 +105,13 @@ const AlertRetrievalContentComponent: React.FC<AlertRetrievalContentProps> = ({
 
         onWorkflowConfigurationChange({
           ...workflowConfiguration,
-          defaultAlertRetrievalMode: mode,
+          alertRetrievalMode: mode,
           ...(defaultQuery != null ? { esqlQuery: defaultQuery } : {}),
         });
       } else {
         onWorkflowConfigurationChange({
           ...workflowConfiguration,
-          defaultAlertRetrievalMode: mode,
+          alertRetrievalMode: mode,
         });
       }
     },
@@ -155,9 +155,9 @@ const AlertRetrievalContentComponent: React.FC<AlertRetrievalContentProps> = ({
   );
 
   const queryMode: QueryMode =
-    workflowConfiguration.defaultAlertRetrievalMode === 'esql' ? 'esql' : 'custom_query';
+    workflowConfiguration.alertRetrievalMode === 'esql' ? 'esql' : 'custom_query';
 
-  const isDefaultEnabled = workflowConfiguration.defaultAlertRetrievalMode !== 'disabled';
+  const isDefaultEnabled = workflowConfiguration.alertRetrievalMode !== 'custom_only';
 
   const { count: matchedAlertsCount } = useMatchedAlertsCount({
     esqlQuery: queryMode === 'esql' ? debouncedEsqlQuery : undefined,

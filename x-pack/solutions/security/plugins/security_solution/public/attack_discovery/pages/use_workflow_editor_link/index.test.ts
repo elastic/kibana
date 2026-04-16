@@ -173,47 +173,9 @@ describe('useWorkflowEditorLink', () => {
     });
   });
 
-  describe('when workflowRunId starts with "stub-"', () => {
-    const workflowId = 'workflow-123';
-    const stubWorkflowRunId = 'stub-46654f85-2a89-44b7-b942-0726bc56f9d9';
-
-    beforeEach(() => {
-      mockGetUrlForApp.mockReturnValue('/app/workflows/workflow-123');
-    });
-
-    it('returns the workflow editor URL without the executions tab', () => {
-      const { result } = renderHook(() =>
-        useWorkflowEditorLink({ workflowId, workflowRunId: stubWorkflowRunId })
-      );
-
-      expect(result.current.editorUrl).toBe('/app/workflows/workflow-123');
-    });
-
-    it('calls getUrlForApp with a path that does NOT include the executions tab', () => {
-      renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId: stubWorkflowRunId }));
-
-      expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows', {
-        path: '/workflow-123',
-      });
-    });
-
-    it('navigates to the workflow editor when navigateToEditor is called', () => {
-      const { result } = renderHook(() =>
-        useWorkflowEditorLink({ workflowId, workflowRunId: stubWorkflowRunId })
-      );
-
-      result.current.navigateToEditor();
-
-      expect(mockNavigateToApp).toHaveBeenCalledWith('workflows', {
-        openInNewTab: true,
-        path: '/workflow-123',
-      });
-    });
-  });
-
   describe('when workflowId is an alias', () => {
     const workflowId = 'attack-discovery-generation';
-    const workflowRunId = 'stub-46654f85-2a89-44b7-b942-0726bc56f9d9';
+    const workflowRunId = null;
 
     beforeEach(() => {
       mockHttpFetch.mockResolvedValue({

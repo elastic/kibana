@@ -115,6 +115,34 @@ describe('useMatchedAlertsCount', () => {
       expect(result.current.count).toBe(200);
     });
 
+    it('immediately applies the new size cap when settings.size changes, before the debounce fires', () => {
+      // This test guards against a regression where the cap used debouncedSettings.size
+      // instead of settings.size, causing "Preview matched alerts" to show a stale cap
+      // (e.g. 1266) while the ES|QL LIMIT was already updated to the new size (e.g. 299).
+      mockUseQueryAlerts.mockReturnValue({
+        data: { hits: { total: { value: 1266, relation: 'eq' } } },
+        loading: false,
+        setQuery: mockSetQuery,
+        response: '',
+        request: '',
+        refetch: null,
+      });
+
+      const { result, rerender } = renderHook(
+        ({ settings }: { settings: typeof defaultSettings }) => useMatchedAlertsCount({ settings }),
+        { initialProps: { settings: { ...defaultSettings, size: 1266 } } }
+      );
+
+      // Initial render: size 1266, totalHits 1266 → count 1266
+      expect(result.current.count).toBe(1266);
+
+      // User reduces the slider to 299; settings.size updates immediately
+      rerender({ settings: { ...defaultSettings, size: 299 } });
+
+      // The cap must reflect the new size immediately (not after the 300ms debounce)
+      expect(result.current.count).toBe(299);
+    });
+
     it('returns loading state from useQueryAlerts', () => {
       mockUseQueryAlerts.mockReturnValue({
         data: null,

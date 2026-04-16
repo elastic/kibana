@@ -123,7 +123,7 @@ jest.mock('../../../workflow_configuration/edit_with_ai', () => ({
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
   alertRetrievalWorkflowIds: [],
-  defaultAlertRetrievalMode: 'custom_query',
+  alertRetrievalMode: 'custom_query',
   validationWorkflowId: 'default',
 };
 
@@ -172,7 +172,7 @@ describe('AlertRetrievalContent', () => {
     expect(screen.getByTestId('defaultAlertRetrievalAccordion')).toBeInTheDocument();
   });
 
-  it('passes isEnabled=true when defaultAlertRetrievalMode is custom_query', () => {
+  it('passes isEnabled=true when alertRetrievalMode is custom_query', () => {
     render(
       <TestProviders>
         <AlertRetrievalContent {...defaultProps} />
@@ -184,10 +184,10 @@ describe('AlertRetrievalContent', () => {
     expect(accordion).toHaveAttribute('data-is-enabled', 'true');
   });
 
-  it('passes isEnabled=true when defaultAlertRetrievalMode is esql', () => {
+  it('passes isEnabled=true when alertRetrievalMode is esql', () => {
     const workflowConfiguration: WorkflowConfiguration = {
       ...defaultWorkflowConfiguration,
-      defaultAlertRetrievalMode: 'esql',
+      alertRetrievalMode: 'esql',
     };
 
     render(
@@ -201,10 +201,10 @@ describe('AlertRetrievalContent', () => {
     expect(accordion).toHaveAttribute('data-is-enabled', 'true');
   });
 
-  it('passes isEnabled=false when defaultAlertRetrievalMode is disabled', () => {
+  it('passes isEnabled=false when alertRetrievalMode is disabled', () => {
     const workflowConfiguration: WorkflowConfiguration = {
       ...defaultWorkflowConfiguration,
-      defaultAlertRetrievalMode: 'disabled',
+      alertRetrievalMode: 'custom_only',
     };
 
     render(
@@ -231,7 +231,7 @@ describe('AlertRetrievalContent', () => {
   it('renders the workflow configuration panel when default is disabled', () => {
     const workflowConfiguration: WorkflowConfiguration = {
       ...defaultWorkflowConfiguration,
-      defaultAlertRetrievalMode: 'disabled',
+      alertRetrievalMode: 'custom_only',
     };
 
     render(
@@ -257,7 +257,7 @@ describe('AlertRetrievalContent', () => {
     it('does not render the query mode selector when default is disabled', () => {
       const workflowConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
-        defaultAlertRetrievalMode: 'disabled',
+        alertRetrievalMode: 'custom_only',
       };
 
       render(
@@ -269,7 +269,7 @@ describe('AlertRetrievalContent', () => {
       expect(screen.queryByTestId('queryModeSelector')).not.toBeInTheDocument();
     });
 
-    it('passes mode=custom_query when defaultAlertRetrievalMode is custom_query', () => {
+    it('passes mode=custom_query when alertRetrievalMode is custom_query', () => {
       render(
         <TestProviders>
           <AlertRetrievalContent {...defaultProps} />
@@ -279,10 +279,10 @@ describe('AlertRetrievalContent', () => {
       expect(screen.getByTestId('queryModeSelector')).toHaveAttribute('data-mode', 'custom_query');
     });
 
-    it('passes mode=esql when defaultAlertRetrievalMode is esql', () => {
+    it('passes mode=esql when alertRetrievalMode is esql', () => {
       const workflowConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
-        defaultAlertRetrievalMode: 'esql',
+        alertRetrievalMode: 'esql',
       };
 
       render(
@@ -352,7 +352,7 @@ describe('AlertRetrievalContent', () => {
   describe('when esql mode is selected', () => {
     const esqlWorkflowConfiguration: WorkflowConfiguration = {
       ...defaultWorkflowConfiguration,
-      defaultAlertRetrievalMode: 'esql',
+      alertRetrievalMode: 'esql',
       esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
     };
 
@@ -466,7 +466,7 @@ describe('AlertRetrievalContent', () => {
       ...defaultProps,
       workflowConfiguration: {
         ...defaultWorkflowConfiguration,
-        defaultAlertRetrievalMode: 'disabled' as const,
+        alertRetrievalMode: 'custom_only' as const,
       },
     };
 
@@ -517,7 +517,7 @@ describe('AlertRetrievalContent', () => {
 
     expect(onWorkflowConfigurationChange).toHaveBeenCalledWith({
       ...defaultWorkflowConfiguration,
-      defaultAlertRetrievalMode: 'disabled',
+      alertRetrievalMode: 'custom_only',
     });
   });
 
@@ -525,7 +525,7 @@ describe('AlertRetrievalContent', () => {
     const onWorkflowConfigurationChange = jest.fn();
     const workflowConfiguration: WorkflowConfiguration = {
       ...defaultWorkflowConfiguration,
-      defaultAlertRetrievalMode: 'disabled',
+      alertRetrievalMode: 'custom_only',
     };
 
     render(
@@ -542,7 +542,7 @@ describe('AlertRetrievalContent', () => {
 
     expect(onWorkflowConfigurationChange).toHaveBeenCalledWith({
       ...workflowConfiguration,
-      defaultAlertRetrievalMode: 'custom_query',
+      alertRetrievalMode: 'custom_query',
     });
   });
 
@@ -559,7 +559,7 @@ describe('AlertRetrievalContent', () => {
 
     const esqlWorkflowConfiguration: WorkflowConfiguration = {
       ...defaultWorkflowConfiguration,
-      defaultAlertRetrievalMode: 'esql',
+      alertRetrievalMode: 'esql',
       esqlQuery: initialQuery,
     };
 
@@ -745,7 +745,7 @@ describe('AlertRetrievalContent', () => {
 
       expect(onWorkflowConfigurationChange).toHaveBeenCalledWith({
         ...workflowConfiguration,
-        defaultAlertRetrievalMode: 'esql',
+        alertRetrievalMode: 'esql',
       });
     });
 
@@ -754,7 +754,7 @@ describe('AlertRetrievalContent', () => {
       const onWorkflowConfigurationChange = jest.fn();
       const workflowConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
-        defaultAlertRetrievalMode: 'esql',
+        alertRetrievalMode: 'esql',
         esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
       };
 
@@ -778,7 +778,7 @@ describe('AlertRetrievalContent', () => {
 
       expect(onWorkflowConfigurationChange).toHaveBeenCalledWith({
         ...workflowConfiguration,
-        defaultAlertRetrievalMode: 'custom_query',
+        alertRetrievalMode: 'custom_query',
       });
     });
 
@@ -788,7 +788,7 @@ describe('AlertRetrievalContent', () => {
         'FROM .alerts-security.alerts-default METADATA _id, _index, _version, _ignored | LIMIT 200';
       const workflowConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
-        defaultAlertRetrievalMode: 'esql',
+        alertRetrievalMode: 'esql',
         esqlQuery: mutatedQuery,
       };
 
@@ -806,7 +806,7 @@ describe('AlertRetrievalContent', () => {
 
       expect(onWorkflowConfigurationChange).toHaveBeenCalledWith(
         expect.objectContaining({
-          defaultAlertRetrievalMode: 'custom_query',
+          alertRetrievalMode: 'custom_query',
           esqlQuery: mutatedQuery,
         })
       );
@@ -819,7 +819,7 @@ describe('AlertRetrievalContent', () => {
         'FROM .alerts-security.alerts-default METADATA _id, _index, _version, _ignored | LIMIT 200';
       const workflowConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
-        defaultAlertRetrievalMode: 'custom_query',
+        alertRetrievalMode: 'custom_query',
         esqlQuery: mutatedQuery,
       };
 
@@ -873,7 +873,7 @@ describe('AlertRetrievalContent', () => {
     it('passes settings start to AlertPreviewTabs in esql mode', () => {
       const esqlWorkflowConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
-        defaultAlertRetrievalMode: 'esql',
+        alertRetrievalMode: 'esql',
         esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
       };
 
@@ -895,7 +895,7 @@ describe('AlertRetrievalContent', () => {
     it('passes settings end to AlertPreviewTabs in esql mode', () => {
       const esqlWorkflowConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
-        defaultAlertRetrievalMode: 'esql',
+        alertRetrievalMode: 'esql',
         esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
       };
 
@@ -956,7 +956,7 @@ describe('AlertRetrievalContent', () => {
   it('does not render a date picker in ES|QL mode', () => {
     const esqlWorkflowConfiguration: WorkflowConfiguration = {
       ...defaultWorkflowConfiguration,
-      defaultAlertRetrievalMode: 'esql',
+      alertRetrievalMode: 'esql',
       esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
     };
 
@@ -976,7 +976,7 @@ describe('AlertRetrievalContent', () => {
     it('passes esqlQuery to useMatchedAlertsCount when in ES|QL mode', () => {
       const esqlWorkflowConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
-        defaultAlertRetrievalMode: 'esql',
+        alertRetrievalMode: 'esql',
         esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
       };
 
@@ -1013,7 +1013,7 @@ describe('AlertRetrievalContent', () => {
     it('does not skip the count when in ES|QL mode and default is enabled', () => {
       const esqlWorkflowConfiguration: WorkflowConfiguration = {
         ...defaultWorkflowConfiguration,
-        defaultAlertRetrievalMode: 'esql',
+        alertRetrievalMode: 'esql',
         esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
       };
 

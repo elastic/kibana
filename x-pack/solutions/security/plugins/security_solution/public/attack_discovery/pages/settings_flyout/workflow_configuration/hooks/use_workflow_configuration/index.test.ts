@@ -23,7 +23,7 @@ describe('useWorkflowConfiguration', () => {
   const testSpaceId = 'test-space';
   const testConfig: WorkflowConfiguration = {
     alertRetrievalWorkflowIds: ['workflow-1'],
-    defaultAlertRetrievalMode: 'disabled',
+    alertRetrievalMode: 'custom_only',
     validationWorkflowId: 'custom',
   };
 

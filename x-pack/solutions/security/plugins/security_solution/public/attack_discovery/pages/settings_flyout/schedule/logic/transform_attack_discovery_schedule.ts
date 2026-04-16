@@ -75,10 +75,10 @@ export const transformAttackDiscoveryScheduleToAttackDiscoverySchedule = (
     workflowConfig:
       schedule.params.workflow_config != null
         ? {
+            alertRetrievalMode:
+              schedule.params.workflow_config.alert_retrieval_mode ?? 'custom_query',
             alertRetrievalWorkflowIds:
               schedule.params.workflow_config.alert_retrieval_workflow_ids ?? [],
-            defaultAlertRetrievalMode:
-              schedule.params.workflow_config.default_alert_retrieval_mode ?? 'custom_query',
             ...(schedule.params.workflow_config.esql_query != null
               ? { esqlQuery: schedule.params.workflow_config.esql_query }
               : {}),

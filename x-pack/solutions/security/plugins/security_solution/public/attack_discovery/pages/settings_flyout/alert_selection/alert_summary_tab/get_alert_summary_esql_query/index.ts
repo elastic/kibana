@@ -34,9 +34,19 @@ export const getAlertSummaryEsqlQuery = ({
       ? esqlQuery.trimEnd()
       : getDefaultBaseQuery({ alertsIndexPattern, maxAlerts });
 
-  return `${baseQuery}
+  const result = `${baseQuery}
 | STATS Count = count() by \`${tableStackBy0}\`
 | SORT Count DESC
 ${getEsqlKeepStatement(tableStackBy0)}
 `;
+
+  // eslint-disable-next-line no-console
+  console.log('[kibana-dkv] getAlertSummaryEsqlQuery:', {
+    esqlQueryProp: esqlQuery,
+    maxAlerts,
+    tableStackBy0,
+    resultQuery: result,
+  });
+
+  return result;
 };
