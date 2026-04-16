@@ -3703,7 +3703,7 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 771,
+        "lineNumber": 774,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3719,7 +3719,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 776,
+            "lineNumber": 779,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,

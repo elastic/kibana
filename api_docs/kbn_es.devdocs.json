@@ -702,7 +702,7 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 771,
+        "lineNumber": 774,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -718,7 +718,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 776,
+            "lineNumber": 779,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -739,7 +739,7 @@
           "(nameSuffix: string, portOffset: number) => Omit<ServerlessEsNodeArgs, \"image\">[]"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 343,
+        "lineNumber": 345,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -755,7 +755,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 344,
+            "lineNumber": 346,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -772,7 +772,7 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 345,
+            "lineNumber": 347,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -793,7 +793,7 @@
           "(nameSuffix: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 232,
+        "lineNumber": 234,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -809,7 +809,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 232,
+            "lineNumber": 234,
             "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
@@ -840,7 +840,7 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 473,
+        "lineNumber": 475,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -862,7 +862,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 476,
+            "lineNumber": 478,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -1004,7 +1004,7 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 458,
+        "lineNumber": 460,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1026,7 +1026,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 461,
+            "lineNumber": 463,
             "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
@@ -1102,7 +1102,7 @@
           "10"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 1121,
+        "lineNumber": 1132,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1119,7 +1119,7 @@
           "Omit<ServerlessEsNodeArgs, \"image\">[]"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 409,
+        "lineNumber": 411,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
