@@ -45,7 +45,7 @@ jest.mock('@kbn/securitysolution-hook-utils', () => ({
 
 // Mock shared_imports to avoid form context dependency
 jest.mock('../../../shared_imports', () => ({
-  UseField: ({ component: Component }: { component: React.ComponentType; path: string }) =>
+  UseField: ({ component: Component }: { component: React.ComponentType }) =>
     Component ? <Component /> : null,
 }));
 
@@ -88,7 +88,7 @@ describe('OsqueryResponseAction', () => {
 
     it('renders upselling component when user lacks Complete tier', () => {
       const MockUpselling = () => (
-        <div data-test-subj="mock-upselling">Upgrade to Endpoint Complete</div>
+        <div data-test-subj="mock-upselling">{'Upgrade to Endpoint Complete'}</div>
       );
       useUpsellingComponentSpy.mockReturnValue(MockUpselling);
 
