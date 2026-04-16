@@ -97,19 +97,17 @@ describe('DiscoverNoResults', () => {
           query: undefined,
           filters: undefined,
         });
-        expect(result.subjects).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "adjustTimeRange": false,
-            "checkIndices": true,
-            "disableFiltersButton": false,
-            "errorMsg": false,
-            "mainMsg": true,
-            "searchAllMatchesGivesNoResults": false,
-            "viewMatchesButton": false,
-          }
-        `);
+        expect(result.subjects).toEqual({
+          adjustFilters: false,
+          adjustSearch: false,
+          adjustTimeRange: false,
+          checkIndices: true,
+          disableFiltersButton: false,
+          errorMsg: false,
+          mainMsg: true,
+          searchAllMatchesGivesNoResults: false,
+          viewMatchesButton: false,
+        });
       });
     });
     describe('timeFieldName', () => {
@@ -119,19 +117,17 @@ describe('DiscoverNoResults', () => {
           query: { language: 'lucene', query: '' },
           filters: [],
         });
-        expect(result.subjects).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "adjustTimeRange": true,
-            "checkIndices": false,
-            "disableFiltersButton": false,
-            "errorMsg": false,
-            "mainMsg": true,
-            "searchAllMatchesGivesNoResults": false,
-            "viewMatchesButton": true,
-          }
-        `);
+        expect(result.subjects).toEqual({
+          adjustFilters: false,
+          adjustSearch: false,
+          adjustTimeRange: true,
+          checkIndices: false,
+          disableFiltersButton: false,
+          errorMsg: false,
+          mainMsg: true,
+          searchAllMatchesGivesNoResults: false,
+          viewMatchesButton: true,
+        });
         expect(searchMock).toHaveBeenCalledTimes(0);
       });
 
@@ -146,38 +142,34 @@ describe('DiscoverNoResults', () => {
           query: { language: 'lucene', query: '' },
           filters: [],
         });
-        expect(subjects).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "adjustTimeRange": true,
-            "checkIndices": false,
-            "disableFiltersButton": false,
-            "errorMsg": false,
-            "mainMsg": true,
-            "searchAllMatchesGivesNoResults": false,
-            "viewMatchesButton": true,
-          }
-        `);
+        expect(subjects).toEqual({
+          adjustFilters: false,
+          adjustSearch: false,
+          adjustTimeRange: true,
+          checkIndices: false,
+          disableFiltersButton: false,
+          errorMsg: false,
+          mainMsg: true,
+          searchAllMatchesGivesNoResults: false,
+          viewMatchesButton: true,
+        });
         expect(searchMock).toHaveBeenCalledTimes(0);
 
         await user.click(screen.getByTestId('discoverNoResultsViewAllMatches'));
 
         await waitFor(() => {
           expect(searchMock).toHaveBeenCalledTimes(1);
-          expect(findSubjects()).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "adjustTimeRange": true,
-            "checkIndices": false,
-            "disableFiltersButton": false,
-            "errorMsg": false,
-            "mainMsg": true,
-            "searchAllMatchesGivesNoResults": true,
-            "viewMatchesButton": false,
-          }
-        `);
+          expect(findSubjects()).toEqual({
+            adjustFilters: false,
+            adjustSearch: false,
+            adjustTimeRange: true,
+            checkIndices: false,
+            disableFiltersButton: false,
+            errorMsg: false,
+            mainMsg: true,
+            searchAllMatchesGivesNoResults: true,
+            viewMatchesButton: false,
+          });
         });
       });
 
@@ -194,38 +186,34 @@ describe('DiscoverNoResults', () => {
           query: { language: 'lucene', query: '' },
           filters: [],
         });
-        expect(subjects).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "adjustTimeRange": true,
-            "checkIndices": false,
-            "disableFiltersButton": false,
-            "errorMsg": false,
-            "mainMsg": true,
-            "searchAllMatchesGivesNoResults": false,
-            "viewMatchesButton": true,
-          }
-        `);
+        expect(subjects).toEqual({
+          adjustFilters: false,
+          adjustSearch: false,
+          adjustTimeRange: true,
+          checkIndices: false,
+          disableFiltersButton: false,
+          errorMsg: false,
+          mainMsg: true,
+          searchAllMatchesGivesNoResults: false,
+          viewMatchesButton: true,
+        });
         expect(searchMock).toHaveBeenCalledTimes(0);
 
         await user.click(screen.getByTestId('discoverNoResultsViewAllMatches'));
 
         await waitFor(() => {
           expect(searchMock).toHaveBeenCalledTimes(1);
-          expect(findSubjects()).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "adjustTimeRange": true,
-            "checkIndices": false,
-            "disableFiltersButton": false,
-            "errorMsg": false,
-            "mainMsg": true,
-            "searchAllMatchesGivesNoResults": false,
-            "viewMatchesButton": true,
-          }
-        `);
+          expect(findSubjects()).toEqual({
+            adjustFilters: false,
+            adjustSearch: false,
+            adjustTimeRange: true,
+            checkIndices: false,
+            disableFiltersButton: false,
+            errorMsg: false,
+            mainMsg: true,
+            searchAllMatchesGivesNoResults: false,
+            viewMatchesButton: true,
+          });
         });
       });
 
@@ -253,38 +241,34 @@ describe('DiscoverNoResults', () => {
           query: { language: 'lucene', query: '' },
           filters: [],
         });
-        expect(subjects).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "adjustTimeRange": true,
-            "checkIndices": false,
-            "disableFiltersButton": false,
-            "errorMsg": false,
-            "mainMsg": true,
-            "searchAllMatchesGivesNoResults": false,
-            "viewMatchesButton": true,
-          }
-        `);
+        expect(subjects).toEqual({
+          adjustFilters: false,
+          adjustSearch: false,
+          adjustTimeRange: true,
+          checkIndices: false,
+          disableFiltersButton: false,
+          errorMsg: false,
+          mainMsg: true,
+          searchAllMatchesGivesNoResults: false,
+          viewMatchesButton: true,
+        });
         expect(searchMock).toHaveBeenCalledTimes(0);
 
         await user.click(screen.getByTestId('discoverNoResultsViewAllMatches'));
 
         await waitFor(() => {
           expect(searchMock).toHaveBeenCalledTimes(1);
-          expect(findSubjects()).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "adjustTimeRange": true,
-            "checkIndices": false,
-            "disableFiltersButton": false,
-            "errorMsg": false,
-            "mainMsg": true,
-            "searchAllMatchesGivesNoResults": false,
-            "viewMatchesButton": true,
-          }
-        `);
+          expect(findSubjects()).toEqual({
+            adjustFilters: false,
+            adjustSearch: false,
+            adjustTimeRange: true,
+            checkIndices: false,
+            disableFiltersButton: false,
+            errorMsg: false,
+            mainMsg: true,
+            searchAllMatchesGivesNoResults: false,
+            viewMatchesButton: true,
+          });
         });
       });
 
@@ -355,38 +339,34 @@ describe('DiscoverNoResults', () => {
           query: { language: 'lucene', query: 'css*' },
           filters: [{} as Filter],
         });
-        expect(subjects).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": true,
-            "adjustSearch": true,
-            "adjustTimeRange": true,
-            "checkIndices": false,
-            "disableFiltersButton": true,
-            "errorMsg": false,
-            "mainMsg": true,
-            "searchAllMatchesGivesNoResults": false,
-            "viewMatchesButton": true,
-          }
-        `);
+        expect(subjects).toEqual({
+          adjustFilters: true,
+          adjustSearch: true,
+          adjustTimeRange: true,
+          checkIndices: false,
+          disableFiltersButton: true,
+          errorMsg: false,
+          mainMsg: true,
+          searchAllMatchesGivesNoResults: false,
+          viewMatchesButton: true,
+        });
         expect(searchMock).toHaveBeenCalledTimes(0);
 
         await user.click(screen.getByTestId('discoverNoResultsViewAllMatches'));
 
         await waitFor(() => {
           expect(searchMock).toHaveBeenCalledTimes(1);
-          expect(findSubjects()).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": true,
-            "adjustSearch": true,
-            "adjustTimeRange": true,
-            "checkIndices": false,
-            "disableFiltersButton": true,
-            "errorMsg": false,
-            "mainMsg": true,
-            "searchAllMatchesGivesNoResults": true,
-            "viewMatchesButton": false,
-          }
-        `);
+          expect(findSubjects()).toEqual({
+            adjustFilters: true,
+            adjustSearch: true,
+            adjustTimeRange: true,
+            checkIndices: false,
+            disableFiltersButton: true,
+            errorMsg: false,
+            mainMsg: true,
+            searchAllMatchesGivesNoResults: true,
+            viewMatchesButton: false,
+          });
         });
       });
     });
