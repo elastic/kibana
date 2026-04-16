@@ -168,6 +168,38 @@ describe('installPrebuiltWatchlists', function () {
     expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
   });
 
+  it('entity source index patterns use each space namespace', async () => {
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['space-2']));
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+    await callInstall();
+
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'okta',
+        indexPattern: 'logs-entityanalytics_okta.user-default',
+      })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'ad',
+        indexPattern: 'logs-entityanalytics_ad.user-default',
+      })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'okta',
+        indexPattern: 'logs-entityanalytics_okta.user-space-2',
+      })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'ad',
+        indexPattern: 'logs-entityanalytics_ad.user-space-2',
+      })
+    );
+  });
+
   it('should deduplicate default namespace when it appears in spaces response', async () => {
     mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default', 'space-1']));
     mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));

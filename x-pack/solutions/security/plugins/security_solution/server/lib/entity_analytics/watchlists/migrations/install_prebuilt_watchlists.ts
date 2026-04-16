@@ -22,7 +22,7 @@ import { WatchlistEntitySourceClient } from '../entity_sources/infra';
 // Bump this when PREBUILT_WATCHLISTS definitions change
 export const PREBUILT_WATCHLISTS_VERSION = 1;
 
-const PREBUILT_WATCHLISTS = [
+const getPrebuiltWatchlists = (namespace: string) => [
   {
     id: PRIVILEGED_USER_WATCHLIST_ID,
     name: PRIVILEGED_USER_WATCHLIST_NAME,
@@ -33,7 +33,7 @@ const PREBUILT_WATCHLISTS = [
       {
         type: 'entity_analytics_integration' as const,
         name: 'okta',
-        indexPattern: getStreamPatternFor('entityanalytics_okta', 'default'),
+        indexPattern: getStreamPatternFor('entityanalytics_okta', namespace),
         integrationName: 'entityanalytics_okta',
         enabled: true,
         matchers: getMatchersFor('entityanalytics_okta'),
@@ -41,7 +41,7 @@ const PREBUILT_WATCHLISTS = [
       {
         type: 'entity_analytics_integration' as const,
         name: 'ad',
-        indexPattern: getStreamPatternFor('entityanalytics_ad', 'default'),
+        indexPattern: getStreamPatternFor('entityanalytics_ad', namespace),
         integrationName: 'entityanalytics_ad',
         enabled: true,
         matchers: getMatchersFor('entityanalytics_ad'),
@@ -49,6 +49,8 @@ const PREBUILT_WATCHLISTS = [
     ],
   },
 ];
+
+type PrebuiltWatchlistDefinition = ReturnType<typeof getPrebuiltWatchlists>[number];
 
 /**
  * Ensures all prebuilt watchlists exist for the given namespace.
@@ -65,7 +67,7 @@ export const ensurePrebuiltWatchlists = async ({
   namespace: string;
   logger: Logger;
 }) => {
-  for (const watchlist of PREBUILT_WATCHLISTS) {
+  for (const watchlist of getPrebuiltWatchlists(namespace)) {
     const { id, entitySources, ...attrs } = watchlist;
 
     const watchlistId = await getOrCreateWatchlist({ watchlistClient, logger, id, attrs });
@@ -111,7 +113,7 @@ const getOrCreateWatchlist = async ({
   watchlistClient: WatchlistConfigClient;
   logger: Logger;
   id: string;
-  attrs: Omit<(typeof PREBUILT_WATCHLISTS)[number], 'id' | 'entitySources'>;
+  attrs: Omit<PrebuiltWatchlistDefinition, 'id' | 'entitySources'>;
 }): Promise<string | undefined> => {
   try {
     const existing = await watchlistClient.get(id);
@@ -167,7 +169,7 @@ const ensureEntitySources = async ({
   namespace: string;
   logger: Logger;
   watchlistId: string;
-  entitySources: (typeof PREBUILT_WATCHLISTS)[number]['entitySources'];
+  entitySources: PrebuiltWatchlistDefinition['entitySources'];
 }) => {
   const sourceClient = new WatchlistEntitySourceClient({ soClient, namespace });
 
