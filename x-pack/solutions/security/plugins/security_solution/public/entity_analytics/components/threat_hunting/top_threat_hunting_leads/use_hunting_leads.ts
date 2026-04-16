@@ -48,7 +48,11 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     };
   }, []);
 
-  const { data, isLoading, refetch } = useQuery({
+  const {
+    data,
+    isLoading: isLeadsLoading,
+    refetch,
+  } = useQuery({
     queryKey: [HUNTING_LEADS_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeads({ signal, ...FETCH_LEADS_PARAMS }),
     enabled: isEnabled,
@@ -78,7 +82,7 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     },
   });
 
-  const { data: statusData } = useQuery({
+  const { data: statusData, isLoading: isStatusLoading } = useQuery({
     queryKey: [LEAD_SCHEDULE_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
     enabled: isEnabled,
@@ -91,14 +95,14 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     onError: (error: Error) => addError(error, { title: i18n.SCHEDULE_UPDATE_ERROR }),
   });
 
-  const hasEverGenerated = hasGenerated || statusData?.lastRun != null;
+  const isLoading = isLeadsLoading || isStatusLoading;
 
   return {
     leads: data?.leads?.map(fromApiLead) ?? [],
     totalCount: data?.total ?? 0,
     isLoading,
     isGenerating,
-    hasGenerated: hasEverGenerated,
+    hasGenerated,
     lastRunTimestamp: statusData?.lastRun ?? null,
     generate,
     refetch,

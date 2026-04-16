@@ -94,7 +94,11 @@ describe('TopThreatHuntingLeads', () => {
 
     expect(screen.getByTestId('topThreatHuntingLeads')).toBeInTheDocument();
     expect(screen.getByTestId('leadsEmptyPrompt')).toBeInTheDocument();
-    expect(screen.getByText('No hunting leads yet')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Generate leads to surface proactive threat hunting opportunities from your entity data.'
+      )
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('leadsLoadingSpinner')).not.toBeInTheDocument();
   });
 

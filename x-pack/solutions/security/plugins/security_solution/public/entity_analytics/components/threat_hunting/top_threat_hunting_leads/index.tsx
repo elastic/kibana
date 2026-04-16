@@ -9,13 +9,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 import {
   EuiAccordion,
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
   EuiPopover,
@@ -25,10 +24,11 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AiButton } from '@kbn/shared-ux-ai-components';
+import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import type { HuntingLead } from './types';
 import { LeadCard } from './lead_card';
 import * as i18n from './translations';
+import illustrationGenAi from '../../../../common/images/illustration_genai.svg';
 
 const MAX_VISIBLE_CARDS = 5;
 const MIN_CARD_WIDTH = 200;
@@ -89,7 +89,9 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="sparkles" aria-hidden={true} />
+        <AiIcon iconType="sparkles" size="m" aria-label="AI Assistant" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiBetaBadge
           label="Tech Preview"
           iconType="flask"
@@ -102,7 +104,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
 
   const extraAction = (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      {leads.length > 0 ? (
+      {leads.length > 0 && (
         <>
           {lastRunTimestamp && (
             <EuiFlexItem grow={false}>
@@ -129,22 +131,6 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
               {i18n.REGENERATE}
             </EuiButtonEmpty>
           </EuiFlexItem>
-        </>
-      ) : (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="sparkles"
-            isLoading={isGenerating}
-            onClick={onGenerate}
-            data-test-subj="generateLeadsButton"
-          >
-            {isGenerating ? i18n.GENERATING_LEADS : i18n.GENERATE_LEADS}
-          </EuiButton>
-        </EuiFlexItem>
-      )}
-      {leads.length > 0 && (
-        <>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
@@ -239,12 +225,46 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             )}
           </EuiFlexGroup>
         ) : leads.length === 0 ? (
-          <EuiEmptyPrompt
-            iconType={hasGenerated ? 'inspect' : 'searchProfilerApp'}
-            title={<h3>{hasGenerated ? i18n.NO_DATA_TITLE : i18n.NO_LEADS_TITLE}</h3>}
-            body={<p>{hasGenerated ? i18n.NO_DATA_DESCRIPTION : i18n.NO_LEADS_DESCRIPTION}</p>}
-            data-test-subj="leadsEmptyPrompt"
-          />
+          hasGenerated ? (
+            <EuiEmptyPrompt
+              iconType="inspect"
+              title={<h3>{i18n.NO_DATA_TITLE}</h3>}
+              body={<p>{i18n.NO_DATA_DESCRIPTION}</p>}
+              actions={
+                <AiButton
+                  size="s"
+                  iconType="sparkles"
+                  isLoading={isGenerating}
+                  onClick={onGenerate}
+                  data-test-subj="generateLeadsButton"
+                >
+                  {i18n.GENERATE_LEADS}
+                </AiButton>
+              }
+              data-test-subj="leadsEmptyPrompt"
+            />
+          ) : (
+            <EuiPanel color="plain" hasBorder={false} hasShadow={false}>
+              <EuiEmptyPrompt
+                layout="horizontal"
+                color="transparent"
+                body={<p>{i18n.NO_LEADS_DESCRIPTION}</p>}
+                actions={
+                  <AiButton
+                    size="s"
+                    iconType="sparkles"
+                    isLoading={isGenerating}
+                    onClick={onGenerate}
+                    data-test-subj="generateLeadsButton"
+                  >
+                    {i18n.GENERATE_LEADS}
+                  </AiButton>
+                }
+                icon={<EuiImage size={128} alt="" url={illustrationGenAi} />}
+                data-test-subj="leadsEmptyPrompt"
+              />
+            </EuiPanel>
+          )
         ) : (
           <div ref={cardsRef}>
             <EuiFlexGroup gutterSize="m" responsive={false} wrap={false}>
