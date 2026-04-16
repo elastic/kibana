@@ -12,6 +12,8 @@ import { BehaviorSubject } from 'rxjs';
 import type { initializeLayoutManager } from './layout_manager';
 import { initializeRelatedPanelsManager } from './related_panels_manager';
 import type { initializeTrackPanel } from './track_panel';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { DashboardBackupService } from '../services/dashboard_backup_service';
 
 const mockChildren = {
   panel: { uuid: 'panel' },
@@ -64,6 +66,12 @@ const mockSections: Record<string, string> = {
   controlInSection: 'a',
 };
 
+const mockSavedObjectId$ = new BehaviorSubject<string | undefined>('test-dashboard-id');
+const mockBackupService = {
+  getIndicateRelatedPanelsId: jest.fn().mockReturnValue(undefined),
+  setIndicateRelatedPanelsId: jest.fn(),
+} as unknown as DashboardBackupService;
+
 const getMockedDeps = () => {
   const mockTrackPanel = {
     focusedPanelId$: new BehaviorSubject<string | undefined>(undefined),
@@ -81,15 +89,44 @@ const getMockedDeps = () => {
 };
 
 describe('initializeRelatedPanelsManager', () => {
-  describe('with no focused panel', () => {
+  describe('with no focused panel, indicate related panel id, or subscriptions to related panel IDs', () => {
     let subscription: Subscription;
     afterEach(() => {
       subscription.unsubscribe();
     });
     const { mockLayoutManager, mockTrackPanel } = getMockedDeps();
-    const relatedPanelsManager = initializeRelatedPanelsManager(mockTrackPanel, mockLayoutManager);
+    const relatedPanelsManager = initializeRelatedPanelsManager({
+      trackPanel: mockTrackPanel,
+      layoutManager: mockLayoutManager,
+      savedObjectId$: mockSavedObjectId$,
+      backupService: mockBackupService,
+      viewMode$: new BehaviorSubject('edit' as ViewMode),
+    });
     test('should not compute', (done) => {
-      subscription = relatedPanelsManager.api.arePanelsRelated$.subscribe(() => {
+      subscription = relatedPanelsManager.internalApi.arePanelsRelated$.subscribe(() => {
+        expect(mockLayoutManager.api.getDashboardPanelFromId).not.toHaveBeenCalled();
+        done();
+      });
+    });
+  });
+
+  describe('in view mode', () => {
+    let subscription: Subscription;
+    afterEach(() => {
+      subscription.unsubscribe();
+    });
+    const { mockLayoutManager, mockTrackPanel } = getMockedDeps();
+    mockTrackPanel.focusedPanelId$.next('panel');
+
+    const relatedPanelsManager = initializeRelatedPanelsManager({
+      trackPanel: mockTrackPanel,
+      layoutManager: mockLayoutManager,
+      savedObjectId$: mockSavedObjectId$,
+      backupService: mockBackupService,
+      viewMode$: new BehaviorSubject('view' as ViewMode),
+    });
+    test('should not compute', (done) => {
+      subscription = relatedPanelsManager.internalApi.arePanelsRelated$.subscribe(() => {
         expect(mockLayoutManager.api.getDashboardPanelFromId).not.toHaveBeenCalled();
         done();
       });
@@ -100,16 +137,22 @@ describe('initializeRelatedPanelsManager', () => {
     const { mockLayoutManager, mockTrackPanel } = getMockedDeps();
     mockTrackPanel.focusedPanelId$.next('panel');
 
-    const relatedPanelsManager = initializeRelatedPanelsManager(mockTrackPanel, mockLayoutManager);
+    const relatedPanelsManager = initializeRelatedPanelsManager({
+      trackPanel: mockTrackPanel,
+      layoutManager: mockLayoutManager,
+      savedObjectId$: mockSavedObjectId$,
+      backupService: mockBackupService,
+      viewMode$: new BehaviorSubject('edit' as ViewMode),
+    });
 
     test('should compute', (done) => {
-      relatedPanelsManager.api.arePanelsRelated$.subscribe(() => {
+      relatedPanelsManager.internalApi.arePanelsRelated$.subscribe(() => {
         expect(mockLayoutManager.api.getDashboardPanelFromId).toHaveBeenCalled();
         done();
       });
     });
 
-    const arePanelsRelated = relatedPanelsManager.api.arePanelsRelated$.value;
+    const arePanelsRelated = relatedPanelsManager.internalApi.arePanelsRelated$.value;
 
     test('should mark a panel without a section ID as related to all filter controls without section IDs', () => {
       expect(arePanelsRelated('control', 'panel')).toBe(true);

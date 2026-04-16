@@ -16,11 +16,13 @@ import type {
   HasEditCapabilities,
   HasType,
   HasUniqueId,
+  CanBeRelatedPanelsIndicator,
   PublishesDataLoading,
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
+import type { PublishesTooltipLabel } from '@kbn/controls-schemas/src/types';
 import type { TemporaryState } from '../data_controls/options_list_control/temporay_state_manager';
 import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../types';
 import type { initializeLabelManager } from '../control_labels';
@@ -32,6 +34,7 @@ export type ESQLControlApi<State> = DefaultEmbeddableApi<
   PublishesUnsavedChanges &
   HasEditCapabilities &
   PublishesDataLoading &
+  PublishesTooltipLabel &
   ReturnType<typeof initializeLabelManager>['api'];
 
 export type ESQLOptionsListRuntimeState = Omit<OptionsListESQLControlState, 'available_options'> &
@@ -50,6 +53,8 @@ export type ESQLOptionsListComponentState = Pick<
 
 export type ESQLOptionsListComponentApi = HasType &
   HasUniqueId &
+  CanBeRelatedPanelsIndicator &
+  PublishesTooltipLabel &
   OptionsListPublishesOptions<string> &
   SubjectsOf<ESQLOptionsListComponentState> &
   SettersOf<

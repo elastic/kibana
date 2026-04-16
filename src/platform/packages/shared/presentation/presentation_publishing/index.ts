@@ -200,6 +200,10 @@ export type { PublishesSearchSession } from './interfaces/fetch/publishes_search
 // =============================================
 
 export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/containers/can_add_new_panel';
+export {
+  apiCanIndicateRelatedPanels,
+  type CanIndicateRelatedPanels,
+} from './interfaces/containers/can_indicate_related_panels';
 
 export {
   apiHasSerializedChildState,
@@ -225,10 +229,12 @@ export {
   apiCanBeCustomized,
   apiCanBeExpanded,
   apiCanBePinned,
+  apiCanBeSelectedToIndicateRelated,
   type IsDuplicable,
   type IsExpandable,
   type IsCustomizable,
   type IsPinnable,
+  type CanBeRelatedPanelsIndicator,
   type HasPanelCapabilities,
 } from './interfaces/containers/panel_capabilities';
 

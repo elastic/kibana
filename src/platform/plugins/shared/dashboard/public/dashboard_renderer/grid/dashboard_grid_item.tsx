@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
@@ -64,6 +64,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       viewMode,
       dashboardContainerRef,
       arePanelsRelated,
+      indicateRelatedPanelsId,
     ] = useBatchedPublishingSubjects(
       dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
@@ -73,7 +74,8 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
       dashboardInternalApi.dashboardContainerRef$,
-      dashboardInternalApi.arePanelsRelated$
+      dashboardInternalApi.arePanelsRelated$,
+      dashboardApi.indicateRelatedPanelsId$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -83,12 +85,18 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       focusedPanelId !== undefined &&
       focusedPanelId !== id &&
       !arePanelsRelated(id, focusedPanelId);
+    const indicatePanel =
+      !focusPanel &&
+      viewMode === 'edit' &&
+      indicateRelatedPanelsId !== undefined &&
+      arePanelsRelated(id, indicateRelatedPanelsId);
     const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
       'dshDashboardGrid__item--focused': focusPanel,
       'dshDashboardGrid__item--blurred': blurPanel,
+      'dshDashboardGrid__item--indicated': indicatePanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: viewMode === 'print',
     });
@@ -223,6 +231,11 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
 });
 
+/**
+ * There's no easy way to override CSS box shadow color while preserving opacity and pixel size,
+ * so set a base shadow opacity and adjust it to the same proportions that EuiPanel does it
+ */
+const BASE_SHADOW_OPACITY = 0.5;
 const dashboardGridItemStyles = {
   item: (context: UseEuiTheme) =>
     css([
@@ -238,6 +251,23 @@ const dashboardGridItemStyles = {
         // Call out focused panels with a simple border
         '&.dshDashboardGrid__item--focused .embPanel': {
           outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
+        },
+        // To indicate related panels, use a teal shadow
+        '&.dshDashboardGrid__item--indicated .embPanel': {
+          outline: `${context.euiTheme.border.width.thin} solid ${transparentize(
+            context.euiTheme.colors.vis.euiColorVis0,
+            BASE_SHADOW_OPACITY * 1.6
+          )}`,
+          boxShadow: `${transparentize(
+            context.euiTheme.colors.vis.euiColorVis0,
+            BASE_SHADOW_OPACITY * 1.6
+          )} 0px 0px 2px 0px, ${transparentize(
+            context.euiTheme.colors.vis.euiColorVis0,
+            BASE_SHADOW_OPACITY
+          )} 0px 3px 10px 0px, ${transparentize(
+            context.euiTheme.colors.vis.euiColorVis0,
+            BASE_SHADOW_OPACITY * 0.6
+          )} 0px 6px 14px 0px`,
         },
       },
       getHighlightStyles(context),

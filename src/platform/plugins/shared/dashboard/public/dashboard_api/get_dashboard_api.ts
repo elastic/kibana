@@ -43,6 +43,7 @@ import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
 import { initializeRelatedPanelsManager } from './related_panels_manager';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 
 export function getDashboardApi({
   creationOptions,
@@ -139,6 +140,14 @@ export function getDashboardApi({
     }
   }
 
+  const relatedPanelsManager = initializeRelatedPanelsManager({
+    trackPanel,
+    layoutManager,
+    savedObjectId$,
+    backupService: getDashboardBackupService(),
+    viewMode$: viewModeManager.api.viewMode$,
+  });
+
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
@@ -169,8 +178,6 @@ export function getDashboardApi({
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
-  const relatedPanelsManager = initializeRelatedPanelsManager(trackPanel, layoutManager);
-
   const dashboardApi = {
     ...viewModeManager.api,
     ...dataLoadingManager.api,
@@ -183,6 +190,7 @@ export function getDashboardApi({
     ...unsavedChangesManager.api,
     ...projectRoutingManager?.api,
     ...trackOverlayApi,
+    ...relatedPanelsManager.api,
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,
@@ -294,7 +302,7 @@ export function getDashboardApi({
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
     ...esqlVariablesManager.api,
-    ...relatedPanelsManager.api,
+    ...relatedPanelsManager.internalApi,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
   };
@@ -324,6 +332,7 @@ export function getDashboardApi({
       timesliceManager.cleanup();
       projectRoutingManager?.cleanup();
       pauseFetchManager.cleanup();
+      relatedPanelsManager.cleanup();
     },
   };
 }

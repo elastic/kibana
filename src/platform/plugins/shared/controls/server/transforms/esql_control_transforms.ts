@@ -39,6 +39,7 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
           esql_query,
           selected_options,
           single_select,
+          title,
           variable_name,
           variable_type,
         } = convertCamelCasedKeysToSnakeCase<LegacyStoredESQLControlExplicitInput>(
@@ -50,6 +51,7 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
           display_settings,
           selected_options: selected_options ?? DEFAULT_ESQL_OPTIONS_LIST_STATE.selected_options,
           single_select: single_select ?? DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select,
+          title,
           variable_name: variable_name ?? '',
           variable_type: variable_type as OptionsListESQLControlState['variable_type'],
         };

@@ -6,16 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import { apiAppliesFilters, apiHasUseGlobalFiltersSetting } from '@kbn/presentation-publishing';
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatest, filter, map, of, switchMap } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariable } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
+import type { PublishesSavedObjectId } from '@kbn/presentation-publishing';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeTrackPanel } from './track_panel';
+import type { DashboardBackupService } from '../services/dashboard_backup_service';
 
 const GLOBAL = Symbol('GLOBAL');
 
@@ -42,13 +44,27 @@ const apiPublishesESQLQuery = (api: unknown): api is PublishesESQLQuery => {
   return Boolean(query) && typeof query === 'object' && 'esql' in query;
 };
 
-export const initializeRelatedPanelsManager = (
-  trackPanel: ReturnType<typeof initializeTrackPanel>,
-  layoutManager: ReturnType<typeof initializeLayoutManager>
-) => {
+export const initializeRelatedPanelsManager = ({
+  trackPanel,
+  layoutManager,
+  savedObjectId$,
+  backupService,
+  viewMode$,
+}: {
+  trackPanel: ReturnType<typeof initializeTrackPanel>;
+  layoutManager: ReturnType<typeof initializeLayoutManager>;
+  savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
+  backupService: DashboardBackupService;
+  viewMode$: PublishingSubject<ViewMode>;
+}) => {
   const { focusedPanelId$ } = trackPanel;
   const { children$, layout$, getDashboardPanelFromId } = layoutManager.api;
   const arePanelsRelated$ = new BehaviorSubject<(a: string, b: string) => boolean>(() => false);
+
+  const indicateRelatedPanelsId$ = new BehaviorSubject<string | undefined>(
+    backupService.getIndicateRelatedPanelsId(savedObjectId$.value)
+  );
+  const hasRelatedPanelIdSubscriptions$ = new BehaviorSubject(false);
 
   /**
    * Iterate through the current children$ and pipe them to a stream of:
@@ -58,11 +74,19 @@ export const initializeRelatedPanelsManager = (
    */
   const childUUIDsIndexed$ = combineLatest([
     children$,
+    viewMode$,
     focusedPanelId$,
+    indicateRelatedPanelsId$,
+    hasRelatedPanelIdSubscriptions$,
     layout$, // Update on layout change to get the most recent sectionIds
   ]).pipe(
-    // Skip calculations if there is no focused panel
-    filter(([_, focusedPanelId]) => Boolean(focusedPanelId)),
+    filter(
+      ([_, viewMode, focusedPanelId, indicateRelatedPanelsId, hasRelatedPanelIdSubscriptions]) =>
+        viewMode === 'edit' && // Do not recompute in view mode, related panels are only used in edit mode
+        (Boolean(focusedPanelId) ||
+          Boolean(indicateRelatedPanelsId) ||
+          hasRelatedPanelIdSubscriptions)
+    ),
     switchMap(([children]) => {
       const childrenBySectionAndFilterApplication = new Map<string | Symbol, SectionFilterEntry>();
       const uuidsUsingGlobalFilters = new Set<string>();
@@ -132,12 +156,40 @@ export const initializeRelatedPanelsManager = (
     }
   );
 
+  const setIndicateRelatedPanelsId = (panelId: string | undefined) => {
+    indicateRelatedPanelsId$.next(panelId);
+    backupService.setIndicateRelatedPanelsId(savedObjectId$.value, panelId);
+  };
+
+  const relatedPanelIdSubscriptions = new Set<Subscription>();
+  const getRelatedPanelIds$ = (panelId: string) => {
+    const relatedPanelIds$ = new BehaviorSubject<string[]>([]);
+    const subscription = combineLatest([arePanelsRelated$, children$])
+      .pipe(
+        map(([arePanelsRelated, children]) => {
+          return Object.keys(children).filter(
+            (id) => id !== panelId && arePanelsRelated(id, panelId)
+          );
+        })
+      )
+      .subscribe((next) => relatedPanelIds$.next(next));
+    relatedPanelIdSubscriptions.add(subscription);
+    hasRelatedPanelIdSubscriptions$.next(true);
+    return relatedPanelIds$;
+  };
+
   return {
-    api: {
+    internalApi: {
       arePanelsRelated$,
+    },
+    api: {
+      indicateRelatedPanelsId$,
+      setIndicateRelatedPanelsId,
+      getRelatedPanelIds$,
     },
     cleanup: () => {
       relatedPanelSubscription.unsubscribe();
+      relatedPanelIdSubscriptions.forEach((sub) => sub.unsubscribe());
     },
   };
 };

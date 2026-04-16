@@ -15,6 +15,10 @@ import { apiHasUniqueId } from '../has_uuid';
 import type { CanAddNewPanel } from './can_add_new_panel';
 import { apiCanAddNewPanel } from './can_add_new_panel';
 import type { CanAddNewSection } from './can_add_new_section';
+import {
+  apiCanIndicateRelatedPanels,
+  type CanIndicateRelatedPanels,
+} from './can_indicate_related_panels';
 
 export interface PanelPackage<SerializedState extends object = object> {
   panelType: string;
@@ -26,7 +30,9 @@ export interface PanelPackage<SerializedState extends object = object> {
   serializedState?: SerializedState;
 }
 
-export interface PresentationContainer<ApiType extends unknown = unknown> extends CanAddNewPanel {
+export interface PresentationContainer<ApiType extends unknown = unknown>
+  extends CanAddNewPanel,
+    CanIndicateRelatedPanels {
   /**
    * Removes a panel from the container.
    */
@@ -70,7 +76,8 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
     apiCanAddNewPanel(api) &&
       typeof (api as PresentationContainer)?.removePanel === 'function' &&
       typeof (api as PresentationContainer)?.replacePanel === 'function' &&
-      apiPublishesChildren(api)
+      apiPublishesChildren(api) &&
+      apiCanIndicateRelatedPanels(api)
   );
 };
 
