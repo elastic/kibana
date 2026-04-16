@@ -113,11 +113,105 @@ describe('evidence_grounding evaluator', () => {
     expect(result.score).toBe(1);
   });
 
-  it('marks non-grounded evidence correctly', async () => {
+  it('grounds evidence against nested source docs via field-path flattening', async () => {
     const result = await evidenceGroundingEvaluator.evaluate({
       input: {
         sample_logs: [],
-        sample_docs: [{ 'body.text': 'some log' }],
+        sample_docs: [
+          {
+            body: {
+              structured: {
+                object: {
+                  reason: 'BackOff',
+                  note: 'Back-off restarting failed container cart in pod cart-abc',
+                },
+              },
+            },
+          },
+        ],
+      },
+      output: [
+        {
+          esql: 'FROM logs | WHERE true',
+          title: 'K8s',
+          category: 'error',
+          severity_score: 50,
+          evidence: [
+            'body.structured.object.reason: BackOff',
+            'Back-off restarting failed container cart',
+          ],
+        },
+      ],
+      expected: {},
+      metadata: null,
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('grounds descriptive evidence via keyword overlap fallback', async () => {
+    const result = await evidenceGroundingEvaluator.evaluate({
+      input: {
+        sample_logs: [],
+        sample_docs: [
+          {
+            body: {
+              text: '{"creditCardNumber":"1234-5678","creditCardCvv":"123","creditCardExpirationYear":2025}',
+            },
+            resource: { attributes: { app: 'payment' } },
+          },
+        ],
+      },
+      output: [
+        {
+          esql: 'FROM logs | WHERE true',
+          title: 'PCI',
+          category: 'error',
+          severity_score: 80,
+          evidence: [
+            'body.text contains full JSON with creditCardNumber, creditCardCvv, creditCardExpirationYear fields',
+          ],
+        },
+      ],
+      expected: {},
+      metadata: null,
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('grounds evidence referencing field names present in docs', async () => {
+    const result = await evidenceGroundingEvaluator.evaluate({
+      input: {
+        sample_logs: [],
+        sample_docs: [
+          {
+            attributes: { lastFourDigits: '3456', msg: 'Charge request received.' },
+            resource: { attributes: { app: 'payment' } },
+          },
+        ],
+      },
+      output: [
+        {
+          esql: 'FROM logs | WHERE true',
+          title: 'Payment',
+          category: 'operational',
+          severity_score: 25,
+          evidence: ['attributes.lastFourDigits field present in payment service logs'],
+        },
+      ],
+      expected: {},
+      metadata: null,
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('rejects evidence with too few matching keywords and no features', async () => {
+    const result = await evidenceGroundingEvaluator.evaluate({
+      input: {
+        sample_logs: [],
+        sample_docs: [{ body: { text: 'some log' } }],
       },
       output: [
         {
@@ -126,6 +220,82 @@ describe('evidence_grounding evaluator', () => {
           category: 'error',
           severity_score: 50,
           evidence: ['Dependency: checkout → payment (confidence 100)'],
+        },
+      ],
+      expected: {},
+      metadata: null,
+    });
+
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('Evidence not found');
+  });
+
+  it('grounds feature-based evidence against input KI features', async () => {
+    const result = await evidenceGroundingEvaluator.evaluate({
+      input: {
+        sample_logs: [],
+        sample_docs: [{ body: { text: 'some log' } }],
+        features: [
+          {
+            type: 'entity',
+            title: 'checkout',
+            description: 'Checkout service handling orders',
+            confidence: 95,
+          },
+          {
+            type: 'dependency',
+            title: 'checkout → payment',
+            description: 'Checkout calls payment service via gRPC',
+            confidence: 80,
+          },
+          {
+            type: 'entity',
+            title: 'payment',
+            description: 'Payment service processing charges',
+            confidence: 92,
+          },
+        ],
+      },
+      output: [
+        {
+          esql: 'FROM logs | WHERE resource.attributes.app == "checkout"',
+          title: 'Checkout Errors',
+          category: 'error',
+          severity_score: 50,
+          evidence: [
+            'Entity: checkout service (confidence 95)',
+            'Dependency: checkout → payment (gRPC, confidence 80)',
+          ],
+        },
+      ],
+      expected: {},
+      metadata: null,
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('rejects feature evidence that does not match any input feature', async () => {
+    const result = await evidenceGroundingEvaluator.evaluate({
+      input: {
+        sample_logs: [],
+        sample_docs: [{ body: { text: 'some log' } }],
+        features: [
+          {
+            type: 'entity',
+            title: 'cart',
+            description: 'Cart service',
+            confidence: 90,
+          },
+        ],
+      },
+      output: [
+        {
+          esql: 'FROM logs | WHERE true',
+          title: 'Missing',
+          category: 'error',
+          severity_score: 50,
+          evidence: ['Entity: payment service (confidence 100)'],
         },
       ],
       expected: {},

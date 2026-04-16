@@ -118,9 +118,19 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Must identify Kubernetes as infrastructure (evidence: resource.attributes.k8s.node.name=minikube, resource.attributes.k8s.namespace.name=otel-demo, deployment/pod/container metadata on all docs)',
             score: 1,
           },
+          {
+            id: 'otel-collector-errors',
+            text: 'Should identify OTel collector connection errors present even in healthy baseline (evidence: Java agent HttpExporter failures for spans/logs, gRPC OTLP exporter failures, "context deadline exceeded" with otel-collector IP)',
+            score: 1,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'otel.javaagent' } },
+              { match_phrase: { 'body.text': 'OTLP' } },
+              { match_phrase: { 'body.text': 'context deadline exceeded' } },
+            ],
+          },
         ],
         min_features: 8,
-        max_features: 16,
+        max_features: 25,
         required_types: ['entity'],
         expect_entity_filters: true,
         expected_ground_truth:
@@ -267,7 +277,7 @@ export const otelDemoDataset: DatasetConfig = {
         required_types: ['entity', 'dependency'],
         expect_entity_filters: true,
         expected_ground_truth:
-          'entities=[cart, checkout, frontend, shipping, payment, email, recommendation, ad, quote, valkey], deps=[checkout->payment, cart->valkey, checkout->email, shipping->quote, frontend->checkout], infra=[kubernetes/minikube], error_signatures=[failed to charge card, dial tcp i/o timeout, gRPC code 13 INTERNAL / code 14 UNAVAILABLE, transport: Error while dialing, connection refused; errors observed in checkout and frontend service logs]',
+          'entities=[cart, checkout, frontend, shipping, payment, email, recommendation, ad, quote, valkey], deps=[checkout->payment, cart->valkey, checkout->email, shipping->quote, frontend->checkout], infra=[kubernetes/minikube], error_signatures=[failed to charge card, dial tcp i/o timeout, gRPC code 13 INTERNAL / code 14 UNAVAILABLE, transport: Error while dialing, connection refused; errors observed in frontend service logs]',
       },
       metadata: {
         difficulty: 'medium',
@@ -292,6 +302,14 @@ export const otelDemoDataset: DatasetConfig = {
                   filter: [
                     { term: { 'resource.attributes.app': 'cart' } },
                     { match_phrase: { 'body.text': 'connect to redis' } },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'resource.attributes.app': 'cart' } },
+                    { match_phrase: { 'body.text': 'Application is shutting down' } },
                   ],
                 },
               },
@@ -408,6 +426,26 @@ export const otelDemoDataset: DatasetConfig = {
                   ],
                 },
               },
+            ],
+          },
+          {
+            id: 'k8s-pod-events',
+            text: 'Should identify Kubernetes pod lifecycle events related to cart container restart after Valkey disconnection (evidence: K8s events with BackOff, Started, Killing reasons for cart pod)',
+            score: 1,
+            sampling_filters: [
+              { match: { 'body.structured.object.reason': 'BackOff' } },
+              { match: { 'body.structured.object.reason': 'Killing' } },
+              { match: { 'body.structured.object.reason': 'Started' } },
+            ],
+          },
+          {
+            id: 'otel-collector-errors',
+            text: 'Should identify OTel collector connection errors (evidence: Java agent HttpExporter failures, gRPC OTLP exporter failures, "context deadline exceeded" with otel-collector IP)',
+            score: 1,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'otel.javaagent' } },
+              { match_phrase: { 'body.text': 'OTLP' } },
+              { match_phrase: { 'body.text': 'context deadline exceeded' } },
             ],
           },
           {
@@ -543,6 +581,16 @@ export const otelDemoDataset: DatasetConfig = {
             ],
           },
           {
+            id: 'otel-collector-errors',
+            text: 'Should identify OTel collector connection errors (evidence: Java agent HttpExporter failures, gRPC OTLP exporter failures, "context deadline exceeded" with otel-collector IP)',
+            score: 1,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'otel.javaagent' } },
+              { match_phrase: { 'body.text': 'OTLP' } },
+              { match_phrase: { 'body.text': 'context deadline exceeded' } },
+            ],
+          },
+          {
             id: 'tech-kubernetes',
             text: 'Must identify Kubernetes as infrastructure (evidence: resource.attributes.k8s.node.name=minikube, resource.attributes.k8s.namespace.name=otel-demo)',
             score: 1,
@@ -640,23 +688,23 @@ export const otelDemoDataset: DatasetConfig = {
         scenario_id: 'payment-unreachable',
         stream_name: 'logs',
         stream_description:
-          'OTel Demo logs where the payment service becomes unreachable, causing charge failures with dial tcp / i/o timeout / deadline exceeded and gRPC transport dialing errors',
+          'OTel Demo logs where the payment service becomes unreachable, causing charge failures with dial tcp / i/o timeout / connection refused and gRPC transport dialing errors in frontend logs',
       },
       output: {
         criteria: [
           {
             id: 'payment-error-query',
-            text: 'Must generate an ES|QL query that catches payment-unreachable errors (evidence: checkout logs contain "failed to charge card", "transport: Error while dialing: dial tcp", "i/o timeout", "context deadline exceeded")',
+            text: 'Must generate an ES|QL query that catches payment-unreachable errors (evidence: frontend logs contain "failed to charge card", "transport: Error while dialing: dial tcp", "i/o timeout", "connection refused")',
             score: 3,
           },
           {
             id: 'checkout-impact-query',
-            text: 'Should generate a query that detects user-facing impact in checkout or frontend caused by payment unreachability (evidence: checkout logs show gRPC INTERNAL/UNAVAILABLE errors when calling payment)',
+            text: 'Should generate a query that detects user-facing impact caused by payment unreachability (evidence: frontend logs show gRPC code 13 INTERNAL / code 14 UNAVAILABLE errors from failed payment calls during checkout)',
             score: 2,
           },
           {
             id: 'grpc-transport-query',
-            text: 'Should generate a query targeting gRPC transport or connection errors (evidence: "transport: Error while dialing", gRPC code 13 INTERNAL / code 14 UNAVAILABLE in checkout and frontend logs)',
+            text: 'Should generate a query targeting gRPC transport or connection errors (evidence: "transport: Error while dialing", gRPC code 13 INTERNAL / code 14 UNAVAILABLE in frontend logs)',
             score: 1,
           },
           {
@@ -668,7 +716,7 @@ export const otelDemoDataset: DatasetConfig = {
         expected_categories: ['error', 'operational'],
         expect_stats: true,
         expected_ground_truth:
-          'queries=[error detection for payment charge failures (failed to charge card), gRPC transport/dialing errors (dial tcp, i/o timeout, deadline exceeded), upstream impact detection in checkout/frontend services, operational monitoring across OTel Demo microservices; STATS queries for aggregate error rate detection during payment disruption]',
+          'queries=[error detection for payment charge failures (failed to charge card), gRPC transport/dialing errors (dial tcp, i/o timeout, connection refused) in frontend logs, user-facing impact detection in frontend from failed checkout→payment calls, operational monitoring across OTel Demo microservices; STATS queries for aggregate error rate detection during payment disruption]',
       },
       metadata: {
         difficulty: 'medium',
@@ -687,17 +735,17 @@ export const otelDemoDataset: DatasetConfig = {
         criteria: [
           {
             id: 'cache-error-query',
-            text: 'Must generate an ES|QL query that catches Valkey/Redis connection failures (evidence: cart logs contain "ECONNREFUSED 10.105.181.182:7070", "No connection established" referencing valkey)',
+            text: 'Must generate an ES|QL query that catches Valkey/Redis connection failures (evidence: cart logs contain "Wasn\'t able to connect to redis" and "fail cartservice.cartstore.ValkeyCartStore" — these are the root-cause signals indicating cart lost connectivity to its Valkey backing store)',
             score: 3,
           },
           {
             id: 'cart-service-error-query',
-            text: 'Should generate a query detecting cart service errors or crash signals (evidence: cart logs show "Application is shutting down", cart crash causes gRPC UNAVAILABLE errors)',
+            text: 'Should generate a query detecting cart service errors or crash signals (evidence: cart logs show "Application is shutting down"; the cart crash then causes gRPC code 14 UNAVAILABLE errors with "ECONNREFUSED 10.105.181.182:7070" in frontend logs)',
             score: 2,
           },
           {
             id: 'upstream-impact-query',
-            text: 'Should generate a query detecting upstream impact in checkout or frontend caused by cart unavailability (evidence: checkout logs "failed to get user cart", frontend sees gRPC code 14 UNAVAILABLE from cart)',
+            text: 'Should generate a query detecting upstream impact from cart unavailability (evidence: frontend logs show "failed to get user cart during checkout" with gRPC code 13 INTERNAL, and "ECONNREFUSED 10.105.181.182:7070" with gRPC code 14 UNAVAILABLE — checkout has no error logs, all error evidence surfaces in frontend)',
             score: 2,
           },
           {
@@ -709,7 +757,7 @@ export const otelDemoDataset: DatasetConfig = {
         expected_categories: ['error', 'operational'],
         expect_stats: true,
         expected_ground_truth:
-          'queries=[error detection for Valkey/Redis ECONNREFUSED connection failures in cart, cart service crash/shutdown detection, upstream impact in checkout/frontend from cart unavailability (gRPC UNAVAILABLE, failed to get user cart), operational monitoring across OTel Demo microservices; STATS queries for aggregate error rate detection during cart cache failure]',
+          'queries=[error detection for Valkey/Redis connection failures in cart logs (connect to redis errors), cart service crash/shutdown detection (Application is shutting down), impact detection in frontend from cart unavailability (gRPC UNAVAILABLE ECONNREFUSED, failed to get user cart during checkout), operational monitoring across OTel Demo microservices; STATS queries for aggregate error rate detection during cart cache failure]',
       },
       metadata: {
         difficulty: 'medium',

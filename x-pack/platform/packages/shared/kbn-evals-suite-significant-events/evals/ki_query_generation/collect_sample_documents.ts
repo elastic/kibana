@@ -91,15 +91,22 @@ export const collectSampleDocuments = async ({
       })
     );
 
+    const unmatchedFilters: string[] = [];
     const criterionHitCounts = new Map<string, number>();
     for (const { hits, criterionId, filter } of filterResults) {
       if (hits.length === 0) {
-        log.warning(
-          `No docs matched sampling filter for [${criterionId}]: ${JSON.stringify(filter)}`
-        );
+        unmatchedFilters.push(`[${criterionId}] filter: ${JSON.stringify(filter)}`);
         continue;
       }
       criterionHitCounts.set(criterionId, (criterionHitCounts.get(criterionId) ?? 0) + hits.length);
+    }
+
+    if (unmatchedFilters.length > 0) {
+      throw new Error(
+        `sampling_filters returned no documents for ${unmatchedFilters.length} filter(s) on a predefined dataset. ` +
+          `This indicates a mismatch between the criteria filters and the snapshot data:\n` +
+          unmatchedFilters.map((f) => `  ${f}`).join('\n')
+      );
     }
 
     const allFilterHits = filterResults.flatMap(({ hits }) => hits);
