@@ -108,8 +108,8 @@ const useAppMenuBarStyles = (
       paddingBottom: hasHeaderTabs
         ? 0
         : currentAppId === 'discover'
-          ? euiTheme.size.s
-          : euiTheme.size.m,
+        ? euiTheme.size.s
+        : euiTheme.size.m,
       background: euiTheme.colors.backgroundBasePlain,
       /* No bottom border / negative margin — avoids an extra “stripe” under the main chrome for every app */
       borderBottom: 'none',
@@ -240,7 +240,7 @@ const useAppMenuBarStyles = (
 
 const AppMenuBarHeaderTabs = ({ tabs }: { tabs: AppMenuHeaderTab[] }) => (
   <EuiTabs
-    bottomBorder={false}
+    bottomBorder
     data-test-subj="kibanaProjectHeaderAppMenuTabs"
     css={{ marginBottom: 0, width: '100%' }}
   >
@@ -331,40 +331,19 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
   const basePath = useBasePath();
   const docLinks = useDocLinks();
   const globalOverflowItems = useMemo((): AppMenuItemType[] => {
-    const documentationItem: AppMenuItemType = {
-      id: 'global-documentation',
-      label: i18n.translate('core.ui.chrome.appMenu.documentationLabel', {
-        defaultMessage: 'Documentation',
-      }),
-      iconType: 'documentation',
-      order: 50,
-      /** Keeps Documentation + global Feedback (order 102) together below one divider in the overflow menu. */
-      separator: 'above',
-      href: docLinks.links.elasticStackGetStarted,
-      target: '_blank',
-    };
-
-    if (currentAppId === 'streams') {
-      return [documentationItem];
-    }
-
     return [
       {
-        id: 'global-add-data',
-        label: i18n.translate('core.ui.chrome.appMenu.addDataLabel', {
-          defaultMessage: 'Add data',
+        id: 'global-documentation',
+        label: i18n.translate('core.ui.chrome.appMenu.documentationLabel', {
+          defaultMessage: 'Documentation',
         }),
-        iconType: 'plusInCircle',
-        order: 100,
-        separator: 'above',
-        run: () => navigateToUrl(basePath.prepend('/app/integrations')),
-      },
-      {
-        ...documentationItem,
-        order: 101,
+        iconType: 'documentation',
+        order: 50,
+        href: docLinks.links.elasticStackGetStarted,
+        target: '_blank',
       },
     ];
-  }, [currentAppId, navigateToUrl, basePath, docLinks]);
+  }, [docLinks]);
   const navLinks = useNavLinks();
   const currentAppTitleFromNav = useMemo(() => {
     if (!currentAppId) {

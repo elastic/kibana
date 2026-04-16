@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiPageSectionProps } from '@elastic/eui';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
@@ -32,29 +32,35 @@ StreamsAppPageTemplate.Body = ({
   className: consumerClassName,
   contentProps: consumerContentProps,
   ...props
-}: EuiPageSectionProps & { noPadding?: boolean }) => (
-  <EuiPageTemplate.Section
-    {...props}
-    grow
-    paddingSize="none"
-    className={cx(
-      css`
-        overflow-y: auto;
-        ${noPadding ? 'padding: 0;' : 'padding: 0 12px 12px 12px;'}
-      `,
-      consumerClassName
-    )}
-    contentProps={{
-      ...consumerContentProps,
-      className: cx(
+}: EuiPageSectionProps & { noPadding?: boolean }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiPageTemplate.Section
+      {...props}
+      grow
+      paddingSize="none"
+      className={cx(
         css`
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          ${noPadding ? 'padding: 0;' : ''}
+          overflow-y: auto;
+          ${noPadding
+            ? 'padding: 0;'
+            : `padding: ${euiTheme.size.m} ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};`}
         `,
-        consumerContentProps?.className
-      ),
-    }}
-  />
-);
+        consumerClassName
+      )}
+      contentProps={{
+        ...consumerContentProps,
+        className: cx(
+          css`
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            ${noPadding ? 'padding: 0;' : ''}
+          `,
+          consumerContentProps?.className
+        ),
+      }}
+    />
+  );
+};

@@ -19,8 +19,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
+import { confirmCreateWithUnsaved } from './confirm_overlays';
+import { dashboardListingTableStrings } from './_dashboard_listing_strings';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
 import type { DashboardListingProps } from './types';
 
@@ -31,6 +35,8 @@ export const DashboardListing = ({
   getDashboardUrl,
   useSessionStorageIntegration,
   getTabs,
+  disableCreateDashboardButton,
+  showCreateDashboardButton = true,
 }: DashboardListingProps) => {
   useExecutionContext(coreServices.executionContext, {
     type: 'application',
@@ -46,6 +52,8 @@ export const DashboardListing = ({
   );
   const isProjectChrome = chromeStyle === 'project';
 
+  const showCreateInTable = !isProjectChrome && showCreateDashboardButton;
+
   const tabs = useMemo(
     () =>
       getDashboardListingTabs({
@@ -54,8 +62,16 @@ export const DashboardListing = ({
         useSessionStorageIntegration,
         initialFilter,
         getTabs,
+        showCreateDashboardButton: showCreateInTable,
       }),
-    [goToDashboard, getDashboardUrl, useSessionStorageIntegration, initialFilter, getTabs]
+    [
+      goToDashboard,
+      getDashboardUrl,
+      useSessionStorageIntegration,
+      initialFilter,
+      getTabs,
+      showCreateInTable,
+    ]
   );
 
   const activeTabId = useMemo(() => {
@@ -69,10 +85,35 @@ export const DashboardListing = ({
     [history]
   );
 
+  const runCreateDashboardFromAppMenu = useCallback(() => {
+    if (disableCreateDashboardButton) {
+      return;
+    }
+    const dashboardBackupService = getDashboardBackupService();
+    if (useSessionStorageIntegration && dashboardBackupService.dashboardHasUnsavedEdits()) {
+      confirmCreateWithUnsaved(
+        () => {
+          dashboardBackupService.clearState();
+          goToDashboard();
+        },
+        goToDashboard
+      );
+      return;
+    }
+    goToDashboard();
+  }, [disableCreateDashboardButton, goToDashboard, useSessionStorageIntegration]);
+
   const listingAppMenuConfig = useMemo((): AppMenuConfig | undefined => {
     if (!isProjectChrome) {
       return undefined;
     }
+    const { showWriteControls } = getDashboardCapabilities();
+    const showAppMenuCreate =
+      showWriteControls &&
+      showCreateDashboardButton &&
+      !disableCreateDashboardButton &&
+      activeTabId === 'dashboards';
+
     return {
       layout: 'chromeBarV2',
       headerTabs: tabs.map((tab) => ({
@@ -82,8 +123,28 @@ export const DashboardListing = ({
         onClick: () => changeActiveTab(tab.id),
         testId: `dashboardListingTab-${tab.id}`,
       })),
+      primaryActionItem: showAppMenuCreate
+        ? {
+            id: 'dashboardListingCreateDashboard',
+            label: i18n.translate('contentManagement.tableList.listing.createNewItemButtonLabel', {
+              defaultMessage: 'Create {entityName}',
+              values: { entityName: dashboardListingTableStrings.getEntityName() },
+            }),
+            iconType: 'plusInCircle',
+            testId: 'newItemButton',
+            run: runCreateDashboardFromAppMenu,
+          }
+        : undefined,
     };
-  }, [isProjectChrome, tabs, activeTabId, changeActiveTab]);
+  }, [
+    isProjectChrome,
+    tabs,
+    activeTabId,
+    changeActiveTab,
+    showCreateDashboardButton,
+    disableCreateDashboardButton,
+    runCreateDashboardFromAppMenu,
+  ]);
 
   return (
     <I18nProvider>

@@ -9,6 +9,7 @@
 
 import type { Dispatch } from 'react';
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   EuiBasicTableColumn,
@@ -27,6 +28,7 @@ import {
   EuiText,
   EuiLiveAnnouncer,
 } from '@elastic/eui';
+import { euiFormVariables } from '@elastic/eui/lib/components/form/form.styles';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import {
@@ -118,7 +120,34 @@ export function Table<T extends UserContentCommonSchema>({
   createdByEnabled,
   favoritesEnabled,
 }: Props<T>) {
-  const euiTheme = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const tableListSearchCompressedFiltersClassName = useMemo(() => {
+    const formVariables = euiFormVariables(euiThemeContext);
+    return css`
+      /*
+       * EuiSearchBarFilters mounts EuiFilterGroup without compressed. Match Streams tree_table /
+       * EUI compressed filter group sizing (filter_group.styles).
+       */
+      .euiSearchBar__filtersHolder .euiFilterGroup {
+        border-radius: ${euiTheme.border.radius.small};
+      }
+      .euiSearchBar__filtersHolder .euiFilterGroup .euiFilterButton__wrapper {
+        height: ${formVariables.controlCompressedHeight};
+        min-height: ${formVariables.controlCompressedHeight};
+      }
+      .euiSearchBar__filtersHolder .euiFilterGroup .euiFilterButton {
+        height: calc(${formVariables.controlCompressedHeight} - 2 * ${euiTheme.border.width.thin});
+        min-height: calc(
+          ${formVariables.controlCompressedHeight} - 2 * ${euiTheme.border.width.thin}
+        );
+      }
+      .euiSearchBar__filtersHolder .euiFilterGroup .euiFilterButton-isToggle {
+        height: calc(${formVariables.controlCompressedHeight} - 3 * ${euiTheme.size.xxs});
+        min-height: calc(${formVariables.controlCompressedHeight} - 3 * ${euiTheme.size.xxs});
+      }
+    `;
+  }, [euiTheme, euiThemeContext]);
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
 
   const renderToolsLeft = useCallback(() => {
@@ -272,6 +301,7 @@ export function Table<T extends UserContentCommonSchema>({
       query: searchQuery.query ?? undefined,
       box: {
         incremental: true,
+        compressed: true,
         'data-test-subj': 'tableListSearchBox',
       },
       filters: searchFilters,
@@ -384,23 +414,25 @@ export function Table<T extends UserContentCommonSchema>({
         clearTagSelection={clearTagSelection}
       >
         <EuiLiveAnnouncer>{selectionAnnouncement}</EuiLiveAnnouncer>
-        <EuiInMemoryTable<T>
-          itemId="id"
-          items={visibleItems}
-          columns={tableColumns}
-          pagination={pagination}
-          loading={isFetchingItems}
-          noItemsMessage={noItemsMessage}
-          selection={selection}
-          search={search}
-          executeQueryOptions={{ enabled: false }}
-          sorting={sorting}
-          onChange={onTableChange}
-          data-test-subj="itemsInMemTable"
-          rowHeader="attributes.title"
-          tableCaption={tableCaption}
-          css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-        />
+        <div className={tableListSearchCompressedFiltersClassName}>
+          <EuiInMemoryTable<T>
+            itemId="id"
+            items={visibleItems}
+            columns={tableColumns}
+            pagination={pagination}
+            loading={isFetchingItems}
+            noItemsMessage={noItemsMessage}
+            selection={selection}
+            search={search}
+            executeQueryOptions={{ enabled: false }}
+            sorting={sorting}
+            onChange={onTableChange}
+            data-test-subj="itemsInMemTable"
+            rowHeader="attributes.title"
+            tableCaption={tableCaption}
+            css={cssFavoriteHoverWithinEuiTableRow(euiTheme)}
+          />
+        </div>
       </TagFilterContextProvider>
     </UserFilterContextProvider>
   );

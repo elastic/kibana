@@ -33,7 +33,12 @@ import type { DashboardListingProps, DashboardSavedObjectUserContent } from './t
 
 type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,
-  'goToDashboard' | 'getDashboardUrl' | 'useSessionStorageIntegration' | 'initialFilter' | 'getTabs'
+  | 'goToDashboard'
+  | 'getDashboardUrl'
+  | 'useSessionStorageIntegration'
+  | 'initialFilter'
+  | 'getTabs'
+  | 'showCreateDashboardButton'
 >;
 
 type TabContentProps = Omit<GetDashboardListingTabsParams, 'getTabs'> & {
@@ -52,6 +57,7 @@ const DashboardsTabContent = ({
   getDashboardUrl,
   useSessionStorageIntegration,
   initialFilter,
+  showCreateDashboardButton,
   parentProps,
 }: TabContentProps) => {
   const {
@@ -64,6 +70,7 @@ const DashboardsTabContent = ({
     getDashboardUrl,
     useSessionStorageIntegration,
     initialFilter,
+    showCreateDashboardButton,
   });
 
   const dashboardFavoritesClient = useMemo(() => {
@@ -100,12 +107,14 @@ export const getDashboardListingTabs = ({
   useSessionStorageIntegration,
   initialFilter,
   getTabs,
+  showCreateDashboardButton = true,
 }: GetDashboardListingTabsParams): TableListTab<DashboardSavedObjectUserContent>[] => {
   const commonProps = {
     goToDashboard,
     getDashboardUrl,
     useSessionStorageIntegration,
     initialFilter,
+    showCreateDashboardButton,
   };
 
   const dashboardsTab: TableListTab<DashboardSavedObjectUserContent> = {
