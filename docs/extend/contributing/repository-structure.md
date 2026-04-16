@@ -95,11 +95,11 @@ This contains global typings for dependencies that do not provide their own type
 
 Contains all code and infrastructure that powers our non-basic features that are provided under a more restrictive license. The code is organized in the following subfolders:
 
-## [x-pack/platform](https://github.com/elastic/kibana/tree/main/x-pack/platform)
+### [x-pack/platform](https://github.com/elastic/kibana/tree/main/x-pack/platform)
 
 Contains all of the non-basic modules that are common to all {{kib}} solutions. Like the `src/platform` code, it is organized in modules that can be either plugins or packages, and in turn, these plugins are organized according to their visibility.
 
-## [x-pack/solutions](https://github.com/elastic/kibana/tree/main/x-pack/solutions)
+### [x-pack/solutions](https://github.com/elastic/kibana/tree/main/x-pack/solutions)
 
 [//]: # (BOOKMARK - List of {{kib}} solutions)
 Contains all of the code that is specific to each {{kib}} solution. At the moment, we have a folder for [observability](https://github.com/elastic/kibana/tree/main/x-pack/solutions/observability), another for [security](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security), another for [search](https://github.com/elastic/kibana/tree/main/x-pack/solutions/search) and another for [workplaceai](https://github.com/elastic/kibana/tree/main/x-pack/solutions/workplaceai) (serverless only).
