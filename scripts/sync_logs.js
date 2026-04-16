@@ -160,7 +160,7 @@ function parseConfig(log) {
   var interval = get('interval', 'SYNC_INTERVAL_SECONDS', '1');
   var sampleMode = get('sample-mode', 'SYNC_SAMPLE_MODE', 'random');
   var randomSeed = get('random-seed', 'SYNC_RANDOM_SEED', undefined);
-  var targetIndex = get('target-index', 'SYNC_TARGET_INDEX', 'logs-generic-default');
+  var targetIndex = get('target-index', 'SYNC_TARGET_INDEX', undefined);
   var batchSize = get('batch-size', 'SYNC_BATCH_SIZE', '100');
   var from = get('from', 'SYNC_FROM', undefined);
   var to = get('to', 'SYNC_TO', undefined);
@@ -595,7 +595,7 @@ Sync options:
   SYNC_INTERVAL_SECONDS        or  --interval         (default: 5)
   SYNC_SAMPLE_MODE             or  --sample-mode      recent|random (default: random)
   SYNC_RANDOM_SEED             or  --random-seed      For random mode
-  SYNC_TARGET_INDEX            or  --target-index     Single target index/stream (default: logs-generic-default)
+  SYNC_TARGET_INDEX            or  --target-index     Single target index/stream (default: preserve original index names)
   SYNC_BATCH_SIZE              or  --batch-size       (default: 100)
   SYNC_FROM                    or  --from             Start of the time range for syncing (ISO 8601 format)
   SYNC_TO                      or  --to               End of the time range for syncing (ISO 8601 format)
