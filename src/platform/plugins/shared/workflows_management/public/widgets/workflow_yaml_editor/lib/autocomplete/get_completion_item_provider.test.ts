@@ -16,7 +16,8 @@ import {
   clearAllYamlProviders,
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
-import { getDeprecatedStepMetadataMap } from '../../../../../common/schema';
+
+import { getDeprecatedStepMetadata } from '../../../../../common/schema';
 
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
@@ -33,7 +34,7 @@ jest.mock('./context/build_autocomplete_context', () => ({
 }));
 
 jest.mock('../../../../../common/schema', () => ({
-  getDeprecatedStepMetadataMap: jest.fn(() => ({})),
+  getDeprecatedStepMetadata: jest.fn(() => undefined),
 }));
 
 describe('getCompletionItemProvider', () => {
@@ -63,7 +64,7 @@ describe('getCompletionItemProvider', () => {
     } as monaco.languages.CompletionContext;
 
     getState = jest.fn(() => ({} as any));
-    (getDeprecatedStepMetadataMap as jest.Mock).mockReturnValue({});
+    (getDeprecatedStepMetadata as jest.Mock).mockReturnValue(undefined);
   });
 
   afterEach(() => {
@@ -170,10 +171,13 @@ describe('getCompletionItemProvider', () => {
         }),
       };
 
-      (getDeprecatedStepMetadataMap as jest.Mock).mockReturnValue({
+      const deprecatedMap: Record<string, { replacementStepType: string }> = {
         'kibana.createCase': { replacementStepType: 'cases.createCase' },
         'kibana.createCaseDefaultSpace': { replacementStepType: 'kibana.createCase' },
-      });
+      };
+      (getDeprecatedStepMetadata as jest.Mock).mockImplementation(
+        (stepType: string) => deprecatedMap[stepType]
+      );
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
       const provider = getCompletionItemProvider(getState);

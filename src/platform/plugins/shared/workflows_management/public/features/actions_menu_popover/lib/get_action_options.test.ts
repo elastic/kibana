@@ -13,7 +13,7 @@ import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extens
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
-import { getAllConnectors, getDeprecatedStepMetadataMap } from '../../../../common/schema';
+import { getAllConnectors, getDeprecatedStepMetadata } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
@@ -21,7 +21,7 @@ import { isActionGroup, isActionOption } from '../types';
 
 jest.mock('../../../../common/schema', () => ({
   getAllConnectors: jest.fn(),
-  getDeprecatedStepMetadataMap: jest.fn(() => ({})),
+  getDeprecatedStepMetadata: jest.fn(() => undefined),
 }));
 jest.mock('../../../trigger_schemas', () => ({
   triggerSchemas: { getTriggerDefinitions: jest.fn(() => []) },
@@ -60,7 +60,7 @@ describe('getActionOptions', () => {
     mockWorkflowsExtensions = workflowsExtensionsMock.createStart();
 
     (getAllConnectors as jest.Mock).mockReturnValue([]);
-    (getDeprecatedStepMetadataMap as jest.Mock).mockReturnValue({});
+    (getDeprecatedStepMetadata as jest.Mock).mockReturnValue(undefined);
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => false
     );
@@ -346,9 +346,9 @@ describe('getActionOptions', () => {
     };
 
     (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
-    (getDeprecatedStepMetadataMap as jest.Mock).mockReturnValue({
-      'kibana.createCase': { replacementStepType: 'cases.createCase' },
-    });
+    (getDeprecatedStepMetadata as jest.Mock).mockImplementation((stepType: string) =>
+      stepType === 'kibana.createCase' ? { replacementStepType: 'cases.createCase' } : undefined
+    );
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);

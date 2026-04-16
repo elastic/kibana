@@ -17,6 +17,7 @@ import type {
 import {
   builtInStepDefinitions,
   DEPRECATED_STEP_METADATA,
+  DEPRECATED_STEP_PREFIX_METADATA,
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
@@ -375,7 +376,16 @@ export function getDeprecatedStepMetadataMap(): Readonly<Record<string, StepDepr
 }
 
 export function getDeprecatedStepMetadata(stepType: string): StepDeprecationInfo | undefined {
-  return getDeprecatedStepMetadataMap()[stepType];
+  const exactMatch = getDeprecatedStepMetadataMap()[stepType];
+  if (exactMatch) {
+    return exactMatch;
+  }
+  for (const { prefix, deprecation } of DEPRECATED_STEP_PREFIX_METADATA) {
+    if (stepType.startsWith(prefix)) {
+      return deprecation;
+    }
+  }
+  return undefined;
 }
 
 export function isDeprecatedStepType(stepType: string): boolean {
