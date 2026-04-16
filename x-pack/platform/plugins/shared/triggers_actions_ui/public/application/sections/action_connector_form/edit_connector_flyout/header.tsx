@@ -83,8 +83,8 @@ const FlyoutHeaderComponent: React.FC<{
         <EuiFlexItem grow={false}>
           {isPreconfigured ? (
             <>
-              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-                <EuiFlexItem autoFocus={true} grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
+                <EuiFlexItem autoFocus={true} grow={false} style={{ minWidth: '200px' }}>
                   <EuiTitle size="s">
                     <h3 id="flyoutTitle">
                       <FormattedMessage
@@ -125,8 +125,8 @@ const FlyoutHeaderComponent: React.FC<{
               </EuiText>
             </>
           ) : (
-            <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-              <EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
+              <EuiFlexItem style={{ minWidth: '200px' }}>
                 <EuiTitle size="s">
                   <h3 id="flyoutTitle">
                     <FormattedMessage
