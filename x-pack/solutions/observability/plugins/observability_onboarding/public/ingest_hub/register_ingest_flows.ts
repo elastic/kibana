@@ -19,14 +19,14 @@ export const registerIngestFlows = (plugins: ObservabilityOnboardingPluginStartD
       description: i18n.translate(
         'xpack.observability_onboarding.ingestHub.kubernetes.description',
         {
-          defaultMessage: 'Monitor your Kubernetes cluster with Elastic Agent',
+          defaultMessage: 'Monitor your Kubernetes cluster',
         }
       ),
       icon: 'logoKubernetes',
       category: i18n.translate('xpack.observability_onboarding.ingestHub.category.containers', {
         defaultMessage: 'Containers',
       }),
-      navigateTo: { appId: PLUGIN_ID, path: '/kubernetes/' },
+      navigateTo: { appId: PLUGIN_ID, path: '/unified-kubernetes/' },
     },
     {
       id: 'docker',

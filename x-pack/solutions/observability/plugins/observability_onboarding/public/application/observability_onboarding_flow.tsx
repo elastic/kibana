@@ -16,6 +16,7 @@ import {
   LandingPage,
   OtelLogsPage,
   OtelKubernetesPage,
+  UnifiedKubernetesPage,
   FirehosePage,
   OtelApmPage,
   CloudForwarderPage,
@@ -53,6 +54,9 @@ export function ObservabilityOnboardingFlow() {
         </Route>
         <Route path="/otel-kubernetes">
           <OtelKubernetesPage />
+        </Route>
+        <Route path="/unified-kubernetes">
+          <UnifiedKubernetesPage />
         </Route>
         <Route path="/otel-logs">
           <OtelLogsPage />

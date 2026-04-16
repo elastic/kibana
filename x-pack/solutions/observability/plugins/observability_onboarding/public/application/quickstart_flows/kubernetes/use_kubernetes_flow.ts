@@ -11,6 +11,8 @@ import { OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT } from '../../..
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
+export type KubernetesFlowData = NonNullable<ReturnType<typeof useKubernetesFlow>['data']>;
+
 export function useKubernetesFlow(
   onboardingFlowType: 'kubernetes_otel' | 'kubernetes' = 'kubernetes'
 ) {
