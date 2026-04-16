@@ -5,7 +5,7 @@ mapped_pages:
 
 # Debugging Kibana [kibana-debugging]
 
-For information about how to debug unit tests, refer to [Debugging Unit Tests](/extend/development-tests.md#debugging-unit-tests).
+For information about how to debug unit tests, refer to [Unit tests](/extend/testing/unit-tests.md).
 
 
 ## Server Code [_server_code]

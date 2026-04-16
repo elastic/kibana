@@ -17,6 +17,12 @@ toc:
       - file: guidelines-for-http-api-design-in-kibana.md
       - file: guidelines-for-terraform-friendly-http-apis.md
       - file: how-we-use-github.md
+      - file: development-pull-request.md
+      - file: pr-review.md
+      - file: kibana-issue-reporting.md
+      - file: interpreting-ci-failures.md
+      - file: ci-metrics.md
+      - file: kibana-linting.md
       - file: managing-third-party-dependencies.md
       - file: scout-best-practices.md
   - folder: key-concepts
@@ -127,16 +133,6 @@ toc:
       - file: stability.md
       - file: security-best-practices.md
       - file: typescript.md
-  - file: contributing.md
-    children:
-      - file: development-github.md
-      - file: development-tests.md
-      - file: interpreting-ci-failures.md
-      - file: ci-metrics.md
-      - file: development-pull-request.md
-      - file: kibana-issue-reporting.md
-      - file: pr-review.md
-      - file: kibana-linting.md
   - folder: testing
     children:
       - file: index.md

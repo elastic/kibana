@@ -31,5 +31,5 @@ Then sit back and wait. There will probably be discussion about the Pull Request
 
 Most PRs go through several iterations of feedback and updates. Depending on the scope and complexity of the PR, the process can take weeks. Please be patient and understand we hold our code base to a high standard.
 
-Check out our [Pull request review guidelines](/extend/pr-review.md) for our general philosophy for pull request reviews.
+Check out our [Pull request review guidelines](/extend/contributing/pr-review.md) for our general philosophy for pull request reviews.
 

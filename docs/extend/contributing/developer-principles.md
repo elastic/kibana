@@ -120,3 +120,11 @@ The primary consumers of the code we write, the APIs that we create, and the fea
 Features that we anticipate end users, admins, and plugin developers consuming should be documented through our official docs, but module-level READMEs and code comments are also appropriate.
 
 Documentation is critical part of developing features and code, so an undocumented feature is an incomplete feature.
+
+## Signing the contributor license agreement
+
+Sign the [Contributor License Agreement](http://www.elastic.co/contributor-agreement/). This grants us the right to distribute your code without restriction, ensuring its origin and continued availability to users. You only need to sign the CLA once.
+
+### Note on contributing code written with the assistance of AI
+
+While any development process is welcome, your PR remains entirely your contribution. By opening a PR, you confirm thorough review, testing, and confidence in your proposed changes.

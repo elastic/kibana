@@ -7,7 +7,7 @@ mapped_pages:
 
 ## Writing tests [_writing_tests]
 
-Learn about [recommended testing approaches](/extend/development-tests.md).
+Learn about [recommended testing approaches](/extend/testing/index.md).
 
 For modern UI and API end-to-end tests in the {{kib}} repo, see [Scout](/extend/testing/scout.md).
 

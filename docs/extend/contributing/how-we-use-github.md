@@ -115,7 +115,7 @@ Assuming you’ve successfully rebased and you’re happy with the code, you sho
 
 ## Creating a pull request
 
-See [Submitting a pull request](https://www.elastic.co/guide/en/kibana/master/development-pull-request.html) for the next steps on getting your code changes merged into Kibana.
+See [Submitting a pull request](/extend/contributing/development-pull-request.md) for the next steps on getting your code changes merged into Kibana.
 
 ## Labels
 
@@ -209,3 +209,22 @@ node scripts/backport
 # Backport a specific commit to specific branches
 node scripts/backport --sha <commit-sha> --branch 9.2 --branch 9.1
 ```
+
+## Release notes
+
+{{kib}} publishes [Release Notes](/release-notes/index.md) for major and minor releases. Release Notes summarize merged PRs in user-friendly language. A script generates these notes by collecting merged PRs for each release.
+
+### Writing release notes text
+
+Release notes text is sourced from your PR title or a single paragraph in the PR description.
+
+To provide a custom paragraph, use a `Release note:` or `## Release note` header in your PR description, followed by the text.
+
+When you create the release notes text, use the following best practices:
+
+- Use active voice.
+- Use sentence case.
+- When you create a PR that adds a feature, start with `Adds`.
+- When you create a PR that improves an existing feature, start with `Improves`.
+- When you create a PR that fixes existing functionality, start with `Fixes`.
+- When you create a PR that deprecates functionality, start with `Deprecates`.
