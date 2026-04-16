@@ -72,9 +72,8 @@ export const useInstallEntityStoreV2 = (services: Services) => {
           await services.http.post(initEntityMaintainersRequest);
           return;
         }
-        // Entity store not installed → install entity store, then init entity maintainers.
+        // Entity store not installed → install entity store (init entity maintainers is already done by the install API).
         await services.http.post(installAllEntitiesRequest);
-        await services.http.post(initEntityMaintainersRequest);
       } catch (e) {
         services.logger.error('Failed to initialize Entity Store V2');
         services.logger.error(e);

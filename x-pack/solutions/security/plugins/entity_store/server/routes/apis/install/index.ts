@@ -35,7 +35,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManagerClient: assetManager } = entityStoreCtx;
+        const { logger, assetManagerClient: assetManager, entityMaintainersClient } = entityStoreCtx;
         const { entityTypes, logExtraction, historySnapshot } = req.body;
         logger.debug('Install api called');
 
@@ -60,6 +60,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
         }
 
         await assetManager.init(req, toInstall, logExtraction, historySnapshot);
+        await entityMaintainersClient.init(req);
 
         return res.created({ body: { ok: true } });
       })
