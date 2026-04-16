@@ -59,12 +59,7 @@ const renderFlyout = (props: Partial<React.ComponentProps<typeof QueryFlyout>> =
   render(
     <EuiProvider>
       <IntlProvider locale="en">
-        <QueryFlyout
-          uniqueQueryIds={[]}
-          onSave={jest.fn()}
-          onClose={jest.fn()}
-          {...props}
-        />
+        <QueryFlyout uniqueQueryIds={[]} onSave={jest.fn()} onClose={jest.fn()} {...props} />
       </IntlProvider>
     </EuiProvider>
   );
