@@ -313,6 +313,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         // If the inspect tokens widget is open then we want to let monaco handle ESCAPE for it,
         // otherwise widget will not close.
         if (inspectTokensWidget) return;
+        // If a keybinding already handled this ESC (e.g., a custom suggest widget
+        // registered via addAction with precondition), don't also exit editing mode.
+        if (ev.browserEvent.defaultPrevented) return;
         // If the autocompletion context menu is open then we want to let ESCAPE close it but
         // **not** exit out of editing mode.
         if (!isSuggestionMenuOpen.current) {

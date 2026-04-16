@@ -15,6 +15,11 @@ import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow
 import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
 import { isDeprecatedStepType } from '../../../../../common/schema';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
+import {
+  emitSuggestions,
+  type EnrichedSuggestionItem,
+  type SuggestionCategory,
+} from '../custom_suggest_widget';
 
 // Unique identifier for the workflow completion provider
 export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provider';
@@ -85,6 +90,107 @@ function mapSuggestions(
       }
     }
   }
+}
+
+/**
+ * Map a CompletionItemKind to a SuggestionCategory for the custom widget.
+ */
+function inferCategory(item: monaco.languages.CompletionItem): SuggestionCategory {
+  const { CompletionItemKind } = monaco.languages;
+  switch (item.kind) {
+    case CompletionItemKind.Struct:
+    case CompletionItemKind.Module:
+    case CompletionItemKind.Function:
+      return 'connector';
+    case CompletionItemKind.Method:
+    case CompletionItemKind.Keyword:
+    case CompletionItemKind.Class:
+    case CompletionItemKind.Constant:
+    case CompletionItemKind.Event:
+    case CompletionItemKind.Interface:
+      return 'step';
+    case CompletionItemKind.Field:
+      return 'variable';
+    case CompletionItemKind.Property:
+      return 'param';
+    case CompletionItemKind.Value:
+    case CompletionItemKind.EnumMember:
+      return 'value';
+    default:
+      return 'param';
+  }
+}
+
+/**
+ * Extract structured metadata from a CompletionItem's existing string fields.
+ * This is a v1 approach — future versions can attach __enrichment at creation time.
+ */
+function enrichCompletionItem(
+  item: monaco.languages.CompletionItem,
+  matchType: string
+): EnrichedSuggestionItem {
+  const label = typeof item.label === 'string' ? item.label : item.label.label;
+  const detail = typeof item.detail === 'string' ? item.detail : '';
+  const doc =
+    typeof item.documentation === 'string'
+      ? item.documentation
+      : typeof item.documentation === 'object' && item.documentation !== null
+      ? item.documentation.value
+      : '';
+
+  const category = inferCategory(item);
+
+  // Parse type info from detail field (patterns like "string", "object: description", "Built-in workflow step")
+  let types: string[] = [];
+  let description = doc;
+  let required: boolean | null = null;
+  let contextLabel: string | undefined;
+
+  if (matchType === 'type' && (category === 'connector' || category === 'step')) {
+    // Connector/step type suggestions: detail = connectorType, documentation = description
+    contextLabel = 'Step Type';
+    if (detail.startsWith('Built-in')) {
+      types = ['step'];
+    } else {
+      types = ['action'];
+    }
+  } else if (category === 'variable') {
+    // Variable suggestions: detail = "type: description" or "type"
+    contextLabel = 'Template Variable';
+    const colonIdx = detail.indexOf(':');
+    if (colonIdx > 0) {
+      types = [detail.slice(0, colonIdx).replace('?', '').trim()];
+      description = detail.slice(colonIdx + 1).trim() || doc;
+      required = !detail.includes('?');
+    } else if (detail) {
+      types = [detail.replace('?', '').trim()];
+      required = !detail.includes('?');
+    }
+  } else if (category === 'param' || category === 'value') {
+    // Parameter/value suggestions from JSON schema or custom properties
+    contextLabel = 'Parameter';
+    if (detail && detail !== 'Enum Value') {
+      types = [detail];
+    }
+  }
+
+  return {
+    label,
+    insertText: typeof item.insertText === 'string' ? item.insertText : label,
+    insertTextRules: item.insertTextRules,
+    kind: item.kind ?? monaco.languages.CompletionItemKind.Text,
+    range: item.range as monaco.IRange,
+    filterText: item.filterText,
+    sortText: item.sortText,
+    additionalTextEdits: item.additionalTextEdits,
+    preselect: item.preselect,
+    command: item.command,
+    types,
+    required,
+    description: description || detail || label,
+    category,
+    contextLabel,
+  };
 }
 
 export function getCompletionItemProvider(
@@ -185,8 +291,21 @@ export function getCompletionItemProvider(
         });
       }
 
+      // Enrich suggestions with structured metadata and emit to the custom
+      // suggest widget via the side-channel store. Return empty to Monaco so
+      // the built-in suggest widget never appears.
+      const enrichedItems = suggestions.map((s) => enrichCompletionItem(s, matchType));
+      emitSuggestions({
+        items: enrichedItems,
+        anchorPosition: { lineNumber: position.lineNumber, column: position.column },
+        triggerKind:
+          completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke
+            ? 'manual'
+            : 'auto',
+      });
+
       return {
-        suggestions,
+        suggestions: [],
         incomplete: isIncomplete,
       };
     },
