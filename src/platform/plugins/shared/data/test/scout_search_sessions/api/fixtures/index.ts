@@ -12,5 +12,10 @@ import { apiTest as baseApiTest } from '@kbn/scout';
 
 export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
 
-export { SESSION_API_PATH, ESE_API_PATH, COMMON_HEADERS, SESSION_VERSION_HEADER } from './constants';
+export {
+  SESSION_API_PATH,
+  ESE_API_PATH,
+  COMMON_HEADERS,
+  SESSION_VERSION_HEADER,
+} from './constants';
 export { waitFor } from './helpers';

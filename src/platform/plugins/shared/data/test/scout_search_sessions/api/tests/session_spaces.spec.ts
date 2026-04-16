@@ -82,9 +82,7 @@ apiTest.describe(
             headers: { ...COMMON_HEADERS, ...cookieHeader },
           });
           if (resp.statusCode !== 200) return false;
-          const idMappings = Object.values(resp.body.attributes.idMapping).map(
-            (v: any) => v.id
-          );
+          const idMappings = Object.values(resp.body.attributes.idMapping).map((v: any) => v.id);
           return idMappings.includes(id);
         },
         true,
@@ -94,10 +92,9 @@ apiTest.describe(
       // Wait for session to complete
       await waitFor(
         async () => {
-          const resp = await apiClient.get(
-            `s/${spaceId}/${SESSION_API_PATH}/${sessionId}/status`,
-            { headers: { ...COMMON_HEADERS, ...cookieHeader } }
-          );
+          const resp = await apiClient.get(`s/${spaceId}/${SESSION_API_PATH}/${sessionId}/status`, {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+          });
           return resp.body.status;
         },
         'complete',

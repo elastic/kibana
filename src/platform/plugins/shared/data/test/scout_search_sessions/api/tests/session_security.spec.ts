@@ -30,112 +30,97 @@ apiTest.describe(
       }));
     });
 
-    apiTest(
-      'should prevent users from accessing other users sessions',
-      async ({ apiClient }) => {
-        const sessionId = randomSessionId();
-        await apiClient.post(SESSION_API_PATH, {
-          headers: { ...COMMON_HEADERS, ...adminCookieHeader },
-          body: {
-            sessionId,
-            name: 'My Session',
-            appId: 'discover',
-            expires: '123',
-            locatorId: 'discover',
-          },
-        });
+    apiTest('should prevent users from accessing other users sessions', async ({ apiClient }) => {
+      const sessionId = randomSessionId();
+      await apiClient.post(SESSION_API_PATH, {
+        headers: { ...COMMON_HEADERS, ...adminCookieHeader },
+        body: {
+          sessionId,
+          name: 'My Session',
+          appId: 'discover',
+          expires: '123',
+          locatorId: 'discover',
+        },
+      });
 
-        const response = await apiClient.get(`${SESSION_API_PATH}/${sessionId}`, {
-          headers: { ...COMMON_HEADERS, ...otherUserCookieHeader },
-        });
-        expect(response).toHaveStatusCode(404);
-      }
-    );
+      const response = await apiClient.get(`${SESSION_API_PATH}/${sessionId}`, {
+        headers: { ...COMMON_HEADERS, ...otherUserCookieHeader },
+      });
+      expect(response).toHaveStatusCode(404);
+    });
 
-    apiTest(
-      'should prevent users from deleting other users sessions',
-      async ({ apiClient }) => {
-        const sessionId = randomSessionId();
-        await apiClient.post(SESSION_API_PATH, {
-          headers: { ...COMMON_HEADERS, ...adminCookieHeader },
-          body: {
-            sessionId,
-            name: 'My Session',
-            appId: 'discover',
-            expires: '123',
-            locatorId: 'discover',
-          },
-        });
+    apiTest('should prevent users from deleting other users sessions', async ({ apiClient }) => {
+      const sessionId = randomSessionId();
+      await apiClient.post(SESSION_API_PATH, {
+        headers: { ...COMMON_HEADERS, ...adminCookieHeader },
+        body: {
+          sessionId,
+          name: 'My Session',
+          appId: 'discover',
+          expires: '123',
+          locatorId: 'discover',
+        },
+      });
 
-        const response = await apiClient.delete(`${SESSION_API_PATH}/${sessionId}`, {
-          headers: { ...COMMON_HEADERS, ...otherUserCookieHeader },
-        });
-        expect(response).toHaveStatusCode(404);
-      }
-    );
+      const response = await apiClient.delete(`${SESSION_API_PATH}/${sessionId}`, {
+        headers: { ...COMMON_HEADERS, ...otherUserCookieHeader },
+      });
+      expect(response).toHaveStatusCode(404);
+    });
 
-    apiTest(
-      'should prevent users from cancelling other users sessions',
-      async ({ apiClient }) => {
-        const sessionId = randomSessionId();
-        await apiClient.post(SESSION_API_PATH, {
-          headers: { ...COMMON_HEADERS, ...adminCookieHeader },
-          body: {
-            sessionId,
-            name: 'My Session',
-            appId: 'discover',
-            expires: '123',
-            locatorId: 'discover',
-          },
-        });
+    apiTest('should prevent users from cancelling other users sessions', async ({ apiClient }) => {
+      const sessionId = randomSessionId();
+      await apiClient.post(SESSION_API_PATH, {
+        headers: { ...COMMON_HEADERS, ...adminCookieHeader },
+        body: {
+          sessionId,
+          name: 'My Session',
+          appId: 'discover',
+          expires: '123',
+          locatorId: 'discover',
+        },
+      });
 
-        const response = await apiClient.post(`${SESSION_API_PATH}/${sessionId}/cancel`, {
-          headers: { ...COMMON_HEADERS, ...otherUserCookieHeader },
-        });
-        expect(response).toHaveStatusCode(404);
-      }
-    );
+      const response = await apiClient.post(`${SESSION_API_PATH}/${sessionId}/cancel`, {
+        headers: { ...COMMON_HEADERS, ...otherUserCookieHeader },
+      });
+      expect(response).toHaveStatusCode(404);
+    });
 
-    apiTest(
-      'should prevent users from extending other users sessions',
-      async ({ apiClient }) => {
-        const sessionId = randomSessionId();
-        await apiClient.post(SESSION_API_PATH, {
-          headers: { ...COMMON_HEADERS, ...adminCookieHeader },
-          body: {
-            sessionId,
-            name: 'My Session',
-            appId: 'discover',
-            expires: '123',
-            locatorId: 'discover',
-          },
-        });
+    apiTest('should prevent users from extending other users sessions', async ({ apiClient }) => {
+      const sessionId = randomSessionId();
+      await apiClient.post(SESSION_API_PATH, {
+        headers: { ...COMMON_HEADERS, ...adminCookieHeader },
+        body: {
+          sessionId,
+          name: 'My Session',
+          appId: 'discover',
+          expires: '123',
+          locatorId: 'discover',
+        },
+      });
 
-        const response = await apiClient.post(`${SESSION_API_PATH}/${sessionId}/_extend`, {
-          headers: { ...COMMON_HEADERS, ...otherUserCookieHeader },
-          body: { expires: '2021-02-26T21:02:43.742Z' },
-        });
-        expect(response).toHaveStatusCode(404);
-      }
-    );
+      const response = await apiClient.post(`${SESSION_API_PATH}/${sessionId}/_extend`, {
+        headers: { ...COMMON_HEADERS, ...otherUserCookieHeader },
+        body: { expires: '2021-02-26T21:02:43.742Z' },
+      });
+      expect(response).toHaveStatusCode(404);
+    });
 
-    apiTest(
-      'should prevent unauthorized users from creating sessions',
-      async ({ apiClient }) => {
-        const sessionId = randomSessionId();
-        // No auth headers — unauthenticated request
-        const response = await apiClient.post(SESSION_API_PATH, {
-          headers: { 'kbn-xsrf': 'foo' },
-          body: {
-            sessionId,
-            name: 'My Session',
-            appId: 'discover',
-            expires: '123',
-            locatorId: 'discover',
-          },
-        });
-        expect(response).toHaveStatusCode(401);
-      }
-    );
+    apiTest('should prevent unauthorized users from creating sessions', async ({ apiClient }) => {
+      const sessionId = randomSessionId();
+      // No auth headers — unauthenticated request
+      const response = await apiClient.post(SESSION_API_PATH, {
+        headers: { 'kbn-xsrf': 'foo' },
+        body: {
+          sessionId,
+          name: 'My Session',
+          appId: 'discover',
+          expires: '123',
+          locatorId: 'discover',
+        },
+      });
+      expect(response).toHaveStatusCode(401);
+    });
   }
 );

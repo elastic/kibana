@@ -14,9 +14,6 @@ export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      '--data.search.sessions.enabled=true',
-    ],
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, '--data.search.sessions.enabled=true'],
   },
 };

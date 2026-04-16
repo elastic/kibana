@@ -141,9 +141,7 @@ apiTest.describe(
         body: { name: 'name2' },
       });
       expect(updateResponse).toHaveStatusCode(200);
-      expect(updateResponse.body.attributes.name).not.toBe(
-        createResponse.body.attributes.name
-      );
+      expect(updateResponse.body.attributes.name).not.toBe(createResponse.body.attributes.name);
       expect(updateResponse.body.attributes.name).toBe('name2');
     });
 
@@ -199,9 +197,7 @@ apiTest.describe(
             headers: { ...COMMON_HEADERS, ...cookieHeader },
           });
           if (resp.statusCode !== 200) return false;
-          const idMappings = Object.values(resp.body.attributes.idMapping).map(
-            (v: any) => v.id
-          );
+          const idMappings = Object.values(resp.body.attributes.idMapping).map((v: any) => v.id);
           return !idMappings.includes(id1) && idMappings.includes(id2);
         },
         true,

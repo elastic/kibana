@@ -76,9 +76,7 @@ apiTest.describe(
             headers: { ...COMMON_HEADERS, ...cookieHeader },
           });
           if (resp.statusCode !== 200) return false;
-          const idMappings = Object.values(resp.body.attributes.idMapping).map(
-            (v: any) => v.id
-          );
+          const idMappings = Object.values(resp.body.attributes.idMapping).map((v: any) => v.id);
           return idMappings.includes(id);
         },
         true,
