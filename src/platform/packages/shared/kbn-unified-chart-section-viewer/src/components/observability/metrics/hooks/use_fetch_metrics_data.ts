@@ -116,12 +116,17 @@ export function useFetchMetricsData({
 
       // Merge newly-fetched dimensions with the accumulated set so that
       // dimensions from the unfiltered response are not lost when a
-      // WHERE filter narrows the result set.
+      // WHERE filter narrows the result set. Skip the ref write when this
+      // fetch has been aborted: a newer fetch may have already reset the ref
+      // for a new data context, and writing stale dimensions here would
+      // corrupt its accumulator.
       const mergedDimensions = mergeDimensions(
         accumulatedDimensionsRef.current,
         parsed.allDimensions
       );
-      accumulatedDimensionsRef.current = mergedDimensions;
+      if (!signal.aborted) {
+        accumulatedDimensionsRef.current = mergedDimensions;
+      }
 
       const sortedMetrics: ParsedMetrics = {
         metricItems: [...parsed.metricItems].sort((a, b) =>

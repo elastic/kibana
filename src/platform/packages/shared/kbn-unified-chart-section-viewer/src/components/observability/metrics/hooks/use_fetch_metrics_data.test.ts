@@ -601,6 +601,107 @@ describe('useFetchMetricsData', () => {
       });
     });
 
+    it('does not let an aborted fetch corrupt the accumulator for a later fetch', async () => {
+      // Reproduces the race where an in-flight fetch resolves *after* its
+      // signal has been aborted (because a data-context change triggered
+      // effect cleanup and a new fetch). useAsyncFn's internal stale-call
+      // tracking discards the aborted fetch's returned value, but the ref
+      // write on line ~128 escapes that guard: without the abort check, a
+      // subsequent fetch against the new context would see the leaked
+      // dimension in the accumulator.
+      const regionAlt = createDimension('region');
+      let resolveFirstFetch: (value: any) => void;
+      const firstFetchPromise = new Promise<any>((resolve) => {
+        resolveFirstFetch = resolve;
+      });
+
+      let fetchCallCount = 0;
+      mockExecuteEsqlQuery.mockImplementation(async () => {
+        fetchCallCount++;
+        if (fetchCallCount === 1) {
+          return firstFetchPromise;
+        }
+        return {
+          documents: [],
+          rawResponse: {},
+          requestParams: { query: 'TS apm-* | METRICS_INFO' },
+        };
+      });
+
+      // Parse mocks are consumed in resolution order, not initiation order:
+      //   1st consumption -> fetch #2 (context B, resolves immediately) -> [hostDimension]
+      //   2nd consumption -> fetch #1 (context A, aborted, resolves last) -> [regionAlt]
+      //   3rd consumption -> fetch #3 (context B, after dim selection)    -> [hostDimension]
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(
+        createMockParsedMetrics(['system.memory.utilization'], [hostDimension])
+      );
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(
+        createMockParsedMetrics(['system.cpu.utilization'], [regionAlt])
+      );
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(
+        createMockParsedMetrics(['system.memory.utilization'], [hostDimension])
+      );
+
+      const params = createDefaultParams();
+      const { result, rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() => {
+        expect(fetchCallCount).toBeGreaterThanOrEqual(1);
+      });
+
+      // Switch the data context. Effect cleanup aborts the first fetch's
+      // signal and a new fetch begins against context B.
+      const contextBParams = {
+        ...params,
+        fetchParams: { ...params.fetchParams, query: { esql: 'TS apm-*' } },
+      };
+      rerender(contextBParams);
+
+      await waitFor(() => {
+        expect(fetchCallCount).toBe(2);
+      });
+
+      // Now resolve the first (aborted) fetch. Its parse callback runs and,
+      // without the abort guard, would write [regionAlt] into the accumulator.
+      resolveFirstFetch!({
+        documents: [
+          {
+            metric_name: 'system.cpu.utilization',
+            data_stream: 'metrics-*',
+            unit: null,
+            metric_type: 'gauge',
+            field_type: 'double',
+            dimension_fields: ['region'],
+          },
+        ],
+        rawResponse: {},
+        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.allDimensions.map((d) => d.name)).toEqual(['host.name']);
+      });
+
+      // Trigger a third fetch within context B by changing only the
+      // dimension selection. The accumulator persists across this change
+      // and must not contain the stale [regionAlt] value from the aborted
+      // fetch that resolved after context B's first fetch.
+      rerender({ ...contextBParams, selectedDimensionNames: [hostDimension] });
+
+      await waitFor(() => {
+        expect(fetchCallCount).toBe(3);
+      });
+
+      await waitFor(() => {
+        // Without the abort guard, 'region' would leak in here.
+        expect(result.current.allDimensions.map((d) => d.name)).toEqual(['host.name']);
+      });
+    });
+
     it('resets accumulated dimensions when the timeRange changes', async () => {
       mockParseMetricsWithTelemetry.mockReturnValueOnce(
         createMockParsedMetrics(['system.cpu.utilization'], [hostDimension, serviceDimension])
