@@ -188,7 +188,10 @@ export const ManageIntegrationsTable: React.FC<{
     return [...new Set(uids)];
   }, [integrations]);
 
-  const { data: userProfiles = new Map<string, UserProfileWithAvatar>() } = useQuery(
+  const {
+    data: userProfiles = new Map<string, UserProfileWithAvatar>(),
+    isLoading: isProfilesLoading,
+  } = useQuery(
     ['manage-integrations-user-profiles', ...uniqueProfileUids],
     async () => {
       const profiles = await userProfileService.bulkGet<{
@@ -487,6 +490,9 @@ export const ManageIntegrationsTable: React.FC<{
         ),
         width: '16%',
         render: (_createdBy: string, item: CreatedIntegrationRow) => {
+          if (isProfilesLoading && item.createdByProfileUid) {
+            return <EuiLoadingSpinner size="s" />;
+          }
           const profile = item.createdByProfileUid
             ? userProfiles.get(item.createdByProfileUid)
             : undefined;
@@ -650,6 +656,7 @@ export const ManageIntegrationsTable: React.FC<{
       euiTheme.size.s,
       euiTheme.size.m,
       userProfiles,
+      isProfilesLoading,
     ]
   );
   const actionsOptions: EuiSelectableOption[] = [

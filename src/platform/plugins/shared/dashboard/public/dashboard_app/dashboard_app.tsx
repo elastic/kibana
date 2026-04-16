@@ -136,6 +136,30 @@ export function DashboardApp({
   }, []);
 
   /**
+   * Handle incoming embeddables from the state transfer service received after the dashboard has already loaded
+   * This can happen if a modal or popup makes use of state transfers and redirects to add panels to a dashboard,
+   * but it tries to add them to the dashboard the user is already looking at. e.g. the AI agent chat sidebar works this way
+   */
+  useEffect(() => {
+    if (!dashboardApi) return;
+    const embeddableStateTransferSubscription = embeddableService
+      .getStateTransfer()
+      .onTransferEmbeddablePackage$(DASHBOARD_APP_ID, true)
+      .subscribe((lateEmbeddables) => {
+        if (lateEmbeddables?.length) {
+          // If a panel is expanded, minimize it so that the user can see the newly added embeddables
+          if (dashboardApi.expandedPanelId$.value) {
+            dashboardApi.expandPanel(dashboardApi.expandedPanelId$.value);
+          }
+          dashboardApi.addIncomingEmbeddables(lateEmbeddables);
+          dashboardApi.setViewMode('edit');
+        }
+      });
+
+    return () => embeddableStateTransferSubscription.unsubscribe();
+  }, [dashboardApi, history, savedDashboardId]);
+
+  /**
    * Validate saved object load outcome
    */
   const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation();
