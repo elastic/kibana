@@ -70,6 +70,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
         css={css`
           margin-top: ${euiTheme.size.l};
           padding-bottom: ${euiTheme.size.m};
+          height: ${euiTheme.size.l};
         `}
       >
         <EuiFlexItem grow={false}>
@@ -87,66 +88,64 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
                 />
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem
-              data-test-subj="workflows-table-utility-bar-actions"
-              grow={false}
-              css={css`
-                visibility: ${showBulkActions ? 'visible' : 'hidden'};
-              `}
-            >
+            <EuiFlexItem data-test-subj="workflows-table-utility-bar-actions" grow={false}>
               <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-                <EuiFlexItem data-test-subj="workflows-table-selected-count" grow={false}>
-                  <EuiText size="s" color="subdued">
-                    {i18n.translate('workflows.utilityBar.selectedWorkflows', {
-                      defaultMessage: '{count} selected',
-                      values: { count: selectedWorkflows.length },
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    isOpen={isPopoverOpen}
-                    closePopover={closePopover}
-                    panelPaddingSize="none"
-                    data-test-subj="workflows-table-bulk-actions-popover"
-                    button={
-                      <EuiButtonEmpty
-                        onClick={togglePopover}
-                        size="s"
-                        iconSide="right"
-                        iconType="chevronSingleDown"
-                        flush="left"
-                        data-test-subj="workflows-table-bulk-actions-button"
-                        aria-label="Bulk actions"
+                {showBulkActions && (
+                  <>
+                    <EuiFlexItem data-test-subj="workflows-table-selected-count" grow={false}>
+                      <EuiText size="s" color="subdued">
+                        {i18n.translate('workflows.utilityBar.selectedWorkflows', {
+                          defaultMessage: '{count} selected',
+                          values: { count: selectedWorkflows.length },
+                        })}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        isOpen={isPopoverOpen}
+                        closePopover={closePopover}
+                        panelPaddingSize="none"
+                        data-test-subj="workflows-table-bulk-actions-popover"
+                        button={
+                          <EuiButtonEmpty
+                            onClick={togglePopover}
+                            size="s"
+                            iconSide="right"
+                            iconType="chevronSingleDown"
+                            flush="left"
+                            data-test-subj="workflows-table-bulk-actions-button"
+                            aria-label="Bulk actions"
+                          >
+                            {i18n.translate('workflows.utilityBar.bulkActions', {
+                              defaultMessage: 'Bulk actions',
+                            })}
+                          </EuiButtonEmpty>
+                        }
                       >
-                        {i18n.translate('workflows.utilityBar.bulkActions', {
-                          defaultMessage: 'Bulk actions',
+                        <EuiContextMenu
+                          panels={panels}
+                          initialPanelId={0}
+                          data-test-subj="workflows-table-bulk-actions-context-menu"
+                        />
+                      </EuiPopover>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        onClick={deselectWorkflows}
+                        size="s"
+                        iconSide="left"
+                        iconType="cross"
+                        flush="left"
+                        data-test-subj="workflows-clear-selection-button"
+                        aria-label="Clear selection"
+                      >
+                        {i18n.translate('workflows.utilityBar.clearSelection', {
+                          defaultMessage: 'Clear selection',
                         })}
                       </EuiButtonEmpty>
-                    }
-                  >
-                    <EuiContextMenu
-                      panels={panels}
-                      initialPanelId={0}
-                      data-test-subj="workflows-table-bulk-actions-context-menu"
-                    />
-                  </EuiPopover>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={deselectWorkflows}
-                    size="s"
-                    iconSide="left"
-                    iconType="cross"
-                    flush="left"
-                    data-test-subj="workflows-clear-selection-button"
-                    aria-label="Clear selection"
-                  >
-                    {i18n.translate('workflows.utilityBar.clearSelection', {
-                      defaultMessage: 'Clear selection',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                    </EuiFlexItem>
+                  </>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
