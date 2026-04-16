@@ -1079,5 +1079,3 @@ export type LayerTypeNoESQL =
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
 export type XYLayer = LayerTypeNoESQL | LayerTypeESQL;
-
-export type XYStyling = TypeOf<typeof xyStylingSchema>;

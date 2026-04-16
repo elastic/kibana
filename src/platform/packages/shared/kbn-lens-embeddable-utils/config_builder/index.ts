@@ -40,5 +40,9 @@ export type {
   LensYBoundsConfig,
 } from './types';
 
-export { lensApiConfigSchema, extendLensApiConfigSchema } from './schema';
-export type { LensApiConfig } from './schema';
+export {
+  lensApiConfigSchema,
+  lensApiConfigSchemaNoESQL,
+  extendLensApiConfigSchema,
+} from './schema';
+export type { LensApiConfig, LensApiConfigESQL, LensApiConfigNoESQL } from './schema';

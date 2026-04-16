@@ -29,7 +29,7 @@ import {
   SPLIT_METRIC_BY_ACCESSOR_PREFIX,
 } from '../constants';
 import { buildMetricsState, buildRowsState, buildSplitMetricsByState } from './columns';
-import { buildAppearanceState } from './appearance';
+import { buildStylingState } from './styling';
 import { processMetricColumnsWithReferences } from '../../utils';
 
 export function buildFormBasedLayer(
@@ -109,7 +109,7 @@ export function buildVisualizationState(config: DatatableConfig): DatatableVisua
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
-    ...buildAppearanceState(config),
+    ...buildStylingState(config),
     columns: rows.concat(splitMetrics, metrics),
   };
 }

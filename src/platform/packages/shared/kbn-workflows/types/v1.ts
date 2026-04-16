@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonValue } from '@kbn/utility-types';
+import type { JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
@@ -525,11 +525,17 @@ export interface StepPropertyHandler<
   connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
+type DependsOnValuePath = `config.${string}` | `input.${string}`;
 export interface PropertySelectionHandler<
   T = unknown,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
   TInput extends Record<string, unknown> = Record<string, unknown>
 > {
+  /**
+   * Dot paths (e.g. `config.proxy.ssl`, `input.owner`) whose values are passed in `context.values`
+   * and included in the selection cache key. If omitted or empty, `context.values` is `{ config: {}, input: {} }`.
+   */
+  dependsOnValues?: DependsOnValuePath[];
   /**
    * Search for options matching the input query.
    * Used by autocomplete dropdowns when the user types.
@@ -596,9 +602,9 @@ export interface StepSelectionValues<
   TInput extends Record<string, unknown> = Record<string, unknown>
 > {
   /** Root-level step properties (everything outside the `with` block). */
-  config: TConfig;
+  config: RecursivePartial<TConfig>;
   /** Properties nested under the `with` block. */
-  input: TInput;
+  input: RecursivePartial<TInput>;
 }
 
 export interface SelectionContext<
@@ -611,7 +617,7 @@ export interface SelectionContext<
   scope: 'config' | 'input';
   /** The property key (e.g., "agent_id") */
   propertyKey: string;
-  /** Sibling values of the current step, keyed by scope. */
+  /** Sibling values of the current step, keyed by scope (only paths listed in `dependsOnValues` are populated). */
   values: StepSelectionValues<TConfig, TInput>;
 }
 

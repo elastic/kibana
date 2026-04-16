@@ -53,20 +53,31 @@ const treemapSharedConfigSchema = {
       }
     )
   ),
-  values: valueDisplaySchema,
-
-  /**
-   * Labels configuration
-   */
-  labels: schema.maybe(
-    schema.object(
-      {
-        visible: schema.maybe(schema.boolean({ meta: { description: 'Show category labels' } })),
-      },
-      { meta: { description: 'Labels configuration' } }
-    )
-  ),
 };
+
+const treemapStylingSchema = schema.object(
+  {
+    values: valueDisplaySchema,
+    /**
+     * Labels configuration
+     */
+    labels: schema.maybe(
+      schema.object(
+        {
+          visible: schema.maybe(schema.boolean({ meta: { description: 'Show category labels' } })),
+        },
+        { meta: { description: 'Labels configuration' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'treemapStyling',
+      title: 'Treemap styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 const partitionConfigPrimaryMetricOptionsSchema = {
   /**
@@ -126,7 +137,7 @@ export const treemapConfigSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...treemapSharedConfigSchema,
-    ...dslOnlyPanelInfoSchema,
+    styling: schema.maybe(treemapStylingSchema),
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
@@ -172,6 +183,7 @@ export const treemapConfigSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
     ...treemapSharedConfigSchema,
+    styling: schema.maybe(treemapStylingSchema),
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */

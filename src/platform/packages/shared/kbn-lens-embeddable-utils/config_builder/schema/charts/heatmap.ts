@@ -55,6 +55,35 @@ const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.l
   meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
 });
 
+const heatmapStylingSchema = schema.object(
+  {
+    cells: schema.maybe(
+      schema.object(
+        {
+          labels: schema.maybe(
+            schema.object({
+              visible: schema.maybe(
+                schema.boolean({
+                  defaultValue: false,
+                  meta: { description: 'Show cell labels' },
+                })
+              ),
+            })
+          ),
+        },
+        { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'heatmapStyling',
+      title: 'Heatmap styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
+
 const heatmapSharedConfigSchema = {
   type: schema.literal('heatmap'),
   legend: schema.maybe(
@@ -68,7 +97,7 @@ const heatmapSharedConfigSchema = {
   ),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
-  axes: schema.maybe(
+  axis: schema.maybe(
     schema.object(
       {
         x: schema.maybe(
@@ -114,23 +143,6 @@ const heatmapSharedConfigSchema = {
       }
     )
   ),
-  cells: schema.maybe(
-    schema.object(
-      {
-        labels: schema.maybe(
-          schema.object({
-            visible: schema.maybe(
-              schema.boolean({
-                defaultValue: false,
-                meta: { description: 'Show cell labels' },
-              })
-            ),
-          })
-        ),
-      },
-      { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
-    )
-  ),
 };
 
 const heatmapAxesConfigSchemaProps = {
@@ -157,6 +169,7 @@ export const heatmapConfigSchemaNoESQL = schema.object(
     ...heatmapAxesConfigSchemaProps,
     ...dslOnlyPanelInfoSchema,
     ...dataSourceSchema,
+    styling: schema.maybe(heatmapStylingSchema),
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
       heatmapConfigMetricOptionsSchemaProps
     ),
@@ -169,6 +182,7 @@ export const heatmapConfigSchemaESQL = schema.object(
     ...heatmapSharedConfigSchema,
     ...heatmapAxesConfigESQLSchemaProps,
     ...dataSourceEsqlTableSchema,
+    styling: schema.maybe(heatmapStylingSchema),
     metric: esqlColumnWithFormatSchema.extends(heatmapConfigMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }

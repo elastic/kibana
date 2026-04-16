@@ -47,8 +47,20 @@ const mosaicConfigSharedSchema = {
       }
     )
   ),
-  values: valueDisplaySchema,
 };
+
+const mosaicStylingSchema = schema.object(
+  {
+    values: valueDisplaySchema,
+  },
+  {
+    meta: {
+      id: 'mosaicStyling',
+      title: 'Mosaic styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 const partitionConfigPrimaryMetricOptionsSchema = {};
 
@@ -101,7 +113,7 @@ export const mosaicConfigSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...mosaicConfigSharedSchema,
-    ...dslOnlyPanelInfoSchema,
+    styling: schema.maybe(mosaicStylingSchema),
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
@@ -152,6 +164,7 @@ export const mosaicConfigSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
     ...mosaicConfigSharedSchema,
+    styling: schema.maybe(mosaicStylingSchema),
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */

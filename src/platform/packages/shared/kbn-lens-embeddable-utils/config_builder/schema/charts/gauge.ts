@@ -21,46 +21,55 @@ import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 import { builderEnums } from '../enums';
 import { objectUnion } from './utils/object_union';
 
-const gaugeConfigSharedOptionsSchema = {
-  shape: schema.maybe(
-    schema.oneOf(
-      [
-        schema.object(
-          {
-            type: schema.literal('bullet'),
-            orientation: builderEnums.simpleOrientation({
-              defaultValue: 'horizontal',
-            }),
-          },
-          {
-            meta: {
-              id: 'gaugeShapeBullet',
-              title: 'Shape (Bullet)',
-              description: 'Bullet gauge shape',
+const gaugeStylingSchema = schema.object(
+  {
+    shape: schema.maybe(
+      schema.oneOf(
+        [
+          schema.object(
+            {
+              type: schema.literal('bullet'),
+              orientation: builderEnums.simpleOrientation({
+                defaultValue: 'horizontal',
+              }),
             },
-          }
-        ),
-        schema.object(
-          {
-            type: schema.oneOf([
-              schema.literal('circle'),
-              schema.literal('semi_circle'),
-              schema.literal('arc'),
-            ]),
-          },
-          {
-            meta: {
-              id: 'gaugeShapeCircular',
-              title: 'Shape (Circular)',
-              description: 'Circular gauge shape',
+            {
+              meta: {
+                id: 'gaugeShapeBullet',
+                title: 'Shape (Bullet)',
+                description: 'Bullet gauge shape',
+              },
+            }
+          ),
+          schema.object(
+            {
+              type: schema.oneOf([
+                schema.literal('circle'),
+                schema.literal('semi_circle'),
+                schema.literal('arc'),
+              ]),
             },
-          }
-        ),
-      ],
-      { defaultValue: { type: 'bullet', orientation: 'horizontal' } }
-    )
-  ),
-};
+            {
+              meta: {
+                id: 'gaugeShapeCircular',
+                title: 'Shape (Circular)',
+                description: 'Circular gauge shape',
+              },
+            }
+          ),
+        ],
+        { defaultValue: { type: 'bullet', orientation: 'horizontal' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'gaugeStyling',
+      title: 'Gauge styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 const gaugeConfigMetricInnerNoESQLOpsSchema = {
   /**
@@ -158,7 +167,7 @@ export const gaugeConfigSchemaNoESQL = schema.object(
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceSchema,
-    ...gaugeConfigSharedOptionsSchema,
+    styling: schema.maybe(gaugeStylingSchema),
     /**
      * Primary value configuration, must define operation.
      */
@@ -176,7 +185,7 @@ export const gaugeConfigSchemaESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    ...gaugeConfigSharedOptionsSchema,
+    styling: schema.maybe(gaugeStylingSchema),
     /**
      * Primary value configuration, must define operation.
      */

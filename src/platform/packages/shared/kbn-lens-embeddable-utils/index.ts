@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LensConfigBuilder } from './config_builder';
+export {
+  LensConfigBuilder,
+  lensApiConfigSchema,
+  lensApiConfigSchemaNoESQL,
+  extendLensApiConfigSchema,
+} from './config_builder';
+
 export type {
+  LensApiConfig,
+  LensApiConfigESQL,
+  LensApiConfigNoESQL,
   DataViewsCommon,
   LensAttributes,
   ChartType,
@@ -41,12 +50,10 @@ export type {
 } from './config_builder';
 export {
   isLensESQLConfig,
+  isLensDSLConfig,
   isLensAPIFormat,
   isLensLegacyFormat,
   isLensLegacyAttributes,
 } from './config_builder/utils';
 
 export { stripUndefined } from './config_builder/transforms/charts/utils';
-
-export { lensApiConfigSchema, extendLensApiConfigSchema } from './config_builder';
-export type { LensApiConfig } from './config_builder';

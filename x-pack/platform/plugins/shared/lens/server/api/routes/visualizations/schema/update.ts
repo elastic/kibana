@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
+import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 
 import { lensResponseItemSchema } from './common';
 
@@ -21,6 +21,6 @@ export const lensUpdateRequestParamsSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const lensUpdateRequestBodySchema = lensApiConfigSchema;
+export const lensUpdateRequestBodySchema = lensApiConfigSchemaNoESQL;
 
 export const lensUpdateResponseBodySchema = lensResponseItemSchema;
