@@ -15,7 +15,7 @@ import { MISSING_UIAM_API_KEY_TAG } from '../../application/rule/constants';
 import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
 
 describe('apiKeyAsAlertAttributes', () => {
-  test('return attributes with uiamApiKey: null when no UIAM key is present', () => {
+  test('return attributes', () => {
     expect(
       apiKeyAsAlertAttributes(
         {
@@ -33,11 +33,10 @@ describe('apiKeyAsAlertAttributes', () => {
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
       apiKeyCreatedByUser: false,
-      uiamApiKey: null,
     });
   });
 
-  test('returns null attributes including uiamApiKey when api keys are not enabled', () => {
+  test('returns null attributes when api keys are not enabled', () => {
     expect(
       apiKeyAsAlertAttributes(
         {
@@ -50,20 +49,10 @@ describe('apiKeyAsAlertAttributes', () => {
       apiKey: null,
       apiKeyOwner: null,
       apiKeyCreatedByUser: null,
-      uiamApiKey: null,
     });
   });
 
-  test('returns null attributes including uiamApiKey when apiKey is null', () => {
-    expect(apiKeyAsAlertAttributes(null, 'test', false)).toEqual({
-      apiKey: null,
-      apiKeyOwner: null,
-      apiKeyCreatedByUser: null,
-      uiamApiKey: null,
-    });
-  });
-
-  test('returns apiKeyCreatedByUser as true with uiamApiKey: null when createdByUser is passed in', () => {
+  test('returns apiKeyCreatedByUser as true when createdByUser is passed in', () => {
     expect(
       apiKeyAsAlertAttributes(
         {
@@ -81,32 +70,7 @@ describe('apiKeyAsAlertAttributes', () => {
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
       apiKeyCreatedByUser: true,
-      uiamApiKey: null,
     });
-  });
-
-  test('uiamApiKey: null prevents stale UIAM key from surviving object spread', () => {
-    const oldRuleAttributes = {
-      apiKey: 'old-es-key',
-      apiKeyOwner: 'old-owner',
-      apiKeyCreatedByUser: false,
-      uiamApiKey: 'old-uiam-key',
-    };
-
-    const newApiKeyAttributes = apiKeyAsAlertAttributes(
-      {
-        apiKeysEnabled: true,
-        result: { id: '789', name: '789', api_key: 'new-es-key' },
-      },
-      'new-owner',
-      true
-    );
-
-    const merged = { ...oldRuleAttributes, ...newApiKeyAttributes };
-
-    expect(merged.uiamApiKey).toBeNull();
-    expect(merged.apiKey).toBe('Nzg5Om5ldy1lcy1rZXk=');
-    expect(merged.apiKeyCreatedByUser).toBe(true);
   });
 
   test('returns UIAM API Key as well', () => {

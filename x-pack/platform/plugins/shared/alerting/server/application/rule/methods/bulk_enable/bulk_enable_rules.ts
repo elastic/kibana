@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type {
@@ -237,15 +238,27 @@ const bulkEnableRulesWithOCC = async (
             }
 
             const nowIso = new Date().toISOString();
-            const updatedAttributes = updateMetaAttributes(context, {
-              ...rule.attributes,
-              ...(!rule.attributes.apiKey &&
-                (await createNewAPIKeySet(context, {
+            const newApiKeyAttributes = !rule.attributes.apiKey
+              ? await createNewAPIKeySet(context, {
                   id: rule.attributes.alertTypeId,
                   ruleName,
                   username,
                   shouldUpdateApiKey: true,
-                }))),
+                })
+              : undefined;
+
+            const updatedAttributes = updateMetaAttributes(context, {
+              ...(newApiKeyAttributes
+                ? {
+                    ...omit(rule.attributes, [
+                      'apiKey',
+                      'apiKeyOwner',
+                      'apiKeyCreatedByUser',
+                      'uiamApiKey',
+                    ]),
+                    ...newApiKeyAttributes,
+                  }
+                : rule.attributes),
               enabled: true,
               updatedBy: username,
               updatedAt: nowIso,

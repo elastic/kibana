@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -101,7 +102,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   });
 
   const updateAttributes = updateMeta(context, {
-    ...attributes,
+    ...omit(attributes, ['apiKey', 'apiKeyOwner', 'apiKeyCreatedByUser', 'uiamApiKey']),
     ...apiKeyAttributes,
     updatedAt: new Date().toISOString(),
     updatedBy: username,

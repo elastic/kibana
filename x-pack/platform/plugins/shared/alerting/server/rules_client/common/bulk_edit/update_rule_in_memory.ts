@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import {
   getRuleNotifyWhenType,
@@ -267,10 +268,13 @@ async function updateAttributes({
   );
 
   // TODO (http-versioning) Remove casts when updateMeta has been converted
-  const castedAttributes = attributes;
   const updatedAttributes = updateMeta(context, {
-    ...castedAttributes,
-    ...(apiKeyAttributes ? { ...apiKeyAttributes } : {}),
+    ...(apiKeyAttributes
+      ? {
+          ...omit(attributes, ['apiKey', 'apiKeyOwner', 'apiKeyCreatedByUser', 'uiamApiKey']),
+          ...apiKeyAttributes,
+        }
+      : attributes),
     tags: tagsWithUiamCheck,
     params: updatedParams,
     actions: rawAlertActions,

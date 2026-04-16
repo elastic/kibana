@@ -333,7 +333,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   );
 
   const updatedRuleAttributes = updateMetaAttributes(context, {
-    ...originalRule,
+    ...omit(originalRule, ['apiKey', 'apiKeyOwner', 'apiKeyCreatedByUser', 'uiamApiKey']),
     ...omit(updateRuleData, 'actions', 'systemActions', 'artifacts'),
     ...apiKeyAttributes,
     tags: tagsWithUiamCheck,

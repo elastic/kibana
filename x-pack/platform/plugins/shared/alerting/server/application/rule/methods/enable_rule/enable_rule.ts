@@ -5,6 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { RawRule, IntervalSchedule } from '../../../../types';
@@ -162,7 +163,9 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     );
 
     const updateAttributes = updateMeta(context, {
-      ...attributes,
+      ...(existingApiKey
+        ? attributes
+        : omit(attributes, ['apiKey', 'apiKeyOwner', 'apiKeyCreatedByUser', 'uiamApiKey'])),
       ...apiKeyAttributes,
       tags: tagsWithUiamCheck,
       ...(attributes.monitoring && {
