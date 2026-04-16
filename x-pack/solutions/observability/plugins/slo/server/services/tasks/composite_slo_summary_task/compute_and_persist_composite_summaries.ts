@@ -16,6 +16,7 @@ import { escapeKuery } from '@kbn/es-query';
 import { ALL_VALUE, compositeSloDefinitionSchema, sloDefinitionSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/Either';
 import { merge } from 'lodash';
+import pLimit from 'p-limit';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import type {
   CompositeSLODefinition,
@@ -87,60 +88,71 @@ export async function computeAndPersistCompositeSummaries({
         bySpace.set(spaceId, items);
       }
 
-      // One soClient.find per space covering all member IDs for that space
+      // Fetch member SLOs for all spaces concurrently — one soClient.find per space
       const memberMapBySpace = new Map<string, Map<string, SLODefinition>>();
-      for (const [spaceId, items] of bySpace) {
-        const allIds = [
-          ...new Set(items.flatMap(({ compositeSlo }) => compositeSlo.members.map((m) => m.sloId))),
-        ];
-        try {
-          const slos = await findMemberSLOs(allIds, spaceId, soClient, logger);
-          memberMapBySpace.set(spaceId, new Map(slos.map((slo) => [slo.id, slo])));
-        } catch (err) {
-          logger.debug(
-            `Failed to fetch member SLOs for space [${spaceId}], skipping ${items.length} composite SLOs: ${err}`
-          );
-        }
-      }
-
-      // Process each composite using the pre-fetched member definitions
-      for (const [spaceId, items] of bySpace) {
-        const memberDefinitionMap = memberMapBySpace.get(spaceId);
-        if (!memberDefinitionMap) continue;
-
-        for (const { compositeSlo } of items) {
+      await Promise.allSettled(
+        [...bySpace.entries()].map(async ([spaceId, items]) => {
+          const allIds = [
+            ...new Set(
+              items.flatMap(({ compositeSlo }) => compositeSlo.members.map((m) => m.sloId))
+            ),
+          ];
           try {
-            const activeMembers = compositeSlo.members.filter((m) =>
-              memberDefinitionMap.has(m.sloId)
-            );
-
-            const summaryParams = activeMembers.map((member) => ({
-              slo: memberDefinitionMap.get(member.sloId)!,
-              instanceId: member.instanceId ?? ALL_VALUE,
-              timeWindowOverride: compositeSlo.timeWindow,
-            }));
-
-            const summaryResults = await summaryClient.computeSummaries(summaryParams);
-
-            const memberSummaries: MemberSummaryData[] = activeMembers.map((member, i) => ({
-              member,
-              sloName: memberDefinitionMap.get(member.sloId)!.name,
-              summary: summaryResults[i].summary,
-              burnRateWindows: summaryResults[i].burnRateWindows,
-            }));
-
-            const { compositeSummary } = computeCompositeSummary(compositeSlo, memberSummaries);
-
-            const docId = `${spaceId}:${compositeSlo.id}`;
-            const doc = buildSummaryDoc(compositeSlo, compositeSummary, spaceId);
-
-            bulkOps.push({ index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: docId } });
-            bulkOps.push(doc);
+            const slos = await findMemberSLOs(allIds, spaceId, soClient, logger);
+            memberMapBySpace.set(spaceId, new Map(slos.map((slo) => [slo.id, slo])));
           } catch (err) {
-            logger.debug(
-              `Failed to compute summary for composite SLO [${compositeSlo.id}] in space [${spaceId}]: ${err}`
+            logger.error(
+              `Failed to fetch member SLOs for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
             );
           }
+        })
+      );
+
+      // Process all composites concurrently, up to 10 at a time
+      const limiter = pLimit(10);
+      const compositeResults = await Promise.allSettled(
+        [...bySpace.entries()].flatMap(([spaceId, items]) => {
+          const memberDefinitionMap = memberMapBySpace.get(spaceId);
+          if (!memberDefinitionMap) return [];
+
+          return items.map(({ compositeSlo }) =>
+            limiter(async () => {
+              const activeMembers = compositeSlo.members.filter((m) =>
+                memberDefinitionMap.has(m.sloId)
+              );
+
+              const summaryParams = activeMembers.map((member) => ({
+                slo: memberDefinitionMap.get(member.sloId)!,
+                instanceId: member.instanceId ?? ALL_VALUE,
+                timeWindowOverride: compositeSlo.timeWindow,
+              }));
+
+              const summaryResults = await summaryClient.computeSummaries(summaryParams);
+
+              const memberSummaries: MemberSummaryData[] = activeMembers.map((member, i) => ({
+                member,
+                sloName: memberDefinitionMap.get(member.sloId)!.name,
+                summary: summaryResults[i].summary,
+                burnRateWindows: summaryResults[i].burnRateWindows,
+              }));
+
+              const { compositeSummary } = computeCompositeSummary(compositeSlo, memberSummaries);
+
+              return {
+                docId: `${spaceId}:${compositeSlo.id}`,
+                doc: buildSummaryDoc(compositeSlo, compositeSummary, spaceId),
+              };
+            })
+          );
+        })
+      );
+
+      for (const result of compositeResults) {
+        if (result.status === 'fulfilled') {
+          bulkOps.push({ index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: result.value.docId } });
+          bulkOps.push(result.value.doc);
+        } else {
+          logger.error(`Failed to compute composite SLO summary: ${result.reason}`);
         }
       }
 
@@ -151,7 +163,7 @@ export async function computeAndPersistCompositeSummaries({
         );
         if (bulkResponse.errors) {
           const failed = bulkResponse.items.filter((item) => item.index?.error);
-          logger.debug(`Bulk upsert had ${failed.length} errors`);
+          logger.error(`Bulk upsert had ${failed.length} errors`);
         }
       }
 
