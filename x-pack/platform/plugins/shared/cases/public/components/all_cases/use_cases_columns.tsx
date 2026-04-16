@@ -40,6 +40,7 @@ import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../incremental_id';
+import { ExtendedFieldsColumnCell } from './extended_fields_column_cell';
 
 type CasesColumns = EuiBasicTableColumn<CaseUI>;
 
@@ -179,9 +180,9 @@ export const useCasesColumns = ({
 
             return (
               <EuiToolTip
+                content={unclampedBadges}
                 data-test-subj="case-table-column-tags-tooltip"
                 position="left"
-                content={unclampedBadges}
               >
                 {clampedBadges}
               </EuiToolTip>
@@ -284,6 +285,15 @@ export const useCasesColumns = ({
 
           return getEmptyCellValue();
         },
+      },
+      extendedFields: {
+        minWidth: '10em',
+        width: '14em',
+        field: casesColumnsConfig.extendedFields.field,
+        name: casesColumnsConfig.extendedFields.name,
+        render: (extendedFields: CaseUI['extendedFields']) => (
+          <ExtendedFieldsColumnCell extendedFields={extendedFields} />
+        ),
       },
       severity: {
         ...tableColumnPresetSeverity<CaseUI>({}),
