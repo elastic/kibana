@@ -146,7 +146,27 @@ export const runRetrieval = async (
   }
 
   // Cap to requested size
-  return results.slice(0, size);
+  const finalResults = results.slice(0, size);
+
+  // Access tracking: bump access_count, recency, and last_used_at for all returned memories.
+  // Fire-and-forget — must not slow down retrieval.
+  if (finalResults.length > 0) {
+    const now = new Date().toISOString();
+    for (const node of finalResults) {
+      memoryClient
+        .update({
+          id: node.id,
+          access_count: (node.access_count ?? 0) + 1,
+          recency: now,
+          last_used_at: now,
+        })
+        .catch(() => {
+          // non-fatal, swallow errors
+        });
+    }
+  }
+
+  return finalResults;
 };
 
 /**

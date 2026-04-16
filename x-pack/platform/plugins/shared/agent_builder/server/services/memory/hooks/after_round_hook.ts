@@ -14,6 +14,7 @@ import type { InternalStartServices } from '../../types';
 import { buildExtractionInputFromRound } from '../extraction/memory_extractor';
 import { createExtractionStrategy } from '../extraction/extractor_factory';
 import { CandidatePipeline } from '../extraction/candidate_pipeline';
+import { consumeRunSignals } from '../create_memory_tools';
 import type { ReinforcementSignal } from '../active_memory_set';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { createEmbeddingService } from '../embeddings';
@@ -158,10 +159,11 @@ export const createMemoryExtractionCallback = (
   round: ConversationRound;
   conversationId: string;
   conversation?: Conversation;
+  runId: string;
 }) => Promise<void>) => {
   const logger = deps.logger.get('memory.afterRound');
 
-  return async ({ request, round, conversationId, conversation }) => {
+  return async ({ request, round, conversationId, conversation, runId }) => {
     const roundId = round.id;
     logger.info(
       `afterRound: starting extraction pipeline, method=${deps.config.memory.extraction.method}, round=${roundId}`
@@ -206,7 +208,7 @@ export const createMemoryExtractionCallback = (
       roundId,
       round,
       conversation,
-      reinforcementSignals: [],
+      reinforcementSignals: consumeRunSignals(runId),
       memoryClient,
       connectorId: connectorId ?? '',
       space,

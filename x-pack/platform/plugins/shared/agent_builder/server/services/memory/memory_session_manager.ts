@@ -47,6 +47,14 @@ export class MemorySessionManager {
   }
 
   /**
+   * Get an existing ActiveMemorySet by runId without creating one.
+   * Returns undefined if no session exists for this runId.
+   */
+  get(runId: string): ActiveMemorySet | undefined {
+    return this.sessions.get(runId)?.set;
+  }
+
+  /**
    * Explicitly delete a session by runId.
    * Called after a round completes to free memory promptly.
    */

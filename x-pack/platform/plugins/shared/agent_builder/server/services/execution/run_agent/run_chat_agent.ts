@@ -333,6 +333,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       round,
       conversationId: conversation?.id ?? runId,
       conversation,
+      runId,
       logger,
     }).catch(() => {
       // errors already logged inside
@@ -491,6 +492,7 @@ let _memoryExtractionCallback:
       round: ConversationRound;
       conversationId: string;
       conversation?: Conversation;
+      runId: string;
     }) => Promise<void>)
   | undefined;
 
@@ -505,6 +507,7 @@ const triggerPostRoundMemoryExtraction = async (params: {
   round: ConversationRound;
   conversationId: string;
   conversation?: Conversation;
+  runId: string;
   logger: Logger;
 }): Promise<void> => {
   if (!_memoryExtractionCallback) {
@@ -520,6 +523,7 @@ const triggerPostRoundMemoryExtraction = async (params: {
       round: params.round,
       conversationId: params.conversationId,
       conversation: params.conversation,
+      runId: params.runId,
     });
   } catch (err) {
     params.logger.warn(`memory: post-round extraction failed: ${(err as Error).message}`);

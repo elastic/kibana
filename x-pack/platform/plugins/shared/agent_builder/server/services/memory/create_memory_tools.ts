@@ -35,10 +35,28 @@ export interface MemoryToolsOptions {
  * This ensures all three tools (checkpoint, remember, reinforce) share state
  * within the same agent execution round.
  */
+// Module-level session manager so it can be accessed from the after-round callback
+// to retrieve reinforcement signals for a completed run.
+let _sessionManager: MemorySessionManager | undefined;
+
+/**
+ * Get reinforcement signals for a given runId and clean up the session.
+ * Called by the after-round extraction callback after a round completes.
+ */
+export const consumeRunSignals = (runId: string): import('./active_memory_set').ReinforcementSignal[] => {
+  if (!_sessionManager) return [];
+  const session = _sessionManager.get(runId);
+  if (!session) return [];
+  const signals = session.getSignals();
+  _sessionManager.delete(runId);
+  return signals;
+};
+
 export const createMemoryTools = (
   options: MemoryToolsOptions
 ): Array<BuiltinToolDefinition<any>> => {
   const sessionManager = new MemorySessionManager();
+  _sessionManager = sessionManager;
   const { getMemoryService, retrievalMethod, getConfig, getInternalServices } = options;
 
   const remember = createRememberTool({
