@@ -123,7 +123,6 @@ Some commonly overlooked services worth knowing about:
 - [Embeddables](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/embeddable/README.md) — render maps, visualizations, and dashboards in your app, or register new widgets for dashboards and Canvas.
 - [UiActions](https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/ui_actions) — let other plugins inject functionality into your app, or inject functionality into other plugins.
 - [kibana_utils](https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils) — stateless helpers including [state syncing](https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_sync) and [state containers](https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_containers) for URL-synced app state.
-- [bfetch](https://github.com/elastic/kibana/tree/main/src/plugins/bfetch) — a streaming service for batching multiple requests to the server. Consider this if your plugin makes many requests.
 
 ## Feature development
 

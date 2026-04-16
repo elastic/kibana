@@ -61,7 +61,7 @@ Each of these will run {{es}} with a basic license. Additional options are avail
 
 You can save some system resources, and the effort of generating sample data, if you have a remote {{es}} cluster to connect to. (Elasticians: you do! Check with your team about where to find credentials)
 
-You’ll need to create a kibana.dev.yml ([Customizing `config/kibana.dev.yml`](/extend/running-kibana-advanced.md#customize-kibana-yml)) and add the following to it:
+You’ll need to create a kibana.dev.yml ([Customizing `config/kibana.dev.yml`](/extend/getting-started/running-kibana-advanced.md#customize-kibana-yml)) and add the following to it:
 
 ```bash
 elasticsearch.hosts:

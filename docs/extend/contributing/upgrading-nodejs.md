@@ -77,10 +77,10 @@ Run the following to install the new Node.js version. Replace `<version>` with t
 nvm install <version>
 ```
 
-To get the same global npm modules installed with the new version of Node.js as is currently installed, use the `--reinstall-packages-from` command-line argument (optionally replace `16` with the desired source version):
+To get the same global npm modules installed with the new version of Node.js as is currently installed, use the `--reinstall-packages-from` command-line argument (replace `<old-version>` with the source version):
 
 ```bash
-nvm install <version> --reinstall-packages-from=16
+nvm install <version> --reinstall-packages-from=<old-version>
 ```
 
 If needed, uninstall the old version of Node.js by running the following. Replace `<old-version>` with the full version number of the version that should be uninstalled:
@@ -89,10 +89,10 @@ If needed, uninstall the old version of Node.js by running the following. Replac
 nvm uninstall <old-version>
 ```
 
-Optionally, tell nvm to always use the "highest" installed Node.js 16 version. Replace `16` if a different major version is desired:
+Optionally, tell nvm to always use the "highest" installed version of a given major. Replace `<major>` with the desired major version number:
 
 ```bash
-nvm alias default 16
+nvm alias default <major>
 ```
 
 Alternatively, include the full version number at the end to specify a specific default version.

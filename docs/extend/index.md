@@ -15,7 +15,6 @@ mapped_pages:
 * [Architecture](./contributing/repository-structure.md)
 * [Contributing](./contributing/how-we-use-github.md)
 * [External plugin development](./external-plugin-development.md)
-* [Advanced](./advanced.md)
 * [List of {{kib}} plugins](./plugin-list.md)
 * [List of dependencies](./dependencies-versions.md)
 * [Development Telemetry](./development-telemetry.md)

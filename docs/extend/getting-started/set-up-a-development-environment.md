@@ -58,8 +58,27 @@ In another terminal tab/window you can start Kibana.
 yarn start
 ```
 
-Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. Read more about the advanced options for [Running Kibana](https://www.elastic.co/guide/en/kibana/current/running-kibana-advanced.html). ###LG TODO: this should be a relative link to the docs, not an absolute link to the website
-You will find the development server running on (http://localhost:5601) - and you can log in with the `elastic:changeme` credential pair.
+Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. You will find the development server running on (http://localhost:5601) - and you can log in with the `elastic:changeme` credential pair.
+
+### Customizing `config/kibana.dev.yml`
+
+The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the {{kib}} CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](/reference/configuration-reference/general-settings.md).
+
+To run Kibana with an alternate yml file entirely, use the `--config` option: `yarn start --config=config/my_config.yml`
+
+### SSL
+
+{{kib}} includes self-signed certificates that can be used for development purposes in the browser and for communicating with {{es}}: `yarn start --ssl` & `yarn es snapshot --ssl`.
+
+### Base path
+
+In dev mode, {{kib}} by default runs behind a proxy which adds a random path component to its URL. To disable this, start {{kib}} with the `--no-base-path` flag:
+
+```bash
+yarn start --no-base-path
+```
+
+You can also set it explicitly via [`server.basePath`](/reference/configuration-reference/general-settings.md#server-basePath) and [`server.rewriteBasePath`](/reference/configuration-reference/general-settings.md#server-rewriteBasePath) in `config/kibana.dev.yml`.
 
 ## Run in serverless mode
 ### LG TODO: Can non-employees even do this??

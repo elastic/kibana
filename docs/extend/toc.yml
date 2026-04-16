@@ -6,6 +6,7 @@ toc:
       - file: set-up-a-development-environment.md
       - file: hello-world.md
       - file: add-data.md
+      - file: running-elasticsearch.md
       - file: troubleshooting.md
   - folder: contributing
     children:
@@ -25,6 +26,7 @@ toc:
       - file: ci-metrics.md
       - file: kibana-linting.md
       - file: managing-third-party-dependencies.md
+      - file: upgrading-nodejs.md
       - file: scout-best-practices.md
   - folder: key-concepts
     children:
@@ -46,6 +48,7 @@ toc:
       - file: security-kibana-system-user.md
       - file: creating-feature-privileges.md
       - file: saved-objects.md
+      - file: legacy-url-aliases.md
       - file: encrypted-saved-objects.md
       - file: persistable-state.md
       - file: audit-logging.md
@@ -151,18 +154,6 @@ toc:
           - file: skip-tests.md
           - file: feature-flags.md
       - file: ftr.md
-  - file: advanced.md
-    children:
-      - file: running-elasticsearch.md
-      - file: running-kibana-advanced.md
-      - file: development-basepath.md
-      - file: upgrading-nodejs.md
-      - file: legacy-url-aliases.md
-      - file: monorepo-packages.md
-      - file: building-kibana.md
-      - file: kibana-debugging.md
-      - file: sample-data.md
-      - file: development-plugin-resources.md
   - file: plugin-list.md
     children:
       - file: kibana-dashboard-plugin.md
