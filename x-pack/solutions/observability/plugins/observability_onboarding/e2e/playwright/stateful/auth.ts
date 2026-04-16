@@ -87,7 +87,7 @@ async function loginServerless(page: import('@playwright/test').Page) {
 }
 
 async function suppressGlobalAnnouncements() {
-  await fetch(`${process.env.KIBANA_BASE_URL}/internal/kibana/global_settings`, {
+  const response = await fetch(`${process.env.KIBANA_BASE_URL}/internal/kibana/global_settings`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -99,4 +99,9 @@ async function suppressGlobalAnnouncements() {
     },
     body: JSON.stringify({ changes: { hideAnnouncements: true } }),
   });
+  if (!response.ok) {
+    throw new Error(
+      `Failed to suppress global announcements: ${response.status} ${response.statusText}`
+    );
+  }
 }
