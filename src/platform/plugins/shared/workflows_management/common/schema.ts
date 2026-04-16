@@ -17,10 +17,10 @@ import type {
 import {
   builtInStepDefinitions,
   DEPRECATED_STEP_METADATA,
-  DEPRECATED_STEP_PREFIX_METADATA,
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
+  getStepPrefixDeprecationInfo,
   SystemConnectorsMap,
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
@@ -364,6 +364,11 @@ export function getDeprecatedStepMetadataMap(): Readonly<Record<string, StepDepr
   for (const connector of getAllConnectorsInternal()) {
     if (connector.deprecation) {
       deprecatedStepMetadata[connector.type] = connector.deprecation;
+    } else {
+      const prefixMatch = getStepPrefixDeprecationInfo(connector.type);
+      if (prefixMatch) {
+        deprecatedStepMetadata[connector.type] = prefixMatch;
+      }
     }
   }
 
@@ -376,16 +381,7 @@ export function getDeprecatedStepMetadataMap(): Readonly<Record<string, StepDepr
 }
 
 export function getDeprecatedStepMetadata(stepType: string): StepDeprecationInfo | undefined {
-  const exactMatch = getDeprecatedStepMetadataMap()[stepType];
-  if (exactMatch) {
-    return exactMatch;
-  }
-  for (const { prefix, deprecation } of DEPRECATED_STEP_PREFIX_METADATA) {
-    if (stepType.startsWith(prefix)) {
-      return deprecation;
-    }
-  }
-  return undefined;
+  return getDeprecatedStepMetadataMap()[stepType] ?? getStepPrefixDeprecationInfo(stepType);
 }
 
 export function isDeprecatedStepType(stepType: string): boolean {

@@ -57,17 +57,21 @@ export const DEPRECATED_STEP_PREFIX_METADATA: StepPrefixDeprecationInfo[] = [
   { prefix: 'gemini.', deprecation: { replacementStepType: 'ai.prompt' } },
 ];
 
-export function getStepDeprecationInfo(stepType: string): StepDeprecationInfo | undefined {
-  const exact = DEPRECATED_STEP_METADATA[stepType];
-  if (exact) {
-    return exact;
-  }
+export function getStepPrefixDeprecationInfo(stepType: string): StepDeprecationInfo | undefined {
   for (const { prefix, deprecation } of DEPRECATED_STEP_PREFIX_METADATA) {
     if (stepType.startsWith(prefix)) {
       return deprecation;
     }
   }
   return undefined;
+}
+
+export function getStepDeprecationInfo(stepType: string): StepDeprecationInfo | undefined {
+  const exact = DEPRECATED_STEP_METADATA[stepType];
+  if (exact) {
+    return exact;
+  }
+  return getStepPrefixDeprecationInfo(stepType);
 }
 
 export function isDeprecatedStepType(stepType: string): boolean {

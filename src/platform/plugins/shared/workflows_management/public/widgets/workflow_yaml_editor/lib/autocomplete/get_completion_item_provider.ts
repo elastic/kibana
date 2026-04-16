@@ -13,7 +13,7 @@ import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
 import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
 import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
-import { getDeprecatedStepMetadata } from '../../../../../common/schema';
+import { isDeprecatedStepType } from '../../../../../common/schema';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -70,7 +70,7 @@ function mapSuggestions(
 
     // Skip deprecated step types - they still work for backward compatibility
     // but we don't want to suggest them to users
-    if (!getDeprecatedStepMetadata(key)) {
+    if (!isDeprecatedStepType(key)) {
       const existing = map.get(key);
 
       if (existing) {
@@ -170,7 +170,7 @@ export function getCompletionItemProvider(
       // Workflow suggestions always win over YAML duplicates.
       for (const suggestion of workflowSuggestions) {
         const key = getDeduplicationKey(suggestion);
-        if (!getDeprecatedStepMetadata(key)) {
+        if (!isDeprecatedStepType(key)) {
           deduplicatedMap.set(key, suggestion);
         }
       }

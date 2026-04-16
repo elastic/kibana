@@ -12,7 +12,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
 import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
-import { getAllConnectors, getDeprecatedStepMetadata } from '../../../../common/schema';
+import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
@@ -266,7 +266,7 @@ export function getActionOptions(
   const baseTypeInstancesCount: Record<string, number> = {};
 
   for (const connector of connectors) {
-    if (!getDeprecatedStepMetadata(connector.type)) {
+    if (!isDeprecatedStepType(connector.type)) {
       const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
       if (customStepDefinition) {
         const group = stepGroups[customStepDefinition.category];
