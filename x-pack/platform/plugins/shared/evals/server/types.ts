@@ -7,11 +7,17 @@
 
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
+import type { ExperimentSuiteDefinition } from './experiments/types';
 
-export type EvalsPluginSetup = Record<string, never>;
+export interface EvalsPluginSetup {
+  registerExperimentSuite: (definition: ExperimentSuiteDefinition) => void;
+}
 export interface EvalsPluginStart {
   datasetService?: DatasetService;
 }
@@ -19,10 +25,13 @@ export interface EvalsPluginStart {
 export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface EvalsStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  inference?: InferenceServerStart;
 }
 
 export interface EvalsRouteHandlerContext {

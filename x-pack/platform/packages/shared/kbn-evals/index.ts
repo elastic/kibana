@@ -39,7 +39,7 @@ export type {
   EvaluationCompleteEvent,
   OnEvaluationComplete,
 } from './src/types';
-export { KibanaEvalsClient } from './src/kibana_evals_executor/client';
+export { KibanaEvalsClient } from '@kbn/evals-runner';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { LlmCorrectnessEvaluationPrompt } from './src/evaluators/correctness/prompt';
 export type { CorrectnessAnalysis } from './src/evaluators/correctness/types';
@@ -49,7 +49,7 @@ export {
 } from './src/evaluators/correctness/scoring';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
-export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
+export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from '@kbn/evals-runner';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
 export {
   containsAllTerms,

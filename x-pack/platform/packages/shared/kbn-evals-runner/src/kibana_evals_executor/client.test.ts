@@ -17,18 +17,17 @@ jest.mock('../utils/tracing', () => ({
 
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { Model } from '@kbn/inference-common';
-import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { EvaluationDataset, Evaluator, RanExperiment } from '../types';
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
-import { KibanaEvalsClient } from './client';
+import { KibanaEvalsClient, type EvalsLogger } from './client';
 
 describe('KibanaEvalsClient', () => {
-  const mockLog: jest.Mocked<SomeDevLog> = {
+  const mockLog: jest.Mocked<EvalsLogger> = {
     debug: jest.fn(),
     info: jest.fn(),
     warning: jest.fn(),
     error: jest.fn(),
-  } as any;
+  };
 
   const model: Model = {
     id: 'gpt-4',

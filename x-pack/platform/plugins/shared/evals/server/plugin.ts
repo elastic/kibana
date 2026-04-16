@@ -28,6 +28,10 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
+import { ExperimentSuiteRegistry } from './experiments/registry';
+import { getEvalsRunSuiteStepDefinition } from './workflows_steps/run_suite';
+import { clusterHealthExperimentSuite } from './experiments/built_in/cluster_health_suite';
+import { experimentSuiteDefinitions } from './experiments/suite_definitions';
 
 export class EvalsPlugin
   implements
@@ -36,6 +40,7 @@ export class EvalsPlugin
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
   private datasetService?: DatasetService;
+  private experimentSuiteRegistry?: ExperimentSuiteRegistry;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -44,15 +49,37 @@ export class EvalsPlugin
 
   setup(
     coreSetup: CoreSetup<EvalsStartDependencies, EvalsPluginStart>,
-    { features, encryptedSavedObjects }: EvalsSetupDependencies
+    {
+      features,
+      encryptedSavedObjects,
+      workflowsManagement,
+      workflowsExtensions,
+    }: EvalsSetupDependencies
   ): EvalsPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('Evals plugin is disabled');
-      return {};
+      return {
+        registerExperimentSuite: () => undefined,
+      };
     }
 
     this.logger.info('Setting up Evals plugin');
     this.datasetService = new DatasetService(this.logger);
+    this.experimentSuiteRegistry = new ExperimentSuiteRegistry();
+    for (const suite of experimentSuiteDefinitions) {
+      this.experimentSuiteRegistry.register(suite);
+    }
+    this.experimentSuiteRegistry.register(clusterHealthExperimentSuite);
+
+    if (workflowsExtensions) {
+      workflowsExtensions.registerStepDefinition(
+        getEvalsRunSuiteStepDefinition({
+          coreSetup,
+          experimentSuiteRegistry: this.experimentSuiteRegistry,
+          datasetService: this.datasetService,
+        })
+      );
+    }
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
     encryptedSavedObjects.registerType({
@@ -115,13 +142,17 @@ export class EvalsPlugin
     registerRoutes({
       router,
       logger: this.logger,
+      experimentSuiteRegistry: this.experimentSuiteRegistry,
+      workflowsManagement,
       canEncrypt: encryptedSavedObjects.canEncrypt,
       getEncryptedSavedObjectsStart: () =>
         coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
     });
 
-    return {};
+    return {
+      registerExperimentSuite: (definition) => this.experimentSuiteRegistry?.register(definition),
+    };
   }
 
   start(_core: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {
