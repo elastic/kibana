@@ -265,7 +265,7 @@ function analyzeUnionSchema(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   unionSchema: z.ZodUnion<any>
 ): string[] {
-  return unionSchema.def.options.map((option) => analyzeUnionOption(option));
+  return unionSchema.def.options.map((option: z.ZodType) => analyzeUnionOption(option));
 }
 
 function analyzeUnionOption(option: z.ZodType): string {
