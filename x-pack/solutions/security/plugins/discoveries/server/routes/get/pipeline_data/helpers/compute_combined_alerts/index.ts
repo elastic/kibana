@@ -6,7 +6,11 @@
  */
 
 /** Extraction strategy used to retrieve alerts from a workflow execution. */
-export type ExtractionStrategy = 'custom_workflow' | 'default_custom_query' | 'default_esql';
+export type ExtractionStrategy =
+  | 'custom_workflow'
+  | 'default_custom_query'
+  | 'default_esql'
+  | 'provided';
 
 /** Per-workflow alert retrieval data extracted by extract_pipeline_alert_data. */
 export interface AlertRetrievalData {

@@ -11,8 +11,13 @@ import { extractAlertRetrievalResult } from '@kbn/discoveries/impl/attack_discov
 import { extractCustomWorkflowResult } from '@kbn/discoveries/impl/attack_discovery/generation/extract_custom_workflow_result';
 import { isEsqlShape } from '@kbn/discoveries/impl/attack_discovery/generation/normalize_last_step_output';
 import type { ParsedApiConfig } from '@kbn/discoveries/impl/attack_discovery/generation/types';
+import { DefaultAlertRetrievalStepTypeId } from '../../../../../../common/step_types/default_alert_retrieval_step';
 
-export type ExtractionStrategy = 'custom_workflow' | 'default_custom_query' | 'default_esql';
+export type ExtractionStrategy =
+  | 'custom_workflow'
+  | 'default_custom_query'
+  | 'default_esql'
+  | 'provided';
 
 export interface PipelineAlertData {
   alerts: string[];
@@ -52,7 +57,7 @@ const findLastStepWithOutput = (
  */
 const determineExtractionStrategy = (execution: WorkflowExecutionDto): ExtractionStrategy => {
   const defaultStep = execution.stepExecutions.find(
-    (step) => step.stepType === 'attack-discovery.defaultAlertRetrieval'
+    (step) => step.stepType === DefaultAlertRetrievalStepTypeId
   );
 
   if (defaultStep != null) {

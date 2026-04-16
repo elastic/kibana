@@ -128,14 +128,14 @@ export const registerGenerateRoute = (
           tracedLogger.debug(
             () =>
               `Workflow configuration: ${JSON.stringify({
+                alert_retrieval_mode: workflowConfig.alert_retrieval_mode,
                 alert_retrieval_workflow_ids: workflowConfig.alert_retrieval_workflow_ids,
                 alerts_index_pattern: alertsIndexPattern,
                 end,
-                filter,
-                default_alert_retrieval_mode: workflowConfig.default_alert_retrieval_mode,
                 esql_query: workflowConfig.esql_query,
-                validation_workflow_id: workflowConfig.validation_workflow_id,
+                filter,
                 start,
+                validation_workflow_id: workflowConfig.validation_workflow_id,
               })}`
           );
 

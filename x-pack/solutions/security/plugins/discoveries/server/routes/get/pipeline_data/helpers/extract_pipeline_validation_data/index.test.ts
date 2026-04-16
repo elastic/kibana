@@ -41,7 +41,7 @@ const baseExecution: WorkflowExecutionDto = {
       output: {
         validated_discoveries: [mockValidatedDiscovery, mockValidatedDiscoveryTwo],
       },
-      stepType: 'attack-discovery.defaultValidation',
+      stepType: 'security.attack-discovery.defaultValidation',
     },
   ],
 } as unknown as WorkflowExecutionDto;
@@ -61,7 +61,7 @@ describe('extractPipelineValidationData', () => {
           output: {
             validated_discoveries: [mockValidatedDiscovery],
           },
-          stepType: 'attack-discovery.defaultValidation',
+          stepType: 'security.attack-discovery.defaultValidation',
         },
       ],
     } as unknown as WorkflowExecutionDto;
@@ -79,7 +79,7 @@ describe('extractPipelineValidationData', () => {
           output: {
             validated_discoveries: [],
           },
-          stepType: 'attack-discovery.defaultValidation',
+          stepType: 'security.attack-discovery.defaultValidation',
         },
       ],
     } as unknown as WorkflowExecutionDto;
@@ -101,7 +101,7 @@ describe('extractPipelineValidationData', () => {
       stepExecutions: [
         {
           output: { some_data: 'value' },
-          stepType: 'attack-discovery.defaultAlertRetrieval',
+          stepType: 'security.attack-discovery.defaultAlertRetrieval',
         },
       ],
     } as unknown as WorkflowExecutionDto;
@@ -127,7 +127,7 @@ describe('extractPipelineValidationData', () => {
       ...baseExecution,
       stepExecutions: [
         {
-          stepType: 'attack-discovery.defaultValidation',
+          stepType: 'security.attack-discovery.defaultValidation',
         },
       ],
     } as unknown as WorkflowExecutionDto;
@@ -143,7 +143,7 @@ describe('extractPipelineValidationData', () => {
       stepExecutions: [
         {
           output: null,
-          stepType: 'attack-discovery.defaultValidation',
+          stepType: 'security.attack-discovery.defaultValidation',
         },
       ],
     } as unknown as WorkflowExecutionDto;
@@ -161,7 +161,7 @@ describe('extractPipelineValidationData', () => {
           output: {
             validated_discoveries: 'not-an-array',
           },
-          stepType: 'attack-discovery.defaultValidation',
+          stepType: 'security.attack-discovery.defaultValidation',
         },
       ],
     } as unknown as WorkflowExecutionDto;
@@ -179,7 +179,7 @@ describe('extractPipelineValidationData', () => {
           output: {
             other_field: 'some-value',
           },
-          stepType: 'attack-discovery.defaultValidation',
+          stepType: 'security.attack-discovery.defaultValidation',
         },
       ],
     } as unknown as WorkflowExecutionDto;
@@ -195,17 +195,17 @@ describe('extractPipelineValidationData', () => {
       stepExecutions: [
         {
           output: { alerts: ['a1'] },
-          stepType: 'attack-discovery.defaultAlertRetrieval',
+          stepType: 'security.attack-discovery.defaultAlertRetrieval',
         },
         {
           output: { attack_discoveries: [] },
-          stepType: 'attack-discovery.generate',
+          stepType: 'security.attack-discovery.generate',
         },
         {
           output: {
             validated_discoveries: [mockValidatedDiscovery],
           },
-          stepType: 'attack-discovery.defaultValidation',
+          stepType: 'security.attack-discovery.defaultValidation',
         },
       ],
     } as unknown as WorkflowExecutionDto;
@@ -213,6 +213,138 @@ describe('extractPipelineValidationData', () => {
     const result = extractPipelineValidationData({ execution });
 
     expect(result).toEqual([mockValidatedDiscovery]);
+  });
+
+  describe('deduplication accounting via persist step', () => {
+    it('subtracts duplicates_dropped_count from validated_discoveries when there are duplicates', () => {
+      const execution = {
+        ...baseExecution,
+        stepExecutions: [
+          {
+            output: {
+              validated_discoveries: [mockValidatedDiscovery, mockValidatedDiscoveryTwo],
+            },
+            stepType: 'security.attack-discovery.defaultValidation',
+          },
+          {
+            output: {
+              duplicates_dropped_count: 1,
+              persisted_discoveries: [mockValidatedDiscovery],
+            },
+            stepType: 'security.attack-discovery.persistDiscoveries',
+          },
+        ],
+      } as unknown as WorkflowExecutionDto;
+
+      const result = extractPipelineValidationData({ execution });
+
+      expect(result).toHaveLength(1);
+    });
+
+    it('returns empty array when all validated_discoveries are duplicates', () => {
+      const execution = {
+        ...baseExecution,
+        stepExecutions: [
+          {
+            output: {
+              validated_discoveries: [mockValidatedDiscovery],
+            },
+            stepType: 'security.attack-discovery.defaultValidation',
+          },
+          {
+            output: {
+              duplicates_dropped_count: 1,
+              persisted_discoveries: [],
+            },
+            stepType: 'security.attack-discovery.persistDiscoveries',
+          },
+        ],
+      } as unknown as WorkflowExecutionDto;
+
+      const result = extractPipelineValidationData({ execution });
+
+      expect(result).toEqual([]);
+    });
+
+    it('returns all validated_discoveries when duplicates_dropped_count is 0', () => {
+      const execution = {
+        ...baseExecution,
+        stepExecutions: [
+          {
+            output: {
+              validated_discoveries: [mockValidatedDiscovery, mockValidatedDiscoveryTwo],
+            },
+            stepType: 'security.attack-discovery.defaultValidation',
+          },
+          {
+            output: {
+              duplicates_dropped_count: 0,
+              persisted_discoveries: [mockValidatedDiscovery, mockValidatedDiscoveryTwo],
+            },
+            stepType: 'security.attack-discovery.persistDiscoveries',
+          },
+        ],
+      } as unknown as WorkflowExecutionDto;
+
+      const result = extractPipelineValidationData({ execution });
+
+      expect(result).toEqual([mockValidatedDiscovery, mockValidatedDiscoveryTwo]);
+    });
+
+    it('clamps to empty array when duplicates_dropped_count exceeds validated_discoveries length', () => {
+      const execution = {
+        ...baseExecution,
+        stepExecutions: [
+          {
+            output: {
+              validated_discoveries: [mockValidatedDiscovery],
+            },
+            stepType: 'security.attack-discovery.defaultValidation',
+          },
+          {
+            output: {
+              duplicates_dropped_count: 5,
+              persisted_discoveries: [],
+            },
+            stepType: 'security.attack-discovery.persistDiscoveries',
+          },
+        ],
+      } as unknown as WorkflowExecutionDto;
+
+      const result = extractPipelineValidationData({ execution });
+
+      expect(result).toEqual([]);
+    });
+
+    it('returns all validated_discoveries when persist step output has no duplicates_dropped_count', () => {
+      const execution = {
+        ...baseExecution,
+        stepExecutions: [
+          {
+            output: {
+              validated_discoveries: [mockValidatedDiscovery],
+            },
+            stepType: 'security.attack-discovery.defaultValidation',
+          },
+          {
+            output: {
+              persisted_discoveries: [mockValidatedDiscovery],
+            },
+            stepType: 'security.attack-discovery.persistDiscoveries',
+          },
+        ],
+      } as unknown as WorkflowExecutionDto;
+
+      const result = extractPipelineValidationData({ execution });
+
+      expect(result).toEqual([mockValidatedDiscovery]);
+    });
+
+    it('returns all validated_discoveries when persist step is not present', () => {
+      const result = extractPipelineValidationData({ execution: baseExecution });
+
+      expect(result).toEqual([mockValidatedDiscovery, mockValidatedDiscoveryTwo]);
+    });
   });
 
   it('preserves optional fields on validated discoveries', () => {
@@ -235,7 +367,7 @@ describe('extractPipelineValidationData', () => {
           output: {
             validated_discoveries: [discoveryWithOptionalFields],
           },
-          stepType: 'attack-discovery.defaultValidation',
+          stepType: 'security.attack-discovery.defaultValidation',
         },
       ],
     } as unknown as WorkflowExecutionDto;

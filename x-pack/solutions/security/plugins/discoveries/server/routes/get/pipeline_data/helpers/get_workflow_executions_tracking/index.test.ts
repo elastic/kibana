@@ -477,6 +477,109 @@ describe('getWorkflowExecutionsTracking', () => {
     expect(result?.diagnosticsContext).toEqual(newerDiagnosticsContext);
   });
 
+  it('returns providedAlerts when present in event.reference', async () => {
+    const providedAlerts = ['alert string one', 'alert string two', 'alert string three'];
+
+    const referenceWithProvidedAlerts = {
+      ...validTracking,
+      providedAlerts,
+    };
+
+    mockSearch.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              event: {
+                reference: JSON.stringify(referenceWithProvidedAlerts),
+              },
+            },
+          },
+        ],
+        total: { value: 1 },
+      },
+    });
+
+    const result = await getWorkflowExecutionsTracking({
+      esClient,
+      eventLogIndex,
+      executionId,
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.providedAlerts).toEqual(providedAlerts);
+    expect(result?.alertRetrieval).toEqual(validTracking.alertRetrieval);
+    expect(result?.generation).toEqual(validTracking.generation);
+    expect(result?.validation).toEqual(validTracking.validation);
+  });
+
+  it('returns providedAlerts from the most recent event when multiple events exist', async () => {
+    const newerProvidedAlerts = ['newer alert one', 'newer alert two'];
+    const olderProvidedAlerts = ['older alert one'];
+
+    mockSearch.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              event: {
+                reference: JSON.stringify({
+                  ...validTracking,
+                  providedAlerts: newerProvidedAlerts,
+                }),
+              },
+            },
+          },
+          {
+            _source: {
+              event: {
+                reference: JSON.stringify({
+                  ...validTracking,
+                  providedAlerts: olderProvidedAlerts,
+                }),
+              },
+            },
+          },
+        ],
+        total: { value: 2 },
+      },
+    });
+
+    const result = await getWorkflowExecutionsTracking({
+      esClient,
+      eventLogIndex,
+      executionId,
+    });
+
+    expect(result?.providedAlerts).toEqual(newerProvidedAlerts);
+  });
+
+  it('does not include providedAlerts when absent from event.reference', async () => {
+    mockSearch.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              event: {
+                reference: JSON.stringify(validTracking),
+              },
+            },
+          },
+        ],
+        total: { value: 1 },
+      },
+    });
+
+    const result = await getWorkflowExecutionsTracking({
+      esClient,
+      eventLogIndex,
+      executionId,
+    });
+
+    expect(result).not.toBeNull();
+    expect(result).not.toHaveProperty('providedAlerts');
+  });
+
   it('does not include diagnosticsContext when absent from event.reference', async () => {
     mockSearch.mockResolvedValue({
       hits: {

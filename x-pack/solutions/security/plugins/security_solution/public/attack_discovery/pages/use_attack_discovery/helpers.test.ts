@@ -344,7 +344,7 @@ describe('getWorkflowConfig', () => {
   describe('with custom workflow configuration', () => {
     const mockSettings = {
       alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
-      defaultAlertRetrievalMode: 'disabled' as const,
+      alertRetrievalMode: 'custom_only' as const,
       validationWorkflowId: 'custom-validation',
     };
     let result: ReturnType<typeof getWorkflowConfig>;
@@ -362,8 +362,8 @@ describe('getWorkflowConfig', () => {
       expect(result.alert_retrieval_workflow_ids).toEqual(['workflow-1', 'workflow-2']);
     });
 
-    it('returns default_alert_retrieval_mode', () => {
-      expect(result.default_alert_retrieval_mode).toBe('disabled');
+    it('returns alert_retrieval_mode', () => {
+      expect(result.alert_retrieval_mode).toBe('custom_only');
     });
 
     it('returns validation_workflow_id', () => {
@@ -374,7 +374,7 @@ describe('getWorkflowConfig', () => {
   describe('with default configuration', () => {
     const defaultSettings = {
       alertRetrievalWorkflowIds: [],
-      defaultAlertRetrievalMode: 'custom_query' as const,
+      alertRetrievalMode: 'custom_query' as const,
       validationWorkflowId: 'default',
     };
     let result: ReturnType<typeof getWorkflowConfig>;
@@ -388,8 +388,8 @@ describe('getWorkflowConfig', () => {
       expect(result.alert_retrieval_workflow_ids).toEqual([]);
     });
 
-    it('returns default_alert_retrieval_mode as custom_query', () => {
-      expect(result.default_alert_retrieval_mode).toBe('custom_query');
+    it('returns alert_retrieval_mode as custom_query', () => {
+      expect(result.alert_retrieval_mode).toBe('custom_query');
     });
 
     it('returns default validation_workflow_id', () => {
@@ -400,7 +400,7 @@ describe('getWorkflowConfig', () => {
   describe('with esql configuration', () => {
     const esqlSettings = {
       alertRetrievalWorkflowIds: [],
-      defaultAlertRetrievalMode: 'esql' as const,
+      alertRetrievalMode: 'esql' as const,
       esqlQuery: 'FROM .alerts-security.alerts-default | WHERE kibana.alert.severity == "high"',
       validationWorkflowId: 'default',
     };
@@ -411,8 +411,8 @@ describe('getWorkflowConfig', () => {
       result = getWorkflowConfig('test-space');
     });
 
-    it('returns default_alert_retrieval_mode as esql', () => {
-      expect(result.default_alert_retrieval_mode).toBe('esql');
+    it('returns alert_retrieval_mode as esql', () => {
+      expect(result.alert_retrieval_mode).toBe('esql');
     });
 
     it('returns esql_query', () => {
@@ -424,7 +424,7 @@ describe('getWorkflowConfig', () => {
     it('does not include esql_query in the result', () => {
       const mockSettings = {
         alertRetrievalWorkflowIds: [],
-        defaultAlertRetrievalMode: 'custom_query' as const,
+        alertRetrievalMode: 'custom_query' as const,
         validationWorkflowId: 'default',
       };
       mockGetWorkflowSettings.mockReturnValue(mockSettings);
@@ -441,7 +441,7 @@ describe('getWorkflowConfig', () => {
     beforeEach(() => {
       const mockSettings = {
         alertRetrievalWorkflowIds: ['workflow-1'],
-        defaultAlertRetrievalMode: 'custom_query' as const,
+        alertRetrievalMode: 'custom_query' as const,
         validationWorkflowId: 'default',
       };
       mockGetWorkflowSettings.mockReturnValue(mockSettings);
@@ -452,8 +452,8 @@ describe('getWorkflowConfig', () => {
       expect(result).toHaveProperty('alert_retrieval_workflow_ids');
     });
 
-    it('has default_alert_retrieval_mode property', () => {
-      expect(result).toHaveProperty('default_alert_retrieval_mode');
+    it('has alert_retrieval_mode property', () => {
+      expect(result).toHaveProperty('alert_retrieval_mode');
     });
 
     it('has validation_workflow_id property', () => {
@@ -464,8 +464,8 @@ describe('getWorkflowConfig', () => {
       expect(result).not.toHaveProperty('alertRetrievalWorkflowIds');
     });
 
-    it('does not have defaultAlertRetrievalMode property', () => {
-      expect(result).not.toHaveProperty('defaultAlertRetrievalMode');
+    it('does not have alertRetrievalMode property', () => {
+      expect(result).not.toHaveProperty('alertRetrievalMode');
     });
 
     it('does not have validationWorkflowId property', () => {
@@ -501,7 +501,7 @@ describe('callInternalGenerateApi', () => {
     beforeEach(() => {
       const mockSettings = {
         alertRetrievalWorkflowIds: ['workflow-1'],
-        defaultAlertRetrievalMode: 'custom_query' as const,
+        alertRetrievalMode: 'custom_query' as const,
         validationWorkflowId: 'default',
       };
       mockGetWorkflowSettings.mockReturnValue(mockSettings);
@@ -556,7 +556,7 @@ describe('callInternalGenerateApi', () => {
   describe('workflow configuration in request body', () => {
     const mockSettings = {
       alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
-      defaultAlertRetrievalMode: 'disabled' as const,
+      alertRetrievalMode: 'custom_only' as const,
       validationWorkflowId: 'custom-validation',
     };
 
@@ -583,7 +583,7 @@ describe('callInternalGenerateApi', () => {
       ]);
     });
 
-    it('includes default_alert_retrieval_mode', async () => {
+    it('includes alert_retrieval_mode', async () => {
       await callInternalGenerateApi({ ...defaultParams, http: mockHttp });
 
       const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
@@ -591,7 +591,7 @@ describe('callInternalGenerateApi', () => {
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
 
-      expect(requestBody.workflow_config.default_alert_retrieval_mode).toBe('disabled');
+      expect(requestBody.workflow_config.alert_retrieval_mode).toBe('custom_only');
     });
 
     it('includes validation_workflow_id', async () => {
@@ -630,7 +630,7 @@ describe('callInternalGenerateApi', () => {
       expect(requestBody.workflow_config.alert_retrieval_workflow_ids).toEqual([]);
     });
 
-    it('uses custom_query for default_alert_retrieval_mode', async () => {
+    it('uses custom_query for alert_retrieval_mode', async () => {
       await callInternalGenerateApi({
         ...defaultParams,
         http: mockHttp,
@@ -642,7 +642,7 @@ describe('callInternalGenerateApi', () => {
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
 
-      expect(requestBody.workflow_config.default_alert_retrieval_mode).toBe('custom_query');
+      expect(requestBody.workflow_config.alert_retrieval_mode).toBe('custom_query');
     });
 
     it('uses default for validation_workflow_id', async () => {
@@ -665,7 +665,7 @@ describe('callInternalGenerateApi', () => {
     beforeEach(() => {
       const mockSettings = {
         alertRetrievalWorkflowIds: [],
-        defaultAlertRetrievalMode: 'custom_query' as const,
+        alertRetrievalMode: 'custom_query' as const,
         validationWorkflowId: 'default',
       };
       mockGetWorkflowSettings.mockReturnValue(mockSettings);
@@ -728,7 +728,7 @@ describe('callInternalGenerateApi', () => {
     it('throws error when response parsing fails', async () => {
       const mockSettings = {
         alertRetrievalWorkflowIds: [],
-        defaultAlertRetrievalMode: 'custom_query' as const,
+        alertRetrievalMode: 'custom_query' as const,
         validationWorkflowId: 'default',
       };
       mockGetWorkflowSettings.mockReturnValue(mockSettings);

@@ -16,6 +16,11 @@ import { ATTACK_DISCOVERY_EVENT_PROVIDER } from '@kbn/discoveries/impl/attack_di
 
 export type EventLogData = WorkflowExecutionsTracking & {
   diagnosticsContext?: DiagnosticsContext;
+  /**
+   * Pre-provided alert strings stored in the generate-step-started event reference.
+   * Available during the running state (before step.input is populated by the engine).
+   */
+  providedAlerts?: string[];
 };
 
 /**
@@ -62,81 +67,95 @@ export const getWorkflowExecutionsTracking = async ({
   }
 
   // Merge alertRetrieval across all events (dedup by workflowRunId).
-  // generation / validation are taken from the most recent event that has
-  // them (hits are sorted descending, so the first match wins).
+  // generation / validation / diagnosticsContext / providedAlerts are taken from the
+  // most recent event that has them (hits are sorted descending, so the first match wins).
   interface TrackingAccumulator {
     diagnosticsContext: DiagnosticsContext | undefined;
     foundAnyValidEvent: boolean;
     generation: WorkflowExecutionsTracking['generation'];
     mergedAlertRetrieval: Map<string, WorkflowExecutionTracking>;
+    providedAlerts: string[] | undefined;
     validation: WorkflowExecutionsTracking['validation'];
   }
 
-  const { diagnosticsContext, foundAnyValidEvent, generation, mergedAlertRetrieval, validation } =
-    hits.reduce<TrackingAccumulator>(
-      (acc, hit) => {
-        const source = hit._source as {
-          event?: {
-            reference?: string;
-          };
+  const {
+    diagnosticsContext,
+    foundAnyValidEvent,
+    generation,
+    mergedAlertRetrieval,
+    providedAlerts,
+    validation,
+  } = hits.reduce<TrackingAccumulator>(
+    (acc, hit) => {
+      const source = hit._source as {
+        event?: {
+          reference?: string;
         };
+      };
 
-        const reference = source?.event?.reference;
+      const reference = source?.event?.reference;
 
-        if (reference == null) {
-          return acc;
-        }
+      if (reference == null) {
+        return acc;
+      }
 
-        try {
-          const parsed = JSON.parse(reference) as Record<string, unknown>;
+      try {
+        const parsed = JSON.parse(reference) as Record<string, unknown>;
 
-          // Merge alertRetrieval entries into the shared Map (dedup by workflowRunId)
-          const alertRetrievalArray = parsed.alertRetrieval as
-            | WorkflowExecutionTracking[]
-            | null
-            | undefined;
+        // Merge alertRetrieval entries into the shared Map (dedup by workflowRunId)
+        const alertRetrievalArray = parsed.alertRetrieval as
+          | WorkflowExecutionTracking[]
+          | null
+          | undefined;
 
-          if (Array.isArray(alertRetrievalArray)) {
-            for (const ref of alertRetrievalArray) {
-              if (!acc.mergedAlertRetrieval.has(ref.workflowRunId)) {
-                acc.mergedAlertRetrieval.set(ref.workflowRunId, ref);
-              }
+        if (Array.isArray(alertRetrievalArray)) {
+          for (const ref of alertRetrievalArray) {
+            if (!acc.mergedAlertRetrieval.has(ref.workflowRunId)) {
+              acc.mergedAlertRetrieval.set(ref.workflowRunId, ref);
             }
           }
-
-          // Normalize legacy "orchestrator" key to "generation" for backward compatibility
-          const rawGeneration =
-            parsed.generation ?? (parsed.orchestrator as WorkflowExecutionsTracking['generation']);
-
-          // Take generation / validation / diagnosticsContext from the most recent event (first match wins)
-          return {
-            ...acc,
-            diagnosticsContext:
-              acc.diagnosticsContext ??
-              (parsed.diagnosticsContext != null
-                ? (parsed.diagnosticsContext as DiagnosticsContext)
-                : undefined),
-            foundAnyValidEvent: true,
-            generation:
-              acc.generation ?? (rawGeneration as WorkflowExecutionsTracking['generation']) ?? null,
-            validation:
-              acc.validation ??
-              (parsed.validation as WorkflowExecutionsTracking['validation']) ??
-              null,
-          };
-        } catch {
-          // Skip events with invalid JSON in event.reference
-          return acc;
         }
-      },
-      {
-        diagnosticsContext: undefined,
-        foundAnyValidEvent: false,
-        generation: null,
-        mergedAlertRetrieval: new Map<string, WorkflowExecutionTracking>(),
-        validation: null,
+
+        // Normalize legacy "orchestrator" key to "generation" for backward compatibility
+        const rawGeneration =
+          parsed.generation ?? (parsed.orchestrator as WorkflowExecutionsTracking['generation']);
+
+        // Take generation / validation / diagnosticsContext / providedAlerts from the most
+        // recent event (first match wins, hits sorted descending by timestamp)
+        return {
+          ...acc,
+          diagnosticsContext:
+            acc.diagnosticsContext ??
+            (parsed.diagnosticsContext != null
+              ? (parsed.diagnosticsContext as DiagnosticsContext)
+              : undefined),
+          foundAnyValidEvent: true,
+          generation:
+            acc.generation ?? (rawGeneration as WorkflowExecutionsTracking['generation']) ?? null,
+          providedAlerts:
+            acc.providedAlerts ??
+            (Array.isArray(parsed.providedAlerts)
+              ? (parsed.providedAlerts as string[])
+              : undefined),
+          validation:
+            acc.validation ??
+            (parsed.validation as WorkflowExecutionsTracking['validation']) ??
+            null,
+        };
+      } catch {
+        // Skip events with invalid JSON in event.reference
+        return acc;
       }
-    );
+    },
+    {
+      diagnosticsContext: undefined,
+      foundAnyValidEvent: false,
+      generation: null,
+      mergedAlertRetrieval: new Map<string, WorkflowExecutionTracking>(),
+      providedAlerts: undefined,
+      validation: null,
+    }
+  );
 
   if (!foundAnyValidEvent) {
     return null;
@@ -149,8 +168,12 @@ export const getWorkflowExecutionsTracking = async ({
     validation,
   };
 
-  if (diagnosticsContext != null) {
-    return { ...base, diagnosticsContext };
+  if (diagnosticsContext != null || providedAlerts != null) {
+    return {
+      ...base,
+      ...(diagnosticsContext != null ? { diagnosticsContext } : {}),
+      ...(providedAlerts != null ? { providedAlerts } : {}),
+    };
   }
 
   return base;

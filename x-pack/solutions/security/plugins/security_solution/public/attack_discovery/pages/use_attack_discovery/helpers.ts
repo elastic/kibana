@@ -124,16 +124,16 @@ export const getRequestBody = ({
 export const getWorkflowConfig = (
   spaceId: string
 ): {
+  alert_retrieval_mode: 'custom_only' | 'custom_query' | 'esql';
   alert_retrieval_workflow_ids: string[];
-  default_alert_retrieval_mode: 'custom_query' | 'disabled' | 'esql' | 'provided';
   esql_query?: string;
   validation_workflow_id: string;
 } => {
   const settings: WorkflowConfiguration = getWorkflowSettings(spaceId);
 
   return {
+    alert_retrieval_mode: settings.alertRetrievalMode,
     alert_retrieval_workflow_ids: settings.alertRetrievalWorkflowIds,
-    default_alert_retrieval_mode: settings.defaultAlertRetrievalMode,
     ...(settings.esqlQuery != null ? { esql_query: settings.esqlQuery } : {}),
     validation_workflow_id: settings.validationWorkflowId,
   };
@@ -179,8 +179,8 @@ export const callInternalGenerateApi = async ({
   const workflowConfig = spaceId
     ? getWorkflowConfig(spaceId)
     : {
+        alert_retrieval_mode: 'custom_query' as const,
         alert_retrieval_workflow_ids: [] as string[],
-        default_alert_retrieval_mode: 'custom_query' as const,
         validation_workflow_id: 'default',
       };
 

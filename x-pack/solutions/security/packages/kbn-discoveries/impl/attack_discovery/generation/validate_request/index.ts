@@ -24,8 +24,8 @@ interface ValidateRequestFailure {
 export type ValidateRequestResult = ValidateRequestSuccess | ValidateRequestFailure;
 
 const getDefaultWorkflowConfig = (): WorkflowConfig => ({
+  alert_retrieval_mode: 'custom_query',
   alert_retrieval_workflow_ids: [],
-  default_alert_retrieval_mode: 'custom_query',
   validation_workflow_id: 'default',
 });
 
@@ -62,22 +62,33 @@ export const validateRequest = ({
   const workflowConfig: WorkflowConfig =
     parsedWorkflowConfig != null
       ? {
+          alert_retrieval_mode: parsedWorkflowConfig.alert_retrieval_mode,
           alert_retrieval_workflow_ids: parsedWorkflowConfig.alert_retrieval_workflow_ids,
-          default_alert_retrieval_mode: parsedWorkflowConfig.default_alert_retrieval_mode,
           esql_query: parsedWorkflowConfig.esql_query,
-          provided_context: parsedWorkflowConfig.provided_context,
           validation_workflow_id: parsedWorkflowConfig.validation_workflow_id,
         }
       : getDefaultWorkflowConfig();
 
   if (
-    workflowConfig.default_alert_retrieval_mode === 'disabled' &&
+    workflowConfig.alert_retrieval_mode === 'custom_only' &&
     workflowConfig.alert_retrieval_workflow_ids.length === 0
   ) {
     return {
       body: {
         message:
-          'At least one alert retrieval method must be specified: either set default_alert_retrieval_mode to a value other than "disabled", or provide alert_retrieval_workflow_ids',
+          'At least one alert retrieval method must be specified: either set alert_retrieval_mode to a value other than "custom_only", or provide alert_retrieval_workflow_ids',
+      },
+      ok: false,
+    };
+  }
+
+  if (
+    workflowConfig.alert_retrieval_mode === 'esql' &&
+    (workflowConfig.esql_query == null || workflowConfig.esql_query.trim() === '')
+  ) {
+    return {
+      body: {
+        message: 'esql_query is required in workflow_config when alert_retrieval_mode is "esql"',
       },
       ok: false,
     };
