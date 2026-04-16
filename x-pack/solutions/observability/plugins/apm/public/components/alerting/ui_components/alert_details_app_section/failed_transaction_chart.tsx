@@ -23,11 +23,8 @@ import * as get_timeseries_color from '../../../shared/charts/helper/get_timeser
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import {
-  isFailedTransactionRateRuleType,
-  useGetChartAlertAnnotations,
-  yLabelFormat,
-} from './helpers';
+import { isFailedTransactionRateRuleType, yLabelFormat } from './helpers';
+import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
