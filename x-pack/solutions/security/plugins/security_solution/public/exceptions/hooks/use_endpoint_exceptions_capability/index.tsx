@@ -12,7 +12,9 @@ import { useHasSecurityCapability } from '../../../helper_hooks';
 export const useEndpointExceptionsCapability = (
   capability: 'showEndpointExceptions' | 'crudEndpointExceptions'
 ): boolean => {
-  const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn(); // todo: do not call on read
+  const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn({
+    enabled: capability === 'crudEndpointExceptions',
+  });
   const canWriteGlobalArtifacts = useHasSecurityCapability('writeGlobalArtifacts');
   const hasCapability = useHasSecurityCapability(capability);
 

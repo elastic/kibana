@@ -35,6 +35,8 @@ describe('useEndpointExceptionsCapability()', () => {
     );
 
     useGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({ data: { status: false } });
+
+    jest.clearAllMocks();
   });
 
   it(`should return 'true' if capability 'crudEndpointExceptions' allowed`, () => {
@@ -62,7 +64,17 @@ describe('useEndpointExceptionsCapability()', () => {
     expect(renderHook('crudEndpointExceptions').result.current).toBe(true);
   });
 
+  it('should call the opt-in API when checking write privilege', () => {
+    renderHook('crudEndpointExceptions');
+    expect(useGetEndpointExceptionsPerPolicyOptIn).toBeCalledWith({ enabled: true });
+  });
+
   it(`should return 'true' if capability 'showEndpointExceptions' is allowed and manage global artifact is not allowed`, () => {
     expect(renderHook('showEndpointExceptions').result.current).toBe(true);
+  });
+
+  it('should not call the opt-in API when checking read privilege', () => {
+    renderHook('showEndpointExceptions');
+    expect(useGetEndpointExceptionsPerPolicyOptIn).toBeCalledWith({ enabled: false });
   });
 });
