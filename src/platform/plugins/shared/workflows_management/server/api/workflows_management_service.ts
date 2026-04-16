@@ -79,7 +79,7 @@ import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_ma
 import { WorkflowConflictError, WorkflowValidationError } from '../../common/lib/errors';
 
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
-import { updateWorkflowYamlFields } from '../../common/lib/yaml';
+import { parseYamlToJSONWithoutValidation, updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -94,6 +94,15 @@ function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefin
   return triggers
     .map((t) => (t && typeof t.type === 'string' ? t.type : null))
     .filter(<T>(v: T): v is NonNullable<T> => v != null);
+}
+
+/** True when the YAML root map includes `enabled` (before Zod defaults). */
+function workflowYamlDeclaresTopLevelEnabled(yamlString: string): boolean {
+  const parsed = parseYamlToJSONWithoutValidation(yamlString);
+  if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
+    return false;
+  }
+  return Object.prototype.hasOwnProperty.call(parsed.json, 'enabled');
 }
 
 const DEFAULT_PAGE_SIZE = 100;
@@ -674,6 +683,22 @@ export class WorkflowsService {
         updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
         validationErrors.push(...yamlResult.validationErrors);
         shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
+
+        // Zod may default `enabled` to true when YAML omits it; do not overwrite stored or request values.
+        if (
+          yamlResult.validationErrors.length === 0 &&
+          yamlResult.updatedDataPatch.valid &&
+          updatedData.definition &&
+          !workflowYamlDeclaresTopLevelEnabled(workflow.yaml)
+        ) {
+          const resolvedEnabled =
+            workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
+          updatedData.enabled = resolvedEnabled;
+          updatedData.definition = {
+            ...updatedData.definition,
+            enabled: resolvedEnabled,
+          } as WorkflowYaml;
+        }
       } else {
         updatedData = { ...updatedData, ...this.applyFieldUpdates(workflow, existingSource) };
       }
