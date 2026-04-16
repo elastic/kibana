@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-cypress-config
 dependsOn:
   - '@kbn/node-libs-browser-webpack-plugin'
-  - '@kbn/peggy-loader'
   - '@kbn/scout-info'
   - '@kbn/repo-info'
   - '@kbn/tooling-log'
