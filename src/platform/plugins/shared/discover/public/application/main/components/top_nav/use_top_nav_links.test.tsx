@@ -89,6 +89,8 @@ describe('useTopNavLinks', () => {
           hasShareIntegration: false,
           persistedDiscoverSession: undefined,
           ...hookAttrs,
+          onOpenSaveModal: hookAttrs.onOpenSaveModal ?? jest.fn(),
+          onOpenSaveAsModal: hookAttrs.onOpenSaveAsModal ?? jest.fn(),
         }),
       {
         wrapper: ({ children }) => (
@@ -383,6 +385,8 @@ describe('useTopNavLinks', () => {
             hasShareIntegration: false,
             persistedDiscoverSession: undefined,
             ...hookAttrs,
+            onOpenSaveModal: hookAttrs.onOpenSaveModal ?? jest.fn(),
+            onOpenSaveAsModal: hookAttrs.onOpenSaveAsModal ?? jest.fn(),
           }),
         {
           wrapper: ({ children }) => (
