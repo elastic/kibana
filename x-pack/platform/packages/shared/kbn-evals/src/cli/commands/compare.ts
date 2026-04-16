@@ -32,6 +32,15 @@ export const compareCmd: Command<void> = {
   Example (auto-discover baseline):
     node scripts/evals compare <pr-run-id> --baseline-branch main --suite sigevents --format markdown
   `,
+  flags: {
+    string: ['baseline-branch', 'suite', 'format', 'kibana-url'],
+    help: `
+      --baseline-branch <branch>  Branch to look up the latest baseline run (e.g. "main")
+      --suite <id>                Suite ID to filter scores for (required with --baseline-branch)
+      --format <type>             Output format: "terminal" (default) or "markdown"
+      --kibana-url <url>          Kibana base URL for deep-links in markdown output
+    `,
+  },
   run: async ({ log, flagsReader }) => {
     const [firstRunId, secondRunIdPositional, ...extraArgs] = flagsReader.getPositionals();
 
