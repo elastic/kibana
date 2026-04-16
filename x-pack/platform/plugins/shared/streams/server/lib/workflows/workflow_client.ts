@@ -152,7 +152,7 @@ export const createWorkflowClient = <
       if (!existing.definition) {
         throw new StatusError(`Workflow ${workflowId} definition is missing.`, 500);
       }
-      return toEngineModel(existing);
+      return toEngineModel({ ...existing, definition: existing.definition });
     }
 
     if (existing) {
@@ -173,7 +173,7 @@ export const createWorkflowClient = <
       throw new StatusError(`Workflow ${workflowId} definition is missing after creation.`, 500);
     }
 
-    return toEngineModel(created);
+    return toEngineModel({ ...created, definition: created.definition });
   };
 
   const removeIfExists = async (request: KibanaRequest): Promise<boolean> => {
