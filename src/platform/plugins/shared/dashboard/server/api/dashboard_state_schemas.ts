@@ -79,7 +79,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
   const panelSchemas = Object.entries(embeddableSchemas)
     // sort to ensure consistent order in OAS documenation
-    .sort(([aType], [bType]) => aType.localeCompare(bType))
+    .sort(([aType, { title: ATitle }], [bType, { title: BTitle }]) => ATitle.localeCompare(BTitle))
     .map(([type, { schema: configSchema, title }]) =>
       schema.object(
         {
