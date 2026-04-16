@@ -11,16 +11,16 @@ import {
   detectFailureStoreStatus,
   createGetDataQualityTool,
 } from './get_data_quality';
-import { createMockGetScopedClients, createMockToolContext } from './test_helpers';
+import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
 
-jest.mock('../../routes/streams/doc_counts/get_streams_doc_counts', () => ({
+jest.mock('../../../routes/streams/doc_counts/get_streams_doc_counts', () => ({
   getDocCountsForStreams: jest.fn(),
   getDegradedDocCountsForStreams: jest.fn(),
   getFailedDocCountsForStreams: jest.fn(),
 }));
 
 const { getDocCountsForStreams, getDegradedDocCountsForStreams, getFailedDocCountsForStreams } =
-  jest.requireMock('../../routes/streams/doc_counts/get_streams_doc_counts');
+  jest.requireMock('../../../routes/streams/doc_counts/get_streams_doc_counts');
 
 describe('createGetDataQualityTool handler', () => {
   beforeEach(() => {
@@ -39,7 +39,7 @@ describe('createGetDataQualityTool handler', () => {
 
   const setup = () => {
     const { getScopedClients, streamsClient } = createMockGetScopedClients();
-    const tool = createGetDataQualityTool({ getScopedClients });
+    const tool = createGetDataQualityTool({ getScopedClients, isServerless: false });
     const context = createMockToolContext();
     return { tool, context, streamsClient };
   };
@@ -56,12 +56,48 @@ describe('createGetDataQualityTool handler', () => {
 
     if ('results' in result) {
       const data = result.results[0].data as Record<string, unknown>;
-      expect(data.lifecycle_total_docs).toBe(1000);
-      expect(data.lifecycle_degraded_docs).toBe(50);
+      expect(data.total_docs).toBe(1000);
+      expect(data.degraded_docs).toBe(50);
       expect(data.recent_failed_docs).toBe(10);
       expect(data.recent_failed_time_range).toEqual({ start: 'now-24h', end: 'now' });
       expect(data.quality).toBeDefined();
       expect(data.failure_store_status).toBe('inherited');
+      expect(data.interpretation).toBeDefined();
+      expect(Array.isArray(data.interpretation)).toBe(true);
+    }
+  });
+
+  it('returns interpretation mentioning processing errors when failed docs > 0', async () => {
+    const { tool, context, streamsClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(mockIngestDefinition);
+    getDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 1000 }]);
+    getDegradedDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 0 }]);
+    getFailedDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 5 }]);
+
+    const result = await tool.handler({ name: 'logs', start: 'now-24h', end: 'now' }, context);
+
+    if ('results' in result) {
+      const data = result.results[0].data as Record<string, unknown>;
+      const interpretation = data.interpretation as string[];
+      expect(interpretation.some((s) => s.includes('processing errors'))).toBe(true);
+    }
+  });
+
+  it('returns interpretation mentioning unmapped fields when degraded docs > 0', async () => {
+    const { tool, context, streamsClient } = setup();
+
+    streamsClient.getStream.mockResolvedValue(mockIngestDefinition);
+    getDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 1000 }]);
+    getDegradedDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 10 }]);
+    getFailedDocCountsForStreams.mockResolvedValue([{ stream: 'logs', count: 0 }]);
+
+    const result = await tool.handler({ name: 'logs', start: 'now-24h', end: 'now' }, context);
+
+    if ('results' in result) {
+      const data = result.results[0].data as Record<string, unknown>;
+      const interpretation = data.interpretation as string[];
+      expect(interpretation.some((s) => s.includes('explicit mapping'))).toBe(true);
     }
   });
 
@@ -157,14 +193,14 @@ describe('computeQualityMetrics', () => {
 });
 
 describe('detectFailureStoreStatus', () => {
-  it('returns "enabled" for enabled failure store', () => {
+  it('returns "enabled" for failure store with lifecycle', () => {
     const def = {
       name: 'logs',
       ingest: {
         wired: { fields: {}, routing: [] },
         processing: [],
         lifecycle: { inherit: {} },
-        failure_store: { enabled: {} },
+        failure_store: { lifecycle: { enabled: { data_retention: '30d' } } },
       },
     } as unknown as Streams.all.Definition;
     expect(detectFailureStoreStatus(def)).toBe('enabled');

@@ -13,14 +13,13 @@ import { getFlattenedObject } from '@kbn/std';
 import { Streams } from '@kbn/streams-schema';
 import type { SearchRequest, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetScopedClients } from '../../../routes/types';
 import {
   STREAMS_QUERY_DOCUMENTS_TOOL_ID as QUERY_DOCUMENTS,
   STREAMS_GET_SCHEMA_TOOL_ID as GET_SCHEMA,
-  STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
-} from './tool_ids';
+} from '../tool_ids';
 import { translateNlToEsDsl } from './nl_to_es_dsl';
-import { classifyError } from './error_utils';
+import { classifyError } from '../error_utils';
 
 const DEFAULT_SIZE = 10;
 const MAX_DOCUMENTS = 25;
@@ -29,7 +28,7 @@ const MAX_FIELDS_FOR_PROMPT = 1000;
 const MAX_FIELDS_PROMPT_CHARS = 20_000;
 
 const queryDocumentsSchema = z.object({
-  name: z.string().describe('Exact stream name, e.g. "logs.nginx"'),
+  name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
   query: z.string().describe(
     dedent(`Natural language description of what to search or aggregate. Include field names when known. Examples:
       - "show me 10 recent documents"
@@ -59,6 +58,11 @@ export const createQueryDocumentsTool = ({
     **When NOT to use:**
     - User wants pre-computed quality/lifecycle metrics — use the focused tool
     - User wants field definitions — use ${GET_SCHEMA}
+
+    **Formatting documents:**
+    - Full/raw documents: show each as a compact "field.name: value" block. Omit stream.name (already known).
+    - Browsing/summarizing: show a table with @timestamp and 3-4 key fields (e.g. body.text, host.name, log.level). Mention how many fields were omitted.
+    **Formatting aggregations:** Always include the metric value alongside each key (e.g. "host2 — 1,532 docs", "200 — 45.2%"). For terms aggregations, show the doc_count. For metric aggregations, show the computed value with units where known.
   `),
   tags: ['streams'],
   schema: queryDocumentsSchema,
@@ -168,7 +172,7 @@ export const createQueryDocumentsTool = ({
               message: `Failed to query stream "${name}": ${message}`,
               stream: name,
               operation: 'query_documents',
-              likely_cause: classifyError(err, LIST_STREAMS),
+              likely_cause: classifyError(err),
             },
           },
         ],

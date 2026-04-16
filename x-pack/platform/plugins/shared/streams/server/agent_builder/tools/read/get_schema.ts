@@ -11,17 +11,19 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams } from '@kbn/streams-schema';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../routes/types';
-import { getUnmappedFields, UNMAPPED_SAMPLE_SIZE } from '../../lib/streams/helpers/unmapped_fields';
+import type { GetScopedClients } from '../../../routes/types';
+import {
+  getUnmappedFields,
+  UNMAPPED_SAMPLE_SIZE,
+} from '../../../lib/streams/helpers/unmapped_fields';
 import {
   STREAMS_GET_SCHEMA_TOOL_ID as GET_SCHEMA,
   STREAMS_GET_STREAM_TOOL_ID as GET_STREAM,
-  STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
-} from './tool_ids';
-import { classifyError } from './error_utils';
+} from '../tool_ids';
+import { classifyError } from '../error_utils';
 
 const getSchemaSchema = z.object({
-  name: z.string().describe('Exact stream name, e.g. "logs.nginx"'),
+  name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
 });
 
 export const createGetSchemaTool = ({
@@ -42,6 +44,8 @@ export const createGetSchemaTool = ({
     **When NOT to use:**
     - User wants a general stream overview — use ${GET_STREAM}
     - User wants data quality or lifecycle info — use the focused tool
+
+    **Formatting:** Show fields as "field.name: type", grouped by source (own vs inherited).
   `),
   tags: ['streams'],
   schema: getSchemaSchema,
@@ -124,7 +128,7 @@ export const createGetSchemaTool = ({
               message: `Failed to get schema for stream "${name}": ${message}`,
               stream: name,
               operation: 'get_schema',
-              likely_cause: classifyError(err, LIST_STREAMS),
+              likely_cause: classifyError(err),
             },
           },
         ],

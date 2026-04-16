@@ -12,19 +12,18 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams, isIlmLifecycle, isDslLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetScopedClients } from '../../../routes/types';
 import {
   STREAMS_GET_LIFECYCLE_STATS_TOOL_ID as GET_LIFECYCLE_STATS,
   STREAMS_GET_DATA_QUALITY_TOOL_ID as GET_DATA_QUALITY,
   STREAMS_GET_SCHEMA_TOOL_ID as GET_SCHEMA,
-  STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
-} from './tool_ids';
-import { classifyError } from './error_utils';
-import { getEffectiveLifecycle } from '../../lib/streams/lifecycle/get_effective_lifecycle';
-import { ilmPhases } from '../../lib/streams/lifecycle/ilm_phases';
+} from '../tool_ids';
+import { classifyError } from '../error_utils';
+import { getEffectiveLifecycle } from '../../../lib/streams/lifecycle/get_effective_lifecycle';
+import { ilmPhases } from '../../../lib/streams/lifecycle/ilm_phases';
 
 const getLifecycleStatsSchema = z.object({
-  name: z.string().describe('Exact stream name, e.g. "logs.nginx"'),
+  name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
 });
 
 export const createGetLifecycleStatsTool = ({
@@ -45,6 +44,8 @@ export const createGetLifecycleStatsTool = ({
     **When NOT to use:**
     - User wants data quality info — use ${GET_DATA_QUALITY}
     - User wants field mappings — use ${GET_SCHEMA}
+
+    **Formatting:** Single summary line (e.g. "Retention: ILM policy 'hot-warm-30d', 45.2 GB, 12.3M docs").
   `),
   tags: ['streams'],
   schema: getLifecycleStatsSchema,
@@ -128,7 +129,7 @@ export const createGetLifecycleStatsTool = ({
               message: `Failed to get lifecycle stats for stream "${name}": ${message}`,
               stream: name,
               operation: 'get_lifecycle_stats',
-              likely_cause: classifyError(err, LIST_STREAMS),
+              likely_cause: classifyError(err),
             },
           },
         ],

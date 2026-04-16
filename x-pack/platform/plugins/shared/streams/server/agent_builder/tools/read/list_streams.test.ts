@@ -6,7 +6,7 @@
  */
 
 import { createListStreamsTool } from './list_streams';
-import { createMockGetScopedClients, createMockToolContext } from './test_helpers';
+import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
 
 describe('createListStreamsTool handler', () => {
   const setup = () => {
