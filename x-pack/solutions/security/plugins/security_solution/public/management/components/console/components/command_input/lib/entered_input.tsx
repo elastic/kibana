@@ -330,8 +330,8 @@ export class EnteredInput {
       let removedChar = this.leftOfCursorContent.pop();
 
       // Since we auto add a space after argument selectors, let's make sure that the character
-      // we just removed from the left side of the cursor is actually a user-typed value and not
-      // an internally added character
+      // we just removed from the end of the left side of the cursor is actually a user-typed value
+      // and not an internally added character
       if (removedChar?.internallyAdded) {
         removedChar = this.leftOfCursorContent.pop();
       }
