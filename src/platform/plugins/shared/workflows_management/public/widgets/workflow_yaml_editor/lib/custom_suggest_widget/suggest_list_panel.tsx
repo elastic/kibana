@@ -14,20 +14,40 @@ import { fuzzyMatch, getLabelHighlightIndices, highlightSegments } from './fuzzy
 import { getSuggestWidgetStyles } from './suggest_widget_styles';
 import type { EnrichedSuggestionItem } from './types';
 import { getStepIconType } from '../../../../shared/ui/step_icons/get_step_icon_type';
+import { HardcodedIcons } from '../../../../shared/ui/step_icons/hardcoded_icons';
 
 /**
- * Get the icon for a suggestion item. Strips leading dots from connector types
- * and tries both the full type and the base prefix (before first dot) to match
- * icons like `slack_api` from `.slack_api.searchMessages`.
+ * Resolve the icon for a suggestion item using the same lookup chain as
+ * the Monaco suggest widget's CSS injection pipeline:
+ *
+ * 1. HardcodedIcons with the full type (e.g., ".slack_api", "elasticsearch", "if")
+ * 2. HardcodedIcons with the base prefix (e.g., ".slack_api" from ".slack_api.searchMessages")
+ * 3. HardcodedIcons with "elasticsearch" / "kibana" prefix check
+ * 4. getStepIconType fallback (EUI icon names like "plugs", "branch", etc.)
  */
 const getItemIcon = (typeStr: string): IconType => {
-  const cleaned = typeStr.replace(/^\./, '');
-  const icon = getStepIconType(cleaned);
-  if (icon === 'plugs' && cleaned.includes('.')) {
-    const base = cleaned.split('.')[0];
-    return getStepIconType(base);
+  // Try exact match in HardcodedIcons (handles ".slack", ".slack_api", "console", "if", etc.)
+  if (HardcodedIcons[typeStr]) {
+    return HardcodedIcons[typeStr];
   }
-  return icon;
+
+  // Try base connector type (e.g., ".slack_api" from ".slack_api.searchMessages")
+  if (typeStr.includes('.')) {
+    const dotIdx = typeStr.indexOf('.', typeStr.startsWith('.') ? 1 : 0);
+    if (dotIdx > 0) {
+      const base = typeStr.slice(0, dotIdx);
+      if (HardcodedIcons[base]) {
+        return HardcodedIcons[base];
+      }
+    }
+  }
+
+  // Prefix-based checks for elasticsearch.* and kibana.*
+  if (typeStr.startsWith('elasticsearch')) return HardcodedIcons.elasticsearch;
+  if (typeStr.startsWith('kibana')) return HardcodedIcons.kibana;
+
+  // Fallback to getStepIconType (returns EUI icon names for built-in step types)
+  return getStepIconType(typeStr.replace(/^\./, ''));
 };
 
 export interface FilteredItem {
