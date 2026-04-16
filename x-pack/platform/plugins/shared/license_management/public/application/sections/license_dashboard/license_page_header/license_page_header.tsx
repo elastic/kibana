@@ -6,13 +6,26 @@
  */
 
 import React from 'react';
+import type { FC, ComponentProps } from 'react';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { getLicenseState } from '../../../store/reducers/license_management';
 
-export const ActiveLicensePageHeader = ({ license, ...props }) => {
+interface LicenseInfo {
+  type: string;
+  status: string;
+  isExpired: boolean;
+  expirationDate: string | null;
+}
+
+interface LicensePageHeaderProps
+  extends Omit<ComponentProps<typeof EuiPageHeader>, 'pageTitle' | 'description'> {
+  license: LicenseInfo;
+}
+
+export const ActiveLicensePageHeader: FC<LicensePageHeaderProps> = ({ license, ...props }) => {
   return (
     <EuiPageHeader
       {...props}
@@ -50,7 +63,7 @@ export const ActiveLicensePageHeader = ({ license, ...props }) => {
   );
 };
 
-export const ExpiredLicensePageHeader = ({ license, ...props }) => {
+export const ExpiredLicensePageHeader: FC<LicensePageHeaderProps> = ({ license, ...props }) => {
   return (
     <EuiPageHeader
       {...props}
@@ -80,7 +93,7 @@ export const ExpiredLicensePageHeader = ({ license, ...props }) => {
   );
 };
 
-export const LicensePageHeader = () => {
+export const LicensePageHeader: FC = () => {
   const license = useSelector(getLicenseState);
 
   return (

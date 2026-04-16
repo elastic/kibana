@@ -6,12 +6,59 @@
  */
 
 import { createAction } from 'redux-actions';
-import { addLicense } from './add_license';
-import { putLicense } from '../../lib/es';
-import { addUploadErrorMessage } from './add_error_message';
 import { i18n } from '@kbn/i18n';
+import type { Dispatch } from 'redux';
+import { addLicense } from './add_license';
+import { putLicense, type PutLicenseResponse } from '../../lib/es';
+import { addUploadErrorMessage } from './add_error_message';
+import type { UploadStatusState, AppThunkAction, ThunkServices } from '../types';
 
-export const uploadLicenseStatus = createAction('LICENSE_MANAGEMENT_UPLOAD_LICENSE_STATUS');
+const extractErrorReason = (err: unknown): string | undefined => {
+  if (typeof err !== 'object' || err === null || !('responseJSON' in err)) {
+    return undefined;
+  }
+  const { responseJSON } = err;
+  if (typeof responseJSON !== 'object' || responseJSON === null || !('error' in responseJSON)) {
+    return undefined;
+  }
+  const { error } = responseJSON;
+  if (typeof error !== 'object' || error === null || !('reason' in error)) {
+    return undefined;
+  }
+  const { reason } = error;
+  return typeof reason === 'string' ? reason : undefined;
+};
+
+const isNonNullObject = (value: unknown): value is object => {
+  return typeof value === 'object' && value !== null;
+};
+
+const hasOwn = <K extends PropertyKey>(value: object, key: K): value is Record<K, unknown> => {
+  return Object.prototype.hasOwnProperty.call(value, key);
+};
+
+const parseLicenseType = (licenseString: string): string | undefined => {
+  try {
+    const parsed: unknown = JSON.parse(licenseString);
+
+    if (!isNonNullObject(parsed) || !hasOwn(parsed, 'license')) {
+      return undefined;
+    }
+    const license = parsed.license;
+
+    if (!isNonNullObject(license) || !hasOwn(license, 'type')) {
+      return undefined;
+    }
+
+    return typeof license.type === 'string' && license.type.length > 0 ? license.type : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+export const uploadLicenseStatus = createAction<UploadStatusState>(
+  'LICENSE_MANAGEMENT_UPLOAD_LICENSE_STATUS'
+);
 
 const genericUploadError = i18n.translate(
   'xpack.licenseMgmt.uploadLicense.genericUploadErrorMessage',
@@ -21,11 +68,11 @@ const genericUploadError = i18n.translate(
 );
 
 const dispatchFromResponse = async (
-  response,
-  dispatch,
-  currentLicenseType,
-  newLicenseType,
-  { history, licensing }
+  response: PutLicenseResponse,
+  dispatch: Dispatch,
+  currentLicenseType: string,
+  newLicenseType: string,
+  { history, licensing }: Pick<ThunkServices, 'history' | 'licensing'>
 ) => {
   const { error, acknowledged, license_status: licenseStatus, acknowledge } = response;
   if (error) {
@@ -55,13 +102,10 @@ const dispatchFromResponse = async (
       dispatch(addLicense(updatedLicense));
       dispatch(uploadLicenseStatus({}));
       history.replace('/home');
-      // reload necessary to get left nav to refresh with proper links
       window.location.reload();
     }
   } else {
-    // first message relates to command line interface, so remove it
-    const messages = Object.values(acknowledge).slice(1);
-    // messages can be in nested arrays
+    const messages = Object.values(acknowledge ?? {}).slice(1);
     const first = i18n.translate(
       'xpack.licenseMgmt.uploadLicense.problemWithUploadedLicenseDescription',
       {
@@ -78,14 +122,17 @@ const dispatchFromResponse = async (
 };
 
 export const uploadLicense =
-  (licenseString, currentLicenseType, acknowledge) => async (dispatch, getState, services) => {
+  (
+    licenseString: string,
+    currentLicenseType: string,
+    acknowledge?: boolean
+  ): AppThunkAction<Promise<void>> =>
+  async (dispatch, _getState, services) => {
     dispatch(uploadLicenseStatus({ applying: true }));
-    let newLicenseType = null;
-    try {
-      ({ type: newLicenseType } = JSON.parse(licenseString).license);
-    } catch (err) {
+    const newLicenseType = parseLicenseType(licenseString);
+    if (newLicenseType === undefined) {
       dispatch(uploadLicenseStatus({}));
-      return dispatch(
+      dispatch(
         addUploadErrorMessage(
           i18n.translate('xpack.licenseMgmt.uploadLicense.checkLicenseFileErrorMessage', {
             defaultMessage: '{genericUploadError} Check your license file.',
@@ -95,17 +142,18 @@ export const uploadLicense =
           })
         )
       );
+      return;
     }
     try {
-      const response = await putLicense(services.http, licenseString, acknowledge);
+      const response = await putLicense(services.http, licenseString, acknowledge ?? false);
       await dispatchFromResponse(response, dispatch, currentLicenseType, newLicenseType, services);
-    } catch (err) {
+    } catch (err: unknown) {
+      const reason = extractErrorReason(err);
       const message =
-        err.responseJSON && err.responseJSON.error.reason
-          ? err.responseJSON.error.reason
-          : i18n.translate('xpack.licenseMgmt.uploadLicense.unknownErrorErrorMessage', {
-              defaultMessage: 'Unknown error.',
-            });
+        reason ??
+        i18n.translate('xpack.licenseMgmt.uploadLicense.unknownErrorErrorMessage', {
+          defaultMessage: 'Unknown error.',
+        });
       dispatch(uploadLicenseStatus({}));
       dispatch(addUploadErrorMessage(`${genericUploadError} ${message}`));
     }

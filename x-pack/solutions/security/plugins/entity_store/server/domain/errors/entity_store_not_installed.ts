@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
-
-export const addLicense = createAction('LICENSE_MANAGEMENT_ADD_LICENSE');
+export class EntityStoreNotInstalledError extends Error {
+  constructor() {
+    super(
+      'Entity Store is not installed. Install it via POST /api/security/entity_store/install or from the Security Entity Store page, then retry.'
+    );
+  }
+}

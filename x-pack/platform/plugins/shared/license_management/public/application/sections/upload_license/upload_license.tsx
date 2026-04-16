@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import type { ScopedHistory } from '@kbn/core/public';
+import type { History } from 'history';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,14 +23,37 @@ import {
   EuiPanel,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { TelemetryPluginStart } from '../../lib/telemetry';
 
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { UploadStatusState } from '../../store/types';
 
-export class UploadLicense extends React.PureComponent {
-  state = {
+export interface Props {
+  currentLicenseType: string;
+  applying: boolean;
+  needsAcknowledgement: boolean;
+  messages?: Array<string | string[]>;
+  errorMessage: string;
+  isInvalid: boolean;
+  telemetry?: TelemetryPluginStart;
+  history: ScopedHistory | History;
+  setBreadcrumb: (section: 'dashboard' | 'upload') => void;
+  addUploadErrorMessage: (message: string | React.ReactNode) => void;
+  uploadLicense: (license: string, currentType: string, acknowledge?: boolean) => void;
+  uploadLicenseStatus: (status: UploadStatusState) => void;
+}
+
+interface State {
+  isOptingInToTelemetry: boolean;
+}
+
+export class UploadLicense extends React.PureComponent<Props, State> {
+  private file: File | undefined;
+
+  state: State = {
     isOptingInToTelemetry: false,
   };
 
@@ -36,14 +61,18 @@ export class UploadLicense extends React.PureComponent {
     this.props.setBreadcrumb('upload');
     this.props.addUploadErrorMessage('');
   }
-  onOptInChange = (isOptingInToTelemetry) => {
+  onOptInChange = (isOptingInToTelemetry: boolean) => {
     this.setState({ isOptingInToTelemetry });
   };
-  send = (acknowledge) => {
+  send = (acknowledge?: boolean) => {
     const file = this.file;
+    if (!file) {
+      return;
+    }
     const fr = new FileReader();
 
-    fr.onload = ({ target: { result } }) => {
+    fr.onload = ({ target }) => {
+      const result = typeof target?.result === 'string' ? target.result : '';
       if (this.state.isOptingInToTelemetry) {
         this.props.telemetry?.telemetryService.setOptIn(true);
       }
@@ -92,7 +121,7 @@ export class UploadLicense extends React.PureComponent {
           <EuiText>
             <ul>
               {messages.map((message) => (
-                <li key={message}>{message}</li>
+                <li key={String(message)}>{message}</li>
               ))}
             </ul>
           </EuiText>
@@ -100,20 +129,21 @@ export class UploadLicense extends React.PureComponent {
       </EuiConfirmModal>
     );
   }
-  errorMessage() {
+  errorMessage(): string[] | null {
     const { errorMessage } = this.props;
     if (!errorMessage) {
       return null;
     }
     return [errorMessage];
   }
-  handleFile = ([file]) => {
+  handleFile = (files: FileList | null) => {
+    const file = files?.[0];
     if (file) {
       this.props.addUploadErrorMessage('');
     }
     this.file = file;
   };
-  submit = (event) => {
+  submit = (event: React.FormEvent) => {
     event.preventDefault();
     if (this.file) {
       this.send();
@@ -179,6 +209,7 @@ export class UploadLicense extends React.PureComponent {
             <EuiSpacer size="m" />
             {shouldShowTelemetryOptIn(telemetry) && (
               <TelemetryOptIn
+                isStartTrial={false}
                 isOptingInToTelemetry={this.state.isOptingInToTelemetry}
                 onOptInChange={this.onOptInChange}
                 telemetry={telemetry}

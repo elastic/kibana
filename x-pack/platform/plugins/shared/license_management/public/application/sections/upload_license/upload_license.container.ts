@@ -19,8 +19,9 @@ import {
   uploadMessages,
 } from '../../store/reducers/license_management';
 import { UploadLicense as PresentationComponent } from './upload_license';
+import type { LicenseManagementState } from '../../store/types';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: LicenseManagementState) => {
   return {
     isInvalid: isInvalid(state),
     needsAcknowledgement: uploadNeedsAcknowledgement(state),

@@ -6,14 +6,18 @@
  */
 
 import React from 'react';
+import type { FC } from 'react';
 
 import { EuiCard, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useAppContext } from '../../../app_context';
 
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+interface Props {
+  uploadPath?: string;
+}
 
-export const AddLicense = ({ uploadPath = `/upload_license` }) => {
+export const AddLicense: FC<Props> = ({ uploadPath = `/upload_license` }) => {
   const { services } = useAppContext();
 
   return (

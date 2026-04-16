@@ -6,15 +6,27 @@
  */
 
 import React, { useEffect } from 'react';
+import type { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LicenseDashboard, UploadLicense } from './sections';
 import { Routes, Route } from '@kbn/shared-ux-router';
+import { EuiPageSection, EuiPageBody, EuiEmptyPrompt } from '@elastic/eui';
+import type { ExecutionContextStart } from '@kbn/core/public';
+import { LicenseDashboard, UploadLicense } from './sections';
 import { APP_PERMISSION } from '../../common/constants';
 import { SectionLoading, useExecutionContext } from '../shared_imports';
-import { EuiPageSection, EuiPageBody, EuiEmptyPrompt } from '@elastic/eui';
 import { UPLOAD_LICENSE_ROUTE } from '../locator';
+import type { TelemetryPluginStart } from './lib/telemetry';
 
-export const App = ({
+export interface Props {
+  hasPermission: boolean | undefined;
+  permissionsLoading: boolean | undefined;
+  permissionsError: unknown;
+  telemetry?: TelemetryPluginStart;
+  loadPermissions: () => void;
+  executionContext: ExecutionContextStart;
+}
+
+export const App: FC<Props> = ({
   hasPermission,
   permissionsLoading,
   permissionsError,
@@ -45,7 +57,18 @@ export const App = ({
   }
 
   if (permissionsError) {
-    const error = permissionsError?.data?.message;
+    let error: string | undefined;
+    if (
+      typeof permissionsError === 'object' &&
+      permissionsError !== null &&
+      'data' in permissionsError
+    ) {
+      const { data } = permissionsError;
+      if (typeof data === 'object' && data !== null && 'message' in data) {
+        const { message } = data;
+        error = typeof message === 'string' ? message : undefined;
+      }
+    }
 
     return (
       <EuiPageSection alignment="center" grow={true}>
@@ -96,12 +119,14 @@ export const App = ({
     );
   }
 
-  const withTelemetry = (Component) => (props) => <Component {...props} telemetry={telemetry} />;
   return (
     <EuiPageBody>
       <Routes>
-        <Route path={`/${UPLOAD_LICENSE_ROUTE}`} component={withTelemetry(UploadLicense)} />
-        <Route path={['/']} component={withTelemetry(LicenseDashboard)} />
+        <Route
+          path={`/${UPLOAD_LICENSE_ROUTE}`}
+          render={({ history }) => <UploadLicense history={history} telemetry={telemetry} />}
+        />
+        <Route path={['/']} render={() => <LicenseDashboard telemetry={telemetry} />} />
       </Routes>
     </EuiPageBody>
   );

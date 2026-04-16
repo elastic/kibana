@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import { handleActions } from 'redux-actions';
+import { createAction } from 'redux-actions';
 
-import { addLicense } from '../actions/add_license';
-
-export const license = handleActions(
-  {
-    [addLicense](state, { payload }) {
-      return payload;
-    },
-  },
-  {}
+export const addUploadErrorMessage = createAction<string | React.ReactNode>(
+  'LICENSE_MANAGEMENT_ADD_UPLOAD_ERROR_MESSAGE'
 );

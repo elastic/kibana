@@ -7,4 +7,7 @@
 
 import React from 'react';
 
-export default (props) => <div>{props.children}</div>;
+const FocusTrapReact = (props: { children: React.ReactNode }) =>
+  React.createElement('div', null, props.children);
+
+export = FocusTrapReact;

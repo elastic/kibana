@@ -8,22 +8,23 @@
 import { handleActions } from 'redux-actions';
 
 import { permissionsSuccess, permissionsError, permissionsLoading } from '../actions/permissions';
+import type { PermissionsState } from '../types';
 
-export const permissions = handleActions(
+export const permissions = handleActions<PermissionsState, unknown>(
   {
-    [permissionsLoading](state, { payload }) {
+    [String(permissionsLoading)](_state, action) {
       return {
-        loading: payload,
+        loading: Boolean(action.payload),
       };
     },
-    [permissionsSuccess](state, { payload }) {
+    [String(permissionsSuccess)](_state, action) {
       return {
-        hasPermission: payload,
+        hasPermission: Boolean(action.payload),
       };
     },
-    [permissionsError](state, { payload }) {
+    [String(permissionsError)](_state, action) {
       return {
-        error: payload,
+        error: action.payload,
       };
     },
   },

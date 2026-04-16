@@ -6,7 +6,6 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 
 import { App as PresentationComponent } from './app';
 import {
@@ -15,8 +14,9 @@ import {
   getPermissionsError,
 } from './store/reducers/license_management';
 import { loadPermissions } from './store/actions/permissions';
+import type { LicenseManagementState } from './store/types';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: LicenseManagementState) => {
   return {
     hasPermission: getPermission(state),
     permissionsLoading: isPermissionsLoading(state),
@@ -28,4 +28,4 @@ const mapDispatchToProps = {
   loadPermissions,
 };
 
-export const App = withRouter(connect(mapStateToProps, mapDispatchToProps)(PresentationComponent));
+export const App = connect(mapStateToProps, mapDispatchToProps)(PresentationComponent);
