@@ -44,6 +44,7 @@ interface EntityStoreUtilsLike {
   installEntityStoreV2: (body?: {
     entityTypes: string[];
     dataViewPattern?: string;
+    maintainerAutoStart?: boolean;
   }) => Promise<unknown>;
   forceUpdateEntityViaCrud: (params: {
     entityType: EntityType;
@@ -358,7 +359,11 @@ export const riskScoreMaintainerScenarioFactory = ({
     minRuns?: number;
     timeoutMs?: number;
   } = {}) => {
-    await entityStoreUtils.installEntityStoreV2({ entityTypes, dataViewPattern });
+    await entityStoreUtils.installEntityStoreV2({
+      entityTypes,
+      dataViewPattern,
+      maintainerAutoStart: runMode === 'sync' ? false : undefined,
+    });
     if (runMode === 'sync') {
       await routes.runMaintainerSync('risk-score');
       return;
