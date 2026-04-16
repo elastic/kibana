@@ -21,7 +21,6 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
   id: MAINTAINER_ID,
   description: 'Automatically resolves entities using field-matching rules',
   interval: '5m',
-  timeout: '30m',
   initialState,
   minLicense: 'enterprise',
   run: async ({ status, abortController, logger, esClient }) => {
