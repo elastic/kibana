@@ -93,6 +93,7 @@ docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}
 ES_VERSION=$(docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | grep SNAPSHOT | head -1)
 KIBANA_ES_DEFAULT_VERSION="$ES_VERSION-$ELASTICSEARCH_GIT_COMMIT"
 KIBANA_ES_DEFAULT_IMAGE="docker.elastic.co/kibana-ci/elasticsearch:$KIBANA_ES_DEFAULT_VERSION"
+echo $ES_VERSION $KIBANA_ES_DEFAULT_VERSION $KIBANA_ES_DEFAULT_IMAGE
 docker tag "docker.elastic.co/elasticsearch/elasticsearch:$ES_VERSION" "$KIBANA_ES_DEFAULT_IMAGE"
 docker_with_retry push "$KIBANA_ES_DEFAULT_IMAGE"
 
