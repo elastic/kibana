@@ -1,28 +1,30 @@
 ---
-navigation_title: Testing framework
+navigation_title: API and E2E tests
+description: Learn about Scout, Kibana's modern UI and API test framework built on Playwright
 ---
 
 # Scout [scout]
 
-Scout is Kibana’s **modern UI and API test framework** built on [Playwright](https://playwright.dev). It focuses on **fast test execution**, a good **developer experience**, and **reusable** test building blocks (e.g., [fixtures](./scout/fixtures.md), [page objects](./scout/page-objects.md) and [API services](./scout/api-services.md)).
+Scout is Kibana's **modern UI and API test framework** built on [Playwright](https://playwright.dev). It focuses on **fast test execution**, a good **developer experience**, and **reusable** test building blocks (e.g., [fixtures](./fixtures.md), [page objects](./page-objects.md) and [API services](./api-services.md)).
 
 ## Start here [scout-start-here]
 
-- [Getting started](./scout/getting-started.md)
-- [Best practices](./scout/best-practices.md)
-- [UI testing](./scout/ui-testing.md)
-- [API testing](./scout/api-testing.md)
+- [Set up Scout in your plugin](./setup-scout.md)
+- [Run Scout tests](./run-scout-tests.md)
+- [Best practices](../contributing/scout-best-practices.md)
+- [Write UI tests](./write-ui-tests.md)
+- [Write API tests](./write-api-tests.md)
 
 ## Scout benefits [scout-main-features]
 
-- **Parallel execution**: run UI suites in [parallel](./scout/parallelism.md) against the same deployment.
-- **Co-located tests**: keep tests close to [plugin code](./scout/setup-plugin.md) for easier iteration and maintenance.
-- **Deployment-agnostic**: write tests once, then use [tags](./scout/deployment-tags.md) to declare where they should run (stateful/serverless).
-- **Fixture-based**: [fixtures](./scout/fixtures.md) cover auth, data setup, clients, and common workflows.
+- **Parallel execution**: run UI suites in [parallel](./parallelism.md) against the same deployment.
+- **Co-located tests**: keep tests close to [plugin code](./setup-scout.md) for easier iteration and maintenance.
+- **Deployment-agnostic**: write tests once, then use [tags](./deployment-tags.md) to declare where they should run (stateful/serverless).
+- **Fixture-based**: [fixtures](./fixtures.md) cover auth, data setup, clients, and common workflows.
 - **Better debugging**: use Playwright [UI Mode](https://playwright.dev/docs/test-ui-mode).
 - **Reporting**: we capture test events that power our dashboards (for example, skipped tests, flaky tests, and more).
 - **Reusability**: reuse or write reusable fixtures, page objects and API helpers to reduce duplication.
-- **Follows modern best practices**: check out our [Scout best practices](./scout/best-practices.md).
+- **Follows modern best practices**: check out our [Scout best practices](../contributing/scout-best-practices.md).
 
 ## Scout packages [scout-packages]
 
@@ -54,7 +56,7 @@ We welcome contributions to one of the Scout packages.
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
 | Is reusable across many plugins/teams | In `@kbn/scout`                                                                                           | Generic fixtures, page objects, and API helpers    |
 | Is reusable but scoped to a solution  | In the solution Scout package (for example `@kbn/scout-security`, `@kbn/scout-oblt`, `@kbn/scout-search`) | Solution workflows and domain-specific helpers     |
-| Is specific to one plugin or package  | In your plugin or package’s `test/scout` directory                                                        | Components specific to your plugin or package only |
+| Is specific to one plugin or package  | In your plugin or package's `test/scout` directory                                                        | Components specific to your plugin or package only |
 
 ## Need help?
 
@@ -74,15 +76,15 @@ No. Scout supports both UI and API testing with Playwright.
 
 #### Q: Are test runs going to be faster? [scout-faq-faster]
 
-Often, yes—especially with [parallel test execution](./scout/parallelism.md).
+Often, yes—especially with [parallel test execution](./parallelism.md).
 
 #### Q: Why is it a good idea for tests to be close to the plugin code? [scout-faq-colocation]
 
-It’s easier to iterate and maintain, and it can enable smarter test selection in the future.
+It's easier to iterate and maintain, and it can enable smarter test selection in the future.
 
 #### Q: Can I use FTR services in Scout (for example, `esArchiver`)? [scout-faq-ftr-services]
 
-Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
+Not directly—use Scout [fixtures](./fixtures.md) instead.
 
 #### Q: What happens to FTR tests? [scout-faq-ftr-tests]
 
@@ -90,4 +92,4 @@ Existing FTR tests continue to run, and teams can migrate them to Scout incremen
 
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 
-Yes. See [Feature flags](./scout/feature-flags.md) for details on enabling flags at runtime with `apiServices.core.settings()` or using custom server configurations.
+Yes. See [Feature flags](./feature-flags.md) for details on enabling flags at runtime with `apiServices.core.settings()` or using custom server configurations.

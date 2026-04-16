@@ -7,7 +7,7 @@ navigation_title: Write API tests
 Scout API tests validate HTTP endpoints with realistic scoped credentials.
 
 :::::{important}
-[Set up your plugin or package](./setup-plugin.md) first.
+[Set up your plugin or package](./setup-scout.md) first.
 :::::
 
 ## Recommended structure [api-test-suite-anatomy]
@@ -17,13 +17,13 @@ Scout API tests validate HTTP endpoints with realistic scoped credentials.
 3. **Call the endpoint under test** with `apiClient` + the scoped headers
 4. **Assert** status + response body, and verify side effects when needed
 
-See [best practices for API tests](./best-practices.md#api-tests).
+See [best practices for API tests](../contributing/scout-best-practices.md#api-tests).
 
 Example test ([Console](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/test/scout/api/tests/spec_definitions.spec.ts)).
 
 ## API matchers [scout-write-api-tests-matchers]
 
-For API tests, import `expect` from `@kbn/scout/api` or `@kbn/scout-<solution>/api` (more on [solution-specific Scout packages](../scout.md#scout-packages)).
+For API tests, import `expect` from `@kbn/scout/api` or `@kbn/scout-<solution>/api` (more on [solution-specific Scout packages](./scout.md#scout-packages)).
 
 Scout provides response matchers for `apiClient` responses and `kbnClient.request(...)` (Axios) responses:
 
@@ -66,7 +66,7 @@ API tests live under `<plugin-root>/test/scout/api/tests` and must end with `.sp
 ## Next steps [api-tests-next]
 
 - [API authentication](./api-auth.md)
-- [Best practices](./best-practices.md)
+- [Best practices](../contributing/scout-best-practices.md)
 - [Fixtures](./fixtures.md)
-- [Run tests](./run-tests.md) and [Debugging](./debugging.md)
+- [Run tests](./run-scout-tests.md) and [Debugging](./debugging.md)
 - [Parallelism notes](./parallelism.md#api-tests-and-parallelism)

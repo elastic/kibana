@@ -13,7 +13,7 @@ The following table outlines possible test file locations and how to invoke them
 | ------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | Jest               | `**/*.test.{js,mjs,ts,tsx}`                       | `yarn test:jest [test path]`                                                                                                                             |
 | Jest (integration) | `**/integration_tests/**/*.test.{js,mjs,ts,tsx}`  | `yarn test:jest_integration [test path]`                                                                                                                 |
-| Scout (Playwright) | `**/test/scout/**/*.spec.ts`                      | `node scripts/scout.js run-tests --config [directory]/playwright.config.ts --arch <stateful                                                              | serverless> --domain <domain>` (see [Run Scout tests](/extend/scout/run-tests.md)) |
+| Scout (Playwright) | `**/test/scout/**/*.spec.ts`                      | `node scripts/scout.js run-tests --config [directory]/playwright.config.ts --arch <stateful                                                              | serverless> --domain <domain>` (see [Run Scout tests](/extend/testing/run-scout-tests.md)) |
 | FTR (Mocha)        | `test/**/config.js` `x-pack/**/test/**/config.ts` | `node scripts/functional_tests_server --config [directory]/config.js` `node scripts/functional_test_runner --config [directory]/config.js --grep=regexp` |
 
 Test runner arguments: - Where applicable, the optional arguments `--grep=regexp` will only run tests or test suites whose descriptions matches the regular expression. - `[test path]` is the relative path to the test file.
@@ -60,7 +60,7 @@ You can also look into the [Scripts README.md](https://github.com/elastic/kibana
 
 #### More testing information: [_more_testing_information]
 
-- [Scout](/extend/scout.md)
+- [Scout](/extend/testing/scout.md)
 - [Functional Testing](#development-functional-tests)
 - [Unit testing frameworks](#development-unit-tests)
 - [Automated Accessibility Testing](#development-accessibility-tests)
@@ -72,12 +72,12 @@ We use functional tests to make sure the {{kib}} UI works as expected. It replac
 
 {{kib}} has two end-to-end test frameworks:
 
-- **Scout**: modern UI and API testing built on Playwright. See [Scout](/extend/scout.md).
+- **Scout**: modern UI and API testing built on Playwright. See [Scout](/extend/testing/scout.md).
 - **FunctionalTestRunner (FTR)**: legacy functional test framework built on Mocha + WebDriver. Many existing suites still use it.
 
 ### Scout (Playwright-based)
 
-We recommend writing new functional tests with [Scout](/extend/scout.md), Kibana’s modern Playwright-based test framework.
+We recommend writing new functional tests with [Scout](/extend/testing/scout.md), Kibana’s modern Playwright-based test framework.
 
 ### `FunctionalTestRunner` (FTR)
 

@@ -39,7 +39,7 @@ The `--grep` value should match the suite tags you use. See [Deployment tags](./
 
 ## Debug flaky tests [scout-debugging-flaky-tests]
 
-When you add new tests, fix flakes, or make significant changes, run the same tests multiple times (recommended: **20–50** runs). See [Best practices](./best-practices.md#use-the-flaky-test-runner-to-catch-flaky-tests-early).
+When you add new tests, fix flakes, or make significant changes, run the same tests multiple times (recommended: **20–50** runs). See [Best practices](../contributing/scout-best-practices.md#use-the-flaky-test-runner-to-catch-flaky-tests-early).
 
 ### Repeat the same test locally [scout-debugging-flaky-tests-local]
 
@@ -57,7 +57,7 @@ node scripts/scout run-tests \
   --repeatEach 30
 ```
 
-The value must be a positive integer. See [Run tests](./run-tests.md) for the full list of `run-tests` flags.
+The value must be a positive integer. See [Run tests](./run-scout-tests.md) for the full list of `run-tests` flags.
 
 #### Using Playwright directly [scout-debugging-flaky-tests-local-playwright]
 

@@ -9,7 +9,7 @@ This guide covers best practices for writing Scout UI and API tests that are rel
 Scout is built on Playwright, so the official [Playwright Best Practices](https://playwright.dev/docs/best-practices) apply.
 
 :::::{tip}
-**New to Scout?** Start with our [Scout introduction page](../scout.md).
+**New to Scout?** Start with our [Scout introduction page](../testing/scout.md).
 :::::
 
 ## UI & API tests [ui-and-api-tests]
@@ -20,21 +20,21 @@ Best practices that apply to both UI and API tests.
 
 Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
-- Every suite must have [deployment tags](./deployment-tags.md). Use tags to target the environments where your tests apply (for example, a feature that only exists in stateful deployments).
+- Every suite must have [deployment tags](../testing/deployment-tags.md). Use tags to target the environments where your tests apply (for example, a feature that only exists in stateful deployments).
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
-- Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early. See [Run tests on Elastic Cloud](./run-tests.md#scout-run-tests-cloud) for setup instructions.
+- Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early. See [Run tests on Elastic Cloud](../testing/run-scout-tests.md#scout-run-tests-cloud) for setup instructions.
 
 ### Prefer runtime feature flags [prefer-runtime-feature-flags]
 
 When a feature is gated behind a flag, enable it at runtime with `apiServices.core.settings()` rather than creating a custom server config. Runtime flags work locally and on Cloud, don’t require a server restart, and avoid the CI cost of a dedicated server instance.
 
-For the full guide (including when a custom server config is unavoidable), see [Feature flags](./feature-flags.md).
+For the full guide (including when a custom server config is unavoidable), see [Feature flags](../testing/feature-flags.md).
 
 ### Run tests multiple times to catch flakiness [use-the-flaky-test-runner-to-catch-flaky-tests-early]
 
 When you add new tests, fix flakes, or make significant changes, run the same tests multiple times to catch flakiness early. A good starting point is **20–50 runs**.
 
-Prefer doing this locally first (faster feedback), and use the Flaky Test Runner in CI when needed. See [Debug flaky tests](./debugging.md#scout-debugging-flaky-tests) for guidance.
+Prefer doing this locally first (faster feedback), and use the Flaky Test Runner in CI when needed. See [Debug flaky tests](../testing/debugging.md#scout-debugging-flaky-tests) for guidance.
 
 ### Keep test suites independent [keep-test-suites-independent]
 
@@ -81,7 +81,7 @@ test('returns 403 when missing read privilege', async ({ apiClient }) => {
 
 ### Organize test suites by role and user flow [organize-test-suites-by-role-and-user-flow]
 
-Prefer “one role + one flow per file” and keep spec files small (roughly 4–5 short tests or 2–3 longer ones). The test runner balances work at the spec-file level, so oversized files become bottlenecks during [parallel execution](./parallelism.md). Put shared login/navigation in `beforeEach`.
+Prefer “one role + one flow per file” and keep spec files small (roughly 4–5 short tests or 2–3 longer ones). The test runner balances work at the spec-file level, so oversized files become bottlenecks during [parallel execution](../testing/parallelism.md). Put shared login/navigation in `beforeEach`.
 
 :::::{dropdown} Example
 
@@ -101,7 +101,7 @@ test('can see dashboard', async ({ page }) => {
 
 ### Use a global setup hook for one-time setup [move-repeated-one-time-setup-operations-to-a-global-setup-hook]
 
-If many files share the same “one-time” work (archives, API calls, settings), move it to a [global setup hook](./global-setup-hook.md).
+If many files share the same “one-time” work (archives, API calls, settings), move it to a [global setup hook](../testing/global-setup-hook.md).
 
 :::::{dropdown} Example
 
@@ -232,7 +232,7 @@ export const COMMON_HEADERS = {
 
 Avoid `admin` unless there’s no alternative. Minimal permissions catch real permission bugs and keep tests realistic. Also test the forbidden path: verify that an under-privileged role receives `403` for endpoints it shouldn’t access.
 
-See [browser authentication](./browser-auth.md) and [API authentication](./api-auth.md).
+See [browser authentication](../testing/browser-auth.md) and [API authentication](../testing/api-auth.md).
 
 :::::{dropdown} Examples
 ❌ **Don’t:** default to `admin` for convenience:
@@ -275,7 +275,7 @@ await use({
 await browserAuth.loginAsPlatformEngineer();
 ```
 
-For setup details, see [Reuse role helpers](./browser-auth.md#scout-browser-auth-extend).
+For setup details, see [Reuse role helpers](../testing/browser-auth.md#scout-browser-auth-extend).
 :::::
 
 ---
@@ -286,11 +286,11 @@ Best practices specific to UI tests.
 
 ### Prefer parallel runs [run-tests-in-parallel-whenever-possible]
 
-Default to [parallel UI suites](./parallelism.md) when possible. Parallel workers share the same Kibana/ES deployment, but run in isolated Spaces.
+Default to [parallel UI suites](../testing/parallelism.md) when possible. Parallel workers share the same Kibana/ES deployment, but run in isolated Spaces.
 
 | Mode           | When to use                                                                                                               |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **Parallel**   | UI tests (most suites), suites that share pre-ingested data (often using the [global setup hook](./global-setup-hook.md)) |
+| **Parallel**   | UI tests (most suites), suites that share pre-ingested data (often using the [global setup hook](../testing/global-setup-hook.md)) |
 | **Sequential** | API tests, suites that require a “clean” Elasticsearch state                                                              |
 
 ### Test behavior, not data correctness [focus-ui-tests-on-behavior-not-data-correctness]
@@ -637,7 +637,7 @@ expect(violations).toHaveLength(0);
 
 :::::
 
-For the full guide (scoping, exclusions, handling pre-existing violations), see [Accessibility testing](./a11y-checks.md).
+For the full guide (scoping, exclusions, handling pre-existing violations), see [Accessibility testing](../testing/a11y-checks.md).
 
 ### Skip onboarding with `addInitScript` [skip-onboarding-flows-with-addinitscript]
 
@@ -665,7 +665,7 @@ If you build a helper that will benefit other tests, consider upstreaming it:
 - **Reusable but solution-scoped**: contribute to the relevant solution Scout package
 - **Plugin-specific**: keep it in your plugin’s `test/scout` tree
 
-For the full guidance, see [Scout](../scout.md#contribute-to-scout-when-possible).
+For the full guidance, see [Scout](../testing/scout.md#contribute-to-scout-when-possible).
 
 ---
 
@@ -679,7 +679,7 @@ Use the right fixture for the right purpose:
 
 | Fixture                       | Use for                                                                          |
 | ----------------------------- | -------------------------------------------------------------------------------- |
-| `apiClient`                   | The endpoint under test (with scoped credentials from [API auth](./api-auth.md)) |
+| `apiClient`                   | The endpoint under test (with scoped credentials from [API auth](../testing/api-auth.md)) |
 | `apiServices`                 | Setup/teardown and side effects                                                  |
 | `kbnClient`, `esClient`, etc. | Lower-level setup when `apiServices` doesn’t have a suitable helper              |
 

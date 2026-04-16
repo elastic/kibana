@@ -18,6 +18,7 @@ toc:
       - file: guidelines-for-terraform-friendly-http-apis.md
       - file: how-we-use-github.md
       - file: managing-third-party-dependencies.md
+      - file: scout-best-practices.md
   - folder: key-concepts
     children:
       - file: plugins-packages-and-the-platform.md
@@ -48,7 +49,6 @@ toc:
     children:
       - file: adding-performance-metrics.md
       - file: wsl-on-windows-development.md
-      - file: testing-kibana-plugins.md
       - file: register-a-new-saved-object-type.md
       - file: saved-object-search-method.md
       - file: access-the-elasticsearch-client-in-a-plugin.md
@@ -139,33 +139,30 @@ toc:
       - file: kibana-issue-reporting.md
       - file: pr-review.md
       - file: kibana-linting.md
-  - file: scout.md
+  - folder: testing
     children:
-      - file: scout/getting-started.md
+      - file: index.md
+      - file: unit-tests.md
+      - file: integration-tests.md
+      - file: scout.md
         children:
-          - file: scout/setup-plugin.md
-          - file: scout/run-tests.md
-          - file: scout/debugging.md
-          - file: scout/best-practices.md
-      - file: scout/core-concepts.md
-        children:
-          - file: scout/fixtures.md
-          - file: scout/page-objects.md
-          - file: scout/api-services.md
-          - file: scout/parallelism.md
-          - file: scout/global-setup-hook.md
-          - file: scout/deployment-tags.md
-          - file: scout/skip-tests.md
-          - file: scout/feature-flags.md
-      - file: scout/ui-testing.md
-        children:
-          - file: scout/write-ui-tests.md
-          - file: scout/browser-auth.md
-          - file: scout/a11y-checks.md
-      - file: scout/api-testing.md
-        children:
-          - file: scout/write-api-tests.md
-          - file: scout/api-auth.md
+          - file: setup-scout.md
+          - file: run-scout-tests.md
+          - file: fixtures.md
+          - file: page-objects.md
+          - file: api-services.md
+          - file: parallelism.md
+          - file: deployment-tags.md
+          - file: global-setup-hook.md
+          - file: write-ui-tests.md
+          - file: write-api-tests.md
+          - file: debugging.md
+          - file: browser-auth.md
+          - file: api-auth.md
+          - file: a11y-checks.md
+          - file: skip-tests.md
+          - file: feature-flags.md
+      - file: ftr.md
   - file: advanced.md
     children:
       - file: running-elasticsearch.md

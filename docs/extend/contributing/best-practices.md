@@ -209,7 +209,7 @@ Has there been a discussion about which license this feature should be available
 
 ## Testing scenarios
 
-Every PR submitted should be accompanied by tests. Read through the [testing plugins tutorial](../tutorials/testing-kibana-plugins.md) for how to test.
+Every PR submitted should be accompanied by tests. Read through the [testing guide](../testing/index.md) for how to test.
 
 ### Browser coverage
 

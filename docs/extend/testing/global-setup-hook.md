@@ -70,6 +70,6 @@ The global setup hook only has access to **worker-scoped** fixtures. It cannot u
 
 ::::::::::{step} Run tests
 
-Run tests as usual via [Run Scout tests](./run-tests.md). The global setup hook will execute first—check console logs to verify it ran successfully.
+Run tests as usual via [Run Scout tests](./run-scout-tests.md). The global setup hook will execute first—check console logs to verify it ran successfully.
 
 ::::::::::::

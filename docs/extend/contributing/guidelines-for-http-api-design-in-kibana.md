@@ -69,7 +69,7 @@ We categorize HTTP APIs as either **internal** or **public** to further reinforc
 :::
 
 :::{note} Unit, Integration and E2E tests
-All HTTP APIs must have [E2E or integration test coverage](../tutorials/testing-kibana-plugins.md#integration-tests) giving confidence the basic functionality works as intended.
+All HTTP APIs must have [E2E or integration test coverage](../testing/integration-tests.md) giving confidence the basic functionality works as intended.
 :::
 
 ### Commitment

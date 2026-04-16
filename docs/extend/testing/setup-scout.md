@@ -4,7 +4,7 @@ navigation_title: Set up plugin
 
 # Set up Scout in your plugin or package [scout-setup-plugin]
 
-This page shows the **minimum setup** to add Scout tests to a plugin/package. For choosing the right import (`@kbn/scout` vs solution packages), see [Scout packages](../scout.md#scout-packages).
+This page shows the **minimum setup** to add Scout tests to a plugin/package. For choosing the right import (`@kbn/scout` vs solution packages), see [Scout packages](./scout.md#scout-packages).
 
 ## Guided setup with the Scout CLI [scout-setup-cli]
 

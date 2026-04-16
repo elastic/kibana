@@ -9,7 +9,7 @@ mapped_pages:
 
 Learn about [recommended testing approaches](/extend/development-tests.md).
 
-For modern UI and API end-to-end tests in the {{kib}} repo, see [Scout](/extend/scout.md).
+For modern UI and API end-to-end tests in the {{kib}} repo, see [Scout](/extend/testing/scout.md).
 
 
 ## Mock {{kib}} Core services in tests [_mock_kib_core_services_in_tests]
