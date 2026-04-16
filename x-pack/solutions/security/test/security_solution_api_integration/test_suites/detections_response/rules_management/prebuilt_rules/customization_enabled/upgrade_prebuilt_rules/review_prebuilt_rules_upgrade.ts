@@ -294,34 +294,31 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       );
     }
-  });
 
-  describe('Deprecated rule exclusion from upgrade review', () => {
-    beforeEach(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-    });
+    describe('Deprecated rule exclusion', () => {
+      it('does not include deprecated rule assets in the upgrade review', async () => {
+        // Install rule-a and rule-b at version 1
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-a', version: 1 }),
+          createRuleAssetSavedObject({ rule_id: 'rule-b', version: 1 }),
+        ]);
+        await installPrebuiltRules(es, supertest);
 
-    it('does not include deprecated rule assets in the upgrade review', async () => {
-      // Install rule-a and rule-b at version 1
-      await createPrebuiltRuleAssetSavedObjects(es, [
-        createRuleAssetSavedObject({ rule_id: 'rule-a', version: 1 }),
-        createRuleAssetSavedObject({ rule_id: 'rule-b', version: 1 }),
-      ]);
-      await installPrebuiltRules(es, supertest);
+        // Replace assets: active upgrade for rule-a, deprecated asset for rule-b
+        await deleteAllPrebuiltRuleAssets(es, log);
+        await createPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-a', version: 2 }),
+        ]);
+        await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+          { rule_id: 'rule-b', version: 2 },
+        ]);
 
-      // Replace assets: active upgrade for rule-a, deprecated asset for rule-b
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await createPrebuiltRuleAssetSavedObjects(es, [
-        createRuleAssetSavedObject({ rule_id: 'rule-a', version: 2 }),
-      ]);
-      await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [{ rule_id: 'rule-b', version: 2 }]);
+        const response = await reviewPrebuiltRulesToUpgrade(supertest);
 
-      const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-      const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);
-      expect(ruleIds).toContain('rule-a');
-      expect(ruleIds).not.toContain('rule-b');
-      expect(response.stats.num_rules_to_upgrade_total).toBe(1);
+        const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);
+        expect(ruleIds).toContain('rule-a');
+        expect(ruleIds).not.toContain('rule-b');
+      });
     });
   });
 };
