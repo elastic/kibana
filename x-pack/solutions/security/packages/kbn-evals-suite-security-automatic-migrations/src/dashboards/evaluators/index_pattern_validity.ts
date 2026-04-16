@@ -33,15 +33,23 @@ export const createIndexPatternValidityEvaluator = (): Evaluator<
     }
 
     const actualPatterns = extractIndexPatterns(output);
-    const actualByTitle = new Map(
-      actualPatterns.map(({ panelTitle, indexPattern }) => [panelTitle.toLowerCase(), indexPattern])
-    );
+    const actualByTitle = new Map<string, string[]>();
+    for (const { panelTitle, indexPattern } of actualPatterns) {
+      const key = panelTitle.toLowerCase();
+      const existing = actualByTitle.get(key);
+      if (existing) {
+        existing.push(indexPattern);
+      } else {
+        actualByTitle.set(key, [indexPattern]);
+      }
+    }
 
     let matchingPanels = 0;
     const mismatches: Array<{ title: string; expected: string; actual: string | null }> = [];
 
     for (const panel of panelsWithExpectedIndex) {
-      const actual = actualByTitle.get(panel.title.toLowerCase()) ?? null;
+      const actuals = actualByTitle.get(panel.title.toLowerCase());
+      const actual = actuals?.find((a) => a === panel.index_pattern) ?? actuals?.[0] ?? null;
       if (actual === panel.index_pattern) {
         matchingPanels++;
       } else {

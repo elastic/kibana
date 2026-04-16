@@ -130,7 +130,7 @@ function extractIndexPatternFromPanel(panel: KibanaPanel): string | undefined {
   // Fallback: parse FROM clause from ES|QL query
   const query = extractQueryFromPanel(panel);
   if (query) {
-    const fromMatch = query.match(/^FROM\s+(\S+)/i);
+    const fromMatch = query.match(/FROM\s+(\S+)/i);
     if (fromMatch) {
       return fromMatch[1];
     }
