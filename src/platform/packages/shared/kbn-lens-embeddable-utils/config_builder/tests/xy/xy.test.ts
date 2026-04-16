@@ -9,6 +9,9 @@
 
 import type { XYVisualizationState } from '@kbn/lens-common';
 import { xyStateSchema } from '../../schema/charts/xy';
+import type { XYState } from '../../schema/charts/xy';
+import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
 import type { LensAttributes } from '../../types';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
@@ -34,6 +37,7 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING } from '../../transforms/charts/xy/defaults';
 
 function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 'area') {
   return {
@@ -685,6 +689,182 @@ describe('XY', () => {
           xyStateSchema
         );
       });
+    });
+  });
+
+  describe('color default application', () => {
+    it('should emit AUTO_COLOR on y-axis metrics when no breakdown is present', () => {
+      const config = {
+        type: 'xy',
+        title: 'Y-axis color default test',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+        ],
+      } satisfies XYState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].color).toEqual(AUTO_COLOR);
+    });
+
+    it('should emit default categorical color mapping on breakdown_by (bar)', () => {
+      const config = {
+        type: 'xy',
+        title: 'Breakdown color default test',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count' }],
+            breakdown_by: { column: 'product' },
+          },
+        ],
+      } satisfies XYState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
+        DEFAULT_CATEGORICAL_COLOR_MAPPING
+      );
+    });
+
+    it('should emit elastic_line_optimized palette on breakdown_by for line charts', () => {
+      const config = {
+        type: 'xy',
+        title: 'Line breakdown color default test',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'line',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count' }],
+            breakdown_by: { column: 'product' },
+          },
+        ],
+      } satisfies XYState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
+        DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+      );
+    });
+
+    it('should emit AUTO_COLOR on reference line when no color is specified', () => {
+      const config = {
+        type: 'xy',
+        title: 'Reference line color default test',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+          {
+            data_source: {
+              type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+              index_pattern: 'test-index',
+              time_field: '@timestamp',
+            },
+            type: 'reference_lines',
+            ignore_global_filters: false,
+            sampling: 1,
+            thresholds: [
+              {
+                operation: 'median',
+                field: 'bytes',
+                label: 'Median',
+                axis_id: 'y',
+              },
+            ],
+          },
+        ],
+      } satisfies XYState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+
+      const refLineLayer = apiOutput.layers.find((l) => 'thresholds' in l);
+      expect(refLineLayer).toBeDefined();
+      if (refLineLayer && 'thresholds' in refLineLayer) {
+        expect(refLineLayer.thresholds[0].color).toEqual(AUTO_COLOR);
+      }
+    });
+
+    it('should emit AUTO_COLOR on annotation events when no color is specified', () => {
+      const config = {
+        type: 'xy',
+        title: 'Annotation color default test',
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'bar',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+          {
+            type: 'annotations',
+            ignore_global_filters: false,
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            events: [
+              {
+                type: 'point',
+                label: 'Test Event',
+                timestamp: '2023-01-01T00:00:00Z',
+              },
+              {
+                type: 'range',
+                label: 'Test Range',
+                interval: {
+                  from: '2023-01-01T00:00:00Z',
+                  to: '2023-01-02T00:00:00Z',
+                },
+                fill: 'inside',
+              },
+            ],
+          },
+        ],
+      } satisfies XYState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYState;
+
+      const annotationLayer = apiOutput.layers.find((l) => 'events' in l);
+      expect(annotationLayer).toBeDefined();
+      if (annotationLayer && 'events' in annotationLayer) {
+        for (const event of annotationLayer.events) {
+          expect(event.color).toEqual(AUTO_COLOR);
+        }
+      }
     });
   });
 });

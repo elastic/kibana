@@ -17,8 +17,13 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
-import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
-import { BadCRUDRequestError, EntityNotFoundError, EntityAlreadyExistsError } from '../errors';
+import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import {
+  BadCRUDRequestError,
+  EntityNotFoundError,
+  EntityAlreadyExistsError,
+  EntityStoreNotInstalledError,
+} from '../errors';
 import { validateAndTransformDoc } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
 import {
@@ -212,6 +217,14 @@ export class CRUDClient {
     });
   }
 
+  private async assertInstalled(): Promise<void> {
+    const indexName = getLatestEntitiesIndexName(this.namespace);
+    const exists = await this.esClient.indices.exists({ index: indexName });
+    if (!exists) {
+      throw new EntityStoreNotInstalledError();
+    }
+  }
+
   /**
    * Page/search over the v2 unified LATEST entities index (normalized hits, optional JSON `filterQuery`, entity-type filter).
    * Prefer {@link listEntities} from HTTP routes; this remains for direct server callers.
@@ -233,6 +246,7 @@ export class CRUDClient {
   // ID will be validated and used if correct
   // 3. Identity only - no ID and identifying data - ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
+    await this.assertInstalled();
     const generatedId = getEuidFromObject(entityType, doc);
     const valid = validateAndTransformDoc(
       'update',
@@ -244,7 +258,7 @@ export class CRUDClient {
     );
     try {
       const { result } = await this.esClient.update({
-        index: getEntitiesAlias(ENTITY_LATEST, this.namespace),
+        index: getLatestEntitiesIndexName(this.namespace),
         id: hashEuid(valid.id),
         doc: valid.doc,
         retry_on_conflict: RETRY_ON_CONFLICT,
@@ -273,6 +287,7 @@ export class CRUDClient {
     objects,
     force = false,
   }: BulkUpdateEntityParams): Promise<BulkObjectResponse[]> {
+    await this.assertInstalled();
     const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
     this.logger.debug(`Preparing ${objects.length} entities for bulk update`);
     for (const { type: entityType, doc } of objects) {
@@ -292,7 +307,7 @@ export class CRUDClient {
     }
     this.logger.debug(`Bulk updating ${objects.length} entities`);
     const resp = await this.esClient.bulk({
-      index: getEntitiesAlias(ENTITY_LATEST, this.namespace),
+      index: getLatestEntitiesIndexName(this.namespace),
       operations,
       refresh: 'wait_for',
     });
@@ -317,6 +332,7 @@ export class CRUDClient {
 
   // createEntity generates EUID and creates the entity in the LATEST index
   public async createEntity(entityType: EntityType, doc: Entity): Promise<void> {
+    await this.assertInstalled();
     const id = getEuidFromObject(entityType, doc);
     if (!id) {
       throw new BadCRUDRequestError(`Could not derive EUID from document`);
@@ -324,7 +340,7 @@ export class CRUDClient {
     const valid = validateAndTransformDoc('create', entityType, this.namespace, doc, id, true);
     try {
       const { result } = await this.esClient.create({
-        index: getEntitiesAlias(ENTITY_LATEST, this.namespace),
+        index: getLatestEntitiesIndexName(this.namespace),
         id: hashEuid(valid.id),
         document: valid.doc,
         refresh: 'wait_for',
@@ -344,7 +360,7 @@ export class CRUDClient {
     try {
       this.logger.debug(`Deleting Entity ID ${id}`);
       await this.esClient.delete({
-        index: getEntitiesAlias(ENTITY_LATEST, this.namespace),
+        index: getLatestEntitiesIndexName(this.namespace),
         id: hashEuid(id),
       });
     } catch (error) {
@@ -402,7 +418,7 @@ export class CRUDClient {
     }
 
     const resp = await this.esClient.search<Entity>({
-      index: getEntitiesAlias(ENTITY_LATEST, this.namespace),
+      index: getLatestEntitiesIndexName(this.namespace),
       query,
       size,
       sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
