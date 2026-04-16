@@ -27,7 +27,7 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ samlAuth, esClient }) => {
       const info = await esClient.info();
-      // eslint-disable-next-line playwright/no-conditional-expect
+
       if (!info.version.number.includes('SNAPSHOT')) {
         apiTest.skip(true, 'Requires shard_delay agg (SNAPSHOT builds only)');
       }
