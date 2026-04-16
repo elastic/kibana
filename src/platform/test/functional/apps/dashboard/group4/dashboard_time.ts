@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
 
   // Failing: See https://github.com/elastic/kibana/issues/261894
-  describe.skip('dashboard time', () => {
+  describe('dashboard time', () => {
     before(async function () {
       await dashboard.initTests();
       await dashboard.preserveCrossAppState();
@@ -52,6 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('dashboard with stored time', function () {
       it('is saved with time', async function () {
+        await dashboard.switchToEditMode();
         await timePicker.setDefaultAbsoluteRange();
         await dashboard.saveDashboard(dashboardName, {
           storeTimeWithDashboard: true,
