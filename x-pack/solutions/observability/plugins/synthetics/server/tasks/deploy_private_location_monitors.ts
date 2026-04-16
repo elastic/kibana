@@ -270,7 +270,7 @@ export class DeployPrivateLocationMonitors {
           maintenanceWindows
         );
 
-        if (result.failedCreates && result.failedCreates.length > 0) {
+        if (result?.failedCreates && result.failedCreates.length > 0) {
           this.serverSetup.logger.error(
             `[DeployPrivateLocationMonitors] Failed to create ${result.failedCreates.length} policies during sync`
           );
