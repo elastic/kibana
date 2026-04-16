@@ -77,6 +77,7 @@ export const isBrowserToolCallEvent = (
 export interface ToolProgressEventData {
   tool_call_id: string;
   message: string;
+  metadata?: Record<string, string>;
 }
 
 export type ToolProgressEvent = ChatEventBase<ChatEventType.toolProgress, ToolProgressEventData>;

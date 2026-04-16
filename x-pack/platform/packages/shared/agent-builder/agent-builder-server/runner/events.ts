@@ -43,7 +43,10 @@ export interface ToolEventEmitter {
   /**
    * Emit a tool progress event based on the provided progress text.
    */
-  reportProgress: (progressMessage: string) => void;
+  reportProgress: (
+    progressMessage: string,
+    options?: { metadata?: Record<string, string> }
+  ) => void;
   /**
    * Emit a UI event which can be listened to on the front-end.
    *

@@ -93,6 +93,10 @@ export interface ToolCallProgress {
    * The full text message
    */
   message: string;
+  /**
+   * Optional structured metadata attached to this progress event.
+   */
+  metadata?: Record<string, string>;
 }
 
 /**

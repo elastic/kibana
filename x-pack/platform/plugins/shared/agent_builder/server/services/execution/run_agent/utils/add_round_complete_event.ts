@@ -397,7 +397,10 @@ const createToolCallStep = ({
     tool_id: toolCall.data.tool_id,
     params: toolCall.data.params,
     tool_call_id: toolCall.data.tool_call_id,
-    progression: toolProgress.map(({ data: { message } }) => ({ message })),
+    progression: toolProgress.map(({ data: { message, metadata } }) => ({
+      message,
+      ...(metadata ? { metadata } : {}),
+    })),
     results: toolResult?.data.results ?? [],
     tool_call_group_id: toolCall.data.tool_call_group_id,
   };

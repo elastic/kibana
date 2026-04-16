@@ -11,13 +11,15 @@ import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createSubagentTool } from './start_subagent';
 
-// The handler is typed as ToolHandlerFn which expects (args, context),
-// but our implementation doesn't use context. Cast to simplify test calls.
-// We also cast the return to access `results` directly since the handler always returns results (never prompts).
+// Mock context with events emitter for tool handler calls.
+const mockContext = {
+  events: { reportProgress: jest.fn(), sendUiEvent: jest.fn() },
+} as any;
+
 const callHandler = async (
   tool: ReturnType<typeof createSubagentTool>,
   params: { description: string; prompt: string; run_in_background?: boolean }
-) => tool.handler(params, {} as any) as Promise<{ results: any[] }>;
+) => tool.handler(params, mockContext) as Promise<{ results: any[] }>;
 
 describe('createSubagentTool', () => {
   const mockRound = {
@@ -59,6 +61,7 @@ describe('createSubagentTool', () => {
     expect(result.results).toHaveLength(1);
     expect(result.results![0].type).toBe(ToolResultType.other);
     expect(result.results![0].data).toEqual({
+      agent_execution_id: 'sub-exec-id',
       response: { message: 'Sub-agent response text' },
     });
   });

@@ -57,14 +57,22 @@ export const filestoreTools = {
   glob: `${internalNamespaces.filestore}.glob`,
 };
 
+export const internalTools = {
+  subAgentTool: 'start_subagent',
+  sleepTool: 'sleep',
+} as const;
+
 export const isAttachmentTool = (toolName: string) =>
   Object.values(attachmentTools).includes(toolName);
 
 export const isFilestoreTool = (toolName: string) =>
   Object.values(filestoreTools).includes(toolName);
 
+const isInternalToolName = (toolName: string) =>
+  Object.values(internalTools).includes(toolName as any);
+
 export const isInternalTool = (toolName: string) =>
-  isAttachmentTool(toolName) || isFilestoreTool(toolName);
+  isAttachmentTool(toolName) || isFilestoreTool(toolName) || isInternalToolName(toolName);
 
 export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
 

@@ -8,13 +8,13 @@
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import { z } from '@kbn/zod/v4';
-import { ToolType, isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import { ToolType, isRoundCompleteEvent, internalTools } from '@kbn/agent-builder-common';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 
-export const SubAgentToolName = 'start_subagent';
+export const SubAgentToolName = internalTools.subAgentTool;
 
 const schema = z.object({
   description: z.string().describe('A short (3-5 word) description of the task'),
@@ -27,7 +27,7 @@ const schema = z.object({
     ),
 });
 
-const description = `Start a sub-agent to perform a specific task.
+const toolDescription = `Start a sub-agent to perform a specific task.
 
 The sub-agent runs with the same configuration as the current agent. Use this to delegate complex sub-tasks.
 
@@ -80,20 +80,30 @@ export const createSubagentTool = ({
 }): BuiltinToolDefinition<typeof schema> => {
   return {
     id: SubAgentToolName,
-    description,
+    description: toolDescription,
     type: ToolType.builtin,
     schema,
     tags: ['subagent'],
-    handler: async ({ description, prompt, run_in_background = false }) => {
+    handler: async ({ description, prompt, run_in_background = false }, context) => {
       try {
+        const fullPrompt = `${description}\n\n${prompt}`;
+
         const { executionId, events$ } = await subAgentExecutor.executeSubAgent({
           agentId,
           connectorId,
           capabilities,
           parentExecutionId,
-          prompt,
+          prompt: fullPrompt,
           // background agents should continue running even if main execution completes
           ...(run_in_background ? {} : { abortSignal }),
+        });
+
+        // Emit progress with execution ID so the UI can show "Watch" before results arrive
+        context.events.reportProgress(`Sub-agent execution ${executionId} started`, {
+          metadata: {
+            agent_execution_id: executionId,
+            internal: 'true',
+          },
         });
 
         if (run_in_background) {
@@ -112,7 +122,7 @@ export const createSubagentTool = ({
           const response = await extractFinalResponse(events$);
 
           return {
-            results: [createOtherResult({ response })],
+            results: [createOtherResult({ agent_execution_id: executionId, response })],
           };
         }
       } catch (error) {

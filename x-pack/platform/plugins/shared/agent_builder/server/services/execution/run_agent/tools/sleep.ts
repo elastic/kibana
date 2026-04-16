@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ToolType } from '@kbn/agent-builder-common';
+import { ToolType, internalTools } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createOtherResult } from '@kbn/agent-builder-server';
 
-export const SleepToolName = 'sleep';
+export const SleepToolName = internalTools.sleepTool;
 
 const MAX_SLEEP_SECONDS = 120;
 

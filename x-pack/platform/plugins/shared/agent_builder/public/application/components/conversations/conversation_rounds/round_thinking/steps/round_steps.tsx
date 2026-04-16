@@ -21,12 +21,10 @@ import { EuiFlexGroup, EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/
 import { ToolResponseFlyout } from './tool_response_flyout';
 import { useToolResultsFlyout } from '../../../../../hooks/thinking/use_tool_results_flyout';
 import { ThinkingItemLayout } from './thinking_item_layout';
-import { ToolCallDisplay } from './tool_call_display';
-import { ToolProgressDisplay } from './tool_progress_display';
 import { ToolResultDisplay } from './tool_result_display';
-import { FlyoutResultItem } from './flyout_result_item';
 import { CompactionDisplay } from './compaction_display';
 import { BackgroundExecutionDisplay } from './background_execution_display';
+import { getToolCallThinkingItems, type ItemFactoryEntry } from './tool_call_thinking';
 
 const labels = {
   roundThinkingSteps: i18n.translate('xpack.agentBuilder.conversation.thinking.stepsList', {
@@ -42,16 +40,6 @@ const labels = {
     defaultMessage: 'Loading...',
   }),
 };
-
-// Exposed in main thinking chain, for now query and esql results
-const mainThinkingResultTypes: string[] = [
-  ToolResultType.query,
-  ToolResultType.esqlResults,
-  ToolResultType.error,
-];
-
-// Tool result types that should not have an icon displayed in the thinking steps list
-const disabledToolResultIconTypes: string[] = [ToolResultType.error, ToolResultType.query];
 
 const getItemIcon = ({
   isLoading,
@@ -69,23 +57,11 @@ const getItemIcon = ({
   return <EuiIcon type="check" color="success" />;
 };
 
-interface ItemFactoryEntry {
-  key: string;
-  factory: ItemFactory;
-  isExecuting?: boolean;
-}
-
-type ItemFactory = (icon?: ReactNode, textColor?: string) => ReactNode;
-
 interface RoundStepsProps {
   steps: ConversationRoundStep[];
   isLoading: boolean;
 }
 export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
-  // Each step will map to multiple thinking items
-  // In the case of tool call steps we'll have
-  // an item for the tool call, items for the progression, and items for the tool call results
-
   const {
     toolResults,
     isOpen: isToolResultsFlyoutOpen,
@@ -98,79 +74,9 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
   const renderedSteps = useMemo(() => {
     const itemFactories: ItemFactoryEntry[] = [];
 
-    // First pass: build all item factories to determine total count
     steps.forEach((step, stepIndex) => {
       if (isToolCallStep(step)) {
-        const hasResults = step.results.length > 0;
-        itemFactories.push({
-          key: `step-${stepIndex}-tool-call`,
-          isExecuting: !hasResults,
-          factory: (icon, textColor) => (
-            <ToolCallDisplay
-              key={`step-${stepIndex}-tool-call`}
-              step={step}
-              icon={icon}
-              textColor={textColor}
-            />
-          ),
-        });
-
-        // Add progression items
-        step.progression?.forEach((progress, progressIndex) => {
-          itemFactories.push({
-            key: `step-${stepIndex}-${step.tool_id}-progress-${progressIndex}`,
-            factory: (icon, textColor) => (
-              <ToolProgressDisplay
-                key={`step-${stepIndex}-${step.tool_id}-progress-${progressIndex}`}
-                progress={progress}
-                icon={icon}
-                textColor={textColor}
-              />
-            ),
-          });
-        });
-
-        // Add main thinking result items
-        step.results
-          .filter((result: ToolResult) => mainThinkingResultTypes.includes(result.type))
-          .forEach((result: ToolResult, resultIndex) => {
-            itemFactories.push({
-              key: `step-${stepIndex}-${step.tool_id}-result-${resultIndex}`,
-              factory: (icon, textColor) => {
-                const shouldDisableIcon = disabledToolResultIconTypes.includes(result.type);
-                return (
-                  <ThinkingItemLayout
-                    key={`step-${stepIndex}-${step.tool_id}-result-${resultIndex}`}
-                    icon={shouldDisableIcon ? undefined : icon}
-                    textColor={textColor}
-                  >
-                    <ToolResultDisplay toolResult={result} />
-                  </ThinkingItemLayout>
-                );
-              },
-            });
-          });
-
-        // Add flyout result items
-        const flyoutResultItems = step.results.filter(
-          (result: ToolResult) => !mainThinkingResultTypes.includes(result.type)
-        );
-        if (flyoutResultItems.length > 0) {
-          itemFactories.push({
-            key: `step-${stepIndex}-${step.tool_id}-result-flyout`,
-            factory: (icon, textColor) => (
-              <FlyoutResultItem
-                key={`step-${stepIndex}-${step.tool_id}-result-flyout`}
-                step={step}
-                stepIndex={stepIndex}
-                flyoutResultItems={flyoutResultItems}
-                onOpenFlyout={openFlyout}
-                icon={icon}
-                textColor={textColor}
-              />
-            ),
-          });
-        }
+        itemFactories.push(...getToolCallThinkingItems({ step, stepIndex, openFlyout }));
       } else if (isReasoningStep(step) && !step.transient) {
         itemFactories.push({
           key: `step-reasoning-${stepIndex}`,
@@ -232,8 +138,6 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
 
     const totalItems = itemFactories.length;
 
-    // Second pass: map over factories and create items with icons based on flat position
-    // The last item should always be loading unless the round has completed
     return itemFactories.map((itemFactory, flatIndex) => {
       const isLastItem = flatIndex === totalItems - 1;
       const isExecutingTool = !!(itemFactory.isExecuting && isLoading);
