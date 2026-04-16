@@ -34,3 +34,6 @@ export const NOTES_VIEW_NOTES_BUTTON_TEST_ID = `${PREFIX}HeaderNotesViewNotesBut
 export const NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID = `${PREFIX}HeaderNotesAddNoteIconButton` as const;
 export const NOTES_COUNT_TEST_ID = `${PREFIX}HeaderNotesCount` as const;
 export const NOTES_LOADING_TEST_ID = `${PREFIX}HeaderNotesLoading` as const;
+
+export const TOOLS_FLYOUT_HEADER_TEST_ID = `${PREFIX}ToolsFlyoutHeader` as const;
+export const TOOLS_FLYOUT_HEADER_TITLE_TEST_ID = `${PREFIX}ToolsFlyoutHeaderTitle` as const;

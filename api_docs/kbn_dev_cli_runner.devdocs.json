@@ -1367,13 +1367,55 @@
       },
       {
         "parentPluginId": "@kbn/dev-cli-runner",
+        "id": "def-common.FlagHelpItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "FlagHelpItem",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagHelpItem.flag",
+            "type": "string",
+            "tags": [],
+            "label": "flag",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagHelpItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-cli-runner",
         "id": "def-common.FlagOptions",
         "type": "Interface",
         "tags": [],
         "label": "FlagOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
-        "lineNumber": 79,
+        "lineNumber": 84,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1389,7 +1431,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
-            "lineNumber": 80,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1405,7 +1447,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
-            "lineNumber": 81,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1413,15 +1455,23 @@
           {
             "parentPluginId": "@kbn/dev-cli-runner",
             "id": "def-common.FlagOptions.help",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "help",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | ",
+              {
+                "pluginId": "@kbn/dev-cli-runner",
+                "scope": "common",
+                "docId": "kibKbnDevCliRunnerPluginApi",
+                "section": "def-common.FlagHelpItem",
+                "text": "FlagHelpItem"
+              },
+              "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1437,7 +1487,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1453,7 +1503,7 @@
               "{ [key: string]: string | string[]; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1469,7 +1519,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
-            "lineNumber": 85,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1485,7 +1535,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
-            "lineNumber": 86,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1501,7 +1551,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-runner/src/flags/types.ts",
-            "lineNumber": 87,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

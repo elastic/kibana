@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
@@ -43,11 +44,16 @@ Use this skill when the user wants to:
 - **${workflowTools.getExamples}**: Search the bundled example library for working workflow YAML patterns
 - **${workflowTools.getConnectors}**: Find connector instances configured in the user's environment
 - **${workflowTools.validateWorkflow}**: Validate a complete workflow YAML string against all rules. When validation fails, step definitions for referenced step types are automatically included.
-- **${workflowTools.listWorkflows}**: List workflows in the user's environment
-- **${workflowTools.getWorkflow}**: Retrieve a specific workflow by ID
+
+### Discovering Existing Workflows (SML)
+
+To list or find existing workflows, use the SML (Semantic Metadata Layer) tools — do NOT use \`${platformCoreTools.search}\` to query internal indices.
+
+1. **${platformCoreTools.smlSearch}**: Search for workflows by name, description, or tags. Pass a query like "workflow" or use "*" to return all available workflows. Results include \`chunk_id\` values.
+2. **${platformCoreTools.smlAttach}**: Attach a workflow to the conversation by passing \`chunk_ids\` from the search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment that you can then edit with the edit tools below.
 
 ### Edit Tools
-- **${workflowTools.replaceYaml}**: Replace the entire workflow YAML, or **create a new workflow from scratch** when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists. Use this to create new workflows.
+- **${workflowTools.setYaml}**: Set the complete workflow YAML. Creates a new workflow when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists, or replaces the entire YAML of an existing one.
 - **${workflowTools.insertStep}**: Insert a new step at the end of the steps list (requires existing attachment)
 - **${workflowTools.modifyStep}**: Replace an entire step by name (requires existing attachment)
 - **${workflowTools.modifyStepProperty}**: Modify a single property of a step (requires existing attachment)
@@ -58,6 +64,10 @@ Use this skill when the user wants to:
 - **workflow_execute_step**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts) return a preview with config and validation instead of executing.
 
 ## Core Instructions
+
+### Creating New Workflows
+
+To create a new workflow, call \`${workflowTools.setYaml}\` with the complete YAML. This tool creates the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment automatically when none exists. Do NOT use attachments.add or attachment_add — that will fail.
 
 ### Search Examples Before Writing Step YAML
 
@@ -170,6 +180,7 @@ Use \`${workflowTools.getConnectors}\` to find the connector IDs configured in t
 **ALWAYS call \`${workflowTools.getStepDefinitions}\` to verify the exact step type ID before inserting a new step or changing a step's type.**
 Step types have specific IDs (e.g. \`kibana.createCase\`, not \`kibana\`; \`http\`, not \`http.request\`).
 Using an incorrect type ID will produce a validation error — verify the ID first to avoid invalid proposals.
+Deprecated step types are excluded from discovery by default; if you are maintaining an existing workflow that already uses one, call \`${workflowTools.getStepDefinitions}\` with \`stepType\` set to the exact legacy ID or pass \`includeDeprecated: true\`.
 
 ### Liquid Templating
 

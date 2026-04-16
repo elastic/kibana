@@ -63,13 +63,13 @@ export const ColorManager: FC<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           aria-label={strings.getAddAriaLabel()}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           isDisabled={!validColor || !onAddColor}
           onClick={() => onAddColor && onAddColor(value)}
         />
         <EuiButtonIcon
           aria-label={strings.getRemoveAriaLabel()}
-          iconType="minusInCircle"
+          iconType="minusCircle"
           isDisabled={!validColor || !onRemoveColor}
           onClick={() => onRemoveColor && onRemoveColor(value)}
         />

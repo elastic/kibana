@@ -52,20 +52,25 @@ export const AlertStatus = memo(({ hit }: AlertStatusProps) => {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiSpacer size="xs" />
-      <EuiFlexItem data-test-subj={WORKFLOW_STATUS_TITLE_TEST_ID}>
-        <EuiTitle size="xxs">
-          <h5>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.document.about.status.statusHistoryTitle"
-              defaultMessage="Last alert status change"
-            />
-          </h5>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem data-test-subj={WORKFLOW_STATUS_DETAILS_TEST_ID}>{lastStatusChange}</EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiSpacer size="xs" />
+        <EuiFlexItem data-test-subj={WORKFLOW_STATUS_TITLE_TEST_ID}>
+          <EuiTitle size="xxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.document.about.status.statusHistoryTitle"
+                defaultMessage="Last alert status change"
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj={WORKFLOW_STATUS_DETAILS_TEST_ID}>
+          {lastStatusChange}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 });
 

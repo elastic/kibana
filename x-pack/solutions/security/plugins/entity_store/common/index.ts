@@ -114,7 +114,8 @@ export {
   ENTITY_HISTORY,
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
+  MAPPING_VERSION,
   getEntityIndexPattern,
-  getEntitiesAliasPattern,
+  getEntitiesAlias,
   getLatestEntitiesIndexName,
 } from './domain/entity_index';

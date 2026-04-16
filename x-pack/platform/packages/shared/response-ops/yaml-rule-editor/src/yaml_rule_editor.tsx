@@ -76,7 +76,7 @@ export const YamlRuleEditor: React.FC<YamlRuleEditorProps> = ({
   esqlCallbacks,
   esqlPropertyNames = DEFAULT_ESQL_PROPERTY_NAMES,
   isReadOnly = false,
-  height = 320,
+  height = 'clamp(320px, calc(100vh - 500px), 750px)',
   dataTestSubj = 'alertingV2YamlRuleEditor',
 }) => {
   const editorSuggestDisposable = useRef<monaco.IDisposable | null>(null);
@@ -262,6 +262,7 @@ export const YamlRuleEditor: React.FC<YamlRuleEditorProps> = ({
       suggestionProvider={suggestionProvider}
       hoverProvider={hoverProvider}
       options={{
+        automaticLayout: true,
         minimap: { enabled: false },
         wordWrap: 'on',
         lineNumbers: 'on',

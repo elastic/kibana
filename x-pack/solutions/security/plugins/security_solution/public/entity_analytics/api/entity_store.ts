@@ -22,8 +22,6 @@ import type {
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
-const ENTITY_STORE_V2_QUERY = { apiVersion: '2' } as const;
-
 export const useEntityStoreRoutes = () => {
   const { http, uiSettings } = useKibana().services;
   const isV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
@@ -33,7 +31,8 @@ export const useEntityStoreRoutes = () => {
       if (isV2Enabled) {
         return http.fetch<GetEntityStoreStatusResponse>(ENTITY_STORE_ROUTES.public.STATUS, {
           method: 'GET',
-          query: { ...ENTITY_STORE_V2_QUERY, include_components: withComponents },
+          version: API_VERSIONS.public.v1,
+          query: { include_components: withComponents },
         });
       }
       return http.fetch<GetEntityStoreStatusResponse>('/api/entity_store/status', {
@@ -47,7 +46,7 @@ export const useEntityStoreRoutes = () => {
       if (isV2Enabled) {
         return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
           method: 'POST',
-          query: ENTITY_STORE_V2_QUERY,
+          version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
         });
       }
@@ -62,7 +61,7 @@ export const useEntityStoreRoutes = () => {
       if (isV2Enabled) {
         return http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.public.START, {
           method: 'PUT',
-          query: ENTITY_STORE_V2_QUERY,
+          version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
         });
       }
@@ -85,7 +84,7 @@ export const useEntityStoreRoutes = () => {
       if (isV2Enabled) {
         return http.fetch<StopEntityEngineResponse>(ENTITY_STORE_ROUTES.public.STOP, {
           method: 'PUT',
-          query: ENTITY_STORE_V2_QUERY,
+          version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
         });
       }
@@ -108,7 +107,7 @@ export const useEntityStoreRoutes = () => {
       if (isV2Enabled) {
         return http.fetch(ENTITY_STORE_ROUTES.public.UNINSTALL, {
           method: 'POST',
-          query: ENTITY_STORE_V2_QUERY,
+          version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
         });
       }

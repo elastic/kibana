@@ -22,6 +22,7 @@ import type {
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { alertFlyoutHistoryKey } from '../../../../../flyout_v2/document/constants/flyout_history';
 import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
@@ -58,6 +59,7 @@ import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { DocumentFlyoutWrapper } from '../../../../../flyout_v2/document/document_flyout_wrapper';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -124,6 +126,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const dispatch = useDispatch();
     const store = useStore();
     const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
     const [activeStatefulEventContext] = useState({
@@ -200,10 +203,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               ),
             }),
             {
-              ownFocus: false,
-              resizable: true,
-              size: 's',
-              type: 'overlay',
+              ...defaultFlyoutProperties,
+              historyKey: alertFlyoutHistoryKey,
+              session: 'start',
             }
           );
         } else {
@@ -235,6 +237,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         }
       },
       [
+        defaultFlyoutProperties,
         newFlyoutSystemEnabled,
         overlays,
         services,

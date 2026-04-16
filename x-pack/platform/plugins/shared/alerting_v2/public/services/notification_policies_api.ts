@@ -43,6 +43,7 @@ export class NotificationPoliciesApi {
     page?: number;
     perPage?: number;
     search?: string;
+    tags?: string[];
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
@@ -54,6 +55,7 @@ export class NotificationPoliciesApi {
           page: params.page,
           perPage: params.perPage,
           search: params.search || undefined,
+          tags: params.tags && params.tags.length > 0 ? params.tags : undefined,
           enabled: params.enabled,
           sortField: params.sortField,
           sortOrder: params.sortOrder,
@@ -119,5 +121,13 @@ export class NotificationPoliciesApi {
     return this.http.get<string[]>(
       `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/suggestions/data_fields`
     );
+  }
+
+  public async fetchTags(params?: { search?: string }) {
+    return this.http.get<string[]>(`${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/suggestions/tags`, {
+      query: {
+        search: params?.search || undefined,
+      },
+    });
   }
 }

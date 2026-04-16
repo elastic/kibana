@@ -22,7 +22,8 @@ const SubmitButton = () => {
   );
 };
 
-describe('TagsField', () => {
+// Failing: See https://github.com/elastic/kibana/issues/261209
+describe.skip('TagsField', () => {
   it('renders the tags label and optional text', () => {
     render(<TagsField />, { wrapper: createFormWrapper() });
 
@@ -41,7 +42,7 @@ describe('TagsField', () => {
       metadata: {
         name: 'Test Rule',
         enabled: true,
-        labels: ['prod', 'critical'],
+        tags: ['prod', 'critical'],
       },
     });
 

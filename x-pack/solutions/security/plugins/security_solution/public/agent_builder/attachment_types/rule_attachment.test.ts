@@ -8,7 +8,7 @@
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import { RULES_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
+import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
 import { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import {
   createRuleAttachmentDefinition,
@@ -38,7 +38,7 @@ const mockAttachments: AttachmentServiceStartContract = {
 const makeApplication = (canEdit: boolean) =>
   ({
     capabilities: {
-      [RULES_FEATURE_ID_V3]: { edit_rules: canEdit },
+      [RULES_FEATURE_LATEST]: { edit_rules: canEdit },
     },
     navigateToApp: jest.fn(),
   } as unknown as ApplicationStart);

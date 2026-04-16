@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'ai.agent',
-    handlerHash: '800765ba855e1e4a93d5bb7a6fce558ec5e369ed416bfb763047305c5d7f40ca',
+    handlerHash: 'eb7dc95f4ed0ed0151051c77827c71d45ec4f17d22efff73d43f4e9f5741a2ee',
   },
   {
     id: 'ai.classify',
@@ -85,35 +85,11 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
   },
   {
-    id: 'cases.createCase',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
-  },
-  {
-    id: 'cases.deleteCases',
-    handlerHash: '461013a1fb15a84b4edf75620cf377080998a35dedd39c672ddadfde4796fdda',
-  },
-  {
-    id: 'cases.updateCase',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
-  },
-  {
-    id: 'cases.updateCases',
-    handlerHash: 'b858a33a3f4fa058b6b89ab5366c96f39a6a79d737d9cf7ff3c43221d640cf10',
-  },
-  {
-    id: 'cases.getCase',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
-  },
-  {
-    id: 'cases.addComment',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
-  },
-  {
     id: 'cases.addAlerts',
     handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
   {
-    id: 'cases.setCategory',
+    id: 'cases.addComment',
     handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
   {
@@ -137,8 +113,20 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
   {
+    id: 'cases.createCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
     id: 'cases.createCaseFromTemplate',
-    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.deleteCases',
+    handlerHash: 'a18a2e1090962d85c945b12e16d13b53d21d08ad1dde449194f5e735d3cd7946',
+  },
+  {
+    id: 'cases.deleteObservable',
+    handlerHash: '0222a4609fe11df28447a5e4637db381ffdc5818a47ae34b3ff54ec8c0ef56e5',
   },
   {
     id: 'cases.findCases',
@@ -149,11 +137,27 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '647032606a8724390063eb7f093e84360b65ff6e44eecaa74222d7c557dfde02',
   },
   {
-    id: 'cases.setCustomField',
+    id: 'cases.getAllAttachments',
+    handlerHash: '457c9c81535a0207aade08cf2bcc9f7a354f5760307da976ae8faca2d43338ee',
+  },
+  {
+    id: 'cases.getCase',
     handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
   {
-    id: 'cases.unassignCase',
+    id: 'cases.getCases',
+    handlerHash: 'f5bb45aa044adfd07898a0ecd172f49d3d7580ca75a6c7fe5261487c6c6ae9e3',
+  },
+  {
+    id: 'cases.getCasesByAlertId',
+    handlerHash: 'e2b50fd7bbbb6122db65f3a52ed78a4c24cb10304abf3927c69288ebb0f75fa7',
+  },
+  {
+    id: 'cases.setCategory',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setCustomField',
     handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
   {
@@ -170,6 +174,22 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.setTitle',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.unassignCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.updateCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.updateCases',
+    handlerHash: '3ae63ce68db19a0ac7a7e6ccaba5807269c4ec035c37acf204713ae100048932',
+  },
+  {
+    id: 'cases.updateObservable',
     handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
 ];

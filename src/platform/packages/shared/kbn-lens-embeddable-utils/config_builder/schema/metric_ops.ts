@@ -13,7 +13,7 @@ import { omit } from 'lodash';
 import { filterSchema } from './filter';
 import { formatSchema } from './format';
 import {
-  LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+  LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
   LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
   LENS_PERCENTILE_DEFAULT_VALUE,
   LENS_PERCENTILE_RANK_DEFAULT_VALUE,
@@ -200,10 +200,19 @@ export const sumMetricOperationSchema = fieldBasedOperationSharedSchema
 export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends(
   {
     operation: schema.literal('last_value'),
-    sort_by: schema.string(),
-    show_array_values: schema.boolean({
-      meta: { description: 'Handle array values' },
-      defaultValue: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+    time_field: schema.string({
+      meta: { description: 'Time field used to determine document recency' },
+    }),
+    /**
+     * Whether to return all values for multi-value fields.
+     * Only affects data table and metric charts; other charts use the last value from the array.
+     */
+    multi_value: schema.boolean({
+      meta: {
+        description:
+          'Whether to return all values for multi-value fields. Only affects data table and metric charts; other charts use the last value from the array.',
+      },
+      defaultValue: LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
     }),
   },
   { meta: { id: 'lastValueOperation', title: 'Last Value Operation' } }

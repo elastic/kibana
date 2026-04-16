@@ -12,8 +12,7 @@
     "patterns": [
       "_ml/anomaly_detectors/_validate/detector"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch",
-    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch",
+    "documentation": null,
     "availability": {
       "stack": false,
       "serverless": false

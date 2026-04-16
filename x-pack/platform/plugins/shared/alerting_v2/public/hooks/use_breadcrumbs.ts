@@ -6,14 +6,8 @@
  */
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import type { MouseEvent } from 'react';
 import { useEffect } from 'react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import {
-  ALERTING_V2_RULES_MANAGEMENT_PATH,
-  ALERTING_V2_NOTIFICATION_POLICIES_MANAGEMENT_PATH,
-  MANAGEMENT_APP_ID,
-} from '../constants';
 import { getAlertingV2Breadcrumb, type AlertingV2BreadcrumbPage } from '../lib/breadcrumb';
 import { useSetBreadcrumbs } from '../application/breadcrumb_context';
 
@@ -21,32 +15,12 @@ export interface UseBreadcrumbsOptions {
   ruleName?: string;
 }
 
-const addClickHandlers = (
-  breadcrumbs: ChromeBreadcrumb[],
-  navigateToUrl: (url: string) => Promise<void>
-): ChromeBreadcrumb[] =>
-  breadcrumbs.map((bc) => ({
-    ...bc,
-    ...(bc.href
-      ? {
-          onClick: (ev: MouseEvent) => {
-            if (ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey) {
-              return;
-            }
-            ev.preventDefault();
-            navigateToUrl(bc.href!);
-          },
-        }
-      : {}),
-  }));
-
 export function useBreadcrumbs(
   page: AlertingV2BreadcrumbPage,
   options: UseBreadcrumbsOptions = {}
 ) {
   const setBreadcrumbs = useSetBreadcrumbs();
   const chrome = useService(CoreStart('chrome'));
-  const application = useService(CoreStart('application'));
 
   useEffect(() => {
     const rootBreadcrumb: ChromeBreadcrumb = {
@@ -55,16 +29,17 @@ export function useBreadcrumbs(
 
     const rulesListBreadcrumb: ChromeBreadcrumb = {
       ...getAlertingV2Breadcrumb('rules_list'),
-      href: application.getUrlForApp(MANAGEMENT_APP_ID, {
-        path: ALERTING_V2_RULES_MANAGEMENT_PATH,
-      }),
+      href: '/',
     };
 
     const notificationPoliciesListBreadcrumb: ChromeBreadcrumb = {
       ...getAlertingV2Breadcrumb('notification_policies_list'),
-      href: application.getUrlForApp(MANAGEMENT_APP_ID, {
-        path: ALERTING_V2_NOTIFICATION_POLICIES_MANAGEMENT_PATH,
-      }),
+      href: '/',
+    };
+
+    const episodesListBreadcrumb: ChromeBreadcrumb = {
+      ...getAlertingV2Breadcrumb('episodes_list'),
+      href: '/',
     };
 
     let breadcrumbs: ChromeBreadcrumb[];
@@ -108,14 +83,25 @@ export function useBreadcrumbs(
           getAlertingV2Breadcrumb('notification_policy_edit'),
         ];
         break;
+      case 'episodes_list':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('episodes_list') }];
+        break;
+      case 'episode_details':
+        breadcrumbs = [
+          rootBreadcrumb,
+          episodesListBreadcrumb,
+          getAlertingV2Breadcrumb('episode_details', {
+            ruleName: options.ruleName ?? '',
+          }),
+        ];
+        break;
       default:
         breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rules_list') }];
     }
 
-    const withClick = addClickHandlers(breadcrumbs, (url) => application.navigateToUrl(url));
-    setBreadcrumbs(withClick);
+    setBreadcrumbs(breadcrumbs);
 
-    const docTitle = [...withClick].reverse().map((b) => (b.text as string) ?? '');
+    const docTitle = [...breadcrumbs].reverse().map((b) => (b.text as string) ?? '');
     chrome.docTitle.change(docTitle);
-  }, [page, options.ruleName, setBreadcrumbs, chrome, application]);
+  }, [page, options.ruleName, setBreadcrumbs, chrome]);
 }

@@ -1,6 +1,6 @@
 ---
 name: create-connector
-description: Creates a new connector spec with workflows for Kibana. Use when asked to create (or add) a new connector, integration, or data source.
+description: Creates a new connector spec for Kibana. Use when asked to create (or add) a new connector, integration, or data source.
 allowed-tools: WebFetch, WebSearch, Read, Grep, Glob, Write, Edit, Bash, Skill
 context: fork
 argument-hint: [3rd-party-service-name]
@@ -8,12 +8,11 @@ argument-hint: [3rd-party-service-name]
 
 # Create a Connector
 
-We're going to create a new connector spec with workflows for **$0**. The connector will enable Kibana to interact with the third-party service, and workflows will expose operations as tools for AI agents.
+We're going to create a new connector spec for **$0**. The connector will enable Kibana to interact with the third-party service and expose operations as tools for AI agents.
 
 ## Reference Materials
 
 - **[reference/connector-patterns.md](reference/connector-patterns.md)** — Directory structure, file templates, and registration patterns
-- **Workflow YAML syntax** — When you need to write or understand workflow YAML files, invoke the `workflows-yaml-reference` skill (use the Skill tool with `skill: "workflows-yaml-reference"`)
 
 ## Step 1: Determine the Connector Strategy
 
@@ -31,7 +30,7 @@ Create the connector spec in `src/platform/packages/shared/kbn-connector-specs/s
 
 Follow the patterns in [reference/connector-patterns.md](reference/connector-patterns.md):
 
-1. **`{connector_name}.ts`** — ConnectorSpec definition with metadata, auth, schema, actions, and `agentBuilderWorkflows`
+1. **`{connector_name}.ts`** — ConnectorSpec definition with metadata, auth, schema, and actions
 2. **`types.ts`** — Zod input schemas and inferred TypeScript types for each action
 3. **`{connector_name}.test.ts`** — Unit tests
 4. **`icon/index.tsx`** — Brand icon component
@@ -42,27 +41,54 @@ Replace the placeholder icon with a proper brand icon. Search for existing SVG/P
 - `src/platform/packages/shared/kbn-connector-specs/src/specs/*/icon/`
 - `x-pack/platform/plugins/shared/stack_connectors/public/connector_types/{connector}/`
 
-## Step 3: Create Workflows
+## Step 3: Write LLM-Quality Descriptions and Skill Content
 
-Create YAML workflow files in a `workflows/` directory alongside the connector spec. For the full YAML schema, invoke the `workflows-yaml-reference` skill.
+AI agents rely on descriptions to choose the right action and construct valid inputs. Every action and parameter must have high-quality descriptive text.
 
-Standard workflows:
-1. **search.yaml** — Primary search. Focus on high-level metadata and matched text.
-2. **get_{item}.yaml** — Retrieve specific items by ID. Include all metadata.
-3. **list_{items}.yaml** — List available items/spaces/projects. Focus on high-level metadata.
+### `isTool` and action descriptions
 
-Remember:
-- Tag with `['agent-builder-tool']` to expose as AI tool
-- Use `<%= {connector-type-without-dot}-stack-connector-id %>` for `connector-id`
-- Use `${{ inputs.param_name }}` for input references
-- Import all workflow YAMLs in the connector spec and list them in `agentBuilderWorkflows`
+Actions should set `isTool: true` to be discoverable by AI agents in Agent Builder. This is the default for most actions. Use `isTool: false` only for actions that should not be invoked autonomously (e.g. destructive or admin-only operations).
+
+Every entry MUST have a `description` field (plain string, NOT `i18n.translate()`) that explains:
+- What the action does
+- When an agent should use it (vs. other actions)
+- What it returns
+- For download/binary actions: a WARNING about large base64 payloads and the need for post-processing
+
+### Parameter descriptions
+
+Every Zod parameter in input schemas MUST have a `.describe()` call that includes:
+- What the parameter controls
+- Concrete examples or allowed values
+- Any constraints (format, length, required vs. optional behavior)
+
+See the ServiceNow, Slack, and GitHub connector specs for examples of strong description quality.
+
+### The `skill` property
+
+Add a `skill` property to the ConnectorSpec — a markdown string providing higher-level LLM guidance:
+- Multi-step workflow patterns (e.g., "to create an incident, first call X, then Y")
+- Common gotchas and error cases
+- Best practices for the service
+
+Use the `[...].join('\n')` pattern to keep the string readable in source:
+
+```ts
+skill: [
+  '## $0 Connector',
+  '',
+  'Use this connector to ...',
+  '',
+  '### Common patterns',
+  '- To do X, first call `actionA` then `actionB`',
+].join('\n'),
+```
 
 ## Step 4: Create Tests
 
 Add tests following the existing examples:
 
 1. **Connector spec tests** — See `google_drive/google_drive.test.ts` or `slack/slack.test.ts` for the pattern.
-2. **Workflow behavioral tests** — See `google_drive/workflows.test.ts` or `slack/workflows.test.ts` for the pattern.
 
 You do not need to execute the tests — just create the files.
 
@@ -97,11 +123,11 @@ This step requires documentation skills from https://github.com/elastic/elastic-
 1. Add an entry in `docs/reference/toc.yml` under the connectors section.
 2. Add a row in `docs/reference/connectors-kibana/_snippets/elastic-connectors-list.md`.
 
-Once you are done developing the connector spec, workflows, tests, and documentation, let the user review your work before next steps.
+Once you are done developing the connector spec, tests, and documentation, let the user review your work before next steps.
 
 ## Important Notes
 
 - **Stop if architectural gaps emerge** — This skill is for adding connectors to the catalog, not for enhancing platform features
-- **Keep workflows focused** — Each workflow should help end users perform a specific operation against the third-party service
+- **Write rich descriptions** — Every action and parameter must have descriptive text that helps LLMs choose the right action and construct valid inputs; add a `skill` property with multi-step patterns and gotchas
 - **Follow existing patterns** — Look at Slack, GitHub, Google Drive, and ServiceNow connectors for reference
 - **DO NOT modify existing documentation** — There may be existing connectors with similar names. Do not modify their documentation files.

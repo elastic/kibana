@@ -12,6 +12,9 @@ import {
 import expect from '@kbn/expect';
 
 import {
+  ACCESS_CONTROL_EDITOR_PASSWORD,
+  ACCESS_CONTROL_EDITOR_USERNAME,
+  createAccessControlEditorUser,
   createSimpleUser,
   loginAsKibanaAdmin,
   loginAsNotObjectOwner,
@@ -32,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_savedobjects_editor']);
       await createSimpleUser(es);
+      await createAccessControlEditorUser(es);
     });
     after(async () => {
       await security.testUser.restoreDefaults();
@@ -143,8 +147,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
           supertestWithoutAuth,
-          'test_user',
-          'changeme'
+          ACCESS_CONTROL_EDITOR_USERNAME,
+          ACCESS_CONTROL_EDITOR_PASSWORD
         );
 
         const res = await supertestWithoutAuth
@@ -215,8 +219,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('failure modes', function () {
-      this.tags('skipFIPS');
-
       it('rejects when overwriting and all objects are write-restricted and inaccessible', async () => {
         const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
           supertestWithoutAuth
@@ -253,8 +255,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
           supertestWithoutAuth,
-          'test_user',
-          'changeme'
+          ACCESS_CONTROL_EDITOR_USERNAME,
+          ACCESS_CONTROL_EDITOR_PASSWORD
         );
 
         const res = await supertestWithoutAuth
@@ -310,7 +312,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
 
         const { cookie: notObjectOwnerCookieCookie, profileUid: nonAdminProfileUid } =
-          await loginAsNotObjectOwner(supertestWithoutAuth, 'test_user', 'changeme');
+          await loginAsNotObjectOwner(
+            supertestWithoutAuth,
+            ACCESS_CONTROL_EDITOR_USERNAME,
+            ACCESS_CONTROL_EDITOR_PASSWORD
+          );
 
         const secondObject = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -387,8 +393,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
           supertestWithoutAuth,
-          'test_user',
-          'changeme'
+          ACCESS_CONTROL_EDITOR_USERNAME,
+          ACCESS_CONTROL_EDITOR_PASSWORD
         );
 
         const objects = [
@@ -466,8 +472,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
           supertestWithoutAuth,
-          'test_user',
-          'changeme'
+          ACCESS_CONTROL_EDITOR_USERNAME,
+          ACCESS_CONTROL_EDITOR_PASSWORD
         );
 
         const res = await supertestWithoutAuth

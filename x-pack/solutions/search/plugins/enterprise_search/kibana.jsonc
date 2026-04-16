@@ -43,8 +43,7 @@
       "cloud",
       "lens",
       "share",
-      "fleet",
-      "searchIndices"
+      "fleet"
     ],
     "requiredBundles": ["kibanaReact"]
   }

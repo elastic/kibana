@@ -882,7 +882,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
     </div>
     <span
       class="c0 greenCheckIcon"
-      data-euiicon-type="checkInCircleFilled"
+      data-euiicon-type="checkCircleFill"
     />
   </div>
   <div

@@ -140,6 +140,12 @@ interface YamlValidationResultIfConditionError extends YamlValidationResultBase 
   owner: 'if-condition-validation';
 }
 
+interface YamlValidationResultDeprecatedStep extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'deprecated-step-validation';
+}
+
 export type CustomPropertyValidationResult =
   | YamlValidationResultCustomPropertyError
   | YamlValidationResultCustomPropertyValid;
@@ -161,6 +167,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'trigger-condition-validation',
   'workflow-output-validation',
   'if-condition-validation',
+  'deprecated-step-validation',
 ] as const;
 
 export const BATCHED_CUSTOM_MARKER_OWNER = 'custom-yaml-validation';
@@ -187,7 +194,8 @@ export type YamlValidationResult =
   | YamlValidationResultWorkflowInputsError
   | YamlValidationResultTriggerConditionError
   | YamlValidationResultWorkflowOutput
-  | YamlValidationResultIfConditionError;
+  | YamlValidationResultIfConditionError
+  | YamlValidationResultDeprecatedStep;
 
 export function validationResultFingerprint(r: YamlValidationResult): string {
   return `${r.owner}\0${r.severity}\0${r.startLineNumber}:${r.startColumn}\0${r.endLineNumber}:${r.endColumn}\0${r.message}`;

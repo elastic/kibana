@@ -147,7 +147,7 @@ export const calculateScoresWithESQLV2 = async ({
         weights,
         page: {
           scores: baseScores,
-          identifierField: 'entity_id',
+          identifierField: 'entity.id',
         },
         entities,
         watchlistConfigs,

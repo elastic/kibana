@@ -90,6 +90,7 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 export class NodesFactory {
@@ -99,7 +100,8 @@ export class NodesFactory {
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
     private workflowGraph: WorkflowGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
-    private dependencies: ContextDependencies
+    private dependencies: ContextDependencies,
+    private workflowExecutionState: WorkflowExecutionState
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
@@ -192,7 +194,9 @@ export class NodesFactory {
           node as ExitForeachNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.workflowExecutionState,
+          this.workflowGraph
         );
       case 'enter-while':
         return new EnterWhileNodeImpl(
@@ -206,7 +210,9 @@ export class NodesFactory {
           node as ExitWhileNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.workflowExecutionState,
+          this.workflowGraph
         );
       case 'loop-break':
         return new LoopBreakNodeImpl(
@@ -214,7 +220,9 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
-          this.stepExecutionRuntimeFactory
+          this.stepExecutionRuntimeFactory,
+          this.workflowExecutionState,
+          this.workflowGraph
         );
       case 'loop-continue':
         return new LoopContinueNodeImpl(
@@ -222,7 +230,9 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
-          this.stepExecutionRuntimeFactory
+          this.stepExecutionRuntimeFactory,
+          this.workflowExecutionState,
+          this.workflowGraph
         );
       case 'enter-retry':
         return new EnterRetryNodeImpl(

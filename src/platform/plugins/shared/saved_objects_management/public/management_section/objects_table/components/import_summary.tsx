@@ -214,15 +214,18 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
     [kibana.services.application]
   );
 
+  const isRulesWarning =
+    'actionPath' in providedWarning && providedWarning.actionPath.endsWith('triggersActions/rules');
+
   const warning = useMemo(
     () =>
-      isUnifiedRulesPageEnabled && 'actionPath' in providedWarning
+      isUnifiedRulesPageEnabled && isRulesWarning
         ? {
             ...providedWarning,
             actionPath: '/app/rules',
           }
         : providedWarning,
-    [isUnifiedRulesPageEnabled, providedWarning]
+    [isUnifiedRulesPageEnabled, isRulesWarning, providedWarning]
   );
 
   const warningContent = useMemo(() => {

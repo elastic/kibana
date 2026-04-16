@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { Logger } from '@kbn/core/server';
-import { castArray } from 'lodash';
+import { castArray, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
@@ -24,53 +24,15 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
 import { ENTITY_RELATIONSHIP_LABELS } from '@kbn/cloud-security-posture-common/constants';
+import { GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
 import {
   type EventEdge,
   type RelationshipEdge,
+  type EntityRecord,
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
 import { transformEntityTypeToIconAndShape, compareConnectorNodes } from './utils';
-
-/**
- * Deduplicates entity documentsData by entity ID and merges sourceFields.
- * MV_EXPAND in the ES|QL query can create Cartesian products when multiple source fields
- * are multi-value, producing duplicate documents for the same entity with different
- * sourceField combinations. This function merges those into a single document per entity,
- * collecting all unique values into arrays where values differ.
- */
-const deduplicateEntityDocuments = (docs: NodeDocumentDataModel[]): NodeDocumentDataModel[] => {
-  const byId = new Map<string, NodeDocumentDataModel>();
-
-  for (const doc of docs) {
-    const existing = byId.get(doc.id);
-    if (!existing) {
-      byId.set(doc.id, doc);
-      continue;
-    }
-
-    // Merge sourceFields: collect unique values per field
-    const existingSf = existing.entity?.sourceFields;
-    const docSf = doc.entity?.sourceFields;
-    if (existingSf && docSf) {
-      for (const [key, value] of Object.entries(docSf)) {
-        const existingVal = existingSf[key];
-        if (existingVal === undefined) {
-          existingSf[key] = value;
-        } else if (existingVal !== value) {
-          const arr = Array.isArray(existingVal) ? existingVal : [existingVal];
-          const valuesToAdd = Array.isArray(value) ? value : [value];
-          const newValues = valuesToAdd.filter((v) => !arr.includes(v));
-          if (newValues.length > 0) {
-            existingSf[key] = [...arr, ...newValues];
-          }
-        }
-      }
-    }
-  }
-
-  return Array.from(byId.values());
-};
 
 interface ConnectorEdges {
   source: string;
@@ -104,6 +66,7 @@ export const parseRecords = (
   logger: Logger,
   eventRecords: EventEdge[] = [],
   relationshipRecords: RelationshipEdge[] = [],
+  entityRecords: EntityRecord[] = [],
   nodesLimit?: number
 ): Pick<GraphResponse, 'nodes' | 'edges' | 'messages'> => {
   const ctx: ParseContext = {
@@ -118,7 +81,7 @@ export const parseRecords = (
   logger.trace(
     `Parsing records [events: ${eventRecords.length}] [relationships: ${
       relationshipRecords.length
-    }] [nodesLimit: ${nodesLimit ?? 'none'}]`
+    }] [entities: ${entityRecords.length}] [nodesLimit: ${nodesLimit ?? 'none'}]`
   );
 
   // Process event records
@@ -141,6 +104,23 @@ export const parseRecords = (
 
   // Create edges and groups for both
   createEdgesAndGroups(ctx);
+
+  for (const entity of entityRecords) {
+    if (ctx.nodesMap[entity.id] === undefined) {
+      createEntityNode(
+        ctx.nodesMap,
+        {
+          nodeId: entity.id,
+          idsCount: 1,
+          entityType: entity.type,
+          entitySubType: entity.sub_type,
+          entityName: entity.name,
+          docData: entity.docData ? castArray(entity.docData) : [],
+        },
+        ctx.logger
+      );
+    }
+  }
 
   logger.trace(
     `Parsed [nodes: ${Object.keys(ctx.nodesMap).length}, edges: ${
@@ -230,22 +210,35 @@ const createEntityNode = (
     entityName?: string | string[] | null;
     docData?: Array<string | null> | string;
     hostIps?: string[];
-  }
+  },
+  logger?: Logger
 ): void => {
   const { nodeId, idsCount, entityType, entitySubType, entityName, docData, hostIps } = params;
+  const EXPAND_DOT_NOTATION = false;
 
   if (nodesMap[nodeId] !== undefined) return;
 
   const resolvedType = resolveEntityType(entityType, idsCount);
   const label = generateEntityLabel(idsCount, nodeId, resolvedType, entityName, entitySubType);
 
-  const documentsData: NodeDocumentDataModel[] = deduplicateEntityDocuments(
-    docData
-      ? castArray(docData)
-          .filter((d): d is string => d != null)
-          .map((d) => JSON.parse(d))
-      : []
-  );
+  const documentsData: NodeDocumentDataModel[] | undefined = docData
+    ? parseDocumentsData(logger, docData)
+    : undefined;
+
+  documentsData?.forEach((doc) => {
+    if (doc.entity?.sourceFields) {
+      const currentlySupportedSourceFields = omit(
+        doc.entity.sourceFields,
+        GRAPH_ACTOR_EUID_SOURCE_FIELDS.all
+      );
+      (doc as Writable<typeof doc>).entity = {
+        ...doc.entity,
+        sourceFields: EXPAND_DOT_NOTATION
+          ? expandDotNotation(currentlySupportedSourceFields)
+          : currentlySupportedSourceFields,
+      };
+    }
+  });
 
   nodesMap[nodeId] = {
     id: nodeId,
@@ -265,7 +258,7 @@ const createGroupedActorAndTargetNodes = (
   actorId: string;
   targetId: string;
 } => {
-  const { nodesMap } = context;
+  const { nodesMap, logger } = context;
   const {
     actorNodeId,
     actorIdsCount,
@@ -284,29 +277,37 @@ const createGroupedActorAndTargetNodes = (
   } = record;
 
   // Create actor entity node
-  createEntityNode(nodesMap, {
-    nodeId: actorNodeId,
-    idsCount: actorIdsCount,
-    entityType: actorEntityType,
-    entitySubType: actorEntitySubType,
-    entityName: actorEntityName,
-    docData: actorsDocData,
-    hostIps: actorHostIps ? castArray(actorHostIps) : [],
-  });
+  createEntityNode(
+    nodesMap,
+    {
+      nodeId: actorNodeId,
+      idsCount: actorIdsCount,
+      entityType: actorEntityType,
+      entitySubType: actorEntitySubType,
+      entityName: actorEntityName,
+      docData: actorsDocData,
+      hostIps: actorHostIps ? castArray(actorHostIps) : [],
+    },
+    logger
+  );
 
   // Create target entity node (or unknown target)
   const targetId = targetIdsCount > 0 && targetNodeId ? targetNodeId : `unknown-${uuidv4()}`;
 
   if (targetIdsCount > 0 && targetNodeId) {
-    createEntityNode(nodesMap, {
-      nodeId: targetNodeId,
-      idsCount: targetIdsCount,
-      entityType: targetEntityType,
-      entitySubType: targetEntitySubType,
-      entityName: targetEntityName,
-      docData: targetsDocData,
-      hostIps: targetHostIps ? castArray(targetHostIps) : [],
-    });
+    createEntityNode(
+      nodesMap,
+      {
+        nodeId: targetNodeId,
+        idsCount: targetIdsCount,
+        entityType: targetEntityType,
+        entitySubType: targetEntitySubType,
+        entityName: targetEntityName,
+        docData: targetsDocData,
+        hostIps: targetHostIps ? castArray(targetHostIps) : [],
+      },
+      logger
+    );
   } else if (nodesMap[targetId] === undefined) {
     // Unknown target
     nodesMap[targetId] = {
@@ -324,7 +325,7 @@ const createGroupedActorAndTargetNodes = (
   };
 };
 
-const createLabelNode = (record: EventEdge): LabelNodeDataModel => {
+const createLabelNode = (logger: Logger | undefined, record: EventEdge): LabelNodeDataModel => {
   const {
     labelNodeId,
     action,
@@ -354,7 +355,7 @@ const createLabelNode = (record: EventEdge): LabelNodeDataModel => {
     label: action,
     color,
     shape: 'label',
-    documentsData: parseDocumentsData(docs),
+    documentsData: parseDocumentsData(logger, docs),
     count: badge,
     ...(uniqueEventsCount > 0 ? { uniqueEventsCount } : {}),
     ...(uniqueAlertsCount > 0 ? { uniqueAlertsCount } : {}),
@@ -411,7 +412,7 @@ const emitAPINodesLimitMessage = (context: ParseContext) => {
 
 const processEventRecord = (record: EventEdge, context: ParseContext) => {
   const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
-  const labelNode = createLabelNode(record);
+  const labelNode = createLabelNode(context.logger, record);
 
   processConnectorNode(context, {
     sourceId: actorId,
@@ -445,25 +446,33 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
   const targetNodeId = record.targetNodeId;
 
   // Create actor and target entity nodes using shared helper
-  createEntityNode(context.nodesMap, {
-    nodeId: actorNodeId,
-    idsCount: record.actorIdsCount,
-    entityType: record.actorEntityType,
-    entitySubType: record.actorEntitySubType,
-    entityName: record.actorEntityName,
-    docData: record.actorsDocData,
-    hostIps: record.actorHostIps ? castArray(record.actorHostIps) : [],
-  });
+  createEntityNode(
+    context.nodesMap,
+    {
+      nodeId: actorNodeId,
+      idsCount: record.actorIdsCount,
+      entityType: record.actorEntityType,
+      entitySubType: record.actorEntitySubType,
+      entityName: record.actorEntityName,
+      docData: record.actorsDocData,
+      hostIps: record.actorHostIps ? castArray(record.actorHostIps) : [],
+    },
+    context.logger
+  );
 
-  createEntityNode(context.nodesMap, {
-    nodeId: targetNodeId,
-    idsCount: record.targetIdsCount,
-    entityType: record.targetEntityType,
-    entitySubType: record.targetEntitySubType,
-    entityName: record.targetEntityName,
-    docData: record.targetsDocData,
-    hostIps: record.targetHostIps ? castArray(record.targetHostIps) : [],
-  });
+  createEntityNode(
+    context.nodesMap,
+    {
+      nodeId: targetNodeId,
+      idsCount: record.targetIdsCount,
+      entityType: record.targetEntityType,
+      entitySubType: record.targetEntitySubType,
+      entityName: record.targetEntityName,
+      docData: record.targetsDocData,
+      hostIps: record.targetHostIps ? castArray(record.targetHostIps) : [],
+    },
+    context.logger
+  );
 
   // Create relationship node - ID is based on actor + relationship (relationshipNodeId)
   // so each actor+relationship combination gets one node that connects to all target groups
@@ -693,10 +702,45 @@ const connectNodes = (
   };
 };
 
-const parseDocumentsData = (docs: string[] | string): NodeDocumentDataModel[] => {
+const parseDocumentsData = (
+  logger: Logger | undefined,
+  docs: Array<string | null> | string
+): NodeDocumentDataModel[] => {
   if (typeof docs === 'string') {
-    return [JSON.parse(docs)];
+    try {
+      return [JSON.parse(docs)];
+    } catch (e) {
+      logger?.error(`Failed to parse document data: ${e}`);
+      logger?.trace(docs);
+      throw e;
+    }
   }
 
-  return docs.map((doc) => JSON.parse(doc));
+  return docs
+    .filter((d): d is string => d != null)
+    .map((doc) => {
+      try {
+        return JSON.parse(doc);
+      } catch (e) {
+        logger?.error(`Failed to parse document data: ${e}`);
+        logger?.trace(doc);
+        throw e;
+      }
+    });
+};
+
+const expandDotNotation = (flat: Record<string, unknown>): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [dotKey, value] of Object.entries(flat)) {
+    const parts = dotKey.split('.');
+    let cursor = result;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (cursor[parts[i]] == null || typeof cursor[parts[i]] !== 'object') {
+        cursor[parts[i]] = {};
+      }
+      cursor = cursor[parts[i]] as Record<string, unknown>;
+    }
+    cursor[parts[parts.length - 1]] = value;
+  }
+  return result;
 };

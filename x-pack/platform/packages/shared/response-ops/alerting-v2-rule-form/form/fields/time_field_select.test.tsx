@@ -8,13 +8,26 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useFormContext } from 'react-hook-form';
 import { TimeFieldSelect } from './time_field_select';
 import { createFormWrapper, createMockServices } from '../../test_utils';
+import type { FormValues } from '../types';
 import * as useDataFieldsModule from '../hooks/use_data_fields';
 
 jest.mock('../hooks/use_data_fields');
 
 const mockServices = createMockServices();
+
+/** Wraps TimeFieldSelect in a form so react-hook-form validation fires on submit. */
+const SubmittableTimeFieldSelect = () => {
+  const { handleSubmit } = useFormContext<FormValues>();
+  return (
+    <form onSubmit={handleSubmit(() => {})}>
+      <TimeFieldSelect />
+      <button type="submit">Submit</button>
+    </form>
+  );
+};
 
 describe('TimeFieldSelect', () => {
   beforeEach(() => {
@@ -105,6 +118,48 @@ describe('TimeFieldSelect', () => {
     await user.selectOptions(select, 'event_time');
 
     expect(select).toHaveValue('event_time');
+  });
+
+  it('shows validation error on submit when no date fields are available', async () => {
+    const user = userEvent.setup();
+
+    jest.mocked(useDataFieldsModule.useDataFields).mockReturnValue({
+      data: {},
+      isLoading: false,
+    } as unknown as ReturnType<typeof useDataFieldsModule.useDataFields>);
+
+    render(<SubmittableTimeFieldSelect />, {
+      wrapper: createFormWrapper({ timeField: '' }, mockServices),
+    });
+
+    // Only the "No time fields available" option should be visible
+    expect(screen.getByRole('combobox')).toHaveValue('');
+    expect(screen.getByText('No time fields available')).toBeInTheDocument();
+
+    // Submit — should show required error
+    await user.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(screen.getByText('A time field is required.')).toBeInTheDocument();
+    });
+  });
+
+  it('does not show placeholder when date fields are available', () => {
+    jest.mocked(useDataFieldsModule.useDataFields).mockReturnValue({
+      data: {
+        '@timestamp': { name: '@timestamp', type: 'date' },
+      },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useDataFieldsModule.useDataFields>);
+
+    render(<TimeFieldSelect />, {
+      wrapper: createFormWrapper({ timeField: '@timestamp' }, mockServices),
+    });
+
+    const select = screen.getByRole('combobox');
+    const options = Array.from(select.querySelectorAll('option'));
+    expect(options).toHaveLength(1);
+    expect(options[0]).toHaveTextContent('@timestamp');
   });
 
   it('renders correctly in flyout layout', () => {

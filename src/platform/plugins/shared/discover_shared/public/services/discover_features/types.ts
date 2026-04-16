@@ -132,7 +132,7 @@ export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
 
 export interface SecuritySolutionAlertFlyoutFooterFeature {
   id: 'security-solution-alert-flyout-footer';
-  renderFooter: (hit: DataTableRecord) => JSX.Element;
+  renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
 export type SecuritySolutionFeature =

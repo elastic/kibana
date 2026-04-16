@@ -62,4 +62,6 @@ export const REMOVED_TYPES: string[] = [
   'guided-onboarding-plugin-state',
   // Removed in 9.4 https://github.com/elastic/kibana/pull/260741
   'streams-significant-events-settings',
+  // Removed in 9.4 https://github.com/elastic/kibana/pull/260587
+  'data_connector',
 ].sort();
