@@ -97,15 +97,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
         {
           meta: {
             id: `kbn-dashboard-panel-type-${type}`,
-            // Transform the raw type string into a human-readable OAS schema title.
-            // for example 'vis' → 'Visualization', 'esql_control' → 'ES|QL control',
-            // 'slo_burn_rate' → 'SLO burn rate', 'discover_session' → 'Discover session'.
-            title: type
-              .replace(/_/g, ' ')
-              .replace(/\bvis\b/i, 'Visualization')
-              .replace(/\besql\b/i, 'ES|QL')
-              .replace(/\bslo\b/i, 'SLO')
-              .replace(/^./, (c) => c.toUpperCase()),
+            title: type,
           },
         }
       )
@@ -250,7 +242,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
           maxSize: 500,
           meta: {
             description:
-              'Filters applied across all panels. Each filter targets a specific field and condition.',
+              'Filters applied across all panels.',
           },
         })
       ),
@@ -265,7 +257,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
           maxSize: MAX_PANELS,
           meta: {
             description:
-              'Panels and sections in the dashboard. Each entry is either a content panel or control (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`).',
+              'Panels and sections in the dashboard. Each entry is either a panel (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`).',
           },
         }
       ),
