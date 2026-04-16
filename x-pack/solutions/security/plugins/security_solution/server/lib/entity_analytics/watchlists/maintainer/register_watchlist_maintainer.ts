@@ -30,7 +30,7 @@ export const registerWatchlistMaintainer = ({
     id: 'watchlist',
     description: 'Entity Analytics Watchlist Maintainer',
     interval: WATCHLIST_MAINTAINER_INTERVAL,
-    timeout: '30m',
+    timeout: '9m',
     initialState: {},
     setup: maintainer.setup,
     run: maintainer.run,
