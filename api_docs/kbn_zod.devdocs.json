@@ -15994,6 +15994,18 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/upload/upload.gen.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_steps_collection_schema.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_variables.ts"
+              },
+              {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/domain/types.ts"
               },
@@ -16200,18 +16212,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/run_script/run_script.gen.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_steps_collection_schema.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_variables.ts"
               }
             ],
             "children": [

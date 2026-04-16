@@ -16,16 +16,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const esql = getService('esql');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  const { dashboard, dashboardControls, discover, common, timePicker } = getPageObjects([
+  const { dashboard, dashboardControls, discover } = getPageObjects([
     'dashboard',
     'dashboardControls',
     'discover',
-    'common',
-    'timePicker',
   ]);
 
   describe('discover esql controls', () => {
@@ -38,10 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls'
       );
       await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls'
+        'src/platform/test/functional/fixtures/kbn_archiver/discover/session_with_control'
       );
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -78,19 +75,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('when unlinking a ES|QL panel with controls and explorting it in discover', () => {
       it('should retain the controls and their state', async () => {
-        // Go to discover
-        await common.navigateToApp('discover');
-        await discover.selectTextBaseLang();
-        await discover.waitUntilTabIsLoaded();
-
-        // Create a search with controls
-        await timePicker.setDefaultAbsoluteRange();
-        await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
-        await discover.waitUntilTabIsLoaded();
-
-        // Save session
-        await discover.saveSearch('ESQL control unlink test');
-
         // Go to dashboards
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();
