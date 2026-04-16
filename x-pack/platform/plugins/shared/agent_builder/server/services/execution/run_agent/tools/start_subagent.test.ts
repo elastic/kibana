@@ -148,7 +148,7 @@ describe('createSubagentTool', () => {
       connectorId: 'connector-1',
       capabilities: undefined,
       parentExecutionId: 'parent-exec-id',
-      prompt: 'Summarize the following data...',
+      prompt: 'Summarize data\n\nSummarize the following data...',
       abortSignal,
     });
   });
