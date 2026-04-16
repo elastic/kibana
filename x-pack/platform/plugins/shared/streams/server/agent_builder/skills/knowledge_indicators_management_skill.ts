@@ -57,11 +57,12 @@ export const knowledgeIndicatorsManagementSkill = defineSkillType({
     1. Search first with ${SEARCH_KIS}.
     2. Compare results for similar intent, similar behavior pattern, or similar query purpose.
     3. If a similar KI exists, present it and avoid creating a duplicate.
-    4. If no similar KI exists, ask user for confirmation.
-    5. Only after explicit user confirmation, create with ${CREATE_FEATURE_KI} or ${CREATE_QUERY_KI}.
+    4. If no similar KI exists, output a formatted KI proposal in chat.
+    5. Call ${CREATE_FEATURE_KI} or ${CREATE_QUERY_KI}.
 
-    Mandatory rule:
-    - Never call ${CREATE_FEATURE_KI} or ${CREATE_QUERY_KI} without explicit user confirmation in the current conversation.
+    Tool safety policy:
+    - ${CREATE_FEATURE_KI} and ${CREATE_QUERY_KI} enforce built-in confirmation prompts before execution.
+    - Do not ask for a separate manual confirmation in chat. The tool confirmation prompt is the confirmation step.
     </required_workflow>
 
     <proactive_suggestions>
@@ -72,13 +73,35 @@ export const knowledgeIndicatorsManagementSkill = defineSkillType({
 
     Required proactive flow:
     1. Run ${SEARCH_KIS} to check for similar KIs first.
-    2. If no close match exists, proactively ask whether to save a new KI.
-    3. Only create after explicit confirmation.
+    2. If no close match exists, output a formatted KI proposal in chat.
+    3. Call the relevant create tool so the built-in confirmation prompt is shown.
 
     Suggested proactive phrasing:
-    - "This looks like a recurring error pattern. I can save it as a Feature KI for future investigations. Should I save it?"
-    - "This query logic looks reusable. I can save it as a Query KI so we can reuse it later. Should I save it?"
+    - "This looks like a recurring error pattern. I will format it as a Feature KI and trigger save confirmation."
+    - "This query logic looks reusable. I will format it as a Query KI and trigger save confirmation."
     </proactive_suggestions>
+
+    <pre_save_format>
+    Before calling a create tool, always print the KI in a structured block in chat.
+
+    Feature KI format:
+    - stream_name
+    - id
+    - type and subtype
+    - title
+    - description
+    - properties (key attributes)
+    - confidence
+    - tags
+
+    Query KI format:
+    - stream_name
+    - title
+    - description
+    - esql.query
+    - severity_score
+    - evidence
+    </pre_save_format>
 
     <tool_examples>
     Example: search first for existing KIs
@@ -97,7 +120,7 @@ export const knowledgeIndicatorsManagementSkill = defineSkillType({
       "limit": 20
     }
 
-    Example: create a Feature KI (after confirmation)
+    Example: create a Feature KI
     Tool: ${CREATE_FEATURE_KI}
     Parameters:
     - stream_name: target stream where KI will be saved
@@ -127,7 +150,7 @@ export const knowledgeIndicatorsManagementSkill = defineSkillType({
       "tags": ["checkout", "timeouts", "latency"]
     }
 
-    Example: create a Query KI (after confirmation)
+    Example: create a Query KI
     Tool: ${CREATE_QUERY_KI}
     Parameters:
     - stream_name: target stream where KI will be saved
@@ -150,13 +173,6 @@ export const knowledgeIndicatorsManagementSkill = defineSkillType({
       "evidence": ["Observed after deployment 2026-04-16"]
     }
     </tool_examples>
-
-    <confirmation>
-    Before creating a KI, ask clearly for confirmation.
-    Suggested phrasing:
-    - "I found no close KI match for this stream. Do you want me to save it as a new Feature KI?"
-    - "I found no close query KI match. Do you want me to save this as a new Query KI?"
-    </confirmation>
   `),
   getRegistryTools: () => [SEARCH_KIS, CREATE_FEATURE_KI, CREATE_QUERY_KI],
 });

@@ -62,6 +62,24 @@ export function createQueryKnowledgeIndicatorTool({
     `,
     schema: createQueryKnowledgeIndicatorSchema,
     tags: ['streams', 'significant_events'],
+    confirmation: {
+      askUser: 'always',
+      getConfirmation: async ({ toolParams }) => {
+        const streamName = String(toolParams.stream_name ?? 'unknown stream');
+        const title = String(toolParams.title ?? 'Untitled query');
+        const esql =
+          typeof toolParams.esql === 'object' && toolParams.esql && 'query' in toolParams.esql
+            ? String((toolParams.esql as { query?: unknown }).query ?? '')
+            : '';
+
+        return {
+          title: 'Save Query KI',
+          message: `Save Query KI for stream "${streamName}" (title: "${title}", esql: "${esql}")?`,
+          confirm_text: 'Save',
+          cancel_text: 'Cancel',
+        };
+      },
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ uiSettings }): Promise<ToolAvailabilityResult> => {

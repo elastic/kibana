@@ -48,6 +48,41 @@ describe('create_query_ki tool', () => {
     expect(tool.id).toBe('platform.streams.sig_events.create_query_ki');
   });
 
+  it('uses always confirmation policy with custom prompt', async () => {
+    const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
+    const tool = createQueryKnowledgeIndicatorTool({
+      getScopedClients,
+      server,
+      logger,
+      telemetry,
+    });
+
+    expect(tool.confirmation?.askUser).toBe('always');
+
+    const confirmation = await tool.confirmation?.getConfirmation?.({
+      toolParams: {
+        stream_name: 'logs.test',
+        title: 'Checkout 5xx burst detector',
+        esql: {
+          query: 'FROM logs.test, logs.test.* | WHERE http.response.status_code >= 500',
+        },
+      },
+    });
+
+    expect(confirmation).toEqual(
+      expect.objectContaining({
+        title: 'Save Query KI',
+        confirm_text: 'Save',
+        cancel_text: 'Cancel',
+      })
+    );
+    expect(confirmation?.message).toContain('stream "logs.test"');
+    expect(confirmation?.message).toContain('title: "Checkout 5xx burst detector"');
+    expect(confirmation?.message).toContain(
+      'esql: "FROM logs.test, logs.test.* | WHERE http.response.status_code >= 500"'
+    );
+  });
+
   it('availability returns available when access check succeeds', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValueOnce(undefined);
 

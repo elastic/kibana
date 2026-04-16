@@ -48,6 +48,38 @@ describe('create_feature_ki tool', () => {
     expect(tool.id).toBe('platform.streams.sig_events.create_feature_ki');
   });
 
+  it('uses always confirmation policy with custom prompt', async () => {
+    const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
+    const tool = createFeatureKnowledgeIndicatorTool({
+      getScopedClients,
+      server,
+      logger,
+      telemetry,
+    });
+
+    expect(tool.confirmation?.askUser).toBe('always');
+
+    const confirmation = await tool.confirmation?.getConfirmation?.({
+      toolParams: {
+        stream_name: 'logs.test',
+        id: 'feature-1',
+        type: 'error_pattern',
+        description: 'Recurring timeout pattern',
+      },
+    });
+
+    expect(confirmation).toEqual(
+      expect.objectContaining({
+        title: 'Save Feature KI',
+        confirm_text: 'Save',
+        cancel_text: 'Cancel',
+      })
+    );
+    expect(confirmation?.message).toContain('stream "logs.test"');
+    expect(confirmation?.message).toContain('id: "feature-1"');
+    expect(confirmation?.message).toContain('type: "error_pattern"');
+  });
+
   it('availability returns available when access check succeeds', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValueOnce(undefined);
 

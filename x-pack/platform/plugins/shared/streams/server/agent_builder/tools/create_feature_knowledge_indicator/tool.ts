@@ -51,6 +51,25 @@ export function createFeatureKnowledgeIndicatorTool({
     `,
     schema: baseFeatureSchema,
     tags: ['streams', 'significant_events'],
+    confirmation: {
+      askUser: 'always',
+      getConfirmation: async ({ toolParams }) => {
+        const streamName = String(toolParams.stream_name ?? 'unknown stream');
+        const id = String(toolParams.id ?? 'unknown-id');
+        const type = String(toolParams.type ?? 'unknown-type');
+        const subtype = toolParams.subtype ? String(toolParams.subtype) : undefined;
+        const title = toolParams.title ? String(toolParams.title) : undefined;
+        const typeLabel = subtype ? `${type}/${subtype}` : type;
+        const titlePart = title ? `, title: "${title}"` : '';
+
+        return {
+          title: 'Save Feature KI',
+          message: `Save Feature KI for stream "${streamName}" (id: "${id}", type: "${typeLabel}"${titlePart})?`,
+          confirm_text: 'Save',
+          cancel_text: 'Cancel',
+        };
+      },
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ uiSettings }): Promise<ToolAvailabilityResult> => {
