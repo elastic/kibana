@@ -52,7 +52,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
     let userProvided: UserProvided<T> | undefined;
 
-    // 1. Check shared process-wide cache
+    // Check shared process-wide cache
     if (this.sharedUserProvidedCache) {
       // await any in-flight write to prevent reading stale data while a write is in progress
       await this.sharedUserProvidedCache.awaitInflightWrite(this.namespace);
