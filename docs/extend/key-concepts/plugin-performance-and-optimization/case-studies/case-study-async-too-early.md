@@ -12,15 +12,17 @@ The following case study is derived from [kibana#179175](https://github.com/elas
 ## Summary
 
 :::{note}
-<u>Before</u>: **`1.2MB`** total assets and **`217k`** code.<br/>
-  <u>After</u>: **`267k`** total assets and **`45.9k`** code.<br/>
-  <u>Savings</u>: **78%** and **79%**.
+  Before: **`1.2MB`** total assets and **`217k`** code.
+
+  After: **`267k`** total assets and **`45.9k`** code.
+
+  Savings: **78%** and **79%**.
 :::
 
 - The `console` plugin provides an embedded console for interacting with Elasticsearch.
 - The `search` plugin was utilizing the embedded console at the bottom of the page.
 - Large async chunks were being fetched on each page load.  One of the largest was the embedded console.
-- Parts of the embedded console were anyncronously imported, but not all of it.
+- Parts of the embedded console were asynchronously imported, but not all of it.
 - By moving the async load higher in the component tree, I was able to significantly improve page load.
 
 ## Investigation
