@@ -60,13 +60,17 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         if (!isEntityStoreV2Enabled) return;
 
         const space = await services.spaces.getActiveSpace();
-        // Install v2 and remove v1 in default namespace AND every namespace where v1 is currently installed
-        if (space.id !== 'default' && !(await isEntityStoreV1Installed(services.http))) return;
-
         const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest
         );
         const isEntityStoreV2Installed = isEntityStoreInstalled(statusResponse.status);
+        // In non-default spaces, only auto-install v2 where v1 existed. If v2 is already there,
+        // skip the v1 check and still run (e.g. init entity maintainers for this space).
+        if (space.id !== 'default' && !isEntityStoreV2Installed) {
+          if (!(await isEntityStoreV1Installed(services.http))) {
+            return;
+          }
+        }
         // Entity store already installed → init entity maintainers only.
         if (isEntityStoreV2Installed) {
           await services.http.post(initEntityMaintainersRequest);
