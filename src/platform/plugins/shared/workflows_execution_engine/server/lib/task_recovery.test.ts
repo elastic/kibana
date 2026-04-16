@@ -37,30 +37,22 @@ describe('shouldFailOnWorkflowRunRetry', () => {
       status,
     } as EsWorkflowExecution);
 
-  it('returns false when taskAttempts is 1', () => {
-    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.RUNNING), 1)).toBe(false);
-  });
-
-  it('returns false when execution is null', () => {
-    expect(shouldFailOnWorkflowRunRetry(null, 2)).toBe(false);
-  });
-
   it('returns false when terminal', () => {
-    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.FAILED), 2)).toBe(false);
-    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.COMPLETED), 2)).toBe(false);
+    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.FAILED))).toBe(false);
+    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.COMPLETED))).toBe(false);
   });
 
   it('returns false for waiting_for_input', () => {
-    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.WAITING_FOR_INPUT), 2)).toBe(false);
+    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.WAITING_FOR_INPUT))).toBe(false);
   });
 
-  it('returns true for running on retry', () => {
-    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.RUNNING), 2)).toBe(true);
+  it('returns true for running', () => {
+    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.RUNNING))).toBe(true);
   });
 
-  it('returns true for other non-terminal in-progress statuses on retry (e.g. pending, waiting)', () => {
-    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.PENDING), 2)).toBe(true);
-    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.WAITING), 2)).toBe(true);
+  it('returns true for other non-terminal in-progress statuses (e.g. pending, waiting)', () => {
+    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.PENDING))).toBe(true);
+    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.WAITING))).toBe(true);
   });
 });
 

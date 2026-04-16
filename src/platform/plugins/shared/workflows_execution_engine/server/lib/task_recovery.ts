@@ -66,7 +66,7 @@ export async function resolveInterruptedWorkflowRunTask({
     return 'run_workflow';
   }
 
-  if (!shouldFailOnWorkflowRunRetry(execution, taskAttempts)) {
+  if (!shouldFailOnWorkflowRunRetry(execution)) {
     if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
       logger.warn(
         `workflow:run retry for execution ${workflowRunId} while status is waiting_for_input; leaving execution unchanged (human resume only)`
@@ -208,14 +208,8 @@ export async function resolveExhaustedWorkflowRunTask({
   }
 }
 
-/** Exported for unit tests */
-export function shouldFailOnWorkflowRunRetry(
-  execution: EsWorkflowExecution | null,
-  taskAttempts: number
-): boolean {
-  if (taskAttempts <= 1 || !execution) {
-    return false;
-  }
+/** For `workflow:run` retry path after `taskAttempts > 1` with a loaded execution; exported for tests. */
+export function shouldFailOnWorkflowRunRetry(execution: EsWorkflowExecution): boolean {
   if (isTerminalStatus(execution.status)) {
     return false;
   }
