@@ -11,6 +11,8 @@ export const WORKFLOW_RUN_TASK_TYPE = 'workflow:run';
 
 export const WORKFLOW_RESUME_TASK_TYPE = 'workflow:resume';
 
+export const WORKFLOW_SCHEDULED_TASK_TYPE = 'workflow:scheduled';
+
 export interface StartWorkflowExecutionParams {
   workflowRunId: string;
   spaceId: string;

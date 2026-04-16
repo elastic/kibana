@@ -68,7 +68,11 @@ import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
-import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './workflow_task_manager/types';
+import {
+  WORKFLOW_RESUME_TASK_TYPE,
+  WORKFLOW_RUN_TASK_TYPE,
+  WORKFLOW_SCHEDULED_TASK_TYPE,
+} from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
 
@@ -354,7 +358,7 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
     plugins.taskManager.registerTaskDefinitions({
-      'workflow:scheduled': {
+      [WORKFLOW_SCHEDULED_TASK_TYPE]: {
         title: 'Scheduled Workflow Execution',
         description: 'Executes workflows on a scheduled basis',
         // Set high timeout for long-running workflows.

@@ -20,6 +20,7 @@ import {
 } from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
 
 describe('checkAndSkipIfExistingScheduledExecution', () => {
@@ -36,7 +37,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
   ): ConcreteTaskInstance => {
     return {
       id: 'task-id',
-      taskType: 'workflow:scheduled',
+      taskType: WORKFLOW_SCHEDULED_TASK_TYPE,
       params: { workflowId: workflow.id, spaceId, triggerType: 'scheduled' },
       state: {},
       attempts: 1,
