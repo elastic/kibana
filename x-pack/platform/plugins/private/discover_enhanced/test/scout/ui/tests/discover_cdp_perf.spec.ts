@@ -21,6 +21,7 @@ import { testData } from '../fixtures';
 const RSPACK_ONLY_BUNDLE_LABELS: readonly string[] = [
   'core',
   'kibana',
+  'one_discover_shared_deps',
   'rspack-chunk',
   'shared-core',
   'shared-misc',
