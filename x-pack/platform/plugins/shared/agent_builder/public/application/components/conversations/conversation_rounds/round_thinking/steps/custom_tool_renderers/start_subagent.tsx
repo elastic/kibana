@@ -9,7 +9,7 @@ import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
-import { EuiLink, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ThinkingItemLayout } from '../thinking_item_layout';
 import { SubAgentExecutionFlyout } from '../sub_agent_execution_flyout';
@@ -97,47 +97,40 @@ const SubAgentToolCallDisplay: React.FC<{
 
   return (
     <>
-      <ThinkingItemLayout
-        icon={icon}
-        accordionContent={step.params}
-        textColor={textColor}
-        loading={step.results.length === 0}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow>
-            <EuiText size="s">
-              <p role="status">
-                {isBackground ? (
+      <ThinkingItemLayout icon={icon} textColor={textColor}>
+        <EuiText size="s">
+          <p role="status">
+            {isBackground ? (
+              <FormattedMessage
+                id="xpack.agentBuilder.thinking.subAgentToolCallBackground"
+                defaultMessage='Started background agent: "{description}"'
+                values={{ description }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.agentBuilder.thinking.subAgentToolCallRunning"
+                defaultMessage='Running agent: "{description}"'
+                values={{ description }}
+              />
+            )}
+            {executionId && (
+              <>
+                {' · '}
+                <EuiLink onClick={() => setWatchExecutionId(executionId)} role="button">
                   <FormattedMessage
-                    id="xpack.agentBuilder.thinking.subAgentToolCallBackground"
-                    defaultMessage='Started background agent: "{description}"'
-                    values={{ description }}
+                    id="xpack.agentBuilder.thinking.watchSubAgent"
+                    defaultMessage="Watch"
                   />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.agentBuilder.thinking.subAgentToolCall"
-                    defaultMessage='Started agent: "{description}"'
-                    values={{ description }}
-                  />
-                )}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          {executionId && (
-            <EuiFlexItem grow={false}>
-              <EuiLink onClick={() => setWatchExecutionId(executionId)} role="button">
-                <FormattedMessage
-                  id="xpack.agentBuilder.thinking.watchSubAgent"
-                  defaultMessage="Watch"
-                />
-              </EuiLink>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+                </EuiLink>
+              </>
+            )}
+          </p>
+        </EuiText>
       </ThinkingItemLayout>
       {watchExecutionId && (
         <SubAgentExecutionFlyout
           executionId={watchExecutionId}
+          params={step.params}
           onClose={() => setWatchExecutionId(null)}
         />
       )}

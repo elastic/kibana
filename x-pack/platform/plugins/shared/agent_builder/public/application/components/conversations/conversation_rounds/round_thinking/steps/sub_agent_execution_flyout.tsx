@@ -16,6 +16,7 @@ import {
   EuiCallOut,
   EuiMarkdownFormat,
   EuiPanel,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -24,11 +25,13 @@ import { useFollowExecution } from './use_follow_execution';
 
 interface SubAgentExecutionFlyoutProps {
   executionId: string;
+  params?: Record<string, any>;
   onClose: () => void;
 }
 
 export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = ({
   executionId,
+  params,
   onClose,
 }) => {
   const { steps, isLoading, response, streamingMessage, error } = useFollowExecution(executionId);
@@ -54,6 +57,14 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {params && (
+          <>
+            <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
+              {JSON.stringify(params, null, 2)}
+            </EuiCodeBlock>
+            <EuiSpacer size="m" />
+          </>
+        )}
         {error && (
           <>
             <EuiCallOut title="Execution error" color="danger" iconType="error">
