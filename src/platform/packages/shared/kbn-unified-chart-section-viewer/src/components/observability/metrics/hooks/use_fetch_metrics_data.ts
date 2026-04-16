@@ -22,8 +22,8 @@ import { mergeDimensions } from '../utils/merge_dimensions';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
- * When selectedDimensionNames has more than one item, refetches with a WHERE filter so only
- * metrics that have at least one of those dimensions are returned.
+ * When selectedDimensionNames is non-empty, refetches with a WHERE filter so only
+ * metrics that have all of the selected dimensions are returned.
  * Returns loading state, error, and parsed metrics info for the grid.
  */
 export function useFetchMetricsData({
