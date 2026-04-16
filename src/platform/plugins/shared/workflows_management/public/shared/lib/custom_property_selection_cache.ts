@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { safeJsonStringify } from '@kbn/std';
 import type {
   SelectionDetails,
   SelectionOption,
@@ -34,7 +35,7 @@ function getFingerprintFromValues(values?: StepSelectionValues): string | undefi
   if (!hasConfig && !hasInput) {
     return undefined;
   }
-  return JSON.stringify(values);
+  return safeJsonStringify(values);
 }
 
 function getSearchCacheKey(
@@ -82,11 +83,7 @@ export function getCachedSearchOption(
 }
 
 function stableSerializePropertyValue(value: unknown): string {
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return String(value);
-  }
+  return safeJsonStringify(value) ?? String(value);
 }
 
 export function getCustomPropertyValidationOutcomeCacheKey(item: CustomPropertyItem): string {
