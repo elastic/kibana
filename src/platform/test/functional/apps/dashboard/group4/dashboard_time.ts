@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.end).to.equal(timePicker.defaultEndTime);
       });
 
-      it('sets time on open', async function () {
+      it('restores saved time on open when no unsaved session state is present', async function () {
         await timePicker.setAbsoluteRange(
           'Jan 1, 2019 @ 00:00:00.000',
           'Jan 2, 2019 @ 00:00:00.000'
