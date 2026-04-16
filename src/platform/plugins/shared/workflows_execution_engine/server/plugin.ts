@@ -39,6 +39,7 @@ import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
   resolveExhaustedWorkflowRunTask,
+  resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
 } from './lib/task_recovery';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
@@ -73,6 +74,9 @@ import { createIndexes } from '../common';
 
 /** Max retry attempts for workflow run tasks, including final-attempt recovery handling after interrupts. */
 const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
+
+/** Same retry budget as `workflow:run` — resume tasks can be interrupted mid-handler like run tasks. */
+const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
@@ -249,7 +253,8 @@ export class WorkflowsExecutionEnginePlugin
         // This is high value to allow long-running workflows.
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
-        maxAttempts: 1,
+        // Retries allow `resolveInterruptedWorkflowResumeTask` to fail-fast abandoned executions after interrupt.
+        maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           if (!fakeRequest) {
             throw new Error('Cannot resume a workflow without Kibana Request');
@@ -300,17 +305,46 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              await resumeWorkflow({
+              const workflowExecutionRepository = new WorkflowExecutionRepository(
+                coreStart.elasticsearch.client.asInternalUser
+              );
+
+              const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
+                workflowExecutionRepository,
                 workflowRunId,
                 spaceId,
-                taskAbortController,
-                config,
+                taskAttempts: taskInstance.attempts,
                 logger,
-                fakeRequest,
-                dependencies,
-                workflowsExecutionEngine,
-                meteringService: this.meteringService,
               });
+
+              if (interruptedOutcome === 'task_complete') {
+                return;
+              }
+
+              try {
+                await resumeWorkflow({
+                  workflowRunId,
+                  spaceId,
+                  taskAbortController,
+                  config,
+                  logger,
+                  fakeRequest,
+                  dependencies,
+                  workflowsExecutionEngine,
+                  meteringService: this.meteringService,
+                });
+              } catch (error) {
+                await resolveExhaustedWorkflowRunTask({
+                  workflowExecutionRepository,
+                  workflowRunId,
+                  spaceId,
+                  taskAttempts: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
+                  error,
+                  logger,
+                });
+                throw error;
+              }
             },
             cancel: async () => {
               taskAbortController.abort();

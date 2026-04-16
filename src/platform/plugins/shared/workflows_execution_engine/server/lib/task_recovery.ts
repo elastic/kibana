@@ -21,10 +21,12 @@ export const taskRecoveryMessages = {
     'Execution abandoned due to recovery mechanism. Execution was created for this scheduled run but the scheduled task was interrupted before completion.',
   workflowRunInterrupted:
     'Execution abandoned due to recovery mechanism. The workflow run task was interrupted before completion (e.g. Kibana restart); the prior run is not resumed.',
+  workflowResumeInterrupted:
+    'Execution abandoned due to recovery mechanism. The workflow resume task was interrupted before completion (e.g. Kibana restart); the prior resume is not applied.',
 } as const;
 
 export function buildTaskAttemptsExhaustedMessage(lastError: string): string {
-  return `Task Manager exhausted all attempts for this workflow run. Last error: ${lastError}`;
+  return `Task Manager exhausted all attempts for this workflow execution task. Last error: ${lastError}`;
 }
 
 export type InterruptedWorkflowRunTaskOutcome = 'run_workflow' | 'task_complete';
@@ -79,6 +81,64 @@ export async function resolveInterruptedWorkflowRunTask({
 
   logger.warn(
     `Marked workflow execution ${workflowRunId} FAILED after workflow:run retry (attempts=${taskAttempts}) — prior run was interrupted`
+  );
+
+  return 'task_complete';
+}
+
+export type InterruptedWorkflowResumeTaskOutcome = 'resume_workflow' | 'task_complete';
+
+/**
+ * When Task Manager retries `workflow:resume` (`attempts > 1`), the prior claim did not finish successfully.
+ * Fail non-terminal executions that are no longer waiting for input (stuck RUNNING / WAITING, etc.).
+ * If still `waiting_for_input`, invoke the resume handler again — the first attempt never completed.
+ */
+export async function resolveInterruptedWorkflowResumeTask({
+  workflowExecutionRepository,
+  workflowRunId,
+  spaceId,
+  taskAttempts,
+  logger,
+}: {
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  workflowRunId: string;
+  spaceId: string;
+  taskAttempts: number;
+  logger: Logger;
+}): Promise<InterruptedWorkflowResumeTaskOutcome> {
+  if (taskAttempts <= 1) {
+    return 'resume_workflow';
+  }
+
+  const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+    workflowRunId,
+    spaceId
+  );
+
+  if (!execution) {
+    logger.warn(
+      `workflow:resume retry (attempts=${taskAttempts}) but no execution document for ${workflowRunId}; continuing resume`
+    );
+    return 'resume_workflow';
+  }
+
+  if (isTerminalStatus(execution.status)) {
+    return 'task_complete';
+  }
+
+  if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+    logger.warn(
+      `workflow:resume retry for execution ${workflowRunId} still waiting_for_input — invoking resume handler again`
+    );
+    return 'resume_workflow';
+  }
+
+  await markExecutionFailedTaskRecovery(workflowExecutionRepository, workflowRunId, {
+    message: taskRecoveryMessages.workflowResumeInterrupted,
+  });
+
+  logger.warn(
+    `Marked workflow execution ${workflowRunId} FAILED after workflow:resume retry (attempts=${taskAttempts}) — prior resume task was interrupted`
   );
 
   return 'task_complete';
@@ -159,8 +219,5 @@ export function shouldFailOnWorkflowRunRetry(
   if (isTerminalStatus(execution.status)) {
     return false;
   }
-  if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
-    return false;
-  }
-  return true;
+  return execution.status !== ExecutionStatus.WAITING_FOR_INPUT;
 }
