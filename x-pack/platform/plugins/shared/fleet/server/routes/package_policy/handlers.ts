@@ -460,7 +460,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     ) {
       const parentAgentPolicies = await agentPolicyService.getByIds(
         soClient,
-        packagePolicy.policy_ids!
+        packagePolicy.policy_ids!,
+        { ignoreMissing: true }
       );
       if (parentAgentPolicies.some((ap) => ap.is_managed)) {
         throw new PackagePolicyRequestError(
