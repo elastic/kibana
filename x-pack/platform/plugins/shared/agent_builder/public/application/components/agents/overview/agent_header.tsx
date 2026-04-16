@@ -23,6 +23,7 @@ import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentVisibilityBadge } from '../list/agent_visibility_badge';
+import { AgentDescription } from './agent_description';
 
 const { agentOverview: overviewLabels } = labels;
 
@@ -129,9 +130,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <EuiText size="m" color="default">
-        {agent.description}
-      </EuiText>
+      <AgentDescription description={agent.description} />
 
       {agent.labels && agent.labels.length > 0 && (
         <>
