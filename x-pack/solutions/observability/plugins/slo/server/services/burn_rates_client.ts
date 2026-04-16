@@ -119,6 +119,9 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
 
     const perItemMeta: BatchItemMeta[] = params.map(
       ({ slo, instanceId, lookbackWindows, remoteName }) => {
+        if (lookbackWindows.length === 0) {
+          throw new Error(`lookbackWindows must not be empty for SLO [${slo.id}]`);
+        }
         const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
           a.duration.isShorterThan(b.duration) ? 1 : -1
         );

@@ -18,3 +18,6 @@ export type { CloudConnectorApiService } from './cloud_connector';
 
 export { getTimelineApiService } from './timeline';
 export type { TimelineApiService } from './timeline';
+
+export { getAttackDiscoveryApiService } from './attack_discovery';
+export type { AttackDiscoveryApiService } from './attack_discovery';
