@@ -29,6 +29,22 @@ import {
 } from '@kbn/streamlang';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 
+const postParseProcessorUnionSchema = z.union([
+  dateProcessorSchema,
+  removeProcessorSchema,
+  renameProcessorSchema,
+  convertProcessorSchema,
+]);
+
+const fullProcessorUnionSchema = z.union([
+  grokProcessorSchema,
+  dissectProcessorSchema,
+  dateProcessorSchema,
+  removeProcessorSchema,
+  renameProcessorSchema,
+  convertProcessorSchema,
+]);
+
 export const pipelineDefinitionSchema = z
   .object({
     steps: z
@@ -36,14 +52,7 @@ export const pipelineDefinitionSchema = z
         // Explicitly set list of processors we want to include in suggestions
         // Currently focused on extract and parse date use cases
         // Future: add set, replace, drop, append processors
-        z.union([
-          grokProcessorSchema,
-          dissectProcessorSchema,
-          dateProcessorSchema,
-          removeProcessorSchema,
-          renameProcessorSchema,
-          convertProcessorSchema,
-        ])
+        fullProcessorUnionSchema
       )
       .describe(
         'Ordered list of processors that transform documents. Processors execute sequentially'
@@ -51,7 +60,27 @@ export const pipelineDefinitionSchema = z
   })
   .describe('The pipeline definition object containing processing steps');
 
+/**
+ * When a system-managed grok/dissect step runs first, the agent only proposes
+ * post-parse processors; grok/dissect are excluded to avoid duplicate parsing.
+ */
+export const postParsePipelineDefinitionSchema = z
+  .object({
+    steps: z
+      .array(postParseProcessorUnionSchema)
+      .describe(
+        'Ordered list of post-parse processors (no grok/dissect). Processors execute sequentially'
+      ),
+  })
+  .describe('Pipeline definition for post-parse-only suggested steps (no grok/dissect)');
+
 export type PipelineDefinition = z.infer<typeof pipelineDefinitionSchema>;
+export type PostParsePipelineDefinition = z.infer<typeof postParsePipelineDefinitionSchema>;
+
+/** Zod schema passed to `suggestProcessingPipeline` to constrain tool calls; chosen by the caller. */
+export type SuggestPipelineAgentSchema =
+  | typeof pipelineDefinitionSchema
+  | typeof postParsePipelineDefinitionSchema;
 
 export function getPipelineDefinitionJsonSchema(schema: z.ZodType) {
   // Register recurring schemas with IDs for cleaner $defs output
