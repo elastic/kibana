@@ -108,6 +108,3 @@ Run `node scripts/create_connectors.js --dry-run` to verify IDs are correct befo
 
 All secrets are fetched via the `vault` CLI at runtime. The default vault address is `https://secrets.elastic.co:8200` (override with `VAULT_ADDR` env var).
 
-Vault paths follow the pattern: `secret/ent-search-team/connectors-sources/<connector-name>`
-
-Missing vault entries are tracked in [elastic/search-team#13913](https://github.com/elastic/search-team/issues/13913).
