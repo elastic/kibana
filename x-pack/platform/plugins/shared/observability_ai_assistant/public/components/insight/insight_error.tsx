@@ -19,7 +19,7 @@ export function InsightError() {
       iconType="error"
     >
       {i18n.translate('xpack.observabilityAiAssistant.insight.error.description', {
-        defaultMessage: 'An error occured.',
+        defaultMessage: 'An error occurred.',
       })}
 
       <EuiSpacer size="m" />
