@@ -10,13 +10,20 @@ import { convertRuleSearchTermToKQL } from '../../../../../../common/detection_e
 
 /**
  * Combines the KQL filter with search into a unified query.
+ *
+ * @param searchTermConverter A function that converts a legacy search term into
+ * a KQL expression. Defaults to the installed-rule (alert SO) converter; callers
+ * working with other saved object types (e.g. prebuilt rule assets) can provide
+ * a context-specific converter.
  */
 export const buildGranularRulesKql = ({
   filter,
   search,
+  searchTermConverter = convertRuleSearchTermToKQL,
 }: {
   filter: string | undefined;
   search: GranularRulesSearch | undefined;
+  searchTermConverter?: (term: string) => string;
 }): string | undefined => {
   const parts: string[] = [];
   const trimmedFilter = filter?.trim();
@@ -29,7 +36,7 @@ export const buildGranularRulesKql = ({
   const trimmedSearch = search?.term?.trim();
 
   if (trimmedSearch && mode === 'legacy') {
-    parts.push(`(${convertRuleSearchTermToKQL(trimmedSearch)})`);
+    parts.push(`(${searchTermConverter(trimmedSearch)})`);
   }
 
   if (parts.length === 0) {

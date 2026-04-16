@@ -6,8 +6,8 @@
  */
 
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { CamelCasedPropertiesDeep } from 'type-fest';
 import type { RuleSummary } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type {
   ReviewRuleInstallationRequestBody,
@@ -22,10 +22,12 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
 import type { BasicRuleInfo } from '../../logic/basic_rule_info';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import type { PrebuiltRuleAssetsFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
-import type { PrebuiltRuleAssetsSort } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
-import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
+import { buildGranularRulesKql } from '../../../rule_management/logic/search/build_granular_rules_kql';
+import {
+  buildPrebuiltRuleAssetsAggregations,
+  expandPrebuiltRuleAssetsAggregationResult,
+} from '../../logic/search/prebuilt_rule_assets_aggregations';
+import { convertPrebuiltRuleAssetSearchTermToKql } from '../../logic/search/convert_prebuilt_rule_asset_search_term_to_kql';
 
 export const reviewRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -34,14 +36,19 @@ export const reviewRuleInstallationHandler = async (
   logger: Logger
 ) => {
   const siemResponse = buildSiemResponse(response);
-  const requestParameters = convertObjectKeysToCamelCase(request.body);
+  const {
+    page,
+    per_page: perPage,
+    filter,
+    search,
+    aggregations,
+    sort_field: sortField,
+    sort_order: sortOrder,
+    search_after: searchAfter,
+  } = request.body;
 
   logger.debug(
-    `reviewRuleInstallationHandler: Executing handler with params: page=${
-      requestParameters.page
-    }, perPage=${requestParameters.perPage}, sort=${JSON.stringify(
-      requestParameters.sort
-    )}, filter=${JSON.stringify(requestParameters.filter)}`
+    `reviewRuleInstallationHandler: Executing handler with params: page=${page}, perPage=${perPage}, sort_field=${sortField}, sort_order=${sortOrder}, filter=${filter}`
   );
 
   try {
@@ -60,26 +67,49 @@ export const reviewRuleInstallationHandler = async (
       installedRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    const [rules, stats] = await Promise.all([
+    const combinedKql = buildGranularRulesKql({
+      filter,
+      search,
+      searchTermConverter: convertPrebuiltRuleAssetSearchTermToKql,
+    });
+    const categoryCounts = aggregations?.counts ?? [];
+    const aggs =
+      categoryCounts.length > 0
+        ? buildPrebuiltRuleAssetsAggregations({ categories: categoryCounts })
+        : undefined;
+
+    const [rulesResult, stats] = await Promise.all([
       fetchRules({
         ruleAssetsClient,
         logger,
         mlAuthz,
         installedRuleVersionsMap,
-        requestParameters,
+        filter: combinedKql,
+        sortField,
+        sortOrder,
+        page,
+        perPage,
+        searchAfter: searchAfter as SortResults | undefined,
+        aggs,
       }),
       fetchStats({ ruleAssetsClient, logger, mlAuthz, installedRuleVersionsMap }),
     ]);
 
+    const counts = rulesResult.aggregations
+      ? expandPrebuiltRuleAssetsAggregationResult(rulesResult.aggregations, categoryCounts)
+      : undefined;
+
     const body: ReviewRuleInstallationResponseBody = {
-      page: requestParameters.page,
-      per_page: requestParameters.perPage,
-      rules: rules.rules,
-      total: rules.total, // Number of rules matching the filter
+      page,
+      per_page: perPage,
+      rules: rulesResult.rules,
+      total: rulesResult.total,
       stats: {
         tags: stats.tags,
-        num_rules_to_install: stats.numRulesToInstall, // Number of installable rules without applying filters
+        num_rules_to_install: stats.numRulesToInstall,
       },
+      ...(counts ? { counts } : {}),
+      ...(rulesResult.searchAfter ? { search_after: rulesResult.searchAfter } : {}),
     };
 
     logger.debug(
@@ -102,35 +132,51 @@ async function fetchRules({
   logger,
   mlAuthz,
   installedRuleVersionsMap,
-  requestParameters,
+  filter,
+  sortField,
+  sortOrder,
+  page,
+  perPage,
+  searchAfter,
+  aggs,
 }: {
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
   logger: Logger;
   mlAuthz: MlAuthz;
   installedRuleVersionsMap: Map<string, RuleSummary>;
-  requestParameters: CamelCasedPropertiesDeep<ReviewRuleInstallationRequestBody>;
-}): Promise<{ rules: RuleResponse[]; total: number }> {
-  const { sort, filter, page, perPage } = requestParameters;
+  filter: string | undefined;
+  sortField: ReviewRuleInstallationRequestBody['sort_field'];
+  sortOrder: ReviewRuleInstallationRequestBody['sort_order'];
+  page: number;
+  perPage: number;
+  searchAfter?: SortResults;
+  aggs?: Parameters<IPrebuiltRuleAssetsClient['searchRuleAssets']>[0]['aggregations'];
+}) {
   const installableVersions = await getInstallableRuleVersions(
     ruleAssetsClient,
     logger,
     mlAuthz,
-    installedRuleVersionsMap,
-    sort,
-    filter
+    installedRuleVersionsMap
   );
 
-  const installableVersionsPage = installableVersions.slice((page - 1) * perPage, page * perPage);
-
-  const installableRuleAssetsPage = await ruleAssetsClient.fetchAssetsByVersion(
-    installableVersionsPage
-  );
+  const searchResult = await ruleAssetsClient.searchRuleAssets({
+    versions: installableVersions,
+    filter,
+    sortField,
+    sortOrder,
+    page,
+    perPage,
+    searchAfter,
+    aggregations: aggs,
+  });
 
   return {
-    rules: installableRuleAssetsPage.map((prebuiltRuleAsset) =>
+    rules: searchResult.assets.map((prebuiltRuleAsset) =>
       convertPrebuiltRuleAssetToRuleResponse(prebuiltRuleAsset)
     ),
-    total: installableVersions.length,
+    total: searchResult.total,
+    searchAfter: searchResult.searchAfter,
+    aggregations: searchResult.aggregations,
   };
 }
 
@@ -164,14 +210,9 @@ async function getInstallableRuleVersions(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,
   logger: Logger,
   mlAuthz: MlAuthz,
-  installedRuleVersionsMap: Map<string, RuleSummary>,
-  sort?: PrebuiltRuleAssetsSort,
-  filter?: PrebuiltRuleAssetsFilter
+  installedRuleVersionsMap: Map<string, RuleSummary>
 ): Promise<BasicRuleInfo[]> {
-  const latestRuleVersions = await ruleAssetsClient.fetchLatestVersions({
-    sort,
-    filter,
-  });
+  const latestRuleVersions = await ruleAssetsClient.fetchLatestVersions();
 
   logger.debug(
     `reviewRuleInstallationHandler: Fetched ${latestRuleVersions.length} latest rule versions from assets`

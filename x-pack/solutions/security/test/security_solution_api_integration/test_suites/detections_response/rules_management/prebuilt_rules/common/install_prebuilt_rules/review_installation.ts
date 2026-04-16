@@ -10,6 +10,7 @@ import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { REVIEW_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/urls';
 import { RULES_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import { MAX_SEARCH_RULES_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -92,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('called with an empty object - defaults to page 1 and per_page 20', async () => {
-        const response = await reviewPrebuiltRulesToInstall(supertest);
+        const response = await reviewPrebuiltRulesToInstall(supertest, {});
 
         expect(response).toMatchObject({
           page: 1,
@@ -169,7 +170,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const page1Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 1,
           per_page: 2,
-          sort: [{ field: 'name', order: 'asc' }],
+          sort_field: 'name',
+          sort_order: 'asc',
         });
 
         expect(page1Response.rules).toHaveLength(2);
@@ -181,6 +183,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const page2Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 2,
           per_page: 2,
+          sort_field: 'name',
+          sort_order: 'asc',
         });
 
         expect(page2Response.rules).toHaveLength(2);
@@ -308,7 +312,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { tags: { include: { values: ['tag-a'] } } } },
+          filter: 'security-rule.attributes.tags: "tag-a"',
         });
 
         expect(response.stats.tags).toEqual(['tag-a', 'tag-b', 'tag-c']);
@@ -341,7 +345,8 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort: [{ field: 'name', order: 'asc' }],
+            sort_field: 'name',
+            sort_order: 'asc',
           });
 
           expect(ascSortResponse.rules).toEqual([
@@ -360,7 +365,8 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort: [{ field: 'name', order: 'desc' }],
+            sort_field: 'name',
+            sort_order: 'desc',
           });
 
           expect(descSortResponse.rules).toEqual([
@@ -382,7 +388,8 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort: [{ field: 'severity', order: 'asc' }],
+            sort_field: 'severity',
+            sort_order: 'asc',
           });
 
           expect(ascSortResponse.rules).toEqual([
@@ -403,7 +410,8 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort: [{ field: 'severity', order: 'desc' }],
+            sort_field: 'severity',
+            sort_order: 'desc',
           });
 
           expect(descSortResponse.rules).toEqual([
@@ -425,7 +433,8 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort: [{ field: 'risk_score', order: 'asc' }],
+            sort_field: 'risk_score',
+            sort_order: 'asc',
           });
 
           expect(ascSortResponse.rules).toEqual([
@@ -444,7 +453,8 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            sort: [{ field: 'risk_score', order: 'desc' }],
+            sort_field: 'risk_score',
+            sort_order: 'desc',
           });
 
           expect(descSortResponse.rules).toEqual([
@@ -473,7 +483,8 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const sortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          sort: [{ field: 'risk_score', order: 'asc' }],
+          sort_field: 'risk_score',
+          sort_order: 'asc',
         });
 
         expect(sortResponse.rules).toEqual([
@@ -511,66 +522,24 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('by name', () => {
-        describe('empty filter provided - returns unfiltered response', () => {
-          it('with empty object', async () => {
-            const ruleAssets = [
-              createRuleAssetSavedObject({ rule_id: 'rule-1', name: 'Rule 1' }),
-              createRuleAssetSavedObject({ rule_id: 'rule-2', name: 'Rule 2' }),
-            ];
-            await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+        it('empty filter provided - returns unfiltered response', async () => {
+          const ruleAssets = [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', name: 'Rule 1' }),
+            createRuleAssetSavedObject({ rule_id: 'rule-2', name: 'Rule 2' }),
+          ];
+          await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-            const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { name: {} } },
-            });
-
-            expect(emptyNameResponse.rules).toHaveLength(2);
-            expect(emptyNameResponse.rules).toEqual(
-              expect.arrayContaining([
-                expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
-                expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
-              ])
-            );
+          const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
+            filter: '',
           });
 
-          it('with empty include array', async () => {
-            const ruleAssets = [
-              createRuleAssetSavedObject({ rule_id: 'rule-1', name: 'Rule 1' }),
-              createRuleAssetSavedObject({ rule_id: 'rule-2', name: 'Rule 2' }),
-            ];
-            await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
-
-            const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { name: { include: { values: [] } } } },
-            });
-
-            expect(emptyNameResponse.rules).toHaveLength(2);
-            expect(emptyNameResponse.rules).toEqual(
-              expect.arrayContaining([
-                expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
-                expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
-              ])
-            );
-          });
-
-          it('with empty string in include array', async () => {
-            const ruleAssets = [
-              createRuleAssetSavedObject({ rule_id: 'rule-1', name: 'Rule 1' }),
-              createRuleAssetSavedObject({ rule_id: 'rule-2', name: 'Rule 2' }),
-            ];
-            await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
-
-            const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { name: { include: { values: [''] } } } },
-            });
-
-            expect(emptyNameResponse.rules).toHaveLength(2);
-            expect(emptyNameResponse.rules).toEqual(
-              expect.arrayContaining([
-                expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
-                expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
-              ])
-            );
-          });
+          expect(emptyNameResponse.rules).toHaveLength(2);
+          expect(emptyNameResponse.rules).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({ rule_id: 'rule-1', name: 'Rule 1' }),
+              expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' }),
+            ])
+          );
         });
 
         describe('name matching', () => {
@@ -583,7 +552,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const response = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { name: { include: { values: ['My rule 1'] } } } },
+              filter: 'security-rule.attributes.name: "My rule 1"',
             });
 
             expect(response.rules).toEqual([
@@ -591,7 +560,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ]);
           });
 
-          it('wildcard matching - matches partial name', async () => {
+          it('wildcard matching - matches partial name via keyword wildcard', async () => {
             const ruleAssets = [
               createRuleAssetSavedObject({ rule_id: 'rule-1', name: 'My rule 1' }),
               createRuleAssetSavedObject({ rule_id: 'rule-2', name: 'My rule 2' }),
@@ -600,7 +569,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const response = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { name: { include: { values: ['rule'] } } } },
+              filter: 'security-rule.attributes.name.keyword: *rule*',
             });
 
             expect(response.rules).toHaveLength(3);
@@ -613,7 +582,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
           });
 
-          it('matches case-insensitively', async () => {
+          it('matches case-insensitively via analyzed name field', async () => {
             const ruleAssets = [
               createRuleAssetSavedObject({ rule_id: 'rule-1', name: 'My rule 1' }),
               createRuleAssetSavedObject({ rule_id: 'rule-2', name: 'My rule 2' }),
@@ -622,7 +591,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const response = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { name: { include: { values: ['mY rulE 1'] } } } },
+              filter: 'security-rule.attributes.name: "mY rulE 1"',
             });
 
             expect(response.rules).toEqual([
@@ -633,40 +602,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('by tags', () => {
-        describe('empty filter provided - returns unfiltered response', () => {
-          it('with empty include array', async () => {
-            const ruleAssets = [
-              createRuleAssetSavedObject({
-                rule_id: 'rule-1',
-                tags: ['tag-a', 'tag-b'],
-              }),
-              createRuleAssetSavedObject({
-                rule_id: 'rule-2',
-                tags: ['tag-b', 'tag-c'],
-              }),
-            ];
-            await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
-
-            const emptyTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { tags: { include: { values: [] } } } },
-            });
-
-            expect(emptyTagResponse.rules).toHaveLength(2);
-            expect(emptyTagResponse.rules).toEqual(
-              expect.arrayContaining([
-                expect.objectContaining({
-                  rule_id: 'rule-1',
-                  tags: ['tag-a', 'tag-b'],
-                }),
-                expect.objectContaining({
-                  rule_id: 'rule-2',
-                  tags: ['tag-b', 'tag-c'],
-                }),
-              ])
-            );
-          });
-        });
-
         describe('single tag', () => {
           it('matches all rules with a tag', async () => {
             const ruleAssets = [
@@ -686,7 +621,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const singleTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { tags: { include: { values: ['tag-b'] } } } },
+              filter: 'security-rule.attributes.tags: "tag-b"',
             });
 
             expect(singleTagResponse.rules).toHaveLength(2);
@@ -722,7 +657,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const singleTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { tags: { include: { values: ['tag-d'] } } } },
+              filter: 'security-rule.attributes.tags: "tag-d"',
             });
 
             expect(singleTagResponse.rules).toEqual([]);
@@ -748,7 +683,8 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const multipleTagsResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { tags: { include: { values: ['tag-a', 'tag-b'] } } } },
+              filter:
+                '(security-rule.attributes.tags: "tag-a") AND (security-rule.attributes.tags: "tag-b")',
             });
 
             expect(multipleTagsResponse.rules).toEqual([
@@ -777,7 +713,8 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const multipleTagsResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              filter: { fields: { tags: { include: { values: ['tag-a', 'tag-c'] } } } },
+              filter:
+                '(security-rule.attributes.tags: "tag-a") AND (security-rule.attributes.tags: "tag-c")',
             });
 
             expect(multipleTagsResponse.rules).toEqual([]);
@@ -785,14 +722,15 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('tags with special characters', () => {
+          // Characters that are safe to round-trip as KQL-escaped string params
+          // (see `prepareKQLStringParam`). KQL-reserved tokens such as `&&`,
+          // `||` or standalone `\` are intentionally out of scope here.
           [
             ' ',
             '%',
             '+',
             '-',
             '=',
-            '&&',
-            '||',
             '>',
             '<',
             '!',
@@ -803,12 +741,10 @@ export default ({ getService }: FtrProviderContext): void => {
             '[',
             ']',
             '^',
-            '"',
             '~',
             '*',
             '?',
             ':',
-            '\\',
             '/',
           ].forEach((specialChar, index) => {
             it(`matches tag with special character "${specialChar}"`, async () => {
@@ -820,7 +756,7 @@ export default ({ getService }: FtrProviderContext): void => {
               await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
 
               const response = await reviewPrebuiltRulesToInstall(supertest, {
-                filter: { fields: { tags: { include: { values: [tag] } } } },
+                filter: `security-rule.attributes.tags: "${tag.replace(/"/g, '\\"')}"`,
               });
               expect(response.rules).toEqual([
                 expect.objectContaining({
@@ -843,7 +779,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const response = await reviewPrebuiltRulesToInstall(supertest, {
-            filter: { fields: { name: { include: { values: ['Rule'] } } } },
+            filter: 'security-rule.attributes.name.keyword: *Rule*',
           });
 
           expect(response).toMatchObject({
@@ -881,7 +817,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const response = await reviewPrebuiltRulesToInstall(supertest, {
-            filter: { fields: { tags: { include: { values: ['tag-a'] } } } },
+            filter: 'security-rule.attributes.tags: "tag-a"',
           });
 
           expect(response).toMatchObject({
@@ -917,8 +853,9 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          sort: [{ field: 'name', order: 'desc' }],
-          filter: { fields: { tags: { include: { values: ['tag-b'] } } } },
+          sort_field: 'name',
+          sort_order: 'desc',
+          filter: 'security-rule.attributes.tags: "tag-b"',
         });
 
         expect(response.rules).toEqual([
@@ -929,6 +866,224 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_id: 'rule-1',
           }),
         ]);
+      });
+    });
+
+    describe('Search term', () => {
+      it('matches rules by name substring via the legacy search term', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', name: 'Phishing detection' }),
+          createRuleAssetSavedObject({ rule_id: 'rule-2', name: 'Malware alert' }),
+          createRuleAssetSavedObject({ rule_id: 'rule-3', name: 'Unrelated rule' }),
+        ];
+
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest, {
+          search: { term: 'phishing' },
+        });
+
+        expect(response.rules).toEqual([
+          expect.objectContaining({ rule_id: 'rule-1', name: 'Phishing detection' }),
+        ]);
+      });
+
+      it('ANDs the filter with the legacy search term', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({
+            rule_id: 'rule-1',
+            name: 'Phishing detection',
+            tags: ['tag-a'],
+          }),
+          createRuleAssetSavedObject({
+            rule_id: 'rule-2',
+            name: 'Phishing alert',
+            tags: ['tag-b'],
+          }),
+        ];
+
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest, {
+          filter: 'security-rule.attributes.tags: "tag-a"',
+          search: { term: 'phishing', mode: 'legacy' },
+        });
+
+        expect(response.rules).toEqual([
+          expect.objectContaining({ rule_id: 'rule-1', tags: ['tag-a'] }),
+        ]);
+      });
+
+      it('returns 400 when search.term exceeds max length', async () => {
+        const response = (await reviewPrebuiltRulesToInstall(
+          supertest,
+          {
+            search: { term: 'x'.repeat(MAX_SEARCH_RULES_SEARCH_TERM_LENGTH + 1) },
+          },
+          400
+        )) as unknown as { status_code: number; message: string[] };
+        expect(response).toMatchObject({
+          status_code: 400,
+          message: expect.any(Array),
+        });
+        expect(
+          response.message.some((m) =>
+            m.includes(
+              `search.term exceeds maximum length of ${MAX_SEARCH_RULES_SEARCH_TERM_LENGTH}`
+            )
+          )
+        ).toBe(true);
+      });
+    });
+
+    describe('KQL filter validation', () => {
+      it('returns 400 for invalid KQL filter', async () => {
+        const response = (await reviewPrebuiltRulesToInstall(
+          supertest,
+          {
+            filter: 'security-rule.attributes.name: (',
+          },
+          400
+        )) as unknown as { status_code: number; message: string[] };
+        expect(response).toMatchObject({
+          status_code: 400,
+          message: expect.any(Array),
+        });
+        expect(response.message.some((m) => m.includes('invalid KQL filter'))).toBe(true);
+      });
+    });
+
+    describe('search_after pagination', () => {
+      it('returns 400 when search_after is provided without sort_field and sort_order', async () => {
+        const response = (await reviewPrebuiltRulesToInstall(
+          supertest,
+          {
+            search_after: ['nonsense-sort-token'],
+          },
+          400
+        )) as unknown as { status_code: number; message: string[] };
+        expect(response).toMatchObject({
+          status_code: 400,
+          message: expect.any(Array),
+        });
+        expect(
+          response.message.some((m) =>
+            m.includes('when search_after is provided, sort_field and sort_order must be set')
+          )
+        ).toBe(true);
+      });
+
+      it('paginates with page and returns results in sort order without a search_after cursor', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({ rule_id: 'rule-a', name: 'Aaa cursor rule' }),
+          createRuleAssetSavedObject({ rule_id: 'rule-z', name: 'Zzz cursor rule' }),
+        ];
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const first = await reviewPrebuiltRulesToInstall(supertest, {
+          per_page: 1,
+          page: 1,
+          sort_field: 'name',
+          sort_order: 'asc',
+        });
+
+        expect(first.rules).toHaveLength(1);
+        expect(first.total).toBe(2);
+        expect(first.rules[0]?.name).toBe('Aaa cursor rule');
+        expect(first.search_after).toBeDefined();
+
+        const second = await reviewPrebuiltRulesToInstall(supertest, {
+          per_page: 1,
+          page: 2,
+          sort_field: 'name',
+          sort_order: 'asc',
+        });
+
+        expect(second.rules).toHaveLength(1);
+        expect(second.total).toBe(2);
+        expect(second.rules[0]?.name).toBe('Zzz cursor rule');
+      });
+
+      it('continues pagination via search_after cursor', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({ rule_id: 'rule-a', name: 'Aaa cursor rule' }),
+          createRuleAssetSavedObject({ rule_id: 'rule-m', name: 'Mmm cursor rule' }),
+          createRuleAssetSavedObject({ rule_id: 'rule-z', name: 'Zzz cursor rule' }),
+        ];
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const first = await reviewPrebuiltRulesToInstall(supertest, {
+          per_page: 1,
+          sort_field: 'name',
+          sort_order: 'asc',
+        });
+
+        expect(first.rules).toHaveLength(1);
+        expect(first.rules[0]?.name).toBe('Aaa cursor rule');
+        expect(first.search_after).toBeDefined();
+
+        const second = await reviewPrebuiltRulesToInstall(supertest, {
+          per_page: 1,
+          sort_field: 'name',
+          sort_order: 'asc',
+          search_after: first.search_after,
+        });
+
+        expect(second.rules).toHaveLength(1);
+        expect(second.rules[0]?.name).toBe('Mmm cursor rule');
+      });
+    });
+
+    describe('Aggregations', () => {
+      it('returns facet counts for tags when aggregations.counts is set', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', tags: ['tag-a'] }),
+          createRuleAssetSavedObject({ rule_id: 'rule-2', tags: ['tag-a'] }),
+          createRuleAssetSavedObject({ rule_id: 'rule-3', tags: ['tag-b'] }),
+        ];
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest, {
+          aggregations: { counts: ['tags'] },
+        });
+
+        expect(response.total).toBe(3);
+        expect(response.counts).toBeDefined();
+        const tagsCounts = response.counts?.tags as Record<string, number> | undefined;
+        expect(tagsCounts).toBeDefined();
+        expect(tagsCounts?.['tag-a']).toBe(2);
+        expect(tagsCounts?.['tag-b']).toBe(1);
+      });
+
+      it('filter intersects with aggregations.counts', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', tags: ['tag-a'] }),
+          createRuleAssetSavedObject({ rule_id: 'rule-2', tags: ['tag-a'] }),
+          createRuleAssetSavedObject({ rule_id: 'rule-3', tags: ['tag-b'] }),
+        ];
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest, {
+          filter: 'security-rule.attributes.tags: "tag-a"',
+          aggregations: { counts: ['tags'] },
+        });
+
+        expect(response.total).toBe(2);
+        const tagsCounts = response.counts?.tags as Record<string, number> | undefined;
+        expect(tagsCounts).toBeDefined();
+        expect(tagsCounts?.['tag-a']).toBe(2);
+        expect(tagsCounts?.['tag-b']).toBeUndefined();
+      });
+
+      it('returns 400 when aggregations.counts contains duplicates', async () => {
+        const response = (await reviewPrebuiltRulesToInstall(
+          supertest,
+          {
+            aggregations: { counts: ['tags', 'tags'] },
+          },
+          400
+        )) as unknown as { status_code: number };
+        expect(response.status_code).toBe(400);
       });
     });
 
