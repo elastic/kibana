@@ -102,7 +102,7 @@ export const getSuggestWidgetStyles = (euiThemeContext: UseEuiTheme) => {
 
   const itemIconSelected = css`
     color: ${euiTheme.colors.textInverse};
-    background: ${transparentize(euiTheme.colors.textInverse, 0.15)};
+    background: color-mix(in srgb, ${euiTheme.colors.textInverse} 15%, transparent);
   `;
 
   const itemLabel = css`
@@ -130,7 +130,7 @@ export const getSuggestWidgetStyles = (euiThemeContext: UseEuiTheme) => {
   `;
 
   const itemKindSelected = css`
-    color: ${transparentize(euiTheme.colors.textInverse, 0.7)};
+    color: color-mix(in srgb, ${euiTheme.colors.textInverse} 70%, transparent);
   `;
 
   const detailsPanel = css`

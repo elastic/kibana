@@ -139,6 +139,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     showSnippets: true,
     filterGraceful: true, // Better filtering
     localityBonus: true, // Prioritize matches near cursor
+    showStatusBar: false, // Suppress "No suggestions" when custom widget handles display
   },
   wordBasedSuggestions: false,
   hover: {
