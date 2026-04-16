@@ -13,7 +13,7 @@ import React from 'react';
 import { ItemValueRuleSummary } from '../item_value_rule_summary';
 import { RecoveryPolicy } from '../recovery_policy';
 import { useRule } from '../rule_context';
-import { EMPTY_VALUE, formatAlertDelay } from '../utils';
+import { EMPTY_VALUE, formatAlertDelay, formatRecoveryDelay } from '../utils';
 
 const MODE_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {
@@ -127,6 +127,17 @@ export const RuleConditions: React.FunctionComponent = () => {
               <ItemValueRuleSummary
                 data-test-subj="alertingV2RuleDetailsAlertDelay"
                 itemValue={formatAlertDelay(rule.state_transition)}
+              />
+            ),
+          },
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.recoveryDelay', {
+              defaultMessage: 'Recovery delay',
+            }),
+            description: (
+              <ItemValueRuleSummary
+                data-test-subj="alertingV2RuleDetailsRecoveryDelay"
+                itemValue={formatRecoveryDelay(rule.state_transition)}
               />
             ),
           },

@@ -10,6 +10,7 @@ import type { apiTest } from '@kbn/scout-security';
 import type { GetStatusResult } from '../../../../server/domain/types';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
+import type { EntityStoreGlobalState } from '../../../../server/domain/saved_objects';
 
 import {
   ENTITY_STORE_ROUTES,
@@ -308,6 +309,38 @@ export const getStatus = (
       responseType: 'json',
     }
   );
+
+/**
+ * Polls until the scheduled history snapshot task has completed its first run
+ * by checking for `lastExecutionTimestamp` in the global state saved object.
+ * Unlike checking for history index existence (which only proves the task started),
+ * this confirms the task finished, preventing a race with a forced snapshot.
+ */
+export const waitForScheduledHistorySnapshot = async (
+  kbnClient: ApiWorkerFixtures['kbnClient'],
+  timeoutMs = 60_000
+): Promise<void> => {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const result = await kbnClient.savedObjects.find<EntityStoreGlobalState>({
+        type: 'entity-store-global-state',
+      });
+      if (result.saved_objects[0]?.attributes.historySnapshot.lastExecutionTimestamp) {
+        return;
+      }
+    } catch (e: unknown) {
+      const status = (e as { response?: { status?: number } })?.response?.status;
+      if (status !== 404) {
+        throw e;
+      }
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error(
+    `Timed out waiting for scheduled history snapshot task to complete after ${timeoutMs}ms`
+  );
+};
 
 export const startEntityTypes = (
   apiClient: ApiClientFixture,
