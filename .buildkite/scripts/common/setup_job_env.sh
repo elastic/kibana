@@ -10,6 +10,9 @@ fi
 
 source .buildkite/scripts/common/util.sh
 
+# Opt out from the Docker ES usage from Cypress while releasing
+CYPRESS_ES_FROM=snapshot
+
 # Set up general-purpose tokens and credentials
 {
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
