@@ -220,7 +220,11 @@ const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
   ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
 ];
 
-export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
+// kibana-ci is only managing x64 images, so we're using the release versions for development
+// aarch64 images should be added in the future to make sure environments match
+export const DOCKER_REPO = `${DOCKER_REGISTRY}/${
+  process.env.CI ? 'kibana-ci' : 'elasticsearch'
+}/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
@@ -1470,11 +1474,34 @@ async function runDockerContainerInSnapshotMode(
   await verifyDockerInstalled(log);
   await maybeCreateDockerNetwork(log);
 
-  const tag = options.tag || (options.version ? `${options.version}-SNAPSHOT` : DOCKER_TAG);
+  let tag = options.tag || (options.version ? `${options.version}-SNAPSHOT` : DOCKER_TAG);
+
+  // When ES_SNAPSHOT_MANIFEST is set, use the commit-pinned docker tag from kibana-ci
+  let repo = DOCKER_REPO;
+  const manifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
+  if (!options.tag && !options.image && manifestUrl) {
+    const resp = await fetch(manifestUrl);
+    if (resp.ok) {
+      const manifest = await resp.json();
+      const { version, sha } = manifest;
+
+      if (!/^\d+\.\d+\.\d+(-SNAPSHOT)?$/.test(version)) {
+        throw createCliError(`Invalid version format in manifest: ${version}`);
+      }
+      if (!/^[0-9a-f]{40}$/.test(sha)) {
+        throw createCliError(`Invalid sha format in manifest: ${sha}`);
+      }
+
+      tag = `${version}-SNAPSHOT-${sha}`;
+      repo = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch`;
+      log.info(`Using commit-pinned docker tag from manifest: ${repo}:${tag}`);
+    }
+  }
+
   const image = resolveDockerImage({
     image: options.image,
     tag,
-    repo: DOCKER_REPO,
+    repo,
     defaultImg: DOCKER_IMG,
   });
   await setupDockerImage({ log, image });
