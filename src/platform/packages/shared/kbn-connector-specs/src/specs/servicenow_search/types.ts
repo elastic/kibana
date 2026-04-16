@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 
 /**
  * Common ServiceNow tables and their purpose, for use in field descriptions.
- * Keep this in sync with the table descriptions in workflow YAML files.
+ * Keep this in sync with the table descriptions in the connector spec skill text.
  */
 const TABLE_DESCRIPTION =
   'The ServiceNow table to query. Common tables: ' +
@@ -22,7 +22,8 @@ const TABLE_DESCRIPTION =
   'problem (problem records linked to incidents), ' +
   'sc_task (service catalog tasks), ' +
   'cmdb_ci (CMDB configuration items — servers, apps, etc.), ' +
-  'sys_user (ServiceNow users). ' +
+  'sys_user (ServiceNow users), ' +
+  'sys_attachment (file attachments — query to find attachment sys_ids for a record). ' +
   'Custom tables are also supported.';
 
 // =============================================================================
@@ -36,7 +37,11 @@ export const SearchInputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional ServiceNow encoded query to combine with the full-text search for additional filtering (e.g., active=true^priority=1). Uses the same syntax as listRecords.'
+      'Optional ServiceNow encoded query to combine with the full-text search for additional filtering. ' +
+        'Syntax: AND conditions with ^ (field1=value1^field2=value2), OR with ^OR (field1=value1^ORfield2=value2). ' +
+        'Operators: = != < > LIKE STARTSWITH ENDSWITH ISEMPTY ISNOTEMPTY. ' +
+        'Date ranges: sys_created_on>2024-01-01^sys_created_on<2025-01-01. ' +
+        'Examples: active=true^priority=1 | state=1^ORstate=2 | assigned_toISEMPTY^active=true | short_descriptionLIKEnetwork^priority<=2'
     ),
   fields: z
     .string()
@@ -44,7 +49,7 @@ export const SearchInputSchema = z.object({
     .describe(
       'Comma-separated list of fields to return (e.g., sys_id,number,short_description,description)'
     ),
-  limit: z.number().optional().describe('Maximum number of results to return (default: 20)'),
+  limit: z.number().default(20).describe('Maximum number of results to return (default: 20)'),
   offset: z.number().optional().describe('Offset for pagination'),
 });
 export type SearchInput = z.infer<typeof SearchInputSchema>;
@@ -62,12 +67,14 @@ export const ListRecordsInputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'ServiceNow encoded query string for filtering (e.g., active=true^priority=1). ' +
-        'Use ^ to AND conditions, ^OR for OR. ' +
-        'Examples: number=INC0010023 | active=true^priority=1 | assignment_group.nameLIKEnetwork^state!=6'
+      'ServiceNow encoded query string for filtering. ' +
+        'Syntax: AND conditions with ^ (field1=value1^field2=value2), OR with ^OR (field1=value1^ORfield2=value2). ' +
+        'Operators: = != < > LIKE STARTSWITH ENDSWITH ISEMPTY ISNOTEMPTY. ' +
+        'Date ranges: sys_created_on>2024-01-01^sys_created_on<2025-01-01. ' +
+        'Examples: number=INC0010023 | active=true^priority=1 | state=1^ORstate=2 | assigned_toISEMPTY^active=true | assignment_group.nameLIKEnetwork^state!=6 | short_descriptionLIKEnetwork^priority<=2'
     ),
   fields: z.string().optional().describe('Comma-separated list of fields to return'),
-  limit: z.number().optional().describe('Maximum number of results to return (default: 20)'),
+  limit: z.number().default(20).describe('Maximum number of results to return (default: 20)'),
   offset: z.number().optional().describe('Offset for pagination'),
   orderBy: z
     .string()
@@ -81,7 +88,7 @@ export const ListTablesInputSchema = z.object({
     .string()
     .optional()
     .describe('Optional filter to search table names or labels (e.g., "incident", "CMDB")'),
-  limit: z.number().optional().describe('Maximum number of tables to return (default: 50)'),
+  limit: z.number().default(50).describe('Maximum number of tables to return (default: 50)'),
   offset: z.number().optional().describe('Offset for pagination'),
 });
 export type ListTablesInput = z.infer<typeof ListTablesInputSchema>;
@@ -90,6 +97,7 @@ export const ListKnowledgeBasesInputSchema = z.object({
   limit: z
     .number()
     .optional()
+    .default(20)
     .describe('Maximum number of knowledge bases to return (default: 20)'),
   offset: z.number().optional().describe('Offset for pagination'),
 });
@@ -104,7 +112,7 @@ export const GetCommentsInputSchema = z.object({
   recordSysId: z
     .string()
     .describe('The sys_id of the record whose comments/work notes to retrieve'),
-  limit: z.number().optional().describe('Maximum number of entries to return (default: 20)'),
+  limit: z.number().default(20).describe('Maximum number of entries to return (default: 20)'),
   offset: z.number().optional().describe('Offset for pagination'),
 });
 export type GetCommentsInput = z.infer<typeof GetCommentsInputSchema>;

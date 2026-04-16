@@ -38,6 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       llmProxy = await createLlmProxy(log);
+      await deleteConnectors(supertest);
       await createConnector(llmProxy, supertest);
 
       // Use full-screen experience helper method to create conversations (this test suite is only testing the history navigation of the sidebar, not the 'creating' of conversations)

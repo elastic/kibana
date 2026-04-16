@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects([
+    'appMenu',
     'settings',
     'common',
     'header',
@@ -434,6 +435,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
 
       await testSubjects.click('ruleFormStep-definition');
@@ -513,7 +515,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await clickViewInApp(RULE_NAME);
       await dataViews.switchToAndValidate(OTHER_DATA_VIEW);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('discoverNewButton');
+      await PageObjects.appMenu.clickMenuItem('discoverNewButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       let selectedDataView = await dataViews.getSelectedName();
       expect(selectedDataView).to.be.equal(OTHER_DATA_VIEW);

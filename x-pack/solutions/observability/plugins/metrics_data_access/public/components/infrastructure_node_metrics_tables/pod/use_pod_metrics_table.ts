@@ -24,8 +24,10 @@ import {
   KUBERNETES_NODE_MEMORY_ALLOCATABLE_BYTES,
   KUBERNETES_NODE_MEMORY_USAGE_BYTES,
   MEMORY_LIMIT_UTILIZATION,
-  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+  otelDatasetFilter,
+  SEMCONV_K8S_POD_CPU_NODE_UTILIZATION,
   SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_WORKING_SET,
 } from '../shared/constants';
 
 type PodMetricsField = typeof ECS_POD_CPU_USAGE_LIMIT_PCT | typeof MEMORY_LIMIT_UTILIZATION;
@@ -59,30 +61,25 @@ const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
 };
 
 type PodMetricsFieldsOtel =
-  | typeof SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION
-  | typeof MEMORY_LIMIT_UTILIZATION;
+  | typeof SEMCONV_K8S_POD_CPU_NODE_UTILIZATION
+  | typeof SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION
+  | typeof SEMCONV_K8S_POD_MEMORY_WORKING_SET;
 
 const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
-  sourceFilter: 'event.dataset: "kubeletstatsreceiver.otel"',
+  sourceFilter: otelDatasetFilter('kubeletstatsreceiver.otel'),
   groupByField: ['k8s.pod.uid', 'k8s.pod.name'],
   metricsMap: {
-    // this is an optional field and wont populate unless specifically enabled in kubeletstatreceiver.
-    // There are not pod metrics that can derive this value.
-    [SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION]: {
+    [SEMCONV_K8S_POD_CPU_NODE_UTILIZATION]: {
       aggregation: 'avg',
-      field: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION, // this is an opt-in field.
+      field: SEMCONV_K8S_POD_CPU_NODE_UTILIZATION,
     },
-    [MEMORY_LIMIT_UTILIZATION]: {
-      field: MEMORY_LIMIT_UTILIZATION,
-      aggregation: 'custom',
-      custom_metrics: [
-        {
-          name: 'A',
-          aggregation: 'avg',
-          field: SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
-        },
-      ],
-      equation: 'A',
+    [SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION]: {
+      aggregation: 'avg',
+      field: SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+    },
+    [SEMCONV_K8S_POD_MEMORY_WORKING_SET]: {
+      aggregation: 'avg',
+      field: SEMCONV_K8S_POD_MEMORY_WORKING_SET,
     },
   },
 };
@@ -90,11 +87,15 @@ const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
 export const metricByField = createMetricByFieldLookup(podMetricsQueryConfig.metricsMap);
 const unpackMetric = makeUnpackMetric(metricByField);
 
+const metricByFieldOtel = createMetricByFieldLookup(podMetricsQueryConfigOtel.metricsMap);
+const unpackMetricOtel = makeUnpackMetric(metricByFieldOtel);
+
 export interface PodNodeMetricsRow {
   id: string;
   name: string;
   averageCpuUsagePercent: number | null;
   averageMemoryUsagePercent: number | null;
+  memoryUnit: '%' | ' MB';
 }
 
 export function usePodMetricsTable({
@@ -119,10 +120,15 @@ export function usePodMetricsTable({
     [kuery]
   );
 
+  const transform = useMemo(
+    () => (series: MetricsExplorerSeries) => seriesToPodNodeMetricsRow(series, isOtel ?? false),
+    [isOtel]
+  );
+
   const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
     metricsExplorerOptions: isOtel ? podMetricsOptionsOtel : podMetricsOptions,
     timerange,
-    transform: seriesToPodNodeMetricsRow,
+    transform,
     sortState,
     currentPageIndex,
     metricsClient,
@@ -140,72 +146,101 @@ export function usePodMetricsTable({
   };
 }
 
-function seriesToPodNodeMetricsRow(series: MetricsExplorerSeries): PodNodeMetricsRow {
+function seriesToPodNodeMetricsRow(
+  series: MetricsExplorerSeries,
+  isOtel: boolean
+): PodNodeMetricsRow {
   const [id, name] = series.keys ?? [];
   if (series.rows.length === 0) {
-    return rowWithoutMetrics(id, name);
+    return rowWithoutMetrics(id, name, isOtel);
   }
 
   return {
     id,
     name,
-    ...calculateMetricAverages(series.rows),
+    ...calculateMetricAverages(series.rows, isOtel),
   };
 }
 
-function rowWithoutMetrics(id: string, name: string) {
+function rowWithoutMetrics(id: string, name: string, isOtel: boolean) {
   return {
     id,
     name,
     averageCpuUsagePercent: null,
     averageMemoryUsagePercent: null,
+    memoryUnit: (isOtel ? ' MB' : '%') as PodNodeMetricsRow['memoryUnit'],
   };
 }
 
-function calculateMetricAverages(rows: MetricsExplorerRow[]) {
-  const { averageCpuUsagePercentValues, averageMemoryUsagePercentValues } =
-    collectMetricValues(rows);
-
-  let averageCpuUsagePercent = null;
-  if (averageCpuUsagePercentValues.length !== 0) {
-    averageCpuUsagePercent = scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
-  }
-
-  let averageMemoryUsagePercent = null;
-  if (averageMemoryUsagePercentValues.length !== 0) {
-    averageMemoryUsagePercent = scaleUpPercentage(averageOfValues(averageMemoryUsagePercentValues));
-  }
-  return {
-    averageCpuUsagePercent,
-    averageMemoryUsagePercent,
-  };
-}
-
-function collectMetricValues(rows: MetricsExplorerRow[]) {
+function calculateMetricAverages(
+  rows: MetricsExplorerRow[],
+  isOtel: boolean
+): Omit<PodNodeMetricsRow, 'id' | 'name'> {
+  const unpackRow = isOtel ? unpackMetricsOtel : unpackMetrics;
   const averageCpuUsagePercentValues: number[] = [];
   const averageMemoryUsagePercentValues: number[] = [];
+  let memoryUnit: PodNodeMetricsRow['memoryUnit'] = '%';
 
-  rows.forEach((row) => {
-    const { averageCpuUsagePercent, averageMemoryUsagePercent } = unpackMetrics(row);
+  for (const row of rows) {
+    const {
+      averageCpuUsagePercent,
+      averageMemoryUsagePercent,
+      memoryUnit: rowMemoryUnit,
+    } = unpackRow(row);
 
     if (averageCpuUsagePercent !== null) {
       averageCpuUsagePercentValues.push(averageCpuUsagePercent);
     }
-
     if (averageMemoryUsagePercent !== null) {
       averageMemoryUsagePercentValues.push(averageMemoryUsagePercent);
     }
-  });
+    memoryUnit = rowMemoryUnit;
+  }
 
-  return {
-    averageCpuUsagePercentValues,
-    averageMemoryUsagePercentValues,
-  };
+  const averageCpuUsagePercent =
+    averageCpuUsagePercentValues.length === 0
+      ? null
+      : scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
+
+  const averageMemoryUsagePercent =
+    averageMemoryUsagePercentValues.length === 0
+      ? null
+      : memoryUnit === '%'
+      ? scaleUpPercentage(averageOfValues(averageMemoryUsagePercentValues))
+      : Math.floor(averageOfValues(averageMemoryUsagePercentValues));
+
+  return { averageCpuUsagePercent, averageMemoryUsagePercent, memoryUnit };
 }
 
 function unpackMetrics(row: MetricsExplorerRow): Omit<PodNodeMetricsRow, 'id' | 'name'> {
   return {
     averageCpuUsagePercent: unpackMetric(row, ECS_POD_CPU_USAGE_LIMIT_PCT),
     averageMemoryUsagePercent: unpackMetric(row, MEMORY_LIMIT_UTILIZATION),
+    memoryUnit: '%',
+  };
+}
+
+function unpackMetricsOtel(row: MetricsExplorerRow): Omit<PodNodeMetricsRow, 'id' | 'name'> {
+  const cpuUtilization = unpackMetricOtel(row, SEMCONV_K8S_POD_CPU_NODE_UTILIZATION);
+  const memLimitUtil = unpackMetricOtel(row, SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION);
+
+  if (memLimitUtil != null) {
+    return {
+      averageCpuUsagePercent: cpuUtilization,
+      averageMemoryUsagePercent: memLimitUtil,
+      memoryUnit: '%',
+    };
+  }
+
+  const memoryBytes = unpackMetricOtel(row, SEMCONV_K8S_POD_MEMORY_WORKING_SET);
+  const memoryMegabytes =
+    typeof memoryBytes === 'number' && Number.isFinite(memoryBytes)
+      ? memoryBytes / 1_000_000
+      : null;
+
+  return {
+    averageCpuUsagePercent: cpuUtilization,
+    averageMemoryUsagePercent: memoryMegabytes,
+    memoryUnit: ' MB',
   };
 }

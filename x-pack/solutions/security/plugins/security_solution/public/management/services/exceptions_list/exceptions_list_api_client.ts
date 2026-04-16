@@ -319,7 +319,8 @@ export class ExceptionsListApiClient {
       body: formData,
       headers: { 'Content-Type': undefined },
       query: {
-        overwrite: true,
+        overwrite: false,
+        as_new_list: false,
       } as ImportExceptionListRequestQuery,
     });
   }

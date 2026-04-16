@@ -43,8 +43,11 @@ test.describe('Rule name validation — Discover flyout', { tag: tags.stateful.c
     });
 
     await test.step('verify default placeholder name is shown', async () => {
-      await expect(pageObjects.ruleForm.nameInlineEdit()).toBeVisible();
-      await expect(pageObjects.ruleForm.nameInlineEdit()).toContainText('Untitled rule');
+      await expect(pageObjects.ruleForm.nameInput()).toBeVisible();
+      await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute(
+        'placeholder',
+        'Untitled rule'
+      );
     });
   });
 
@@ -54,7 +57,7 @@ test.describe('Rule name validation — Discover flyout', { tag: tags.stateful.c
     await test.step('switch to ES|QL mode and open flyout', async () => {
       await pageObjects.ruleForm.switchToEsqlMode();
       await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
-      await expect(pageObjects.ruleForm.nameInlineEdit()).toBeVisible();
+      await expect(pageObjects.ruleForm.nameInput()).toBeVisible();
     });
 
     await test.step('click save and verify validation error', async () => {
@@ -71,7 +74,7 @@ test.describe('Rule name validation — Discover flyout', { tag: tags.stateful.c
     await test.step('switch to ES|QL mode and open flyout', async () => {
       await pageObjects.ruleForm.switchToEsqlMode();
       await pageObjects.ruleForm.openRulesFlyoutFromDiscover();
-      await expect(pageObjects.ruleForm.nameInlineEdit()).toBeVisible();
+      await expect(pageObjects.ruleForm.nameInput()).toBeVisible();
     });
 
     await test.step('click save and verify error callout is visible in viewport', async () => {

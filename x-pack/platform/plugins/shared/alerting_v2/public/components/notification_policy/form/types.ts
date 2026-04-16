@@ -14,6 +14,7 @@ import type {
 export interface NotificationPolicyFormState {
   name: string;
   description: string;
+  tags: string[];
   matcher: string;
   groupingMode: GroupingMode;
   groupBy: string[];

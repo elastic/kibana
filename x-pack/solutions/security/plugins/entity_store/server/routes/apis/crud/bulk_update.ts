@@ -13,7 +13,7 @@ import { ALL_ENTITY_TYPES, API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../..
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { BadCRUDRequestError } from '../../../domain/errors';
+import { BadCRUDRequestError, EntityStoreNotInstalledError } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
 const bodySchema = z.object({
@@ -32,8 +32,8 @@ const querySchema = z.object({
 export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: ENTITY_STORE_ROUTES.CRUD_BULK_UPDATE,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.CRUD_BULK_UPDATE,
+      access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -41,7 +41,7 @@ export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
@@ -67,6 +67,9 @@ export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
             },
           });
         } catch (error) {
+          if (error instanceof EntityStoreNotInstalledError) {
+            return res.badRequest({ body: error });
+          }
           if (error instanceof BadCRUDRequestError) {
             return res.badRequest({ body: error });
           }

@@ -86,12 +86,18 @@ export class SearchInferenceEndpointsPlugin
       return pluginsStart.inference.getConnectorList(request);
     };
 
+    const getConnectorById = async (id: string, request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.inference.getConnectorById(id, request);
+    };
+
     defineRoutes({
       logger: this.logger,
       router,
       featureRegistry: this.featureRegistry,
       getForFeature,
       getConnectorList,
+      getConnectorById,
     });
 
     plugins.features.registerKibanaFeature({
@@ -103,7 +109,11 @@ export class SearchInferenceEndpointsPlugin
       app: [],
       catalogue: [],
       management: {
-        ml: [ELASTIC_INFERENCE_SERVICE_APP_ID, INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
+        modelManagement: [
+          ELASTIC_INFERENCE_SERVICE_APP_ID,
+          INFERENCE_ENDPOINTS_APP_ID,
+          MODEL_SETTINGS_APP_ID,
+        ],
       },
       privileges: {
         all: {
@@ -111,7 +121,7 @@ export class SearchInferenceEndpointsPlugin
           api: [ApiPrivileges.manage(PLUGIN_ID)],
           catalogue: [],
           management: {
-            ml: [
+            modelManagement: [
               ELASTIC_INFERENCE_SERVICE_APP_ID,
               INFERENCE_ENDPOINTS_APP_ID,
               MODEL_SETTINGS_APP_ID,

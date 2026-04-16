@@ -65,6 +65,7 @@ describe('SessionViewDetails', () => {
               investigatedAlertId="alert-id"
               renderCellActions={jest.fn()}
               onJumpToEvent={onJumpToEvent}
+              onAlertUpdated={jest.fn()}
             />
           </Router>
         </Provider>

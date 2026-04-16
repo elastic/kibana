@@ -8,7 +8,6 @@
 import { useMemo } from 'react';
 import type { FormValues } from '../types';
 import { useDefaultGroupBy } from './use_default_group_by';
-import { useQueryBaseAndCondition } from './use_query_base_and_condition';
 
 interface UseFormDefaultsProps {
   /** The ES|QL query to derive defaults from */
@@ -21,12 +20,15 @@ interface UseFormDefaultsProps {
  * This hook extracts:
  * - groupingKey: columns from the STATS ... BY clause
  *
+ * The full query is used as-is for `evaluation.query.base` — it is no longer
+ * split into base + condition because the framework executor only uses the
+ * base query field.
+ *
  * Note: timeField defaults to '@timestamp' which is the most common time field.
  * TimeFieldSelect may update this if @timestamp is not available in the query results.
  */
 export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => {
   const { defaultGroupBy } = useDefaultGroupBy({ query });
-  const { baseQuery, condition } = useQueryBaseAndCondition({ query });
 
   return useMemo(
     () => ({
@@ -43,8 +45,7 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
       },
       evaluation: {
         query: {
-          base: baseQuery,
-          condition,
+          base: query,
         },
       },
       grouping: defaultGroupBy.length
@@ -58,6 +59,6 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
       stateTransitionAlertDelayMode: 'immediate',
       stateTransitionRecoveryDelayMode: 'immediate',
     }),
-    [baseQuery, condition, defaultGroupBy]
+    [query, defaultGroupBy]
   );
 };

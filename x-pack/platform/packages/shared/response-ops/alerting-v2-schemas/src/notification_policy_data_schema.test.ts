@@ -348,6 +348,22 @@ describe('updateNotificationPolicyDataSchema', () => {
         })
       ).toThrow('not valid for grouping mode');
     });
+
+    it('rejects per_status_interval without interval even when groupingMode is omitted', () => {
+      expect(() =>
+        updateNotificationPolicyDataSchema.parse({
+          throttle: { strategy: 'per_status_interval' },
+        })
+      ).toThrow('requires an interval');
+    });
+
+    it('rejects time_interval without interval even when groupingMode is omitted', () => {
+      expect(() =>
+        updateNotificationPolicyDataSchema.parse({
+          throttle: { strategy: 'time_interval' },
+        })
+      ).toThrow('requires an interval');
+    });
   });
 });
 

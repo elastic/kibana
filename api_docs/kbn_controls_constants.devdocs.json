@@ -173,7 +173,7 @@
           "\"esql_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 14,
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -207,7 +207,7 @@
           "\"options_list_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 13,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -224,7 +224,7 @@
           "\"range_slider_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -241,7 +241,7 @@
           "\"time_slider_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

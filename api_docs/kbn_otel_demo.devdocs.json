@@ -21,7 +21,7 @@
           "\nDeploys a demo environment on Kubernetes (minikube) with telemetry data\nbeing sent to Elasticsearch. Resolves when pods are ready — does NOT\nblock on log streaming.\n"
         ],
         "signature": [
-          "({\n  log,\n  demoType = 'otel-demo',\n  configPath,\n  logsIndex = 'logs',\n  version,\n  scenarioIds = [],\n  forceRebuildImages = false,\n}: { log: ",
+          "({\n  log,\n  demoType = 'otel-demo',\n  configPath,\n  logsIndex = 'logs',\n  version,\n  scenarioIds = [],\n  forceRebuildImages = false,\n  useVanillaCollector = false,\n}: { log: ",
           {
             "pluginId": "@kbn/tooling-log",
             "scope": "common",
@@ -37,7 +37,7 @@
             "section": "def-server.DemoType",
             "text": "DemoType"
           },
-          " | undefined; configPath?: string | undefined; logsIndex?: string | undefined; version?: string | undefined; scenarioIds?: string[] | undefined; forceRebuildImages?: boolean | undefined; }) => Promise<",
+          " | undefined; configPath?: string | undefined; logsIndex?: string | undefined; version?: string | undefined; scenarioIds?: string[] | undefined; forceRebuildImages?: boolean | undefined; useVanillaCollector?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/otel-demo",
             "scope": "server",
@@ -48,7 +48,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-        "lineNumber": 82,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -58,10 +58,10 @@
             "id": "def-server.deployDemo.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  log,\n  demoType = 'otel-demo',\n  configPath,\n  logsIndex = 'logs',\n  version,\n  scenarioIds = [],\n  forceRebuildImages = false,\n}",
+            "label": "{\n  log,\n  demoType = 'otel-demo',\n  configPath,\n  logsIndex = 'logs',\n  version,\n  scenarioIds = [],\n  forceRebuildImages = false,\n  useVanillaCollector = false,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-            "lineNumber": 105,
+            "lineNumber": 109,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -83,7 +83,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 106,
+                "lineNumber": 110,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -106,7 +106,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 107,
+                "lineNumber": 111,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -122,7 +122,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 108,
+                "lineNumber": 112,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -138,7 +138,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 109,
+                "lineNumber": 113,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -154,7 +154,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 110,
+                "lineNumber": 114,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -170,7 +170,7 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 111,
+                "lineNumber": 115,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -186,7 +186,23 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 112,
+                "lineNumber": 116,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.deployDemo.$1.useVanillaCollector",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "useVanillaCollector",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -263,7 +279,7 @@
           "\nEnsures a demo environment is running on Kubernetes (minikube) with\ntelemetry data being sent to Elasticsearch.\n\nThis function:\n1. Ensures minikube is running\n2. Reads Elasticsearch configuration from kibana.dev.yml\n3. Enables the streams feature in Kibana (sets up logs index)\n4. Generates OTel Collector configuration with k8sattributes processor\n5. Generates Kubernetes manifests for the demo\n6. Deploys to minikube using kubectl\n"
         ],
         "signature": [
-          "({\n  log,\n  signal,\n  demoType = 'otel-demo',\n  configPath,\n  logsIndex = 'logs',\n  version,\n  teardown = false,\n  scenarioIds = [],\n  forceRebuildImages = false,\n}: { log: ",
+          "({\n  log,\n  signal,\n  demoType = 'otel-demo',\n  configPath,\n  logsIndex = 'logs',\n  version,\n  teardown = false,\n  scenarioIds = [],\n  forceRebuildImages = false,\n  useVanillaCollector = false,\n}: { log: ",
           {
             "pluginId": "@kbn/tooling-log",
             "scope": "common",
@@ -279,10 +295,10 @@
             "section": "def-server.DemoType",
             "text": "DemoType"
           },
-          " | undefined; configPath?: string | undefined; logsIndex?: string | undefined; version?: string | undefined; teardown?: boolean | undefined; scenarioIds?: string[] | undefined; forceRebuildImages?: boolean | undefined; }) => Promise<void>"
+          " | undefined; configPath?: string | undefined; logsIndex?: string | undefined; version?: string | undefined; teardown?: boolean | undefined; scenarioIds?: string[] | undefined; forceRebuildImages?: boolean | undefined; useVanillaCollector?: boolean | undefined; }) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-        "lineNumber": 375,
+        "lineNumber": 417,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -292,10 +308,10 @@
             "id": "def-server.ensureOtelDemo.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  log,\n  signal,\n  demoType = 'otel-demo',\n  configPath,\n  logsIndex = 'logs',\n  version,\n  teardown = false,\n  scenarioIds = [],\n  forceRebuildImages = false,\n}",
+            "label": "{\n  log,\n  signal,\n  demoType = 'otel-demo',\n  configPath,\n  logsIndex = 'logs',\n  version,\n  teardown = false,\n  scenarioIds = [],\n  forceRebuildImages = false,\n  useVanillaCollector = false,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-            "lineNumber": 409,
+            "lineNumber": 452,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -317,7 +333,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 410,
+                "lineNumber": 453,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -333,7 +349,7 @@
                   "AbortSignal"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 411,
+                "lineNumber": 454,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -356,7 +372,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 412,
+                "lineNumber": 455,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -372,7 +388,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 413,
+                "lineNumber": 456,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -388,7 +404,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 414,
+                "lineNumber": 457,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -404,7 +420,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 415,
+                "lineNumber": 458,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -420,7 +436,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 416,
+                "lineNumber": 459,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -436,7 +452,7 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 417,
+                "lineNumber": 460,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -452,7 +468,23 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 418,
+                "lineNumber": 461,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.ensureOtelDemo.$1.useVanillaCollector",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "useVanillaCollector",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 462,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1065,7 +1097,7 @@
           " | undefined; scenarioIds?: string[] | undefined; reset?: boolean | undefined; }) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-        "lineNumber": 438,
+        "lineNumber": 483,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1078,7 +1110,7 @@
             "label": "{\n  log,\n  demoType = 'otel-demo',\n  scenarioIds = [],\n  reset = false,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-            "lineNumber": 452,
+            "lineNumber": 497,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1100,7 +1132,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 453,
+                "lineNumber": 498,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1123,7 +1155,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 454,
+                "lineNumber": 499,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1139,7 +1171,7 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 455,
+                "lineNumber": 500,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1155,7 +1187,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 456,
+                "lineNumber": 501,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1394,7 +1426,7 @@
           "; namespace: string; signal?: AbortSignal | undefined; }) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-        "lineNumber": 329,
+        "lineNumber": 371,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1407,7 +1439,7 @@
             "label": "{\n  log,\n  namespace,\n  signal,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-            "lineNumber": 337,
+            "lineNumber": 379,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1429,7 +1461,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 338,
+                "lineNumber": 380,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1442,7 +1474,7 @@
                 "label": "namespace",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 339,
+                "lineNumber": 381,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1458,7 +1490,7 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 340,
+                "lineNumber": 382,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1498,7 +1530,7 @@
           " | undefined; }) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-        "lineNumber": 357,
+        "lineNumber": 399,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1511,7 +1543,7 @@
             "label": "{\n  log,\n  demoType = 'otel-demo',\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-            "lineNumber": 363,
+            "lineNumber": 405,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1533,7 +1565,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 364,
+                "lineNumber": 406,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1556,7 +1588,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-                "lineNumber": 365,
+                "lineNumber": 407,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1588,7 +1620,7 @@
           " | undefined; } | undefined) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/util/assert_minikube_available.ts",
-        "lineNumber": 78,
+        "lineNumber": 93,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1604,7 +1636,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/util/assert_minikube_available.ts",
-            "lineNumber": 82,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1618,7 +1650,7 @@
             "label": "options",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/util/assert_minikube_available.ts",
-            "lineNumber": 83,
+            "lineNumber": 98,
             "columnNumber": 13,
             "deprecated": false,
             "trackAdoption": false,
@@ -1634,7 +1666,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/util/assert_minikube_available.ts",
-                "lineNumber": 83,
+                "lineNumber": 98,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1650,7 +1682,7 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/util/assert_minikube_available.ts",
-                "lineNumber": 83,
+                "lineNumber": 98,
                 "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1673,7 +1705,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/util/assert_minikube_available.ts",
-                "lineNumber": 83,
+                "lineNumber": 98,
                 "columnNumber": 65,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1928,7 +1960,7 @@
           "\nInterface for demo-specific manifest generators"
         ],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/types.ts",
-        "lineNumber": 134,
+        "lineNumber": 138,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1952,7 +1984,7 @@
               ") => string"
             ],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/types.ts",
-            "lineNumber": 138,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1974,7 +2006,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-otel-demo/src/types.ts",
-                "lineNumber": 138,
+                "lineNumber": 142,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1994,7 +2026,7 @@
         "label": "DeployResult",
         "description": [],
         "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-        "lineNumber": 75,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2007,7 +2039,7 @@
             "label": "namespace",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-            "lineNumber": 76,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2020,7 +2052,7 @@
             "label": "kibanaUrl",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-            "lineNumber": 77,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2033,7 +2065,7 @@
             "label": "elasticsearchHost",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-            "lineNumber": 78,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2046,7 +2078,7 @@
             "label": "logsIndex",
             "description": [],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
-            "lineNumber": 79,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2574,6 +2606,42 @@
             ],
             "path": "src/platform/packages/shared/kbn-otel-demo/src/types.ts",
             "lineNumber": 130,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.ManifestOptions.hostAliases",
+            "type": "Array",
+            "tags": [],
+            "label": "hostAliases",
+            "description": [
+              "Host aliases to inject into the collector pod for DNS resolution from inside pods"
+            ],
+            "signature": [
+              "{ ip: string; hostnames: string[]; }[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/types.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.ManifestOptions.collectorImage",
+            "type": "string",
+            "tags": [],
+            "label": "collectorImage",
+            "description": [
+              "OTel Collector container image — always set by ensure_otel_demo (EDOT by default, vanilla with --vanilla)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/types.ts",
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

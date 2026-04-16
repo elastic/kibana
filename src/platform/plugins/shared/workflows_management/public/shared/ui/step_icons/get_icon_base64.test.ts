@@ -15,6 +15,7 @@ import {
   getTriggerBoltFallbackDataUrl,
   resolveIconToDataUrl,
 } from './get_icon_base64';
+import { getStepIconType } from './get_step_icon_type';
 import { HardcodedIcons } from './hardcoded_icons';
 
 // Mock renderToStaticMarkup from react-dom/server
@@ -203,10 +204,10 @@ describe('getIconBase64', () => {
   });
 
   describe('step icons', () => {
-    it('returns the resolved icon when icon is provided', async () => {
+    it('returns the resolved icon when icon is provided for unknown actionTypeId', async () => {
       const dataUrl = 'data:image/svg+xml;base64,c3RlcA==';
       const result = await getIconBase64({
-        actionTypeId: '.slack',
+        actionTypeId: '.custom-connector',
         icon: dataUrl,
         kind: 'step',
       });
@@ -214,7 +215,37 @@ describe('getIconBase64', () => {
       expect(result).toBe(dataUrl);
     });
 
-    it('returns hardcoded icon when actionTypeId matches a known type', async () => {
+    it('prefers hardcoded icon over icon param for known actionTypeIds', async () => {
+      const result = await getIconBase64({
+        actionTypeId: '.slack',
+        icon: 'logoSlack',
+        kind: 'step',
+      });
+
+      expect(result).toBe(HardcodedIcons['.slack']);
+    });
+
+    it('prefers hardcoded icon for email over EUI name string', async () => {
+      const result = await getIconBase64({
+        actionTypeId: '.email',
+        icon: 'email',
+        kind: 'step',
+      });
+
+      expect(result).toBe(HardcodedIcons['.email']);
+    });
+
+    it('prefers hardcoded icon for inference over EUI name string', async () => {
+      const result = await getIconBase64({
+        actionTypeId: '.inference',
+        icon: 'sparkles',
+        kind: 'step',
+      });
+
+      expect(result).toBe(HardcodedIcons['.inference']);
+    });
+
+    it('returns hardcoded icon when actionTypeId matches a known type without icon', async () => {
       const result = await getIconBase64({
         actionTypeId: '.slack',
         kind: 'step',
@@ -223,14 +254,13 @@ describe('getIconBase64', () => {
       expect(result).toBe(HardcodedIcons['.slack']);
     });
 
-    it('returns DEFAULT_CONNECTOR_DATA_URL for unknown actionTypeId without icon', async () => {
+    it('returns plugs fallback for unknown actionTypeId without icon', async () => {
       const result = await getIconBase64({
         actionTypeId: 'unknown-action-type',
         kind: 'step',
       });
 
-      // Should be the default connector fallback (no fromRegistry)
-      expect(result).toMatch(/^data:image\/svg\+xml;base64,/);
+      expect(result).toBe(HardcodedIcons.default);
     });
 
     it('returns HardcodedIcons.kibana as fallback when fromRegistry is true', async () => {
@@ -270,5 +300,154 @@ describe('getIconBase64', () => {
 describe('getTriggerBoltFallbackDataUrl', () => {
   it('returns HardcodedIcons.trigger', () => {
     expect(getTriggerBoltFallbackDataUrl()).toBe(HardcodedIcons.trigger);
+  });
+});
+
+describe('getIconBase64 – every HardcodedIcons entry resolves to its hardcoded value', () => {
+  const NON_STEP_KEYS = ['trigger', 'flask', 'beta', 'default'];
+  const REACT_COMPONENT_KEYS = ['elasticsearch', 'kibana'];
+
+  const stepEntries = Object.entries(HardcodedIcons).filter(
+    ([key]) => !NON_STEP_KEYS.includes(key) && !REACT_COMPONENT_KEYS.includes(key)
+  );
+
+  it.each(stepEntries)(
+    'returns hardcoded icon for actionTypeId "%s"',
+    async (actionTypeId, expectedIcon) => {
+      const result = await getIconBase64({ actionTypeId, kind: 'step' });
+      expect(result).toBe(expectedIcon);
+    }
+  );
+});
+
+describe('getIconBase64 – hardcoded icon wins over EUI name strings', () => {
+  const casesWithEuiNames: Array<[string, string]> = [
+    ['.slack', 'logoSlack'],
+    ['.slack_api', 'logoSlack'],
+    ['.email', 'mail'],
+    ['.inference', 'sparkles'],
+    ['console', 'commandLine'],
+    ['if', 'branch'],
+    ['foreach', 'refresh'],
+    ['while', 'refresh'],
+    ['switch', 'productStreamsWired'],
+    ['wait', 'clock'],
+    ['waitForInput', 'user'],
+    ['alert', 'warning'],
+    ['scheduled', 'clock'],
+    ['manual', 'user'],
+    ['data.set', 'database'],
+  ];
+
+  it.each(casesWithEuiNames)(
+    'prefers hardcoded icon for "%s" over EUI icon name "%s"',
+    async (actionTypeId, euiIconName) => {
+      const result = await getIconBase64({
+        actionTypeId,
+        icon: euiIconName,
+        kind: 'step',
+      });
+      expect(result).toBe(HardcodedIcons[actionTypeId]);
+    }
+  );
+});
+
+describe('getIconBase64 – error handling', () => {
+  it('returns plugs fallback for unknown connector with non-resolvable EUI icon name', async () => {
+    const result = await getIconBase64({
+      actionTypeId: '.some-broken-connector',
+      icon: 'nonExistentEuiIcon',
+      kind: 'step',
+    });
+
+    expect(result).toBe(HardcodedIcons.default);
+  });
+
+  it('returns kibana fallback for registry step with non-resolvable icon', async () => {
+    const result = await getIconBase64({
+      actionTypeId: 'some-registry-step',
+      icon: 'nonExistentEuiIcon',
+      kind: 'step',
+      fromRegistry: true,
+    });
+
+    expect(result).toBe(HardcodedIcons.kibana);
+  });
+
+  it('returns bolt fallback for trigger with non-resolvable icon', async () => {
+    const result = await getIconBase64({
+      actionTypeId: 'broken-trigger-unique-2',
+      icon: 'nonExistentEuiIcon',
+      kind: 'trigger',
+    });
+
+    expect(result).toBe(HardcodedIcons.trigger);
+  });
+
+  it('returns plugs fallback when icon is a throwing function component', async () => {
+    renderToStaticMarkup.mockImplementation(() => {
+      throw new Error('render failed');
+    });
+
+    const BrokenComponent: React.FC = () => null;
+    const result = await getIconBase64({
+      actionTypeId: '.another-broken-connector',
+      icon: BrokenComponent,
+      kind: 'step',
+    });
+
+    expect(result).toBe(HardcodedIcons.default);
+  });
+});
+
+describe('getStepIconType and getIconBase64 consistency', () => {
+  const stepTypesInBothPaths = [
+    'console',
+    'data.set',
+    'foreach',
+    'while',
+    'switch',
+    'if',
+    'wait',
+    'waitForInput',
+    'workflow.execute',
+    'workflow.executeAsync',
+    'workflow.output',
+    'workflow.fail',
+  ];
+
+  it.each(stepTypesInBothPaths)(
+    '"%s" resolves to a non-fallback icon in both getStepIconType and getIconBase64',
+    async (stepType) => {
+      const euiIcon = getStepIconType(stepType);
+      expect(euiIcon).not.toBe('plugs');
+      expect(euiIcon).not.toBe('info');
+
+      const dataUrl = await getIconBase64({ actionTypeId: stepType, kind: 'step' });
+      expect(dataUrl).toBe(HardcodedIcons[stepType]);
+      expect(HardcodedIcons[stepType]).toBeDefined();
+    }
+  );
+
+  const triggerOnlyTypes = ['alert', 'scheduled', 'manual'];
+
+  it.each(triggerOnlyTypes)(
+    '"%s" has a hardcoded icon but is not in getStepIconType (trigger-only type)',
+    async (stepType) => {
+      expect(HardcodedIcons[stepType]).toBeDefined();
+
+      const dataUrl = await getIconBase64({ actionTypeId: stepType, kind: 'step' });
+      expect(dataUrl).toBe(HardcodedIcons[stepType]);
+    }
+  );
+
+  it('http resolves in getStepIconType but falls back in getIconBase64 (no hardcoded entry)', async () => {
+    const euiIcon = getStepIconType('http');
+    expect(euiIcon).toBe('globe');
+
+    expect(HardcodedIcons.http).toBeUndefined();
+
+    const dataUrl = await getIconBase64({ actionTypeId: 'http', kind: 'step' });
+    expect(dataUrl).toBe(HardcodedIcons.default);
   });
 });

@@ -21,12 +21,6 @@ jest.mock('../fields/recovery_base_query_only_field', () => ({
   ),
 }));
 
-jest.mock('../fields/recovery_base_and_condition_field', () => ({
-  RecoveryBaseAndConditionField: () => (
-    <div data-test-subj="mockRecoveryBaseAndConditionField">Recovery Condition Field</div>
-  ),
-}));
-
 jest.mock('../fields/alert_delay_field', () => ({
   AlertDelayField: () => <div data-test-subj="mockAlertDelayField">Alert Delay Field</div>,
 }));
@@ -109,10 +103,9 @@ describe('AlertConditionsFieldGroup', () => {
     );
 
     expect(screen.queryByTestId('mockRecoveryBaseQueryOnlyField')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mockRecoveryBaseAndConditionField')).not.toBeInTheDocument();
   });
 
-  it('renders RecoveryBaseQueryOnlyField when type is query and no evaluation condition exists', () => {
+  it('renders RecoveryBaseQueryOnlyField when type is query', () => {
     const Wrapper = createFormWrapper({
       kind: 'alert',
       recoveryPolicy: { type: 'query' },
@@ -126,29 +119,6 @@ describe('AlertConditionsFieldGroup', () => {
     );
 
     expect(screen.getByTestId('mockRecoveryBaseQueryOnlyField')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockRecoveryBaseAndConditionField')).not.toBeInTheDocument();
-  });
-
-  it('renders RecoveryBaseAndConditionField when type is query and evaluation condition exists', () => {
-    const Wrapper = createFormWrapper({
-      kind: 'alert',
-      recoveryPolicy: { type: 'query' },
-      evaluation: {
-        query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count > 100',
-        },
-      },
-    });
-
-    render(
-      <Wrapper>
-        <AlertConditionsFieldGroup />
-      </Wrapper>
-    );
-
-    expect(screen.getByTestId('mockRecoveryBaseAndConditionField')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockRecoveryBaseQueryOnlyField')).not.toBeInTheDocument();
   });
 
   it('always renders recovery type field regardless of type', () => {
@@ -164,27 +134,5 @@ describe('AlertConditionsFieldGroup', () => {
     );
 
     expect(screen.getByTestId('mockRecoveryTypeField')).toBeInTheDocument();
-  });
-
-  it('falls back to RecoveryBaseQueryOnlyField when evaluation condition is only whitespace', () => {
-    const Wrapper = createFormWrapper({
-      kind: 'alert',
-      recoveryPolicy: { type: 'query' },
-      evaluation: {
-        query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: '   ',
-        },
-      },
-    });
-
-    render(
-      <Wrapper>
-        <AlertConditionsFieldGroup />
-      </Wrapper>
-    );
-
-    expect(screen.getByTestId('mockRecoveryBaseQueryOnlyField')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockRecoveryBaseAndConditionField')).not.toBeInTheDocument();
   });
 });

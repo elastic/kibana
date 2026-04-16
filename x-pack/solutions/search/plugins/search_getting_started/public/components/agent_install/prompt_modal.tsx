@@ -35,7 +35,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ prompt, onClose }) => 
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.gettingStarted.promptModal.title', {
-            defaultMessage: 'Copy prompt to your CLI agent',
+            defaultMessage: 'Copy prompt to your coding agent',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -44,7 +44,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ prompt, onClose }) => 
           <p>
             {i18n.translate('xpack.gettingStarted.promptModal.description', {
               defaultMessage:
-                'Paste this prompt into Claude Code or any CLI-based LLM agent to install the Elasticsearch onboarding assistant.',
+                'Paste this prompt into any coding agent to install the Elasticsearch onboarding skills.',
             })}
           </p>
         </EuiText>

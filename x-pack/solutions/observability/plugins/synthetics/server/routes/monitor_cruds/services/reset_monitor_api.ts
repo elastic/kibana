@@ -117,22 +117,57 @@ export class ResetMonitorAPI {
     if (this.force) {
       return this.forceReset(monitors, allPrivateLocations, spaceId);
     }
-    return this.defaultReset(monitors, allPrivateLocations, spaceId);
+
+    const validLocationIds = await this.getLocationIdsWithExistingAgentPolicy(allPrivateLocations);
+    return this.defaultReset(monitors, allPrivateLocations, spaceId, validLocationIds);
+  }
+
+  private async getLocationIdsWithExistingAgentPolicy(
+    allPrivateLocations: Awaited<ReturnType<typeof getPrivateLocations>>
+  ): Promise<Set<string>> {
+    const { server } = this.routeContext;
+    const agentPolicyIds = allPrivateLocations.map((loc) => loc.agentPolicyId).filter(Boolean);
+    if (agentPolicyIds.length === 0) {
+      return new Set();
+    }
+
+    const internalSoClient = server.coreStart.savedObjects.createInternalRepository();
+    const existingPolicies = await server.fleet.agentPolicyService.getByIds(
+      internalSoClient,
+      agentPolicyIds,
+      { ignoreMissing: true }
+    );
+    const existingAgentPolicyIds = new Set(existingPolicies.map((p) => p.id));
+
+    return new Set(
+      allPrivateLocations
+        .filter((loc) => existingAgentPolicyIds.has(loc.agentPolicyId))
+        .map((loc) => loc.id)
+    );
   }
 
   private async defaultReset(
     monitors: DecryptedMonitorPair[],
     allPrivateLocations: Awaited<ReturnType<typeof getPrivateLocations>>,
-    spaceId: string
+    spaceId: string,
+    validLocationIds: Set<string>
   ) {
     const { syntheticsMonitorClient } = this.routeContext;
 
     const { failedPolicyUpdates, publicSyncErrors } = await syntheticsMonitorClient.editMonitors(
-      monitors.map(({ normalizedMonitor, decryptedMonitor }) => ({
-        monitor: normalizedMonitor.attributes as MonitorFields,
-        id: normalizedMonitor.id,
-        decryptedPreviousMonitor: decryptedMonitor,
-      })),
+      monitors.map(({ normalizedMonitor, decryptedMonitor }) => {
+        const monitor = normalizedMonitor.attributes as MonitorFields;
+        return {
+          monitor: {
+            ...monitor,
+            locations: (monitor.locations ?? []).filter(
+              (loc) => loc.isServiceManaged || validLocationIds.has(loc.id)
+            ),
+          },
+          id: normalizedMonitor.id,
+          decryptedPreviousMonitor: decryptedMonitor,
+        };
+      }),
       allPrivateLocations,
       spaceId
     );

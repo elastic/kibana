@@ -8,7 +8,7 @@
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { buildEpisodesQuery } from '../utils/build_episodes_esql_query';
+import { buildEpisodesQuery } from '../queries/episodes_query';
 import { fetchAlertingEpisodes } from './fetch_alerting_episodes';
 
 jest.mock('../utils/execute_esql_query');
@@ -20,16 +20,17 @@ describe('fetchAlertingEpisodes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockExecuteEsqlQuery.mockResolvedValue([]);
   });
 
-  it('should call executeEsqlQuery with correct parameters', () => {
+  it('should call executeEsqlQuery with correct parameters', async () => {
     const pageSize = 10;
     const expectedQuery = buildEpisodesQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
 
-    fetchAlertingEpisodes({
+    await fetchAlertingEpisodes({
       pageSize,
       services: { expressions: mockExpressions },
     });
@@ -52,14 +53,14 @@ describe('fetchAlertingEpisodes', () => {
     });
   });
 
-  it('should call executeEsqlQuery with different page size', () => {
+  it('should call executeEsqlQuery with different page size', async () => {
     const pageSize = 20;
     const expectedQuery = buildEpisodesQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
 
-    fetchAlertingEpisodes({
+    await fetchAlertingEpisodes({
       pageSize,
       services: { expressions: mockExpressions },
     });
@@ -82,7 +83,7 @@ describe('fetchAlertingEpisodes', () => {
     });
   });
 
-  it('should call executeEsqlQuery with abort signal when provided', () => {
+  it('should call executeEsqlQuery with abort signal when provided', async () => {
     const pageSize = 15;
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
@@ -91,7 +92,7 @@ describe('fetchAlertingEpisodes', () => {
       sortDirection: 'desc',
     }).print('basic');
 
-    fetchAlertingEpisodes({
+    await fetchAlertingEpisodes({
       pageSize,
       abortSignal,
       services: { expressions: mockExpressions },
@@ -115,7 +116,7 @@ describe('fetchAlertingEpisodes', () => {
     });
   });
 
-  it('should call executeEsqlQuery with custom sort parameters', () => {
+  it('should call executeEsqlQuery with custom sort parameters', async () => {
     const pageSize = 25;
     const sortState = {
       sortField: 'episode.status',
@@ -123,7 +124,7 @@ describe('fetchAlertingEpisodes', () => {
     };
     const expectedQuery = buildEpisodesQuery(sortState).print('basic');
 
-    fetchAlertingEpisodes({
+    await fetchAlertingEpisodes({
       pageSize,
       sortState,
       services: { expressions: mockExpressions },

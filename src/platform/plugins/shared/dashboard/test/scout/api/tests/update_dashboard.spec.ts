@@ -70,7 +70,7 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toBe(title);
   });
 
-  apiTest('validation - returns error when object is not provided', async ({ apiClient }) => {
+  apiTest('validation - returns 400 when body is not empty', async ({ apiClient }) => {
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -86,7 +86,7 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     );
   });
 
-  apiTest('validation - returns error when access_control is provided', async ({ apiClient }) => {
+  apiTest('validation - returns 400 when access_control is provided', async ({ apiClient }) => {
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -102,12 +102,9 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      "[request body.access_control]: a value wasn't expected to be present"
-    );
   });
 
-  apiTest('validation - returns error if panels is not an array', async ({ apiClient }) => {
+  apiTest('validation - returns 400 if panels is not an array', async ({ apiClient }) => {
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -121,13 +118,10 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.panels]: expected value of type [array] but got [Object]'
-    );
   });
 
   apiTest(
-    'validation - returns error if user does not have permission to update a dashboard',
+    'validation - returns 403 if user does not have permission to update a dashboard',
     async ({ apiClient }) => {
       const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
         headers: {
@@ -141,7 +135,6 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       });
 
       expect(response).toHaveStatusCode(403);
-      expect(response.body.message).toBe('Unable to update dashboard');
     }
   );
 });

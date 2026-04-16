@@ -33,6 +33,7 @@ describe('AlertsPageContent', () => {
     mockUseUserPrivileges.mockReturnValue(
       getUserPrivilegesMockDefaultValue({
         rulesPrivileges: {
+          ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
           rules: {
             read: true,
             edit: false,
@@ -71,6 +72,7 @@ describe('AlertsPageContent', () => {
       mockUseUserPrivileges.mockReturnValue(
         getUserPrivilegesMockDefaultValue({
           rulesPrivileges: {
+            ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
             rules: {
               read: false,
               edit: false,

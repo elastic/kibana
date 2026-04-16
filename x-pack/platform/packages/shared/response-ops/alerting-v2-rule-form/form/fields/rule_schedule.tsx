@@ -24,6 +24,7 @@ interface Props {
   value: string;
   onChange: (value: string) => void;
   errors?: string;
+  compressed?: boolean;
 }
 
 export const RuleSchedule = React.forwardRef<HTMLInputElement, Props>((props, ref) => (

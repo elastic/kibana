@@ -45,7 +45,7 @@ const getWatchlistColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
 });
 
 const getNumberOfEntitiesColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
-  field: 'users.length', // TODO: update this function when data is available https://github.com/elastic/security-team/issues/16103
+  field: 'entityCount',
   name: (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.numberOfUsers"

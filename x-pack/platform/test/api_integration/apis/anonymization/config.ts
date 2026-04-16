@@ -15,10 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     kbnTestServer: {
       ...baseIntegrationTestsConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.anonymization.active=true',
-      ],
+      serverArgs: [...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs')],
     },
     esTestCluster: {
       ...baseIntegrationTestsConfig.get('esTestCluster'),

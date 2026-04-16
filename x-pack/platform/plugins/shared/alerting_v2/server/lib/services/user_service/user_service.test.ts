@@ -18,38 +18,38 @@ describe('UserService', () => {
   });
 
   it('returns the current user profile uid when user profile service is available', async () => {
-    const { userService, userProfile } = createUserService();
+    const { userService, userProfileService } = createUserService();
 
     await expect(userService.getCurrentUserProfileUid()).resolves.toBe('elastic_profile_uid');
 
-    expect(userProfile.getCurrent).toHaveBeenCalledWith({
+    expect(userProfileService.getCurrent).toHaveBeenCalledWith({
       request: expect.anything(),
     });
   });
 
   it('returns the current user info when user profile service is available', async () => {
-    const { userService, userProfile } = createUserService();
+    const { userService, userProfileService } = createUserService();
 
     await expect(userService.getCurrentUserProfile()).resolves.toEqual({
       uid: 'elastic_profile_uid',
       username: 'elastic',
     });
 
-    expect(userProfile.getCurrent).toHaveBeenCalledWith({
+    expect(userProfileService.getCurrent).toHaveBeenCalledWith({
       request: expect.anything(),
     });
   });
 
   it('returns null when the profile is not found', async () => {
-    const { userService, userProfile } = createUserService();
-    userProfile.getCurrent.mockResolvedValue(null);
+    const { userService, userProfileService } = createUserService();
+    userProfileService.getCurrent.mockResolvedValue(null);
 
     await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
   });
 
   it('returns null user info when the profile is not found', async () => {
-    const { userService, userProfile } = createUserService();
-    userProfile.getCurrent.mockResolvedValue(null);
+    const { userService, userProfileService } = createUserService();
+    userProfileService.getCurrent.mockResolvedValue(null);
 
     await expect(userService.getCurrentUserProfile()).resolves.toEqual({
       uid: null,
