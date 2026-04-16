@@ -101,7 +101,6 @@ import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_anal
 import {
   GENERATE_LEADS_URL,
   GET_LEADS_URL,
-  GET_LEAD_BY_ID_URL,
   LEAD_GENERATION_STATUS_URL,
   DISMISS_LEAD_URL,
   BULK_UPDATE_LEADS_URL,
@@ -111,7 +110,6 @@ import {
 import type {
   FindLeadsResponse,
   GenerateLeadsResponse,
-  Lead,
   LeadGenerationStatus,
   BulkUpdateLeadsResponse,
 } from '../../../common/entity_analytics/lead_generation/types';
@@ -847,13 +845,6 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
-    const fetchLeadById = ({ signal, id }: { signal?: AbortSignal; id: string }) =>
-      http.fetch<Lead>(GET_LEAD_BY_ID_URL.replace('{id}', id), {
-        version: API_VERSIONS.internal.v1,
-        method: 'GET',
-        signal,
-      });
-
     const fetchLeadGenerationStatus = ({ signal }: { signal?: AbortSignal }) =>
       http.fetch<LeadGenerationStatus>(LEAD_GENERATION_STATUS_URL, {
         version: API_VERSIONS.internal.v1,
@@ -952,7 +943,6 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntityDetailsHighlights,
       fetchWatchlists,
       fetchLeads,
-      fetchLeadById,
       fetchLeadGenerationStatus,
       generateLeads,
       dismissLead,

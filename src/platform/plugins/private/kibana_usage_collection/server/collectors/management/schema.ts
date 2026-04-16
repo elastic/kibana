@@ -758,6 +758,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the Streams management Overview tab',
     },
   },
+  'observability:streamsEnableDraftStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable draft streams with read-time ES|QL views',
+    },
+  },
   'observability:streamsSigEventsIndexPatterns': {
     type: 'keyword',
     _meta: {
