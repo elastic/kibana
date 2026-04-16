@@ -84,7 +84,7 @@ export const GlobalActions = React.memo(() => {
             size="xs"
             css={styles.iconButton}
             aria-label={SHARE_ARIA_LABEL}
-            data-test-subj="chromeNextAppHeaderGlobalShare"
+            data-test-subj={`chromeNextAppHeaderGlobalShare ${shareAction.testId ?? ''}`.trim()}
             onClick={shareAction.onClick}
           />
         </EuiToolTip>

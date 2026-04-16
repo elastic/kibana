@@ -14,6 +14,7 @@
  *   button, so only (limit - 1) items are visible and the rest go into the overflow popover.
  * The primary action button is on the right side and does not count towards this limit.
  */
+export const APP_MENU_SHARE_ID = 'share';
 export const APP_MENU_ITEM_LIMIT = 3;
 export const APP_MENU_NOTIFICATION_INDICATOR_TOP = 2;
 export const APP_MENU_NOTIFICATION_INDICATOR_LEFT = 25;

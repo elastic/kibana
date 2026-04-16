@@ -9,10 +9,8 @@
 
 import { useMemo } from 'react';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
-import { getTooltip } from '@kbn/core-chrome-app-menu-components';
+import { APP_MENU_SHARE_ID, getTooltip } from '@kbn/core-chrome-app-menu-components';
 import { useAppMenu, useNextHeader } from '../../../shared/chrome_hooks';
-
-const SHARE_ITEM_ID = 'share';
 
 interface ResolvedAppMenu {
   menu: AppMenuConfig | undefined;
@@ -30,12 +28,12 @@ function useResolvedAppMenu(): ResolvedAppMenu {
 
     const shareItem = hasExplicitShare
       ? undefined
-      : menu.items?.find((item) => item.id === SHARE_ITEM_ID);
+      : menu.items?.find((item) => item.id === APP_MENU_SHARE_ID);
 
     if (!shareItem) return { menu, shareItem: undefined };
 
     return {
-      menu: { ...menu, items: menu.items?.filter((item) => item.id !== SHARE_ITEM_ID) },
+      menu: { ...menu, items: menu.items?.filter((item) => item.id !== APP_MENU_SHARE_ID) },
       shareItem,
     };
   }, [menu, hasExplicitShare]);
@@ -53,6 +51,7 @@ export interface ShareAction {
   onClick: () => void;
   tooltipContent?: string;
   tooltipTitle?: string;
+  testId?: string;
 }
 
 /**
@@ -78,6 +77,7 @@ export function useShareAction(): ShareAction | undefined {
       onClick: () => shareItem.run!(),
       tooltipContent: content,
       tooltipTitle: title,
+      testId: shareItem.testId,
     };
   }, [explicitShare, shareItem]);
 }
