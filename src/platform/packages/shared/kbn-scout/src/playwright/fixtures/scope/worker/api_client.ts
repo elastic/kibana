@@ -119,7 +119,7 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
             req = req.send(options.body);
           }
 
-          if (options.signal) {  
+          if (options.signal) {
             if (options.signal.aborted) {
               req.abort();
             } else {
