@@ -44,7 +44,7 @@ export function executeAsReasoningAgent<
   TToolCallbacks extends ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>,
   TFinalToolChoice extends ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>> | undefined =
     | ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>>
-    | undefined,
+    | undefined
 >(
   options: UnboundPromptOptions<TPrompt> &
     ReasoningPromptOptions & { prompt: TPrompt } & {
