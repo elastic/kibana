@@ -69,7 +69,7 @@ export interface FeaturesIdentifiedTelemetry {
   filters_capped: boolean;
   has_filtered_documents: boolean;
   duration_ms: number;
-  state: 'success' | 'failure';
+  state: 'success' | 'failure' | 'canceled';
   features_new: number;
   features_updated: number;
   input_tokens_used: number;
@@ -80,7 +80,7 @@ export interface FeaturesIdentifiedTelemetry {
   code_ignored_count: number;
 }
 
-interface TelemetryContext {
+export interface TelemetryContext {
   run_id: string;
   iteration: number;
   stream_name: string;
@@ -92,11 +92,11 @@ interface TelemetryContext {
   has_filtered_documents: boolean;
 }
 
-function buildTelemetry(
+export function buildTelemetry(
   ctx: TelemetryContext,
   durationMs: number,
   outcome:
-    | { state: 'failure' }
+    | { state: 'failure' | 'canceled' }
     | {
         state: 'success';
         tokensUsed: ChatCompletionTokenCount;
@@ -106,11 +106,11 @@ function buildTelemetry(
         codeIgnoredCount: number;
       }
 ): FeaturesIdentifiedTelemetry {
-  if (outcome.state === 'failure') {
+  if (outcome.state !== 'success') {
     return {
       ...ctx,
       duration_ms: durationMs,
-      state: 'failure',
+      state: outcome.state,
       features_new: 0,
       features_updated: 0,
       input_tokens_used: 0,
@@ -180,10 +180,8 @@ interface RunInferredIterationOptions {
   streamName: string;
   start: number;
   end: number;
+  allFeatures: Feature[];
   discoveredFeatures: Feature[];
-  storedFeatures: Feature[];
-  discoveredSet: ReadonlySet<string>;
-  storedSet: ReadonlySet<string>;
   excludedFeatures: Feature[];
   inferenceClient: BoundInferenceClient;
   systemPrompt: string;
@@ -193,7 +191,7 @@ interface RunInferredIterationOptions {
 }
 
 type InferredIterationResult =
-  | { hasDocuments: false; docsCount: 0; docIds: [] }
+  | { hasDocuments: false }
   | {
       hasDocuments: true;
       docsCount: number;
@@ -218,10 +216,8 @@ async function runInferredIteration({
   streamName,
   start,
   end,
+  allFeatures,
   discoveredFeatures,
-  storedFeatures,
-  discoveredSet,
-  storedSet,
   excludedFeatures,
   inferenceClient,
   systemPrompt,
@@ -255,7 +251,7 @@ async function runInferredIteration({
   });
 
   if (batchResult.documents.length === 0) {
-    return { hasDocuments: false, docsCount: 0, docIds: [] };
+    return { hasDocuments: false };
   }
 
   const { totalFilters, filtersCapped, hasFilteredDocuments } = batchResult;
@@ -263,6 +259,11 @@ async function runInferredIteration({
   const docIds = batchResult.documents
     .map((doc) => doc._id)
     .filter((id): id is string => id != null);
+
+  const discoveredUuids = new Set(discoveredFeatures.map((f) => f.uuid));
+  const storedFeatures = allFeatures.filter(
+    (f) => !isComputedFeature(f) && !discoveredUuids.has(f.uuid)
+  );
 
   const allKnownFeatures = [...storedFeatures, ...discoveredFeatures];
   const topRanked = [...allKnownFeatures]
@@ -306,8 +307,7 @@ async function runInferredIteration({
   const { newFeatures, updatedFeatures, codeIgnoredCount } = reconcileInferredFeatures({
     rawFeatures,
     allKnownFeatures,
-    discoveredSet,
-    storedSet,
+    discoveredFeatures,
     ignoredFeatures,
     excludedFeatures,
     featureTtlDays,
@@ -390,21 +390,14 @@ export async function identifyInferredFeatures({
   const startedAt = Date.now();
 
   const { discoveredFeatures } = prevState;
-  const discoveredSet = new Set(discoveredFeatures.map((f) => f.uuid));
-  const storedFeatures = allFeatures.filter(
-    (f) => !isComputedFeature(f) && !discoveredSet.has(f.uuid)
-  );
-  const storedSet = new Set(storedFeatures.map((f) => f.uuid));
 
   const iterationResult = await runInferredIteration({
     esClient,
     streamName,
     start,
     end,
+    allFeatures,
     discoveredFeatures,
-    storedFeatures,
-    discoveredSet,
-    storedSet,
     excludedFeatures,
     inferenceClient,
     systemPrompt,
@@ -437,67 +430,61 @@ export async function identifyInferredFeatures({
     has_filtered_documents: hasFilteredDocuments,
   };
 
-  if (outcome.state === 'failure') {
-    const durationMs = Date.now() - startedAt;
-    const failedResult: IterationResult = {
+  let nextDiscovered = prevState.discoveredFeatures;
+  let iterationEntry: IterationResult;
+  let telemetryOutcome: Parameters<typeof buildTelemetry>[2];
+
+  if (outcome.state === 'success') {
+    const { tokensUsed, newFeatures, updatedFeatures, ignoredFeatures, codeIgnoredCount } = outcome;
+
+    const allChanged = [...newFeatures, ...updatedFeatures];
+    if (allChanged.length > 0) {
+      await featureClient.bulk(
+        streamName,
+        allChanged.map((feature) => ({ index: { feature } }))
+      );
+    }
+
+    const discoveredMap = new Map(nextDiscovered.map((f) => [f.uuid, f]));
+    for (const feature of allChanged) {
+      discoveredMap.set(feature.uuid, feature);
+    }
+    nextDiscovered = Array.from(discoveredMap.values());
+
+    iterationEntry = {
       runId,
       iteration,
-      durationMs,
-      state: 'failure',
-      tokensUsed: { ...EMPTY_TOKENS },
-      newFeatures: [],
-      updatedFeatures: [],
+      durationMs: Date.now() - startedAt,
+      state: 'success',
+      tokensUsed,
+      newFeatures: newFeatures.map(toFeatureSummary),
+      updatedFeatures: updatedFeatures.map(toFeatureSummary),
     };
 
-    trackFeaturesIdentified?.(buildTelemetry(telemetryCtx, durationMs, { state: 'failure' }));
-
-    return {
-      hasDocuments: true,
-      docsCount,
-      docIds,
-      state: {
-        discoveredFeatures: prevState.discoveredFeatures,
-        iterationResults: [...prevState.iterationResults, failedResult],
-      },
-    };
-  }
-
-  const { tokensUsed, newFeatures, updatedFeatures, ignoredFeatures, codeIgnoredCount } = outcome;
-
-  const allChanged = [...newFeatures, ...updatedFeatures];
-  if (allChanged.length > 0) {
-    await featureClient.bulk(
-      streamName,
-      allChanged.map((feature) => ({ index: { feature } }))
-    );
-  }
-
-  const discoveredMap = new Map(discoveredFeatures.map((f) => [f.uuid, f]));
-  for (const feature of allChanged) {
-    discoveredMap.set(feature.uuid, feature);
-  }
-  const nextDiscovered = Array.from(discoveredMap.values());
-
-  const durationMs = Date.now() - startedAt;
-  const successResult: IterationResult = {
-    runId,
-    iteration,
-    durationMs,
-    state: 'success',
-    tokensUsed,
-    newFeatures: newFeatures.map(toFeatureSummary),
-    updatedFeatures: updatedFeatures.map(toFeatureSummary),
-  };
-
-  trackFeaturesIdentified?.(
-    buildTelemetry(telemetryCtx, durationMs, {
+    telemetryOutcome = {
       state: 'success',
       tokensUsed,
       newCount: newFeatures.length,
       updatedCount: updatedFeatures.length,
       llmIgnoredCount: ignoredFeatures.length,
       codeIgnoredCount,
-    })
+    };
+  } else {
+    iterationEntry = {
+      runId,
+      iteration,
+      durationMs: Date.now() - startedAt,
+      state: 'failure',
+      tokensUsed: { ...EMPTY_TOKENS },
+      newFeatures: [],
+      updatedFeatures: [],
+    };
+
+    telemetryOutcome = { state: 'failure' };
+  }
+
+  trackFeaturesIdentified?.(
+    buildTelemetry(telemetryCtx, iterationEntry.durationMs, telemetryOutcome)
   );
 
   return {
@@ -506,7 +493,7 @@ export async function identifyInferredFeatures({
     docIds,
     state: {
       discoveredFeatures: nextDiscovered,
-      iterationResults: [...prevState.iterationResults, successResult],
+      iterationResults: [...prevState.iterationResults, iterationEntry],
     },
   };
 }

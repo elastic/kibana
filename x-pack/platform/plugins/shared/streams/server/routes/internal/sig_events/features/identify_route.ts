@@ -22,6 +22,7 @@ import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { formatInferenceProviderError } from '../../../utils/create_connector_sse_error';
 import {
   MS_PER_DAY,
+  buildTelemetry,
   identifyInferredFeatures,
   identifyComputedFeatures,
 } from '../../../../lib/sig_events/features';
@@ -100,7 +101,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxPreviouslyIdentifiedFeatures,
     } = params.body ?? {};
 
-    const [connectorId, stream] = await Promise.all([
+    const [connectorId, stream, featureClient] = await Promise.all([
       connectorIdOverride
         ? Promise.resolve(connectorIdOverride)
         : resolveConnectorForFeature({
@@ -110,9 +111,10 @@ const identifyInferredFeaturesRoute = createServerRoute({
             request,
           }),
       streamsClient.getStream(streamName),
+      getFeatureClient(),
     ]);
 
-    const featureClient = await getFeatureClient();
+    const streamType = getStreamTypeFromDefinition(stream);
 
     try {
       return await identifyInferredFeatures({
@@ -123,7 +125,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
         streamName,
-        streamType: getStreamTypeFromDefinition(stream),
+        streamType,
         start,
         end,
         runId,
@@ -146,27 +148,23 @@ const identifyInferredFeaturesRoute = createServerRoute({
         } completed iterations: ${error instanceof Error ? error.message : String(error)}`
       );
 
-      telemetry.trackFeaturesIdentified({
-        run_id: runId,
-        iteration: iterationResults.length + 1,
-        stream_name: streamName,
-        stream_type: getStreamTypeFromDefinition(stream),
-        state: 'failure',
-        docs_count: 0,
-        features_new: 0,
-        features_updated: 0,
-        input_tokens_used: 0,
-        output_tokens_used: 0,
-        total_tokens_used: 0,
-        cached_tokens_used: 0,
-        duration_ms: Date.now() - now,
-        total_filters: 0,
-        filters_capped: false,
-        has_filtered_documents: false,
-        excluded_features_count: 0,
-        llm_ignored_count: 0,
-        code_ignored_count: 0,
-      });
+      telemetry.trackFeaturesIdentified(
+        buildTelemetry(
+          {
+            run_id: runId,
+            iteration: iterationResults.length + 1,
+            stream_name: streamName,
+            stream_type: streamType,
+            docs_count: 0,
+            excluded_features_count: 0,
+            total_filters: 0,
+            filters_capped: false,
+            has_filtered_documents: false,
+          },
+          Date.now() - now,
+          { state: 'failure' }
+        )
+      );
 
       if (isInferenceProviderError(error)) {
         const connector = await inferenceClient
