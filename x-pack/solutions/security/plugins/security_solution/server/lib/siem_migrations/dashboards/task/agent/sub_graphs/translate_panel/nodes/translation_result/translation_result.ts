@@ -80,11 +80,7 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
     return {
       elastic_panel: panelJSON,
       translation_result: translationResult,
-      comments: [
-        generateAssistantComment(
-          `## Final ES|QL Query\n\n\`\`\`esql\n${query}\n\`\`\``
-        ),
-      ],
+      comments: [generateAssistantComment(`## Final ES|QL Query\n\n\`\`\`esql\n${query}\n\`\`\``)],
     };
   };
 };
