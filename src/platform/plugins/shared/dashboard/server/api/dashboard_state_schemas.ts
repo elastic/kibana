@@ -241,8 +241,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
         schema.arrayOf(asCodeFilterSchema, {
           maxSize: 500,
           meta: {
-            description:
-              'Filters applied across all panels.',
+            description: 'Filters applied across all panels.',
           },
         })
       ),
