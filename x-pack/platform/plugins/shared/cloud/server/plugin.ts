@@ -54,6 +54,11 @@ export interface CloudSetup {
    */
   csp?: string;
   /**
+   * The cloud region identifier (e.g., `us-east-1`, `europe-west1`, `eastus2`).
+   * Provider-specific region name without the CSP prefix.
+   */
+  region?: string;
+  /**
    * The Elastic Cloud Organization that owns this deployment/project.
    */
   organizationId?: string;
@@ -373,6 +378,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.getCloudUrls(),
       cloudId: this.config.id,
       csp: this.config.csp,
+      region: this.config.region,
       organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,

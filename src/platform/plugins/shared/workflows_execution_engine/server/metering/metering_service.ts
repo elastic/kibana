@@ -63,7 +63,7 @@ export class WorkflowsMeteringService {
       return;
     }
 
-    const usageRecord = this.buildUsageRecord(execution, instanceGroupId);
+    const usageRecord = this.buildUsageRecord(execution, instanceGroupId, cloudSetup);
 
     try {
       await this.usageReportingService.reportUsage([usageRecord]);
@@ -84,7 +84,11 @@ export class WorkflowsMeteringService {
    * The record follows Usage Record Schema v2. Kibana (Stage 1) sends raw data;
    * the transform function (Stage 3) decides what's billable and how to price it.
    */
-  private buildUsageRecord(execution: EsWorkflowExecution, instanceGroupId: string): UsageRecord {
+  private buildUsageRecord(
+    execution: EsWorkflowExecution,
+    instanceGroupId: string,
+    cloudSetup?: CloudSetup
+  ): UsageRecord {
     const durationMs = execution.duration || 0;
     const durationMinutes = Math.ceil(durationMs / 60000);
     const normalizedQuantity = Math.max(1, Math.ceil(durationMs / BUCKET_SIZE_MS));
@@ -120,6 +124,8 @@ export class WorkflowsMeteringService {
       source: {
         id: METERING_SOURCE_ID,
         instance_group_id: instanceGroupId,
+        provider: cloudSetup?.csp,
+        region: cloudSetup?.region,
       },
     };
   }

@@ -10,8 +10,11 @@
  *
  * Stage 1 (Kibana) populates: id, usage_timestamp, creation_timestamp, usage.type,
  * usage.quantity, usage.period_seconds, usage.metadata, source.id, source.instance_group_id.
+ * Stage 1 may also provide source.provider and source.region when running in ECH
+ * (where the Usage API cannot infer them).
  *
- * Stage 2 (Usage API) enriches with: source.account, source.product, source.provider, source.region.
+ * Stage 2 (Usage API) enriches with: source.account, source.product, and (if not already
+ * provided) source.provider and source.region.
  * Stage 3 (Transform function) adds: usage.pli, usage.count.
  */
 export interface UsageRecord {
@@ -45,6 +48,10 @@ export interface UsageSource {
   id: string;
   /** Serverless project ID or stateful deployment ID. */
   instance_group_id: string;
+  /** Cloud service provider (e.g., `aws`, `gcp`, `azure`). Optional in Serverless (auto-enriched by Usage API); required for ECH. */
+  provider?: string;
+  /** Cloud region (e.g., `us-east-1`, `europe-west1`). Optional in Serverless (auto-enriched by Usage API); required for ECH. */
+  region?: string;
   /** Optional metadata such as product tier. */
   metadata?: {
     tier?: string;
