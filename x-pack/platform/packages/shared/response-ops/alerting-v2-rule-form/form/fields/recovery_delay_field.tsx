@@ -91,7 +91,7 @@ export const RecoveryDelayField = () => {
             'stateTransition',
             {
               ...st,
-              recoveringCount: st.recoveringCount ?? DEFAULT_RECOVERING_COUNT,
+              recoveringCount: st.recoveringCount || DEFAULT_RECOVERING_COUNT,
               recoveringTimeframe: null,
             },
             { shouldDirty: true, shouldTouch: true }

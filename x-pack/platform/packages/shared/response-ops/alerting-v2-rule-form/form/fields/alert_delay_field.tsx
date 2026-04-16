@@ -91,7 +91,7 @@ export const AlertDelayField = () => {
             'stateTransition',
             {
               ...st,
-              pendingCount: st.pendingCount ?? DEFAULT_PENDING_COUNT,
+              pendingCount: st.pendingCount || DEFAULT_PENDING_COUNT,
               pendingTimeframe: null,
             },
             { shouldDirty: true, shouldTouch: true }
