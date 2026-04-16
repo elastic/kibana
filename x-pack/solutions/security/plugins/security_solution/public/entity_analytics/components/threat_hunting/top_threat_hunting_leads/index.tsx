@@ -22,6 +22,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AiButton } from '@kbn/shared-ux-ai-components';
@@ -88,7 +89,13 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="flask" aria-hidden={true} />
+        <EuiIcon type="sparkles" aria-hidden={true} />
+        <EuiBetaBadge
+          label="Tech Preview"
+          iconType="flask"
+          aria-hidden={true}
+          tooltipContent="This functionality is experimental and not supported. It may change or be removed at any time."
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

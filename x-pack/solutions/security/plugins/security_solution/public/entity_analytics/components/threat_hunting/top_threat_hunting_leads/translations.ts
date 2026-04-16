@@ -188,3 +188,8 @@ export const SEARCH_LEADS_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.searchPlaceholder',
   { defaultMessage: 'Search leads...' }
 );
+
+export const TAGS_SECTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.tagsSection',
+  { defaultMessage: 'Tags' }
+);
