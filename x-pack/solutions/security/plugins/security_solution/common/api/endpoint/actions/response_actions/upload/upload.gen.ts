@@ -16,7 +16,10 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { BaseActionSchema } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
 export type UploadRouteRequestBody = z.infer<typeof UploadRouteRequestBody>;
 export const UploadRouteRequestBody = BaseActionSchema.merge(
@@ -34,8 +37,5 @@ export const UploadRouteRequestBody = BaseActionSchema.merge(
   })
 );
 
-export type UploadRouteResponse = z.infer<typeof UploadRouteResponse>;
-export const UploadRouteResponse = z.object({});
-
 export type EndpointUploadActionResponse = z.infer<typeof EndpointUploadActionResponse>;
-export const EndpointUploadActionResponse = UploadRouteResponse;
+export const EndpointUploadActionResponse = ResponseActionCreateSuccessResponse;
