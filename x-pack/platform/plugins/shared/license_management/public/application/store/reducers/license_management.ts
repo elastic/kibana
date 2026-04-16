@@ -116,8 +116,9 @@ export const getUploadErrorMessage = (state: LicenseManagementState) => {
 
 export const shouldShowStartTrial = (state: LicenseManagementState) => {
   const licenseType = getLicenseType(state);
+  const canStartTrial = state.trialStatus.canStartTrial === true;
   return (
-    state.trialStatus.canStartTrial &&
+    canStartTrial &&
     licenseType !== 'trial' &&
     ((licenseType !== 'platinum' && licenseType !== 'enterprise') || isExpired(state))
   );

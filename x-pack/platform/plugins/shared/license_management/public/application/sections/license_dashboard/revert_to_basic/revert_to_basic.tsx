@@ -24,9 +24,9 @@ import type { UploadStatusState } from '../../../store/types';
 
 export interface Props {
   shouldShowRevertToBasicLicense: boolean;
-  licenseType: LicenseType | undefined;
+  licenseType?: LicenseType;
   needsAcknowledgement: boolean;
-  messages: string[] | undefined;
+  messages?: string[];
   startBasicLicense: (currentLicenseType: string, ack?: boolean) => void;
   cancelStartBasicLicense: () => void;
   uploadLicenseStatus?: (status: UploadStatusState) => void;

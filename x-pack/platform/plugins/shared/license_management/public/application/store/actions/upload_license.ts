@@ -127,7 +127,7 @@ export const uploadLicense =
     currentLicenseType: string,
     acknowledge?: boolean
   ): AppThunkAction<Promise<void>> =>
-  async (dispatch, getState, services) => {
+  async (dispatch, _getState, services) => {
     dispatch(uploadLicenseStatus({ applying: true }));
     const newLicenseType = parseLicenseType(licenseString);
     if (newLicenseType === undefined) {

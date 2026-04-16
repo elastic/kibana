@@ -35,7 +35,7 @@ export interface Props {
   currentLicenseType: string;
   applying: boolean;
   needsAcknowledgement: boolean;
-  messages: Array<string | string[]> | undefined;
+  messages?: Array<string | string[]>;
   errorMessage: string;
   isInvalid: boolean;
   telemetry?: TelemetryPluginStart;

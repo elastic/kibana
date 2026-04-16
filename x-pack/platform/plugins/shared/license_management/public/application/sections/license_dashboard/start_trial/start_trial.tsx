@@ -46,7 +46,7 @@ export interface Props {
   loadTrialStatus: () => void;
   startLicenseTrial: () => void;
   telemetry?: TelemetryPluginStart;
-  shouldShowStartTrial: boolean | undefined;
+  shouldShowStartTrial: boolean;
 }
 
 interface State {
