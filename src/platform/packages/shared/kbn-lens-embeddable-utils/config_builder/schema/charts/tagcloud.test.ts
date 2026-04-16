@@ -57,7 +57,9 @@ describe('Tagcloud Schema', () => {
           label: 'Sum of price',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
-        caption: { visible: true },
+        styling: {
+          caption: { visible: true },
+        },
         tag_by: {
           operation: 'terms',
           fields: ['category'],
@@ -114,12 +116,14 @@ describe('Tagcloud Schema', () => {
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            orientation: 'horizontal',
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
           },
-          orientation: 'horizontal',
         };
 
         const validated = tagcloudStateSchema.validate(input);
@@ -138,12 +142,14 @@ describe('Tagcloud Schema', () => {
             field: 'sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            orientation: 'vertical',
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
           },
-          orientation: 'vertical',
         };
 
         const validated = tagcloudStateSchema.validate(input);
@@ -162,12 +168,14 @@ describe('Tagcloud Schema', () => {
             field: 'sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            orientation: 'angled',
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
           },
-          orientation: 'angled',
         };
 
         const validated = tagcloudStateSchema.validate(input);
@@ -188,10 +196,12 @@ describe('Tagcloud Schema', () => {
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
-          font_size: {
-            min: 10,
-            max: 80,
+          styling: {
+            caption: { visible: false },
+            font_size: {
+              min: 10,
+              max: 80,
+            },
           },
           tag_by: {
             operation: 'terms',
@@ -215,19 +225,24 @@ describe('Tagcloud Schema', () => {
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            font_size: {},
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
           },
-          font_size: {},
         };
 
         const validated = tagcloudStateSchema.validate(input);
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          font_size: { min: 18, max: 72 },
+          styling: {
+            ...input.styling,
+            font_size: { min: 18, max: 72 },
+          },
           tag_by: { ...input.tag_by, limit: 5 },
         });
       });
@@ -268,12 +283,14 @@ describe('Tagcloud Schema', () => {
             operation: 'count',
             field: 'test_field',
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            orientation: 'invalid',
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
           },
-          orientation: 'invalid',
         };
 
         expect(() => tagcloudStateSchema.validate(input)).toThrow();
@@ -286,14 +303,16 @@ describe('Tagcloud Schema', () => {
             operation: 'count',
             field: 'test_field',
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            font_size: {
+              min: 0,
+              max: 72,
+            },
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-          },
-          font_size: {
-            min: 0,
-            max: 72,
           },
         };
 
@@ -307,13 +326,15 @@ describe('Tagcloud Schema', () => {
             operation: 'count',
             field: 'test_field',
           },
+          styling: {
+            font_size: {
+              min: 14,
+              max: 150,
+            },
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-          },
-          font_size: {
-            min: 14,
-            max: 150,
           },
         };
 
@@ -347,7 +368,9 @@ describe('Tagcloud Schema', () => {
             field: 'revenue',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -368,10 +391,13 @@ describe('Tagcloud Schema', () => {
           ...baseTagcloudConfig,
           title: 'Sales Tagcloud',
           description: 'Sales metrics visualization by category',
-          orientation: 'horizontal',
-          font_size: {
-            min: 12,
-            max: 60,
+          styling: {
+            orientation: 'horizontal',
+            font_size: {
+              min: 12,
+              max: 60,
+            },
+            caption: { visible: true },
           },
           metric: {
             operation: 'sum',
@@ -379,7 +405,6 @@ describe('Tagcloud Schema', () => {
             label: 'Sum of sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: true },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -413,18 +438,20 @@ describe('Tagcloud Schema', () => {
             column: 'count',
             label: 'Count',
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            orientation: 'vertical',
+            font_size: {
+              min: 16,
+              max: 48,
+            },
+          },
           tag_by: {
             column: 'category',
             color: {
               mode: 'gradient',
               palette: 'kibana_palette',
             },
-          },
-          orientation: 'vertical',
-          font_size: {
-            min: 16,
-            max: 48,
           },
         };
 
