@@ -53,7 +53,9 @@ export function useFetchMetricsData({
   );
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
-    async (signal: AbortSignal): Promise<ParsedMetrics | null> => {
+    async (
+      signal: AbortSignal
+    ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
       const documents = await trackRequest(
         'Grid of metrics',
         'This request queries Elasticsearch to fetch metrics info for the grid.',
@@ -99,7 +101,10 @@ export function useFetchMetricsData({
         trackMetricsInfo(parsed.telemetry);
       }
 
-      return sortedMetrics;
+      return {
+        ...sortedMetrics,
+        activeDimensions: selectedDimensionNames ?? [],
+      };
     },
     [
       metricsInfoQuery,
@@ -111,6 +116,7 @@ export function useFetchMetricsData({
       services.data.search.search,
       services.uiSettings,
       trackMetricsInfo,
+      selectedDimensionNames,
     ]
   );
 
@@ -139,5 +145,6 @@ export function useFetchMetricsData({
     error: error ?? null,
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],
+    activeDimensions: value?.activeDimensions ?? [],
   };
 }
