@@ -57,7 +57,7 @@ Post one comment on the PR with a single `/flaky` command. Include tokens only f
 Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigger_flaky_test_runner) or post this comment on the PR:
 
 ```
-/flaky <type>:<path>:25 [<type>:<path>:25 ...]
+/flaky <type>:<path>:30 [<type>:<path>:30 ...]
 ```
 
 This check is experimental. Share your feedback in the #appex-qa channel.
@@ -68,24 +68,24 @@ Examples:
 Scout-only:
 
 ```
-/flaky scoutConfig:x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts:25
+/flaky scoutConfig:x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts:30
 ```
 
 FTR-only (multiple configs):
 
 ```
-/flaky ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group7.ts:25 ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group8.ts:25
+/flaky ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group7.ts:30 ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group8.ts:30
 ```
 
 Mixed Scout + FTR:
 
 ```
-/flaky scoutConfig:x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts:25 ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group7.ts:25 ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group8.ts:25
+/flaky scoutConfig:x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts:30 ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group7.ts:30 ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group8.ts:30
 ```
 
 **Rules:**
 
-- Always use `:25` on every token.
+- Always use `:30` on every token.
 - Only include config paths that are verified to exist and run the changed tests.
 - Always post a single `/flaky` line — never multiple.
 - Deduplicate: include each config path only once.
