@@ -119,11 +119,21 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
             req = req.send(options.body);
           }
 
-          if (options.signal) {
+          if (options.signal) {  
             if (options.signal.aborted) {
               req.abort();
             } else {
-              options.signal.addEventListener('abort', () => req.abort(), { once: true });
+              options.signal.addEventListener(
+                'abort',
+                () => {
+                  try {
+                    req.abort();
+                  } catch {
+                    // Swallow — the abort rejection propagates via the awaited request
+                  }
+                },
+                { once: true }
+              );
             }
           }
 
