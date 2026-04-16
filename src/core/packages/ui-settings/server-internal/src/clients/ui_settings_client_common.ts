@@ -47,45 +47,41 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    let userProvided: UserProvided<T> | undefined;
-
     // Check shared process-wide cache
     if (this.sharedUserProvidedCache) {
       const sharedCached = this.sharedUserProvidedCache.get(this.namespace);
       if (sharedCached) {
-        userProvided = sharedCached as UserProvided<T>;
+        return this.applyOverrides(sharedCached);
       }
 
       // check for in-flight read request (deduplication)
       const inflightRead = this.sharedUserProvidedCache.getInflightRead(this.namespace);
       if (inflightRead) {
-        userProvided = await inflightRead;
+        return this.applyOverrides(await inflightRead);
       }
-    }
 
-    if (!userProvided) {
       this.log.debug(
         `[UiSettings] getUserProvided cache MISS - fetching from ES for namespace=${this.namespace}`
       );
-      // Fetch from ES, process, and cache at all levels
-      const promise = this.computeUserProvided<T>();
-
-      // Register in-flight promise for deduplication
-      if (this.sharedUserProvidedCache) {
-        this.sharedUserProvidedCache.setInflightRead(this.namespace, promise);
-      }
-
-      userProvided = await promise;
     }
 
-    // write all overridden keys, dropping the userValue if override is null and
-    // adding keys for overrides that are not in saved object
+    // Fetch from ES, process, and cache
+    const promise = this.computeUserProvided<T>();
+
+    // Register in-flight promise for deduplication
+    if (this.sharedUserProvidedCache) {
+      this.sharedUserProvidedCache.setInflightRead(this.namespace, promise);
+    }
+
+    return this.applyOverrides(await promise);
+  }
+
+  private applyOverrides<T = unknown>(userProvided: UserProvided<T>): UserProvided<T> {
     const result = { ...userProvided };
     for (const [key, value] of Object.entries(this.overrides)) {
       result[key] =
         value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
     }
-
     return result;
   }
 
