@@ -12,7 +12,7 @@ paths:
       operationId: UnassignWatchlistEntities
       summary: Manually unassign entities from a watchlist
       description: |
-        Unassigns the provided entities from a watchlist by their EUIDs.
+        Unassigns the provided entities from the specified watchlist.
         This only removes the "manual" assignment. If the entity is also
         assigned via other sources (e.g. index or integration), it will
         remain on the watchlist.
