@@ -45,7 +45,6 @@ import {
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
 import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
 import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threat_hunting_leads/threat_hunting_leads_flyout';
-import { LeadProvenanceFlyout } from '../components/threat_hunting/top_threat_hunting_leads/lead_provenance_flyout';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
 import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
@@ -65,7 +64,6 @@ export const EntityAnalyticsHomePage = () => {
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const leadGenerationEnabled = useIsExperimentalFeatureEnabled('leadGenerationEnabled');
-  const leadDetailsEnabled = useIsExperimentalFeatureEnabled('leadGenerationDetailsEnabled');
   const spaceId = useSpaceId();
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
@@ -83,7 +81,6 @@ export const EntityAnalyticsHomePage = () => {
   const openAgentBuilderWithLead = useLeadAttachment();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [provenanceLead, setProvenanceLead] = useState<HuntingLead | null>(null);
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? entityDataViewLoading : oldIsSourcererLoading),
@@ -136,10 +133,6 @@ export const EntityAnalyticsHomePage = () => {
     (lead: HuntingLead) => openAgentBuilderWithLead(lead),
     [openAgentBuilderWithLead]
   );
-
-  const handleLeadInfoClick = useCallback((lead: HuntingLead) => setProvenanceLead(lead), []);
-
-  const handleCloseProvenance = useCallback(() => setProvenanceLead(null), []);
 
   const handleHuntInChat = useCallback(() => {
     const firstLead = leads[0];
@@ -197,7 +190,6 @@ export const EntityAnalyticsHomePage = () => {
                   onSeeAll={handleOpenFlyout}
                   onLeadClick={handleOpenLeadInChat}
                   onHuntInChat={handleHuntInChat}
-                  onLeadInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
                   onGenerate={generate}
                   isScheduled={isScheduled}
                   onToggleSchedule={toggleSchedule}
@@ -240,19 +232,7 @@ export const EntityAnalyticsHomePage = () => {
       </SecuritySolutionPageWrapper>
 
       {leadGenerationEnabled && isFlyoutOpen && (
-        <ThreatHuntingLeadsFlyout
-          onClose={handleCloseFlyout}
-          onSelectLead={handleOpenLeadInChat}
-          onInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
-        />
-      )}
-
-      {leadGenerationEnabled && provenanceLead && (
-        <LeadProvenanceFlyout
-          lead={provenanceLead}
-          onClose={handleCloseProvenance}
-          onInvestigateInChat={handleOpenLeadInChat}
-        />
+        <ThreatHuntingLeadsFlyout onClose={handleCloseFlyout} onSelectLead={handleOpenLeadInChat} />
       )}
 
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
