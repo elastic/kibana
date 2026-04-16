@@ -47,13 +47,16 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
         validate: {
           request: {
             query: schema.object({
-              fields: schema.oneOf([
-                fieldSchema,
-                schema.arrayOf(fieldSchema, {
-                  maxSize: MAX_AGG_FIELDS,
-                  meta: { description: 'Fields to aggregate on.' },
-                }),
-              ]),
+              fields: schema.oneOf(
+                [
+                  fieldSchema,
+                  schema.arrayOf(fieldSchema, {
+                    maxSize: MAX_AGG_FIELDS,
+                    meta: { description: 'Fields to aggregate on.' },
+                  }),
+                ],
+                { meta: { description: 'Field or fields to aggregate on.' } }
+              ),
             }),
           },
         },
