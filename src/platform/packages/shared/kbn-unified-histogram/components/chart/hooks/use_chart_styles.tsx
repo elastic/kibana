@@ -24,9 +24,8 @@ export const useChartStyles = (chartVisible: boolean) => {
     display: flex;
     flex-direction: column;
     position: relative;
-    /* End inset only: start (left in LTR) flush so the chart aligns with the panel edge; end keeps breathing room */
-    padding-inline-start: 0;
-    padding-inline-end: ${euiTheme.size.m};
+    /* Horizontal inset lives here (not on the chart wrapper) so Lens absolute-fill children are not clipped */
+    padding-inline: ${euiTheme.size.m};
 
     // SASSTODO: the visualizing component should have an option or a modifier
     .series > rect {
