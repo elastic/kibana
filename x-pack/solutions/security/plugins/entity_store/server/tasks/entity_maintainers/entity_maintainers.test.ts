@@ -127,7 +127,31 @@ describe('entity_maintainer task', () => {
             taskStatus: EntityMaintainerTaskStatus.STARTED,
           },
           params: {},
+          enabled: true,
         },
+        { request }
+      );
+    });
+
+    it('should schedule task as disabled when enabled option is false', async () => {
+      const { logger, request, taskManagerStart } = createMockDeps();
+
+      await scheduleEntityMaintainerTask({
+        logger,
+        taskManager: taskManagerStart as any,
+        id: 'maintainer-a',
+        interval: '1m',
+        namespace: 'default',
+        request,
+        enabled: false,
+      });
+
+      expect(mockEnsureScheduled).toHaveBeenCalledTimes(1);
+      expect(mockEnsureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'maintainer-a:default',
+          enabled: false,
+        }),
         { request }
       );
     });
@@ -164,6 +188,7 @@ describe('entity_maintainer task', () => {
             taskStatus: EntityMaintainerTaskStatus.STARTED,
           },
           params: {},
+          enabled: true,
         },
         { request }
       );
@@ -178,6 +203,7 @@ describe('entity_maintainer task', () => {
             taskStatus: EntityMaintainerTaskStatus.STARTED,
           },
           params: {},
+          enabled: true,
         },
         { request }
       );
@@ -239,7 +265,7 @@ describe('entity_maintainer task', () => {
       const runner = createTaskRunner({
         taskInstance: {
           id: 'test-maintainer:default',
-          state: {},
+          state: { namespace: 'default' },
         },
         abortController: new AbortController(),
         fakeRequest: { headers: {} } as KibanaRequest,
@@ -335,14 +361,14 @@ describe('entity_maintainer task', () => {
       const defs2 = mockRegisterTaskDefinitions.mock.calls[1][0];
       const runnerA = defs1['entity_store:v2:entity_maintainer_task:maintainer-a'].createTaskRunner(
         {
-          taskInstance: { id: 'maintainer-a:default', state: {} },
+          taskInstance: { id: 'maintainer-a:default', state: { namespace: 'default' } },
           abortController: new AbortController(),
           fakeRequest: { headers: {} } as KibanaRequest,
         }
       );
       const runnerB = defs2['entity_store:v2:entity_maintainer_task:maintainer-b'].createTaskRunner(
         {
-          taskInstance: { id: 'maintainer-b:default', state: {} },
+          taskInstance: { id: 'maintainer-b:default', state: { namespace: 'default' } },
           abortController: new AbortController(),
           fakeRequest: { headers: {} } as KibanaRequest,
         }
@@ -376,7 +402,7 @@ describe('entity_maintainer task', () => {
       const fakeRequest = { headers: {} } as KibanaRequest;
 
       const runner1 = createTaskRunner({
-        taskInstance: { id: 'test-maintainer:default', state: {} },
+        taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } },
         abortController: new AbortController(),
         fakeRequest,
       });
@@ -392,6 +418,7 @@ describe('entity_maintainer task', () => {
               runs: 1,
               lastSuccessTimestamp: new Date().toISOString(),
               lastErrorTimestamp: null,
+              namespace: 'default',
             },
             state: { synced: true },
           },
@@ -428,7 +455,7 @@ describe('entity_maintainer task', () => {
       const fakeRequest = { headers: {} } as KibanaRequest;
 
       const runner1 = createTaskRunner({
-        taskInstance: { id: 'test-maintainer:default', state: {} },
+        taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } },
         abortController: new AbortController(),
         fakeRequest,
       });
@@ -466,7 +493,7 @@ describe('entity_maintainer task', () => {
       const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
       const createTaskRunner = defs[taskType].createTaskRunner;
       const runner = createTaskRunner({
-        taskInstance: { id: 'test-maintainer:default', state: {} },
+        taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } },
         abortController: new AbortController(),
         fakeRequest: { headers: {} } as KibanaRequest,
       });
@@ -496,7 +523,7 @@ describe('entity_maintainer task', () => {
       const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
       const createTaskRunner = defs[taskType].createTaskRunner;
       const runner = createTaskRunner({
-        taskInstance: { id: 'test-maintainer:default', state: {} },
+        taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } },
         abortController: new AbortController(),
         fakeRequest: { headers: {} } as KibanaRequest,
       });
