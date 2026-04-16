@@ -11,7 +11,6 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import type { DiscoverGridFlyoutProps } from './discover_grid_flyout';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverServices } from '../../build_services';
@@ -94,24 +93,17 @@ describe('Discover flyout', function () {
       setExpandedDoc: jest.fn(),
     };
 
-    const view = render(
+    render(
       <DiscoverTestProvider services={services}>
         <DiscoverGridFlyout {...props} />
       </DiscoverTestProvider>
     );
 
-    const rerenderComponent = (newProps: DiscoverGridFlyoutProps) =>
-      view.rerender(
-        <DiscoverTestProvider services={services}>
-          <DiscoverGridFlyout {...newProps} />
-        </DiscoverTestProvider>
-      );
-
     await waitFor(() => {
       expect(screen.getByTestId('docViewerFlyout')).toBeInTheDocument();
     });
 
-    return { props, rerenderComponent, services, user };
+    return { props, services, user };
   };
 
   beforeEach(() => {
@@ -220,17 +212,18 @@ describe('Discover flyout', function () {
     expect(props.setExpandedDoc).toHaveBeenCalledWith(props.hits[props.hits.length - 2]);
   });
 
-  it('allows navigating with arrow keys through documents', async () => {
-    const { props, rerenderComponent, user } = await renderComponent({});
+  it('allows navigating to the next document with the right arrow key', async () => {
+    const { props, user } = await renderComponent({});
 
     screen.getByTestId('euiFlyoutBodyOverflow').focus();
     await user.keyboard('{ArrowRight}');
 
     expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::2::' }));
+  });
 
-    rerenderComponent({ ...props, hit: props.hits[1] });
-    await waitFor(() => {
-      expect(screen.getByTestId('docViewerFlyout')).toBeInTheDocument();
+  it('allows navigating to the previous document with the left arrow key', async () => {
+    const { props, user } = await renderComponent({
+      expandedHit: esHitsMock[1],
     });
 
     screen.getByTestId('euiFlyoutBodyOverflow').focus();
@@ -239,17 +232,18 @@ describe('Discover flyout', function () {
     expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::1::' }));
   });
 
-  it('should not navigate with keypresses when already at the border of documents', async () => {
-    const { props, rerenderComponent, user } = await renderComponent({});
+  it('does not navigate to the previous document with the left arrow key on the first document', async () => {
+    const { props, user } = await renderComponent({});
 
     screen.getByTestId('euiFlyoutBodyOverflow').focus();
     await user.keyboard('{ArrowLeft}');
 
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
+  });
 
-    rerenderComponent({ ...props, hit: props.hits[props.hits.length - 1] });
-    await waitFor(() => {
-      expect(screen.getByTestId('docViewerFlyout')).toBeInTheDocument();
+  it('does not navigate to the next document with the right arrow key on the last document', async () => {
+    const { props, user } = await renderComponent({
+      expandedHit: esHitsMock[esHitsMock.length - 1],
     });
 
     screen.getByTestId('euiFlyoutBodyOverflow').focus();
