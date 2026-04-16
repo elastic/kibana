@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiProvider } from '@elastic/eui';
+import { EuiProvider, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { monaco } from '@kbn/monaco';
@@ -15,7 +15,7 @@ import { monaco } from '@kbn/monaco';
 import { clearSuggestions, subscribeSuggestions } from './enriched_suggestion_store';
 import { SuggestContentWidget } from './suggest_content_widget';
 import { getFilteredItems } from './suggest_list_panel';
-import { SuggestWidgetComponent } from './suggest_widget_component';
+import { type SuggestWidgetHandle, SuggestWidgetRoot } from './suggest_widget_root';
 import type { EnrichedSuggestionItem, SuggestionsPayload } from './types';
 
 /**
@@ -31,9 +31,15 @@ export const useCustomSuggestWidget = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   isEditorMounted: boolean
 ): void => {
+  // Inherit color mode from the parent app's EUI context
+  const { colorMode } = useEuiTheme();
+  const colorModeRef = useRef(colorMode);
+  colorModeRef.current = colorMode;
+
   // Mutable state refs (not React state — we render imperatively via root.render)
   const widgetRef = useRef<SuggestContentWidget | null>(null);
   const rootRef = useRef<Root | null>(null);
+  const handleRef = useRef<SuggestWidgetHandle | null>(null);
   const ctxKeyRef = useRef<monaco.editor.IContextKey<boolean> | null>(null);
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
 
@@ -44,33 +50,16 @@ export const useCustomSuggestWidget = (
   const isVisibleRef = useRef(false);
   const isAcceptingRef = useRef(false);
 
-  // ── Render the React component into the widget DOM ──
+  // ── Update widget state via imperative handle (no root.render() per keystroke) ──
 
   const render = useCallback(() => {
-    const root = rootRef.current;
-    if (!root) return;
-
-    root.render(
-      React.createElement(
-        EuiProvider,
-        { colorMode: 'dark' },
-        React.createElement(SuggestWidgetComponent, {
-          items: itemsRef.current,
-          filterText: filterTextRef.current,
-          selectedIndex: selectedIndexRef.current,
-          isVisible: isVisibleRef.current,
-          onSelect: (index: number) => {
-            selectedIndexRef.current = index;
-            render();
-          },
-          onAccept: (index: number) => {
-            selectedIndexRef.current = index;
-            acceptSuggestion();
-          },
-        })
-      )
-    );
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- intentionally stable
+    handleRef.current?.update({
+      items: itemsRef.current,
+      filterText: filterTextRef.current,
+      selectedIndex: selectedIndexRef.current,
+      isVisible: isVisibleRef.current,
+    });
+  }, []);
 
   // ── Show / Hide ──
 
@@ -171,9 +160,32 @@ export const useCustomSuggestWidget = (
     const widget = new SuggestContentWidget(editor);
     widgetRef.current = widget;
 
-    // Create React root on the inner node
+    // Create React root on the inner node — render once with EuiProvider + SuggestWidgetRoot.
+    // Subsequent updates go through the imperative handle (no root.render per keystroke).
     const root = createRoot(widget.getInnerNode());
     rootRef.current = root;
+
+    const refCallback = (handle: SuggestWidgetHandle | null) => {
+      handleRef.current = handle;
+    };
+
+    root.render(
+      React.createElement(
+        EuiProvider,
+        { colorMode: colorModeRef.current === 'DARK' ? 'dark' : 'light' },
+        React.createElement(SuggestWidgetRoot, {
+          ref: refCallback,
+          onSelect: (index: number) => {
+            selectedIndexRef.current = index;
+            render();
+          },
+          onAccept: (index: number) => {
+            selectedIndexRef.current = index;
+            acceptSuggestion();
+          },
+        })
+      )
+    );
 
     // Create context key for conditional keybindings
     const ctxKey = editor.createContextKey('customSuggestWidgetVisible', false);
@@ -365,9 +377,6 @@ export const useCustomSuggestWidget = (
     const unsubscribe = subscribeSuggestions((payload) => {
       showWidget(payload);
     });
-
-    // Initial render (hidden)
-    render();
 
     // ── Cleanup ──
 
