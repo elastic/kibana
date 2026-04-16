@@ -15,9 +15,9 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
+import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server/internal';
 import { sortBy } from 'lodash';
-import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
+import { getVirtualVersionMap } from '@kbn/core-saved-objects-server/internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
   let esServer: TestElasticsearchUtils;

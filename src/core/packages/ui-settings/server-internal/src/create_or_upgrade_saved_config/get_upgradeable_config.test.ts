@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { getUpgradeableConfig } from './get_upgradeable_config';
 
 describe('getUpgradeableConfig', () => {

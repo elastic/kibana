@@ -14,7 +14,7 @@ import { mockPluginInitializerProvider, runtimeResolverMock } from './plugins_se
 import { type PluginName, type DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser/mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';

@@ -25,7 +25,7 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/test-eui-helpers",
-    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/core-execution-context-browser",
     "@kbn/i18n",
     "@kbn/utility-types",
     "@kbn/share-plugin",

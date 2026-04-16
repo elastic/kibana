@@ -7,7 +7,7 @@
 
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
 import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { unset } from 'lodash';
 import { ConnectorMappingsService } from '.';

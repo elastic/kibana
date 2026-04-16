@@ -16,7 +16,7 @@ import { stripVersionQualifier } from '@kbn/std';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
+import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server/internal';
 import type {
   ReadonlyModeType,
   ThemeName,

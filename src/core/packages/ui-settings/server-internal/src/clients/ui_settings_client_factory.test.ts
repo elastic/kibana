@@ -8,7 +8,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { UiSettingsClientFactory } from './ui_settings_client_factory';
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
 import { UiSettingsClient } from './ui_settings_client';

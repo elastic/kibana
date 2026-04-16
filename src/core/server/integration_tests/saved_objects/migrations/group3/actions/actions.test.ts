@@ -14,7 +14,7 @@ import type { TaskEither } from 'fp-ts/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { MIGRATION_CLIENT_OPTIONS } from '@kbn/core-saved-objects-server-internal';
+import { MIGRATION_CLIENT_OPTIONS } from '@kbn/core-saved-objects-server/internal';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   bulkOverwriteTransformedDocuments,
@@ -45,7 +45,7 @@ import {
   type DocumentsTransformSuccess,
   createBulkIndexOperationTuple,
   checkClusterRoutingAllocationEnabled,
-} from '@kbn/core-saved-objects-migration-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../../kibana_migrator_archive_utils';
 import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';

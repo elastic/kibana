@@ -51,7 +51,7 @@ export type {
   SavedObjectMigrationParams,
   SavedObjectsMigrationLogger,
   SavedObjectMigrationFn,
-} from './src/migration';
+} from './src/migration_types';
 export type { SavedObjectsRequestHandlerContext } from './src/request_handler_context';
 export type {
   SavedObjectsTypeManagementDefinition,
@@ -133,6 +133,8 @@ export {
   type BulkResolveError,
 } from './src/saved_objects_error_helpers';
 
+export { REMOVED_TYPES } from './src/service/constants';
+
 export type {
   ModelVersionIdentifier,
   SavedObjectsModelVersion,
@@ -169,3 +171,21 @@ export type {
   SavedObjectReference,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-api-server';
+
+// Utilities (previously @kbn/core-saved-objects-utils-server)
+export {
+  mergeSavedObjectMigrations,
+  mergeSavedObjectMigrationMaps,
+} from './src/utils/merge_migrations';
+export {
+  SavedObjectsUtils,
+  ALL_NAMESPACES_STRING,
+  DEFAULT_NAMESPACE_STRING,
+  FIND_DEFAULT_PAGE,
+  FIND_DEFAULT_PER_PAGE,
+} from './src/utils/saved_objects_utils';
+export {
+  setsAreEqual,
+  arrayMapsAreEqual,
+  setMapsAreEqual,
+} from './src/utils/saved_objects_test_utils';

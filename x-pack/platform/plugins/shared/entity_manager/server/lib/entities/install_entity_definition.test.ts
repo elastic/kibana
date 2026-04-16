@@ -8,7 +8,7 @@
 import semver from 'semver';
 import moment from 'moment';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';

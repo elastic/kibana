@@ -8,7 +8,7 @@
  */
 
 import supertest from 'supertest';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
@@ -17,7 +17,7 @@ import type {
   InternalContextSetup,
 } from '@kbn/core-http-context-server-internal';
 import type { DocLinksServicePreboot } from '@kbn/core-doc-links-server';
-import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server/internal';
 import type { IRouter } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { createInternalHttpService } from '../utilities';

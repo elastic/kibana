@@ -14,7 +14,7 @@ import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
 import type { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { schema } from '@kbn/config-schema';
 import type { IConfigServiceMock } from '@kbn/config-mocks';

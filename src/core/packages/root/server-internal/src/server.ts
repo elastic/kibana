@@ -21,7 +21,7 @@ import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
 import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import { EnvironmentService } from '@kbn/core-environment-server-internal';
-import { ExecutionContextService } from '@kbn/core-execution-context-server-internal';
+import { ExecutionContextService } from '@kbn/core-execution-context-server/internal';
 import { FeatureFlagsService } from '@kbn/core-feature-flags-server-internal';
 import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
@@ -30,7 +30,7 @@ import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
 import { MetricsService } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
+import { SavedObjectsService } from '@kbn/core-saved-objects-server/internal';
 import { I18nService } from '@kbn/core-i18n-server-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-server-internal';
 import { UserActivityService } from '@kbn/core-user-activity-server-internal';
@@ -39,7 +39,7 @@ import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
-import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
+import { DataStreamsService } from '@kbn/core-data-streams-server/internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,

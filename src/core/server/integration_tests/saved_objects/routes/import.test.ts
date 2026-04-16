@@ -11,19 +11,19 @@ jest.mock('uuid');
 
 import supertest from 'supertest';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
-import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObjectsImporter } from '@kbn/core-saved-objects-import-export-server-internal';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-server/internal';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-server/internal';
+import { SavedObjectsImporter } from '@kbn/core-saved-objects-server/internal';
 import {
   registerImportRoute,
   type InternalSavedObjectsRequestHandlerContext,
-} from '@kbn/core-saved-objects-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 
 // import type { ExecutionContextRunner } from './execution_context';
 import { getExecutionContextRunner } from './execution_context';

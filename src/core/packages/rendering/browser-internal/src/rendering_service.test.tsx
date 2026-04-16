@@ -75,7 +75,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser/mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';

@@ -22,7 +22,7 @@ import type { Logger } from '@kbn/logging';
 import type { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server/internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type {
   RequestHandlerContextBase,

@@ -66,7 +66,6 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/actions-plugin'
   - '@kbn/core-elasticsearch-server'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-saved-objects-server'
   - '@kbn/shared-ux-prompt-not-found'
   - '@kbn/logging'
@@ -76,7 +75,6 @@ dependsOn:
   - '@kbn/observability-shared-plugin'
   - '@kbn/core-http-server'
   - '@kbn/std'
-  - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/observability-ai-assistant-plugin'
   - '@kbn/unified-doc-viewer-plugin'
@@ -130,7 +128,6 @@ dependsOn:
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/agent-builder-plugin'
   - '@kbn/scout-oblt'
-  - '@kbn/core-saved-objects-utils-server'
 tags:
   - plugin
   - prod

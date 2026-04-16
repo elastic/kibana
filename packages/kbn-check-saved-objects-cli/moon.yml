@@ -19,10 +19,8 @@ project:
 dependsOn:
   - '@kbn/some-dev-log'
   - '@kbn/dev-cli-errors'
-  - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-plugins-server-internal'
-  - '@kbn/core-saved-objects-migration-server-internal'
   - '@kbn/dev-cli-runner'
   - '@kbn/test'
   - '@kbn/core-elasticsearch-client-server-mocks'
@@ -31,7 +29,6 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/utils'
   - '@kbn/dev-utils'
-  - '@kbn/core-saved-objects-server-internal'
   - '@kbn/core-root-server-internal'
   - '@kbn/core-test-helpers-so-type-serializer'
   - '@kbn/core-saved-objects-api-server'

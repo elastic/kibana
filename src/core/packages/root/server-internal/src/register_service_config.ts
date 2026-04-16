@@ -14,7 +14,7 @@ import { config as loggingConfig } from '@kbn/core-logging-server-internal';
 import { coreDeprecationProvider } from '@kbn/core-config-server-internal';
 import { nodeConfig } from '@kbn/core-node-server-internal';
 import { pidConfig } from '@kbn/core-environment-server-internal';
-import { executionContextConfig } from '@kbn/core-execution-context-server-internal';
+import { executionContextConfig } from '@kbn/core-execution-context-server/internal';
 import {
   config as httpConfig,
   cspConfig,
@@ -27,7 +27,7 @@ import { opsConfig } from '@kbn/core-metrics-server-internal';
 import {
   savedObjectsConfig,
   savedObjectsMigrationConfig,
-} from '@kbn/core-saved-objects-base-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 import { config as i18nConfig } from '@kbn/core-i18n-server-internal';
 import { config as deprecationConfig } from '@kbn/core-deprecations-server-internal';
 import { config as userActivityConfig } from '@kbn/core-user-activity-server-internal';
@@ -36,7 +36,7 @@ import { uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
 import { config as pluginsConfig } from '@kbn/core-plugins-server-internal';
 import { featureFlagsConfig } from '@kbn/core-feature-flags-server-internal';
 import { pricingConfig } from '@kbn/core-pricing-server-internal';
-import { config as dataStreamsConfig } from '@kbn/core-data-streams-server-internal';
+import { config as dataStreamsConfig } from '@kbn/core-data-streams-server/internal';
 import { elasticApmConfig } from './root/elastic_config';
 import { serverlessConfig } from './root/serverless_config';
 import { airgappedConfig } from './root/airgapped_config';

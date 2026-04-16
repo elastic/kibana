@@ -11,7 +11,7 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { pluginServiceMock } from '@kbn/core-plugins-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
@@ -52,7 +52,7 @@ jest.doMock('@kbn/config', () => {
 });
 
 export const mockSavedObjectsService = savedObjectsServiceMock.create();
-jest.doMock('@kbn/core-saved-objects-server-internal', () => ({
+jest.doMock('@kbn/core-saved-objects-server/internal', () => ({
   SavedObjectsService: jest.fn(() => mockSavedObjectsService),
 }));
 

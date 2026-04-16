@@ -18,6 +18,11 @@ project:
   sourceRoot: src/core/packages/execution-context/server
 dependsOn:
   - '@kbn/core-execution-context-common'
+  - '@kbn/config-schema'
+  - '@kbn/logging'
+  - '@kbn/core-base-server-internal'
+  - '@kbn/core-base-server-mocks'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - shared-server
   - package

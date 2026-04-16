@@ -14,7 +14,7 @@ import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
+} from '@kbn/core-saved-objects-server/mocks';
 import { auditLoggerMock } from '@kbn/core-security-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';

@@ -9,7 +9,7 @@ import { RecoveredActionGroup } from '../../../common';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { extractReferences } from './extract_references';
 import type { RulesClientContext } from '..';
-import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-server/mocks';
 
 const loggerErrorMock = jest.fn();
 const getBulkMock = jest.fn();

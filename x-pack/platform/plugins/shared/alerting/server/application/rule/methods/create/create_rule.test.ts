@@ -42,8 +42,8 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+jest.mock('@kbn/core-saved-objects-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server');
   return {
     ...actual,
     SavedObjectsUtils: {

@@ -6,7 +6,7 @@
  */
 
 import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UserActionFinder } from './find';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';

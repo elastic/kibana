@@ -8,7 +8,7 @@
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { ReferenceDataClientInterface, ReferenceDataSavedObject } from './types';

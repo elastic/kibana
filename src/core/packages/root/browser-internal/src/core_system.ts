@@ -20,7 +20,7 @@ import { ThemeService } from '@kbn/core-theme-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
-import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
+import { ExecutionContextService } from '@kbn/core-execution-context-browser/internal';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { FeatureFlagsService } from '@kbn/core-feature-flags-browser-internal';

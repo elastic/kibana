@@ -10,7 +10,7 @@ import { EndpointAgentStatusClient } from './endpoint/endpoint_agent_status_clie
 import { SentinelOneAgentStatusClient } from './sentinel_one/sentinel_one_agent_status_client';
 import { CrowdstrikeAgentStatusClient } from './crowdstrike/crowdstrike_agent_status_client';
 import { UnsupportedAgentTypeError } from './errors';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { CrowdstrikeMock } from '../../actions/clients/crowdstrike/mocks';
 import { responseActionsClientMock } from '../../actions/clients/mocks';
 import type { AgentStatusClientOptions } from './lib/base_agent_status_client';

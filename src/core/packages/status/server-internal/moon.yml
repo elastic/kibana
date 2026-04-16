@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/core-analytics-server'
   - '@kbn/core-environment-server-internal'
   - '@kbn/core-elasticsearch-server-internal'
-  - '@kbn/core-saved-objects-server-internal'
   - '@kbn/core-status-server'
   - '@kbn/core-status-common'
   - '@kbn/core-usage-data-base-server-internal'
@@ -47,6 +46,7 @@ dependsOn:
   - '@kbn/core-analytics-server-mocks'
   - '@kbn/core-logging-server-internal'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-saved-objects-server'
 tags:
   - shared-server
   - package

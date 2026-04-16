@@ -13,7 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsTypeManagementDefinition } from './saved_objects_management';
 import type { SavedObjectsValidationMap } from './validation';
-import type { SavedObjectMigrationMap } from './migration';
+import type { SavedObjectMigrationMap } from './migration_types';
 import type { SavedObjectsTypeMappingDefinition } from './mapping_definition';
 import type {
   SavedObjectsModelVersionMap,

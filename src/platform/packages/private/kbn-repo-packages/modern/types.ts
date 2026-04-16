@@ -109,6 +109,11 @@ export interface PackageManifestBaseFields {
    * Specifies the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
    */
   visibility?: ModuleVisibility;
+  /**
+   * When true, the type_check pipeline will run a noCheck pre-pass to emit .d.ts
+   * for this package before the main composite build.
+   */
+  bundledTypes?: boolean;
 }
 
 export interface PluginPackageManifest extends PackageManifestBaseFields {

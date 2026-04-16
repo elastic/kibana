@@ -8,8 +8,8 @@
 import type { EcsEvent, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-server/mocks';
 import type {
   AuditEvent,
   AuditLogger,

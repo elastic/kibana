@@ -16,7 +16,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { KibanaTheme } from '@kbn/react-kibana-context-common';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser/mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';

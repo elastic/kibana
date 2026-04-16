@@ -21,7 +21,7 @@ import { addSpanLabels, addTransactionLabels } from '@kbn/apm-utils';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server/internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-internal';

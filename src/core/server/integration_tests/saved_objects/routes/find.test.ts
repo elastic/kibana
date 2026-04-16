@@ -10,7 +10,7 @@
 import supertest from 'supertest';
 import querystring from 'querystring';
 
-import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
   coreUsageStatsClientMock,
@@ -22,7 +22,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   registerFindRoute,
   type InternalSavedObjectsRequestHandlerContext,
-} from '@kbn/core-saved-objects-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 import { deprecationMock, setupConfig } from './routes_test_utils';
 
 const testTypes = [

@@ -14,14 +14,14 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import type { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
-import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import type { savedObjectsExporterMock } from '@kbn/core-saved-objects-server/mocks';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-server/internal';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
 import {
   registerExportRoute,
   type InternalSavedObjectsRequestHandlerContext,
-} from '@kbn/core-saved-objects-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 
 const allowedTypes = ['index-pattern', 'search'];
 const config = {

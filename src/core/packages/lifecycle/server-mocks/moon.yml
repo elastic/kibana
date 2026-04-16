@@ -24,7 +24,7 @@ dependsOn:
   - '@kbn/core-deprecations-server-mocks'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-environment-server-mocks'
-  - '@kbn/core-execution-context-server-mocks'
+  - '@kbn/core-execution-context-server'
   - '@kbn/core-http-context-server-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-resources-server-mocks'
@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/core-metrics-server-mocks'
   - '@kbn/core-preboot-server-mocks'
   - '@kbn/core-rendering-server-mocks'
-  - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/core-status-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/core-usage-data-server-mocks'
@@ -46,9 +45,10 @@ dependsOn:
   - '@kbn/core-feature-flags-server-mocks'
   - '@kbn/core-pricing-server-mocks'
   - '@kbn/core-di-mocks'
-  - '@kbn/core-data-streams-server-mocks'
+  - '@kbn/core-data-streams-server'
   - '@kbn/lazy-object'
   - '@kbn/core-user-activity-server-mocks'
+  - '@kbn/core-saved-objects-server'
 tags:
   - shared-server
   - package

@@ -23,7 +23,7 @@
     "@kbn/config",
     "@kbn/core-base-server-internal",
     "@kbn/core-http-context-server-mocks",
-    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-execution-context-server",
     "@kbn/lazy-object",
     "@kbn/core-doc-links-server-mocks",
     "@kbn/core-user-activity-server-mocks",

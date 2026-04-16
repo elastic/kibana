@@ -6,7 +6,7 @@
  */
 
 import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 
 import type { Settings } from '../../types';
 import { appContextService } from '../app_context';

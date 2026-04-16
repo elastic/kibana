@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-client-server-mocks'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/datemath'
   - '@kbn/server-route-repository'

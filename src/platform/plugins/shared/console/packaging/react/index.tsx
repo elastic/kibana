@@ -8,7 +8,7 @@
  */
 
 // This is a packaged standalone version of console that needs to import browser code
-/* eslint-disable @kbn/imports/no_boundary_crossing */
+/* eslint-disable @kbn/imports/no_boundary_crossing, @kbn/imports/no_core_internal_imports */
 
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { noop } from 'lodash';
@@ -37,7 +37,7 @@ import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 
 import { HttpService } from '@kbn/core-http-browser-internal';
-import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
+import { ExecutionContextService } from '@kbn/core-execution-context-browser/internal';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';

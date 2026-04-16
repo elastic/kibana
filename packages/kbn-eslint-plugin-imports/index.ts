@@ -17,6 +17,7 @@ import { NoGroupCrossingImportsRule } from './src/rules/no_group_crossing_import
 import { NoGroupCrossingManifestsRule } from './src/rules/no_group_crossing_manifests';
 import { RequireImportRule } from './src/rules/require_import';
 import { NoDirectHandlebarsImportRule } from './src/rules/no_direct_handlebars_import';
+import { NoCoreInternalImportsRule } from './src/rules/no_core_internal_imports';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-imports'` to your eslint config to use them
@@ -32,4 +33,5 @@ export const rules = {
   no_group_crossing_manifests: NoGroupCrossingManifestsRule,
   require_import: RequireImportRule,
   no_direct_handlebars_import: NoDirectHandlebarsImportRule,
+  no_core_internal_imports: NoCoreInternalImportsRule,
 };

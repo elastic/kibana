@@ -22,7 +22,7 @@
     "@kbn/core-base-browser-mocks",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-doc-links-browser-mocks",
-    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/core-execution-context-browser",
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-injected-metadata-browser-mocks",
     "@kbn/core-theme-browser-mocks",

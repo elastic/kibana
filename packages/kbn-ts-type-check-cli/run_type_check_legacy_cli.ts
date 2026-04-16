@@ -14,11 +14,16 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit } from '@kbn/std';
+import { readTsConfig } from '@kbn/ts-projects';
 
 import {
+  bootstrapBundledTypes,
+  bootstrapCircularConsumers,
   cleanTypeCheckCaches,
   createTypeCheckConfigs,
   detectLocalChanges,
+  getBundledTypesProjectsNeedingBootstrap,
+  getCircularConsumersNeedingBootstrap,
   TSC_LABEL,
 } from './execute_type_check_validation';
 import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
@@ -59,7 +64,32 @@ export const runLegacyTypeCheckCli = () => {
           !project.isTypeCheckDisabled() && (!projectFilter || project.path === projectFilter)
       );
 
-      const createdConfigs = await createTypeCheckConfigs(log, projects, TS_PROJECTS);
+      // Resolve root paths once for all consumers of bundledTypes packages
+      const rootTsconfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
+      const rootTsconfig = readTsConfig(rootTsconfigPath);
+      const rootPaths = (rootTsconfig.compilerOptions?.paths as Record<string, string[]>) ?? {};
+
+      // Bootstrap bundledTypes packages if their bundled .d.ts doesn't exist yet
+      const needBootstrap = getBundledTypesProjectsNeedingBootstrap(TS_PROJECTS);
+      if (needBootstrap.length > 0) {
+        await bootstrapBundledTypes(log, procRunner, needBootstrap);
+      }
+
+      // Bootstrap circular consumers: projects that both consume bundledTypes and are
+      // referenced by bundledTypes packages. Their .d.ts must exist before the main build.
+      const circularConsumers = getCircularConsumersNeedingBootstrap(TS_PROJECTS);
+      if (circularConsumers.length > 0) {
+        await bootstrapCircularConsumers(
+          log,
+          procRunner,
+          circularConsumers,
+          TS_PROJECTS,
+          true,
+          rootPaths
+        );
+      }
+
+      const createdConfigs = await createTypeCheckConfigs(log, projects, TS_PROJECTS, rootPaths);
       let tscFailed = false;
       try {
         log.info(

@@ -33,7 +33,7 @@ dependsOn:
   - '@kbn/analytics'
   - '@kbn/i18n-react'
   - '@kbn/core-doc-links-browser-mocks'
-  - '@kbn/core-execution-context-browser-mocks'
+  - '@kbn/core-execution-context-browser'
   - '@kbn/config-schema'
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-router-server-mocks'

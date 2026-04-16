@@ -20,7 +20,7 @@ import type {
   ICollectorSet,
 } from '@kbn/usage-collection-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Milestone } from '../../../../common/trial_companion/types';

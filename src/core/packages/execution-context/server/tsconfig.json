@@ -11,7 +11,12 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/core-execution-context-common"
+    "@kbn/core-execution-context-common",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-logging-server-mocks"
   ],
   "exclude": [
     "target/**/*",

@@ -12,10 +12,10 @@ import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
@@ -25,7 +25,7 @@ import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
-import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
 export function createInternalCoreStartMock() {

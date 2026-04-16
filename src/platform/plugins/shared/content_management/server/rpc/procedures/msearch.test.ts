@@ -8,7 +8,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 
 import type { MSearchIn, MSearchQuery } from '../../../common';
 import { validate, disableTransformsCache } from '../../utils';

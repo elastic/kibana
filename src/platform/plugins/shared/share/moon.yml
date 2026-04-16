@@ -24,7 +24,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/config-schema'
   - '@kbn/core-custom-branding-browser'
-  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/core-saved-objects-server'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/core-analytics-browser'
   - '@kbn/shared-ux-error-boundary'

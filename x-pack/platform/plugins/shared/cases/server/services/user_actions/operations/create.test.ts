@@ -8,7 +8,7 @@
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { unset } from 'lodash';

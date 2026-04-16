@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';

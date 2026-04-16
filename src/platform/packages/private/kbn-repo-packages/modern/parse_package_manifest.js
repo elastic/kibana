@@ -231,6 +231,7 @@ function validatePackageManifest(parsed, repoRoot, path) {
     build,
     description,
     serviceFolders,
+    bundledTypes,
     ...extra
   } = /** @type {import('./types').PackageManifestBaseFields} */ (/** @type {unknown} */ (parsed));
 
@@ -286,6 +287,10 @@ function validatePackageManifest(parsed, repoRoot, path) {
     throw err(`devOnly`, devOnly, `must be a boolean when defined`);
   }
 
+  if (bundledTypes !== undefined && typeof bundledTypes !== 'boolean') {
+    throw err(`bundledTypes`, bundledTypes, `must be a boolean when defined`);
+  }
+
   if (description !== undefined && !isSomeString(description)) {
     throw err(`description`, description, `must be a non-empty string when specified`);
   }
@@ -300,6 +305,7 @@ function validatePackageManifest(parsed, repoRoot, path) {
     group,
     visibility,
     devOnly,
+    bundledTypes,
     build: validatePackageManifestBuild(build),
     description,
     serviceFolders,

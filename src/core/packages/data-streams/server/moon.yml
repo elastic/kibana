@@ -19,6 +19,12 @@ project:
 dependsOn:
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
+  - '@kbn/logging'
+  - '@kbn/core-base-server-internal'
+  - '@kbn/core-elasticsearch-server-internal'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/config-schema'
+  - '@kbn/lazy-object'
 tags:
   - shared-server
   - package

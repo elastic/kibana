@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { MonitorConfigRepository } from './monitor_config_repository';
 import type { SyntheticsMonitor } from '../../common/runtime_types';
 import { ConfigKey } from '../../common/runtime_types';

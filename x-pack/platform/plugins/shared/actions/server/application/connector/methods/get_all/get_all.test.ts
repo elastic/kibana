@@ -13,7 +13,7 @@ import { getOAuthClientCredentialsAccessToken } from '../../../../lib/get_oauth_
 import {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
+} from '@kbn/core-saved-objects-server/mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
@@ -31,8 +31,8 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+jest.mock('@kbn/core-saved-objects-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-server');
   return {
     ...actual,
     SavedObjectsUtils: {

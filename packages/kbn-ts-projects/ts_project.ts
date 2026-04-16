@@ -248,6 +248,13 @@ export class TsProject {
   }
 
   /**
+   * Returns true if this project has opted into bundled .d.ts generation via noCheck pre-pass during type_check
+   */
+  public hasBundledTypes() {
+    return this.pkg?.manifest.bundledTypes === true;
+  }
+
+  /**
    * Resolve a path relative to the directory containing this tsconfig.json file
    */
   public resolve(projectRel: string) {
@@ -355,6 +362,43 @@ export class TsProject {
           project.path,
           {},
           `kbn_references: ${JSON.stringify(ref)}`
+        ) ?? []
+      );
+    });
+  }
+
+  /**
+   * Get the typecheck-only refs for this project. These are dependencies that
+   * should be resolved via paths (not project references) during type-checking
+   * and are NOT included in Moon's project graph (avoiding cycles).
+   */
+  public getTypeCheckOnlyRefs(tsProjects: TsProject[]): TsProject[] {
+    const refs = this.config.typecheck_only_references;
+    if (!refs) {
+      return [];
+    }
+
+    if (!Array.isArray(refs) || !refs.every((r) => typeof r === 'string')) {
+      throw new Error(
+        `invalid typecheck_only_references in ${this.name}: expected an array of strings`
+      );
+    }
+
+    const importMap = this.getImportMap(tsProjects);
+    return refs.flatMap((ref: string) => {
+      const project = importMap.get(ref);
+      if (!project) {
+        throw new Error(
+          `invalid typecheck_only_references in ${this.name}: ${ref} does not point to another TS project`
+        );
+      }
+
+      return (
+        TsProject.createFromCache(
+          this.cache,
+          project.path,
+          {},
+          `typecheck_only_references: ${JSON.stringify(ref)}`
         ) ?? []
       );
     });

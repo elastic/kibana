@@ -17,11 +17,11 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/plugins/shared/content_management
 dependsOn:
+  - '@kbn/core-saved-objects-server'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/object-versioning'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/saved-objects-settings'
   - '@kbn/core-http-server'

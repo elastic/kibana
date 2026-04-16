@@ -13,7 +13,7 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
@@ -22,7 +22,7 @@ import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server/mocks';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
@@ -33,7 +33,7 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
-import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
 export function createInternalCoreSetupMock() {

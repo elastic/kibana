@@ -11,7 +11,6 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type {
   AuthorizeBulkGetObject,
@@ -20,6 +19,7 @@ import type {
   AuthorizeUpdateObject,
   BulkResolveError,
 } from '@kbn/core-saved-objects-server';
+import { typeRegistryMock } from '@kbn/core-saved-objects-server/mocks';
 import type {
   CheckPrivilegesResponse,
   CheckSavedObjectsPrivileges,

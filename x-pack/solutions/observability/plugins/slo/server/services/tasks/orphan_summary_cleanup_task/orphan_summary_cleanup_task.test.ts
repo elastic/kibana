@@ -10,7 +10,7 @@ import {
   elasticsearchClientMock,
   type ElasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';

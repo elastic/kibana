@@ -29,13 +29,13 @@
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/core-saved-objects-server-mocks",
     "@kbn/logging",
     "@kbn/core-http-common",
     "@kbn/core-lifecycle-server-internal",
     "@kbn/cbor",
     "@kbn/lazy-object",
     "@kbn/core-http-server",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": [
     "target/**/*",

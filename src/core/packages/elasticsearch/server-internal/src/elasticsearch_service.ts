@@ -16,7 +16,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type {
   InternalExecutionContextSetup,
   IExecutionContext,
-} from '@kbn/core-execution-context-server-internal';
+} from '@kbn/core-execution-context-server/internal';
 import type { IAuthHeadersStorage } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';

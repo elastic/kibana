@@ -33,7 +33,6 @@
     "@kbn/core-rendering-browser",
     "@kbn/core-user-profile-browser",
     "@kbn/core-user-profile-browser-mocks",
-    "@kbn/core-execution-context-browser-mocks",
     "@kbn/core-execution-context-browser",
     "@kbn/react-kibana-context-render",
     "@kbn/core-feature-flags-browser",

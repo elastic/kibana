@@ -18,7 +18,7 @@ import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-te
 import {
   registerBulkUpdateRoute,
   type InternalSavedObjectsRequestHandlerContext,
-} from '@kbn/core-saved-objects-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 import { loggerMock } from '@kbn/logging-mocks';
 import { deprecationMock, setupConfig } from '../routes_test_utils';
 

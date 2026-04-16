@@ -15,7 +15,7 @@ import { RuleTypeRunner } from './rule_type_runner';
 import { TaskRunnerTimer } from './task_runner_timer';
 import { DEFAULT_FLAPPING_SETTINGS, RecoveredActionGroup } from '../types';
 import type { TaskRunnerContext } from './types';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { referenceDataMocks } from './mocks';
 import { ReferenceDataClient } from './reference_data_client';

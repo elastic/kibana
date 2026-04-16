@@ -12,8 +12,8 @@ import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { createCoreContext } from '@kbn/core-http-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-server/mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server/mocks';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
@@ -23,7 +23,7 @@ import {
 import {
   registerGetRoute,
   type InternalSavedObjectsRequestHandlerContext,
-} from '@kbn/core-saved-objects-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { contextServiceMock, coreMock } from '../../../../mocks';

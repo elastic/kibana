@@ -16,7 +16,7 @@ import {
 import {
   CoreSavedObjectsRouteHandlerContext,
   type InternalSavedObjectsServiceStart,
-} from '@kbn/core-saved-objects-server-internal';
+} from '@kbn/core-saved-objects-server/internal';
 import {
   CoreDeprecationsRouteHandlerContext,
   type InternalDeprecationsServiceStart,

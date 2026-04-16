@@ -109,7 +109,6 @@
     "@kbn/event-log-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/core-saved-objects-utils-server",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/apm-utils",
@@ -131,7 +130,6 @@
     "@kbn/repo-info",
     "@kbn/storybook",
     "@kbn/core-saved-objects-common",
-    "@kbn/core-saved-objects-import-export-server-mocks",
     "@kbn/user-profile-components",
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
@@ -193,7 +191,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
     "@kbn/field-utils",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-analytics-browser",
     "@kbn/automatic-import-plugin",
     "@kbn/config",
@@ -211,7 +208,6 @@
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
     "@kbn/inference-plugin",
-    "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-security-server-mocks",
     "@kbn/serverless",
     "@kbn/data-stream-adapter",
@@ -292,6 +288,6 @@
     "@kbn/search-inference-endpoints",
     "@kbn/evals-plugin",
     "@kbn/shared-ux-column-presets",
-    "@kbn/core-overlays-browser",
+    "@kbn/core-overlays-browser"
   ]
 }
