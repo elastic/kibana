@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef } from 'react';
 
 import { fuzzyMatch, getLabelHighlightIndices, highlightSegments } from './fuzzy_match';
 import { getSuggestWidgetStyles } from './suggest_widget_styles';
-import type { EnrichedSuggestionItem, SuggestionCategory } from './types';
+import type { EnrichedSuggestionItem } from './types';
+import { getStepIconType } from '../../../../shared/ui/step_icons/get_step_icon_type';
 
 export interface FilteredItem {
   item: EnrichedSuggestionItem;
@@ -21,27 +22,21 @@ export interface FilteredItem {
   score: number;
 }
 
-const getIconForCategory = (category: SuggestionCategory): string => {
-  switch (category) {
-    case 'connector':
-      return '>_';
-    case 'step':
-      return 'fn';
-    case 'param':
-      return 'P';
-    case 'variable':
-      return '$';
-    case 'filter':
-      return 'f';
-    case 'keyword':
-      return 'K';
-    case 'trigger':
-      return 'T';
-    case 'value':
-      return 'V';
-    default:
-      return '?';
+/** Get the descriptive kind label to show next to each item. */
+const getKindLabel = (item: EnrichedSuggestionItem): string => {
+  // For step/connector type suggestions, the description is more useful than the category
+  if (item.category === 'connector' || item.category === 'step') {
+    if (item.description?.startsWith('Built-in')) return 'step';
+    if (item.label.startsWith('elasticsearch.')) return 'Elasticsearch';
+    if (item.label.startsWith('kibana.')) return 'Kibana';
+    return 'connector';
   }
+  if (item.category === 'variable') return 'variable';
+  if (item.category === 'filter') return 'filter';
+  if (item.category === 'keyword') return 'keyword';
+  if (item.category === 'trigger') return 'trigger';
+  if (item.category === 'param') return 'property';
+  return item.category;
 };
 
 export const getFilteredItems = (
@@ -124,7 +119,12 @@ export const SuggestListPanel: React.FC<SuggestListPanelProps> = ({
               onMouseEnter={() => onSelect(i)}
             >
               <span css={[styles.itemIcon, isSelected && styles.itemIconSelected]}>
-                {getIconForCategory(item.category)}
+                <EuiIcon
+                  type={getStepIconType(item.filterText ?? item.label)}
+                  size="s"
+                  color={isSelected ? 'inherit' : 'subdued'}
+                  aria-hidden={true}
+                />
               </span>
               <span css={styles.itemLabel}>
                 {segments.map((seg, si) =>
@@ -141,7 +141,7 @@ export const SuggestListPanel: React.FC<SuggestListPanelProps> = ({
                 )}
               </span>
               <span css={[styles.itemKind, isSelected && styles.itemKindSelected]}>
-                {item.category}
+                {getKindLabel(item)}
               </span>
             </div>
           );

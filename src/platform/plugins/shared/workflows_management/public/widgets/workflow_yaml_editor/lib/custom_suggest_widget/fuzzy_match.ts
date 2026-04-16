@@ -143,77 +143,29 @@ export const fuzzyMatch = (pattern: string, text: string): FuzzyMatchResult => {
     searchFrom = idx + 1;
   }
   if (bestSubIdx >= 0) {
-    // Verify first match is strong (Monaco rejects weak first matches by default)
-    if (bestSubIdx === 0 || isStrongPosition(text, bestSubIdx)) {
-      return {
-        matches: true,
-        indices: Array.from({ length: pLen }, (_, i) => bestSubIdx + i),
-        score: bestSubScore,
-      };
-    }
+    return {
+      matches: true,
+      indices: Array.from({ length: pLen }, (_, i) => bestSubIdx + i),
+      score: bestSubScore,
+    };
   }
 
-  // ── Subsequence check ──
-  // Verify pattern chars exist in order in text
-  let pi = 0;
-  for (let ti = 0; ti < tLen && pi < pLen; ti++) {
-    if (tLow[ti] === pLow[pi]) pi++;
-  }
-  if (pi < pLen) {
-    return { matches: false, indices: [], score: -1 };
-  }
-
-  // ── DP scoring (simplified Monaco algorithm) ──
-  // Match pattern characters against text, preferring strong positions and contiguous runs
-
-  // Find best match positions greedily, preferring strong positions.
-  // First match must be at a strong position (Monaco's firstMatchCanBeWeak: false).
+  // ── Subsequence matching ──
+  // The completion provider already pre-filters items (via typePrefix.includes()),
+  // so we accept any subsequence match here. Items matching at strong positions
+  // score higher and sort to the top; weak matches sort to the bottom.
   const indices: number[] = [];
-  pi = 0;
+  let pi = 0;
 
-  // First pass: try to match each pattern char, requiring the first to be strong
   for (let ti = 0; ti < tLen && pi < pLen; ti++) {
     if (tLow[ti] === pLow[pi]) {
-      // First match must be at a strong position — skip weak first positions
-      const shouldMatch = pi > 0 || isStrongPosition(text, ti);
-      if (shouldMatch) {
-        indices.push(ti);
-        pi++;
-      }
+      indices.push(ti);
+      pi++;
     }
   }
 
-  // If greedy matching didn't find all chars, try a second pass
-  // that only enforces strong-first but accepts any subsequent position
   if (indices.length < pLen) {
-    indices.length = 0;
-    pi = 0;
-
-    // Verify a strong first position exists at all
-    const hasStrongFirst = Array.from({ length: tLen }, (_, i) => i).some(
-      (i) => tLow[i] === pLow[0] && isStrongPosition(text, i)
-    );
-    if (!hasStrongFirst) {
-      return { matches: false, indices: [], score: -1 };
-    }
-
-    // Match: strong first, any subsequent
-    let firstMatched = false;
-    for (let ti = 0; ti < tLen && pi < pLen; ti++) {
-      if (tLow[ti] === pLow[pi]) {
-        if (!firstMatched && !isStrongPosition(text, ti)) {
-          // Skip — waiting for a strong first position
-        } else {
-          indices.push(ti);
-          pi++;
-          firstMatched = true;
-        }
-      }
-    }
-
-    if (indices.length < pLen) {
-      return { matches: false, indices: [], score: -1 };
-    }
+    return { matches: false, indices: [], score: -1 };
   }
 
   return { matches: true, indices, score: scoreMatchPositions(indices, pattern, text, pLen) };

@@ -82,8 +82,10 @@ export const useCustomSuggestWidget = (
     clearSuggestions();
     render();
 
-    // Clear aria active descendant
-    editorRef.current?.setAriaOptions?.({ activeDescendant: undefined } as never);
+    // Clear aria active descendant (setAriaOptions is available on internal editor API)
+    (
+      editorRef.current as { setAriaOptions?: (opts: Record<string, unknown>) => void }
+    )?.setAriaOptions?.({ activeDescendant: undefined });
   }, [render]);
 
   // ── Show ──
