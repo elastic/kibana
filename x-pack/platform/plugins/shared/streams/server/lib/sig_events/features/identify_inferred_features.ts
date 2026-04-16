@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -16,18 +14,11 @@ import {
   type Feature,
   type BaseFeature,
   type IterationResult,
-  type Streams,
   isComputedFeature,
   isFeatureWithFilter,
-  isDuplicateFeature,
-  hasSameFingerprint,
-  mergeFeature,
-  toBaseFeature,
 } from '@kbn/streams-schema';
 import {
   identifyFeatures,
-  generateAllComputedFeatures,
-  sumTokens,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
 } from '@kbn/streams-ai';
@@ -36,42 +27,14 @@ import { fetchSampleDocuments } from '../../tasks/task_definitions/features_iden
 import { PromptsConfigService } from '../saved_objects/prompts_config_service';
 import type { SigEventsTuningConfig } from '../../../../common/sig_events_tuning_config';
 import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../../../../common/sig_events_tuning_config';
+import { EMPTY_TOKENS, type AccumulatedIterationState } from './iteration_state';
+import {
+  reconcileInferredFeatures,
+  toFeatureSummary,
+  toFeatureProjection,
+} from './reconcile_features';
 
-export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
-
-export const EMPTY_TOKENS: ChatCompletionTokenCount = {
-  prompt: 0,
-  completion: 0,
-  total: 0,
-  cached: 0,
-};
-
-// ---------------------------------------------------------------------------
-// Shared helpers
-// ---------------------------------------------------------------------------
-
-const toFeatureSummary = ({ id, title }: Feature) => ({ id, title: title ?? id });
-
-const toFeatureProjection = ({ id, type, subtype, title, description, properties }: Feature) => ({
-  id,
-  type,
-  subtype,
-  title,
-  description,
-  properties,
-});
-
-function createFeatureMetadata(
-  featureTtlDays: number = DEFAULT_SIG_EVENTS_TUNING_CONFIG.feature_ttl_days
-) {
-  const now = Date.now();
-  return {
-    status: 'active' as const,
-    last_seen: new Date(now).toISOString(),
-    expires_at: new Date(now + featureTtlDays * MS_PER_DAY).toISOString(),
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Tuning params type (subset of SigEventsTuningConfig)
@@ -90,30 +53,6 @@ type IterationTuningParams = Partial<
 > & {
   maxPreviouslyIdentifiedFeatures?: number;
 };
-
-// ---------------------------------------------------------------------------
-// Accumulated iteration state
-// ---------------------------------------------------------------------------
-
-export interface AccumulatedIterationState {
-  discoveredFeatures: Feature[];
-  iterationResults: IterationResult[];
-}
-
-export function createEmptyAccumulatedState(): AccumulatedIterationState {
-  return {
-    discoveredFeatures: [],
-    iterationResults: [],
-  };
-}
-
-export function deriveSuccessCount(results: IterationResult[]): number {
-  return results.filter((r) => r.state === 'success').length;
-}
-
-export function deriveTotalTokensUsed(results: IterationResult[]): ChatCompletionTokenCount {
-  return results.reduce((acc, r) => sumTokens(acc, r.tokensUsed), { ...EMPTY_TOKENS });
-}
 
 // ---------------------------------------------------------------------------
 // Telemetry
@@ -196,111 +135,6 @@ function buildTelemetry(
     llm_ignored_count: outcome.llmIgnoredCount,
     code_ignored_count: outcome.codeIgnoredCount,
   };
-}
-
-// ---------------------------------------------------------------------------
-// Computed features reconciliation
-// ---------------------------------------------------------------------------
-
-function reconcileComputedFeatures({
-  computedFeatures,
-  streamName,
-  featureTtlDays,
-}: {
-  computedFeatures: BaseFeature[];
-  streamName: string;
-  featureTtlDays?: number;
-}): Feature[] {
-  const metadata = createFeatureMetadata(featureTtlDays);
-  return computedFeatures.map((feature) => ({
-    ...feature,
-    ...metadata,
-    uuid: uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS),
-  }));
-}
-
-// ---------------------------------------------------------------------------
-// Inferred features reconciliation
-// ---------------------------------------------------------------------------
-
-function reconcileInferredFeatures({
-  rawFeatures,
-  allKnownFeatures,
-  discoveredSet,
-  storedSet,
-  ignoredFeatures,
-  excludedFeatures,
-  featureTtlDays,
-  logger: log,
-}: {
-  rawFeatures: BaseFeature[];
-  allKnownFeatures: Feature[];
-  discoveredSet: ReadonlySet<string>;
-  storedSet: ReadonlySet<string>;
-  ignoredFeatures: IgnoredFeature[];
-  excludedFeatures: ReadonlyArray<Feature>;
-  featureTtlDays?: number;
-  logger: { debug: (msg: string | (() => string)) => void };
-}): { newFeatures: Feature[]; updatedFeatures: Feature[]; codeIgnoredCount: number } {
-  const metadata = createFeatureMetadata(featureTtlDays);
-  const newFeatures: Feature[] = [];
-  const updatedFeatures: Feature[] = [];
-
-  for (const ignored of ignoredFeatures) {
-    log.debug(
-      () =>
-        `LLM ignored feature "${ignored.feature_id}" (matched excluded "${ignored.excluded_feature_id}"): ${ignored.reason}`
-    );
-  }
-
-  const excludedByLowerId = new Set(excludedFeatures.map((f) => f.id.toLowerCase()));
-
-  let codeIgnoredCount = 0;
-  const nonExcluded = rawFeatures.filter((feature) => {
-    if (excludedByLowerId.has(feature.id.toLowerCase())) {
-      codeIgnoredCount++;
-      log.debug(() => `Dropping inferred feature [${feature.id}] matches excluded feature by ID`);
-      return false;
-    }
-    const fingerprintMatch = excludedFeatures.find((excluded) =>
-      hasSameFingerprint(feature, excluded)
-    );
-    if (fingerprintMatch) {
-      codeIgnoredCount++;
-      log.debug(
-        () =>
-          `Dropping inferred feature [${feature.id}] because it matches excluded feature [${fingerprintMatch.id}] by fingerprint`
-      );
-      return false;
-    }
-    return true;
-  });
-
-  const byLowerId = new Map<string, Feature>();
-  for (const f of allKnownFeatures) {
-    byLowerId.set(f.id.toLowerCase(), f);
-  }
-
-  for (const raw of nonExcluded) {
-    const match =
-      byLowerId.get(raw.id.toLowerCase()) ??
-      allKnownFeatures.find((f) => isDuplicateFeature(f, raw));
-
-    if (match) {
-      if (storedSet.has(match.uuid) && !discoveredSet.has(match.uuid)) {
-        updatedFeatures.push({ ...raw, ...metadata, uuid: match.uuid });
-      } else {
-        const merged = mergeFeature(match, raw);
-        if (!isEqual(merged, toBaseFeature(match))) {
-          updatedFeatures.push({ ...merged, ...metadata, uuid: match.uuid });
-        }
-      }
-    } else {
-      newFeatures.push({ ...raw, ...metadata, uuid: uuid() });
-    }
-  }
-
-  return { newFeatures, updatedFeatures, codeIgnoredCount };
 }
 
 // ---------------------------------------------------------------------------
@@ -679,53 +513,4 @@ export async function identifyInferredFeatures({
       iterationResults: [...prevState.iterationResults, successResult],
     },
   };
-}
-
-// ---------------------------------------------------------------------------
-// Top-level: Identify computed features (full handler)
-// ---------------------------------------------------------------------------
-
-export interface IdentifyComputedFeaturesOptions {
-  stream: Streams.all.Definition;
-  streamName: string;
-  start: number;
-  end: number;
-  esClient: ElasticsearchClient;
-  featureClient: FeatureClient;
-  logger: Logger;
-  featureTtlDays?: number;
-}
-
-export async function identifyComputedFeatures({
-  stream,
-  streamName,
-  start,
-  end,
-  esClient,
-  featureClient,
-  logger,
-  featureTtlDays,
-}: IdentifyComputedFeaturesOptions): Promise<Feature[]> {
-  const computedFeatures = await generateAllComputedFeatures({
-    stream,
-    start,
-    end,
-    esClient,
-    logger: logger.get('computed_features'),
-  });
-
-  const reconciledComputedFeatures = reconcileComputedFeatures({
-    computedFeatures,
-    streamName,
-    featureTtlDays,
-  });
-
-  if (reconciledComputedFeatures.length > 0) {
-    await featureClient.bulk(
-      streamName,
-      reconciledComputedFeatures.map((feature) => ({ index: { feature } }))
-    );
-  }
-
-  return reconciledComputedFeatures;
 }

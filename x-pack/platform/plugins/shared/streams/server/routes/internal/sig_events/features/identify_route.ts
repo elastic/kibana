@@ -24,7 +24,7 @@ import {
   MS_PER_DAY,
   identifyInferredFeatures,
   identifyComputedFeatures,
-} from '../../../../lib/sig_events/features/features_identification_service';
+} from '../../../../lib/sig_events/features';
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
