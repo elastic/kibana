@@ -35,7 +35,7 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
     // TODO this causes async imports when plugin starts
@@ -44,8 +44,10 @@ export class DashboardAgentPlugin
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
         agentBuilder: plugins.agentBuilder,
+        canWriteDashboards: core.application.capabilities.dashboard_v2?.showWriteControls === true,
         dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
         unifiedSearch: plugins.unifiedSearch,
+        filterManager: plugins.data.query.filterManager,
         dashboardPlugin: plugins.dashboard,
       });
     });
