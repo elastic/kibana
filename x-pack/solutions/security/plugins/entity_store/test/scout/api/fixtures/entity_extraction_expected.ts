@@ -271,6 +271,20 @@ export const expectedHostEntities: Hits = [
   },
   {
     _index: LATEST_INDEX,
+    _id: '92a7476f32e5e8edec138184b41959c82fa37050841e24c58d07500addd57aa2',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:17.000Z',
+      host: { id: 'host-606' },
+      entity: {
+        name: 'host-606',
+        type: 'Host',
+        id: 'host:host-606',
+        EngineMetadata: { Type: 'host', UntypedId: 'host-606' },
+      },
+    },
+  },
+  {
+    _index: LATEST_INDEX,
     _id: '1632a83b7ec4a14465d1af6d1896969cf1dc5c212d2a71b2a17087c8de799b7a',
     _source: {
       '@timestamp': '2026-01-20T12:05:17.000Z',
@@ -326,7 +340,7 @@ export const expectedHostEntities: Hits = [
     },
   },
   {
-    _index: '.entities.v2.latest.security_default-00001',
+    _index: LATEST_INDEX,
     _id: '461490dda53c8f34ea128a61fb4f9463adddfc4f4073be8c45f3a2f05f13e509',
     _source: {
       '@timestamp': '2026-01-20T12:05:24.000Z',
@@ -618,6 +632,7 @@ export const expectedUserEntities: Hits = [
     _source: {
       '@timestamp': '2026-01-20T12:05:17.000Z',
       user: { email: 'larry@example.com', name: 'larry.black' },
+      host: { id: 'host-606' },
       entity: {
         name: 'larry.black',
         type: 'Identity',

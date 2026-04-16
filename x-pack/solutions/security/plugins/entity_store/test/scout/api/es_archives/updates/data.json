@@ -764,6 +764,9 @@
     "source": {
       "@timestamp": "2026-01-20T12:05:17Z",
       "event": { "kind": null, "category": "iam", "type": "creation", "module": "azure" },
+      "host": {
+        "id": "host-606"
+      },
       "user": {
         "email": "larry@example.com",
         "name": "larry.black"

@@ -340,6 +340,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     dslFilterSource: {
       user: { email: 'larry@example.com', name: 'larry.black' },
       event: { kind: null, category: 'iam', type: 'creation', module: 'azure' },
+      host: { id: 'host-606' },
     },
     expectedEuid: 'user:larry@example.com@entra_id',
     expectedMeta: {
