@@ -6,8 +6,51 @@ paths: {}
 components:
   schemas:
     CopyPacksResponse:
+      description: 'The response for copying a pack.'
       type: object
-      properties: {}
+      properties:
+        data:
+          description: 'The copied pack.'
+          type: object
+          properties:
+            saved_object_id:
+              description: 'The saved object ID of the copied pack.'
+              type: string
+            name:
+              description: 'The name of the copied pack.'
+              type: string
+            description:
+              description: 'The pack description.'
+              type: string
+            queries:
+              description: 'The queries in the copied pack.'
+              type: object
+            version:
+              description: 'The pack version.'
+              type: integer
+            enabled:
+              description: 'Whether the pack is enabled. Always false for copies.'
+              type: boolean
+            created_at:
+              description: 'The creation timestamp.'
+              type: string
+            created_by:
+              description: 'The user who created the copy.'
+              type: string
+            updated_at:
+              description: 'The last update timestamp.'
+              type: string
+            updated_by:
+              description: 'The user who last updated the pack.'
+              type: string
+            policy_ids:
+              description: 'A list of agent policy IDs associated with the pack. Always empty for copies.'
+              type: array
+              items:
+                type: string
+            shards:
+              description: 'Shard configuration for the pack.'
+              type: object
       example:
         data:
           saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"

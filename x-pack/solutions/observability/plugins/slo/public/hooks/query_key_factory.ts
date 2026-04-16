@@ -134,6 +134,7 @@ export const sloKeys = {
     tags?: string;
     sortBy?: string;
     sortDirection?: string;
+    status?: string;
   }) => [...sloKeys.compositeLists(), filters] as const,
   compositeDetails: () => [...sloKeys.all, 'compositeDetail'] as const,
   compositeDetail: (id: string) => [...sloKeys.compositeDetails(), id] as const,

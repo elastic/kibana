@@ -198,4 +198,29 @@ fields:
           - field: environment
             operator: eq 
             value: production
+  # USER_PICKER lets the user select one or many Kibana users
+  # set multiple: false to restrict to a single selection
+  # default is an optional list of pre-selected users (uid + name)
+  - name: reviewers
+    control: USER_PICKER
+    label: Reviewers
+    type: keyword
+    metadata:
+      multiple: true
+      # default:
+      #   - uid: "abc123"
+      #     name: "Jane Doe"
+  # notes is shown only when at least one reviewer has been selected
+  - name: review_notes
+    control: TEXTAREA
+    label: Review notes
+    type: keyword
+    display:
+      show_when:
+        field: reviewers
+        operator: not_empty
+    validation:
+      required_when:
+        field: reviewers
+        operator: not_empty
 `.trimStart();
