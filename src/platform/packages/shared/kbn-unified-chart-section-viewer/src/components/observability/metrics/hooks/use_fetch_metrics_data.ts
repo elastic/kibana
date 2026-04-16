@@ -59,15 +59,15 @@ export function useFetchMetricsData({
   const accumulatedDimensionsRef = useRef<Dimension[]>([]);
   const previousEsqlRef = useRef<string | undefined>(esql);
 
-  if (esql !== previousEsqlRef.current) {
-    accumulatedDimensionsRef.current = [];
-    previousEsqlRef.current = esql;
-  }
-
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (
       signal: AbortSignal
     ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
+      if (esql !== previousEsqlRef.current) {
+        accumulatedDimensionsRef.current = [];
+        previousEsqlRef.current = esql;
+      }
+
       const documents = await trackRequest(
         'Grid of metrics',
         'This request queries Elasticsearch to fetch metrics info for the grid.',
