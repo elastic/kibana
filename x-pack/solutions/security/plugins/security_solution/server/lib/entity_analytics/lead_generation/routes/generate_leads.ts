@@ -6,18 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  IKibanaResponse,
-  KibanaRequest,
-  Logger,
-  StartServicesAccessor,
-} from '@kbn/core/server';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { IKibanaResponse, Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GENERATE_LEADS_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { generateLeadsRequestSchema } from '../../../../../common/entity_analytics/lead_generation/types';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
@@ -27,6 +20,7 @@ import type { StartPlugins } from '../../../../plugin';
 import { fetchCandidateEntities } from '../entity_conversion';
 import { runLeadGenerationPipeline } from '../run_pipeline';
 import { upsertLeadGenerationConfig } from '../saved_object';
+import { resolveChatModel } from '../utils';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const generateLeadsRoute = (
@@ -124,20 +118,3 @@ export const generateLeadsRoute = (
       })
     );
 };
-
-const resolveChatModel = async (
-  inference: InferenceServerStart,
-  request: KibanaRequest,
-  connectorId: string
-): Promise<InferenceChatModel> =>
-  inference.getChatModel({
-    request,
-    connectorId,
-    chatModelOptions: {
-      temperature: 0,
-      maxRetries: 0,
-      telemetryMetadata: {
-        pluginId: 'securitySolution',
-      },
-    },
-  });

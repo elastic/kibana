@@ -126,6 +126,18 @@ describe('TopThreatHuntingLeads', () => {
     expect(onSeeAll).toHaveBeenCalledTimes(1);
   });
 
+  it('"Generate" button is disabled when connectorId is not provided', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId={undefined} />);
+
+    expect(screen.getByTestId('generateLeadsButton')).toBeDisabled();
+  });
+
+  it('"Generate" button is disabled when connectorId is empty string', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId="" />);
+
+    expect(screen.getByTestId('generateLeadsButton')).toBeDisabled();
+  });
+
   it('"Generate" button calls onGenerate with loading state when isGenerating', () => {
     const onGenerate = jest.fn();
 

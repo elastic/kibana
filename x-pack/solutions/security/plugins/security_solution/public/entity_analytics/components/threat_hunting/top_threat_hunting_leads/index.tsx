@@ -45,7 +45,7 @@ interface TopThreatHuntingLeadsProps {
   onGenerate: () => void;
   isScheduled?: boolean;
   onToggleSchedule?: (enabled: boolean) => void;
-  connectorId: string;
+  connectorId: string | undefined;
   onConnectorIdSelected: (id: string) => void;
 }
 
@@ -141,14 +141,18 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                 aria-label={i18n.OPTIONS_LABEL}
               >
                 <div style={{ width: 320 }}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="plugs" aria-hidden={true} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <strong>{i18n.CONNECTOR_LABEL}</strong>
-                      </EuiText>
+                  <EuiFlexGroup direction="column" gutterSize="xs">
+                    <EuiFlexItem>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="plugs" aria-hidden={true} />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s">
+                            <strong>{i18n.CONNECTOR_LABEL}</strong>
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <ConnectorSelectorInline

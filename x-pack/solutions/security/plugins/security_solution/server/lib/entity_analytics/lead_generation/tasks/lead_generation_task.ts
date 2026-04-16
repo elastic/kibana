@@ -13,6 +13,7 @@ import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 
 import type { ExperimentalFeatures } from '../../../../../common';
@@ -30,6 +31,7 @@ import {
 import { runLeadGenerationPipeline } from '../run_pipeline';
 import { fetchCandidateEntities } from '../entity_conversion';
 import { getLeadGenerationConfig } from '../saved_object';
+import { resolveChatModel } from '../utils';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -170,12 +172,16 @@ const runLeadGenerationTask = async ({
 
   try {
     logger.info('[LeadGeneration] Running scheduled lead generation task');
-    // Use the scoped client from fakeRequest when available so the task runs
-    // with the user's privileges. Entity Store indices (entities-latest-*) are
-    // not accessible to kibana_system, so asInternalUser is insufficient.
-    const esClient = fakeRequest
-      ? core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser
-      : core.elasticsearch.client.asInternalUser;
+
+    if (!fakeRequest) {
+      throw new Error(
+        'No fakeRequest available in task context; cannot resolve inference connector'
+      );
+    }
+
+    // Use the scoped client so the task runs with the user's privileges.
+    // Entity Store indices (entities-latest-*) are not accessible to kibana_system.
+    const esClient = core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
     const soClient = buildScopedInternalSavedObjectsClientUnsafe({
       coreStart: core,
       namespace: state.namespace,
@@ -189,28 +195,21 @@ const runLeadGenerationTask = async ({
       soClient,
     });
 
-    if (!fakeRequest) {
-      throw new Error(
-        'No fakeRequest available in task context; cannot resolve inference connector'
-      );
-    }
-
     const config = await getLeadGenerationConfig(soClient, state.namespace);
     if (!config?.connectorId) {
-      throw new Error(
-        'No connectorId configured; skipping scheduled run. Call POST /enable with a connectorId first.'
+      throw createTaskRunError(
+        new Error(
+          'No connectorId configured; skipping scheduled run. Call POST /enable with a connectorId first.'
+        ),
+        TaskErrorSource.USER
       );
     }
 
-    const chatModel = await startPlugins.inference.getChatModel({
-      request: fakeRequest,
-      connectorId: config.connectorId,
-      chatModelOptions: {
-        temperature: 0,
-        maxRetries: 0,
-        telemetryMetadata: { pluginId: 'securitySolution' },
-      },
-    });
+    const chatModel = await resolveChatModel(
+      startPlugins.inference,
+      fakeRequest,
+      config.connectorId
+    );
 
     await runLeadGenerationPipeline({
       listEntities: () => fetchCandidateEntities(crudClient, logger),
@@ -253,18 +252,6 @@ export const startLeadGenerationTask = async ({
     await taskManager.ensureScheduled(taskDefinition, { request });
     logger.info(`[LeadGeneration] Scheduled lead generation task with id ${taskId}`);
   } catch (e) {
-    // ensureScheduled drops the `request` option when falling back to bulkUpdateSchedules
-    // on a version conflict (Task Manager bug). Workaround: remove the stale task and
-    // re-schedule so the new API key is stored correctly.
-    if (e.message?.includes('Request is not defined')) {
-      logger.warn(
-        `[LeadGeneration][task ${taskId}] ensureScheduled failed due to stale API key scope — removing and re-scheduling`
-      );
-      await taskManager.removeIfExists(taskId);
-      await taskManager.schedule(taskDefinition, { request });
-      logger.info(`[LeadGeneration] Re-scheduled lead generation task with id ${taskId}`);
-      return;
-    }
     logger.warn(`[LeadGeneration][task ${taskId}]: error scheduling task, received ${e.message}`);
     throw e;
   }

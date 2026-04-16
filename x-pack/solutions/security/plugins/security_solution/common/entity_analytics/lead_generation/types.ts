@@ -94,7 +94,7 @@ export type LeadGenerationEngineConfig = z.infer<typeof leadGenerationEngineConf
 
 export const generateLeadsRequestSchema = z.object({
   maxLeads: z.number().int().min(1).max(50).optional(),
-  connectorId: z.string(),
+  connectorId: z.string().min(1),
 });
 
 export type GenerateLeadsRequest = z.infer<typeof generateLeadsRequestSchema>;
@@ -150,7 +150,7 @@ export const bulkUpdateLeadsResponseSchema = z.object({
 export type BulkUpdateLeadsResponse = z.infer<typeof bulkUpdateLeadsResponseSchema>;
 
 export const enableLeadGenerationRequestSchema = z.object({
-  connectorId: z.string(),
+  connectorId: z.string().min(1),
 });
 
 export type EnableLeadGenerationRequest = z.infer<typeof enableLeadGenerationRequestSchema>;
