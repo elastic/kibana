@@ -120,6 +120,58 @@ const metricStateBackgroundChartSchemaESQL = {
 
 const metricStylingSchema = schema.object(
   {
+    /**
+     * Icon configuration
+     */
+    icon: schema.maybe(
+      schema.object(
+        {
+          /**
+           * Icon name
+           */
+          name: schema.oneOf(
+            [
+              schema.literal('alert'),
+              schema.literal('asterisk'),
+              schema.literal('bell'),
+              schema.literal('bolt'),
+              schema.literal('bug'),
+              schema.literal('compute'),
+              schema.literal('editor_comment'),
+              schema.literal('flag'),
+              schema.literal('globe'),
+              schema.literal('heart'),
+              schema.literal('map_marker'),
+              schema.literal('pin'),
+              schema.literal('sort_down'),
+              schema.literal('sort_up'),
+              schema.literal('star_empty'),
+              schema.literal('tag'),
+              schema.literal('temperature'),
+            ],
+            { meta: { description: 'Icon name' } }
+          ),
+          /**
+           * Icon alignment. Possible values:
+           * - 'right': Icon is aligned to the right
+           * - 'left': Icon is aligned to the left
+           */
+          alignment: schema.maybe(
+            leftRightAlignmentSchema({
+              meta: { description: 'Icon alignment' },
+              defaultValue: DEFAULT_PRIMARY_ICON_ALIGNMENT,
+            })
+          ),
+        },
+        {
+          meta: {
+            id: 'metricIconConfig',
+            title: 'Icon Configuration',
+            description: 'Icon configuration for the metric chart',
+          },
+        }
+      )
+    ),
     primary: schema.maybe(
       schema.object({
         /**
@@ -202,58 +254,6 @@ const metricStylingSchema = schema.object(
             }
           )
         ),
-        /**
-         * Icon configuration
-         */
-        icon: schema.maybe(
-          schema.object(
-            {
-              /**
-               * Icon name
-               */
-              name: schema.oneOf(
-                [
-                  schema.literal('alert'),
-                  schema.literal('asterisk'),
-                  schema.literal('bell'),
-                  schema.literal('bolt'),
-                  schema.literal('bug'),
-                  schema.literal('compute'),
-                  schema.literal('editor_comment'),
-                  schema.literal('flag'),
-                  schema.literal('globe'),
-                  schema.literal('heart'),
-                  schema.literal('map_marker'),
-                  schema.literal('pin'),
-                  schema.literal('sort_down'),
-                  schema.literal('sort_up'),
-                  schema.literal('star_empty'),
-                  schema.literal('tag'),
-                  schema.literal('temperature'),
-                ],
-                { meta: { description: 'Icon name' } }
-              ),
-              /**
-               * Icon alignment. Possible values:
-               * - 'right': Icon is aligned to the right
-               * - 'left': Icon is aligned to the left
-               */
-              alignment: schema.maybe(
-                leftRightAlignmentSchema({
-                  meta: { description: 'Icon alignment' },
-                  defaultValue: DEFAULT_PRIMARY_ICON_ALIGNMENT,
-                })
-              ),
-            },
-            {
-              meta: {
-                id: 'metricIconConfig',
-                title: 'Icon Configuration',
-                description: 'Icon configuration for the primary metric',
-              },
-            }
-          )
-        ),
       })
     ),
     secondary: schema.maybe(
@@ -313,7 +313,7 @@ const metricStylingSchema = schema.object(
   {
     meta: {
       id: 'metricStyling',
-      description: 'Visual styling options for the chart',
+      description: 'Visual chart styling options',
     },
   }
 );

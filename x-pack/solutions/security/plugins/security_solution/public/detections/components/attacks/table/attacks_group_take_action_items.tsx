@@ -201,14 +201,14 @@ export function AttacksGroupTakeActionItems({
     () => ({
       id: 0,
       items: [
-        ...workflowItems,
-        ...runWorkflowItems,
-        ...assignItems,
-        ...tagsItems,
-        ...investigateInTimelineItems,
         ...casesItems,
+        ...workflowItems,
+        ...tagsItems,
+        ...assignItems,
+        ...runWorkflowItems,
         ...viewInAiAssistantItems,
         ...datasetItems,
+        ...investigateInTimelineItems,
       ],
     }),
     [
