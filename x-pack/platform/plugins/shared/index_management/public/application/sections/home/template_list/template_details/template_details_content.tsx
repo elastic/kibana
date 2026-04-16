@@ -38,7 +38,7 @@ import { SectionLoading } from '../../../../../shared_imports';
 import type { Error } from '../../../../components';
 import { TemplateDeleteModal, SectionError } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
-import { useServices } from '../../../../app_context';
+import { useServices, useAppContext } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
 import { TemplateTypeIndicator, TemplateDeprecatedBadge } from '../components';
 import { TabSummary, TabPreview } from './tabs';
@@ -78,13 +78,6 @@ const TABS = [
     }),
     dataTestSubj: 'aliasesTabBtn',
   },
-  {
-    id: PREVIEW_TAB_ID,
-    name: i18n.translate('xpack.idxMgmt.templateDetails.previewTabTitle', {
-      defaultMessage: 'Preview',
-    }),
-    dataTestSubj: 'previewTabBtn',
-  },
 ];
 
 const tabToUiMetricMap: { [key: string]: string } = {
@@ -111,6 +104,7 @@ export const TemplateDetailsContent = ({
   reload,
 }: Props) => {
   const { uiMetricService } = useServices();
+  const { privs } = useAppContext();
   const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(templateName, isLegacy);
   const isCloudManaged = templateDetails?._kbnMeta.type === 'cloudManaged';
   const templateType = templateDetails?._kbnMeta.type;
@@ -119,6 +113,17 @@ export const TemplateDetailsContent = ({
   >([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
+
+  // only display tabs if the user has the manageIndexTemplates privilege
+  if (privs.manageIndexTemplates) {
+    TABS.push({
+      id: PREVIEW_TAB_ID,
+      name: i18n.translate('xpack.idxMgmt.templateDetails.previewTabTitle', {
+        defaultMessage: 'Preview',
+      }),
+      dataTestSubj: 'previewTabBtn',
+    });
+  }
 
   const renderHeader = () => {
     return (
@@ -254,7 +259,7 @@ export const TemplateDetailsContent = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {templateDetails && (
+          {templateDetails && privs.manageIndexTemplates && (
             <EuiFlexItem grow={false}>
               {/* Manage templates context menu */}
               <EuiPopover
