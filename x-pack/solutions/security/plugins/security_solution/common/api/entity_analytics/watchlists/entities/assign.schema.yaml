@@ -12,7 +12,7 @@ paths:
       operationId: AssignWatchlistEntities
       summary: Manually assign entities to a watchlist
       description: |
-        Assigns the provided entities to a watchlist by their EUIDs.
+        Assigns the provided entities to the specified watchlist.
         The entities must already exist in the entity store.
       parameters:
         - name: watchlist_id
