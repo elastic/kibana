@@ -150,7 +150,7 @@ describe('TopThreatHuntingLeads', () => {
     expect(screen.queryByTestId('refreshLeadsButton')).not.toBeInTheDocument();
   });
 
-  it('shows refresh icon instead of "Generate" button when leads exist', () => {
+  it('shows refresh button instead of "Generate" button when leads exist', () => {
     const onGenerate = jest.fn();
     const lead = createMockLead();
 

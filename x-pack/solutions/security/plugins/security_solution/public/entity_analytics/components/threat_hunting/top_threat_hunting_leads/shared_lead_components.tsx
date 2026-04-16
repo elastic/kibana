@@ -111,9 +111,16 @@ export const TagsPopover: React.FC<{ tags: string[] }> = ({ tags }) => {
           tabIndex={0}
           onMouseEnter={open}
           onMouseLeave={scheduleClose}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen((prev) => !prev);
+          }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') e.stopPropagation();
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsOpen((prev) => !prev);
+            }
           }}
         >
           <EuiBadge color="hollow">{`+${hiddenTags.length}`}</EuiBadge>
