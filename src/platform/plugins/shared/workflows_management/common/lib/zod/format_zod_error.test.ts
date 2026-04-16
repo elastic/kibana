@@ -45,7 +45,9 @@ describe('formatZodError', () => {
         triggers: [{ type: 'invalid' }],
       });
     const result = formatZodError(error!);
-    expect(result.message).toBe('Invalid trigger type. Available: manual, alert, scheduled');
+    expect(result.message).toBe(
+      'type has an invalid value. Please check the expected format for this field.'
+    );
   });
 
   it('should format invalid connector type', () => {
@@ -293,7 +295,9 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError);
-      expect(result.message).toBe('Invalid trigger type. Available: manual, alert, scheduled');
+      expect(result.message).toBe(
+        'type has an invalid value. Please check the expected format for this field.'
+      );
     });
 
     it('should format invalid_union for type path', () => {

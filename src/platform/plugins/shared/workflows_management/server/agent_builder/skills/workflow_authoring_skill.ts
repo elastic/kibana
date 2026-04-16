@@ -54,6 +54,9 @@ Use this skill when the user wants to:
 - **${workflowTools.modifyProperty}**: Modify a top-level workflow property (requires existing attachment)
 - **${workflowTools.deleteStep}**: Delete a step by name (requires existing attachment)
 
+### Execution Tool
+- **workflow_execute_step**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts) return a preview with config and validation instead of executing.
+
 ## Core Instructions
 
 ### Search Examples Before Writing Step YAML
@@ -196,6 +199,21 @@ Useful filters:
 - \`| json\` - Convert to JSON string
 - \`| url_encode\` - URL encode a string
 - \`| default: "value"\` - Provide default if nil
+
+### Verify Steps Against the Real Environment
+
+After writing or modifying an \`elasticsearch.search\`, \`elasticsearch.esql.query\`, or any data-querying step, call \`workflow_execute_step\` with the step name to test it against the user's real data:
+
+1. Execute the step — if it returns zero hits or errors, inspect the output to discover actual field names, values, and data shapes
+2. Fix the step (field names, query filters, aggregation paths) and re-execute until the output looks correct
+3. Use the real output structure to build accurate Liquid templates in downstream steps that reference this step's output
+
+**You do not know the user's index mappings.** Field names in custom indices are often non-standard (e.g. \`ts\` instead of \`@timestamp\`, \`svc\` instead of \`service.name\`). Executing the step is the only reliable way to discover them. Even for well-known indices, executing confirms the data exists in the user's environment.
+
+If a step references previous step outputs, provide \`contextOverride\` with sample data:
+\`{ "steps": { "previous_step": { "output": { "data": [...] } } } }\`
+
+For unsafe steps (HTTP, connectors, index writes), the tool returns a preview with config and validation — use this to verify correctness without executing.
 
 ### Self-Validation Before Proposing Changes
 

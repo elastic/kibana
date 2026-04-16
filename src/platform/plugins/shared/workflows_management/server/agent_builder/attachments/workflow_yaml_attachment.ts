@@ -140,6 +140,10 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     `- Prefer surgical edits (${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}) over ${workflowTools.replaceYaml}\n` +
     `- **ALWAYS call ${workflowTools.getStepDefinitions} to verify the exact step type ID before changing a step's type or inserting a new step.** Step types have specific IDs (e.g. \`kibana.createCase\`, not \`kibana\`).\n` +
     `- Use ${workflowTools.getExamples} to find working workflow patterns\n\n` +
+    `## Verifying Steps\n\n` +
+    `After writing or editing an \`elasticsearch.search\`, \`elasticsearch.esql.query\`, or any data-querying step, call \`workflow_execute_step\` with the step name to test it against real data.\n` +
+    `You do not know the user's index mappings — field names in custom indices are often non-standard. Executing the step is the only reliable way to discover them.\n` +
+    `If the step returns zero hits or errors, inspect the output, fix field names and filters, and re-execute until correct. Use the real output structure to build accurate Liquid templates in downstream steps.\n\n` +
     `## Rendering\n\n` +
     `- The ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment is rendered in chat as a YAML code preview with a Save button.\n` +
     `- You can render it with <render_attachment id="{attachmentId}"/> where {attachmentId} is the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment ID.\n` +

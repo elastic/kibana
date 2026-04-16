@@ -14,10 +14,6 @@ import { z } from '@kbn/zod/v4';
 import { getDetailedTypeDescription } from './zod_type_description';
 import { getAllConnectors } from '../../schema';
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Types
-// ═══════════════════════════════════════════════════════════════════════════
-
 export interface ErrorContext {
   schema?: z.ZodType;
   yamlDocument?: Document;
@@ -28,24 +24,12 @@ export interface EnrichmentResult {
   enriched: boolean;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Cache
-// ═══════════════════════════════════════════════════════════════════════════
-
 const enrichmentCache = new Map<string, string | null>();
 
 export function clearEnrichmentCache(): void {
   enrichmentCache.clear();
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Main API
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Core function to enrich an error message with schema-aware hints.
- * Used by both formatZodError (for Zod errors) and formatMonacoYamlMarker (for Monaco).
- */
 export function enrichErrorMessage(
   path: PropertyKey[],
   originalMessage: string,
@@ -53,49 +37,37 @@ export function enrichErrorMessage(
   context: ErrorContext
 ): EnrichmentResult {
   const { schema } = context;
-  // TODO: remove the field name, it's in the path, and could be nested; also default fieldback doesn't make sense
   const fieldName = path.length > 0 ? String(path[path.length - 1]) : 'field';
 
-  // 1. Domain-specific messages (e.g. "No triggers found", "Invalid trigger type")
-  //    always more helpful than schema-derived descriptions
-  const domainEnriched = tryDomainSpecificEnrichment(path, fieldName, errorCode, originalMessage);
+  const domainEnriched = tryDomainSpecificEnrichment(path, errorCode, originalMessage);
   if (domainEnriched) {
     return { message: domainEnriched, enriched: true };
   }
 
-  // 2. Schema-aware enrichment (e.g. "field should be an object with properties: …")
   if (schema && path.length > 0) {
-    const schemaEnriched = trySchemaAwareEnrichment(path, fieldName, errorCode, context);
+    const schemaEnriched = trySchemaAwareEnrichment(path, fieldName, context);
     if (schemaEnriched) {
       return { message: schemaEnriched, enriched: true };
     }
   }
 
-  // 3. Generic code-based fallback (e.g. "field has an invalid value")
   const genericEnriched = tryGenericFallbackEnrichment(path, fieldName, errorCode);
   if (genericEnriched) {
     return { message: genericEnriched, enriched: true };
   }
 
-  // 4. Raw message with path appended
   const fallbackMessage =
     path.length > 0 ? `${originalMessage} at ${path.join('.')}` : originalMessage;
   return { message: fallbackMessage, enriched: false };
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Schema-Aware Enrichment
-// ═══════════════════════════════════════════════════════════════════════════
-
 function trySchemaAwareEnrichment(
   path: PropertyKey[],
   fieldName: string,
-  errorCode: string,
   context: ErrorContext
 ): string | null {
   const { schema, yamlDocument } = context;
 
-  // Get step type for cache key (handles nested steps)
   const stepType = getStepTypeAtPath(path, yamlDocument);
   const cacheKey = `${path.join('.')}-${fieldName}-${stepType ?? 'unknown'}`;
 
@@ -105,10 +77,8 @@ function trySchemaAwareEnrichment(
 
   let result: string | null = null;
 
-  // Try connector params schema enrichment (unified handling for all types)
   result = tryConnectorSchemaEnrichment(path, fieldName, yamlDocument);
 
-  // Fallback: try full workflow schema path
   if (!result && schema) {
     result = tryWorkflowSchemaEnrichment(path, fieldName, schema);
   }
@@ -117,40 +87,35 @@ function trySchemaAwareEnrichment(
   return result;
 }
 
-/**
- * Tries to enrich using connector params schema.
- * Handles all schema types: objects, unions, arrays, primitives, etc.
- */
 function tryConnectorSchemaEnrichment(
   path: PropertyKey[],
   fieldName: string,
   yamlDocument?: Document
 ): string | null {
-  // Find the step info from the path
   const stepInfo = findStepInfoFromPath(path, yamlDocument);
-  if (!stepInfo) return null;
+  if (!stepInfo) {
+    return null;
+  }
 
   const { stepType, pathWithinWith } = stepInfo;
 
-  // Get the connector params schema
   const paramsSchema = getConnectorParamsSchema(stepType);
-  if (!paramsSchema) return null;
+  if (!paramsSchema) {
+    return null;
+  }
 
-  // Get the field schema at the path within 'with'
   const fieldSchema =
     pathWithinWith.length === 0
       ? paramsSchema
       : getSchemaAtPath(paramsSchema, pathWithinWith.join('.'))?.schema;
 
-  if (!fieldSchema) return null;
+  if (!fieldSchema) {
+    return null;
+  }
 
   return generateSchemaErrorMessage(fieldName, fieldSchema);
 }
 
-/**
- * Fallback: tries to enrich using the full workflow schema path.
- * Only used when connector schema lookup fails.
- */
 function tryWorkflowSchemaEnrichment(
   path: PropertyKey[],
   fieldName: string,
@@ -162,55 +127,39 @@ function tryWorkflowSchemaEnrichment(
     .replace(/\.\[/g, '[');
 
   const schemaAtPath = getSchemaAtPath(schema, pathString);
-  if (!schemaAtPath?.schema) return null;
+  if (!schemaAtPath?.schema) {
+    return null;
+  }
 
   return generateSchemaErrorMessage(fieldName, schemaAtPath.schema);
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Code-Specific Enrichment (no schema required)
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Specific domain messages that are always more helpful than schema-derived
- * descriptions. Runs before schema-aware enrichment.
- */
 function tryDomainSpecificEnrichment(
   path: PropertyKey[],
-  fieldName: string,
   errorCode: string,
   originalMessage: string
 ): string | null {
-  // Handle trigger union errors
-  if (errorCode === 'invalid_union' && path[0] === 'triggers' && path.includes('type')) {
-    return 'Invalid trigger type. Available: manual, alert, scheduled';
-  }
-
-  // Handle connector type union errors
-  if (errorCode === 'invalid_union' && path.includes('type')) {
+  if (errorCode === 'invalid_union' && path[0] === 'steps' && path.includes('type')) {
     return 'Invalid connector type. Use Ctrl+Space to see available options.';
   }
 
-  // Handle literal type errors for connector types
   if (errorCode === 'invalid_literal' && path.includes('type')) {
     const receivedMatch = originalMessage.match(/received[:\s]+"?([^"]+)"?/i);
     const receivedValue = receivedMatch?.[1] || '';
 
-    if (receivedValue.startsWith?.('elasticsearch.')) {
+    if (receivedValue.startsWith('elasticsearch.')) {
       return `Unknown Elasticsearch API: "${receivedValue}". Use autocomplete to see valid elasticsearch.* APIs.`;
     }
-    if (receivedValue.startsWith?.('kibana.')) {
+    if (receivedValue.startsWith('kibana.')) {
       return `Unknown Kibana API: "${receivedValue}". Use autocomplete to see valid kibana.* APIs.`;
     }
     return `Unknown connector type: "${receivedValue}". Available: elasticsearch.*, kibana.*, slack, http, console, wait, inference.*`;
   }
 
-  // Handle missing triggers
   if (errorCode === 'invalid_type' && path.length === 1 && path[0] === 'triggers') {
     return 'No triggers found. Add at least one trigger.';
   }
 
-  // Handle missing steps
   if (errorCode === 'invalid_type' && path.length === 1 && path[0] === 'steps') {
     return 'No steps found. Add at least one step.';
   }
@@ -218,10 +167,6 @@ function tryDomainSpecificEnrichment(
   return null;
 }
 
-/**
- * Generic fallback for error codes that didn't match domain-specific or
- * schema-aware enrichment. Runs last.
- */
 function tryGenericFallbackEnrichment(
   path: PropertyKey[],
   fieldName: string,
@@ -234,89 +179,72 @@ function tryGenericFallbackEnrichment(
   return null;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// YAML Document Navigation (with nested step support)
-// ═══════════════════════════════════════════════════════════════════════════
-
 interface StepInfo {
   stepType: string;
-  pathWithinWith: PropertyKey[];
+  pathWithinWith: string[];
 }
 
-/**
- * Finds step info from a path, handling nested steps.
- * Returns the step type and the path within the 'with' block.
- */
 function findStepInfoFromPath(path: PropertyKey[], yamlDocument?: Document): StepInfo | null {
   if (!yamlDocument?.contents || !YAML.isMap(yamlDocument.contents)) {
     return null;
   }
 
-  // Find the 'with' index in the path
   const withIndex = path.indexOf('with');
-  if (withIndex === -1) return null;
+  if (withIndex === -1) {
+    return null;
+  }
 
-  // The path before 'with' should lead to a step
   const pathToStep = path.slice(0, withIndex);
   const pathWithinWith = path.slice(withIndex + 1);
 
-  // Navigate to the step and get its type
   const stepType = getStepTypeAtYamlPath(pathToStep, yamlDocument);
-  if (!stepType) return null;
+  if (!stepType) {
+    return null;
+  }
 
   return { stepType, pathWithinWith: pathWithinWith.map(String) };
 }
 
-/**
- * Gets the step type from YAML document at a given path.
- * Handles nested steps: steps[0].steps[1] → finds step at steps[0].steps[1]
- */
 export function getStepTypeAtPath(path: PropertyKey[], yamlDocument?: Document): string | null {
   if (!yamlDocument?.contents || !YAML.isMap(yamlDocument.contents)) {
     return null;
   }
 
-  // Find the 'with' index to determine the path to the step
   const withIndex = path.indexOf('with');
   const pathToStep = withIndex !== -1 ? path.slice(0, withIndex) : path;
 
   return getStepTypeAtYamlPath(pathToStep, yamlDocument);
 }
 
-/**
- * Navigates the YAML document to find the step type at the given path.
- */
 function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document): string | null {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let current: any = yamlDocument.contents;
+    let current: unknown = yamlDocument.contents;
 
     for (let i = 0; i < pathToStep.length; i++) {
       const segment = pathToStep[i];
 
       if (YAML.isMap(current)) {
-        // Find the key in the map
         const item = current.items.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (pair: any) => YAML.isScalar(pair.key) && pair.key.value === segment
+          (pair) => YAML.isScalar(pair.key) && pair.key.value === segment
         );
-        if (!item) return null;
+        if (!item) {
+          return null;
+        }
         current = item.value;
       } else if (YAML.isSeq(current)) {
-        // Navigate into array by index
-        const index = typeof segment === 'number' ? segment : parseInt(String(segment), 10);
-        if (isNaN(index) || index < 0 || index >= current.items.length) return null;
+        const index = typeof segment === 'number' ? segment : Number.parseInt(String(segment), 10);
+        if (Number.isNaN(index) || index < 0 || index >= current.items.length) {
+          return null;
+        }
         current = current.items[index];
       } else {
         return null;
       }
     }
 
-    // Now 'current' should be a step node - find its 'type' field
     if (YAML.isMap(current)) {
       const typeItem = current.items.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (pair: any) => YAML.isScalar(pair.key) && pair.key.value === 'type'
+        (pair) => YAML.isScalar(pair.key) && pair.key.value === 'type'
       );
       if (typeItem && YAML.isScalar(typeItem.value)) {
         return String(typeItem.value.value);
@@ -329,47 +257,18 @@ function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Connector Schema Utilities
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Gets the params schema for a given connector/step type
- */
 function getConnectorParamsSchema(stepType: string): z.ZodType | null {
-  try {
-    const allConnectors = getAllConnectors();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const connector = allConnectors.find((c: any) => c.type === stepType);
-    return connector?.paramsSchema ?? null;
-  } catch {
-    return null;
-  }
+  return getAllConnectors().find((connector) => connector.type === stepType)?.paramsSchema ?? null;
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Schema Analysis Utilities
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Analyzes a union schema to extract user-friendly option descriptions
- */
 
 function analyzeUnionSchema(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   unionSchema: z.ZodUnion<any>
-): Array<{ name: string; description: string }> {
-  const options: Array<{ name: string; description: string }> = [];
-
-  for (const option of unionSchema.def.options) {
-    const optionInfo = analyzeUnionOption(option);
-    options.push(optionInfo);
-  }
-
-  return options;
+): string[] {
+  return unionSchema.def.options.map((option) => analyzeUnionOption(option));
 }
 
-function analyzeUnionOption(option: z.ZodType): { name: string; description: string } {
+function analyzeUnionOption(option: z.ZodType): string {
   if (option instanceof z.ZodObject) {
     const shape = option.def.shape;
     const discriminator = findDiscriminatorInShape(shape);
@@ -383,7 +282,7 @@ function analyzeUnionOption(option: z.ZodType): { name: string; description: str
       if (otherProps.length > 0) {
         description += `\n    other props: ${otherProps.join(', ')}`;
       }
-      return { name: String(discriminator.value), description };
+      return description;
     }
 
     const requiredProps = Object.keys(shape)
@@ -391,47 +290,41 @@ function analyzeUnionOption(option: z.ZodType): { name: string; description: str
       .sort();
 
     if (requiredProps.length > 0) {
-      return {
-        name: `object_with_${requiredProps.join('_')}`,
-        description: `object with: ${requiredProps.join(', ')}`,
-      };
+      return `object with: ${requiredProps.join(', ')}`;
     }
 
-    // All properties are optional — show them so the user knows what's available
     const allProps = Object.keys(shape).sort();
     if (allProps.length > 0) {
-      return {
-        name: 'object',
-        description: `object (optional: ${allProps.join(', ')})`,
-      };
+      return `object (optional: ${allProps.join(', ')})`;
     }
 
-    return { name: 'object', description: 'an object' };
+    return 'an object';
   }
 
   if (option instanceof z.ZodRecord) {
-    return { name: 'record', description: 'a key-value mapping' };
+    return 'a key-value mapping';
   }
 
   if (option instanceof z.ZodLiteral) {
-    return {
-      name: String(option.value),
-      description: `literal value: ${JSON.stringify(option.value)}`,
-    };
+    return `literal value: ${JSON.stringify(option.value)}`;
   }
 
-  if (option instanceof z.ZodString) return { name: 'string', description: 'a string' };
-  if (option instanceof z.ZodNumber) return { name: 'number', description: 'a number' };
-  if (option instanceof z.ZodBoolean) return { name: 'boolean', description: 'a boolean' };
+  if (option instanceof z.ZodString) {
+    return 'a string';
+  }
+  if (option instanceof z.ZodNumber) {
+    return 'a number';
+  }
+  if (option instanceof z.ZodBoolean) {
+    return 'a boolean';
+  }
 
-  const typeName = getTypeDescriptionForError(option);
-  return { name: typeName, description: typeName };
+  return getTypeDescriptionForError(option);
 }
 
 function findDiscriminatorInShape(
   shape: Record<string, z.ZodType>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): { key: string; value: any } | null {
+): { key: string; value: unknown } | null {
   for (const [key, schema] of Object.entries(shape)) {
     if (schema instanceof z.ZodLiteral) {
       return { key, value: schema.value };
@@ -448,37 +341,22 @@ function isOptionalSchema(schema: z.ZodType): boolean {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Unified Schema Error Message Generation
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Generates a user-friendly error message for any schema type.
- * Handles unions, objects, arrays, and primitives uniformly.
- * When the schema is an array, peeks at the element schema to give
- * richer hints like "should be a list of objects with properties: …".
- */
 function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): string | null {
   try {
-    // Unwrap optional/nullable/default wrappers
     const unwrappedSchema = unwrapSchema(schema);
 
-    // Handle unions with special "oneOf" formatting
     if (unwrappedSchema instanceof z.ZodUnion) {
       return generateUnionErrorMessage(fieldName, unwrappedSchema);
     }
 
-    // Handle objects with property list
     if (unwrappedSchema instanceof z.ZodObject) {
       return `${fieldName} expects ${getObjectPropertiesDescription(unwrappedSchema)}`;
     }
 
-    // Handle arrays — peek at the element schema for a richer hint
     if (unwrappedSchema instanceof z.ZodArray) {
       return generateArrayErrorMessage(fieldName, unwrappedSchema);
     }
 
-    // For all other types, use the type description
     const expectedType = getTypeDescriptionForError(unwrappedSchema);
     return `${fieldName} expects ${expectedType}`;
   } catch {
@@ -486,22 +364,17 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
   }
 }
 
-/**
- * Generates error message for union types with "oneOf" format.
- */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<any>): string | null {
-  const unionOptions = analyzeUnionSchema(unionSchema);
-  if (unionOptions.length === 0) return null;
+  const optionDescriptions = analyzeUnionSchema(unionSchema);
+  if (optionDescriptions.length === 0) {
+    return null;
+  }
 
-  const optionsList = unionOptions.map((opt) => `  - ${opt.description}`).join('\n');
+  const optionsList = optionDescriptions.map((description) => `  - ${description}`).join('\n');
   return `${fieldName} must be one of:\n${optionsList}`;
 }
 
-/**
- * Generates error message for array types by peeking at the element schema.
- * e.g. "fields expects a list of objects with: type, name, description"
- */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<any>): string {
   const elementSchema = unwrapSchema(arraySchema.element);
@@ -521,13 +394,10 @@ function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<an
   return `${fieldName} expects a list of ${elementType}`;
 }
 
-/**
- * Unwraps optional/nullable/default wrappers to get the core schema.
- */
 function unwrapSchema(schema: z.ZodType): z.ZodType {
   let current = schema;
 
-  while (current) {
+  while (true) {
     if (current instanceof z.ZodOptional) {
       current = current.unwrap() as z.ZodType;
     } else if (current instanceof z.ZodNullable) {
