@@ -44,6 +44,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
       : `${ELASTIC_DOCS}get-started`,
     apiReference: `${API_DOCS}`,
+    releaseNotes: `${ELASTIC_DOCS}release-notes`,
     serverlessReleaseNotes: `${ELASTIC_DOCS}release-notes/cloud-serverless`,
     hostedCloudReleaseNotes: `${ELASTIC_DOCS}release-notes/cloud-hosted`,
     upgrade: {

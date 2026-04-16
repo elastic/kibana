@@ -45,4 +45,32 @@ describe('<Timestamp />', () => {
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('should render children after the timestamp', () => {
+    const hit = createMockHit({ '@timestamp': '2024-01-15T10:30:00.000Z' });
+
+    const { getByText } = render(
+      <TestProviders>
+        <Timestamp hit={hit}>
+          <div>{'test'}</div>
+        </Timestamp>
+      </TestProviders>
+    );
+
+    expect(getByText('test')).toBeInTheDocument();
+  });
+
+  it('should not render children when timestamp is absent', () => {
+    const hit = createMockHit({});
+
+    const { queryByText } = render(
+      <TestProviders>
+        <Timestamp hit={hit}>
+          <div>{'test'}</div>
+        </Timestamp>
+      </TestProviders>
+    );
+
+    expect(queryByText('test')).not.toBeInTheDocument();
+  });
 });
