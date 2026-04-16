@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,

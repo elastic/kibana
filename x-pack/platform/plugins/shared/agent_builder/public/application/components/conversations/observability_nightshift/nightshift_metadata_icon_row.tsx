@@ -20,12 +20,14 @@ import React from 'react';
 
 export interface NightshiftMetadataIconItemProps {
   title: string;
-  iconType: NonNullable<EuiAvatarProps['iconType']>;
   value: React.ReactNode;
   /** Background fill for the icon avatar (see {@link https://eui.elastic.co/docs/components/display/avatar/#icons EuiAvatar icons}). */
   color?: EuiAvatarProps['color'];
   /** Icon glyph color; contrasts with `color` when set. */
   iconColor?: EuiAvatarProps['iconColor'];
+  /** When true, only title and value are shown (no leading icon avatar). */
+  hideIcon?: boolean;
+  iconType?: NonNullable<EuiAvatarProps['iconType']>;
 }
 
 export const NightshiftMetadataIconCard: React.FC<NightshiftMetadataIconItemProps> = ({
@@ -34,8 +36,22 @@ export const NightshiftMetadataIconCard: React.FC<NightshiftMetadataIconItemProp
   value,
   color,
   iconColor,
+  hideIcon = false,
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  if (hideIcon) {
+    return (
+      <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+        <EuiTitle size="xxxs">
+          <p>{title}</p>
+        </EuiTitle>
+        <EuiText size="xs" css={css({ marginTop: euiTheme.size.xs })}>
+          {value}
+        </EuiText>
+      </EuiPanel>
+    );
+  }
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="s">
@@ -45,7 +61,7 @@ export const NightshiftMetadataIconCard: React.FC<NightshiftMetadataIconItemProp
             type="space"
             size="s"
             name={title}
-            iconType={iconType}
+            iconType={iconType ?? 'alert'}
             color={color ?? euiTheme.colors.backgroundBaseSubdued}
             iconColor={iconColor}
             aria-hidden={true}

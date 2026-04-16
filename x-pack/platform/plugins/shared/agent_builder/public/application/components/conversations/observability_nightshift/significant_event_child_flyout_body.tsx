@@ -7,18 +7,20 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiBadge,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiHorizontalRule,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NightshiftInfoPanel } from './nightshift_info_panel';
 import { NightshiftMetadataIconCard } from './nightshift_metadata_icon_row';
 import { NightshiftStreamsMetricTiles } from './nightshift_streams_metric_tiles';
+import { RemediationPlanPanel } from './remediation_plan_panel';
 
 export interface SignificantEventDetailFields {
   id: string;
@@ -35,7 +37,6 @@ export interface SignificantEventChildFlyoutBodyProps {
 export const SignificantEventChildFlyoutBody: React.FC<SignificantEventChildFlyoutBodyProps> = ({
   event,
 }) => {
-  const { euiTheme } = useEuiTheme();
 
   const summaryPanelTitle = i18n.translate(
     'xpack.agentBuilder.observabilityNightshift.sigEvents.childSummaryTitle',
@@ -89,19 +90,15 @@ export const SignificantEventChildFlyoutBody: React.FC<SignificantEventChildFlyo
     }
   );
 
-  const severityIconColor =
-    event.severityColor === 'danger'
-      ? euiTheme.colors.severity.danger
-      : event.severityColor === 'warning'
-        ? euiTheme.colors.severity.warning
-        : euiTheme.colors.textParagraph;
-
-  const severityBg =
-    event.severityColor === 'danger'
-      ? euiTheme.colors.backgroundLightDanger
-      : event.severityColor === 'warning'
-        ? euiTheme.colors.backgroundLightWarning
-        : euiTheme.colors.backgroundLightNeutral;
+  const severityHealthColor = useMemo(() => {
+    if (event.severityColor === 'danger') {
+      return 'danger' as const;
+    }
+    if (event.severityColor === 'warning') {
+      return 'warning' as const;
+    }
+    return 'subdued' as const;
+  }, [event.severityColor]);
 
   const generalInfoDescriptionItems = useMemo(() => {
     return [
@@ -177,30 +174,22 @@ export const SignificantEventChildFlyoutBody: React.FC<SignificantEventChildFlyo
         <EuiFlexGroup gutterSize="s" responsive={true} wrap>
           <EuiFlexItem grow={true}>
             <NightshiftMetadataIconCard
+              hideIcon
               title={metaSeverityTitle}
-              iconType="alert"
-              value={<strong>{event.severityLabel}</strong>}
-              color={severityBg}
-              iconColor={severityIconColor}
+              value={
+                <EuiHealth color={severityHealthColor}>{event.severityLabel}</EuiHealth>
+              }
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <NightshiftMetadataIconCard
+              hideIcon
               title={metaStreamTitle}
-              iconType="indexOpen"
-              value="75"
-              color={euiTheme.colors.backgroundLightAccent}
-              iconColor={euiTheme.colors.accentText}
+              value={<EuiBadge color="accent">75</EuiBadge>}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <NightshiftMetadataIconCard
-              title={metaWindowTitle}
-              iconType="clock"
-              value={metaWindowValue}
-              color={euiTheme.colors.backgroundBaseSubdued}
-              iconColor={euiTheme.colors.textParagraph}
-            />
+            <NightshiftMetadataIconCard hideIcon title={metaWindowTitle} value={metaWindowValue} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -233,6 +222,10 @@ export const SignificantEventChildFlyoutBody: React.FC<SignificantEventChildFlyo
             </React.Fragment>
           ))}
         </NightshiftInfoPanel>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <RemediationPlanPanel />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
