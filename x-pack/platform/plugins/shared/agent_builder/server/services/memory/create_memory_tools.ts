@@ -20,6 +20,12 @@ import {
 export interface MemoryToolsOptions {
   /** Lazy getter for the memory service (resolved at handler invocation time). */
   getMemoryService: () => MemoryService;
+  /** Retrieval method to use (e.g. 'bm25'). */
+  retrievalMethod: string;
+  /** Full plugin config. */
+  getConfig: () => import('../../config').AgentBuilderConfig;
+  /** Lazy getter for internal services. */
+  getInternalServices: () => import('../types').InternalStartServices;
 }
 
 /**
@@ -34,19 +40,23 @@ export const createMemoryTools = (
   options: MemoryToolsOptions
 ): Array<BuiltinToolDefinition<any>> => {
   const sessionManager = new MemorySessionManager();
-  const { getMemoryService } = options;
+  const { getMemoryService, retrievalMethod, getConfig, getInternalServices } = options;
 
   const checkpoint = createCheckpointTool({
     getMemoryService,
+    retrievalMethod,
+    getConfig,
+    getInternalServices,
     getActiveMemorySet: () => {
-      // This getter is overridden below to use the session manager.
-      // The tools are wrapped so the real active set is resolved per-call.
       throw new Error('getActiveMemorySet must be resolved per-call');
     },
   });
 
   const remember = createRememberTool({
     getMemoryService,
+    retrievalMethod,
+    getConfig,
+    getInternalServices,
     getActiveMemorySet: () => {
       throw new Error('getActiveMemorySet must be resolved per-call');
     },
@@ -66,6 +76,9 @@ export const createMemoryTools = (
       const activeSet = sessionManager.getOrCreate(context.runContext.runId);
       const tool = createCheckpointTool({
         getMemoryService,
+        retrievalMethod,
+        getConfig,
+        getInternalServices,
         getActiveMemorySet: () => activeSet,
       });
       return tool.handler(params, context);
@@ -78,6 +91,9 @@ export const createMemoryTools = (
       const activeSet = sessionManager.getOrCreate(context.runContext.runId);
       const tool = createRememberTool({
         getMemoryService,
+        retrievalMethod,
+        getConfig,
+        getInternalServices,
         getActiveMemorySet: () => activeSet,
       });
       return tool.handler(params, context);

@@ -40,11 +40,19 @@ const storageSettings = {
       user_id: types.keyword({}),
       user_name: types.keyword({}),
 
+      // Denormalized conversation ID for efficient aggregation queries.
+      // Copied from source_refs[0].conversation_id at creation time.
+      conversation_id: types.keyword({}),
+
       // Core memory fields
       type: types.keyword({}),
       subtype: types.keyword({}),
       summary: types.text({}),
       full: types.text({}),
+
+      // Semantic text field for embedding-based similarity search.
+      // ES auto-generates embeddings at index time via the configured inference endpoint.
+      full_semantic: types.semantic_text({}),
 
       // Scoring signals
       confidence: types.float({}),
@@ -93,10 +101,12 @@ export interface MemoryProperties {
   space: string;
   user_id?: string;
   user_name: string;
+  conversation_id?: string;
   type: MemoryType;
   subtype?: string;
   summary: string;
   full: string;
+  full_semantic?: string;
   confidence: number;
   salience: number;
   recency: string;
@@ -147,82 +157,46 @@ export const createStorage = ({
  *
  * This is called once during service start.
  */
-export const ensureMemoryIndexWithEmbeddings = async ({
+export const ensureMemoryIndexMappings = async ({
   esClient,
   logger,
+  inferenceEndpointId,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  inferenceEndpointId?: string;
 }): Promise<void> => {
   try {
     const exists = await esClient.indices.exists({ index: memoryIndexName });
 
     if (!exists) {
-      // Index will be auto-created by storage adapter on first write.
-      // We schedule a post-creation mapping update via a separate call after first write.
       logger.debug(
-        `Memory index ${memoryIndexName} does not yet exist; dense_vector mapping will be added after first write.`
+        `Memory index ${memoryIndexName} does not yet exist; mappings will be updated after first write.`
       );
       return;
     }
 
-    // Check if the embedding field mapping already exists
     const mappings = await esClient.indices.getMapping({ index: memoryIndexName });
     const indexMappings = mappings[memoryIndexName]?.mappings?.properties ?? {};
 
-    if (!('embedding' in indexMappings)) {
-      logger.info(`Adding dense_vector embedding mapping to ${memoryIndexName}`);
+    // Update semantic_text field with inference endpoint if configured
+    if (inferenceEndpointId && !('full_semantic' in indexMappings)) {
+      logger.info(`Adding semantic_text mapping with inference_id=${inferenceEndpointId} to ${memoryIndexName}`);
       await esClient.indices.putMapping({
         index: memoryIndexName,
         properties: {
-          embedding: {
-            type: 'dense_vector',
-            dims: 768,
-            index: true,
-            similarity: 'cosine',
+          full_semantic: {
+            type: 'semantic_text',
+            inference_id: inferenceEndpointId,
           } as MappingProperty,
         },
       });
     }
   } catch (err) {
-    // Non-fatal: kNN search will fall back to BM25-only if embedding field is absent.
-    logger.warn(`Failed to ensure embedding mapping on ${memoryIndexName}: ${err.message}`);
+    logger.warn(`Failed to ensure memory index mappings on ${memoryIndexName}: ${err.message}`);
   }
 };
 
-/**
- * Attempt to add the dense_vector mapping after the storage adapter has created the index.
- * This is used as a best-effort hook after the first memory document is written.
- */
-export const addEmbeddingMappingIfMissing = async ({
-  esClient,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-}): Promise<void> => {
-  try {
-    const mappings = await esClient.indices.getMapping({ index: memoryIndexName });
-    const indexMappings = mappings[memoryIndexName]?.mappings?.properties ?? {};
-
-    if (!('embedding' in indexMappings)) {
-      await esClient.indices.putMapping({
-        index: memoryIndexName,
-        properties: {
-          embedding: {
-            type: 'dense_vector',
-            dims: 768,
-            index: true,
-            similarity: 'cosine',
-          } as MappingProperty,
-        },
-      });
-      logger.debug(`Successfully added embedding mapping to ${memoryIndexName}`);
-    }
-  } catch (err) {
-    logger.warn(`Could not add embedding mapping to ${memoryIndexName}: ${err.message}`);
-  }
-};
 
 /**
  * Convert MemoryLink[] (application type) to the storage representation.

@@ -66,6 +66,7 @@ export interface InternalStartServices {
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
   memory: MemoryService;
+  elasticsearch: ElasticsearchServiceStart;
 }
 
 export interface ServiceSetupDeps {

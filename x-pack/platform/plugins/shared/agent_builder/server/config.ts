@@ -18,16 +18,40 @@ export const configSchema = schema.object({
   memory: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     showToolCalls: schema.boolean({ defaultValue: true }),
-    roundStartRetrieval: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+    retrieval: schema.object({
+      roundStartEnabled: schema.boolean({ defaultValue: true }),
       method: schema.oneOf(
-        [schema.literal('bm25')],
+        [
+          schema.literal('bm25'),
+          schema.literal('semantic'),
+          schema.literal('hybrid'),
+          schema.literal('conversation'),
+        ],
         { defaultValue: 'bm25' }
       ),
+      inferenceEndpointId: schema.maybe(schema.string()),
+      reranking: schema.oneOf(
+        [schema.literal('nothing'), schema.literal('memx'), schema.literal('ab')],
+        { defaultValue: 'nothing' }
+      ),
+      postRetrieval: schema.object({
+        deduplicate: schema.boolean({ defaultValue: false }),
+        lowConfidenceRejection: schema.object({
+          enabled: schema.boolean({ defaultValue: false }),
+          threshold: schema.number({ defaultValue: 0.5, min: 0, max: 1 }),
+        }),
+      }),
+      conversation: schema.object({
+        topK: schema.number({ defaultValue: 3, min: 1, max: 20 }),
+        stage: schema.oneOf(
+          [schema.literal(1), schema.literal(2)],
+          { defaultValue: 1 }
+        ),
+      }),
     }),
     extraction: schema.object({
       method: schema.oneOf(
-        [schema.literal('llm'), schema.literal('chunking')],
+        [schema.literal('llm'), schema.literal('chunking'), schema.literal('turn')],
         { defaultValue: 'llm' }
       ),
       connectorId: schema.maybe(schema.string()),

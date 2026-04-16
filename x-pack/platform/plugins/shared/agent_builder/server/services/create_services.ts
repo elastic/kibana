@@ -243,7 +243,9 @@ export class ServiceManager {
 
     // Best-effort index initialization: initialize in the background so it doesn't
     // block the plugin start lifecycle.
-    memory.initialize().catch((err: Error) => {
+    memory.initialize({
+      inferenceEndpointId: this.config.memory?.retrieval?.inferenceEndpointId,
+    }).catch((err: Error) => {
       logger.get('memory').warn(`Memory index initialization failed: ${err.message}`);
     });
 
@@ -267,6 +269,7 @@ export class ServiceManager {
       consumption,
       memory,
       inference,
+      elasticsearch,
     };
 
     return this.internalStart;

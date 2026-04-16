@@ -14,6 +14,7 @@ import type { MemoryNode } from '@kbn/agent-builder-common';
 import type { MemoryService } from '../memory_service';
 import { ActiveMemorySet } from '../active_memory_set';
 import { createGraphTraversalService } from '../graph/graph_traversal';
+import { runRetrieval } from '../retrieval/run_retrieval';
 
 /** Tool ID for the memory remember tool. */
 export const MEMORY_REMEMBER_TOOL_ID = 'memory.remember';
@@ -51,6 +52,12 @@ export interface RememberToolOptions {
   getMemoryService: () => MemoryService;
   /** Lazy getter for the active memory set for the current round. */
   getActiveMemorySet: () => ActiveMemorySet;
+  /** Retrieval method to use for query-based search (e.g. 'bm25'). */
+  retrievalMethod: string;
+  /** Full plugin config for retrieval context. */
+  getConfig: () => import('../../../config').AgentBuilderConfig;
+  /** Lazy getter for internal services (esClient, inference, etc.). */
+  getInternalServices: () => import('../../types').InternalStartServices;
 }
 
 /**
@@ -68,6 +75,9 @@ export interface RememberToolOptions {
 export const createRememberTool = ({
   getMemoryService,
   getActiveMemorySet,
+  retrievalMethod,
+  getConfig,
+  getInternalServices,
 }: RememberToolOptions): BuiltinToolDefinition<typeof rememberSchema> => ({
   id: MEMORY_REMEMBER_TOOL_ID,
   type: ToolType.builtin,
@@ -125,9 +135,16 @@ export const createRememberTool = ({
       }
     } else {
       try {
-        const searchResults = await memoryClient.search(query!, {
-          status: ['candidate', 'provisional', 'established', 'consolidated'],
+        const services = getInternalServices();
+        const config = getConfig();
+        const searchResults = await runRetrieval(retrievalMethod, memoryClient, query!, context.logger, {
           size: 1,
+          esClient: services.elasticsearch.client.asInternalUser,
+          space: '',
+          config,
+          inference: services.inference,
+          request: context.request,
+          connectorId: config.memory.extraction.connectorId,
         });
         if (searchResults.length === 0) {
           return {

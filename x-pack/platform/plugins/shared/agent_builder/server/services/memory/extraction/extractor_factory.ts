@@ -12,6 +12,7 @@ import type { AgentBuilderConfig } from '../../../config';
 import type { ExtractionInput, ExtractionResult } from './memory_extractor';
 import { MemoryExtractor } from './memory_extractor';
 import { ChunkingExtractor } from './chunking_extractor';
+import { TurnExtractor } from './turn_extractor';
 
 /**
  * Common interface for all memory extraction methods.
@@ -38,6 +39,7 @@ export interface ExtractionStrategyOptions {
  *
  * - 'llm': Uses MemoryExtractor (requires inference + connector + request)
  * - 'chunking': Uses ChunkingExtractor (no external dependencies)
+ * - 'turn': Uses TurnExtractor (one episodic memory per round, no external dependencies)
  */
 export const createExtractionStrategy = (
   opts: ExtractionStrategyOptions
@@ -67,6 +69,9 @@ export const createExtractionStrategy = (
         config: opts.config.memory.extraction.chunking,
         logger: opts.logger,
       });
+    }
+    case 'turn': {
+      return new TurnExtractor({ logger: opts.logger });
     }
     default: {
       opts.logger.warn(`Unknown memory extraction method "${method}", falling back to "chunking"`);

@@ -11,7 +11,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getUserFromRequest } from '../utils';
 import type { MemoryClient } from './client';
-import { createMemoryClient, ensureMemoryIndexWithEmbeddings } from './client';
+import { createMemoryClient, ensureMemoryIndexMappings } from './client';
 
 export interface MemoryService {
   getScopedClient(options: { request: KibanaRequest }): Promise<MemoryClient>;
@@ -41,9 +41,13 @@ export class MemoryServiceImpl implements MemoryService {
    * Initialize the memory index with the dense_vector embedding mapping.
    * Called once during plugin start.
    */
-  async initialize(): Promise<void> {
+  async initialize(opts?: { inferenceEndpointId?: string }): Promise<void> {
     const esClient = this.elasticsearch.client.asInternalUser;
-    await ensureMemoryIndexWithEmbeddings({ esClient, logger: this.logger });
+    await ensureMemoryIndexMappings({
+      esClient,
+      logger: this.logger,
+      inferenceEndpointId: opts?.inferenceEndpointId,
+    });
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<MemoryClient> {

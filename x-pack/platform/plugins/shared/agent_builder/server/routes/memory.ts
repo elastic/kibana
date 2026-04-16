@@ -268,6 +268,33 @@ export function registerMemoryRoutes({
     })
   );
 
+  // DELETE /internal/agent_builder/memory — delete ALL memories for the current user/space
+  router.delete(
+    {
+      path: MEMORY_BASE_PATH,
+      validate: {},
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_WRITE_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { memory } = getInternalServices();
+      const client = await memory.getScopedClient({ request });
+
+      // Fetch all memories and hard-delete them
+      let deleted = 0;
+      let batch = await client.list({ size: 100 });
+      while (batch.length > 0) {
+        for (const node of batch) {
+          await client.delete(node.id);
+          deleted++;
+        }
+        batch = await client.list({ size: 100 });
+      }
+
+      return response.ok({ body: { success: true, deleted } });
+    })
+  );
+
   // ---------------------------------------------------------------------------
   // Story 8.2 — Memory search route
   // ---------------------------------------------------------------------------

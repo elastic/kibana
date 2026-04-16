@@ -213,7 +213,8 @@ export class AgentBuilderPlugin
 
       registerMemoryBeforeAgentHook(serviceSetups, {
         logger: this.logger,
-        roundStartRetrieval: this.config.memory.roundStartRetrieval,
+        retrieval: this.config.memory.retrieval,
+        config: this.config,
         getInternalServices,
       });
 
@@ -271,6 +272,9 @@ export class AgentBuilderPlugin
           }
           return services.memory;
         },
+        retrievalMethod: this.config.memory.retrieval.method,
+        getConfig: () => this.config,
+        getInternalServices,
       });
       memoryTools.forEach((tool) => {
         serviceSetups.tools.register(tool);

@@ -23,7 +23,6 @@ import {
   createStorage,
   linksToStorage,
   sourceRefsToStorage,
-  addEmbeddingMappingIfMissing,
 } from './storage';
 import type { MemoryStorage, MemoryProperties } from './storage';
 
@@ -181,14 +180,18 @@ class MemoryClientImpl implements MemoryClient {
     const now = new Date().toISOString();
     const id = uuidv4();
 
+    const conversationId = req.source_refs?.[0]?.conversation_id;
+
     const doc: MemoryProperties = {
       space: this.space,
       user_id: this.userId,
       user_name: this.userName,
+      conversation_id: conversationId,
       type: req.type,
       subtype: req.subtype,
       summary: req.summary,
       full: req.full,
+      full_semantic: req.full,
       confidence: req.confidence,
       salience: req.salience ?? 0.5,
       recency: now,
@@ -204,13 +207,6 @@ class MemoryClientImpl implements MemoryClient {
     };
 
     await this.storage.getClient().index({ id, document: doc });
-
-    // Best-effort: ensure dense_vector mapping exists after first write
-    addEmbeddingMappingIfMissing({ esClient: this.esClient, logger: this.logger }).catch(
-      (err: Error) => {
-        this.logger.warn(`Failed to add embedding mapping: ${err.message}`);
-      }
-    );
 
     return this.get(id);
   }
@@ -294,10 +290,12 @@ class MemoryClientImpl implements MemoryClient {
             space: this.space,
             user_id: this.userId,
             user_name: this.userName,
+            conversation_id: req.source_refs?.[0]?.conversation_id,
             type: req.type,
             subtype: req.subtype,
             summary: req.summary,
             full: req.full,
+            full_semantic: req.full,
             confidence: req.confidence,
             salience: req.salience ?? 0.5,
             recency: now,
@@ -318,13 +316,6 @@ class MemoryClientImpl implements MemoryClient {
     const ids = operations.map((op) => op.index._id!);
 
     await this.storage.getClient().bulk({ operations });
-
-    // Best-effort: ensure dense_vector mapping exists
-    addEmbeddingMappingIfMissing({ esClient: this.esClient, logger: this.logger }).catch(
-      (err: Error) => {
-        this.logger.warn(`Failed to add embedding mapping: ${err.message}`);
-      }
-    );
 
     // Fetch created nodes
     const results = await Promise.allSettled(ids.map((id) => this.get(id)));

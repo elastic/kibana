@@ -15,47 +15,22 @@ import { getCurrentSpaceId } from '../../../utils/spaces';
 import { ActiveMemorySet } from '../active_memory_set';
 import type { ScoredMemoryNode } from '../retrieval/scoring';
 import { scoreMemoryNode, DEFAULT_RETRIEVAL_CONFIG } from '../retrieval/scoring';
+import type { AgentBuilderConfig } from '../../../config';
 import { getTokenBudgetForStage } from '../retrieval/retrieval_service';
-import type { MemoryClient } from '../client';
-
-/**
- * Run round-start retrieval using the configured method.
- * New methods can be added here as additional cases.
- */
-const runRetrieval = async (
-  method: string,
-  memoryClient: MemoryClient,
-  query: string,
-  logger: Logger
-): Promise<MemoryNode[]> => {
-  switch (method) {
-    case 'bm25':
-      return memoryClient.search(query, {
-        stage: 'round_start',
-        size: 20,
-        status: ['candidate', 'provisional', 'established', 'consolidated'],
-      });
-    default:
-      logger.warn(`memory.beforeAgent: unknown retrieval method "${method}", falling back to bm25`);
-      return memoryClient.search(query, {
-        stage: 'round_start',
-        size: 20,
-        status: ['candidate', 'provisional', 'established', 'consolidated'],
-      });
-  }
-};
+import { runRetrieval } from '../retrieval/run_retrieval';
 
 /**
  * Deps needed to register the before-agent memory injection hook.
  */
-export interface RoundStartRetrievalConfig {
-  enabled: boolean;
+export interface MemoryRetrievalConfig {
+  roundStartEnabled: boolean;
   method: string;
 }
 
 export interface RegisterMemoryBeforeAgentHookDeps {
   logger: Logger;
-  roundStartRetrieval: RoundStartRetrievalConfig;
+  retrieval: MemoryRetrievalConfig;
+  config: AgentBuilderConfig;
   getInternalServices: () => InternalStartServices;
 }
 
@@ -174,14 +149,14 @@ export const runMemoryBeforeAgentHook = async (
   context: BeforeAgentHookContext,
   deps: RegisterMemoryBeforeAgentHookDeps
 ): Promise<void | HookHandlerResult<HookLifecycle.beforeAgent>> => {
-  const { logger, roundStartRetrieval, getInternalServices } = deps;
+  const { logger, retrieval, getInternalServices } = deps;
 
-  if (!roundStartRetrieval.enabled) {
+  if (!retrieval.roundStartEnabled) {
     logger.info('memory.beforeAgent: round-start retrieval disabled via config');
     return;
   }
 
-  logger.info(`memory.beforeAgent: using retrieval method="${roundStartRetrieval.method}"`);
+  logger.info(`memory.beforeAgent: using retrieval method="${retrieval.method}"`);
 
   let services: InternalStartServices;
   try {
@@ -191,7 +166,7 @@ export const runMemoryBeforeAgentHook = async (
     return;
   }
 
-  const { memory, spaces } = services;
+  const { memory, spaces, inference, conversations } = services;
 
   const query = context.nextInput.message;
 
@@ -213,7 +188,28 @@ export const runMemoryBeforeAgentHook = async (
 
   let retrievedNodes: MemoryNode[] = [];
   try {
-    retrievedNodes = await runRetrieval(roundStartRetrieval.method, memoryClient, query, logger);
+    const space = getCurrentSpaceId({ request: context.request, spaces });
+
+    const convClient = await conversations.getScopedClient({ request: context.request });
+
+    retrievedNodes = await runRetrieval(retrieval.method, memoryClient, query, logger, {
+      stage: 'round_start',
+      size: 20,
+      esClient: services.elasticsearch.client.asInternalUser,
+      space,
+      userName: '',
+      config: deps.config,
+      inference,
+      request: context.request,
+      connectorId: deps.config.memory.extraction.connectorId,
+      loadConversation: async (id: string) => {
+        try {
+          return await convClient.get(id);
+        } catch {
+          return undefined;
+        }
+      },
+    });
   } catch (err) {
     logger.warn(`memory.beforeAgent: retrieval failed — ${(err as Error).message}`);
     return;

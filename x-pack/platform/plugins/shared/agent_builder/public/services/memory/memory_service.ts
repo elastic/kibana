@@ -169,6 +169,10 @@ export class MemoryService {
     return await this.http.delete<MemoryDeleteResponse>(`${MEMORY_BASE_PATH}/${id}`);
   }
 
+  async deleteAll(): Promise<{ success: boolean; deleted: number }> {
+    return await this.http.delete<{ success: boolean; deleted: number }>(MEMORY_BASE_PATH);
+  }
+
   async search(params: MemorySearchParams): Promise<MemorySearchResponse> {
     return await this.http.post<MemorySearchResponse>(`${MEMORY_BASE_PATH}/search`, {
       body: JSON.stringify({

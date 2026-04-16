@@ -7,4 +7,4 @@
 
 export type { MemoryClient } from './memory_client';
 export { createMemoryClient } from './memory_client';
-export { memoryIndexName, createStorage, ensureMemoryIndexWithEmbeddings } from './storage';
+export { memoryIndexName, createStorage, ensureMemoryIndexMappings } from './storage';

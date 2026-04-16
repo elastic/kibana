@@ -139,6 +139,40 @@ export const useMemoryDelete = ({
   });
 };
 
+export const useMemoryDeleteAll = ({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: () => void;
+  onError?: () => void;
+} = {}) => {
+  const { memoryService } = useAgentBuilderServices();
+  const queryClient = useQueryClient();
+  const { addSuccessToast, addErrorToast } = useToasts();
+
+  return useMutation({
+    mutationFn: () => memoryService.deleteAll(),
+    onSuccess: (data) => {
+      addSuccessToast({
+        title: i18n.translate('xpack.agentBuilder.memory.deleteAll.successToast', {
+          defaultMessage: 'All memories deleted ({count})',
+          values: { count: data.deleted },
+        }),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.memory.all });
+      onSuccess?.();
+    },
+    onError: () => {
+      addErrorToast({
+        title: i18n.translate('xpack.agentBuilder.memory.deleteAll.errorToast', {
+          defaultMessage: 'Failed to delete all memories',
+        }),
+      });
+      onError?.();
+    },
+  });
+};
+
 export const useMemoryCreate = ({
   onSuccess,
   onError,

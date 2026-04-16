@@ -13,6 +13,7 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import type { MemoryNode } from '@kbn/agent-builder-common';
 import type { MemoryService } from '../memory_service';
 import { ActiveMemorySet } from '../active_memory_set';
+import { runRetrieval } from '../retrieval/run_retrieval';
 
 /** Tool ID for the memory checkpoint tool. */
 export const MEMORY_CHECKPOINT_TOOL_ID = 'memory.checkpoint';
@@ -67,6 +68,12 @@ export interface CheckpointToolOptions {
   getMemoryService: () => MemoryService;
   /** Lazy getter for the active memory set for the current round. */
   getActiveMemorySet: () => ActiveMemorySet;
+  /** Retrieval method to use (e.g. 'bm25'). */
+  retrievalMethod: string;
+  /** Full plugin config for retrieval context. */
+  getConfig: () => import('../../../config').AgentBuilderConfig;
+  /** Lazy getter for internal services (esClient, inference, etc.). */
+  getInternalServices: () => import('../../types').InternalStartServices;
 }
 
 /**
@@ -80,6 +87,9 @@ export interface CheckpointToolOptions {
 export const createCheckpointTool = ({
   getMemoryService,
   getActiveMemorySet,
+  retrievalMethod,
+  getConfig,
+  getInternalServices,
 }: CheckpointToolOptions): BuiltinToolDefinition<typeof checkpointSchema> => ({
   id: MEMORY_CHECKPOINT_TOOL_ID,
   type: ToolType.builtin,
@@ -151,9 +161,17 @@ export const createCheckpointTool = ({
 
     let retrievedMemories: MemoryNode[];
     try {
-      retrievedMemories = await memoryClient.search(searchQuery, {
+      const services = getInternalServices();
+      const config = getConfig();
+      retrievedMemories = await runRetrieval(retrievalMethod, memoryClient, searchQuery, context.logger, {
         stage: 'tool_checkpoint',
         size: 10,
+        esClient: services.elasticsearch.client.asInternalUser,
+        space: '',
+        config,
+        inference: services.inference,
+        request: context.request,
+        connectorId: config.memory.extraction.connectorId,
       });
     } catch (err) {
       context.logger.warn(

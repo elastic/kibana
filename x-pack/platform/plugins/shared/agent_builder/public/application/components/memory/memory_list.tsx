@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import type { MemoryNode, MemoryType, MemoryStatus } from '@kbn/agent-builder-common';
 import { MemoryTypeBadge, MemoryStatusBadge } from './memory_type_badge';
 import { MemoryDetailFlyout } from './memory_detail_flyout';
-import { useMemoryList, useMemoryDelete } from '../../hooks/memory/use_memory_list';
+import { useMemoryList, useMemoryDelete, useMemoryDeleteAll } from '../../hooks/memory/use_memory_list';
 
 const pageTitle = i18n.translate('xpack.agentBuilder.memory.list.pageTitle', {
   defaultMessage: 'Memory',
@@ -109,6 +109,7 @@ const statusOptions = [
 export const AgentBuilderMemoryList: React.FC = () => {
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | undefined>(undefined);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | undefined>(undefined);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [searchText, setSearchText] = useState('');
 
   const {
@@ -128,6 +129,10 @@ export const AgentBuilderMemoryList: React.FC = () => {
 
   const { mutate: deleteMutation, isLoading: isDeleting } = useMemoryDelete({
     onSuccess: () => setPendingDeleteId(undefined),
+  });
+
+  const { mutate: deleteAllMutation, isLoading: isDeletingAll } = useMemoryDeleteAll({
+    onSuccess: () => setShowDeleteAllConfirm(false),
   });
 
   const handleDelete = useCallback((id: string) => {
@@ -286,6 +291,19 @@ export const AgentBuilderMemoryList: React.FC = () => {
                 defaultMessage: 'Refresh',
               })}
             </EuiButton>,
+            <EuiButton
+              key="deleteAll"
+              iconType="trash"
+              color="danger"
+              onClick={() => setShowDeleteAllConfirm(true)}
+              isLoading={isDeletingAll}
+              isDisabled={total === 0}
+              data-test-subj="agentBuilderMemoryListDeleteAll"
+            >
+              {i18n.translate('xpack.agentBuilder.memory.list.deleteAllButton', {
+                defaultMessage: 'Delete all',
+              })}
+            </EuiButton>,
           ]}
         />
         <KibanaPageTemplate.Section>
@@ -376,6 +394,37 @@ export const AgentBuilderMemoryList: React.FC = () => {
           onClose={() => setSelectedMemoryId(undefined)}
           onOpenMemory={setSelectedMemoryId}
         />
+      )}
+
+      {showDeleteAllConfirm && (
+        <EuiConfirmModal
+          title={i18n.translate('xpack.agentBuilder.memory.list.deleteAllModal.title', {
+            defaultMessage: 'Delete all memories',
+          })}
+          onCancel={() => setShowDeleteAllConfirm(false)}
+          onConfirm={() => deleteAllMutation()}
+          cancelButtonText={i18n.translate(
+            'xpack.agentBuilder.memory.list.deleteAllModal.cancelButton',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.agentBuilder.memory.list.deleteAllModal.confirmButton',
+            { defaultMessage: 'Delete all' }
+          )}
+          buttonColor="danger"
+          isLoading={isDeletingAll}
+          data-test-subj="agentBuilderMemoryDeleteAllModal"
+        >
+          <EuiText>
+            <p>
+              {i18n.translate('xpack.agentBuilder.memory.list.deleteAllModal.body', {
+                defaultMessage:
+                  'This will permanently delete all {count} memories. This action cannot be undone.',
+                values: { count: total },
+              })}
+            </p>
+          </EuiText>
+        </EuiConfirmModal>
       )}
 
       {pendingDeleteId && (
