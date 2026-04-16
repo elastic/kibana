@@ -52,7 +52,7 @@ steps:
       message: "Hello"
 `;
 
-spaceTest.describe('Import/Export edge cases', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Import/Export edge cases', { tag: tags.stateful.classic }, () => {
   let workflowsApi: WorkflowsApiService;
 
   spaceTest.beforeAll(async ({ apiServices }) => {

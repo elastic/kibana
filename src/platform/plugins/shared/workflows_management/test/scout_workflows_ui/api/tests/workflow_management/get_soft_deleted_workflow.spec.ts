@@ -40,7 +40,7 @@ steps:
 
 spaceTest.describe(
   'GET workflow should not return soft-deleted workflows',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.stateful.classic },
   () => {
     let workflowsApi: WorkflowsApiService;
 

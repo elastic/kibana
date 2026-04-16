@@ -100,7 +100,7 @@ steps:
       message: "Count: $\{{inputs.count}}"
 `;
 
-spaceTest.describe('Input validation', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Input validation', { tag: tags.stateful.classic }, () => {
   let workflowsApi: WorkflowsApiService;
 
   spaceTest.beforeAll(async ({ apiServices }) => {

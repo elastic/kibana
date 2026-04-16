@@ -131,132 +131,128 @@ steps:
       message: "Should not execute"
 `;
 
-spaceTest.describe(
-  'Execution lifecycle and error handling',
-  { tag: tags.deploymentAgnostic },
-  () => {
-    let workflowsApi: WorkflowsApiService;
+spaceTest.describe('Execution lifecycle and error handling', { tag: tags.stateful.classic }, () => {
+  let workflowsApi: WorkflowsApiService;
 
-    spaceTest.beforeAll(async ({ apiServices }) => {
-      spaceTest.setTimeout(120_000);
-      workflowsApi = apiServices.workflowsApi;
+  spaceTest.beforeAll(async ({ apiServices }) => {
+    spaceTest.setTimeout(120_000);
+    workflowsApi = apiServices.workflowsApi;
+  });
+
+  spaceTest.afterAll(async () => {
+    await workflowsApi.deleteAll();
+  });
+
+  // BUG: cancel during wait step does not terminate — execution stays non-terminal
+  // until the wait duration expires. See https://github.com/elastic/security-team/issues/16621
+  spaceTest.skip('cancel during wait step terminates execution', async () => {
+    spaceTest.setTimeout(120_000);
+    const workflow = await workflowsApi.create(CANCEL_DURING_WAIT_YAML);
+
+    const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});
+
+    await waitForConditionOrThrow({
+      action: () => workflowsApi.getExecution(workflowExecutionId),
+      condition: (exec) => (exec?.stepExecutions?.length ?? 0) >= 1,
+      interval: 500,
+      timeout: 10_000,
+      errorMessage: 'Execution did not start first step within timeout',
     });
 
-    spaceTest.afterAll(async () => {
-      await workflowsApi.deleteAll();
+    await workflowsApi.cancel(workflowExecutionId);
+
+    const execution = await workflowsApi.waitForTermination({
+      workflowExecutionId,
+      timeout: 90_000,
     });
 
-    // BUG: cancel during wait step does not terminate — execution stays non-terminal
-    // until the wait duration expires. See https://github.com/elastic/security-team/issues/16621
-    spaceTest.skip('cancel during wait step terminates execution', async () => {
-      spaceTest.setTimeout(120_000);
-      const workflow = await workflowsApi.create(CANCEL_DURING_WAIT_YAML);
+    expect(execution?.status).toBe(ExecutionStatus.CANCELLED);
+    const stepIds = execution?.stepExecutions.map((s) => s.stepId) ?? [];
+    expect(stepIds).not.toContain('end_log');
+  });
+
+  spaceTest('cancel during foreach terminates and stops iterations', async () => {
+    const workflow = await workflowsApi.create(CANCEL_DURING_FOREACH_YAML);
+
+    const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});
+
+    await waitForConditionOrThrow({
+      action: () => workflowsApi.getExecution(workflowExecutionId),
+      condition: (exec) => (exec?.stepExecutions?.length ?? 0) >= 3,
+      interval: 500,
+      timeout: 15_000,
+      errorMessage: 'Foreach did not start iterating within timeout',
+    });
+
+    await workflowsApi.cancel(workflowExecutionId);
+
+    const execution = await workflowsApi.waitForTermination({
+      workflowExecutionId,
+      timeout: 30_000,
+    });
+
+    expect(execution?.status).toBe(ExecutionStatus.CANCELLED);
+    const iterationSteps = execution?.stepExecutions.filter((s) => s.stepId === 'log_iteration');
+    expect(iterationSteps?.length ?? 0).toBeLessThan(10);
+  });
+
+  spaceTest('on-failure continue allows execution to proceed past failing step', async () => {
+    const workflow = await workflowsApi.create(ON_FAILURE_CONTINUE_YAML);
+
+    const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});
+    const execution = await workflowsApi.waitForTermination({ workflowExecutionId });
+
+    expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+    const stepIds = execution?.stepExecutions.map((s) => s.stepId) ?? [];
+    expect(stepIds).toContain('after_failure');
+
+    const failedStep = execution?.stepExecutions.find((s) => s.stepId === 'failing_step');
+    expect(failedStep?.status).toBe(ExecutionStatus.FAILED);
+  });
+
+  spaceTest('on-failure default behavior stops execution', async () => {
+    const workflow = await workflowsApi.create(ON_FAILURE_STOP_YAML);
+
+    const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});
+    const execution = await workflowsApi.waitForTermination({ workflowExecutionId });
+
+    expect(execution?.status).toBe(ExecutionStatus.FAILED);
+    const stepIds = execution?.stepExecutions.map((s) => s.stepId) ?? [];
+    expect(stepIds).not.toContain('should_not_run');
+  });
+
+  spaceTest(
+    'on-failure continue inside foreach — continues to next iteration and after loop',
+    async () => {
+      const workflow = await workflowsApi.create(ON_FAILURE_IN_FOREACH_YAML);
 
       const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});
-
-      await waitForConditionOrThrow({
-        action: () => workflowsApi.getExecution(workflowExecutionId),
-        condition: (exec) => (exec?.stepExecutions?.length ?? 0) >= 1,
-        interval: 500,
-        timeout: 10_000,
-        errorMessage: 'Execution did not start first step within timeout',
-      });
-
-      await workflowsApi.cancel(workflowExecutionId);
-
-      const execution = await workflowsApi.waitForTermination({
-        workflowExecutionId,
-        timeout: 90_000,
-      });
-
-      expect(execution?.status).toBe(ExecutionStatus.CANCELLED);
-      const stepIds = execution?.stepExecutions.map((s) => s.stepId) ?? [];
-      expect(stepIds).not.toContain('end_log');
-    });
-
-    spaceTest('cancel during foreach terminates and stops iterations', async () => {
-      const workflow = await workflowsApi.create(CANCEL_DURING_FOREACH_YAML);
-
-      const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});
-
-      await waitForConditionOrThrow({
-        action: () => workflowsApi.getExecution(workflowExecutionId),
-        condition: (exec) => (exec?.stepExecutions?.length ?? 0) >= 3,
-        interval: 500,
-        timeout: 15_000,
-        errorMessage: 'Foreach did not start iterating within timeout',
-      });
-
-      await workflowsApi.cancel(workflowExecutionId);
-
       const execution = await workflowsApi.waitForTermination({
         workflowExecutionId,
         timeout: 30_000,
       });
 
-      expect(execution?.status).toBe(ExecutionStatus.CANCELLED);
-      const iterationSteps = execution?.stepExecutions.filter((s) => s.stepId === 'log_iteration');
-      expect(iterationSteps?.length ?? 0).toBeLessThan(10);
-    });
-
-    spaceTest('on-failure continue allows execution to proceed past failing step', async () => {
-      const workflow = await workflowsApi.create(ON_FAILURE_CONTINUE_YAML);
-
-      const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});
-      const execution = await workflowsApi.waitForTermination({ workflowExecutionId });
-
       expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
       const stepIds = execution?.stepExecutions.map((s) => s.stepId) ?? [];
-      expect(stepIds).toContain('after_failure');
+      expect(stepIds).toContain('after_loop');
 
-      const failedStep = execution?.stepExecutions.find((s) => s.stepId === 'failing_step');
-      expect(failedStep?.status).toBe(ExecutionStatus.FAILED);
-    });
+      const failedSteps = execution?.stepExecutions.filter(
+        (s) => s.stepId === 'maybe_fail' && s.status === ExecutionStatus.FAILED
+      );
+      expect(failedSteps?.length ?? 0).toBe(3);
+    }
+  );
 
-    spaceTest('on-failure default behavior stops execution', async () => {
-      const workflow = await workflowsApi.create(ON_FAILURE_STOP_YAML);
+  spaceTest('running a disabled workflow should fail or be rejected', async () => {
+    const workflow = await workflowsApi.create(DISABLED_WORKFLOW_YAML);
 
-      const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});
-      const execution = await workflowsApi.waitForTermination({ workflowExecutionId });
+    let rejected = false;
+    try {
+      await workflowsApi.run(workflow.id, {});
+    } catch {
+      rejected = true;
+    }
 
-      expect(execution?.status).toBe(ExecutionStatus.FAILED);
-      const stepIds = execution?.stepExecutions.map((s) => s.stepId) ?? [];
-      expect(stepIds).not.toContain('should_not_run');
-    });
-
-    spaceTest(
-      'on-failure continue inside foreach — continues to next iteration and after loop',
-      async () => {
-        const workflow = await workflowsApi.create(ON_FAILURE_IN_FOREACH_YAML);
-
-        const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});
-        const execution = await workflowsApi.waitForTermination({
-          workflowExecutionId,
-          timeout: 30_000,
-        });
-
-        expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
-        const stepIds = execution?.stepExecutions.map((s) => s.stepId) ?? [];
-        expect(stepIds).toContain('after_loop');
-
-        const failedSteps = execution?.stepExecutions.filter(
-          (s) => s.stepId === 'maybe_fail' && s.status === ExecutionStatus.FAILED
-        );
-        expect(failedSteps?.length ?? 0).toBe(3);
-      }
-    );
-
-    spaceTest('running a disabled workflow should fail or be rejected', async () => {
-      const workflow = await workflowsApi.create(DISABLED_WORKFLOW_YAML);
-
-      let rejected = false;
-      try {
-        await workflowsApi.run(workflow.id, {});
-      } catch {
-        rejected = true;
-      }
-
-      expect(rejected).toBe(true);
-    });
-  }
-);
+    expect(rejected).toBe(true);
+  });
+});

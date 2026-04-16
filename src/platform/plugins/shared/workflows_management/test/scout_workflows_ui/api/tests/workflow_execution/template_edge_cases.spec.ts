@@ -132,7 +132,7 @@ steps:
       message: "After empty loop"
 `;
 
-spaceTest.describe('Template engine edge cases', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Template engine edge cases', { tag: tags.stateful.classic }, () => {
   let workflowsApi: WorkflowsApiService;
 
   spaceTest.beforeAll(async ({ apiServices }) => {

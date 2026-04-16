@@ -116,7 +116,7 @@ steps:
       workflow-id: "workflow-00000000-0000-0000-0000-000000000000"
 `;
 
-spaceTest.describe('Workflow composition edge cases', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Workflow composition edge cases', { tag: tags.stateful.classic }, () => {
   let workflowsApi: WorkflowsApiService;
 
   spaceTest.beforeAll(async ({ apiServices }) => {

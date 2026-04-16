@@ -25,7 +25,7 @@ steps:
       message: "hello"
 `;
 
-spaceTest.describe('Bulk delete workflows API', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Bulk delete workflows API', { tag: tags.stateful.classic }, () => {
   let workflowsApi: WorkflowsApiService;
 
   spaceTest.beforeAll(async ({ apiServices }) => {

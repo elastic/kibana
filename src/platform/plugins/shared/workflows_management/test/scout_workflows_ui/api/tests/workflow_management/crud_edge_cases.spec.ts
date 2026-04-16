@@ -61,7 +61,7 @@ steps:
       message: "hello"
 `;
 
-spaceTest.describe('Workflow management CRUD edge cases', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Workflow management CRUD edge cases', { tag: tags.stateful.classic }, () => {
   let workflowsApi: WorkflowsApiService;
 
   spaceTest.beforeAll(async ({ apiServices }) => {

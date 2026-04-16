@@ -196,7 +196,7 @@ steps:
           message: "EMPTY_DEFAULT"
 `;
 
-spaceTest.describe('Switch step execution', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Switch step execution', { tag: tags.stateful.classic }, () => {
   let workflowsApi: WorkflowsApiService;
 
   spaceTest.beforeAll(async ({ apiServices }) => {
