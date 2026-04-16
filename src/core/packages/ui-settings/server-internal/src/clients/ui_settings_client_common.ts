@@ -46,18 +46,20 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     this.namespace = namespace;
   }
 
-  async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    // Check shared process-wide cache
-    if (this.sharedUserProvidedCache) {
-      const sharedCached = this.sharedUserProvidedCache.get(this.namespace);
-      if (sharedCached) {
-        return this.applyOverrides(sharedCached);
-      }
-
+  async getUserProvided<T = unknown>(bypassCache = false): Promise<UserProvided<T>> {
+    if (this.sharedUserProvidedCache && !bypassCache) {
       // check for in-flight read request (deduplication)
       const inflightRead = this.sharedUserProvidedCache.getInflightRead(this.namespace);
       if (inflightRead) {
+        this.log.debug(
+          `[UiSettings] getUserProvided using existing in-flight read for namespace=${this.namespace}`
+        );
         return this.applyOverrides(await inflightRead);
+      }
+
+      const sharedCached = this.sharedUserProvidedCache.get(this.namespace);
+      if (sharedCached) {
+        return this.applyOverrides(sharedCached);
       }
 
       this.log.debug(
@@ -66,11 +68,14 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     }
 
     // Fetch from ES, process, and cache
-    const promise = this.computeUserProvided<T>();
+    const promise = this.computeUserProvided<T>(bypassCache);
 
-    // Register in-flight promise for deduplication
-    if (this.sharedUserProvidedCache) {
-      this.sharedUserProvidedCache.setInflightRead(this.namespace, promise);
+    if (!bypassCache) {
+      // Register in-flight promise for deduplication
+      //
+      // if the cache is being bypassed, we don't want to register the promise as other
+      // calls should not wait for it but should use the existing cache entry until it is updated
+      this.sharedUserProvidedCache?.setInflightRead(this.namespace, promise);
     }
 
     return this.applyOverrides(await promise);
@@ -85,13 +90,10 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     return result;
   }
 
-  private async computeUserProvided<T = unknown>(): Promise<UserProvided<T>> {
+  private async computeUserProvided<T = unknown>(bypassCache = false): Promise<UserProvided<T>> {
     const userProvided: UserProvided<T> = this.onReadHook(await this.read());
 
-    // Cache at shared level (cross-request)
-    if (this.sharedUserProvidedCache) {
-      this.sharedUserProvidedCache.set(this.namespace, userProvided);
-    }
+    this.sharedUserProvidedCache?.set(this.namespace, userProvided);
 
     return userProvided;
   }
