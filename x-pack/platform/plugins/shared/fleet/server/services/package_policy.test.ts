@@ -1554,6 +1554,42 @@ describe('Package policy service', () => {
   });
 
   describe('list', () => {
+    it('should use NOT latest_revision:false filter to include 8.x policies without the field', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        page: 1,
+        per_page: 20,
+        saved_objects: [],
+      });
+
+      await packagePolicyService.list(soClient, {});
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
+        })
+      );
+    });
+
+    it('should combine user kuery with NOT latest_revision:false filter', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        page: 1,
+        per_page: 20,
+        saved_objects: [],
+      });
+
+      await packagePolicyService.list(soClient, { kuery: 'ingest-package-policies.name: nginx' });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false AND (ingest-package-policies.attributes.name: nginx)`,
+        })
+      );
+    });
+
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
       soClient.find.mockResolvedValueOnce({
@@ -7739,7 +7775,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
         })
       );
     });
@@ -7759,7 +7795,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true AND (one=two)`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false AND (one=two)`,
         })
       );
     });
@@ -7813,7 +7849,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
         })
       );
     });
@@ -7831,7 +7867,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
+          filter: `NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
         })
       );
     });
@@ -7852,7 +7888,7 @@ describe('Package policy service', () => {
           perPage: 12,
           sortField: 'updated_by',
           sortOrder: 'desc',
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true AND (one=two)`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false AND (one=two)`,
         })
       );
     });
@@ -9024,5 +9060,269 @@ describe('_getAssetForTemplatePath()', () => {
     };
     const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, templatePath);
     expect(asset).toEqual(expectedFallbackAsset);
+  });
+});
+
+describe('compilePackagePolicyForVersions()', () => {
+  const mockRecompileInputsWithAgentVersion =
+    recompileInputsWithAgentVersion as jest.MockedFunction<typeof recompileInputsWithAgentVersion>;
+  const mockGetAgentVersionsForVersionSpecificPolicies =
+    getAgentVersionsForVersionSpecificPolicies as jest.MockedFunction<
+      typeof getAgentVersionsForVersionSpecificPolicies
+    >;
+
+  // An assetsMap that triggers hasAgentVersionConditionInInputTemplate to return true
+  const versionConditionAssetsMap = new Map([
+    [
+      'pkg-1.0.0/data_stream/logs/agent/stream/stream.yml.hbs',
+      Buffer.from('{{#semverSatisfies _meta.agent.version "^9.0.0"}}enabled{{/semverSatisfies}}'),
+    ],
+  ]) as PackagePolicyAssetsMap;
+
+  const mockPackageInfo = { name: 'test', version: '1.0.0' } as PackageInfo;
+  const mockPackagePolicy = { id: 'pkg-policy-1' } as PackagePolicy;
+
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    } as any);
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    mockRecompileInputsWithAgentVersion.mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    jest.clearAllMocks();
+  });
+
+  const makeSoClient = (existingInputsForVersions: Record<string, any> = {}) => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.get.mockResolvedValue({
+      id: 'pkg-policy-1',
+      type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: { inputs_for_versions: existingInputsForVersions },
+    } as any);
+    soClient.update.mockResolvedValue({} as any);
+    return soClient;
+  };
+
+  describe('async task path (agentVersions provided)', () => {
+    it('skips recompilation and SO update when all requested versions already exist in inputs_for_versions', async () => {
+      const soClient = makeSoClient({ '8.18': [{ type: 'logfile' }] });
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy,
+        ['8.18']
+      );
+
+      expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('compiles only versions missing from inputs_for_versions', async () => {
+      const soClient = makeSoClient({ '8.18': [{ type: 'logfile' }] });
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy,
+        ['8.18', '9.3']
+      );
+
+      // 8.18 already compiled - only 9.3 should be recompiled
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(1);
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledWith(
+        mockPackageInfo,
+        mockPackagePolicy,
+        '9.3',
+        soClient
+      );
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        mockPackagePolicy.id,
+        expect.objectContaining({
+          inputs_for_versions: expect.objectContaining({ '8.18': expect.anything(), '9.3': [] }),
+        })
+      );
+    });
+
+    it('compiles all requested versions when none exist in inputs_for_versions', async () => {
+      const soClient = makeSoClient({});
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy,
+        ['8.18', '9.3']
+      );
+
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('create/update path (no agentVersions)', () => {
+    it('recompiles default versions plus any previously stored extra versions', async () => {
+      mockGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.3', '9.4']);
+      // 8.18 is an older version previously stored from an agent that enrolled
+      const soClient = makeSoClient({ '8.18': [{ type: 'logfile' }] });
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy
+      );
+
+      // Should compile for 9.3, 9.4 (defaults) and 8.18 (existing stored version)
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(3);
+      const calledVersions = mockRecompileInputsWithAgentVersion.mock.calls.map(
+        ([, , version]) => version
+      );
+      expect(calledVersions).toEqual(expect.arrayContaining(['9.3', '9.4', '8.18']));
+    });
+
+    it('compiles only default versions when no extra versions are stored', async () => {
+      mockGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.3', '9.4']);
+      const soClient = makeSoClient({});
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy
+      );
+
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(2);
+      const calledVersions = mockRecompileInputsWithAgentVersion.mock.calls.map(
+        ([, , version]) => version
+      );
+      expect(calledVersions).toEqual(expect.arrayContaining(['9.3', '9.4']));
+    });
+
+    it('deduplicates versions when an existing stored version matches a default version', async () => {
+      mockGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.3', '9.4']);
+      // 9.3 is both a default version and already stored
+      const soClient = makeSoClient({ '9.3': [{ type: 'logfile' }] });
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy
+      );
+
+      // Should compile 9.3 and 9.4 - no duplicates
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(2);
+    });
+  });
+});
+
+describe('getCompiledVersionsForAgentPolicy()', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    } as any);
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    jest.clearAllMocks();
+  });
+
+  it('returns empty array when feature flag is disabled', async () => {
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: false,
+    } as any);
+    const soClient = savedObjectsClientMock.create();
+
+    const result = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(result).toEqual([]);
+    expect(soClient.find).not.toHaveBeenCalled();
+  });
+
+  it('uses NOT latest_revision:false filter so 8.x policies are included', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      per_page: 10000,
+      page: 1,
+    });
+
+    await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.stringContaining('NOT'),
+      })
+    );
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.not.stringContaining('latest_revision:true'),
+      })
+    );
+  });
+
+  it('returns empty array when no package policies have inputs_for_versions', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes: { inputs_for_versions: undefined },
+        },
+      ],
+      total: 1,
+      per_page: 100,
+      page: 1,
+    } as any);
+
+    const result = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(result).toEqual([]);
+  });
+
+  it('returns the union of all inputs_for_versions keys across package policies', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes: { inputs_for_versions: { '9.1': [], '8.18': [] } },
+        },
+        {
+          id: 'pp-2',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          // 8.18 appears in both — should be deduplicated
+          attributes: { inputs_for_versions: { '8.18': [], '9.3': [] } },
+        },
+      ],
+      total: 2,
+      per_page: 100,
+      page: 1,
+    } as any);
+
+    const result = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(result).toHaveLength(3);
+    expect(result).toEqual(expect.arrayContaining(['9.1', '8.18', '9.3']));
   });
 });
