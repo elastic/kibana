@@ -14,9 +14,11 @@ import { serializeEditorContent } from './serialize';
 import {
   createCommandRange,
   createTextFragment,
+  ensureCaretTargetBeforeFirstBadge,
   insertSpaceAfter,
   placeCursorAfter,
   placeCursorAtEnd,
+  stripZeroWidthSpaces,
 } from './utils';
 
 export interface MessageEditorInstance {
@@ -64,10 +66,17 @@ const useMessageEditorInstance = ({
   const messageEditor = useMemo(
     () => ({
       ref,
-      // Sync empty state and re-evaluate command menu on every input change
+      // Sync empty state, maintain caret targets, and re-evaluate command menu on every input change
       onChange: () => {
         syncIsEmpty();
         if (ref.current) {
+          if (ensureCaretTargetBeforeFirstBadge(ref.current)) {
+            const sel = window.getSelection();
+            const zwsNode = ref.current.firstChild;
+            if (sel && zwsNode instanceof Text) {
+              placeCursorAfter(zwsNode, sel);
+            }
+          }
           checkInputForCommand(ref.current);
         }
       },
@@ -100,6 +109,7 @@ const useMessageEditorInstance = ({
 
         const badge = createCommandBadgeElement(selection);
         commandRange.insertNode(badge);
+        ensureCaretTargetBeforeFirstBadge(ref.current);
 
         const space = insertSpaceAfter(badge, ref.current);
         placeCursorAfter(space, sel);
@@ -166,6 +176,7 @@ const useMessageEditorController = ({
           }
         }
 
+        ensureCaretTargetBeforeFirstBadge(ref.current);
         syncIsEmpty();
         placeCursorAtEnd(ref.current);
       },
@@ -212,7 +223,8 @@ export const useMessageEditor = (
     if (!ref?.current) {
       return;
     }
-    const nextIsEmpty = !ref.current.textContent || ref.current.textContent.trim() === '';
+    const textContent = stripZeroWidthSpaces(ref.current.textContent ?? '');
+    const nextIsEmpty = !textContent || textContent.trim() === '';
     if (nextIsEmpty) {
       // If current text content is empty clear innerHTML
       // This is required so the :empty pseudo-class gets reset and the placeholder is shown
