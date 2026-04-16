@@ -21,7 +21,6 @@ import { createSloAttachmentType } from './slo';
 import { createHostAttachmentType } from './host';
 import { createTransactionAttachmentType } from './transaction';
 import { createMonitorAttachmentType } from './monitor';
-import { createServiceMapAttachmentType } from './service_map';
 
 export async function registerAttachments({
   core,
@@ -44,7 +43,6 @@ export async function registerAttachments({
     createHostAttachmentType({ logger, dataRegistry }),
     createTransactionAttachmentType({ logger, dataRegistry }),
     createMonitorAttachmentType({ logger, dataRegistry }),
-    createServiceMapAttachmentType(),
   ];
 
   for (const attachment of attachmentTypes) {

@@ -8,37 +8,28 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ComponentType } from 'react';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { SERVICE_MAP_ATTACHMENT_TYPE } from '../../common/attachments';
-import type { ServiceMapAttachmentData } from '../../common/attachments';
-import type { ServiceMapRendererProps } from '../types';
+import {
+  SERVICE_MAP_ATTACHMENT_TYPE,
+  type ServiceMapAttachmentData,
+} from '../../../common/agent_builder/attachments';
+import { LazyAgentServiceMap } from './lazy_agent_service_map';
 
 type ServiceMapAttachment = Attachment<
   typeof SERVICE_MAP_ATTACHMENT_TYPE,
   ServiceMapAttachmentData
 >;
 
-export const registerServiceMapAttachment = ({
-  attachments,
-  getServiceMapComponent,
-}: {
-  attachments: AttachmentServiceStartContract;
-  getServiceMapComponent: () => ComponentType<ServiceMapRendererProps> | null;
-}) => {
+export const registerServiceMapAttachment = (attachments: AttachmentServiceStartContract) => {
   attachments.addAttachmentType<ServiceMapAttachment>(SERVICE_MAP_ATTACHMENT_TYPE, {
     getLabel: (attachment) =>
       attachment.data?.title ??
-      i18n.translate('xpack.observabilityAgentBuilder.attachments.serviceMap.label', {
+      i18n.translate('xpack.apm.agentBuilder.attachments.serviceMap.label', {
         defaultMessage: 'Service Map',
       }),
     getIcon: () => 'graphApp',
     renderInlineContent: ({ attachment }) => {
-      const ServiceMapCanvas = getServiceMapComponent();
-      if (!ServiceMapCanvas) {
-        return null;
-      }
       return (
         <div
           css={css`
@@ -46,7 +37,7 @@ export const registerServiceMapAttachment = ({
             height: 500px;
           `}
         >
-          <ServiceMapCanvas connections={attachment.data.connections} />
+          <LazyAgentServiceMap connections={attachment.data.connections} />
         </div>
       );
     },

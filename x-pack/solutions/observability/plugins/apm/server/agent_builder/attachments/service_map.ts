@@ -10,7 +10,7 @@ import {
   SERVICE_MAP_ATTACHMENT_TYPE,
   serviceMapAttachmentDataSchema,
   type ServiceMapAttachmentData,
-} from '../../common/attachments';
+} from '../../../common/agent_builder/attachments';
 
 export const createServiceMapAttachmentType = (): AttachmentTypeDefinition<
   typeof SERVICE_MAP_ATTACHMENT_TYPE,

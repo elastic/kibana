@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { ServiceMapAttachmentData } from '@kbn/observability-agent-builder-plugin/common/attachments';
+import type { ServiceMapAttachmentData } from '../../../common/agent_builder/attachments';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from '../../components/shared/service_map/test_helpers';
 import { AgentServiceMap, formatEdgeLabel } from './agent_service_map';
 

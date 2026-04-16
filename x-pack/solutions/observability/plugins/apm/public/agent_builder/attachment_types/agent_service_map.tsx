@@ -20,7 +20,7 @@ import {
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import '@xyflow/react/dist/style.css';
-import type { ServiceMapAttachmentData } from '@kbn/observability-agent-builder-plugin/common/attachments';
+import type { ServiceMapAttachmentData } from '../../../common/agent_builder/attachments';
 import { ServiceNode } from '../../components/shared/service_map/service_node';
 import { DependencyNode } from '../../components/shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../components/shared/service_map/grouped_resources_node';
