@@ -68,13 +68,19 @@ export const entityMaintainerRouteHelpersFactory = (
   return {
     getMaintainers,
 
-    initMaintainers: async (expectStatusCode: number = 200) => {
+    initMaintainers: async ({
+      expectStatusCode = 200,
+      autoStart,
+    }: {
+      expectStatusCode?: number;
+      autoStart?: boolean;
+    } = {}) => {
       const response = await withHeaders(
         supertest.post(
           routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, namespace)
         )
       )
-        .send()
+        .send(autoStart === undefined ? {} : { autoStart })
         .expect((res) => {
           if (res.status !== expectStatusCode) {
             throw new Error(
@@ -88,6 +94,17 @@ export const entityMaintainerRouteHelpersFactory = (
     runMaintainer: async (id: string, expectStatusCode: number = 200) => {
       const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN.replace('{id}', id);
       const response = await withHeaders(supertest.post(routeWithNamespace(route, namespace)))
+        .send()
+        .expect(expectStatusCode);
+      return response;
+    },
+
+    runMaintainerSync: async (id: string, expectStatusCode: number = 200) => {
+      const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN.replace('{id}', id);
+      const response = await withHeaders(
+        supertest.post(routeWithNamespace(route, namespace)).query({ sync: 'true' })
+      )
+        .timeout(10 * 60 * 1000)
         .send()
         .expect(expectStatusCode);
       return response;
@@ -123,6 +140,7 @@ export const waitForMaintainerRun = async ({
   minRuns = 1,
   maintainerId = 'risk-score',
   timeoutMs = 60_000,
+  triggerRun = true,
 }: {
   retry: RetryServiceLike;
   routes: Pick<
@@ -132,7 +150,28 @@ export const waitForMaintainerRun = async ({
   minRuns?: number;
   maintainerId?: string;
   timeoutMs?: number;
+  triggerRun?: boolean;
 }): Promise<void> => {
+  // Wait for the runs count to stabilise across two consecutive polls so the
+  // task is idle before we capture the baseline and trigger a new run.
+  // This prevents race conditions where runSoon silently swallows a 409 conflict
+  // if the task is already running.
+  let lastSeenRuns = -1;
+  await retry.waitForWithTimeout(
+    `Entity maintainer "${maintainerId}" to settle before run`,
+    30_000,
+    async () => {
+      const response = await routes.getMaintainers(200, [maintainerId]);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; runs: number }) => m.id === maintainerId
+      );
+      const runs = maintainer?.runs ?? 0;
+      if (runs === lastSeenRuns) return true;
+      lastSeenRuns = runs;
+      return false;
+    }
+  );
+
   // Capture current runs count so we wait for an actual NEW run,
   // not a stale count from a previous test.
   let baselineRuns = 0;
@@ -147,7 +186,7 @@ export const waitForMaintainerRun = async ({
   }
 
   let requiredNewRuns = minRuns;
-  let manualRunTriggered = false;
+  let manualRunTriggered = !triggerRun;
   let alreadyRunningHandled = false;
 
   await retry.waitForWithTimeout(
@@ -188,7 +227,7 @@ export const waitForMaintainerRun = async ({
   // state, a version_conflict_engine_exception wedges the task permanently.
   // Wait for the runs count to stabilise across two consecutive polls so the
   // task is idle before we hand control back.
-  let lastSeenRuns = -1;
+  lastSeenRuns = -1;
   await retry.waitForWithTimeout(
     `Entity maintainer "${maintainerId}" to settle after run`,
     30_000,
