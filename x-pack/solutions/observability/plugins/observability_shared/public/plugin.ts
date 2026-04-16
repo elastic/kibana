@@ -46,8 +46,6 @@ import {
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
 
-export const OBSERVABILITY_SESSION_TAG = 'observability';
-
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }

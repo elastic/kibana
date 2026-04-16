@@ -72,18 +72,9 @@ When using `agent_builder`, you can optionally specify which agent to invoke usi
 
 #### Local Setup for Agent Builder Evaluations
 
-The Scout server **cannot be used for Elastic AI Agent evaluations**, because the Elastic AI Agent requires a feature flag enabled at Kibana start time. Instead, run evaluations against a local Kibana instance:
+Run Agent Builder evaluations against a local Kibana instance using these steps:
 
-**1. Enable AI Agents (Agent Builder)**
-
-Add the following to your Kibana config file (e.g., `config/kibana.dev.yml`):
-
-```yaml
-feature_flags.overrides:
-  aiAssistant.aiAgents.enabled: true
-```
-
-**2. Start Kibana without base path**
+**1. Start Kibana without base path**
 
 ```bash
 yarn start --no-base-path
@@ -91,7 +82,7 @@ yarn start --no-base-path
 
 > The APM synthrace client fixture requires Kibana to run without a base path.
 
-**3. Configure local Scout server**
+**2. Configure local Scout server**
 
 Create `.scout/servers/local.json` with the following content:
 
@@ -110,7 +101,7 @@ Create `.scout/servers/local.json` with the following content:
 }
 ```
 
-**4. Run evaluations**
+**3. Run evaluations**
 
 ```bash
 EVALUATION_REPETITIONS=1 \
