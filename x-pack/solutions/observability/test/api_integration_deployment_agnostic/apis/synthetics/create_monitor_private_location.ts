@@ -533,12 +533,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } catch (e) {
           // ignore cleanup errors
         }
-        // Restore the package to the latest version so subsequent tests aren't affected
-        try {
-          await testPrivateLocations.installSyntheticsPackage();
-        } catch (e) {
-          // ignore cleanup errors
-        }
+        // Restore the package to the latest version — this MUST succeed
+        // or subsequent tests will run against the wrong version
+        await testPrivateLocations.installSyntheticsPackage();
       }
     });
 
@@ -557,7 +554,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('can create valid monitors without all defaults', async () => {
-      // Delete a required property to make payload invalid
+      let monitorId = '';
       const newMonitor = {
         name: 'Sample name',
         type: 'http',
@@ -565,18 +562,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      expect(apiResponse).eql(
-        omitMonitorKeys({
-          ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
-          ...newMonitor,
-          spaces: ['default'],
-        })
-      );
+        expect(apiResponse).eql(
+          omitMonitorKeys({
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
+            ...newMonitor,
+            spaces: ['default'],
+          })
+        );
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('can disable retries', async () => {
+      let monitorId = '';
       const maxAttempts = 1;
       const newMonitor = {
         max_attempts: maxAttempts,
@@ -586,12 +589,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+        rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('can enable retries with max attempts', async () => {
+      let monitorId = '';
       const maxAttempts = 2;
       const newMonitor = {
         max_attempts: maxAttempts,
@@ -601,12 +610,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: true }));
+        rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: true }));
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('can enable retries', async () => {
+      let monitorId = '';
       const newMonitor = {
         retest_on_failure: false,
         urls: 'https://elastic.co',
@@ -615,9 +630,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+        rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('cannot create a invalid monitor without a monitor type', async () => {
