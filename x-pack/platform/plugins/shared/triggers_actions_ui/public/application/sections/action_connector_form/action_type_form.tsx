@@ -259,7 +259,10 @@ export const ActionTypeForm = ({
   ]);
 
   const getDefaultParams = async () => {
-    const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
+    if (!actionTypeRegistry.has(actionItem.actionTypeId)) {
+      return undefined;
+    }
+    const connectorType = actionTypeRegistry.get(actionItem.actionTypeId);
     let defaultParams;
     if (actionItem.group === recoveryActionGroup) {
       defaultParams = connectorType.defaultRecoveredActionParams;
@@ -345,12 +348,14 @@ export const ActionTypeForm = ({
         setActionParamsErrors({ errors: {} });
         return;
       }
-      const res: { errors: IErrorObject } = await actionTypeRegistry
-        .get(actionItem.actionTypeId)
-        ?.validateParams(
-          actionItem.params,
-          actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
-        );
+      const res: { errors: IErrorObject } = actionTypeRegistry.has(actionItem.actionTypeId)
+        ? await actionTypeRegistry
+            .get(actionItem.actionTypeId)
+            .validateParams(
+              actionItem.params,
+              actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
+            )
+        : { errors: {} };
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -426,7 +431,9 @@ export const ActionTypeForm = ({
     />
   );
 
-  const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
+  const actionTypeRegistered = actionTypeRegistry.has(actionConnector.actionTypeId)
+    ? actionTypeRegistry.get(actionConnector.actionTypeId)
+    : undefined;
   if (!actionTypeRegistered) return null;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 

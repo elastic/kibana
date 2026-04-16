@@ -6,6 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { connectorsSpecs, serializeConnectorSpec } from '@kbn/connector-specs';
 import {
@@ -190,6 +191,41 @@ describe('use_action_type_model_utils', () => {
         const model = transformSpecToActionTypeModel(baseSpec);
         // Since test-connector is not in ConnectorIconsMap, it should fall back to 'plugs'
         expect(model.iconClass).toBe('plugs');
+      });
+    });
+
+    describe('getHideInUi', () => {
+      const workflowsOnlySpec: ConnectorSpecResponse = {
+        ...baseSpec,
+        metadata: {
+          ...baseSpec.metadata,
+          supportedFeatureIds: [WorkflowsConnectorFeatureId],
+        },
+      };
+
+      it('returns false when workflows UI is enabled', () => {
+        const uiSettings = { get: jest.fn().mockReturnValue(true) };
+        const model = transformSpecToActionTypeModel(workflowsOnlySpec, uiSettings as any);
+        expect(model.getHideInUi?.([])).toBe(false);
+        expect(uiSettings.get).toHaveBeenCalledWith('workflows:ui:enabled', true);
+      });
+
+      it('returns true when workflows UI is disabled', () => {
+        const uiSettings = { get: jest.fn().mockReturnValue(false) };
+        const model = transformSpecToActionTypeModel(workflowsOnlySpec, uiSettings as any);
+        expect(model.getHideInUi?.([])).toBe(true);
+      });
+
+      it('returns false for workflows-only spec when uiSettings is undefined', () => {
+        const model = transformSpecToActionTypeModel(workflowsOnlySpec);
+        expect(model.getHideInUi?.([])).toBe(false);
+      });
+
+      it('returns false when supportedFeatureIds is not workflows-only', () => {
+        const uiSettings = { get: jest.fn().mockReturnValue(false) };
+        const model = transformSpecToActionTypeModel(baseSpec, uiSettings as any);
+        expect(model.getHideInUi?.([])).toBe(false);
+        expect(uiSettings.get).not.toHaveBeenCalled();
       });
     });
   });

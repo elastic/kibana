@@ -6,8 +6,10 @@
  */
 
 import { lazy } from 'react';
-import type { HttpSetup } from '@kbn/core/public';
+import type { ActionType } from '@kbn/actions-plugin/common';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
+import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema, getMeta, setMeta } from '@kbn/connector-specs';
@@ -65,7 +67,10 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
  * This creates a model that can be used by the connector form components,
  * with dynamically generated form fields from the JSON schema.
  */
-export function transformSpecToActionTypeModel(spec: ConnectorSpecResponse): ActionTypeModel {
+export function transformSpecToActionTypeModel(
+  spec: ConnectorSpecResponse,
+  uiSettings?: IUiSettingsClient
+): ActionTypeModel {
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
@@ -74,6 +79,15 @@ export function transformSpecToActionTypeModel(spec: ConnectorSpecResponse): Act
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
+    getHideInUi: (_actionTypes: ActionType[]) => {
+      if (
+        spec.metadata.supportedFeatureIds.length === 1 &&
+        spec.metadata.supportedFeatureIds[0] === WorkflowsConnectorFeatureId
+      ) {
+        return !(uiSettings?.get<boolean>('workflows:ui:enabled', true) ?? true);
+      }
+      return false;
+    },
     actionConnectorFields: lazy(() => {
       const zodSchema = fromConnectorSpecSchema(spec.schema);
       if (!zodSchema) {

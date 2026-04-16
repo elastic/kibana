@@ -212,11 +212,13 @@ export function useDynamicTypeIcons(
     }
     const registry = actionTypeRegistryRef.current;
     const connectorTypes = Object.values(connectorTypesData ?? {}).map((connector) => {
-      const actionType = registry.get(connector.actionTypeId);
+      const icon = registry.has(connector.actionTypeId)
+        ? registry.get(connector.actionTypeId).iconClass
+        : undefined;
       return {
         actionTypeId: connector.actionTypeId,
         displayName: connector.displayName,
-        icon: actionType.iconClass,
+        icon,
       };
     });
 

@@ -100,7 +100,9 @@ export function NotificationAction({
 }: NotificationActionProps) {
   const isRuleAction = getIsRuleAction(action, actionTypeRegistry);
   const connectorType = connectorTypes.find(({ id }) => id === action.actionTypeId);
-  const registeredAction = actionTypeRegistry.get(action.actionTypeId);
+  const registeredAction = actionTypeRegistry.has(action.actionTypeId)
+    ? actionTypeRegistry.get(action.actionTypeId)
+    : undefined;
 
   /*
   since there is no "connector" for system actions,
@@ -110,11 +112,11 @@ export function NotificationAction({
   */
   const connectorTypeName = isRuleAction
     ? connectorType?.name ?? ''
-    : registeredAction.actionTypeTitle ?? '';
+    : registeredAction?.actionTypeTitle ?? '';
   const iconType = registeredAction?.iconClass ?? 'apps';
 
   const connector = connectors.find(({ id }) => id === action.id);
-  const connectorName = (isRuleAction ? connector?.name : registeredAction.actionTypeTitle) ?? '';
+  const connectorName = (isRuleAction ? connector?.name : registeredAction?.actionTypeTitle) ?? '';
 
   return (
     <EuiFlexItem>

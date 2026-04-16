@@ -10,7 +10,6 @@ import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-action
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { ConfigSchema as StackConnectorsConfigType } from '../server/config';
 import { registerConnectorTypes } from './connector_types';
-import { registerConnectorTypesFromSpecs } from './connector_types_from_spec/register_from_spec';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
@@ -44,14 +43,6 @@ export class StackConnectorsPublicPlugin
         validateEmailAddresses: actions.validateEmailAddresses,
       },
     });
-
-    if (ExperimentalFeaturesService.get().connectorsFromSpecs) {
-      registerConnectorTypesFromSpecs({
-        connectorTypeRegistry: triggersActionsUi.actionTypeRegistry,
-        uiSettingsPromise: core.getStartServices().then(([coreStart]) => coreStart.uiSettings),
-        isEarsEnabled: actions.isEarsEnabled,
-      });
-    }
   }
 
   public start() {}

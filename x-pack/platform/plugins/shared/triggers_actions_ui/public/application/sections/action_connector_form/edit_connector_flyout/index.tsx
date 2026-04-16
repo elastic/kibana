@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ActionType, ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
@@ -27,7 +27,6 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types/action_types';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
-  ActionTypeModel,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
 } from '../../../../types';
@@ -35,6 +34,8 @@ import { EditConnectorTabs } from '../../../../types';
 import type { ConnectorFormState } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
+import { useActionTypeModel } from '../../../hooks/use_action_type_model';
+import { loadActionTypes } from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { TestConnectorForm } from '../test_connector_form';
@@ -78,6 +79,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   const {
     docLinks,
+    http,
     application: { capabilities },
   } = useKibana().services;
 
@@ -134,9 +136,57 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
-  const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
-  const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
-  const disabled = !isFormModified || hasErrors || isSaving;
+  const [resolvedActionType, setResolvedActionType] = useState<ActionType | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const types = await loadActionTypes({ http });
+        if (cancelled) {
+          return;
+        }
+        const match = types.find((t) => t.id === connector.actionTypeId);
+        setResolvedActionType(
+          match ??
+            ({
+              id: connector.actionTypeId,
+              name: connector.name ?? '',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
+              supportedFeatureIds: [],
+              isSystemActionType: false,
+              isDeprecated: false,
+              source: ACTION_TYPE_SOURCES.spec,
+            } as ActionType)
+        );
+      } catch {
+        if (!cancelled) {
+          setResolvedActionType(null);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [http, connector.actionTypeId, connector.name]);
+
+  const {
+    actionTypeModel,
+    isLoading: isLoadingActionTypeModel,
+    error: actionTypeModelError,
+  } = useActionTypeModel(actionTypeRegistry, resolvedActionType);
+
+  const showButtons =
+    canSave &&
+    actionTypeModel &&
+    !connector.isPreconfigured &&
+    !isLoadingActionTypeModel &&
+    !actionTypeModelError;
+  const disabled =
+    !isFormModified || hasErrors || isSaving || isLoadingActionTypeModel || !!actionTypeModelError;
 
   const onExecutionAction = useCallback(async () => {
     try {

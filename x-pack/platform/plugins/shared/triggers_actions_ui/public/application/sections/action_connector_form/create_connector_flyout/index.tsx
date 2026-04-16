@@ -131,10 +131,17 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionTypeModel && actionTypeModel.subtype
       ? (actionTypeModel?.subtype ?? [])
           .filter((item) => allActionTypes && allActionTypes[item.id].enabledInConfig)
-          .map((subtypeAction) => ({
-            ...actionTypeRegistry.get(subtypeAction.id),
-            name: subtypeAction.name,
-          }))
+          .flatMap((subtypeAction) => {
+            if (!actionTypeRegistry.has(subtypeAction.id)) {
+              return [];
+            }
+            return [
+              {
+                ...actionTypeRegistry.get(subtypeAction.id),
+                name: subtypeAction.name,
+              },
+            ];
+          })
       : [];
 
   const groupActionButtons =

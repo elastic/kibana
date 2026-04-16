@@ -43,8 +43,14 @@ export function DefaultEmail({
     return null;
   }
 
-  const emailActionType = actionTypeRegistry.get('.email');
-  const ActionParams = emailActionType.actionParamsFields;
+  const emailActionType = actionTypeRegistry.has('.email')
+    ? actionTypeRegistry.get('.email')
+    : undefined;
+  const ActionParams = emailActionType?.actionParamsFields;
+
+  if (!ActionParams) {
+    return null;
+  }
 
   const onEmailChange = (key: string, val: string[]) => {
     onChange({

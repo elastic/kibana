@@ -56,9 +56,11 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     showMustacheAutocompleteSwitch,
   } = useRuleFormState();
 
-  const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
+  const actionTypeModel = actionTypeRegistry.has(action.actionTypeId)
+    ? actionTypeRegistry.get(action.actionTypeId)
+    : undefined;
 
-  const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
+  const ParamsFieldsComponent = actionTypeModel?.actionParamsFields;
 
   const actionsParamsError = actionsParamsErrors[action.uuid!] || {};
 

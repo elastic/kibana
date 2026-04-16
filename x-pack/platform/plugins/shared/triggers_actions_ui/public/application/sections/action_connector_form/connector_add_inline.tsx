@@ -64,11 +64,13 @@ export const AddConnectorInline = ({
   const actionTypeName = actionTypesIndex
     ? actionTypesIndex[actionItem.actionTypeId].name
     : actionItem.actionTypeId;
-  const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
+  const actionTypeRegistered = actionTypeRegistry.has(actionItem.actionTypeId)
+    ? actionTypeRegistry.get(actionItem.actionTypeId)
+    : undefined;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((subtype) => subtype.id);
   const connectorDropdownErrors = useMemo(
-    () => [`Unable to load ${actionTypeRegistered.actionTypeTitle} connector`],
-    [actionTypeRegistered.actionTypeTitle]
+    () => [`Unable to load ${actionTypeRegistered?.actionTypeTitle ?? actionTypeName} connector`],
+    [actionTypeRegistered?.actionTypeTitle, actionTypeName]
   );
 
   const noConnectorsLabel = (

@@ -9,6 +9,7 @@ import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { connectorsSpecs, serializeConnectorSpec } from '@kbn/connector-specs';
 import { useKibana } from '../../common/lib/kibana';
@@ -50,6 +51,12 @@ describe('useActionTypeModel', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useKibanaMock.mockReturnValue({
+      services: {
+        http: { get: jest.fn() },
+        uiSettings: { get: jest.fn().mockReturnValue(true) },
+      },
+    } as ReturnType<typeof useKibanaMock>);
     actionTypeRegistry = actionTypeRegistryMock.create();
     queryClient = new QueryClient({
       defaultOptions: {
@@ -356,5 +363,48 @@ describe('useActionTypeModel', () => {
     expect(model?.actionConnectorFields).toBeDefined();
     expect(model?.actionParamsFields).toBeDefined();
     expect(model?.validateParams).toBeDefined();
+  });
+
+  it('exposes getHideInUi on fetched spec model using uiSettings for workflows-only connectors', async () => {
+    const workflowsSpecResponse = {
+      ...mockSpecResponse,
+      metadata: {
+        ...mockSpecResponse.metadata,
+        id: 'workflows-spec-connector',
+        supportedFeatureIds: [WorkflowsConnectorFeatureId],
+      },
+    };
+
+    const uiSettingsGet = jest.fn().mockReturnValue(false);
+    useKibanaMock.mockReturnValue({
+      services: {
+        http: { get: jest.fn().mockResolvedValue(workflowsSpecResponse) },
+        uiSettings: { get: uiSettingsGet },
+      },
+    } as ReturnType<typeof useKibanaMock>);
+
+    const specActionType: ActionType = {
+      id: 'workflows-spec-connector',
+      name: 'Workflows Spec',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: [WorkflowsConnectorFeatureId],
+      source: ACTION_TYPE_SOURCES.spec,
+    };
+
+    actionTypeRegistry.has.mockReturnValue(false);
+
+    const { result } = renderHook(() => useActionTypeModel(actionTypeRegistry, specActionType), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.actionTypeModel?.getHideInUi?.([])).toBe(true);
+    expect(uiSettingsGet).toHaveBeenCalledWith('workflows:ui:enabled', true);
   });
 });

@@ -132,7 +132,9 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
   `;
 
   const dispatch = useRuleFormDispatch();
-  const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
+  const actionTypeModel = actionTypeRegistry.has(action.actionTypeId)
+    ? actionTypeRegistry.get(action.actionTypeId)
+    : undefined;
   const actionType = connectorTypes.find(({ id }) => id === action.actionTypeId)!;
   const connector = connectors.find(({ id }) => id === action.id)!;
 
@@ -172,9 +174,11 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
 
   const validateActionParams = useCallback(
     async (params: RuleActionParam) => {
-      const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
-        .get(action.actionTypeId)
-        ?.validateParams(params, connectorConfig);
+      const res: { errors: RuleFormParamsErrors } = actionTypeRegistry.has(action.actionTypeId)
+        ? ((await actionTypeRegistry
+            .get(action.actionTypeId)
+            .validateParams(params, connectorConfig)) as { errors: RuleFormParamsErrors })
+        : { errors: {} as RuleFormParamsErrors };
 
       dispatch({
         type: 'setActionParamsError',
@@ -292,7 +296,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
                   <EuiIconTip
                     content={actionType?.name}
                     size="l"
-                    type={actionTypeModel.iconClass}
+                    type={actionTypeModel?.iconClass ?? 'apps'}
                   />
                 </Suspense>
               )}
@@ -301,7 +305,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
               <EuiFlexItem grow={false}>
                 <EuiText size="s">{connector.name}</EuiText>
               </EuiFlexItem>
-              {actionTypeModel.isExperimental && (
+              {actionTypeModel?.isExperimental && (
                 <EuiFlexItem grow={false}>
                   <EuiBetaBadge
                     size="s"

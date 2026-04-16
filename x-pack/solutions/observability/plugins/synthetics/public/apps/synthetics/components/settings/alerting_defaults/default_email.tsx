@@ -28,10 +28,16 @@ export function DefaultEmail({
 }) {
   const { actionTypeRegistry } = useKibana<SyntheticsPluginServices>().services.triggersActionsUi;
 
-  const emailActionType = actionTypeRegistry.get('.email');
-  const ActionParams = emailActionType.actionParamsFields;
+  const emailActionType = actionTypeRegistry.has('.email')
+    ? actionTypeRegistry.get('.email')
+    : undefined;
+  const ActionParams = emailActionType?.actionParamsFields;
 
   const [isTouched, setIsTouched] = useState(false);
+
+  if (!ActionParams) {
+    return null;
+  }
 
   const errors = hasInvalidEmail(selectedConnectors, value, isTouched);
 

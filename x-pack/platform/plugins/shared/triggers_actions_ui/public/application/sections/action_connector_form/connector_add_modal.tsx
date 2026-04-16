@@ -38,6 +38,7 @@ import type {
 } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useCreateConnector } from '../../hooks/use_create_connector';
+import { useActionTypeModel } from '../../hooks/use_action_type_model';
 import type { ConnectorFormState, ResetForm } from './connector_form';
 import { ConnectorForm } from './connector_form';
 import { loadActionTypes } from '../../lib/action_connector_api';
@@ -77,15 +78,26 @@ const ConnectorAddModal = ({
   });
 
   const canSave = hasSaveActionsCapability(capabilities);
-  const actionTypeModel = actionTypeRegistry.get(actionType.id);
+  const {
+    actionTypeModel,
+    isLoading: isLoadingActionTypeModel,
+    error: actionTypeModelError,
+  } = useActionTypeModel(actionTypeRegistry, actionType);
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> = actionTypeModel
     ? (actionTypeModel?.subtype ?? [])
         .filter((item) => allActionTypes?.[item.id]?.enabledInConfig)
-        .map((subtypeAction) => ({
-          ...actionTypeRegistry.get(subtypeAction.id),
-          name: subtypeAction.name,
-        }))
+        .flatMap((subtypeAction) => {
+          if (!actionTypeRegistry.has(subtypeAction.id)) {
+            return [];
+          }
+          return [
+            {
+              ...actionTypeRegistry.get(subtypeAction.id),
+              name: subtypeAction.name,
+            },
+          ];
+        })
     : [];
 
   const groupActionButtons =
@@ -142,6 +154,9 @@ const ConnectorAddModal = ({
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
+  const registeredActionTypeModel = actionTypeRegistry.has(actionType.id)
+    ? actionTypeRegistry.get(actionType.id)
+    : undefined;
 
   const validateAndCreateConnector = useCallback(async () => {
     setPreSubmitValidationErrorMessage(null);
@@ -245,7 +260,7 @@ const ConnectorAddModal = ({
       className="actConnectorModal"
       css={css`
         z-index: 9000;
-        width: ${actionTypeRegistry.get(actionType.id).modalWidth};
+        width: ${registeredActionTypeModel?.modalWidth ?? 600}px;
         overflow-y: auto;
       `}
       data-test-subj="connectorAddModal"
@@ -288,7 +303,7 @@ const ConnectorAddModal = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          {loadingActionTypes ? (
+          {loadingActionTypes || isLoadingActionTypeModel ? (
             <SectionLoading>
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.connectorAddModal.loadingConnectorTypesDescription"
@@ -340,7 +355,7 @@ const ConnectorAddModal = ({
               type="submit"
               iconType="check"
               isLoading={isSaving}
-              disabled={hasErrors}
+              disabled={hasErrors || !!actionTypeModelError}
               onClick={onSubmit}
             >
               <FormattedMessage

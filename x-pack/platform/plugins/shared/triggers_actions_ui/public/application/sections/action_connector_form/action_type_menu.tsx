@@ -159,13 +159,13 @@ export const ActionTypeMenu = ({
         };
       }
 
-      const actionTypeModel = actionTypeRegistry.get(id);
+      const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
       return {
         iconClass: actionTypeModel ? actionTypeModel.iconClass : '',
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
-        isExperimental: actionTypeModel.isExperimental,
+        isExperimental: actionTypeModel?.isExperimental,
         isDeprecated: actionType.isDeprecated,
       };
     });

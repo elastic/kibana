@@ -152,7 +152,10 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       connectors?.map((c, index) => {
         const apiProvider = getGenAiConfig(c)?.apiProvider;
         const connectorTypeTitle =
-          apiProvider ?? getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId));
+          apiProvider ??
+          (actionTypeRegistry.has(c.actionTypeId)
+            ? getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId))
+            : c.actionTypeId);
         const connectorDetails = c.isPreconfigured ? PRECONFIGURED_CONNECTOR : connectorTypeTitle;
         return {
           key: c.id,

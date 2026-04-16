@@ -38,7 +38,7 @@ export function useActionTypeModel(
   actionTypeRegistry: ActionTypeRegistryContract,
   actionType: ActionType | null
 ): UseActionTypeModelResult {
-  const { http } = useKibana().services;
+  const { http, uiSettings } = useKibana().services;
 
   const registeredModel = useMemo(() => {
     if (actionType == null) {
@@ -76,8 +76,8 @@ export function useActionTypeModel(
     if (!specData) {
       return null;
     }
-    return transformSpecToActionTypeModel(specData);
-  }, [specData]);
+    return transformSpecToActionTypeModel(specData, uiSettings);
+  }, [specData, uiSettings]);
 
   return useMemo(
     () => ({
