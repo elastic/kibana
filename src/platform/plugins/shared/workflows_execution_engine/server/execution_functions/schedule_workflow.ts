@@ -83,7 +83,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
     if (isStaleExecution) {
       if (existingExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
         logger.warn(
-          `Stale scheduled retry for execution ${existingExecution.id} (taskRunAt: ${executionTaskRunAt}) is waiting_for_input — skipping duplicate scheduled invocation (human resume only)`
+          `Stale scheduled retry for execution ${existingExecution.id} (taskRunAt: ${executionTaskRunAt}) is waiting_for_input - skipping duplicate scheduled invocation (human resume only)`
         );
         return true;
       }

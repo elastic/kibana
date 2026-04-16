@@ -80,7 +80,7 @@ export async function resolveInterruptedWorkflowRunTask({
   });
 
   logger.warn(
-    `Marked workflow execution ${workflowRunId} FAILED after workflow:run retry (attempts=${taskAttempts}) — prior run was interrupted`
+    `Marked workflow execution ${workflowRunId} FAILED after workflow:run retry (attempts=${taskAttempts}) - prior run was interrupted`
   );
 
   return 'task_complete';
@@ -91,7 +91,7 @@ export type InterruptedWorkflowResumeTaskOutcome = 'resume_workflow' | 'task_com
 /**
  * When Task Manager retries `workflow:resume` (`attempts > 1`), the prior claim did not finish successfully.
  * Fail non-terminal executions that are no longer waiting for input (stuck RUNNING / WAITING, etc.).
- * If still `waiting_for_input`, invoke the resume handler again — the first attempt never completed.
+ * If still `waiting_for_input`, invoke the resume handler again - the first attempt never completed.
  */
 export async function resolveInterruptedWorkflowResumeTask({
   workflowExecutionRepository,
@@ -128,7 +128,7 @@ export async function resolveInterruptedWorkflowResumeTask({
 
   if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
     logger.warn(
-      `workflow:resume retry for execution ${workflowRunId} still waiting_for_input — invoking resume handler again`
+      `workflow:resume retry for execution ${workflowRunId} still waiting_for_input - invoking resume handler again`
     );
     return 'resume_workflow';
   }
@@ -138,7 +138,7 @@ export async function resolveInterruptedWorkflowResumeTask({
   });
 
   logger.warn(
-    `Marked workflow execution ${workflowRunId} FAILED after workflow:resume retry (attempts=${taskAttempts}) — prior resume task was interrupted`
+    `Marked workflow execution ${workflowRunId} FAILED after workflow:resume retry (attempts=${taskAttempts}) - prior resume task was interrupted`
   );
 
   return 'task_complete';

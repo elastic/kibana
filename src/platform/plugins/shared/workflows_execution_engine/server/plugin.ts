@@ -79,7 +79,7 @@ import { createIndexes } from '../common';
 /** Max retry attempts for workflow run tasks, including final-attempt recovery handling after interrupts. */
 const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
 
-/** Same retry budget as `workflow:run` — resume tasks can be interrupted mid-handler like run tasks. */
+/** Same retry budget as `workflow:run` - resume tasks can be interrupted mid-handler like run tasks. */
 const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
