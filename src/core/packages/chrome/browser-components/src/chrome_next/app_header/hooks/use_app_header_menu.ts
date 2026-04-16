@@ -10,14 +10,24 @@
 import { useMemo } from 'react';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { APP_MENU_SHARE_ID, getTooltip } from '@kbn/core-chrome-app-menu-components';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+import { useObservable } from '@kbn/use-observable';
 import { useAppMenu, useNextHeader } from '../../../shared/chrome_hooks';
+
+const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuItemType => ({
+  label: 'Feedback',
+  id: 'feedback',
+  iconType: 'comment',
+  order: 1,
+  run: feedbackHandler,
+});
 
 interface ResolvedAppMenu {
   menu: AppMenuConfig | undefined;
   shareItem: AppMenuItemType | undefined;
 }
 
-function useResolvedAppMenu(): ResolvedAppMenu {
+const useResolvedAppMenu = (): ResolvedAppMenu => {
   const config = useNextHeader();
   const globalAppMenu = useAppMenu();
   const menu = config?.appMenu ?? globalAppMenu;
@@ -37,14 +47,24 @@ function useResolvedAppMenu(): ResolvedAppMenu {
       shareItem,
     };
   }, [menu, hasExplicitShare]);
-}
+};
 
 /**
  * Returns the resolved app menu with the `share` item stripped out.
  * The share action is auto-promoted to the global actions area by Chrome.
  */
-export function useAppHeaderMenu(): AppMenuConfig | undefined {
-  return useResolvedAppMenu().menu;
+export function useAppHeaderMenu(): {
+  config: AppMenuConfig | undefined;
+  staticItems: AppMenuItemType[];
+} {
+  const { menu } = useResolvedAppMenu();
+  const chrome = useChromeService();
+  const feedbackHandler = useObservable(chrome.getFeedbackHandler$(), undefined);
+
+  return {
+    config: menu,
+    staticItems: feedbackHandler ? [createFeedbackMenuItem(feedbackHandler)] : [],
+  };
 }
 
 export interface ShareAction {

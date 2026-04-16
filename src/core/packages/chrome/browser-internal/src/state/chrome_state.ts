@@ -78,6 +78,9 @@ export interface ChromeState {
     supportUrl: State<string>;
     globalMenuLinks: ArrayState<ChromeGlobalHelpExtensionMenuLink>;
   };
+
+  /** Feedback handler registered by the feedback plugin */
+  feedbackHandler: State<(() => void) | undefined>;
 }
 
 export interface ChromeStateDeps {
@@ -125,6 +128,9 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const helpSupportUrl = createState<string>(docLinks.links.kibana.askElastic);
   const globalHelpMenuLinks = createArrayState<ChromeGlobalHelpExtensionMenuLink>();
 
+  // Feedback
+  const feedbackHandler = createState<(() => void) | undefined>(undefined);
+
   return {
     visibility,
     style,
@@ -152,5 +158,6 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
     },
+    feedbackHandler,
   };
 }

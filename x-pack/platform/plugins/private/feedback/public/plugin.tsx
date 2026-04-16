@@ -6,12 +6,17 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import { EuiModal } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
+import { isNextChrome } from '@kbn/core-chrome-feature-flags';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { i18n } from '@kbn/i18n';
 import type { FeedbackFormData } from '../common';
 import { getAppDetails } from './src/utils';
 
@@ -28,6 +33,12 @@ interface FeedbackPluginStartDependencies {
 const LazyFeedbackTriggerButton = lazy(() =>
   import('@kbn/feedback-components').then(({ FeedbackTriggerButton }) => ({
     default: FeedbackTriggerButton,
+  }))
+);
+
+const LazyFeedbackContainer = lazy(() =>
+  import('@kbn/feedback-components').then(({ FeedbackContainer }) => ({
+    default: FeedbackContainer,
   }))
 );
 
@@ -101,6 +112,40 @@ export class FeedbackPlugin implements Plugin {
         return false;
       }
     };
+
+    if (isNextChrome(core.featureFlags)) {
+      const modalCss = css`
+        overflow-y: auto;
+      `;
+
+      core.chrome.registerFeedbackHandler(() => {
+        const modal = core.overlays.openModal(
+          toMountPoint(
+            core.rendering.addContext(
+              <EuiModal
+                onClose={() => modal.close()}
+                aria-label={i18n.translate('feedback.modal.ariaLabel', {
+                  defaultMessage: 'Feedback form',
+                })}
+                css={modalCss}
+              >
+                <Suspense fallback={null}>
+                  <LazyFeedbackContainer
+                    getQuestions={getQuestions}
+                    getAppDetails={getAppDetailsWrapper}
+                    getCurrentUserEmail={getCurrentUserEmail}
+                    sendFeedback={sendFeedback}
+                    showToast={showToast}
+                    hideFeedbackContainer={() => modal.close()}
+                  />
+                </Suspense>
+              </EuiModal>
+            ),
+            core
+          )
+        );
+      });
+    }
 
     core.chrome.navControls.registerRight({
       order: 1001,

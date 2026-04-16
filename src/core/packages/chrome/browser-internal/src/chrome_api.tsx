@@ -206,6 +206,14 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
     },
 
     sidebar,
+
+    registerFeedbackHandler: (handler: () => void) => {
+      state.feedbackHandler.set(handler);
+      return () => {
+        state.feedbackHandler.update((current) => (current === handler ? undefined : current));
+      };
+    },
+    getFeedbackHandler$: () => state.feedbackHandler.$,
   };
 
   return chromeStart;

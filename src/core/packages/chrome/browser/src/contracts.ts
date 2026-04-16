@@ -327,6 +327,19 @@ export interface ChromeStart {
   next: ChromeNext;
 
   /**
+   * Register a handler that opens the feedback UI.
+   * Called by the feedback plugin during `start`.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerFeedbackHandler(handler: () => void): () => void;
+
+  /**
+   * Get an observable of the currently registered feedback handler, or `undefined` if none.
+   */
+  getFeedbackHandler$(): Observable<(() => void) | undefined>;
+
+  /**
    * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers
    */
   withProvider(component: ReactNode): ReactNode;
