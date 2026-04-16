@@ -375,8 +375,8 @@ describe('computeAndPersistCompositeSummaries', () => {
         abortController,
       });
 
-      // computeSummaries is still called with empty params (returns [] immediately)
-      expect(mockComputeSummaries).toHaveBeenCalledWith([]);
+      // no member SLOs resolved — computeSummaries is not called
+      expect(mockComputeSummaries).not.toHaveBeenCalled();
       // computeCompositeSummary is still called with empty member summaries
       expect(mockComputeCompositeSummary).toHaveBeenCalledWith(expect.anything(), []);
     });
@@ -462,9 +462,12 @@ describe('computeAndPersistCompositeSummaries', () => {
       const composite2 = buildStoredCompositeSLO({ id: 'composite-slo-id-22222222' });
       mockPointInTimeFinder([[composite1, composite2]]);
 
-      mockComputeSummaries
-        .mockRejectedValueOnce(new Error('compute failed'))
-        .mockResolvedValueOnce([buildSummaryResult()]);
+      mockComputeSummaries.mockResolvedValue([buildSummaryResult(), buildSummaryResult()]);
+      mockComputeCompositeSummary
+        .mockImplementationOnce(() => {
+          throw new Error('compute failed');
+        })
+        .mockReturnValueOnce(buildCompositeSummary());
 
       await computeAndPersistCompositeSummaries({
         esClient,
@@ -473,8 +476,8 @@ describe('computeAndPersistCompositeSummaries', () => {
         abortController,
       });
 
-      // Second SLO still processed
-      expect(mockComputeSummaries).toHaveBeenCalledTimes(2);
+      // Second SLO still processed despite first throwing
+      expect(mockComputeCompositeSummary).toHaveBeenCalledTimes(2);
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
     });
 
