@@ -45,6 +45,12 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
     color: ${euiTheme.colors.textSubdued};
   `;
 
+  let createdByUsername = agent.created_by?.username;
+  if (createdByUsername === 'system') {
+    createdByUsername = overviewLabels.createdByElastic;
+  }
+  const byAuthorLabel = createdByUsername && overviewLabels.byAuthor(createdByUsername);
+
   return (
     <>
       <EuiFlexGroup gutterSize="m" responsive={false}>
@@ -58,10 +64,10 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                 <h1>{agent.name}</h1>
               </EuiTitle>
               <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false} wrap>
-                {agent.created_by?.username && (
+                {byAuthorLabel && (
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="subdued">
-                      {overviewLabels.byAuthor(agent.created_by.username)}
+                      {byAuthorLabel}
                     </EuiText>
                   </EuiFlexItem>
                 )}

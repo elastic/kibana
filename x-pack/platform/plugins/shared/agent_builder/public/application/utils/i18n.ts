@@ -2053,6 +2053,9 @@ export const labels = {
         defaultMessage: 'Save instructions',
       }
     ),
+    createdByElastic: i18n.translate('xpack.agentBuilder.overview.createdByElastic', {
+      defaultMessage: 'Elastic',
+    }),
     byAuthor: (author: string) =>
       i18n.translate('xpack.agentBuilder.overview.byAuthor', {
         defaultMessage: 'By {author}',
