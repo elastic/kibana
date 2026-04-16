@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -71,7 +72,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             title={overviewLabels.customInstructionsTitle}
             titleElement="h3"
             titleSize="xs"
-            description={currentInstructions || overviewLabels.customInstructionsOnboardingText}
+            description={currentInstructions ? undefined : overviewLabels.customInstructionsOnboardingText}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
             footer={
@@ -91,7 +92,11 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                 color: ${euiTheme.colors.textSubdued};
               }
             `}
-          />
+          >
+            {currentInstructions ? (
+              <EuiMarkdownFormat textSize="s">{currentInstructions}</EuiMarkdownFormat>
+            ) : undefined}
+          </EuiCard>
         </EuiFlexItem>
 
         {/* Agent Settings Card */}
