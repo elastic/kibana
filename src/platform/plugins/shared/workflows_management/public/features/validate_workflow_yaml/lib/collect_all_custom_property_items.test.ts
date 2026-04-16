@@ -218,7 +218,7 @@ steps:
 `;
     const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
     const selectionHandler = {
-      dependsOnValues: ['config.proxy.ssl', 'config.other'],
+      dependsOnValues: ['config.proxy.ssl', 'config.other'] as any,
       search: jest.fn(),
       resolve: jest.fn(),
       getDetails: jest.fn(),
