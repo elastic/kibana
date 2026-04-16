@@ -12,7 +12,6 @@ import {
   EuiSplitPanel,
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiFlexItem,
   EuiTitle,
   EuiLink,
   useEuiTheme,
@@ -264,16 +263,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   </EuiFormRow>
                 </EuiDescribedFormGroup>
               )}
-              {showChatExperienceSetting && (
-                <EuiFlexItem>
-                  <ChatExperience />
-                </EuiFlexItem>
-              )}
-              {showAiAssistantsVisibilitySetting && !isAgentExperience && (
-                <EuiFlexItem>
-                  <AIAssistantVisibility />
-                </EuiFlexItem>
-              )}
+              {showChatExperienceSetting && <ChatExperience />}
+              {showAiAssistantsVisibilitySetting && !isAgentExperience && <AIAssistantVisibility />}
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
 

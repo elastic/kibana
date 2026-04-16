@@ -225,7 +225,7 @@ describe('InferenceEndpoints', () => {
     expect(screen.getByText('External Inference')).toBeInTheDocument();
   });
 
-  it('hides EIS documentation and ML Trained Models links', () => {
+  it('shows only API documentation link in header', () => {
     useQueryInferenceEndpoints.mockReturnValue({
       data: mixedEndpoints,
       isLoading: false,
