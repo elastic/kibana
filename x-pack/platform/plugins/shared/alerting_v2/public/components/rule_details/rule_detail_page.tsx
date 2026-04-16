@@ -11,20 +11,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import type { RuleApiResponse } from '../../services/rules_api';
 import { RuleDetailsActionsMenu } from './rule_details_actions_menu';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
 import { RuleSidebar } from './sidebar/rule_sidebar';
+import { useRule } from './rule_context';
 import { paths } from '../../constants';
 
-export interface RuleDetailPageProps {
-  rule: RuleApiResponse;
-}
-
-export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ rule }) => {
+export const RuleDetailPage: React.FunctionComponent = () => {
+  const rule = useRule();
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
   const { basePath } = useService(CoreStart('http'));
 
@@ -49,12 +46,11 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
     <>
       <EuiPageHeader
         data-test-subj="ruleDetailsTitle"
-        pageTitle={<RuleTitleWithBadges rule={rule} />}
-        description={<RuleHeaderDescription rule={rule} />}
+        pageTitle={<RuleTitleWithBadges />}
+        description={<RuleHeaderDescription />}
         rightSideItems={[
           <RuleDetailsActionsMenu
             key="actions"
-            rule={rule}
             showDeleteConfirmation={showDeleteConfirmationModal}
           />,
           <EuiButtonEmpty
@@ -78,7 +74,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
 
       <EuiSpacer size="l" />
 
-      <RuleSidebar rule={rule} />
+      <RuleSidebar />
 
       <EuiSpacer size="l" />
       {showDeleteConfirmation && (
