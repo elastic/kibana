@@ -10,36 +10,25 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash, getTypeHashes } from '@kbn/core-test-helpers-so-type-serializer';
 import type { Root } from '@kbn/core-root-server-internal';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import type { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 import { sortBy } from 'lodash';
 import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
-  let esServer: TestElasticsearchUtils;
   let root: Root;
   let typeRegistry: ISavedObjectTypeRegistry;
 
   beforeAll(async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-    });
-
-    esServer = await startES();
     root = createRootWithCorePlugins({}, { oss: false });
     await root.preboot();
-    await root.setup();
-    const coreStart = await root.start();
-    typeRegistry = coreStart.savedObjects.getTypeRegistry();
+    const coreSetup: InternalCoreSetup = await root.setup();
+    typeRegistry = coreSetup.savedObjects.getTypeRegistry();
   });
 
   afterAll(async () => {
     await root?.shutdown();
-    await esServer?.stop();
   });
 
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
