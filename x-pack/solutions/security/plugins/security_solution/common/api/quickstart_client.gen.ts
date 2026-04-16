@@ -619,8 +619,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Assigns the provided entities to a watchlist by their EUIDs.
+    * Assigns the provided entities to the specified watchlist using a "manual" source label.
 The entities must already exist in the entity store.
+
+If an entity is already on the watchlist, no new document is created — the "manual" label
+is added to its existing source labels instead.
 
     */
   async assignWatchlistEntities(props: AssignWatchlistEntitiesProps) {
@@ -3288,9 +3291,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Unassigns the provided entities from a watchlist by their EUIDs.
+    * Unassigns the provided entities from the specified watchlist.
 This only removes the "manual" assignment. If the entity is also
-assigned via other sources (e.g. index or integration), it will
+assigned via other sources (for example, index or integration), it will
 remain on the watchlist.
 
     */
