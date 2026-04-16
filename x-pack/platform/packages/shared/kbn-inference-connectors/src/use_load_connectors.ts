@@ -52,9 +52,9 @@ export const useLoadConnectors = ({
   settings,
 }: UseLoadConnectorsProps): UseLoadConnectorsResult => {
   const [soEntryFound, setSoEntryFound] = useState(false);
-  const query = useQuery(
-    [...QUERY_KEY, featureId],
-    async () => {
+  const query = useQuery({
+    queryKey: [...QUERY_KEY, featureId],
+    queryFn: async () => {
       const defaultConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
       const defaultConnectorOnly = settings.client.get<boolean>(
         GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -86,25 +86,23 @@ export const useLoadConnectors = ({
 
       return aiConnectors;
     },
-    {
-      retry: false,
-      keepPreviousData: true,
-      onError: (error: IHttpFetchError) => {
-        if (error.name !== 'AbortError') {
-          toasts?.addError(
-            error.body && (error.body as { message?: string }).message
-              ? new Error((error.body as { message: string }).message)
-              : error,
-            {
-              title: i18n.translate('inferenceConnectors.useLoadConnectors.errorMessage', {
-                defaultMessage: 'Error loading models',
-              }),
-            }
-          );
-        }
-      },
-    }
-  );
+    retry: false,
+    keepPreviousData: true,
+    onError: (error: IHttpFetchError) => {
+      if (error.name !== 'AbortError') {
+        toasts?.addError(
+          error.body && (error.body as { message?: string }).message
+            ? new Error((error.body as { message: string }).message)
+            : error,
+          {
+            title: i18n.translate('inferenceConnectors.useLoadConnectors.errorMessage', {
+              defaultMessage: 'Error loading models',
+            }),
+          }
+        );
+      }
+    },
+  });
 
   return { ...query, soEntryFound };
 };
