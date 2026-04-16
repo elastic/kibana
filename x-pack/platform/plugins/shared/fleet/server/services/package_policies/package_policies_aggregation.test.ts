@@ -64,7 +64,8 @@ describe('getPackagePoliciesCountByPackageName', () => {
       })
     );
     const [[callArgs]] = soClient.find.mock.calls;
-    expect(callArgs.aggs!.count_by_package_name.terms.size).toBeGreaterThan(10);
+    const termsSize = (callArgs.aggs as any)?.count_by_package_name?.terms?.size;
+    expect(termsSize).toBeGreaterThan(10);
   });
 
   it('returns a map of package name to count', async () => {
