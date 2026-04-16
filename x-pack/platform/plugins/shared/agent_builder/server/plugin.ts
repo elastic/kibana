@@ -250,6 +250,7 @@ export class AgentBuilderPlugin
           return {
             elasticsearch: coreStart.elasticsearch,
             logger: this.logger.get('services.memory.consolidation'),
+            config: this.config,
           };
         },
       });
@@ -389,6 +390,7 @@ export class AgentBuilderPlugin
     scheduleMemoryConsolidationTask({
       taskManager,
       logger: this.logger.get('services.memory.consolidation'),
+      interval: this.config.memory.nightly.interval,
     }).catch((error) => {
       this.logger.error(`Failed to schedule memory consolidation task: ${error.message}`);
     });

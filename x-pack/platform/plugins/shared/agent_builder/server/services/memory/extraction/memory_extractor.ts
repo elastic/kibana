@@ -403,3 +403,43 @@ export const buildExtractionInputFromRound = (
     conversation,
   };
 };
+
+/**
+ * Build an ExtractionInput from a full conversation (all rounds combined).
+ * Used by idle-based extraction which processes the entire conversation at once.
+ */
+export const buildExtractionInputFromConversation = (
+  conversation: Conversation
+): ExtractionInput => {
+  const allMessages: string[] = [];
+  const allToolCalls: ToolCallWithResult[] = [];
+  const allReasoningSteps: string[] = [];
+
+  for (const round of conversation.rounds) {
+    const userMsg = round.input.message ?? '';
+    const assistantMsg = round.response.message ?? '';
+
+    if (userMsg) allMessages.push(`User: ${userMsg}`);
+
+    const toolCalls = round.steps
+      .filter(isToolCallStep)
+      .map((step) => step as unknown as ToolCallWithResult);
+    allToolCalls.push(...toolCalls);
+
+    const reasoning = round.steps
+      .filter(isReasoningStep)
+      .filter((step) => !step.transient && step.reasoning?.trim())
+      .map((step) => step.reasoning.trim());
+    allReasoningSteps.push(...reasoning);
+
+    if (assistantMsg) allMessages.push(`Assistant: ${assistantMsg}`);
+  }
+
+  return {
+    userMessage: allMessages.filter((m) => m.startsWith('User:')).join('\n'),
+    assistantResponse: allMessages.filter((m) => m.startsWith('Assistant:')).join('\n'),
+    toolCalls: allToolCalls.length > 0 ? allToolCalls : undefined,
+    reasoningSteps: allReasoningSteps.length > 0 ? allReasoningSteps : undefined,
+    conversation,
+  };
+};

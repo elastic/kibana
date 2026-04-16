@@ -60,6 +60,11 @@ export const configSchema = schema.object({
         { defaultValue: 'llm' }
       ),
       connectorId: schema.maybe(schema.string()),
+      afterRound: schema.boolean({ defaultValue: true }),
+      onIdle: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+        idleTimeoutMs: schema.number({ defaultValue: 120000, min: 10000, max: 600000 }),
+      }),
       chunking: schema.object({
         method: schema.oneOf(
           [
@@ -84,6 +89,35 @@ export const configSchema = schema.object({
             [schema.literal('tfidf'), schema.literal('inference')],
             { defaultValue: 'tfidf' }
           ),
+        }),
+      }),
+    }),
+    nightly: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      interval: schema.string({ defaultValue: '15m' }),
+      steps: schema.object({
+        reextract: schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        }),
+        deduplicate: schema.object({
+          enabled: schema.boolean({ defaultValue: false }),
+          similarityThreshold: schema.number({ defaultValue: 0.85, min: 0.5, max: 1 }),
+          useLlm: schema.boolean({ defaultValue: false }),
+        }),
+        formMemories: schema.object({
+          enabled: schema.boolean({ defaultValue: false }),
+          useLlm: schema.boolean({ defaultValue: true }),
+        }),
+        organize: schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        }),
+        prune: schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+          maxAgeDays: schema.number({ defaultValue: 30, min: 1, max: 365 }),
+          maxMemories: schema.number({ defaultValue: 1000, min: 10, max: 100000 }),
+        }),
+        organizeNoLlm: schema.object({
+          enabled: schema.boolean({ defaultValue: false }),
         }),
       }),
     }),

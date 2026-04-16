@@ -163,8 +163,74 @@ export const createMemoryExtractionCallback = (
 }) => Promise<void>) => {
   const logger = deps.logger.get('memory.afterRound');
 
+  // Track idle timers per conversation for idle-based extraction.
+  // When the timer fires, load the full conversation and extract from all of it.
+  const idleTimers = new Map<string, { timer: NodeJS.Timeout; request: KibanaRequest }>();
+
   return async ({ request, round, conversationId, conversation, runId }) => {
     const roundId = round.id;
+    const reinforcementSignals = consumeRunSignals(runId);
+
+    // Schedule idle-based extraction if enabled
+    if (deps.config.memory.extraction.onIdle.enabled) {
+      const existing = idleTimers.get(conversationId);
+      if (existing) {
+        clearTimeout(existing.timer);
+      }
+
+      const timer = setTimeout(async () => {
+        idleTimers.delete(conversationId);
+
+        logger.info(
+          `onIdle: conversation ${conversationId} idle for ${deps.config.memory.extraction.onIdle.idleTimeoutMs}ms, ` +
+          `loading full conversation for extraction`
+        );
+
+        try {
+          const services = deps.getInternalServices();
+          const convClient = await services.conversations.getScopedClient({ request });
+          const fullConversation = await convClient.get(conversationId);
+
+          if (!fullConversation || fullConversation.rounds.length === 0) {
+            logger.info(`onIdle: conversation ${conversationId} not found or empty, skipping`);
+            return;
+          }
+
+          const lastRound = fullConversation.rounds[fullConversation.rounds.length - 1];
+          const connectorId = deps.config.memory.extraction.connectorId;
+          const space = getCurrentSpaceId({ request, spaces: services.spaces });
+          const memoryClient = await services.memory.getScopedClient({ request });
+
+          await runAfterRoundExtractionPipeline(
+            {
+              request,
+              conversationId,
+              roundId: lastRound.id,
+              round: lastRound,
+              conversation: fullConversation,
+              reinforcementSignals: [],
+              memoryClient,
+              connectorId: connectorId ?? '',
+              space,
+            },
+            { ...deps, inference: services.inference }
+          );
+
+          logger.info(`onIdle: extraction complete for conversation ${conversationId} (${fullConversation.rounds.length} rounds)`);
+        } catch (err) {
+          logger.warn(`onIdle: extraction failed for conversation ${conversationId} — ${(err as Error).message}`);
+        }
+      }, deps.config.memory.extraction.onIdle.idleTimeoutMs);
+
+      idleTimers.set(conversationId, { timer, request });
+    }
+
+    // Skip after-round extraction if disabled
+    if (!deps.config.memory.extraction.afterRound) {
+      logger.info(`afterRound: after-round extraction disabled via config, skipping`);
+      return;
+    }
+
     logger.info(
       `afterRound: starting extraction pipeline, method=${deps.config.memory.extraction.method}, round=${roundId}`
     );
@@ -208,7 +274,7 @@ export const createMemoryExtractionCallback = (
       roundId,
       round,
       conversation,
-      reinforcementSignals: consumeRunSignals(runId),
+      reinforcementSignals,
       memoryClient,
       connectorId: connectorId ?? '',
       space,
