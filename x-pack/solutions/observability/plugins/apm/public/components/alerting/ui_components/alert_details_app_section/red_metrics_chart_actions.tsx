@@ -140,7 +140,7 @@ function RedMetricsChartActionsPopover({
           disabled={!apmLink}
           data-test-subj="apmAlertDetailsOpenInApmAction"
           data-action="openInApm"
-          data-source={`apmAlertDetails-${ruleTypeId}`}
+          data-source={`alertDetails-${ruleTypeId}`}
         >
           {inApmLabel}
         </EuiContextMenuItem>
@@ -149,7 +149,7 @@ function RedMetricsChartActionsPopover({
           disabled={!discoverLink}
           data-test-subj="apmAlertDetailsTracesOpenInDiscoverAction"
           data-action="openTracesInDiscover"
-          data-source={`apmAlertDetails-${ruleTypeId}`}
+          data-source={`alertDetails-${ruleTypeId}`}
         >
           {tracesInDiscoverLabel}
         </EuiContextMenuItem>

@@ -124,11 +124,11 @@ describe('RedMetricsChartActions', () => {
 
     expect(getByTestId('apmAlertDetailsOpenInApmAction')).toHaveAttribute(
       'data-source',
-      'apmAlertDetails-apm.transaction_duration'
+      'alertDetails-apm.transaction_duration'
     );
     expect(getByTestId('apmAlertDetailsTracesOpenInDiscoverAction')).toHaveAttribute(
       'data-source',
-      'apmAlertDetails-apm.transaction_duration'
+      'alertDetails-apm.transaction_duration'
     );
   });
 
