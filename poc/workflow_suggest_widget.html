@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>POC: Custom Workflow Suggest Widget</title>
+<title>POC: Custom Workflow Suggest Widget (IContentWidget + Context Keys)</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -71,11 +71,42 @@
     overflow: hidden;
   }
 
+  /* Debug bar */
+  .debug-bar {
+    padding: 6px 20px;
+    background: #25262e;
+    border-top: 1px solid #343741;
+    font-size: 11px;
+    font-family: 'SF Mono', monospace;
+    color: #69707d;
+    display: flex;
+    gap: 24px;
+    flex-shrink: 0;
+  }
+
+  .debug-bar .ctx-key {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .debug-bar .ctx-key .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #343741;
+  }
+
+  .debug-bar .ctx-key .dot.active { background: #7ee2a8; }
+
   /* ─── Custom Suggest Widget ─── */
 
-  .suggest-widget-custom {
-    position: absolute;
-    z-index: 1000;
+  /* Monaco sets `display: block; position: fixed; visibility: inherit;`
+     as inline styles on IContentWidget DOM nodes. Since inline styles
+     override class selectors, we hide the inner wrapper instead —
+     Monaco doesn't touch that. */
+
+  .suggest-widget-inner {
     display: flex;
     background: #1d1e24;
     border: 1px solid #343741;
@@ -85,7 +116,7 @@
     max-height: 340px;
   }
 
-  .suggest-widget-custom.hidden { display: none; }
+  .suggest-widget-inner.hidden { display: none; }
 
   /* ── Left panel: Suggestion list ── */
 
@@ -307,7 +338,7 @@
 <body>
 
 <div class="header">
-  <h1>Workflow YAML Editor — Custom Suggest Widget POC</h1>
+  <h1>POC v2 — IContentWidget + Context Keys + addAction keybindings</h1>
   <span class="hint">Press <kbd>Ctrl</kbd>+<kbd>Space</kbd> to trigger, or type after a key</span>
   <div class="scenario-tabs">
     <button class="scenario-tab active" data-scenario="connector-types">Connector Types</button>
@@ -318,11 +349,25 @@
 
 <div id="editor-container"></div>
 
+<div class="debug-bar">
+  <div class="ctx-key">
+    <span class="dot" id="dot-visible"></span>
+    <span>customSuggestWidgetVisible</span>
+  </div>
+  <div class="ctx-key">
+    <span class="dot" id="dot-focus"></span>
+    <span>editorTextFocus</span>
+  </div>
+  <div id="debug-position" style="margin-left: auto;">—</div>
+  <div id="debug-filter">filter: ""</div>
+  <div id="debug-widget-type">widget: IContentWidget</div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
 <script>
 
 // ─────────────────────────────────────────────────────────────
-// Suggestion Data
+// Suggestion Data (unchanged from v1)
 // ─────────────────────────────────────────────────────────────
 
 const SUGGESTION_DATA = {
@@ -474,9 +519,8 @@ steps:
 `,
 };
 
-// Cursor positions (line, column) where the widget should appear
 const SCENARIO_CURSOR = {
-  'connector-types': { lineNumber: 13, column: 11 },
+  'connector-types': { lineNumber: 11, column: 11 },
   'connector-params': { lineNumber: 12, column: 7 },
   'template-vars': { lineNumber: 22, column: 16 },
 };
@@ -498,12 +542,10 @@ function fuzzyMatch(pattern, text) {
     }
   }
   if (pi < pLower.length) return { matches: false, indices: [], score: -1 };
-
-  // Score: consecutive matches are better, earlier matches are better
   let score = 0;
   for (let i = 0; i < indices.length; i++) {
-    score -= indices[i]; // earlier = better
-    if (i > 0 && indices[i] === indices[i - 1] + 1) score += 10; // consecutive bonus
+    score -= indices[i];
+    if (i > 0 && indices[i] === indices[i - 1] + 1) score += 10;
   }
   return { matches: true, indices, score };
 }
@@ -531,6 +573,8 @@ require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0
 
 require(['vs/editor/editor.main'], function (monaco) {
 
+  // Enable fixedOverflowWidgets so content widgets can escape the editor bounds
+  // (same option Kibana uses in code_editor.tsx)
   const editor = monaco.editor.create(document.getElementById('editor-container'), {
     value: SCENARIO_YAML['connector-types'],
     language: 'yaml',
@@ -543,43 +587,270 @@ require(['vs/editor/editor.main'], function (monaco) {
     scrollBeyondLastLine: false,
     padding: { top: 12 },
     tabSize: 2,
-    quickSuggestions: false,
+    fixedOverflowWidgets: true,   // KEY: allows content widgets to overflow editor bounds
+    quickSuggestions: false,       // Suppress built-in suggest widget
     suggestOnTriggerCharacters: false,
     wordBasedSuggestions: 'off',
     parameterHints: { enabled: false },
   });
 
-  // ─── Custom Suggest Widget ───
+  // ─────────────────────────────────────────────────────────────
+  // Context Keys (public API: editor.createContextKey)
+  //
+  // These gate keybindings so arrow/enter/escape only intercept
+  // when the custom widget is visible. Same mechanism Monaco uses
+  // internally for `suggestWidgetVisible`.
+  // ─────────────────────────────────────────────────────────────
+
+  const ctxWidgetVisible = editor.createContextKey('customSuggestWidgetVisible', false);
+
+  // Debug: update status bar dots
+  function updateDebugBar() {
+    document.getElementById('dot-visible').classList.toggle('active', !!ctxWidgetVisible.get());
+    document.getElementById('debug-filter').textContent = `filter: "${filterText}"`;
+    const pos = editor.getPosition();
+    document.getElementById('debug-position').textContent = pos
+      ? `Ln ${pos.lineNumber}, Col ${pos.column}`
+      : '—';
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Custom Suggest Widget as IContentWidget
+  //
+  // IContentWidget positions relative to text content (line/col),
+  // scrolls with the text, and auto-flips ABOVE/BELOW based on
+  // available space. allowEditorOverflow lets it extend beyond
+  // the editor viewport (same as Monaco's built-in suggest widget).
+  // ─────────────────────────────────────────────────────────────
 
   let currentScenario = 'connector-types';
-  let widgetVisible = false;
   let selectedIndex = 0;
   let filterText = '';
   let filteredItems = [];
+  let anchorPosition = null; // {lineNumber, column} where widget was triggered
 
   // Create widget DOM
   const widgetEl = document.createElement('div');
-  widgetEl.className = 'suggest-widget-custom hidden';
+  widgetEl.className = 'suggest-widget-custom';
+  // Set explicit width so Monaco's max-width doesn't clip the flex children
+  widgetEl.style.width = '702px'; // 320 + 1 (border) + 380 + 1 (border)
   widgetEl.innerHTML = `
-    <div class="suggest-list-panel">
-      <div class="suggest-list-header">Suggested</div>
-      <div class="suggest-list"></div>
-    </div>
-    <div class="suggest-details-panel">
-      <div class="detail-empty">Select a suggestion to see details</div>
+    <div class="suggest-widget-inner hidden">
+      <div class="suggest-list-panel">
+        <div class="suggest-list-header">Suggested</div>
+        <div class="suggest-list"></div>
+      </div>
+      <div class="suggest-details-panel">
+        <div class="detail-empty">Select a suggestion to see details</div>
+      </div>
     </div>
   `;
+  const innerEl = widgetEl.querySelector('.suggest-widget-inner');
+
+  // Prevent clicks on the widget from stealing editor focus
+  widgetEl.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+  });
 
   const listEl = widgetEl.querySelector('.suggest-list');
   const detailsEl = widgetEl.querySelector('.suggest-details-panel');
 
-  // Register as overlay widget
-  const overlayWidget = {
+  // ─── IContentWidget implementation ───
+
+  const contentWidget = {
     getId: () => 'custom.suggest.widget',
+
     getDomNode: () => widgetEl,
-    getPosition: () => null, // we position manually
+
+    // allowEditorOverflow: the widget DOM is placed in the overflow container
+    // (outside editor's scrollable area), so it can extend beyond the viewport.
+    // In Kibana this renders into [data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"].
+    allowEditorOverflow: true,
+
+    // suppressMouseDown: prevents the editor from receiving mousedown events
+    // that originate on this widget (keeps editor focus stable when clicking suggestions).
+    suppressMouseDown: true,
+
+    getPosition: () => {
+      if (!anchorPosition) return null;
+      return {
+        position: anchorPosition,
+        preference: [
+          // Try below cursor first, flip above if not enough space
+          monaco.editor.ContentWidgetPositionPreference.BELOW,
+          monaco.editor.ContentWidgetPositionPreference.ABOVE,
+        ],
+      };
+    },
   };
-  editor.addOverlayWidget(overlayWidget);
+
+  // Register the widget once. We show/hide via CSS class and
+  // call layoutContentWidget() to reposition when anchor changes.
+  editor.addContentWidget(contentWidget);
+
+  // ─────────────────────────────────────────────────────────────
+  // Keybindings via editor.addAction (precondition-gated)
+  //
+  // These actions ONLY fire when customSuggestWidgetVisible is true.
+  // When the widget is hidden, arrow keys, Enter, Escape all
+  // behave normally (Monaco's default behavior).
+  //
+  // addAction is the recommended public API for conditional
+  // keybindings — it creates proper keybinding rules internally.
+  // ─────────────────────────────────────────────────────────────
+
+  editor.addAction({
+    id: 'customSuggest.selectPrevious',
+    label: 'Custom Suggest: Select Previous',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.UpArrow],
+    run: () => {
+      selectedIndex = Math.max(0, selectedIndex - 1);
+      renderList();
+    },
+  });
+
+  editor.addAction({
+    id: 'customSuggest.selectNext',
+    label: 'Custom Suggest: Select Next',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.DownArrow],
+    run: () => {
+      selectedIndex = Math.min(filteredItems.length - 1, selectedIndex + 1);
+      renderList();
+    },
+  });
+
+  editor.addAction({
+    id: 'customSuggest.accept',
+    label: 'Custom Suggest: Accept',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.Enter, monaco.KeyCode.Tab],
+    run: () => {
+      acceptSuggestion();
+    },
+  });
+
+  editor.addAction({
+    id: 'customSuggest.dismiss',
+    label: 'Custom Suggest: Dismiss',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.Escape],
+    run: () => {
+      hideWidget();
+    },
+  });
+
+  // Page Up / Page Down for fast scrolling
+  editor.addAction({
+    id: 'customSuggest.pageUp',
+    label: 'Custom Suggest: Page Up',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.PageUp],
+    run: () => {
+      selectedIndex = Math.max(0, selectedIndex - 8);
+      renderList();
+    },
+  });
+
+  editor.addAction({
+    id: 'customSuggest.pageDown',
+    label: 'Custom Suggest: Page Down',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.PageDown],
+    run: () => {
+      selectedIndex = Math.min(filteredItems.length - 1, selectedIndex + 8);
+      renderList();
+    },
+  });
+
+  // Trigger widget: Ctrl+Space (always available)
+  editor.addAction({
+    id: 'customSuggest.trigger',
+    label: 'Custom Suggest: Trigger',
+    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space],
+    run: () => {
+      showWidget();
+    },
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // Filter text tracking via onDidChangeModelContent
+  //
+  // Instead of fragile onKeyDown char-matching, we listen to
+  // actual model content changes to track what the user typed
+  // since the widget opened. This handles all input methods
+  // (keyboard, paste, IME, etc.)
+  // ─────────────────────────────────────────────────────────────
+
+  editor.onDidChangeModelContent((e) => {
+    if (!ctxWidgetVisible.get() || isAccepting) return;
+
+    for (const change of e.changes) {
+      if (change.text.length > 0 && change.rangeLength === 0) {
+        // Insertion — append to filter (handles single chars, paste, IME)
+        filterText += change.text;
+      } else if (change.text.length === 0 && change.rangeLength > 0) {
+        // Deletion — trim filter from the end
+        filterText = filterText.slice(0, Math.max(0, filterText.length - change.rangeLength));
+      } else if (change.text.length > 0 && change.rangeLength > 0) {
+        // Replacement — trim deleted, then append inserted
+        filterText = filterText.slice(0, Math.max(0, filterText.length - change.rangeLength));
+        filterText += change.text;
+      }
+    }
+
+    selectedIndex = 0;
+    renderList();
+    updateDebugBar();
+
+    // If filter becomes empty from backspace, dismiss
+    if (filterText.length === 0 && e.changes.some(c => c.rangeLength > 0)) {
+      hideWidget();
+    }
+  });
+
+  // ─── Dismiss on cursor moving to a different line ───
+
+  editor.onDidChangeCursorPosition((e) => {
+    if (!ctxWidgetVisible.get()) return;
+
+    // If cursor moved to a completely different line, dismiss
+    if (anchorPosition && e.position.lineNumber !== anchorPosition.lineNumber) {
+      hideWidget();
+      return;
+    }
+
+    updateDebugBar();
+  });
+
+  // Dismiss on click outside widget
+  editor.onMouseDown(() => {
+    if (ctxWidgetVisible.get()) {
+      hideWidget();
+    }
+  });
+
+  // Reposition on scroll (IContentWidget auto-handles this, but
+  // we may need to update visibility for edge cases)
+  editor.onDidScrollChange(() => {
+    if (ctxWidgetVisible.get()) {
+      editor.layoutContentWidget(contentWidget);
+    }
+  });
+
+  // Track editor focus for debug bar
+  editor.onDidFocusEditorText(() => {
+    document.getElementById('dot-focus').classList.add('active');
+  });
+  editor.onDidBlurEditorText(() => {
+    document.getElementById('dot-focus').classList.remove('active');
+    // Optionally dismiss on blur (in production, delay to allow widget clicks)
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // Widget show/hide/accept logic
+  // ─────────────────────────────────────────────────────────────
 
   function getIconForKind(kind) {
     switch (kind) {
@@ -623,7 +894,6 @@ require(['vs/editor/editor.main'], function (monaco) {
       </div>
     `).join('');
 
-    // Click handlers
     listEl.querySelectorAll('.suggest-item').forEach(el => {
       el.addEventListener('mousedown', (e) => {
         e.preventDefault();
@@ -632,13 +902,14 @@ require(['vs/editor/editor.main'], function (monaco) {
         acceptSuggestion();
       });
       el.addEventListener('mouseover', () => {
-        selectedIndex = parseInt(el.dataset.index);
-        renderList();
-        renderDetails();
+        const idx = parseInt(el.dataset.index);
+        if (idx !== selectedIndex) {
+          selectedIndex = idx;
+          renderList();
+        }
       });
     });
 
-    // Scroll selected into view
     const selectedEl = listEl.querySelector('.suggest-item.selected');
     if (selectedEl) {
       selectedEl.scrollIntoView({ block: 'nearest' });
@@ -708,51 +979,38 @@ require(['vs/editor/editor.main'], function (monaco) {
     `;
   }
 
-  function positionWidget() {
+  // Flag to suppress onDidChangeModelContent during acceptSuggestion
+  let isAccepting = false;
+
+  function showWidget() {
     const pos = editor.getPosition();
     if (!pos) return;
 
-    const scrolledPos = editor.getScrolledVisiblePosition(pos);
-    if (!scrolledPos) return;
-
-    const editorDom = editor.getDomNode();
-    if (!editorDom) return;
-
-    const editorRect = editorDom.getBoundingClientRect();
-    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-
-    let top = scrolledPos.top + lineHeight + 4;
-    let left = scrolledPos.left;
-
-    // If widget would go below the editor, show above
-    const widgetHeight = 340;
-    if (top + widgetHeight > editorRect.height) {
-      top = scrolledPos.top - widgetHeight - 4;
-    }
-
-    // Clamp left so widget doesn't go off-screen
-    const widgetWidth = 700;
-    if (left + widgetWidth > editorRect.width) {
-      left = Math.max(0, editorRect.width - widgetWidth - 20);
-    }
-
-    widgetEl.style.top = top + 'px';
-    widgetEl.style.left = left + 'px';
-  }
-
-  function showWidget() {
     filterText = '';
     selectedIndex = 0;
-    widgetEl.classList.remove('hidden');
-    widgetVisible = true;
-    positionWidget();
+    anchorPosition = { lineNumber: pos.lineNumber, column: pos.column };
+
+    // Set context key BEFORE showing — this enables the keybindings
+    ctxWidgetVisible.set(true);
+
+    innerEl.classList.remove('hidden');
+
+    // Tell Monaco to (re-)position the content widget at the anchor
+    editor.layoutContentWidget(contentWidget);
+
     renderList();
+    updateDebugBar();
   }
 
   function hideWidget() {
-    widgetEl.classList.add('hidden');
-    widgetVisible = false;
+    innerEl.classList.add('hidden');
+
+    // Clear context key — this disables the keybindings
+    ctxWidgetVisible.set(false);
+
     filterText = '';
+    anchorPosition = null;
+    updateDebugBar();
   }
 
   function acceptSuggestion() {
@@ -763,23 +1021,19 @@ require(['vs/editor/editor.main'], function (monaco) {
     const pos = editor.getPosition();
     if (!pos) return;
 
-    // Determine what text to insert
     let insertText = item.label;
-
-    // For params, add ": " suffix
     if (item.kind === 'param') {
       insertText = item.label + ': ';
     }
-    // For template vars, just the path
-    if (item.kind === 'variable') {
-      insertText = item.label;
-    }
 
-    // Calculate the range to replace (from start of typed filter to cursor)
-    const lineContent = editor.getModel().getLineContent(pos.lineNumber);
-    const startCol = pos.column - filterText.length;
-
+    // Replace from anchor column (where widget was triggered) to current cursor
+    const startCol = anchorPosition ? anchorPosition.column : pos.column - filterText.length;
     const range = new monaco.Range(pos.lineNumber, startCol, pos.lineNumber, pos.column);
+
+    // Suppress the onDidChangeModelContent handler during the edit —
+    // otherwise it would re-filter with the inserted text and keep the widget open
+    isAccepting = true;
+    hideWidget();
 
     editor.executeEdits('custom-suggest', [{
       range,
@@ -787,115 +1041,9 @@ require(['vs/editor/editor.main'], function (monaco) {
       forceMoveMarkers: true,
     }]);
 
-    hideWidget();
+    isAccepting = false;
     editor.focus();
   }
-
-  // ─── Key handling ───
-
-  editor.onKeyDown((e) => {
-    if (!widgetVisible) {
-      // Ctrl+Space to trigger
-      if (e.keyCode === monaco.KeyCode.Space && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        e.stopPropagation();
-        showWidget();
-        return;
-      }
-      return;
-    }
-
-    // Widget is visible — handle navigation
-    switch (e.keyCode) {
-      case monaco.KeyCode.UpArrow:
-        e.preventDefault();
-        e.stopPropagation();
-        selectedIndex = Math.max(0, selectedIndex - 1);
-        renderList();
-        break;
-
-      case monaco.KeyCode.DownArrow:
-        e.preventDefault();
-        e.stopPropagation();
-        selectedIndex = Math.min(filteredItems.length - 1, selectedIndex + 1);
-        renderList();
-        break;
-
-      case monaco.KeyCode.Enter:
-      case monaco.KeyCode.Tab:
-        e.preventDefault();
-        e.stopPropagation();
-        acceptSuggestion();
-        break;
-
-      case monaco.KeyCode.Escape:
-        e.preventDefault();
-        e.stopPropagation();
-        hideWidget();
-        break;
-
-      case monaco.KeyCode.Backspace:
-        // Let the editor handle the delete, then update filter
-        setTimeout(() => {
-          if (filterText.length > 0) {
-            filterText = filterText.slice(0, -1);
-            selectedIndex = 0;
-            renderList();
-          } else {
-            hideWidget();
-          }
-        }, 0);
-        break;
-
-      default:
-        // For printable characters, update filter after editor processes the keystroke
-        if (e.keyCode >= monaco.KeyCode.KeyA && e.keyCode <= monaco.KeyCode.KeyZ ||
-            e.keyCode >= monaco.KeyCode.Digit0 && e.keyCode <= monaco.KeyCode.Digit9 ||
-            e.keyCode === monaco.KeyCode.Period ||
-            e.keyCode === monaco.KeyCode.Minus ||
-            e.keyCode === monaco.KeyCode.Underline) {
-          setTimeout(() => {
-            // Get the character that was just typed
-            const pos = editor.getPosition();
-            if (!pos) return;
-            const lineContent = editor.getModel().getLineContent(pos.lineNumber);
-            const charBefore = lineContent[pos.column - 2];
-            if (charBefore) {
-              filterText += charBefore;
-              selectedIndex = 0;
-              renderList();
-              positionWidget();
-            }
-          }, 0);
-        }
-        break;
-    }
-  });
-
-  // Dismiss on click outside
-  editor.onMouseDown((e) => {
-    if (widgetVisible) {
-      // Check if click is on the widget
-      const target = e.event.browserEvent.target;
-      if (!widgetEl.contains(target)) {
-        hideWidget();
-      }
-    }
-  });
-
-  // Dismiss on scroll
-  editor.onDidScrollChange(() => {
-    if (widgetVisible) {
-      positionWidget();
-    }
-  });
-
-  // Reposition on layout change
-  editor.onDidLayoutChange(() => {
-    if (widgetVisible) {
-      positionWidget();
-    }
-  });
 
   // ─── Scenario switching ───
 
@@ -903,16 +1051,13 @@ require(['vs/editor/editor.main'], function (monaco) {
     currentScenario = scenario;
     hideWidget();
 
-    // Update tab UI
     document.querySelectorAll('.scenario-tab').forEach(tab => {
       tab.classList.toggle('active', tab.dataset.scenario === scenario);
     });
 
-    // Update editor content
     const model = editor.getModel();
     model.setValue(SCENARIO_YAML[scenario]);
 
-    // Set cursor position and show widget
     const cursor = SCENARIO_CURSOR[scenario];
     setTimeout(() => {
       editor.setPosition(cursor);
