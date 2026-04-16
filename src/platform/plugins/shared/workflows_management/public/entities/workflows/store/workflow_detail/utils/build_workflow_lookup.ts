@@ -264,8 +264,8 @@ export function buildStepSelectionValues(
   // Same null-prototype initialization as setNested (see comment there) — required to avoid prototype pollution.
   const config = Object.create(null) as RecursivePartial<Record<string, unknown>>;
   const input = Object.create(null) as RecursivePartial<Record<string, unknown>>;
-  const pathsToMatch = valuePaths && valuePaths.length > 0 ? valuePaths : undefined;
 
+  const pathsToMatch = valuePaths && valuePaths.length > 0 ? valuePaths : undefined;
   if (!pathsToMatch) {
     return { config, input };
   }

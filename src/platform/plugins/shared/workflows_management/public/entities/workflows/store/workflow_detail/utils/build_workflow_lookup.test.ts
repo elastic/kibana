@@ -658,7 +658,7 @@ steps:
     expect(values).toEqual({ config: {}, input: {} });
   });
 
-  it('should not assign onto Object.prototype when path segments include __proto__', () => {
+  it('should not assign onto Object.prototype when path segments include "__proto__"', () => {
     const probe = '__wmBuildWorkflowLookupProtoProbe';
     delete (Object.prototype as Record<string, unknown>)[probe];
     const step = getStep(`
@@ -671,5 +671,39 @@ steps:
     buildStepSelectionValues(step, [`config.__proto__.${probe}`]);
     expect(Object.hasOwn(Object.prototype, probe)).toBe(false);
     expect((Object.prototype as Record<string, unknown>)[probe]).toBeUndefined();
+  });
+
+  it('should not assign onto Object.prototype when path segments include "constructor"', () => {
+    const probe = '__wmBuildWorkflowLookupProtoProbe';
+    delete (Object.prototype as Record<string, unknown>)[probe];
+    const step = getStep(`
+steps:
+  - name: s1
+    type: my.step
+    constructor:
+      ${probe}: polluted
+`);
+    const values = buildStepSelectionValues(step, [`config.constructor.${probe}`]);
+    expect((Object.prototype as Record<string, unknown>)[probe]).toBeUndefined();
+    expect(({} as Record<string, unknown>)[probe]).toBeUndefined();
+    expect(values.config.constructor).toBeDefined();
+    expect((values.config.constructor as any)[probe]).toBe('polluted');
+  });
+
+  it('should not assign onto Object.prototype when path segments include "prototype"', () => {
+    const probe = '__wmBuildWorkflowLookupProtoProbe';
+    delete (Object.prototype as Record<string, unknown>)[probe];
+    const step = getStep(`
+steps:
+  - name: s1
+    type: my.step
+    prototype:
+      ${probe}: polluted
+`);
+    const values = buildStepSelectionValues(step, [`config.prototype.${probe}`]);
+    expect((Object.prototype as Record<string, unknown>)[probe]).toBeUndefined();
+    expect(({} as Record<string, unknown>)[probe]).toBeUndefined();
+    expect(values.config.prototype).toBeDefined();
+    expect((values.config.prototype as Record<string, unknown>)[probe]).toBe('polluted');
   });
 });
