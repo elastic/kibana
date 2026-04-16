@@ -225,14 +225,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  it('checks default values on new saved query', () => {
-    cy.contains('Queries').click();
-    cy.contains('Create query').click();
-    // ADD MORE FIELDS HERE
-    cy.getBySel('resultsTypeField').within(() => {
-      cy.contains('Snapshot');
-    });
-  });
+  // Removed: 'checks default values on new saved query'
+  // Migrated to Jest component test: public/routes/saved_queries/edit/form.test.tsx
+  // Phase 2 migration — form field default values are UI-only assertions
 
   describe('prebuilt', () => {
     let packName: string;
@@ -269,15 +264,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cleanupSavedQuery(savedQueryId);
     });
 
-    it('checks result type on prebuilt saved query', () => {
-      // Navigate to page 2 where users_elastic is located
-      cy.getBySel('pagination-button-1').click();
-      cy.get(rowActionsMenuSelector('users_elastic')).click();
-      cy.contains('Edit query').click();
-      cy.getBySel('resultsTypeField').within(() => {
-        cy.contains('Snapshot');
-      });
-    });
+    // Removed: 'checks result type on prebuilt saved query'
+    // Migrated to Jest component test: public/routes/saved_queries/edit/form.test.tsx
+    // Phase 2 migration — result type field rendering is a UI-only assertion
 
     it('user can run prebuilt saved query and add to case', () => {
       // Navigate to page 2 where users_elastic is located
