@@ -1711,6 +1711,157 @@ steps:
       );
     });
 
+    it('should preserve stored enabled when valid YAML has no enabled key and request omits enabled', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: {
+            username: 'test-user',
+          },
+        },
+      } as any;
+
+      const command: { yaml: string } = {
+        yaml: 'name: Updated Workflow\ntriggers:\n  - type: manual\nsteps:\n  - type: console\n    name: first-step\n    with:\n      message: "Hello, world!"',
+      };
+
+      expect(command.yaml).not.toMatch(/(?:^|\n)\s*enabled\s*:/);
+
+      const disabledDoc = {
+        ...mockWorkflowDocument,
+        _source: {
+          ...mockWorkflowDocument._source,
+          enabled: false,
+          definition: {
+            ...mockWorkflowDocument._source.definition,
+            enabled: false,
+          },
+        },
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [disabledDoc] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.enabled).toBe(false);
+      expect(result.valid).toBe(true);
+
+      const indexCall = mockEsClient.index.mock.calls[0][0] as {
+        document: { enabled: boolean; definition: { enabled: boolean }; yaml: string };
+      };
+      expect(indexCall.document.enabled).toBe(false);
+      expect(indexCall.document.definition.enabled).toBe(false);
+      expect(indexCall.document.yaml).toBe(command.yaml);
+      expect(indexCall.document.yaml).not.toMatch(/(?:^|\n)\s*enabled\s*:/);
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          index: '.workflows-workflows',
+          document: expect.objectContaining({
+            name: 'Updated Workflow',
+            enabled: false,
+            valid: true,
+            yaml: command.yaml,
+            definition: expect.objectContaining({ enabled: false }),
+            lastUpdatedBy: 'test-user',
+            spaceId: 'default',
+          }),
+          refresh: true,
+          require_alias: true,
+        })
+      );
+    });
+
+    it('should use request enabled when valid YAML omits enabled', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: {
+            username: 'test-user',
+          },
+        },
+      } as any;
+
+      const command = {
+        yaml: 'name: Updated Workflow\ntriggers:\n  - type: manual\nsteps:\n  - type: console\n    name: first-step\n    with:\n      message: "Hello, world!"',
+        enabled: true,
+      };
+
+      expect(command.yaml).not.toMatch(/(?:^|\n)\s*enabled\s*:/);
+
+      const disabledDoc = {
+        ...mockWorkflowDocument,
+        _source: {
+          ...mockWorkflowDocument._source,
+          enabled: false,
+          definition: {
+            ...mockWorkflowDocument._source.definition,
+            enabled: false,
+          },
+        },
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [disabledDoc] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.enabled).toBe(true);
+      expect(result.valid).toBe(true);
+
+      const indexCall = mockEsClient.index.mock.calls[0][0] as {
+        document: { enabled: boolean; definition: { enabled: boolean }; yaml: string };
+      };
+      expect(indexCall.document.enabled).toBe(true);
+      expect(indexCall.document.definition.enabled).toBe(true);
+      expect(indexCall.document.yaml).toBe(command.yaml);
+      expect(indexCall.document.yaml).not.toMatch(/(?:^|\n)\s*enabled\s*:/);
+    });
+
+    it('should use request enabled false when valid YAML omits enabled', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: {
+            username: 'test-user',
+          },
+        },
+      } as any;
+
+      const command = {
+        yaml: 'name: Updated Workflow\ntriggers:\n  - type: manual\nsteps:\n  - type: console\n    name: first-step\n    with:\n      message: "Hello, world!"',
+        enabled: false,
+      };
+
+      expect(command.yaml).not.toMatch(/(?:^|\n)\s*enabled\s*:/);
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [mockWorkflowDocument] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.enabled).toBe(false);
+      expect(result.valid).toBe(true);
+
+      const indexCall = mockEsClient.index.mock.calls[0][0] as {
+        document: { enabled: boolean; definition: { enabled: boolean }; yaml: string };
+      };
+      expect(indexCall.document.enabled).toBe(false);
+      expect(indexCall.document.definition.enabled).toBe(false);
+      expect(indexCall.document.yaml).toBe(command.yaml);
+    });
+
     it('should throw error when workflow not found', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
 
