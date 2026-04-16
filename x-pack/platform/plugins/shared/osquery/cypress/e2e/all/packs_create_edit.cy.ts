@@ -20,7 +20,6 @@ import {
   UPDATE_PACK_BUTTON,
   TABLE_ROWS,
   formFieldInputSelector,
-  FLYOUT_SAVED_QUERY_CANCEL_BUTTON,
 } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
