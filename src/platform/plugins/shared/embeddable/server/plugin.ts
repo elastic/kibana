@@ -51,6 +51,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
    * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
    */
+  // TODO rename to registerEmbeddableSchema
   registerTransforms: (type: string, transforms: EmbeddableTransformsSetup<any, any>) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
@@ -59,7 +60,7 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
   /**
    * Returns all embeddable schemas registered with registerTransforms.
    */
-  getAllEmbeddableSchemas: () => { [key: string]: ObjectType };
+  getAllEmbeddableSchemas: () => { [key: string]: { schema: ObjectType; title: string } };
 
   getTransforms: (type: string) =>
     | (EmbeddableTransforms & {

@@ -320,6 +320,7 @@ Containers use schemas to
 embeddableServerSetup.registerTransforms(
   'my_embeddable_type',
   {
+    title: 'My embeddable',
     getTransforms: (drilldownTransfroms) => ({
       transformIn: (state: EmbeddableState) => {
         return {

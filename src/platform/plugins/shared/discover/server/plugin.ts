@@ -71,6 +71,7 @@ export class DiscoverServerPlugin
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
     plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, {
+      title: 'Discover session',
       getTransforms: (drilldownTransforms) =>
         getSearchEmbeddableTransforms(drilldownTransforms, () => this.embeddableTransformsEnabled),
       getSchema: (getDrilldownsSchema) =>

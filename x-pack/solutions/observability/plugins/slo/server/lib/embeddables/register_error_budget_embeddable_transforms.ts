@@ -15,6 +15,7 @@ import { getTransforms } from '../../../common/embeddables/error_budget/transfor
  */
 export const registerErrorBudgetEmbeddableTransforms = (embeddable: EmbeddableSetup): void => {
   embeddable.registerTransforms(SLO_ERROR_BUDGET_ID, {
+    title: 'SLO error budget',
     getSchema: getErrorBudgetEmbeddableSchema,
     getTransforms,
   });

@@ -84,6 +84,7 @@ export class AiopsPlugin
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {
+      title: 'AIOPS change point chart',
       getTransforms: () => ({
         transformIn: changePointTransformIn,
         transformOut: changePointTransformOut,
@@ -91,6 +92,7 @@ export class AiopsPlugin
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, {
+      title: 'AIOPS pattern analysis',
       getTransforms: () => ({
         transformIn: patternAnalysisTransformIn,
         transformOut: patternAnalysisTransformOut,
@@ -98,6 +100,7 @@ export class AiopsPlugin
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
+      title: 'AIOPS log rate analysis',
       getTransforms: () => ({
         transformIn: logRateTransformIn,
         transformOut: logRateTransformOut,

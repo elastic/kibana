@@ -47,6 +47,10 @@ export type EmbeddableTransformsSetup<
   StoredEmbeddableState extends object = object,
   EmbeddableState extends object = object
 > = {
+  /**
+   * Title displayed in Open API documenation
+   */
+  title: string;
   getTransforms?: (
     drilldownTransforms: DrilldownTransforms
   ) => EmbeddableTransforms<StoredEmbeddableState, EmbeddableState>;

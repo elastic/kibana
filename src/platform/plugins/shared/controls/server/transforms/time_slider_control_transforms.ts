@@ -18,6 +18,7 @@ import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
 export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(TIME_SLIDER_CONTROL, {
+    title: 'Time slider control',
     getSchema: () => timeSliderControlSchema,
     getTransforms: () => ({
       transformOut: <
