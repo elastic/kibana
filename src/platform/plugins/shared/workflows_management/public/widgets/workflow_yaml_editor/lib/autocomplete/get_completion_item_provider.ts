@@ -142,7 +142,7 @@ function enrichCompletionItem(
 
   // Parse type info from detail field (patterns like "string", "object: description", "Built-in workflow step")
   let types: string[] = [];
-  let description = doc;
+  const description = doc;
   let required: boolean | null = null;
   let contextLabel: string | undefined;
 
@@ -155,17 +155,17 @@ function enrichCompletionItem(
       types = ['action'];
     }
   } else if (category === 'variable') {
-    // Variable suggestions: detail = "type: description" or "type"
+    // Variable suggestions: detail = "type" or "type?: description"
+    // The detail contains the Zod type description (e.g., "string", "{ id: string; name: string }").
+    // Don't split on colon — the type itself may contain colons for object shapes.
+    // Don't show Required for variables — it's not applicable.
     contextLabel = 'Template Variable';
-    const colonIdx = detail.indexOf(':');
-    if (colonIdx > 0) {
-      types = [detail.slice(0, colonIdx).replace('?', '').trim()];
-      description = detail.slice(colonIdx + 1).trim() || doc;
-      required = !detail.includes('?');
-    } else if (detail) {
-      types = [detail.replace('?', '').trim()];
-      required = !detail.includes('?');
+    if (detail) {
+      // Use the full detail as the type description
+      types = [detail.replace(/\?$/, '').trim()];
     }
+    // Variables don't have a required/optional concept in autocomplete context
+    required = null;
   } else if (category === 'param' || category === 'value') {
     // Parameter/value suggestions from JSON schema or custom properties
     contextLabel = 'Parameter';

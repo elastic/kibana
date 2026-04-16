@@ -7,13 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, type IconType, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef } from 'react';
 
 import { fuzzyMatch, getLabelHighlightIndices, highlightSegments } from './fuzzy_match';
 import { getSuggestWidgetStyles } from './suggest_widget_styles';
 import type { EnrichedSuggestionItem } from './types';
 import { getStepIconType } from '../../../../shared/ui/step_icons/get_step_icon_type';
+
+/**
+ * Get the icon for a suggestion item. Strips leading dots from connector types
+ * and tries both the full type and the base prefix (before first dot) to match
+ * icons like `slack_api` from `.slack_api.searchMessages`.
+ */
+const getItemIcon = (typeStr: string): IconType => {
+  const cleaned = typeStr.replace(/^\./, '');
+  const icon = getStepIconType(cleaned);
+  if (icon === 'plugs' && cleaned.includes('.')) {
+    const base = cleaned.split('.')[0];
+    return getStepIconType(base);
+  }
+  return icon;
+};
 
 export interface FilteredItem {
   item: EnrichedSuggestionItem;
@@ -120,7 +135,7 @@ export const SuggestListPanel: React.FC<SuggestListPanelProps> = ({
             >
               <span css={[styles.itemIcon, isSelected && styles.itemIconSelected]}>
                 <EuiIcon
-                  type={getStepIconType(item.filterText ?? item.label)}
+                  type={getItemIcon(item.filterText ?? item.label)}
                   size="s"
                   color={isSelected ? 'inherit' : 'subdued'}
                   aria-hidden={true}
