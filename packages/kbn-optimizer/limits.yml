@@ -7,7 +7,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 47881
-  apm: 25600
+  apm: 25363
   apmSourcesAccess: 2278
   automaticImport: 15269
   banners: 4006
@@ -122,7 +122,7 @@ pageLoadAssetSize:
   newsfeed: 11110
   noDataPage: 1749
   observability: 107797
-  observabilityAgentBuilder: 11200
+  observabilityAgentBuilder: 10178
   observabilityAIAssistant: 71481
   observabilityAIAssistantApp: 17100
   observabilityAiAssistantManagement: 7126
