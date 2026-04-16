@@ -1491,6 +1491,10 @@ async function runDockerContainerInSnapshotMode(
       tag = `${version}-SNAPSHOT-${sha}`;
       repo = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch`;
       log.info(`Using commit-pinned docker tag from manifest: ${repo}:${tag}`);
+    } else {
+      log.warning(
+        `Failed to fetch ES_SNAPSHOT_MANIFEST (${resp.status}), falling back to default image`
+      );
     }
   }
 
