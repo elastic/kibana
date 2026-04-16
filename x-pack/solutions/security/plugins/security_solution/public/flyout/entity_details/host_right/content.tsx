@@ -94,7 +94,12 @@ export const HostPanelContent = ({
         )}
       {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
-          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
+          <ResolutionSection
+            entityId={entityStoreEntityId}
+            entityType={EntityType.host}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
           <EuiHorizontalRule />
         </>
       )}

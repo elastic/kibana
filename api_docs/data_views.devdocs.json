@@ -15414,6 +15414,14 @@
                 "path": "src/platform/plugins/shared/vis_types/timeseries/server/lib/get_fields.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_index_form.tsx"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_index_form.tsx"
+              },
+              {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
               },
@@ -15576,14 +15584,6 @@
               {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/public/components/edit_index_pattern/create_edit_field/create_edit_field.tsx"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_index_form.tsx"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_index_form.tsx"
               },
               {
                 "plugin": "@kbn/discover-utils",

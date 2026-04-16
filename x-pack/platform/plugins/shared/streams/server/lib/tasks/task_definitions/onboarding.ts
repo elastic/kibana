@@ -374,6 +374,7 @@ export async function persistQueries(
     queries.map((query) => ({
       index: {
         id: v4(),
+        type: query.type,
         esql: query.esql,
         title: query.title,
         description: query.description,
