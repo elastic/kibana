@@ -82,7 +82,26 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
     expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Alerting');
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 3');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsNoDataConfig')).toHaveTextContent('No data');
+  });
+
+  it('renders Immediate for alert and recovery delay when counts are zero', () => {
+    renderConditions({
+      ...alertRule,
+      state_transition: { pending_count: 0, recovering_count: 0 },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('Immediate');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('Immediate');
+  });
+
+  it('renders recovery delay with count when recovering_count is set', () => {
+    renderConditions({
+      ...alertRule,
+      state_transition: { pending_count: 0, recovering_count: 5 },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('Immediate');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('After 5');
   });
 
   it('renders fallback values for missing optional fields', () => {
