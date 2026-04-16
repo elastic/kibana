@@ -48,7 +48,7 @@ const MockPreviewLink = ({
 }: {
   field: string;
   value: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) => (
   <div data-test-subj="mockPreviewLink" data-field={field} data-value={value}>
     {children}
