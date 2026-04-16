@@ -8,7 +8,7 @@ paths:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.4.0
       operationId: UnassignWatchlistEntities
       summary: Manually unassign entities from a watchlist
       description: |
