@@ -18,10 +18,11 @@ import {
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
+import type { KIFeatureExtractionOutput } from '../../src/evaluators/ki_feature_extraction';
 import {
   createKIFeatureExtractionEvaluators,
   getFeaturesFromOutput,
-} from '../../src/evaluators/ki_feature_extraction/evaluators';
+} from '../../src/evaluators/ki_feature_extraction';
 import { createCorrectnessEvaluators } from '../../src/evaluators/correctness/evaluators';
 import {
   getActiveDatasets,
@@ -84,7 +85,11 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
         await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-        sampleDocuments = await collectSampleDocuments({ esClient, scenario, log });
+        sampleDocuments = await collectSampleDocuments({
+          esClient,
+          scenario,
+          log,
+        });
         if (sampleDocuments.length === 0) {
           throw new Error(`No log documents found after replaying snapshot ${source.snapshotName}`);
         }
@@ -155,7 +160,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                     meta.failure_domain
                   }${meta.failure_mode ? `, failure mode: ${meta.failure_mode}` : ''}`;
                 },
-                extractResponse: (output) => {
+                extractResponse: (output: KIFeatureExtractionOutput) => {
                   const features = getFeaturesFromOutput(output);
                   return features
                     .map(

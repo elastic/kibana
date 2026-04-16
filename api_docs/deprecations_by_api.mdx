@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2026-04-10
+date: 2026-04-16
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -18,7 +18,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | ---------------|-----------|-----------|
 | <DocLink id="kibAlertingPluginApi" section="def-public.PluginSetupContract.registerNavigation" text="registerNavigation"/> | ml, stackAlerts, @kbn/test-suites-xpack-platform | - |
 | <DocLink id="kibCasesPluginApi" section="def-common.FEATURE_ID" text="FEATURE_ID"/> | ml | - |
-| <DocLink id="kibDataViewsPluginApi" section="def-common.AbstractDataView.title" text="title"/> | data, @kbn/search-errors, savedObjectsManagement, kql, unifiedSearch, @kbn/unified-field-list, @kbn/lens-embeddable-utils, lens, triggersActionsUi, dataVisualizer, ml, canvas, upgradeAssistant, fleet, graph, transform, @kbn/ml-data-view-utils, stackAlerts, datasetQuality, maps, exploratoryView, controls, visTypeTimeseries, uptime, ux, enterpriseSearch, securitySolution, timelines, @kbn/test-suites-xpack-observability, @kbn/cloud-security-posture-graph, eventAnnotationListing, inputControlVis, visDefaultEditor, dataViewManagement, workflowsManagement, @kbn/discover-utils, visTypeTimelion, visTypeVega | - |
+| <DocLink id="kibDataViewsPluginApi" section="def-common.AbstractDataView.title" text="title"/> | data, @kbn/search-errors, savedObjectsManagement, kql, unifiedSearch, @kbn/unified-field-list, @kbn/lens-embeddable-utils, lens, triggersActionsUi, dataVisualizer, ml, canvas, upgradeAssistant, fleet, graph, transform, @kbn/ml-data-view-utils, stackAlerts, datasetQuality, maps, exploratoryView, controls, visTypeTimeseries, workflowsManagement, uptime, ux, enterpriseSearch, securitySolution, timelines, @kbn/test-suites-xpack-observability, @kbn/cloud-security-posture-graph, eventAnnotationListing, inputControlVis, visDefaultEditor, dataViewManagement, @kbn/discover-utils, visTypeTimelion, visTypeVega | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | ml, securitySolution | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authz" text="authz"/> | savedObjectsTagging, ml, actions | - |
 | <DocLink id="kibKbnCoreApplicationBrowserPluginApi" section="def-public.AppMountParameters.setHeaderActionMenu" text="setHeaderActionMenu"/> | @kbn/core, visualizations, lens, maps, discover, dashboard, ml, fleet, graph, monitoring, security, observabilityShared, exploratoryView, observability, profiling, slo, apm, infra, synthetics, uptime, ux, enterpriseSearch, securitySolution | - |
@@ -69,13 +69,13 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnLensCommonPluginApi" section="def-common.LensPartitionVisualizationState.palette" text="palette"/> | @kbn/lens-embeddable-utils, lens, securitySolution, visTypePie | - |
 | <DocLink id="kibKbnLensCommonPluginApi" section="def-common.LensTagCloudState.palette" text="palette"/> | @kbn/lens-embeddable-utils, securitySolution, visTypeTagcloud | - |
 | <DocLink id="kibKbnReactQueryPluginApi" section="def-common.QueryObserverOptions.onSuccess" text="onSuccess"/> | @kbn/alerts-ui-shared, triggersActionsUi, cases, @kbn/anonymization-ui, osquery, @kbn/securitysolution-list-hooks, slo, infra, securitySolution | - |
-| <DocLink id="kibKbnReactQueryPluginApi" section="def-common.QueryObserverOptions.onError" text="onError"/> | @kbn/alerts-ui-shared, @kbn/response-ops-rules-apis, triggersActionsUi, @kbn/response-ops-alerts-apis, @kbn/response-ops-alerts-table, @kbn/inference-connectors, @kbn/elastic-assistant, cases, @kbn/inference-endpoint-ui-common, alertingVTwo, @kbn/alerting-v2-episodes-ui, maintenanceWindows, osquery, stackConnectors, streamsApp, @kbn/securitysolution-list-hooks, observability, slo, infra, searchPlayground, @kbn/cloud-security-posture-graph, @kbn/cloud-security-posture, cloudSecurityPosture, securitySolution, workflowsManagement | - |
+| <DocLink id="kibKbnReactQueryPluginApi" section="def-common.QueryObserverOptions.onError" text="onError"/> | @kbn/alerts-ui-shared, @kbn/response-ops-rules-apis, triggersActionsUi, @kbn/response-ops-alerts-apis, @kbn/response-ops-alerts-table, @kbn/inference-connectors, @kbn/elastic-assistant, cases, @kbn/inference-endpoint-ui-common, alertingVTwo, @kbn/alerting-v2-episodes-ui, maintenanceWindows, osquery, stackConnectors, streamsApp, @kbn/securitysolution-list-hooks, observability, slo, infra, workflowsManagement, searchPlayground, @kbn/cloud-security-posture-graph, @kbn/cloud-security-posture, cloudSecurityPosture, securitySolution | - |
 | <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginStart.authc" text="authc"/> | security, cloudLinks, securitySolution, cases | - |
 | <DocLink id="kibKbnZodPluginApi" section="def-common.nativeEnum" text="nativeEnum"/> | securitySolution, streams, dashboardAgent, agentBuilderPlatform, @kbn/agent-builder-genai-utils, workflowsManagement, @kbn/entities-schema | - |
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.uuid" text="uuid"/> | @kbn/connector-specs, @kbn/elastic-assistant-common, automaticImport, @kbn/openapi-common, securitySolution | - |
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.datetime" text="datetime"/> | @kbn/streams-schema, @kbn/elastic-assistant-common, cases, @kbn/anonymization-common, agentBuilder, @kbn/logs-overview, alertingVTwo, @kbn/securitysolution-exceptions-common, securitySolution, entityStore, @kbn/securitysolution-lists-common | - |
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.passthrough" text="passthrough"/> | actions, @kbn/workflows, @kbn/connector-schemas, @kbn/sample-log-parser, workflowsManagement, stackConnectors, timelines, lists, securitySolution | - |
-| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.merge" text="merge"/> | @kbn/streams-schema, @kbn/elastic-assistant-common, @kbn/workflows, @kbn/entities-schema, osquery, @kbn/securitysolution-exceptions-common, securitySolution, entityStore, workflowsManagement | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.merge" text="merge"/> | @kbn/streams-schema, @kbn/elastic-assistant-common, @kbn/workflows, @kbn/entities-schema, osquery, @kbn/securitysolution-exceptions-common, securitySolution, workflowsManagement, entityStore | - |
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodDefault.removeDefault" text="removeDefault"/> | securitySolution | - |
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodError.flatten" text="flatten"/> | securitySolution | - |
 | <DocLink id="kibDashboardPluginApi" section="def-server.DashboardPluginStart.scanDashboards" text="scanDashboards"/> | observability | - |
@@ -111,7 +111,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | graph, visTypeTimeseries, dataViewManagement | - |
 | <DocLink id="kibSavedObjectsFinderPluginApi" section="def-public.SavedObjectMetaData.includeFields" text="includeFields"/> | visualizations, graph | - |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectSaveModalWithSaveResult" text="SavedObjectSaveModalWithSaveResult"/> | visualizations, dashboard, graph, links | - |
-| <DocLink id="kibSavedObjectsPluginApi" section="def-public.showSaveModal" text="showSaveModal"/> | visualizations, maps, discover, dashboard, graph, links | - |
+| <DocLink id="kibSavedObjectsPluginApi" section="def-public.showSaveModal" text="showSaveModal"/> | visualizations, maps, dashboard, graph, links | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.removeScriptedField" text="removeScriptedField"/> | dataViews, dataViewManagement | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.getScriptedFields" text="getScriptedFields"/> | dataViews, dataViewManagement | - |
@@ -129,7 +129,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnLensCommonPluginApi" section="def-common.MetricVisualizationState.secondaryPrefix" text="secondaryPrefix"/> | @kbn/lens-embeddable-utils, lens | - |
 | <DocLink id="kibKbnLensCommonPluginApi" section="def-common.XYDataLayerConfig.palette" text="palette"/> | @kbn/lens-embeddable-utils, lens | - |
 | <DocLink id="kibNavigationPluginApi" section="def-public.TopNavMenuProps" text="TopNavMenuProps"/> | lens, discover, dashboard | - |
-| <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectSaveModal" text="SavedObjectSaveModal"/> | presentationUtil, lens, discover | - |
+| <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectSaveModal" text="SavedObjectSaveModal"/> | presentationUtil, lens | - |
 | <DocLink id="kibKbnLensCommonPluginApi" section="def-common.MetricVisualizationState.titleWeight" text="titleWeight"/> | lens | - |
 | <DocLink id="kibKbnLensCommon-2PluginApi" section="def-common.LegacyLensStateApi.getLegacySerializedState" text="getLegacySerializedState"/> | lens, triggersActionsUi | - |
 | <DocLink id="kibManagementPluginApi" section="def-public.ManagementAppMountParams.theme$" text="theme$"/> | triggersActionsUi | - |
@@ -143,16 +143,15 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionsServiceSetup.getFunctions" text="getFunctions"/> | canvas | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionsServiceSetup.getTypes" text="getTypes"/> | canvas | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-server.ExpressionFunctionDefinition.context" text="context"/> | canvas | - |
+| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._def" text="_def"/> | @kbn/workflows, workflowsManagement | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.shallowWithIntl" text="shallowWithIntl"/> | uptime, telemetry | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.mountWithIntl" text="mountWithIntl"/> | uptime | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.renderWithI18nProvider" text="renderWithI18nProvider"/> | uptime | - |
-| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType._def" text="_def"/> | @kbn/workflows, workflowsManagement | - |
 | <DocLink id="kibKbnScoutPluginApi" section="def-common.Locator.isVisible.$1.timeout" text="timeout"/> | apm, synthetics, @kbn/scout | - |
 | <DocLink id="kibExpressionGaugePluginApi" section="def-common.GaugeState.percentageMode" text="percentageMode"/> | visTypeGauge | - |
 | <DocLink id="kibExpressionPartitionVisPluginApi" section="def-common.LabelsParams.truncate" text="truncate"/> | visTypePie | - |
 | <DocLink id="kibExpressionPartitionVisPluginApi" section="def-common.LabelsParams.last_level" text="last_level"/> | visTypePie | - |
 | <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginSetup.authc" text="authc"/> | security | - |
-| <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.findTestSubject" text="findTestSubject"/> | indexManagement, security, dataViewFieldEditor | - |
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodIssueCode" text="ZodIssueCode"/> | agentBuilder, entityStore, cases, @kbn/agent-builder-common, @kbn/alerting-v2-schemas, @kbn/entities-schema, @kbn/connector-schemas, @kbn/zod-helpers | - |
 | <DocLink id="kibInferencePluginApi" section="def-server.EsqlDocumentBase.getSystemMessage" text="getSystemMessage"/> | @kbn/ai-tools | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.wrapWithTheme" text="wrapWithTheme"/> | aiAssistantManagementSelection, observabilityAiAssistantManagement | - |
@@ -166,8 +165,8 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnReportingExportTypesCsvCommonPluginApi" section="def-common.CSV_JOB_TYPE_DEPRECATED" text="CSV_JOB_TYPE_DEPRECATED"/> | reporting | - |
 | <DocLink id="kibKbnReportingExportTypesPdfPluginApi" section="def-server.PdfV1ExportType" text="PdfV1ExportType"/> | reporting | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.registerTestBed" text="registerTestBed"/> | reporting, dataViewEditor, dataViewFieldEditor | - |
-| <DocLink id="kibKbnAgentBuilderCommonPluginApi" section="def-common.AgentConfiguration.replace_default_instructions" text="replace_default_instructions"/> | searchGettingStarted | - |
 | <DocLink id="kibKbnAgentBuilderCommonPluginApi" section="def-common.ConverseInput.attachments" text="attachments"/> | agentBuilder | - |
+| <DocLink id="kibKbnContentListMockDataPluginApi" section="def-public.NULL_USER" text="NULL_USER"/> | @kbn/content-management-storybook, @kbn/content-list-mock-data | - |
 | <DocLink id="kibKbnContentManagementTableListViewTablePluginApi" section="def-public.TableListViewTableProps.withoutPageTemplateWrapper" text="withoutPageTemplateWrapper"/> | @kbn/content-management-table-list-view, filesManagement | - |
 | <DocLink id="kibKbnEsqlComposerPluginApi" section="def-common.timeseries" text="timeseries"/> | infra | - |
 | <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectMigrationContext.convertToMultiNamespaceTypeVersion" text="convertToMultiNamespaceTypeVersion"/> | encryptedSavedObjects | - |
@@ -178,6 +177,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnPresentationPublishingPluginApi" section="def-common.useBatchedOptionalPublishingSubjects" text="useBatchedOptionalPublishingSubjects"/> | presentationPanel | - |
 | <DocLink id="kibKbnReportingExportTypesPdfCommonPluginApi" section="def-common.JobParamsPDFDeprecated" text="JobParamsPDFDeprecated"/> | @kbn/reporting-export-types-pdf | - |
 | <DocLink id="kibKbnScoutObltPluginApi" section="def-common.Locator.type" text="type"/> | @kbn/scout | - |
+| <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.findTestSubject" text="findTestSubject"/> | indexManagement, dataViewFieldEditor | - |
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodType.isOptional" text="isOptional"/> | @kbn/workflows | - |
 | <DocLink id="kibKbnZodPluginApi" section="def-common._ZodNumber.finite" text="finite"/> | @kbn/workflows, @kbn/connector-schemas | - |
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.url" text="url"/> | @kbn/connector-specs, @kbn/connector-schemas, @kbn/router-to-openapispec | - |
@@ -248,6 +248,7 @@ Safe to remove.
 | <DocLink id="kibSecurityPluginApi" section="def-public.SecurityPluginSetup.authc" text="authc"/> | security | 
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.ConcreteTaskInstance.numSkippedRuns" text="numSkippedRuns"/> | taskManager | 
 | <DocLink id="kibVisualizationsPluginApi" section="def-public.VisualizeEmbeddable" text="VisualizeEmbeddable"/> | visualizations | 
+| <DocLink id="kibKbnAgentBuilderCommonPluginApi" section="def-common.AgentConfiguration.replace_default_instructions" text="replace_default_instructions"/> | @kbn/agent-builder-common | 
 | <DocLink id="kibKbnAgentBuilderCommonPluginApi" section="def-common.AgentAnswerStepConfiguration.replace_default_instructions" text="replace_default_instructions"/> | @kbn/agent-builder-common | 
 | <DocLink id="kibKbnAgentBuilderCommonPluginApi" section="def-common.AgentResearchStepConfiguration.replace_default_instructions" text="replace_default_instructions"/> | @kbn/agent-builder-common | 
 | <DocLink id="kibKbnEsqlComposerPluginApi" section="def-common.drop" text="drop"/> | @kbn/esql-composer | 

@@ -80,6 +80,20 @@ const datePickerStyle = css`
   }
 `;
 
+const TechnicalPreviewBadge = () => (
+  <EuiBetaBadge
+    tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+      defaultMessage: 'This feature is in technical preview. We are working on it...',
+    })}
+    label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+      defaultMessage: 'Technical preview',
+    })}
+    iconType="flask"
+    size="s"
+    css={{ display: 'block' }}
+  />
+);
+
 export function StreamsTreeTable({
   loading,
   streams = [],
@@ -438,30 +452,20 @@ export function StreamsTreeTable({
                   >
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
-                  {item.stream.name === LOGS_ROOT_STREAM_NAME && (
-                    <DeprecatedLogsBadge
-                      openFlyout={openFlyout}
-                      hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
-                    />
-                  )}
+                  {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
+                    Streams.QueryStream.Definition.is(item.stream)) && <TechnicalPreviewBadge />}
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
-                  {ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) && (
-                    <EuiBetaBadge
-                      tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
-                        defaultMessage:
-                          'This feature is in technical preview. We are working on it...',
-                      })}
-                      label={i18n.translate('xpack.streams.technicalPreviewLabel', {
-                        defaultMessage: 'Technical preview',
-                      })}
-                      iconType="flask"
-                      size="s"
-                      css={{ display: 'block' }}
-                    />
-                  )}
+                  {item.stream.name === LOGS_ROOT_STREAM_NAME &&
+                    !Streams.QueryStream.Definition.is(item.stream) && (
+                      <DeprecatedLogsBadge
+                        openFlyout={openFlyout}
+                        hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
+                      />
+                    )}
                   {isRoot(item.stream.name) &&
                     item.stream.name !== LOGS_ROOT_STREAM_NAME &&
-                    !item.data_stream && (
+                    !item.data_stream &&
+                    !Streams.QueryStream.Definition.is(item.stream) && (
                       <EuiToolTip
                         position="right"
                         content={i18n.translate(

@@ -6,49 +6,15 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ToolsFlyoutHeader } from './tools_flyout_header';
-import { TOOLS_FLYOUT_HEADER_TEST_ID, TOOLS_FLYOUT_HEADER_EXPAND_BUTTON_TEST_ID } from './test_ids';
+import { TOOLS_FLYOUT_HEADER_TEST_ID } from './test_ids';
 
-const mockOpenSystemFlyout = jest.fn();
-
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      overlays: {
-        openSystemFlyout: mockOpenSystemFlyout,
-      },
-    },
-  }),
-}));
-
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useStore: () => ({}),
-}));
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
-}));
-
-jest.mock('../hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
-}));
-
-jest.mock('./flyout_provider', () => ({
-  flyoutProviders: jest.fn(({ children }: { children: React.ReactNode }) => children),
-}));
-
-jest.mock('../../document', () => ({
-  DocumentFlyout: () => <div data-test-subj="mockDocumentFlyout" />,
-}));
-
-jest.mock('../../document/components/title', () => ({
-  Title: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="mockTitle">{String(hit.id)}</div>
+jest.mock('./tools_flyout_title', () => ({
+  ToolsFlyoutTitle: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="mockToolsFlyoutTitle">{String(hit.id)}</div>
   ),
 }));
 
@@ -78,10 +44,6 @@ const renderHeader = (props: Partial<Parameters<typeof ToolsFlyoutHeader>[0]> = 
 };
 
 describe('<ToolsFlyoutHeader />', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should render the header container', () => {
     const { getByTestId } = renderHeader();
     expect(getByTestId(TOOLS_FLYOUT_HEADER_TEST_ID)).toBeInTheDocument();
@@ -92,20 +54,9 @@ describe('<ToolsFlyoutHeader />', () => {
     expect(getByText('Session view')).toBeInTheDocument();
   });
 
-  it('should render the expand button', () => {
+  it('should render ToolsFlyoutTitle', () => {
     const { getByTestId } = renderHeader();
-    expect(getByTestId(TOOLS_FLYOUT_HEADER_EXPAND_BUTTON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should call openSystemFlyout when the expand button is clicked', () => {
-    const { getByTestId } = renderHeader();
-    fireEvent.click(getByTestId(TOOLS_FLYOUT_HEADER_EXPAND_BUTTON_TEST_ID));
-    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
-  });
-
-  it('should render the document title', () => {
-    const { getByTestId } = renderHeader();
-    expect(getByTestId('mockTitle')).toBeInTheDocument();
+    expect(getByTestId('mockToolsFlyoutTitle')).toBeInTheDocument();
   });
 
   it('should render the document severity', () => {

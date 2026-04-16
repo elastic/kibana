@@ -190,9 +190,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
+      machineType: c4d-highmem-4
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 105
     timeout_in_minutes: 60
     retry:
@@ -248,11 +249,9 @@ steps:
       diskSizeGb: 105
     key: build_scout_tests
     timeout_in_minutes: 20
-    depends_on:
-      - build
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:

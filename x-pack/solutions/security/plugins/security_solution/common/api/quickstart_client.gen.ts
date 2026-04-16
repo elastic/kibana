@@ -198,17 +198,6 @@ import type {
   GetEndpointSuggestionsResponse,
 } from './endpoint/suggestions/get_suggestions.gen';
 import type {
-  CreateWorkflowInsightRequestBodyInput,
-  CreateWorkflowInsightResponse,
-  GetPendingWorkflowInsightsRequestQueryInput,
-  GetPendingWorkflowInsightsResponse,
-  GetWorkflowInsightsRequestQueryInput,
-  GetWorkflowInsightsResponse,
-  UpdateWorkflowInsightRequestParamsInput,
-  UpdateWorkflowInsightRequestBodyInput,
-  UpdateWorkflowInsightResponse,
-} from './endpoint/workflow_insights/workflow_insights.gen';
-import type {
   BulkUpsertAssetCriticalityRecordsRequestBodyInput,
   BulkUpsertAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
@@ -1002,6 +991,9 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Create or update the protection updates note for a package policy.
+   */
   async createUpdateProtectionUpdatesNote(props: CreateUpdateProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateUpdateProtectionUpdatesNote`);
     return this.kbnClient
@@ -1041,19 +1033,6 @@ For detailed information on Kibana actions and alerting, and additional API call
         ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async createWorkflowInsight(props: CreateWorkflowInsightProps) {
-    this.log.info(`${new Date().toISOString()} Calling API CreateWorkflowInsight`);
-    return this.kbnClient
-      .request<CreateWorkflowInsightResponse>({
-        path: '/internal/api/endpoint/workflow_insights',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -1879,6 +1858,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all endpoint host metadata.
+   */
   async getEndpointMetadataList(props: GetEndpointMetadataListProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEndpointMetadataList`);
     return this.kbnClient
@@ -1961,20 +1943,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getPendingWorkflowInsights(props: GetPendingWorkflowInsightsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetPendingWorkflowInsights`);
-    return this.kbnClient
-      .request<GetPendingWorkflowInsightsResponse>({
-        path: '/internal/api/endpoint/workflow_insights/pending',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
+  /**
+   * Get the most recent policy response for an endpoint.
+   */
   async getPolicyResponse(props: GetPolicyResponseProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetPolicyResponse`);
     return this.kbnClient
@@ -2003,6 +1974,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the protection updates note for a package policy.
+   */
   async getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetProtectionUpdatesNote`);
     return this.kbnClient
@@ -2257,20 +2231,6 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getWorkflowInsights(props: GetWorkflowInsightsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetWorkflowInsights`);
-    return this.kbnClient
-      .request<GetWorkflowInsightsResponse>({
-        path: '/internal/api/endpoint/workflow_insights',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
-
-        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3453,19 +3413,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async updateWorkflowInsight(props: UpdateWorkflowInsightProps) {
-    this.log.info(`${new Date().toISOString()} Calling API UpdateWorkflowInsight`);
-    return this.kbnClient
-      .request<UpdateWorkflowInsightResponse>({
-        path: replaceParams('/internal/api/endpoint/workflow_insights/{insightId}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'PUT',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   async uploadAssetCriticalityRecords(props: UploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API UploadAssetCriticalityRecords`);
     return this.kbnClient
@@ -3655,9 +3602,6 @@ export interface CreateWatchlistEntitySourceProps {
   params: CreateWatchlistEntitySourceRequestParamsInput;
   body: CreateWatchlistEntitySourceRequestBodyInput;
 }
-export interface CreateWorkflowInsightProps {
-  body: CreateWorkflowInsightRequestBodyInput;
-}
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
@@ -3806,9 +3750,6 @@ export interface GetEntityStoreStatusProps {
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
 }
-export interface GetPendingWorkflowInsightsProps {
-  query: GetPendingWorkflowInsightsRequestQueryInput;
-}
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
 }
@@ -3849,9 +3790,6 @@ export interface GetWatchlistProps {
 }
 export interface GetWatchlistEntitySourceProps {
   params: GetWatchlistEntitySourceRequestParamsInput;
-}
-export interface GetWorkflowInsightsProps {
-  query: GetWorkflowInsightsRequestQueryInput;
 }
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
@@ -4036,10 +3974,6 @@ export interface UpdateWatchlistProps {
 export interface UpdateWatchlistEntitySourceProps {
   params: UpdateWatchlistEntitySourceRequestParamsInput;
   body: UpdateWatchlistEntitySourceRequestBodyInput;
-}
-export interface UpdateWorkflowInsightProps {
-  params: UpdateWorkflowInsightRequestParamsInput;
-  body: UpdateWorkflowInsightRequestBodyInput;
 }
 export interface UploadAssetCriticalityRecordsProps {
   attachment: FormData;
