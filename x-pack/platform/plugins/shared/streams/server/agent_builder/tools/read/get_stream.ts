@@ -9,9 +9,11 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, findInheritedLifecycle, findInheritedFailureStore } from '@kbn/streams-schema';
+import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
+import { getDataStreamLifecycle, getFailureStore } from '../../../lib/streams/stream_crud';
 import { STREAMS_GET_STREAM_TOOL_ID as GET_STREAM } from '../tool_ids';
 import { classifyError } from '../error_utils';
 
@@ -83,6 +85,17 @@ export const createGetStreamTool = ({
             )
             .map((r) => ({ destination: r.destination, condition: r.where, status: r.status })),
         }));
+
+        try {
+          result.effective_lifecycle = findInheritedLifecycle(definition, ancestors);
+        } catch {
+          // Ancestor chain incomplete — raw lifecycle is still available
+        }
+        try {
+          result.effective_failure_store = findInheritedFailureStore(definition, ancestors);
+        } catch {
+          // Ancestor chain incomplete — raw failure_store is still available
+        }
       } else if (Streams.ClassicStream.Definition.is(definition)) {
         result.type = 'classic';
         result.stream_hierarchy = 'standalone';
@@ -93,6 +106,16 @@ export const createGetStreamTool = ({
 
         if (definition.ingest.processing.steps.length > 0) {
           result.processing_format = 'streamlang';
+        }
+
+        try {
+          const dataStream = await streamsClient.getDataStream(name);
+          result.effective_lifecycle = getDataStreamLifecycle(dataStream);
+          result.effective_failure_store = getFailureStore({
+            dataStream: dataStream as DataStreamWithFailureStore,
+          });
+        } catch {
+          // Data stream may not exist yet
         }
       } else if (Streams.QueryStream.Definition.is(definition)) {
         result.type = 'query';

@@ -117,7 +117,7 @@ export const createGetDataQualityTool = ({
       }
       if (degradedCount > 0) {
         interpretation.push(
-          'Degraded documents contain unmapped fields. This is often normal (dynamic mapping) and does not necessarily indicate a problem.'
+          "Degraded documents contain fields not in the stream's explicit mapping. This is normal — Elasticsearch dynamically maps these fields at index time and they remain fully searchable. Do NOT treat this as an error or suggest mapping fixes unless the user explicitly asks."
         );
       }
 

@@ -97,7 +97,7 @@ describe('createGetDataQualityTool handler', () => {
     if ('results' in result) {
       const data = result.results[0].data as Record<string, unknown>;
       const interpretation = data.interpretation as string[];
-      expect(interpretation.some((s) => s.includes('unmapped fields'))).toBe(true);
+      expect(interpretation.some((s) => s.includes('explicit mapping'))).toBe(true);
     }
   });
 

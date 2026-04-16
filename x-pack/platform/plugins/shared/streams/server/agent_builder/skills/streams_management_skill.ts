@@ -105,6 +105,10 @@ export const streamsManagementSkill = defineSkillType({
     - Keyword fields with ignore_above: long text stored in _source is intentionally not indexed.
     - Classic streams: field_overrides only cover fields the user explicitly overrides; all other fields use the underlying data stream's mappings (which may be dynamic).
     Degraded documents occur when _source contains fields not in the mapping, but this often reflects normal dynamic mapping behavior, not a broken configuration. Only suggest mapping fields when the user asks to fix a specific issue (e.g. a field not appearing in ES|QL queries or aggregations). Do not proactively treat unmapped fields as problems to fix.
+
+    When ${GET_DATA_QUALITY} reports degraded documents, do NOT proactively offer to map fields or describe the situation as a "problem" or "issue" unless the user's question was specifically about fixing data quality. Report the numbers factually and let the user decide whether action is needed.
+
+    Inherited configuration: ${GET_STREAM} returns both the raw configuration (lifecycle, failure_store) and the effective resolved values (effective_lifecycle, effective_failure_store). When reporting lifecycle or failure store status, always use the effective values — they resolve "inherit" to the actual policy in effect. The "from" field indicates which stream in the hierarchy provides the value.
     </streams_domain>
 
     <tool_selection>

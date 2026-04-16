@@ -17,7 +17,7 @@ describe('createGetStreamTool handler', () => {
     return { tool, context, streamsClient };
   };
 
-  it('returns wired definition shape', async () => {
+  it('returns wired definition shape with effective values', async () => {
     const { tool, context, streamsClient } = setup();
 
     const definition = {
@@ -36,7 +36,7 @@ describe('createGetStreamTool handler', () => {
         },
         processing: { steps: [], updated_at: '2024-01-01T00:00:00Z' },
         lifecycle: { dsl: { data_retention: '7d' } },
-        failure_store: { enabled: {} },
+        failure_store: { disabled: {} },
       },
     } as unknown as Streams.all.Definition;
 
@@ -55,6 +55,58 @@ describe('createGetStreamTool handler', () => {
       expect(data.routing).toBeDefined();
       expect(data.lifecycle).toBeDefined();
       expect(data.ancestors).toBeDefined();
+      expect(data.effective_lifecycle).toEqual({
+        dsl: { data_retention: '7d' },
+        from: 'logs.wired',
+      });
+      expect(data.effective_failure_store).toEqual({
+        disabled: {},
+        from: 'logs.wired',
+      });
+    }
+  });
+
+  it('resolves effective values from ancestors for wired streams with inherit', async () => {
+    const { tool, context, streamsClient } = setup();
+
+    const parent = {
+      name: 'logs',
+      description: 'Root',
+      ingest: {
+        wired: { fields: {}, routing: [] },
+        processing: { steps: [], updated_at: '2024-01-01T00:00:00Z' },
+        lifecycle: { dsl: { data_retention: '30d' } },
+        failure_store: { disabled: {} },
+      },
+    } as unknown as Streams.WiredStream.Definition;
+
+    const child = {
+      name: 'logs.child',
+      description: 'Child stream',
+      ingest: {
+        wired: { fields: {}, routing: [] },
+        processing: { steps: [], updated_at: '2024-01-01T00:00:00Z' },
+        lifecycle: { inherit: {} },
+        failure_store: { inherit: {} },
+      },
+    } as unknown as Streams.all.Definition;
+
+    streamsClient.getStream.mockResolvedValue(child);
+    streamsClient.getAncestors.mockResolvedValue([parent]);
+    streamsClient.getDescendants.mockResolvedValue([]);
+
+    const result = await tool.handler({ name: 'logs.child' }, context);
+
+    if ('results' in result) {
+      const data = result.results[0].data as Record<string, unknown>;
+      expect(data.effective_lifecycle).toEqual({
+        dsl: { data_retention: '30d' },
+        from: 'logs',
+      });
+      expect(data.effective_failure_store).toEqual({
+        disabled: {},
+        from: 'logs',
+      });
     }
   });
 
@@ -111,7 +163,7 @@ describe('createGetStreamTool handler', () => {
     }
   });
 
-  it('returns classic definition shape', async () => {
+  it('returns classic definition shape with effective values from data stream', async () => {
     const { tool, context, streamsClient } = setup();
 
     streamsClient.getStream.mockResolvedValue({
@@ -125,6 +177,13 @@ describe('createGetStreamTool handler', () => {
       },
     } as unknown as Streams.all.Definition);
 
+    streamsClient.getDataStream.mockResolvedValue({
+      name: 'logs.classic',
+      lifecycle: { data_retention: '14d' },
+      next_generation_managed_by: 'Data stream lifecycle',
+      failure_store: { enabled: false },
+    } as never);
+
     const result = await tool.handler({ name: 'logs.classic' }, context);
 
     if ('results' in result) {
@@ -132,6 +191,8 @@ describe('createGetStreamTool handler', () => {
       expect(data.type).toBe('classic');
       expect(data.stream_hierarchy).toBe('standalone');
       expect(data.field_overrides).toBeDefined();
+      expect(data.effective_lifecycle).toBeDefined();
+      expect(data.effective_failure_store).toBeDefined();
     }
   });
 

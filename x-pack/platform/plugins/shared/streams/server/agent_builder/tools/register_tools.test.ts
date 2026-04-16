@@ -57,7 +57,8 @@ describe('registerAgentBuilderTools', () => {
 
     for (const [tool] of agentBuilder.tools.register.mock.calls) {
       expect(tool.description).toBeTruthy();
-      expect('schema' in tool && tool.schema).toBeDefined();
+      expect(tool).toHaveProperty('schema');
+      expect((tool as { schema: unknown }).schema).toBeDefined();
     }
   });
 
