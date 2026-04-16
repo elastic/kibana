@@ -8,16 +8,30 @@
 import type { Logger } from '@kbn/logging';
 import type { ExtractionInput } from './memory_extractor';
 import type { ExtractionResult, ExtractedMemoryCandidate } from './memory_extractor';
+import { segmentWithTextTiling } from './segmentation/text_tiling';
+import { segmentWithEmbeddingSimilarity } from './segmentation/embedding_similarity';
+import type { EmbedFn } from './segmentation/embedding_similarity';
 
 /**
  * Configuration for the chunking extractor.
  */
 export interface ChunkingExtractorConfig {
+  method?: string;
   maxChunkChars: number;
   overlapChars: number;
+  texttiling?: {
+    windowSize: number;
+    smoothingWidth: number;
+    threshold: number;
+  };
+  embeddingSimilarity?: {
+    sentenceWindowSize: number;
+    similarityThreshold: number;
+  };
 }
 
 const DEFAULT_CONFIG: ChunkingExtractorConfig = {
+  method: 'fixed',
   maxChunkChars: 300,
   overlapChars: 30,
 };
@@ -36,10 +50,16 @@ const DEFAULT_CONFIG: ChunkingExtractorConfig = {
 export class ChunkingExtractor {
   private readonly config: ChunkingExtractorConfig;
   private readonly logger: Logger;
+  private readonly embedFn?: EmbedFn;
 
-  constructor({ config, logger }: { config?: Partial<ChunkingExtractorConfig>; logger: Logger }) {
+  constructor({ config, logger, embedFn }: {
+    config?: Partial<ChunkingExtractorConfig>;
+    logger: Logger;
+    embedFn?: EmbedFn;
+  }) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.logger = logger;
+    this.embedFn = embedFn;
   }
 
   async extract(input: ExtractionInput): Promise<ExtractionResult> {
@@ -49,17 +69,33 @@ export class ChunkingExtractor {
       return { semantic: [], episodic: [], procedural: [] };
     }
 
-    const chunks = this.chunkText(text);
+    const method = this.config.method ?? 'fixed';
+    let chunks: string[];
+
+    switch (method) {
+      case 'texttiling':
+        chunks = segmentWithTextTiling(text, this.config.texttiling);
+        break;
+      case 'embedding_similarity':
+        chunks = await segmentWithEmbeddingSimilarity(text, this.config.embeddingSimilarity, this.embedFn);
+        break;
+      case 'hybrid':
+        return this.extractHybrid(input);
+      case 'fixed':
+      default:
+        chunks = this.chunkText(text);
+        break;
+    }
 
     const candidates: ExtractedMemoryCandidate[] = chunks.map((chunk) => ({
       summary: chunk.length > 100 ? chunk.slice(0, 97) + '...' : chunk,
       full: chunk,
-      subtype: 'chunked_extract',
+      subtype: `chunked_${method}`,
       confidence: 0.5,
     }));
 
     this.logger.debug(
-      `ChunkingExtractor: produced ${candidates.length} chunks from ${text.length} chars`
+      `ChunkingExtractor: produced ${candidates.length} chunks from ${text.length} chars using method=${method}`
     );
 
     return {
@@ -67,6 +103,73 @@ export class ChunkingExtractor {
       episodic: [],
       procedural: [],
     };
+  }
+
+  /**
+   * Hybrid extraction: produces both per-turn episodic memories AND
+   * larger semantic memories from groups of related turns.
+   *
+   * 1. Create one episodic memory for the current turn (user + assistant)
+   * 2. If the full conversation is available, build a text of all turns
+   *    and use embedding-similarity segmentation to find topic clusters
+   * 3. Each cluster becomes a semantic memory (multi-turn context)
+   */
+  private async extractHybrid(input: ExtractionInput): Promise<ExtractionResult> {
+    const episodic: ExtractedMemoryCandidate[] = [];
+    const semantic: ExtractedMemoryCandidate[] = [];
+
+    // Step 1: Current turn → episodic memory
+    const turnText = `User: ${input.userMessage?.trim() ?? ''}\nAssistant: ${input.assistantResponse?.trim() ?? ''}`;
+    if (turnText.trim().length > 10) {
+      episodic.push({
+        summary: input.userMessage?.length > 80
+          ? input.userMessage.slice(0, 77) + '...'
+          : input.userMessage || input.assistantResponse?.slice(0, 80) || '',
+        full: turnText,
+        subtype: 'turn',
+        confidence: 0.6,
+      });
+    }
+
+    // Step 2: If conversation history is available, segment all turns into topic groups
+    if (input.conversation?.rounds && input.conversation.rounds.length > 1) {
+      const allTurns = input.conversation.rounds.map((round) => {
+        const userMsg = round.input.message ?? '';
+        const assistantMsg = round.response.message ?? '';
+        return `User: ${userMsg}\nAssistant: ${assistantMsg}`;
+      });
+
+      // Use each turn as a "sentence" for the similarity segmenter
+      const fullText = allTurns.join('\n\n---\n\n');
+      const segments = await segmentWithEmbeddingSimilarity(
+        fullText,
+        {
+          ...this.config.embeddingSimilarity,
+          sentenceWindowSize: 1,
+        },
+        this.embedFn
+      );
+
+      // Each segment that spans multiple turns becomes a semantic memory
+      for (const segment of segments) {
+        const turnCount = (segment.match(/---/g) || []).length + 1;
+        if (turnCount > 1) {
+          const firstLine = segment.split('\n')[0] ?? '';
+          semantic.push({
+            summary: firstLine.length > 80 ? firstLine.slice(0, 77) + '...' : firstLine,
+            full: segment,
+            subtype: 'multi_turn_cluster',
+            confidence: 0.5,
+          });
+        }
+      }
+    }
+
+    this.logger.debug(
+      `ChunkingExtractor hybrid: ${episodic.length} episodic + ${semantic.length} semantic (multi-turn clusters)`
+    );
+
+    return { semantic, episodic, procedural: [] };
   }
 
   private buildText(input: ExtractionInput): string {

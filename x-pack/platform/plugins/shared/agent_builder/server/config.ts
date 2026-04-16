@@ -56,8 +56,30 @@ export const configSchema = schema.object({
       ),
       connectorId: schema.maybe(schema.string()),
       chunking: schema.object({
+        method: schema.oneOf(
+          [
+            schema.literal('fixed'),
+            schema.literal('texttiling'),
+            schema.literal('embedding_similarity'),
+            schema.literal('hybrid'),
+          ],
+          { defaultValue: 'fixed' }
+        ),
         maxChunkChars: schema.number({ defaultValue: 300, min: 50, max: 2000 }),
         overlapChars: schema.number({ defaultValue: 30, min: 0, max: 200 }),
+        texttiling: schema.object({
+          windowSize: schema.number({ defaultValue: 20, min: 5, max: 100 }),
+          smoothingWidth: schema.number({ defaultValue: 2, min: 0, max: 10 }),
+          threshold: schema.number({ defaultValue: 0.1, min: 0, max: 1 }),
+        }),
+        embeddingSimilarity: schema.object({
+          sentenceWindowSize: schema.number({ defaultValue: 3, min: 1, max: 20 }),
+          similarityThreshold: schema.number({ defaultValue: 0.3, min: 0, max: 1 }),
+          similarity: schema.oneOf(
+            [schema.literal('tfidf'), schema.literal('inference')],
+            { defaultValue: 'tfidf' }
+          ),
+        }),
       }),
     }),
   }),

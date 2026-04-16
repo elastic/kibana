@@ -80,16 +80,21 @@ const rerankMemx = (nodes: MemoryNode[], ctx: RerankContext): MemoryNode[] => {
 /**
  * AB reranking: multi-factor formula from plan 020.
  *
- * score = relevance + type_weight(stage, type) + utility + recency
- *       + reinforcement + confidence - redundancy
+ * score = relevance + type_weight + utility + recency + freshness
+ *       + reinforcement + confidence + salience + frequency + stability
+ *       - redundancy
  *
- * - relevance: uses position as proxy (first result = highest relevance)
+ * - relevance: position-based proxy from original retrieval order
  * - type_weight: stage-dependent weight for memory type
- * - utility: direct from memory node
- * - recency: exponential decay
+ * - utility: how useful this memory has proven across its history
+ * - recency: exponential decay from recency timestamp (type-specific rates)
+ * - freshness: exponential decay from last_used_at (rewards recently accessed memories)
  * - reinforcement: normalized reinforcement_score
- * - confidence: direct from memory node
- * - redundancy: penalize if summary is very similar to an already-scored node
+ * - confidence: how accurate we believe this memory is
+ * - salience: how important/prominent relative to others
+ * - frequency: log-normalized access count
+ * - stability: how stable this memory is over time
+ * - redundancy: penalize if summary overlaps with already-scored nodes
  */
 const rerankAb = (nodes: MemoryNode[], ctx: RerankContext): MemoryNode[] => {
   const now = Date.now();
@@ -102,19 +107,42 @@ const rerankAb = (nodes: MemoryNode[], ctx: RerankContext): MemoryNode[] => {
 
     const utility = node.utility ?? 0.5;
 
-    const lastUsed = node.recency ? new Date(node.recency).getTime() : now;
-    const ageDays = Math.max(0, (now - lastUsed) / (24 * 60 * 60 * 1000));
+    // Recency: decay from the recency timestamp (when memory was last relevant)
+    const recencyTs = node.recency ? new Date(node.recency).getTime() : now;
+    const recencyAgeDays = Math.max(0, (now - recencyTs) / (24 * 60 * 60 * 1000));
     const decayRate = node.type === 'episodic' ? 0.1 : node.type === 'procedural' ? 0.01 : 0.03;
-    const recency = Math.exp(-decayRate * ageDays);
+    const recency = Math.exp(-decayRate * recencyAgeDays);
+
+    // Freshness: decay from last_used_at (rewards recently accessed memories)
+    const lastUsedTs = node.last_used_at ? new Date(node.last_used_at).getTime() : (node.created_at ? new Date(node.created_at).getTime() : now);
+    const freshnessDays = Math.max(0, (now - lastUsedTs) / (24 * 60 * 60 * 1000));
+    const freshness = Math.exp(-0.05 * freshnessDays);
 
     const reinforcement = Math.min(1, node.reinforcement_score ?? 0);
 
     const confidence = node.confidence ?? 0.5;
 
+    const salience = node.salience ?? 0.5;
+
+    const frequency = Math.log1p(node.access_count ?? 0) / Math.log1p(100);
+
+    const stability = node.stability ?? 0.1;
+
     const redundancy = computeRedundancy(node.summary, seenSummaries);
     seenSummaries.push(node.summary);
 
-    const score = relevance + typeWeight + utility + recency + reinforcement + confidence - redundancy;
+    const score =
+      0.20 * relevance +
+      0.10 * typeWeight +
+      0.10 * utility +
+      0.15 * recency +
+      0.05 * freshness +
+      0.10 * reinforcement +
+      0.10 * confidence +
+      0.05 * salience +
+      0.03 * frequency +
+      0.05 * stability -
+      0.07 * redundancy;
 
     return { node, score };
   });

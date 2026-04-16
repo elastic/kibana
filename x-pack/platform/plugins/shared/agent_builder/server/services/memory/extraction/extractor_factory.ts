@@ -8,11 +8,13 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AgentBuilderConfig } from '../../../config';
 import type { ExtractionInput, ExtractionResult } from './memory_extractor';
 import { MemoryExtractor } from './memory_extractor';
 import { ChunkingExtractor } from './chunking_extractor';
 import { TurnExtractor } from './turn_extractor';
+import type { EmbedFn } from './segmentation/embedding_similarity';
 
 /**
  * Common interface for all memory extraction methods.
@@ -32,6 +34,7 @@ export interface ExtractionStrategyOptions {
   inference?: InferenceServerStart;
   connectorId?: string;
   request?: KibanaRequest;
+  esClient?: ElasticsearchClient;
 }
 
 /**
@@ -65,9 +68,36 @@ export const createExtractionStrategy = (
       });
     }
     case 'chunking': {
+      let embedFn: EmbedFn | undefined;
+      const chunkingConfig = opts.config.memory.extraction.chunking;
+
+      if (
+        chunkingConfig.embeddingSimilarity?.similarity === 'inference' &&
+        opts.esClient &&
+        opts.config.memory.retrieval.inferenceEndpointId
+      ) {
+        const esClient = opts.esClient;
+        const endpointId = opts.config.memory.retrieval.inferenceEndpointId;
+        embedFn = async (text: string): Promise<number[]> => {
+          try {
+            const response = await esClient.inference.inference({
+              inference_id: endpointId,
+              task_type: 'text_embedding',
+              input: text,
+            });
+            const embedding = (response as any).text_embedding?.embedding;
+            return Array.isArray(embedding) ? embedding : [];
+          } catch (err) {
+            opts.logger.warn(`embedFn: inference call failed: ${(err as Error).message}`);
+            return [];
+          }
+        };
+      }
+
       return new ChunkingExtractor({
-        config: opts.config.memory.extraction.chunking,
+        config: chunkingConfig,
         logger: opts.logger,
+        embedFn,
       });
     }
     case 'turn': {
