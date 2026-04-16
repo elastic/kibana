@@ -67,18 +67,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Jan 2, 2019 @ 00:00:00.000'
         );
 
-        const dashboardState = await browser.getSessionStorageItem('dashboardStateManagerPanels');
-        this.log.debug('dashboard backup session state', dashboardState);
+        const dashboardStateBefore = await browser.getSessionStorageItem('dashboardStateManagerPanels');
+        this.log.warn('dashboard backup session state (before)', dashboardStateBefore);
 
         await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
 
+        const dashboardStateAfter = await browser.getSessionStorageItem('dashboardStateManagerPanels');
+        this.log.warn('dashboard backup session state (after loading from landing page)', dashboardStateAfter);
+
+
         await dashboard.loadSavedDashboard(dashboardName);
 
-        await retry.try(async () => {
-          const time = await timePicker.getTimeConfig();
-          expect(time.start).to.equal(timePicker.defaultStartTime);
-          expect(time.end).to.equal(timePicker.defaultEndTime);
-        });
+        const time = await timePicker.getTimeConfig();
+        expect(time.start).to.equal(timePicker.defaultStartTime);
+        expect(time.end).to.equal(timePicker.defaultEndTime);
       });
 
       // If time is stored with a dashboard, it's supposed to override the current time settings when opened.
