@@ -54,7 +54,7 @@ export const PrevalenceDetails: React.FC<PrevalenceDetailsProps> = ({
       <EuiFlyoutHeader
         hasBorder
         css={css`
-          padding-block-end: ${euiTheme.size.m} !important;
+          padding-block: ${euiTheme.size.s} !important;
         `}
       >
         <ToolsFlyoutHeader hit={hit} title={TITLE} />
