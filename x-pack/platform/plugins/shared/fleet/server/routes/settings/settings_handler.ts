@@ -36,6 +36,12 @@ export const putSpaceSettingsHandler: FleetRequestHandler<
 
   // Fetch old settings before saving to compute the diff
   const oldSettings = await getSpaceSettings(spaceId);
+  const oldList = oldSettings.namespace_index_templates_enabled_for;
+  // Use request body directly rather than re-fetching after save to avoid a redundant DB read.
+  // When the field is absent the list is unchanged, so the diff will be empty.
+  const newList = request.body.namespace_index_templates_enabled_for ?? oldList;
+  const addedNamespaces = newList.filter((ns) => !oldList.includes(ns));
+  const removedNamespaces = oldList.filter((ns) => !newList.includes(ns));
 
   await saveSpaceSettings({
     settings: {
@@ -46,12 +52,6 @@ export const putSpaceSettingsHandler: FleetRequestHandler<
   });
 
   const settings = await getSpaceSettings(spaceId);
-
-  // Compute diff for namespace index templates opt-in list
-  const oldList = oldSettings.namespace_index_templates_enabled_for;
-  const newList = settings.namespace_index_templates_enabled_for;
-  const addedNamespaces = newList.filter((ns) => !oldList.includes(ns));
-  const removedNamespaces = oldList.filter((ns) => !newList.includes(ns));
 
   let namespaceTemplatesSummary;
 

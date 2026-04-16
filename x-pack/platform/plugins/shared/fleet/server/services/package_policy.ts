@@ -178,6 +178,7 @@ import {
   handleExperimentalDatastreamFeatureOptIn,
   handleNamespaceTemplateDelete,
   handleNamespaceTemplateUpdate,
+  handleOldNamespaceTemplateCleanup,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
 } from './package_policies';
@@ -1670,7 +1671,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: restOfPackagePolicy,
     });
 
-    // Handle namespace-scoped index template creation for opted-in namespaces
+    // Create namespace-scoped index template for the new namespace (if opted in).
+    // Deletion of the old namespace template is deferred to handleOldNamespaceTemplateCleanup
+    // which runs after the SO save, so a failed save never permanently removes the old template.
     await handleNamespaceTemplateUpdate({
       soClient,
       esClient,
@@ -1747,6 +1750,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       )
       .catch(catchAndSetErrorStackTrace.withMessage(`update of package policy [${id}] failed`));
+
+    // SO is now committed. Safe to remove the old namespace template if namespace changed.
+    if (
+      restOfPackagePolicy.package?.name &&
+      (restOfPackagePolicy.namespace || 'default') !== (oldPackagePolicy.namespace || 'default')
+    ) {
+      await handleOldNamespaceTemplateCleanup({
+        soClient,
+        esClient,
+        packageName: restOfPackagePolicy.package.name,
+        oldNamespace: oldPackagePolicy.namespace || 'default',
+        spaceId: soClient.getCurrentNamespace(),
+      });
+    }
 
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
 

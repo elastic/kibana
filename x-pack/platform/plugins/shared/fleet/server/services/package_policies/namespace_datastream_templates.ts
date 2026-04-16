@@ -207,11 +207,14 @@ function buildNamespaceTemplate({
 
 /**
  * When a package policy is created or its namespace changes, create (or update) a
- * namespace-scoped index template for each of the package's data streams if the
+ * namespace-scoped index template for each of the package's data streams if the new
  * namespace is opted in via space settings.
  *
- * On namespace change, deletes the old namespace template if no other policy for
- * this package still uses that namespace.
+ * This function only handles creation of the new namespace template. Deletion of the
+ * old namespace template (on a namespace change) is deferred to
+ * `handleOldNamespaceTemplateCleanup`, which must be called AFTER the policy saved
+ * object has been successfully committed. Splitting the operations this way avoids
+ * permanently losing the old template if the SO save fails.
  */
 export async function handleNamespaceTemplateUpdate({
   soClient,
@@ -239,15 +242,9 @@ export async function handleNamespaceTemplateUpdate({
     return;
   }
 
-  // Check if the new namespace is opted in for namespace-scoped templates
+  // Only proceed if the new namespace is opted in for namespace-scoped templates
   const newNamespaceEnabled = await isNamespaceIndexTemplateEnabled(newNamespace, spaceId);
-  const oldNamespaceEnabled =
-    oldNamespace !== undefined
-      ? await isNamespaceIndexTemplateEnabled(oldNamespace, spaceId)
-      : false;
-
-  // If neither old nor new namespace is opted in, nothing to do
-  if (!newNamespaceEnabled && !oldNamespaceEnabled) {
+  if (!newNamespaceEnabled) {
     return;
   }
 
@@ -274,57 +271,27 @@ export async function handleNamespaceTemplateUpdate({
 
   const logger = appContextService.getLogger();
   const updatedIndexTemplates: IndexTemplateEntry[] = [];
-  const currentPolicyId = oldPackagePolicy?.id;
-
-  // Check if old namespace can be cleaned up
-  let oldNamespaceSafeToRemove = false;
-  if (oldNamespace && oldNamespaceEnabled) {
-    oldNamespaceSafeToRemove = await isNamespaceSafeToRemove(
-      soClient,
-      packagePolicy.package.name,
-      oldNamespace,
-      currentPolicyId ? [currentPolicyId] : []
-    );
-  }
 
   await pMap(
     dataStreams,
     async (dataStream) => {
       const templateName = getRegistryDataStreamAssetBaseName(dataStream);
+      const baseTemplate = await fetchBaseTemplate(
+        esClient,
+        templateName,
+        'handleNamespaceTemplateUpdate'
+      );
+      if (!baseTemplate) return;
 
-      // Create namespace template for the new namespace (if opted in)
-      if (newNamespaceEnabled) {
-        const baseTemplate = await fetchBaseTemplate(
-          esClient,
-          templateName,
-          'handleNamespaceTemplateUpdate'
-        );
-        if (baseTemplate) {
-          const { name: nsName, template: nsTemplate } = buildNamespaceTemplate({
-            baseTemplate,
-            dataStream,
-            namespace: newNamespace,
-            templateName,
-          });
+      const { name: nsName, template: nsTemplate } = buildNamespaceTemplate({
+        baseTemplate,
+        dataStream,
+        namespace: newNamespace,
+        templateName,
+      });
 
-          await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate });
-          updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
-        }
-      }
-
-      // Delete old namespace template if safe to do so
-      if (oldNamespace && oldNamespaceEnabled && oldNamespaceSafeToRemove) {
-        const oldNsName = generateNamespaceTemplateName(templateName, oldNamespace);
-        try {
-          await esClient.indices.deleteIndexTemplate({ name: oldNsName }, { ignore: [404] });
-        } catch (err: unknown) {
-          logger.warn(
-            `[handleNamespaceTemplateUpdate] Failed to delete namespace template ${oldNsName}: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
-        }
-      }
+      await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate });
+      updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
     },
     { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
   );
@@ -333,48 +300,107 @@ export async function handleNamespaceTemplateUpdate({
     await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates);
   }
 
-  // Update the Installation saved object to track namespace template refs
-  const freshInstallation = await getInstallation({
-    savedObjectsClient: soClient,
-    pkgName: packagePolicy.package.name,
-  });
-  const currentEsRefs = freshInstallation?.installed_es ?? [];
-
-  const assetsToAdd: Array<{ id: string; type: ElasticsearchAssetType }> = [];
-  const assetsToRemove: Array<{ id: string; type: ElasticsearchAssetType }> = [];
-
-  if (newNamespaceEnabled && updatedIndexTemplates.length > 0) {
-    // Derive tracked assets from the templates that were actually created.
+  if (updatedIndexTemplates.length > 0) {
+    // Track the newly created index templates in the Installation SO.
     // Note: ${namespace}@custom component templates are user-created and intentionally
     // not tracked in installed_es to avoid showing them as Fleet-managed assets.
-    for (const { templateName } of updatedIndexTemplates) {
-      assetsToAdd.push({
-        id: templateName,
-        type: ElasticsearchAssetType.indexTemplate,
-      });
-    }
+    const freshInstallation = await getInstallation({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+    });
+    const assetsToAdd = updatedIndexTemplates.map(({ templateName }) => ({
+      id: templateName,
+      type: ElasticsearchAssetType.indexTemplate,
+    }));
+    await updateEsAssetReferences(
+      soClient,
+      packagePolicy.package.name,
+      freshInstallation?.installed_es ?? [],
+      { assetsToAdd }
+    );
   }
+}
 
-  if (oldNamespace && oldNamespaceEnabled && oldNamespaceSafeToRemove) {
-    for (const dataStream of dataStreams) {
+/**
+ * Removes the namespace-scoped index templates for `oldNamespace` after a policy's
+ * namespace has changed and its saved object has been successfully committed.
+ *
+ * Because the SO is already saved with the new namespace by the time this runs,
+ * `isNamespaceSafeToRemove` will naturally exclude the updated policy from its count.
+ * Must be called AFTER the package policy SO save.
+ */
+export async function handleOldNamespaceTemplateCleanup({
+  soClient,
+  esClient,
+  packageName,
+  oldNamespace,
+  spaceId,
+}: {
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  packageName: string;
+  oldNamespace: string;
+  spaceId?: string;
+}) {
+  const namespaceEnabled = await isNamespaceIndexTemplateEnabled(oldNamespace, spaceId);
+  if (!namespaceEnabled) return;
+
+  // No excludePolicyIds needed: the policy SO is already saved with the new namespace,
+  // so the updated policy is no longer counted as using oldNamespace.
+  const safeToRemove = await isNamespaceSafeToRemove(soClient, packageName, oldNamespace, []);
+  if (!safeToRemove) return;
+
+  const installedPkg = await getInstalledPackageWithAssets({
+    savedObjectsClient: soClient,
+    pkgName: packageName,
+  });
+  if (!installedPkg) return;
+
+  const { packageInfo } = installedPkg;
+  const dataStreams = packageInfo.data_streams ?? [];
+  if (dataStreams.length === 0) return;
+
+  const logger = appContextService.getLogger();
+
+  await pMap(
+    dataStreams,
+    async (dataStream) => {
       const templateName = getRegistryDataStreamAssetBaseName(dataStream);
-      assetsToRemove.push({
-        id: generateNamespaceTemplateName(templateName, oldNamespace),
-        type: ElasticsearchAssetType.indexTemplate,
-      });
-    }
-    assetsToRemove.push({
-      id: `${oldNamespace}@custom`,
-      type: ElasticsearchAssetType.componentTemplate,
-    });
-  }
+      const nsName = generateNamespaceTemplateName(templateName, oldNamespace);
+      try {
+        await esClient.indices.deleteIndexTemplate({ name: nsName }, { ignore: [404] });
+      } catch (err: unknown) {
+        logger.warn(
+          `[handleOldNamespaceTemplateCleanup] Failed to delete namespace template ${nsName}: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    },
+    { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+  );
 
-  if (assetsToAdd.length > 0 || assetsToRemove.length > 0) {
-    await updateEsAssetReferences(soClient, packagePolicy.package.name, currentEsRefs, {
-      assetsToAdd,
-      assetsToRemove,
-    });
-  }
+  const freshInstallation = await getInstallation({
+    savedObjectsClient: soClient,
+    pkgName: packageName,
+  });
+  if (!freshInstallation) return;
+
+  const assetsToRemove: Array<{ id: string; type: ElasticsearchAssetType }> = [
+    ...dataStreams.map((dataStream) => ({
+      id: generateNamespaceTemplateName(
+        getRegistryDataStreamAssetBaseName(dataStream),
+        oldNamespace
+      ),
+      type: ElasticsearchAssetType.indexTemplate as ElasticsearchAssetType,
+    })),
+    // Include backward-compat removal of any previously tracked ${oldNamespace}@custom ref
+    { id: `${oldNamespace}@custom`, type: ElasticsearchAssetType.componentTemplate },
+  ];
+
+  await updateEsAssetReferences(soClient, packageName, freshInstallation.installed_es ?? [], {
+    assetsToRemove,
+  });
 }
 
 /**
@@ -686,21 +712,24 @@ export async function syncNamespaceTemplates({
 
   // --- Handle added namespaces: create templates for existing integrations ---
   if (addedNamespaces.length > 0) {
-    // Find all package policies using any of the added namespaces
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const allPolicies = await soClient.find<PackagePolicySOAttributes>({
-      type: savedObjectType,
-      perPage: SO_SEARCH_LIMIT,
-      namespaces: ['*'],
-    });
 
     for (const namespace of addedNamespaces) {
-      const policiesForNamespace = allPolicies.saved_objects.filter(
-        (so) => (so.attributes.namespace || 'default') === namespace && so.attributes.package?.name
-      );
+      // Query only policies for this namespace rather than fetching all policies and filtering
+      // in JS, to avoid scanning every policy in large deployments.
+      const policiesForNamespace = await soClient.find<PackagePolicySOAttributes>({
+        type: savedObjectType,
+        filter: `${savedObjectType}.attributes.namespace:${namespace}`,
+        perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
+      });
 
       const uniquePackageNames = [
-        ...new Set(policiesForNamespace.map((so) => so.attributes.package!.name)),
+        ...new Set(
+          policiesForNamespace.saved_objects
+            .filter((so) => so.attributes.package?.name)
+            .map((so) => so.attributes.package!.name)
+        ),
       ];
 
       if (uniquePackageNames.length === 0) continue;
