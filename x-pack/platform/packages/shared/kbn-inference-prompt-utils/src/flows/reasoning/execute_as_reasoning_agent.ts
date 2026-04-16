@@ -44,7 +44,7 @@ export function executeAsReasoningAgent<
   TToolCallbacks extends ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>,
   TFinalToolChoice extends ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>> | undefined =
     | ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>>
-    | undefined
+    | undefined,
 >(
   options: UnboundPromptOptions<TPrompt> &
     ReasoningPromptOptions & { prompt: TPrompt } & {
@@ -97,6 +97,23 @@ export async function executeAsReasoningAgent(
     abortSignal,
   } = options;
   const startTime = Date.now();
+
+  // Create a timeout-based AbortSignal for the inference client.prompt calls
+  // This ensures individual API calls respect the maxDurationMs timeout.
+  let effectiveAbortSignal = abortSignal;
+  if (maxDurationMs !== undefined) {
+    const timeoutSignal = AbortSignal.timeout(maxDurationMs);
+    if (abortSignal) {
+      // If there's already an abort signal, create one that aborts if either signal aborts
+      const controller = new AbortController();
+      const cleanup = () => controller.abort();
+      abortSignal.addEventListener('abort', cleanup);
+      timeoutSignal.addEventListener('abort', cleanup);
+      effectiveAbortSignal = controller.signal;
+    } else {
+      effectiveAbortSignal = timeoutSignal;
+    }
+  }
 
   async function callTools(toolCalls: ToolCall[]): Promise<ToolMessage[]> {
     return await Promise.all(
@@ -226,8 +243,8 @@ export async function executeAsReasoningAgent(
     const toolChoice = forceComplete
       ? options.finalToolChoice || ToolChoiceType.none
       : forceReason
-      ? ToolChoiceType.none
-      : ToolChoiceType.auto;
+        ? ToolChoiceType.none
+        : ToolChoiceType.auto;
 
     const response = await inferenceClient.prompt({
       ...promptOptions,
@@ -255,7 +272,7 @@ export async function executeAsReasoningAgent(
       stream: false,
       temperature,
       toolChoice,
-      abortSignal,
+      abortSignal: effectiveAbortSignal,
       prevMessages: formatMessages({
         messages: prevMessages,
         power,
