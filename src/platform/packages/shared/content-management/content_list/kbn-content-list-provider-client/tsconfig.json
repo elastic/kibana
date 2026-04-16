@@ -13,6 +13,8 @@
   "kbn_references": [
     "@kbn/content-list-provider",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/content-management-favorites-public",
+    "@kbn/content-management-tags",
   ]
 }

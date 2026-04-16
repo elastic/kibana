@@ -2281,10 +2281,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@71.4.0":
-  version "71.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.4.0.tgz#e1fde46d4de175b8ce38fbb7a63686c919cfbefc"
-  integrity sha512-vD4J/uKDyhAirqrOzNgWUjBSRWUhiJjQH6OBlD6jXAm85TY+h7Ov7ZQ64DSZvnqzfnJKJTMO8VEW89Kw24hDcg==
+"@elastic/charts@71.5.0":
+  version "71.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.5.0.tgz#b1e195f42f4c0611cda8bd26a57a23a516ef667b"
+  integrity sha512-0T6BVc8Rklldf3GJSpkMFX411dL48nxZ0E6KhwAdDf7E4vLFm4z672Azjkq60LzTBxE7BfHDhoamiPnNxXJEQg==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -36250,10 +36250,10 @@ yaml@2.7.1:
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.7.1.tgz#44a247d1b88523855679ac7fa7cda6ed7e135cf6"
   integrity sha512-10ULxpnOCQXxJvBgxsn9ptjq6uviG/htZKk9veJGhlqn3w/DxQ631zFF+nlQXLwmImeS5amR2dl2U8sg6U9jsQ==
 
-yaml@2.8.1:
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.8.1.tgz#1870aa02b631f7e8328b93f8bc574fac5d6c4d79"
-  integrity sha512-lcYcMxX2PO9XMGvAJkJ3OsNMw+/7FKes7/hgerGUYWIoWu5j/+YQqcZr5JnPZWzOsEBgMbSbiSTn/dv/69Mkpw==
+yaml@2.8.3:
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.8.3.tgz#a0d6bd2efb3dd03c59370223701834e60409bd7d"
+  integrity sha512-AvbaCLOO2Otw/lW5bmh9d/WEdcDFdQp2Z2ZUH3pX9U2ihyUY0nvLv7J6TrWowklRGPYbB/IuIMfYgxaCPg5Bpg==
 
 yaml@^1.10.0:
   version "1.10.2"
