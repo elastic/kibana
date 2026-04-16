@@ -10,7 +10,6 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { charset as mimeCharset } from 'mime-types';
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest } from '@kbn/workflows';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
@@ -22,7 +21,7 @@ import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
-import { getKibanaUrl } from '../utils';
+import { getKibanaUrl, isTextContentType, readResponseStream } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -322,22 +321,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   }
 
   /**
-   * Determines whether a Content-Type represents text (safe for UTF-8 decoding) rather than
-   * binary data. Uses a layered approach:
-   *  1. text/* prefix — always text
-   *  2. +json / +xml structured syntax suffix — always text
-   *  3. mime-types IANA-derived DB (charset() returns a charset string for text types)
-   * Unknown types default to binary to avoid data corruption.
-   */
-  private isTextContentType(contentType: string | null): boolean {
-    if (!contentType) return true;
-    const mimeType = contentType.split(';')[0].trim().toLowerCase();
-    if (mimeType.startsWith('text/')) return true;
-    if (mimeType.endsWith('+json') || mimeType.endsWith('+xml')) return true;
-    return !!mimeCharset(mimeType);
-  }
-
-  /**
    * Reads a fetch Response body as a stream with size enforcement.
    * Binary content types are returned as a raw Buffer to preserve the original bytes.
    * Text/JSON content types are decoded as UTF-8 and parsed normally.
@@ -349,17 +332,23 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
    * so Buffer.isBuffer() and the base64_encode filter would not handle it correctly.
    * For now this is acceptable since binary data is typically consumed immediately.
    */
-  private async readResponseBody(response: Response): Promise<any> {
+  private async readResponseBody(
+    response: Response
+  ): Promise<Buffer | Record<string, unknown> | string | null> {
     if (!response.body) {
       return null;
     }
 
     const contentType = response.headers.get('content-type');
     const maxSize = this.getMaxResponseBytes();
-    const { buffer } = await this.readStream(response, maxSize);
+    const { buffer, truncated } = await readResponseStream(response, maxSize);
+
+    if (truncated) {
+      throw new ResponseSizeLimitError(maxSize, this.step.name);
+    }
     if (buffer.byteLength === 0) return null;
 
-    if (!this.isTextContentType(contentType)) {
+    if (!isTextContentType(contentType)) {
       return buffer;
     }
 
@@ -372,48 +361,13 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   }
 
   /**
-   * Reads a Response body stream into a raw Buffer with byte-size enforcement.
-   * Cancels the stream when the limit is exceeded and returns the bytes read so far
-   * along with a `truncated` flag.
-   * @throws ResponseSizeLimitError when throwOnExceed is true and the limit is exceeded.
-   */
-  private async readStream(
-    response: Response,
-    maxBytes: number,
-    throwOnExceed: boolean = true
-  ): Promise<{ buffer: Buffer; truncated: boolean }> {
-    if (!response.body) return { buffer: Buffer.alloc(0), truncated: false };
-    const reader = response.body.getReader();
-    const chunks: Uint8Array[] = [];
-    let totalBytes = 0;
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        totalBytes += value.byteLength;
-        if (maxBytes > 0 && totalBytes > maxBytes) {
-          void reader.cancel();
-          if (throwOnExceed) {
-            throw new ResponseSizeLimitError(maxBytes, this.step.name);
-          }
-          return { buffer: Buffer.concat(chunks), truncated: true };
-        }
-        chunks.push(value);
-      }
-    } finally {
-      reader.releaseLock();
-    }
-    return { buffer: Buffer.concat(chunks), truncated: false };
-  }
-
-  /**
    * Reads a Response body stream as a UTF-8 string with truncation for error bodies.
    */
   private async readStreamWithLimit(
     response: Response,
     opts: { maxBytes: number; onExceed: 'truncate' }
   ): Promise<string> {
-    const { buffer, truncated } = await this.readStream(response, opts.maxBytes, false);
+    const { buffer, truncated } = await readResponseStream(response, opts.maxBytes);
     const text = buffer.toString('utf-8');
     return truncated ? `${text}... [truncated]` : text;
   }

@@ -10,6 +10,7 @@
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 
 import { KibanaActionStepImpl } from './kibana_action_step';
+import type { RunStepResult } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -18,6 +19,12 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 // Mock fetch globally
 global.fetch = jest.fn();
 const mockedFetch = global.fetch as jest.MockedFunction<typeof fetch>;
+
+const runStep = (
+  step: KibanaActionStepImpl,
+  input?: Record<string, unknown>
+): Promise<RunStepResult> =>
+  (step as unknown as { _run(i?: Record<string, unknown>): Promise<RunStepResult> })._run(input);
 
 function createMockReadableStream(data: string) {
   const encoder = new TextEncoder();
@@ -157,7 +164,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       // Verify fetch was called
       expect(mockedFetch).toHaveBeenCalled();
@@ -202,7 +209,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       expect(mockedFetch).toHaveBeenCalled();
 
@@ -234,7 +241,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       expect(mockedFetch).toHaveBeenCalled();
 
@@ -273,7 +280,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       // Verify Agent was created with correct options
       expect(MockedAgent).toHaveBeenCalledWith(
@@ -308,7 +315,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       // Agent should not be created
       expect(MockedAgent).not.toHaveBeenCalled();
@@ -342,7 +349,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -378,7 +385,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       const fetchCall = mockedFetch.mock.calls[0];
       const fetchOptions = fetchCall[1] as RequestInit;
@@ -412,7 +419,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -448,7 +455,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       expect(MockedAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -495,7 +502,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       const fetchCall = mockedFetch.mock.calls[0];
       const fetchedUrl = fetchCall[0] as string;
@@ -526,7 +533,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       const fetchCall = mockedFetch.mock.calls[0];
       const fetchedUrl = fetchCall[0] as string;
@@ -557,7 +564,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await expect((kibanaStep as any)._run(stepWith)).rejects.toThrow(
+      await expect(runStep(kibanaStep, stepWith)).rejects.toThrow(
         'Cannot set both use_server_info and use_localhost'
       );
       expect(mockedFetch).not.toHaveBeenCalled();
@@ -587,7 +594,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(stepWith);
+      const result = await runStep(kibanaStep, stepWith);
 
       expect(result.output._debug).toBeDefined();
       expect(result.output._debug.fullUrl).toBe('https://localhost:5601/api/cases');
@@ -614,7 +621,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(stepWith);
+      const result = await runStep(kibanaStep, stepWith);
 
       expect(result.output._debug).toBeUndefined();
     });
@@ -642,7 +649,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(stepWith);
+      const result = await runStep(kibanaStep, stepWith);
 
       expect(result.error).toBeDefined();
       expect(result.error.details._debug).toBeDefined();
@@ -671,7 +678,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(stepWith);
+      const result = await runStep(kibanaStep, stepWith);
 
       expect(result.output._debug.fullUrl).toBe(
         'https://localhost:5601/api/cases?page=1&perPage=10'
@@ -704,7 +711,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       const fetchCall = mockedFetch.mock.calls[0];
       const fetchOptions = fetchCall[1] as RequestInit;
@@ -747,7 +754,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      await (kibanaStep as any)._run(stepWith);
+      await runStep(kibanaStep, stepWith);
 
       // Verify Agent was created with all options
       expect(MockedAgent).toHaveBeenCalledWith(
@@ -816,7 +823,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(stepWith);
+      const result = await runStep(kibanaStep, stepWith);
 
       expect(result.error).toBeDefined();
       expect(result.error.type).toBe('StepSizeLimitExceeded');
@@ -862,7 +869,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(stepWith);
+      const result = await runStep(kibanaStep, stepWith);
 
       expect(result.error).toBeDefined();
       expect(result.error.message.length).toBeLessThan(1.5 * 1024 * 1024);
@@ -895,7 +902,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(stepWith);
+      const result = await runStep(kibanaStep, stepWith);
 
       expect(result.error).toBeUndefined();
       expect(result.output).toEqual({});
@@ -929,7 +936,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(stepWith);
+      const result = await runStep(kibanaStep, stepWith);
 
       expect(result.error).toBeUndefined();
       expect(result.output._debug).toBeDefined();
@@ -980,7 +987,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run(stepWith);
+      const result = await runStep(kibanaStep, stepWith);
 
       expect(result.error).toBeUndefined();
       expect(result.output).toEqual({ id: 'case-1', title: 'Test' });
@@ -1012,7 +1019,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const kibanaStep = createKibanaRequestStep({
         request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
       });
-      const result = await (kibanaStep as any)._run({
+      const result = await runStep(kibanaStep, {
         request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
       });
 
@@ -1027,7 +1034,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const kibanaStep = createKibanaRequestStep({
         request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
       });
-      const result = await (kibanaStep as any)._run({
+      const result = await runStep(kibanaStep, {
         request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
       });
 
@@ -1046,7 +1053,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const kibanaStep = createKibanaRequestStep({
         request: { method: 'GET', path: '/api/reporting/jobs/download/def' },
       });
-      const result = await (kibanaStep as any)._run({
+      const result = await runStep(kibanaStep, {
         request: { method: 'GET', path: '/api/reporting/jobs/download/def' },
       });
 
@@ -1061,7 +1068,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const kibanaStep = createKibanaRequestStep({
         request: { method: 'GET', path: '/api/some-binary-endpoint' },
       });
-      const result = await (kibanaStep as any)._run({
+      const result = await runStep(kibanaStep, {
         request: { method: 'GET', path: '/api/some-binary-endpoint' },
       });
 
@@ -1077,7 +1084,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const kibanaStep = createKibanaRequestStep({
         request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
       });
-      const result = await (kibanaStep as any)._run({
+      const result = await runStep(kibanaStep, {
         request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
       });
 
@@ -1091,7 +1098,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const kibanaStep = createKibanaRequestStep({
         request: { method: 'GET', path: '/api/cases/test' },
       });
-      const result = await (kibanaStep as any)._run({
+      const result = await runStep(kibanaStep, {
         request: { method: 'GET', path: '/api/cases/test' },
       });
 
@@ -1108,7 +1115,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const kibanaStep = createKibanaRequestStep({
         request: { method: 'GET', path: '/api/some-custom-endpoint' },
       });
-      const result = await (kibanaStep as any)._run({
+      const result = await runStep(kibanaStep, {
         request: { method: 'GET', path: '/api/some-custom-endpoint' },
       });
 
@@ -1128,13 +1135,33 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const kibanaStep = createKibanaRequestStep({
         request: { method: 'GET', path: '/api/some-text-endpoint' },
       });
-      const result = await (kibanaStep as any)._run({
+      const result = await runStep(kibanaStep, {
         request: { method: 'GET', path: '/api/some-text-endpoint' },
       });
 
       expect(result.error).toBeUndefined();
       expect(Buffer.isBuffer(result.output)).toBe(false);
       expect(result.output).toBe('Hello plain text');
+    });
+
+    it('should return a Buffer when Content-Type header is missing', async () => {
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        body: createMockBinaryStream(pngBytes),
+        headers: new Headers(),
+      } as any);
+
+      const kibanaStep = createKibanaRequestStep({
+        request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
+      });
+      const result = await runStep(kibanaStep, {
+        request: { method: 'GET', path: '/api/reporting/jobs/download/abc' },
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(Buffer.isBuffer(result.output)).toBe(true);
+      expect(result.output).toEqual(Buffer.from(pngBytes));
     });
 
     it('should enforce size limits on binary responses', async () => {
@@ -1162,7 +1189,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         mockWorkflowLogger
       );
 
-      const result = await (kibanaStep as any)._run({
+      const result = await runStep(kibanaStep, {
         request: { method: 'GET', path: '/api/reporting/jobs/download/big' },
       });
 
