@@ -235,10 +235,6 @@ describe('UnifiedDataTable', () => {
       component = await getComponent();
     });
 
-    afterEach(() => {
-      component?.unmount();
-    });
-
     test(
       'no documents are selected initially',
       async () => {
@@ -376,8 +372,11 @@ describe('UnifiedDataTable', () => {
         });
         await toggleDocSelection(component, esHitsMock[2]);
         await toggleDocSelection(component, esHitsMock[1]);
-        const copiedText = await copySelectedDocumentsAsText(component);
-        expect(copiedText).toBe(
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
+        // wait for async copy action to avoid act warning
+        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
           '"\'@timestamp"\tdate\textension\tname\n-\t"2020-20-01T12:12:12.124"\tjpg\ttest2\n-\t"2020-20-01T12:12:12.124"\tgif\ttest3'
         );
       },
