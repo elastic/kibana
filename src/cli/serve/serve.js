@@ -118,6 +118,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
   delete extraCliOptions.env;
 
   let isServerlessSamlSupported = false;
+  let isStatefulSamlSupported = false;
   if (opts.dev) {
     if (opts.serverless) {
       setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
@@ -126,6 +127,8 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
         opts,
         extraCliOptions
       );
+    } else {
+      isStatefulSamlSupported = tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
@@ -302,6 +305,9 @@ export default function (program) {
     );
 
     const isServerlessSamlSupported = isServerlessMode && opts.ssl !== false;
+    const isStatefulSamlSupported =
+      !isServerlessMode && !!opts.dev && MOCK_IDP_PLUGIN_SUPPORTED;
+    const isSamlSupported = isServerlessSamlSupported || isStatefulSamlSupported;
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
@@ -314,9 +320,9 @@ export default function (program) {
       // We can tell users they only have to run with `yarn start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
-      // We also want to run without base path when running in serverless mode so that Elasticsearch can
+      // We also want to run without base path when SAML Mock IdP is configured so that Elasticsearch can
       // connect to Kibana's mock identity provider.
-      basePath: opts.runExamples || isServerlessSamlSupported ? false : !!opts.basePath,
+      basePath: opts.runExamples || isSamlSupported ? false : !!opts.basePath,
       optimize: !!opts.optimize,
       disableOptimizer: !opts.optimizer,
       oss: !!opts.oss,
@@ -487,6 +493,93 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
         'local-dev:ZG9ja2VyLmludGVybmFsOjkyMDAkaG9zdDo5MjAwJGtpYmFuYTo5MjAw'
       );
     }
+  }
+
+  return true;
+}
+
+/**
+ * Tries to configure SAML provider in stateful (traditional) mode and applies the necessary configuration.
+ * @param rawConfig Full configuration object.
+ * @param opts CLI options.
+ * @param extraCliOptions Extra CLI options.
+ * @returns {boolean} True if SAML provider was successfully configured.
+ */
+function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
+  if (!MOCK_IDP_PLUGIN_SUPPORTED) {
+    return false;
+  }
+
+  // Ensure the plugin is loaded in dynamically to exclude from production build
+  const {
+    MOCK_IDP_REALM_NAME,
+    MOCK_IDP_UIAM_ORGANIZATION_ID, // eslint-disable-next-line import/no-dynamic-require
+  } = require(MOCK_IDP_PLUGIN_PATH);
+
+  // Check if there are any custom authentication providers already configured with the order `0` reserved for the
+  // SAML provider or if there is an existing SAML provider with the name MOCK_IDP_REALM_NAME. We check
+  // both rawConfig and extraCliOptions because the latter can be used to override the former.
+  let hasBasicOrTokenProviderConfigured = false;
+  for (const configSource of [rawConfig, extraCliOptions]) {
+    const providersConfig = _.get(configSource, 'xpack.security.authc.providers', {});
+    for (const [providerType, providers] of Object.entries(providersConfig)) {
+      if (providerType === 'basic' || providerType === 'token') {
+        hasBasicOrTokenProviderConfigured = true;
+      }
+
+      for (const [providerName, provider] of Object.entries(providers)) {
+        if (provider.order === 0) {
+          console.warn(
+            `The SAML authentication provider won't be configured because the order "0" is already used by the custom authentication provider "${providerType}/${providerName}".` +
+              `Please update the custom provider to use a different order or remove it to allow the SAML provider to be configured.`
+          );
+          return false;
+        }
+
+        if (providerType === 'saml' && providerName === MOCK_IDP_REALM_NAME) {
+          console.warn(
+            `The SAML authentication provider won't be configured because the SAML provider with "${MOCK_IDP_REALM_NAME}" name is already configured".`
+          );
+          return false;
+        }
+      }
+    }
+  }
+
+  console.info(
+    'Kibana will be configured with SAML Mock IdP for stateful development. ' +
+      'Make sure Elasticsearch is started with SAML realm configured.'
+  );
+
+  // Make SAML provider the first in the provider chain
+  lodashSet(rawConfig, `xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
+    order: 0,
+    realm: MOCK_IDP_REALM_NAME,
+    icon: 'user',
+    description: 'Continue as Test User',
+    hint: 'Allows testing stateful user roles',
+  });
+
+  // Disable login selector to automatically trigger SAML authentication, unless it's explicitly enabled.
+  if (!_.has(rawConfig, 'xpack.security.authc.selector.enabled')) {
+    lodashSet(rawConfig, 'xpack.security.authc.selector.enabled', false);
+  }
+
+  // Since we explicitly configured SAML authentication provider, default Basic provider won't be automatically
+  // configured, and we have to do it manually instead unless other Basic or Token provider was already configured.
+  if (!hasBasicOrTokenProviderConfigured) {
+    lodashSet(rawConfig, 'xpack.security.authc.providers.basic.basic', {
+      order: Number.MAX_SAFE_INTEGER,
+    });
+  }
+
+  // Set a fake cloud.id so that the cloud plugin is activated (required by the mockIdpPlugin).
+  if (!_.has(rawConfig, 'xpack.cloud.id')) {
+    lodashSet(rawConfig, 'xpack.cloud.id', 'ftr_fake_cloud_id');
+  }
+
+  if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
+    lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
   }
 
   return true;

@@ -13,11 +13,10 @@ import { offeringBasedSchema, schema } from '@kbn/config-schema';
 export type ConfigType = TypeOf<typeof ConfigSchema>;
 
 export const ConfigSchema = schema.object({
-  // The plugin should only be enabled in Serverless.
   enabled: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
-    traditional: schema.boolean({ defaultValue: false }),
-    options: { defaultValue: false },
+    traditional: schema.boolean({ defaultValue: true }),
+    options: { defaultValue: true },
   }),
   uiam: offeringBasedSchema({
     serverless: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
