@@ -143,7 +143,7 @@ export const LabsFlyout = (props: Props) => {
           <h2 id={flyoutTitleId}>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="beaker" size="l" />
+                <EuiIcon type="beaker" size="l" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>{strings.getTitleLabel()}</EuiFlexItem>
             </EuiFlexGroup>

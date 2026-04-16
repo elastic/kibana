@@ -54,7 +54,7 @@ export const ControlClone = ({
       {isTwoLine && <EuiFormLabel>{panelTitle ?? defaultPanelTitle}</EuiFormLabel>}
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="grabHorizontal" css={styles.grabIcon} />
+          <EuiIcon type="grabHorizontal" css={styles.grabIcon} aria-hidden={true} />
         </EuiFlexItem>
         {!isTwoLine && (
           <EuiFlexItem>
