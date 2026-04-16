@@ -215,7 +215,7 @@ describe('RenderingService', () => {
       const bannerList = targetDomElement.querySelector('#globalBannerList') as HTMLElement | null;
       expect(bannerList).not.toBeNull();
       expect(bannerList).toHaveStyle({
-        paddingTop: '12px',
+        paddingTop: '0px',
         paddingBottom: '12px',
         paddingLeft: '12px',
         paddingRight: '12px',
