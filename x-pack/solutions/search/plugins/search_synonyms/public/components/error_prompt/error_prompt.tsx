@@ -18,7 +18,7 @@ const ERROR_MESSAGES = {
     body: (
       <FormattedMessage
         id="xpack.search.synonyms.errorDescription"
-        defaultMessage="An error occured while fetching synonyms. Check Kibana logs for more information."
+        defaultMessage="An error occurred while fetching synonyms. Check Kibana logs for more information."
       />
     ),
   },
