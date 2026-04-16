@@ -74,8 +74,7 @@ export const searchResponseBodySchema = schema.object({
         access_control: accessControlSchema,
       }),
       meta: asCodeMetaSchema,
-    }),
-    { maxSize: 100 }
+    })
   ),
   total: schema.number({
     meta: { description: 'The total number of dashboards matching the query.' },
