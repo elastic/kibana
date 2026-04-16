@@ -1734,7 +1734,7 @@
           "{ projectName: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 42,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1751,7 +1751,7 @@
           "{ projectName: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 46,
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1768,7 +1768,7 @@
           "{ sort_field: any; sort_order: any; page: number; per_page: number; from?: string | undefined; to?: string | undefined; name?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 48,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1785,7 +1785,7 @@
           "{ sort_field: any; sort_order: any; from?: string | undefined; to?: string | undefined; name?: string | undefined; page?: unknown; per_page?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 67,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1802,7 +1802,7 @@
           "{ traces: { trace_id: string; name: string; start_time: string; duration_ms: number; status?: string | undefined; total_spans?: number | undefined; input_preview?: string | undefined; output_preview?: string | undefined; error?: string | undefined; tokens?: { input?: number | undefined; output?: number | undefined; total?: number | undefined; } | undefined; prompt_id?: string | undefined; model?: string | undefined; }[]; total: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 69,
+        "lineNumber": 68,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2072,23 +2072,6 @@
         "description": [],
         "signature": [
           "{ trace_id: string; name: string; start_time: string; duration_ms: number; status?: string | undefined; total_spans?: number | undefined; input_preview?: string | undefined; output_preview?: string | undefined; error?: string | undefined; tokens?: { input?: number | undefined; output?: number | undefined; total?: number | undefined; } | undefined; prompt_id?: string | undefined; model?: string | undefined; }"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 26,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/evals-common",
-        "id": "def-common.TraceSummaryTokens",
-        "type": "Type",
-        "tags": [],
-        "label": "TraceSummaryTokens",
-        "description": [],
-        "signature": [
-          "{ input?: number | undefined; output?: number | undefined; total?: number | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
         "lineNumber": 19,
@@ -4842,7 +4825,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 43,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4886,7 +4869,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 49,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4968,7 +4951,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 70,
+        "lineNumber": 69,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5153,6 +5136,25 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_tracing_projects_route.gen.ts",
         "lineNumber": 50,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.goldenClusterPrivileges",
+        "type": "Object",
+        "tags": [],
+        "label": "goldenClusterPrivileges",
+        "description": [
+          "\nShared privilege descriptors for the golden cluster API key.\n\nUsed by the CLI (`node scripts/evals init`) and the evals plugin\n(remote Kibana configuration UI). Consumers override `name` and\n`metadata` to suit their context."
+        ],
+        "signature": [
+          "{ readonly kibana_role_descriptors: { readonly 'kbn-evals-all': { readonly elasticsearch: { readonly cluster: readonly [\"manage_index_templates\"]; readonly indices: readonly [{ readonly names: readonly [\"kibana-evaluations*\"]; readonly privileges: readonly [\"auto_configure\", \"create_index\", \"create_doc\", \"read\", \"view_index_metadata\"]; }, { readonly names: readonly [\"traces-*\"]; readonly privileges: readonly [\"auto_configure\", \"create_index\", \"create_doc\", \"read\", \"view_index_metadata\"]; }, { readonly names: readonly [\"kibana-evaluation-dataset*\"]; readonly privileges: readonly [\"auto_configure\", \"create_index\", \"create_doc\", \"read\", \"view_index_metadata\", \"delete\", \"index\"]; }]; }; readonly kibana: readonly [{ readonly base: readonly []; readonly spaces: readonly [\"*\"]; readonly feature: { readonly evals: readonly [\"all\"]; }; }]; }; }; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/golden_cluster_privileges.ts",
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5391,38 +5393,6 @@
           "ZodOptional",
           "<",
           "ZodString",
-          ">; }, ",
-          "node_modules/zod/v4/core/schemas",
-          "$strip>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 27,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/evals-common",
-        "id": "def-common.TraceSummaryTokens",
-        "type": "Object",
-        "tags": [],
-        "label": "TraceSummaryTokens",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ input: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
-          ">; output: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
-          ">; total: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
           ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>"
