@@ -39,7 +39,6 @@ export const useContentListItems = () => {
   return {
     items: state.items,
     totalItems: state.totalItems,
-    counts: state.counts,
     isLoading: state.isLoading,
     isFetching: state.isFetching,
     error: state.error,

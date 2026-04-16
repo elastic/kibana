@@ -19,13 +19,7 @@ jest.mock('./query_utils', () => ({
     getCustomAgentsMetrics: jest.fn(),
     getConversationMetrics: jest.fn(),
     getCountersByPrefix: jest.fn(),
-    calculatePercentilesFromBuckets: jest.fn(),
-    getTTFTMetrics: jest.fn(),
-    getTTLTMetrics: jest.fn(),
-    getTokensByModel: jest.fn(),
-    getQueryToResultTimeByModel: jest.fn(),
-    getQueryToResultTimeByAgentType: jest.fn(),
-    getToolCallsByModel: jest.fn(),
+    getAllRoundMetrics: jest.fn(),
   })),
   isIndexNotFoundError: jest.fn(),
 }));
@@ -192,64 +186,56 @@ describe('telemetry_collector', () => {
           tokens_output: 20000,
           average_tokens_per_conversation: 500,
         }),
-        getTTFTMetrics: jest.fn().mockResolvedValue({
-          p50: 100,
-          p75: 200,
-          p90: 400,
-          p95: 600,
-          p99: 800,
-          mean: 150,
-          total_samples: 1000,
-        }),
-        getTTLTMetrics: jest.fn().mockResolvedValue({
-          p50: 1000,
-          p75: 2000,
-          p90: 4000,
-          p95: 6000,
-          p99: 8000,
-          mean: 1500,
-          total_samples: 1000,
-        }),
-        getTokensByModel: jest.fn().mockResolvedValue([
-          {
-            model: 'gpt-4',
-            total_tokens: 20000,
-            avg_tokens_per_round: 200,
-            sample_count: 100,
+        getAllRoundMetrics: jest.fn().mockResolvedValue({
+          ttft: {
+            p50: 100,
+            p75: 200,
+            p90: 400,
+            p95: 600,
+            p99: 800,
+            mean: 150,
+            total_samples: 1000,
           },
-        ]),
-        getQueryToResultTimeByModel: jest.fn().mockResolvedValue([
-          {
-            model: 'gpt-4',
-            p50: 900,
-            p75: 1200,
-            p90: 1500,
-            p95: 2000,
-            p99: 2500,
-            mean: 1100,
-            total_samples: 100,
-            sample_count: 100,
-          },
-        ]),
-        getQueryToResultTimeByAgentType: jest.fn().mockResolvedValue([
-          {
-            agent_id: 'default',
+          ttlt: {
             p50: 1000,
             p75: 2000,
             p90: 4000,
             p95: 6000,
             p99: 8000,
             mean: 1500,
-            total_samples: 300,
-            sample_count: 300,
+            total_samples: 1000,
           },
-        ]),
-        getToolCallsByModel: jest.fn().mockResolvedValue([
-          {
-            model: 'gpt-4',
-            count: 15,
-          },
-        ]),
+          byModel: [
+            {
+              model: 'gpt-4',
+              ttlt_p50: 900,
+              ttlt_p75: 1200,
+              ttlt_p90: 1500,
+              ttlt_p95: 2000,
+              ttlt_p99: 2500,
+              ttlt_mean: 1100,
+              ttlt_samples: 100,
+              input_tokens: 10000,
+              output_tokens: 10000,
+              total_tokens: 20000,
+              rounds: 100,
+              avg_tokens_per_round: 200,
+              tool_calls: 15,
+            },
+          ],
+          byAgent: [
+            {
+              agent_id: 'default',
+              p50: 1000,
+              p75: 2000,
+              p90: 4000,
+              p95: 6000,
+              p99: 8000,
+              mean: 1500,
+              total_samples: 300,
+            },
+          ],
+        }),
         getCountersByPrefix: jest.fn().mockImplementation((domain, prefix) => {
           if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_`) {
             return Promise.resolve(
@@ -297,14 +283,6 @@ describe('telemetry_collector', () => {
             );
           }
           return Promise.resolve(new Map());
-        }),
-        calculatePercentilesFromBuckets: jest.fn().mockReturnValue({
-          p50: 500,
-          p75: 2000,
-          p90: 4000,
-          p95: 6000,
-          p99: 8000,
-          mean: 1500,
         }),
       };
       QueryUtils.mockImplementation(() => mockQueryUtils);
