@@ -60,7 +60,7 @@ const RadioGroupField: React.FC<RadioGroupFieldProps> = ({
         name={name}
         options={options}
         idSelected={idSelected}
-        onChange={(id) => field.setValue(id)}
+        onChange={field.setValue}
       />
     </EuiFormRow>
   );
