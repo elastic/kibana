@@ -75,6 +75,22 @@ paths:
                 gap_auto_fill_scheduler_id:
                   type: string
                   description: Optional scheduler ID for scoping the "error" gap fill status (exhausted retries).
+            examples:
+              basicSearch:
+                summary: Paginated search with KQL filter, free-text term, and facet counts
+                value:
+                  page: 1
+                  per_page: 20
+                  sort_field: enabled
+                  sort_order: desc
+                  filter: 'alert.attributes.enabled: true'
+                  search:
+                    term: windows
+                    mode: legacy
+                  aggregations:
+                    counts:
+                      - tags
+                      - enabled
       responses:
         '200':
           description: Successful response
@@ -113,6 +129,24 @@ paths:
                   - perPage
                   - total
                   - data
+              examples:
+                basicSearch:
+                  summary: Paginated response with facet counts and a search_after cursor
+                  value:
+                    page: 1
+                    perPage: 20
+                    total: 42
+                    data: []
+                    search_after:
+                      - 1700000000000
+                      - 'abcd'
+                    counts:
+                      tags:
+                        Windows: 12
+                        Linux: 7
+                      enabled:
+                        'true': 30
+                        'false': 12
 components:
   schemas:
     SearchRulesSearchAfterItem:

@@ -15,6 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/node-libs-browser-webpack-plugin",
+    "@kbn/peggy-loader",
     "@kbn/scout-info",
     "@kbn/repo-info",
     "@kbn/tooling-log",
