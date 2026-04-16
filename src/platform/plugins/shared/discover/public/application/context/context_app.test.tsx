@@ -162,7 +162,7 @@ describe('ContextApp test', () => {
 
     renderComponent();
 
-    await user.click(await screen.findByTestId('docTableExpandToggleColumn'));
+    user.click(screen.getByTestId('docTableExpandToggleColumn'));
 
     expect(await screen.findByTestId('docViewerFlyout')).toBeVisible();
 
