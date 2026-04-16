@@ -32,15 +32,7 @@ export const iterationResultSchema = z.object({
   updatedFeatures: z.array(featureSummarySchema),
 });
 
-export interface IterationResult {
-  runId: string;
-  iteration: number;
-  durationMs: number;
-  state: 'success' | 'failure';
-  tokensUsed: ChatCompletionTokenCount;
-  newFeatures: Array<{ id: string; title: string }>;
-  updatedFeatures: Array<{ id: string; title: string }>;
-}
+export type IterationResult = z.infer<typeof iterationResultSchema>;
 
 export interface IdentifyFeaturesResult {
   features: BaseFeature[];

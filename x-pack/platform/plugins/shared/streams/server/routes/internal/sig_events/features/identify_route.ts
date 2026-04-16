@@ -143,6 +143,28 @@ const identifyInferredFeaturesRoute = createServerRoute({
         } completed iterations: ${error instanceof Error ? error.message : String(error)}`
       );
 
+      telemetry.trackFeaturesIdentified({
+        run_id: runId,
+        iteration: iterationResults.length,
+        stream_name: streamName,
+        stream_type: getStreamTypeFromDefinition(stream),
+        state: 'failure',
+        docs_count: 0,
+        features_new: 0,
+        features_updated: 0,
+        input_tokens_used: 0,
+        output_tokens_used: 0,
+        total_tokens_used: 0,
+        cached_tokens_used: 0,
+        duration_ms: Date.now() - now,
+        total_filters: 0,
+        filters_capped: false,
+        has_filtered_documents: false,
+        excluded_features_count: 0,
+        llm_ignored_count: 0,
+        code_ignored_count: 0,
+      });
+
       if (isInferenceProviderError(error)) {
         const connector = await inferenceClient
           .getConnectorById(connectorId)

@@ -425,7 +425,6 @@ export async function identifyInferredFeatures({
 
   const { docsCount, docIds, totalFilters, filtersCapped, hasFilteredDocuments, outcome } =
     iterationResult;
-  const elapsedMs = () => Date.now() - startedAt;
 
   const telemetryCtx: TelemetryContext = {
     run_id: runId,
@@ -440,7 +439,7 @@ export async function identifyInferredFeatures({
   };
 
   if (outcome.state === 'failure') {
-    const durationMs = elapsedMs();
+    const durationMs = Date.now() - startedAt;
     const failedResult: IterationResult = {
       runId,
       iteration,
@@ -481,7 +480,7 @@ export async function identifyInferredFeatures({
   }
   const nextDiscovered = Array.from(discoveredMap.values());
 
-  const durationMs = elapsedMs();
+  const durationMs = Date.now() - startedAt;
   const successResult: IterationResult = {
     runId,
     iteration,
