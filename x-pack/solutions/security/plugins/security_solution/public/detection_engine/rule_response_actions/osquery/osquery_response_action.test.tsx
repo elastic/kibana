@@ -101,9 +101,7 @@ describe('OsqueryResponseAction', () => {
     it('calls useUpsellingComponent with osqueryAutomatedResponseActions key', () => {
       renderComponent();
 
-      expect(useUpsellingComponentSpy).toHaveBeenCalledWith(
-        'osquery_automated_response_actions'
-      );
+      expect(useUpsellingComponentSpy).toHaveBeenCalledWith('osquery_automated_response_actions');
     });
   });
 
