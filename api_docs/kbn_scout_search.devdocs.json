@@ -3200,7 +3200,7 @@
           "<{}, {}>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3222,7 +3222,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -11872,7 +11872,7 @@
             "label": "esServerlessOptions",
             "description": [],
             "signature": [
-              "{ uiam: boolean; cps?: boolean | undefined; } | undefined"
+              "{ uiam: boolean; uiamOAuth?: boolean | undefined; cps?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
             "lineNumber": 29,
