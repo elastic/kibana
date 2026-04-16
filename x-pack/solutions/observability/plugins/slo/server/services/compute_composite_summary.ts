@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CompositeSLOMemberSummary, CompositeSLOSummary } from '@kbn/slo-schema';
+import type { CompositeSLOMemberSummary, CompositeSLOSummary, SLOStatus } from '@kbn/slo-schema';
 import {
   computeNormalisedWeights,
   computeWeightedSli,
@@ -21,6 +21,7 @@ export interface MemberSummaryData {
   sloName: string;
   summary: {
     sliValue: number;
+    status: SLOStatus;
     fiveMinuteBurnRate: number;
     oneHourBurnRate: number;
     oneDayBurnRate: number;
@@ -94,7 +95,7 @@ function buildMemberSummary(
   ms: {
     member: { sloId: string; weight: number; instanceId?: string };
     sloName: string;
-    summary: { sliValue: number };
+    summary: { sliValue: number; status: SLOStatus };
   },
   normalisedWeight: number
 ): CompositeSLOMemberSummary {
@@ -107,6 +108,7 @@ function buildMemberSummary(
     weight: ms.member.weight,
     normalisedWeight,
     sliValue,
+    status: ms.summary.status,
     contribution,
     ...(ms.member.instanceId !== undefined ? { instanceId: ms.member.instanceId } : {}),
   };
