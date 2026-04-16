@@ -345,7 +345,7 @@ const FLYOUT_TITLE = i18n.translate('xpack.streams.suggestedRulesFlyout.title', 
 
 const FLYOUT_DESCRIPTION = i18n.translate('xpack.streams.suggestedRulesFlyout.description', {
   defaultMessage:
-    'We generate rules based on the queries that are of critical importance for this stream. You can review and discard results.',
+    'Based on severity, we show rules of critical and high importance for this stream. You can review and discard results.',
 });
 
 const SHOWING_RULES_LABEL = (count: number) =>
