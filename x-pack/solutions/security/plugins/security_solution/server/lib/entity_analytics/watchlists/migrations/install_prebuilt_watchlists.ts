@@ -21,7 +21,6 @@ import { WatchlistEntitySourceClient } from '../entity_sources/infra';
 // Bump this when PREBUILT_WATCHLISTS definitions change
 export const PREBUILT_WATCHLISTS_VERSION = 1;
 
-
 const OKTA_PRIVILEGED_ROLES = [
   'Super Administrator',
   'Organization Administrator',
