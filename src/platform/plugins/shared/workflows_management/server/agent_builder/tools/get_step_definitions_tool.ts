@@ -31,6 +31,7 @@ import {
   addDynamicConnectorsToCache,
   getAllConnectors,
   getCachedAllConnectorsMap,
+  getDeprecatedStepMetadata,
 } from '../../../common/schema';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
@@ -117,7 +118,8 @@ export function formatConnectorStep(connector: ConnectorContractUnion): StepDefi
     ? buildStepParamsSummary(connector.configSchema)
     : undefined;
   const outputSummary = buildOutputSummary(connector.outputSchema);
-  const deprecationMetadata = formatDeprecationMetadata(connector.type, connector.deprecation);
+  const deprecation = connector.deprecation ?? getDeprecatedStepMetadata(connector.type);
+  const deprecationMetadata = formatDeprecationMetadata(connector.type, deprecation);
 
   return {
     id: connector.type,
