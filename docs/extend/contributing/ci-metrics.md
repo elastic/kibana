@@ -112,7 +112,7 @@ This command has to run the optimizer in distributable mode so it will take a lo
 
 Changes to the [`limits.yml` file](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml) will trigger review from the Operations team, who will attempt to verify that the size increase is justified. If you have findings you can share from the steps above that would be very helpful!
 
-For broader guidance on lazy-loading patterns, see [Plugin performance](/extend/plugin-performance.md).
+For broader guidance on lazy-loading patterns, see [Plugin performance and optimization](/extend/key-concepts/plugin-performance-and-optimization/plugin-performance-and-optimization.md).
 
 ## Actions to reduce `page load bundle size` [ci-metric-quick-actions]
 

@@ -1,4 +1,10 @@
 redirects:
+  'extend/development-best-practices.md': 'extend/contributing/best-practices.md'
+  'extend/plugin-performance.md': 'extend/key-concepts/plugin-performance-and-optimization/plugin-performance-and-optimization.md'
+  'extend/kibana-navigation.md': 'extend/key-concepts/routing-navigation-and-url.md'
+  'extend/stability.md': 'extend/contributing/best-practices.md'
+  'extend/security-best-practices.md': 'extend/contributing/best-practices.md'
+  'extend/typescript.md': 'extend/contributing/typescript-project-references.md'
   'extend/development-documentation.md': 'docs-content://extend/contribute/index.md'
   'extend/development-getting-started.md': 'extend/getting-started/welcome.md'
   'extend/saved-objects-service.md': 'extend/saved-objects.md'

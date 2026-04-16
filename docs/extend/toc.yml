@@ -12,6 +12,7 @@ toc:
       - file: developer-principles.md
       - file: repository-structure.md
       - file: standards-and-guidelines.md
+      - file: typescript-project-references.md
       - file: best-practices.md
       - file: documentation.md
       - file: guidelines-for-http-api-design-in-kibana.md
@@ -126,13 +127,6 @@ toc:
           - file: lens-config-builder-api-table.md
           - file: lens-config-builder-api-heatmap.md
           - file: lens-config-builder-api-xy-chart.md
-  - file: development-best-practices.md
-    children:
-      - file: plugin-performance.md
-      - file: kibana-navigation.md
-      - file: stability.md
-      - file: security-best-practices.md
-      - file: typescript.md
   - folder: testing
     children:
       - file: index.md

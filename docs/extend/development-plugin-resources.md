@@ -10,7 +10,7 @@ Here are some resources that are helpful for getting started with plugin develop
 
 ## Some light reading [_some_light_reading]
 
-If you haven’t already, start with [*Getting started*](./getting-started/welcome.md). If you are planning to add your plugin to the {{kib}} repo, read the [*Contributing*](./contributing/developer-principles.md) guide, if you are building a plugin externally, read [*External plugin development*](/extend/external-plugin-development.md). In both cases, read up on our recommended [*Best practices*](/extend/development-best-practices.md).
+If you haven’t already, start with [*Getting started*](./getting-started/welcome.md). If you are planning to add your plugin to the {{kib}} repo, read the [*Contributing*](./contributing/developer-principles.md) guide, if you are building a plugin externally, read [*External plugin development*](/extend/external-plugin-development.md). In both cases, read up on our recommended [*Best practices*](/extend/contributing/best-practices.md).
 
 
 ## Creating an empty plugin [_creating_an_empty_plugin]
