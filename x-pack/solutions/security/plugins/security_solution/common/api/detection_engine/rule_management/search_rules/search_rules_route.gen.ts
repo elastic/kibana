@@ -28,6 +28,14 @@ import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
+export type SearchRulesValidationErrorResponse = z.infer<typeof SearchRulesValidationErrorResponse>;
+export const SearchRulesValidationErrorResponse = z
+  .object({
+    message: z.array(z.string()),
+    status_code: z.number().int(),
+  })
+  .strict();
+
 /**
   * One value in a `search_after` array. Elasticsearch sort values may be a
 string, number, boolean, or null.

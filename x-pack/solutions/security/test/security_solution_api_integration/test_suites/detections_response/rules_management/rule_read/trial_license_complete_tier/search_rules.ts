@@ -12,7 +12,7 @@ import {
 } from '@kbn/core-http-common';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { DETECTION_ENGINE_RULES_URL_SEARCH } from '@kbn/security-solution-plugin/common/constants';
-import { MAX_SEARCH_RULES_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import { MAX_SEARCH_RULES_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_management/api/rules/search_rules/request_schema_validation';
 import { getSimpleRule } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 

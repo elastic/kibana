@@ -168,10 +168,6 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
                       },
                     },
                   },
-                  {
-                    test: /\.peggy$/,
-                    loader: require.resolve('@kbn/peggy-loader'),
-                  },
                 ],
               },
               plugins: [new NodeLibsBrowserPlugin()],

@@ -75,22 +75,6 @@ paths:
                 gap_auto_fill_scheduler_id:
                   type: string
                   description: Optional scheduler ID for scoping the "error" gap fill status (exhausted retries).
-            examples:
-              basicSearch:
-                summary: Paginated search with KQL filter, free-text term, and facet counts
-                value:
-                  page: 1
-                  per_page: 20
-                  sort_field: enabled
-                  sort_order: desc
-                  filter: 'alert.attributes.enabled: true'
-                  search:
-                    term: windows
-                    mode: legacy
-                  aggregations:
-                    counts:
-                      - tags
-                      - enabled
       responses:
         '200':
           description: Successful response
@@ -147,8 +131,39 @@ paths:
                       enabled:
                         'true': 30
                         'false': 12
+        '400':
+          description: |
+            Request validation failed (for example invalid KQL, incompatible sort and
+            `search_after`, or gap filter constraints). The response body lists human-readable errors.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchRulesValidationErrorResponse'
+              examples:
+                validationErrors:
+                  summary: Multiple validation failures
+                  value:
+                    message:
+                      - 'when "sort_order" and "sort_field" must exist together or not at all'
+                      - 'invalid KQL filter: expected end of input, but found unexpected character'
+                    status_code: 400
 components:
   schemas:
+    SearchRulesValidationErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - status_code
+      properties:
+        message:
+          type: array
+          items:
+            type: string
+        status_code:
+          type: integer
+          enum:
+            - 400
     SearchRulesSearchAfterItem:
       description: |
         One value in a `search_after` array. Elasticsearch sort values may be a

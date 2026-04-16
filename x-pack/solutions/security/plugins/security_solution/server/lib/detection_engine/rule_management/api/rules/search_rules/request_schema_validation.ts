@@ -6,9 +6,9 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
-import type { FindRulesRequestQueryInput } from '../find_rules/find_rules_route.gen';
-import { validateFindRulesRequestQuery } from '../find_rules/request_schema_validation';
-import type { SearchRulesRequestBodyInput } from './search_rules_route.gen';
+import type { FindRulesRequestQueryInput } from '../../../../../../../common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
+import { validateFindRulesRequestQuery } from '../../../../../../../common/api/detection_engine/rule_management/find_rules/request_schema_validation';
+import type { SearchRulesRequestBodyInput } from '../../../../../../../common/api/detection_engine/rule_management/search_rules/search_rules_route.gen';
 
 export const MAX_SEARCH_RULES_SEARCH_TERM_LENGTH = 1000;
 

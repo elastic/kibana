@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { SearchRulesRequestBodyInput } from './search_rules_route.gen';
+import type { SearchRulesRequestBodyInput } from '../../../../../../../common/api/detection_engine/rule_management/search_rules/search_rules_route.gen';
 import {
   MAX_SEARCH_RULES_FILTER_KQL_LENGTH,
   MAX_SEARCH_RULES_SEARCH_TERM_LENGTH,
   validateSearchRulesKqlFilter,
   validateSearchRulesRequestBody,
 } from './request_schema_validation';
+
+const gapParamsTogetherMessage =
+  'Query fields "gap_fill_statuses", "gaps_range_start" and "gaps_range_end" has to be specified together';
 
 describe('validateSearchRulesKqlFilter', () => {
   it('accepts empty and whitespace filter', () => {
@@ -163,9 +166,7 @@ describe('validateSearchRulesRequestBody', () => {
       ...defaultInput,
       gap_fill_statuses: ['unfilled'],
     });
-    expect(errors).toContain(
-      '"gap_fill_statuses", "gaps_range_start" and "gaps_range_end" must be specified together'
-    );
+    expect(errors).toContain(gapParamsTogetherMessage);
   });
 
   it('rejects gaps_range_start and gaps_range_end without gap_fill_statuses', () => {
@@ -174,9 +175,7 @@ describe('validateSearchRulesRequestBody', () => {
       gaps_range_start: '2024-01-01T00:00:00Z',
       gaps_range_end: '2024-01-02T00:00:00Z',
     });
-    expect(errors).toContain(
-      '"gap_fill_statuses", "gaps_range_start" and "gaps_range_end" must be specified together'
-    );
+    expect(errors).toContain(gapParamsTogetherMessage);
   });
 
   it('rejects gap_fill_statuses with only gaps_range_start', () => {
@@ -185,9 +184,7 @@ describe('validateSearchRulesRequestBody', () => {
       gap_fill_statuses: ['filled'],
       gaps_range_start: '2024-01-01T00:00:00Z',
     });
-    expect(errors).toContain(
-      '"gap_fill_statuses", "gaps_range_start" and "gaps_range_end" must be specified together'
-    );
+    expect(errors).toContain(gapParamsTogetherMessage);
   });
 
   it('rejects search_after when gap filtering is active', () => {

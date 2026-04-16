@@ -23,10 +23,8 @@ import type {
   SearchRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
-import {
-  SearchRulesRequestBody,
-  validateSearchRulesRequestBody,
-} from '../../../../../../../common/api/detection_engine/rule_management';
+import { SearchRulesRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
+import { validateSearchRulesRequestBody } from './request_schema_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
 import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';
