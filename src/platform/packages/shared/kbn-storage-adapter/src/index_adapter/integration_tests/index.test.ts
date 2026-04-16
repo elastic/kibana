@@ -441,6 +441,56 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
+  describe('automatic mapping reconciliation on read', () => {
+    const updatedStorageSettings = {
+      name: TEST_INDEX_NAME,
+      schema: {
+        properties: {
+          foo: { type: 'keyword' as const },
+          bar: { type: 'keyword' as const },
+        },
+      },
+    } satisfies StorageSettings;
+
+    afterAll(async () => {
+      await client?.clean();
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
+    });
+
+    it('updates stale mappings before the first search', async () => {
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
+      await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      await verifyIndex();
+
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('read_updated');
+
+      const updatedAdapter = createStorageIndexAdapter(updatedStorageSettings);
+      const updatedClient = updatedAdapter.getClient();
+
+      await updatedClient.search({ track_total_hits: true, size: 1, query: { match_all: {} } });
+
+      const getIndicesResponse = await esClient.indices.get({ index: TEST_INDEX_NAME });
+      const writeIndexName = `${TEST_INDEX_NAME}-000001`;
+
+      expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('read_updated');
+      expect(getIndicesResponse[writeIndexName].mappings?.properties).toMatchObject({
+        foo: { type: 'keyword' },
+        bar: { type: 'keyword' },
+      });
+    });
+
+    it('does not create resources when searching on a clean instance', async () => {
+      await client.clean();
+
+      const freshAdapter = createStorageIndexAdapter(storageSettings);
+      const freshClient = freshAdapter.getClient();
+
+      await freshClient.search({ track_total_hits: true, size: 1, query: { match_all: {} } });
+
+      await verifyNoIndex();
+    });
+  });
+
   describe('when writing/bootstrapping with an existing, incompatible index', () => {
     beforeAll(async () => {
       await client.index({ id: 'foo', document: { foo: 'bar' } });

@@ -15,11 +15,10 @@ import {
   LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { expectedHostEntities } from '../fixtures/entity_extraction_expected';
+import { assertEntitiesEqual, expectedHostEntities } from '../fixtures/entity_extraction_expected';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/263067
-apiTest.describe.skip(
+apiTest.describe(
   'Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage)',
   { tag: ENTITY_STORE_TAGS },
   () => {
@@ -100,14 +99,10 @@ apiTest.describe.skip(
               },
             },
           },
-          sort: '@timestamp:asc,entity.id:asc',
           size: 1000, // a lot just to be sure we are not capping it
         });
 
-        expect(entities.hits.hits).toHaveLength(expectedResultCount);
-        // it's deterministic because of the SHA-256 id
-        // manually checking object until we have a snapshot matcher
-        expect(entities.hits.hits).toMatchObject(expectedHostEntities);
+        assertEntitiesEqual(expectedHostEntities, entities.hits.hits);
       }
     );
 
@@ -116,7 +111,6 @@ apiTest.describe.skip(
       async ({ apiClient, esClient }) => {
         // We process some entities twice because they didn't fall in the same logs page
         const expectedProcessedEntities = 24;
-        const expectedStoredEntities = 20;
         const minimumPagesWithEntityPaginationOnly = 4;
 
         const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
@@ -167,8 +161,7 @@ apiTest.describe.skip(
           size: 1000,
         });
 
-        expect(entities.hits.hits).toHaveLength(expectedStoredEntities);
-        expect(entities.hits.hits).toMatchObject(expectedHostEntities);
+        assertEntitiesEqual(expectedHostEntities, entities.hits.hits);
       }
     );
   }
