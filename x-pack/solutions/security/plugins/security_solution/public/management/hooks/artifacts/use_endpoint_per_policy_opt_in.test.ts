@@ -11,14 +11,18 @@ import {
 } from '../../../common/mock/endpoint';
 import { waitFor } from '@testing-library/dom';
 import { useGetEndpointExceptionsPerPolicyOptIn } from './use_endpoint_per_policy_opt_in';
-import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '../../../../common/endpoint/constants';
+import { endpointExceptionsPerPolicyOptInAllHttpMocks } from '../../mocks/endpoint_per_policy_opt_in_http_mocks';
 
 describe('useGetEndpointExceptionsPerPolicyOptIn()', () => {
   let testContext: AppContextTestRender;
+  let getOptInHttpMock: ReturnType<
+    typeof endpointExceptionsPerPolicyOptInAllHttpMocks
+  >['responseProvider']['optInGet'];
 
   beforeEach(() => {
     testContext = createAppRootMockRenderer();
-    testContext.coreStart.http.get.mockResolvedValue({ isOptedIn: false });
+    getOptInHttpMock = endpointExceptionsPerPolicyOptInAllHttpMocks(testContext.coreStart.http)
+      .responseProvider.optInGet;
   });
 
   afterEach(() => {
@@ -34,10 +38,7 @@ describe('useGetEndpointExceptionsPerPolicyOptIn()', () => {
       const { result } = testContext.renderHook(() => useGetEndpointExceptionsPerPolicyOptIn());
 
       expect(result.current.data).toBeUndefined();
-      expect(testContext.coreStart.http.get).not.toHaveBeenCalledWith(
-        ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
-        expect.anything()
-      );
+      expect(getOptInHttpMock).not.toHaveBeenCalled();
     });
 
     it('should not call the API even when enabled is true', () => {
@@ -46,10 +47,7 @@ describe('useGetEndpointExceptionsPerPolicyOptIn()', () => {
       );
 
       expect(result.current.data).toBeUndefined();
-      expect(testContext.coreStart.http.get).not.toHaveBeenCalledWith(
-        ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
-        expect.anything()
-      );
+      expect(getOptInHttpMock).not.toHaveBeenCalled();
     });
   });
 
@@ -62,11 +60,8 @@ describe('useGetEndpointExceptionsPerPolicyOptIn()', () => {
       const { result } = testContext.renderHook(() => useGetEndpointExceptionsPerPolicyOptIn());
 
       await waitFor(() => {
-        expect(result.current.data).toEqual({ isOptedIn: false });
-        expect(testContext.coreStart.http.get).toHaveBeenCalledWith(
-          ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
-          { version: '1' }
-        );
+        expect(result.current.data).toEqual({ status: false });
+        expect(getOptInHttpMock).toHaveBeenCalled();
       });
     });
 
@@ -74,11 +69,8 @@ describe('useGetEndpointExceptionsPerPolicyOptIn()', () => {
       const { result } = testContext.renderHook(() => useGetEndpointExceptionsPerPolicyOptIn({}));
 
       await waitFor(() => {
-        expect(result.current.data).toEqual({ isOptedIn: false });
-        expect(testContext.coreStart.http.get).toHaveBeenCalledWith(
-          ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
-          { version: '1' }
-        );
+        expect(result.current.data).toEqual({ status: false });
+        expect(getOptInHttpMock).toHaveBeenCalled();
       });
     });
 
@@ -88,11 +80,8 @@ describe('useGetEndpointExceptionsPerPolicyOptIn()', () => {
       );
 
       await waitFor(() => {
-        expect(result.current.data).toEqual({ isOptedIn: false });
-        expect(testContext.coreStart.http.get).toHaveBeenCalledWith(
-          ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
-          { version: '1' }
-        );
+        expect(result.current.data).toEqual({ status: false });
+        expect(getOptInHttpMock).toHaveBeenCalled();
       });
     });
 
@@ -103,10 +92,7 @@ describe('useGetEndpointExceptionsPerPolicyOptIn()', () => {
 
       await waitFor(() => {
         expect(result.current.data).toBeUndefined();
-        expect(testContext.coreStart.http.get).not.toHaveBeenCalledWith(
-          ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
-          expect.anything()
-        );
+        expect(getOptInHttpMock).not.toHaveBeenCalled();
       });
     });
   });
