@@ -797,7 +797,7 @@ describe('XY', () => {
                 operation: 'median',
                 field: 'bytes',
                 label: 'Median',
-                axis_id: 'y',
+                axis: 'y',
               },
             ],
           },
