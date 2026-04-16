@@ -55,6 +55,7 @@ toc:
       - file: versioning-http-apis.md
       - file: versioning-interfaces.md
       - file: generating-oas-for-http-apis.md
+      - file: home-tutorials.md
       - file: submitting-a-kibana-pull-request.md
       - file: kibana-expressions-service.md
       - file: kibana-data-search-services.md
@@ -119,7 +120,6 @@ toc:
       - file: patterns.md
       - file: core-packages.md
       - file: development-security.md
-      - file: add-data-tutorials.md
       - file: development-visualize-index.md
       - file: reporting-integration.md
   - file: development-best-practices.md
