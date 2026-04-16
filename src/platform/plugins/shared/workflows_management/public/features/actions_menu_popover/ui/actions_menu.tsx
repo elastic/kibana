@@ -30,9 +30,11 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
+import { STEPS_PREFIX, useDisplayOptions } from '../lib/use_display_options';
 import {
   type ActionOptionData,
   type EditorCommand,
+  getMenuItemData,
   isActionConnectorGroup,
   isActionConnectorOption,
   isActionGroup,
@@ -49,9 +51,6 @@ export interface ActionsMenuProps {
   onCommandSelected?: (commandId: string) => void;
   onJumpToStep?: (lineNumber: number) => void;
 }
-
-const STEPS_PREFIX = 'Steps: ';
-const MAX_VISIBLE_STEPS = 7;
 
 export function ActionsMenu({
   onActionSelected,
@@ -90,15 +89,23 @@ export function ActionsMenu({
     }
   }, [defaultOptions, currentPath]);
 
+  const displayOptions = useDisplayOptions({
+    options,
+    searchTerm,
+    commands,
+    jumpToStepEntries,
+    currentPath,
+  });
+
   const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
-    const optionId = String((rawOption as unknown as Record<string, unknown>).id ?? '');
+    const itemData = getMenuItemData(rawOption);
     const effectiveSearch = searchValue.startsWith(STEPS_PREFIX)
       ? searchValue.slice(STEPS_PREFIX.length).trim()
       : searchValue.startsWith('#')
       ? searchValue.slice(1).trim()
       : searchValue;
 
-    if (optionId.startsWith('__cmd:') || optionId.startsWith('__jump:')) {
+    if (itemData?.kind === 'command' || itemData?.kind === 'jump') {
       return (
         <EuiText size="s">
           <EuiHighlight search={effectiveSearch}>{rawOption.label}</EuiHighlight>
@@ -106,7 +113,7 @@ export function ActionsMenu({
       );
     }
 
-    if (optionId === '__viewAll' || optionId === '__viewExisting') {
+    if (itemData?.kind === 'nav') {
       return (
         <EuiFlexGroup
           alignItems="center"
@@ -126,8 +133,9 @@ export function ActionsMenu({
       );
     }
 
-    const option = rawOption as unknown as ActionOptionData;
-    const shouldUseGroupStyle = isActionGroup(option);
+    const action =
+      itemData?.kind === 'action' ? itemData.action : (rawOption as unknown as ActionOptionData);
+    const shouldUseGroupStyle = isActionGroup(action);
     return (
       <EuiFlexGroup alignItems="center" css={styles.actionOption}>
         <EuiFlexItem
@@ -138,16 +146,16 @@ export function ActionsMenu({
           ]}
         >
           <span css={shouldUseGroupStyle ? styles.groupIconInner : styles.actionIconInner}>
-            {isActionConnectorGroup(option) || isActionConnectorOption(option) ? (
+            {isActionConnectorGroup(action) || isActionConnectorOption(action) ? (
               <StepIcon
-                stepType={getBaseConnectorType(option.connectorType)}
+                stepType={getBaseConnectorType(action.connectorType)}
                 executionStatus={undefined}
               />
-            ) : isActionGroup(option) || isActionOption(option) ? (
+            ) : isActionGroup(action) || isActionOption(action) ? (
               <EuiIcon
-                type={option.iconType}
+                type={action.iconType}
                 size="m"
-                color={option.iconColor}
+                color={action.iconColor}
                 aria-hidden={true}
               />
             ) : null}
@@ -159,10 +167,10 @@ export function ActionsMenu({
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiTitle size="xxxs" css={styles.actionTitle}>
                   <h6>
-                    <EuiHighlight search={effectiveSearch}>{option.label}</EuiHighlight>
+                    <EuiHighlight search={effectiveSearch}>{action.label}</EuiHighlight>
                   </h6>
                 </EuiTitle>
-                {option.stability === 'tech_preview' && (
+                {action.stability === 'tech_preview' && (
                   <EuiBetaBadge
                     iconType="flask"
                     label={i18n.translate('workflows.actionsMenu.techPreviewBadge', {
@@ -172,7 +180,7 @@ export function ActionsMenu({
                     css={styles.techPreviewBadge}
                   />
                 )}
-                {option.stability === 'beta' && (
+                {action.stability === 'beta' && (
                   <EuiBetaBadge
                     label={i18n.translate('workflows.actionsMenu.betaBadge', {
                       defaultMessage: 'Beta',
@@ -183,13 +191,13 @@ export function ActionsMenu({
                 )}
               </EuiFlexGroup>
               <EuiText color="subdued" size="xs">
-                {option.instancesLabel}
+                {action.instancesLabel}
               </EuiText>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>
-              <EuiHighlight search={effectiveSearch}>{option.description || ''}</EuiHighlight>
+              <EuiHighlight search={effectiveSearch}>{action.description || ''}</EuiHighlight>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -197,165 +205,45 @@ export function ActionsMenu({
     );
   };
 
-  const displayOptions: EuiSelectableOption[] = useMemo(() => {
-    const result: EuiSelectableOption[] = [];
-    const term = searchTerm.trim().toLowerCase();
-    const isStepsMode = searchTerm.startsWith(STEPS_PREFIX);
-    const isHashMode = !isStepsMode && searchTerm.trimStart().startsWith('#');
-    const hasSearch = term.length > 0;
+  const handleChange = (
+    _updatedOptions: EuiSelectableOption[],
+    _event: React.BaseSyntheticEvent,
+    selectedOption: EuiSelectableOption
+  ) => {
+    const itemData = getMenuItemData(selectedOption);
 
-    // Inside a sub-group: show only group options
-    if (currentPath.length > 0) {
-      for (const opt of options) {
-        result.push(opt as unknown as EuiSelectableOption);
+    if (itemData?.kind === 'nav') {
+      if (itemData.target === 'viewAll') {
+        const currentQuery = searchTerm.trim();
+        setSearchTerm(`${STEPS_PREFIX}${currentQuery}`);
+      } else {
+        setSearchTerm('#');
       }
-      return result;
-    }
-
-    // # mode: show only jump-to-step entries
-    if (isHashMode) {
-      const jumpTerm = term.slice(1).trim();
-      const filteredJumps = (jumpToStepEntries ?? []).filter(
-        (entry) => !jumpTerm || entry.id.toLowerCase().includes(jumpTerm)
-      );
-      if (filteredJumps.length > 0) {
-        result.push({
-          label: i18n.translate('workflows.actionsMenu.jumpToStepGroupLabel', {
-            defaultMessage: 'Jump to a step',
-          }),
-          isGroupLabel: true,
-        });
-        for (const entry of filteredJumps) {
-          result.push({
-            id: `__jump:${entry.id}`,
-            label: entry.label,
-            className: 'compactOption',
-          } as unknown as EuiSelectableOption);
-        }
-      }
-      return result;
-    }
-
-    // "Steps: X" mode: show ALL matching step options without limit
-    if (isStepsMode) {
-      result.push({
-        label: i18n.translate('workflows.actionsMenu.addStepGroupLabel', {
-          defaultMessage: 'Add step',
-        }),
-        isGroupLabel: true,
-      });
-      for (const opt of options) {
-        result.push(opt as unknown as EuiSelectableOption);
-      }
-      return result;
-    }
-
-    // Normal mode
-    result.push({
-      label: i18n.translate('workflows.actionsMenu.addStepGroupLabel', {
-        defaultMessage: 'Add step',
-      }),
-      isGroupLabel: true,
-    });
-    const visibleOptions = hasSearch ? options.slice(0, MAX_VISIBLE_STEPS) : options;
-    for (const opt of visibleOptions) {
-      result.push(opt as unknown as EuiSelectableOption);
-    }
-
-    if (hasSearch && options.length > MAX_VISIBLE_STEPS) {
-      result.push({
-        label: i18n.translate('workflows.actionsMenu.viewAllSteps', {
-          defaultMessage: 'View all steps to add',
-        }),
-        id: '__viewAll',
-        className: 'compactOption',
-      } as unknown as EuiSelectableOption);
-    }
-
-    const filteredCmds = (commands ?? []).filter(
-      (cmd) => !term || cmd.label.toLowerCase().includes(term)
-    );
-    if (filteredCmds.length > 0) {
-      result.push({
-        label: i18n.translate('workflows.actionsMenu.commandsGroupLabel', {
-          defaultMessage: 'Commands',
-        }),
-        isGroupLabel: true,
-      });
-      for (const cmd of filteredCmds) {
-        result.push({
-          id: `__cmd:${cmd.id}`,
-          label: cmd.label,
-          className: 'compactOption',
-        } as unknown as EuiSelectableOption);
-      }
-    }
-
-    if (hasSearch) {
-      const filteredJumps = (jumpToStepEntries ?? []).filter(
-        (entry) => entry.id.toLowerCase().includes(term) || entry.label.toLowerCase().includes(term)
-      );
-      if (filteredJumps.length > 0) {
-        result.push({
-          label: i18n.translate('workflows.actionsMenu.jumpToStepGroupLabel', {
-            defaultMessage: 'Jump to a step',
-          }),
-          isGroupLabel: true,
-        });
-        for (const entry of filteredJumps) {
-          result.push({
-            id: `__jump:${entry.id}`,
-            label: entry.label,
-            className: 'compactOption',
-          } as unknown as EuiSelectableOption);
-        }
-        if ((jumpToStepEntries ?? []).length > filteredJumps.length) {
-          result.push({
-            label: i18n.translate('workflows.actionsMenu.viewAllExistingSteps', {
-              defaultMessage: 'View all existing steps',
-            }),
-            id: '__viewExisting',
-            className: 'compactOption',
-          } as unknown as EuiSelectableOption);
-        }
-      }
-    }
-
-    return result;
-  }, [options, searchTerm, commands, jumpToStepEntries, currentPath]);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleChange = (_: any, __: any, selectedOption: any) => {
-    const optionId: string = selectedOption?.id ?? '';
-
-    if (optionId === '__viewAll') {
-      const currentQuery = searchTerm.trim();
-      setSearchTerm(`${STEPS_PREFIX}${currentQuery}`);
       return;
     }
-    if (optionId === '__viewExisting') {
-      setSearchTerm('#');
+    if (itemData?.kind === 'command') {
+      onCommandSelected?.(itemData.command.id);
       return;
     }
-    if (optionId.startsWith('__cmd:')) {
-      onCommandSelected?.(optionId.slice(6));
-      return;
-    }
-    if (optionId.startsWith('__jump:')) {
-      const entry = jumpToStepEntries?.find((e) => e.id === optionId.slice(7));
-      if (entry) onJumpToStep?.(entry.lineStart);
+    if (itemData?.kind === 'jump') {
+      onJumpToStep?.(itemData.entry.lineStart);
       return;
     }
 
-    if (isActionGroup(selectedOption)) {
-      const nextPath = selectedOption.pathIds ?? [...currentPath, selectedOption.id];
+    const action =
+      itemData?.kind === 'action'
+        ? itemData.action
+        : (selectedOption as unknown as ActionOptionData);
+    if (isActionGroup(action)) {
+      const nextPath = action.pathIds ?? [...currentPath, action.id];
       setCurrentPath([...nextPath]);
       setSearchTerm('');
-      setOptions(selectedOption.options);
+      setOptions(action.options);
     } else {
-      onActionSelected(selectedOption);
+      onActionSelected(action);
     }
   };
+
   const handleBack = () => {
     const nextPath = currentPath.slice(0, -1);
     let nextOptions: ActionOptionData[] = defaultOptions;
@@ -406,7 +294,7 @@ export function ActionsMenu({
   const isActionSearchMatch = (option: ActionOptionData, normalizedTerm: string) =>
     getActionMatchRank(option, normalizedTerm) <= MAX_ACTION_MATCH_RANK;
 
-  // Filtering is handled by handleSearchChange + displayOptions;
+  // Filtering is handled by handleSearchChange + useDisplayOptions;
   // override EuiSelectable's built-in matcher so it doesn't double-filter.
   const optionMatcher = () => true;
 
@@ -471,6 +359,10 @@ export function ActionsMenu({
       }}
       listProps={{
         showIcons: false,
+        // Virtualization requires uniform row heights, but the menu mixes tall
+        // step-option rows (~64px) with compact command/jump rows (~36px).
+        // The total item count is bounded (max 7 visible steps + a few commands
+        // + jump entries), so non-virtualized rendering is safe here.
         isVirtualized: false,
       }}
       renderOption={renderActionOption}

@@ -15,6 +15,7 @@ import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
@@ -603,9 +604,27 @@ export const WorkflowYAMLEditor = ({
 
   const editorCommands: EditorCommand[] = useMemo(
     () => [
-      { id: 'foldAll', label: 'Collapse all', iconType: 'minusInCircle' },
-      { id: 'unfoldAll', label: 'Expand all', iconType: 'plusInCircle' },
-      { id: 'find', label: 'Find and Replace', iconType: 'search' },
+      {
+        id: 'foldAll',
+        label: i18n.translate('workflows.yamlEditor.commands.collapseAll', {
+          defaultMessage: 'Collapse all',
+        }),
+        iconType: 'minusInCircle',
+      },
+      {
+        id: 'unfoldAll',
+        label: i18n.translate('workflows.yamlEditor.commands.expandAll', {
+          defaultMessage: 'Expand all',
+        }),
+        iconType: 'plusInCircle',
+      },
+      {
+        id: 'find',
+        label: i18n.translate('workflows.yamlEditor.commands.findReplace', {
+          defaultMessage: 'Find and Replace',
+        }),
+        iconType: 'search',
+      },
     ],
     []
   );

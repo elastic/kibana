@@ -16,7 +16,7 @@ import type { ActionsMenuProps } from './actions_menu';
 
 interface ActionsMenuPopoverProps extends EuiPopoverProps, ActionsMenuProps {}
 
-export function ActionsMenuPopover({
+export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   onActionSelected,
   commands,
   jumpToStepEntries,
@@ -44,4 +44,4 @@ export function ActionsMenuPopover({
       />
     </EuiPopover>
   );
-}
+});
