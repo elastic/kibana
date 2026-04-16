@@ -99,7 +99,7 @@ const commonBasePropertiesSchema = schema.object({
     schema.string({
       meta: {
         description:
-          'Identifier of the component or plugin that manages this filter. When set, the filter is treated as owned by that component.',
+          'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
       },
     })
   ),
