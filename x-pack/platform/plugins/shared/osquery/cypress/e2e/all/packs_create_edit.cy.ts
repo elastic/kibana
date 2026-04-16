@@ -45,11 +45,8 @@ describe(
     let savedQueryId: string;
     let savedQueryName: string;
     let nomappingSavedQueryId: string;
-    let nomappingSavedQueryName: string;
     let oneMappingSavedQueryId: string;
-    let oneMappingSavedQueryName: string;
     let multipleMappingsSavedQueryId: string;
-    let multipleMappingsSavedQueryName: string;
 
     before(() => {
       loadSavedQuery().then((data) => {
@@ -62,7 +59,6 @@ describe(
         query: 'select * from uptime;',
       }).then((data) => {
         nomappingSavedQueryId = data.saved_object_id;
-        nomappingSavedQueryName = data.id;
       });
       loadSavedQuery({
         ecs_mapping: {
@@ -75,7 +71,6 @@ describe(
         timeout: 607,
       }).then((data) => {
         oneMappingSavedQueryId = data.saved_object_id;
-        oneMappingSavedQueryName = data.id;
       });
       loadSavedQuery({
         ecs_mapping: {
@@ -93,7 +88,6 @@ describe(
         query: 'select * from uptime;',
       }).then((data) => {
         multipleMappingsSavedQueryId = data.saved_object_id;
-        multipleMappingsSavedQueryName = data.id;
       });
     });
 
