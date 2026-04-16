@@ -9,13 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import {
-  apiTest,
-  ESE_API_PATH,
-  COMMON_HEADERS,
-  TEST_INDEX,
-  TEST_DOC_ID,
-} from '../../fixtures';
+import { apiTest, ESE_API_PATH, COMMON_HEADERS, TEST_INDEX, TEST_DOC_ID } from '../../fixtures';
 
 apiTest.describe(
   'ese search - privileges (stateful only)',
