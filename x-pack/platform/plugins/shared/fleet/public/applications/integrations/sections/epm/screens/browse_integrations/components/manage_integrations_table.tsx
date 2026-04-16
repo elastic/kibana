@@ -22,6 +22,7 @@ import {
   EuiSelectable,
   EuiInMemoryTable,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   EuiCallOut,
 } from '@elastic/eui';
@@ -33,12 +34,13 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
 
 import { PackageIcon } from '../../../../../../../components/package_icon';
 
+import { useGetPackagesQuery } from '../../../../../../../hooks/use_request/epm';
 import { useStartServices } from '../../../../../hooks';
 
 import { ManageIntegrationActions } from './manage_integration_actions';
@@ -105,6 +107,18 @@ export const ManageIntegrationsTable: React.FC<{
   const [selectedItems, setSelectedItems] = useState<CreatedIntegrationRow[]>([]);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isBulkInstalling, setIsBulkInstalling] = useState(false);
+
+  const queryClient = useQueryClient();
+  const { data: packagesData } = useGetPackagesQuery({});
+  const installedPackageVersions = useMemo(
+    () =>
+      new Map(
+        (packagesData?.items ?? [])
+          .filter((item) => item.status === 'installed')
+          .map((item) => [item.name, item.version])
+      ),
+    [packagesData]
+  );
   const { euiTheme } = useEuiTheme();
   const {
     application,
@@ -177,7 +191,10 @@ export const ManageIntegrationsTable: React.FC<{
     return [...new Set(uids)];
   }, [integrations]);
 
-  const { data: userProfiles = new Map<string, UserProfileWithAvatar>() } = useQuery(
+  const {
+    data: userProfiles = new Map<string, UserProfileWithAvatar>(),
+    isLoading: isProfilesLoading,
+  } = useQuery(
     ['manage-integrations-user-profiles', ...uniqueProfileUids],
     async () => {
       const profiles = await userProfileService.bulkGet<{
@@ -358,6 +375,7 @@ export const ManageIntegrationsTable: React.FC<{
           body: zipBlob as unknown as BodyInit,
         });
 
+        await queryClient.invalidateQueries({ queryKey: ['get-packages'] });
         notifications.toasts.addSuccess({
           title: i18n.translate(
             'xpack.fleet.epmList.manageIntegrations.actions.installSuccessTitle',
@@ -373,7 +391,7 @@ export const ManageIntegrationsTable: React.FC<{
         });
       }
     },
-    [http, notifications]
+    [http, notifications, queryClient]
   );
 
   const selection: EuiTableSelectionType<CreatedIntegrationRow> = useMemo(
@@ -394,7 +412,11 @@ export const ManageIntegrationsTable: React.FC<{
   }, [selectedItems, deleteIntegration]);
 
   const handleBulkInstall = useCallback(async () => {
-    const approvedItems = selectedItems.filter((item) => item.status === 'approved');
+    const approvedItems = selectedItems.filter(
+      (item) =>
+        item.status === 'approved' &&
+        installedPackageVersions.get(item.integrationId) !== item.version
+    );
     setIsBulkInstalling(true);
     try {
       await Promise.all(approvedItems.map((item) => installToCluster(item.integrationId)));
@@ -402,9 +424,9 @@ export const ManageIntegrationsTable: React.FC<{
     } finally {
       setIsBulkInstalling(false);
     }
-  }, [selectedItems, installToCluster]);
+  }, [selectedItems, installToCluster, installedPackageVersions]);
 
-  const hasApprovedSelected = selectedItems.some((item) => item.status === 'approved');
+  const canBulkInstall = selectedItems.every((item) => item.status === 'approved');
 
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
     () => [
@@ -469,6 +491,9 @@ export const ManageIntegrationsTable: React.FC<{
         ),
         width: '16%',
         render: (_createdBy: string, item: CreatedIntegrationRow) => {
+          if (isProfilesLoading && item.createdByProfileUid) {
+            return <EuiLoadingSpinner size="s" />;
+          }
           const profile = item.createdByProfileUid
             ? userProfiles.get(item.createdByProfileUid)
             : undefined;
@@ -571,6 +596,7 @@ export const ManageIntegrationsTable: React.FC<{
               <ManageIntegrationActions
                 integration={item}
                 isPackageReady={true}
+                installedVersion={installedPackageVersions.get(item.integrationId)}
                 inlineActionType="reviewApprove"
                 showMenuButton={false}
                 onEdit={goToEditIntegration}
@@ -601,6 +627,7 @@ export const ManageIntegrationsTable: React.FC<{
           <ManageIntegrationActions
             integration={item}
             isPackageReady={isIntegrationPackageReady(item)}
+            installedVersion={installedPackageVersions.get(item.integrationId)}
             onEdit={goToEditIntegration}
             onDelete={deleteIntegration}
             DataStreamResultsFlyoutComponent={automaticImport?.components.DataStreamResultsFlyout}
@@ -620,6 +647,7 @@ export const ManageIntegrationsTable: React.FC<{
       approveAndDeployIntegration,
       downloadZipPackage,
       installToCluster,
+      installedPackageVersions,
       automaticImport?.components.DataStreamResultsFlyout,
       euiTheme.colors.backgroundLightText,
       euiTheme.colors.textParagraph,
@@ -629,6 +657,7 @@ export const ManageIntegrationsTable: React.FC<{
       euiTheme.size.s,
       euiTheme.size.m,
       userProfiles,
+      isProfilesLoading,
     ]
   );
   const actionsOptions: EuiSelectableOption[] = [
@@ -795,22 +824,37 @@ export const ManageIntegrationsTable: React.FC<{
               />
             </EuiButton>
           </EuiFlexItem>
-          {hasApprovedSelected && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType="exportAction"
-                isLoading={isBulkInstalling}
-                onClick={handleBulkInstall}
-                data-test-subj="manageIntegrationsBulkInstallBtn"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.bulkInstall"
-                  defaultMessage="Install"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                !canBulkInstall
+                  ? i18n.translate(
+                      'xpack.fleet.epmList.manageIntegrations.bulkInstallDisabledTooltip',
+                      {
+                        defaultMessage:
+                          'Not all selected integrations are approved. Deselect unapproved integrations to install.',
+                      }
+                    )
+                  : undefined
+              }
+            >
+              <span>
+                <EuiButton
+                  size="s"
+                  iconType="exportAction"
+                  isLoading={isBulkInstalling}
+                  isDisabled={!canBulkInstall}
+                  onClick={handleBulkInstall}
+                  data-test-subj="manageIntegrationsBulkInstallBtn"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.epmList.manageIntegrations.bulkInstall"
+                    defaultMessage="Install"
+                  />
+                </EuiButton>
+              </span>
+            </EuiToolTip>
+          </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
         <EuiText size="s">
