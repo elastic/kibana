@@ -16,6 +16,27 @@ paths:
         required: true
         content:
           application/json:
+            examples:
+              paginatedDefaults:
+                summary: First page with default page size
+                value:
+                  page: 1
+                  per_page: 20
+              withFilterSortAndFacets:
+                summary: KQL filter, sort, free-text search, and facet counts
+                value:
+                  page: 1
+                  per_page: 50
+                  filter: 'alert.attributes.enabled:true'
+                  sort_field: 'name'
+                  sort_order: 'asc'
+                  search:
+                    term: 'powershell'
+                    mode: 'legacy'
+                  aggregations:
+                    counts:
+                      - 'tags'
+                      - 'enabled'
             schema:
               type: object
               additionalProperties: false
@@ -80,6 +101,24 @@ paths:
           description: Successful response
           content:
             application/json:
+              examples:
+                basicSearch:
+                  summary: Paginated response with facet counts and a search_after cursor
+                  value:
+                    page: 1
+                    perPage: 20
+                    total: 42
+                    data: []
+                    search_after:
+                      - 1700000000000
+                      - 'abcd'
+                    counts:
+                      tags:
+                        Windows: 12
+                        Linux: 7
+                      enabled:
+                        'true': 30
+                        'false': 12
               schema:
                 type: object
                 additionalProperties: false
@@ -113,24 +152,6 @@ paths:
                   - perPage
                   - total
                   - data
-              examples:
-                basicSearch:
-                  summary: Paginated response with facet counts and a search_after cursor
-                  value:
-                    page: 1
-                    perPage: 20
-                    total: 42
-                    data: []
-                    search_after:
-                      - 1700000000000
-                      - 'abcd'
-                    counts:
-                      tags:
-                        Windows: 12
-                        Linux: 7
-                      enabled:
-                        'true': 30
-                        'false': 12
         '400':
           description: |
             Request validation failed (for example invalid KQL, incompatible sort and
