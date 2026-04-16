@@ -89,17 +89,13 @@ const canNavigateToParent = (crumb: ChromeBreadcrumb | undefined): boolean => {
   return Boolean(crumb.onClick || crumb.href);
 };
 
-const DISCOVER_APP_ID = 'discover';
-
 const useAppMenuBarStyles = (
   euiTheme: UseEuiTheme['euiTheme'],
   hasSecondaryRow: boolean,
   showBackToParent: boolean,
-  hasHeaderTabs: boolean,
-  currentAppId: string | undefined
+  hasHeaderTabs: boolean
 ) =>
   useMemo(() => {
-    const hideBottomBorder = currentAppId === DISCOVER_APP_ID;
     const root = {
       display: 'flex',
       flexDirection: 'column' as const,
@@ -110,8 +106,9 @@ const useAppMenuBarStyles = (
       paddingInline: euiTheme.size.m,
       paddingBottom: hasHeaderTabs ? 0 : euiTheme.size.m,
       background: euiTheme.colors.backgroundBasePlain,
-      borderBottom: hideBottomBorder ? 'none' : euiTheme.border.thin,
-      marginBottom: hideBottomBorder ? 0 : `-${euiTheme.border.width.thin}`,
+      /* No bottom border / negative margin — avoids an extra “stripe” under the main chrome for every app */
+      borderBottom: 'none',
+      marginBottom: 0,
       minHeight: 0,
       boxSizing: 'border-box' as const,
       '&:hover .appMenuBar__globalActions': {
@@ -234,7 +231,7 @@ const useAppMenuBarStyles = (
       titleEuiTitleReact,
       menuSection,
     };
-  }, [euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs, currentAppId]);
+  }, [euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs]);
 
 const AppMenuBarHeaderTabs = ({ tabs }: { tabs: AppMenuHeaderTab[] }) => (
   <EuiTabs
@@ -260,8 +257,9 @@ const AppMenuBarHeaderTabs = ({ tabs }: { tabs: AppMenuHeaderTab[] }) => (
 
 export interface AppMenuBarProps {
   /**
-   * Global overlay banners (e.g. telemetry notices), at the top of the project app header
-   * (`kibanaProjectHeader`), above the title and action menu row.
+   * Optional: render overlay banners inside the project app header. By default, banners mount in
+   * the main layout content (`#globalBannerList` in `grid_layout`) so they are not stacked in
+   * `kibanaProjectHeader`.
    */
   globalBanners?: ReactNode;
 }
@@ -292,13 +290,7 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
   const showBackToParent =
     !hideBackFromAppMenu && Boolean(parentBreadcrumb) && canNavigateToParent(parentBreadcrumb);
   const currentAppId = useCurrentAppId();
-  const styles = useAppMenuBarStyles(
-    euiTheme,
-    hasSecondaryRow,
-    showBackToParent,
-    hasHeaderTabs,
-    currentAppId
-  );
+  const styles = useAppMenuBarStyles(euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs);
   const hasLegacyActionMenu = useHasLegacyActionMenu();
 
   useLayoutEffect(() => {

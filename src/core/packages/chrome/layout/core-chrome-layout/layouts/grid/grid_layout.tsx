@@ -34,6 +34,9 @@ import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
+/** Horizontal inset for overlay banners in `#globalBannerList` (matches main app chrome gutters). */
+const GLOBAL_BANNER_LIST_HORIZONTAL_INSET = '12px';
+
 const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig } = {
   classic: {
     chromeStyle: 'classic',
@@ -106,11 +109,7 @@ export class GridLayout implements LayoutService {
           header = <ClassicHeader />;
         } else {
           header = <ProjectHeader />;
-          applicationTopBar = (
-            <AppMenuBar
-              globalBanners={<div id="globalBannerList">{appBannerComponent}</div>}
-            />
-          );
+          applicationTopBar = <AppMenuBar />;
           navigation = <GridLayoutProjectSideNav />;
         }
       }
@@ -134,8 +133,21 @@ export class GridLayout implements LayoutService {
               <>
                 {!chromeVisible && <ChromelessHeader />}
 
-                {!(chromeVisible && chromeStyle === 'project') ? (
-                  <div id="globalBannerList">{appBannerComponent}</div>
+                {chromeVisible ? (
+                  <div id="globalBannerList">
+                    <div
+                      className="globalBannerList__inset"
+                      style={{
+                        paddingLeft: GLOBAL_BANNER_LIST_HORIZONTAL_INSET,
+                        paddingRight: GLOBAL_BANNER_LIST_HORIZONTAL_INSET,
+                        boxSizing: 'border-box',
+                        width: '100%',
+                        minWidth: 0,
+                      }}
+                    >
+                      {appBannerComponent}
+                    </div>
+                  </div>
                 ) : null}
                 <AppWrapper chromeVisible={chromeVisible}>
                   <div id={APP_FIXED_VIEWPORT_ID} />
