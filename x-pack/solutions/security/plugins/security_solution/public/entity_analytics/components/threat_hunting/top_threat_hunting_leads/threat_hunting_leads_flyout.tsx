@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,13 +33,11 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50];
 interface ThreatHuntingLeadsFlyoutProps {
   onClose: () => void;
   onSelectLead: (lead: HuntingLead) => void;
-  onInfoClick?: (lead: HuntingLead) => void;
 }
 
 export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> = ({
   onClose,
   onSelectLead,
-  onInfoClick,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -118,7 +115,7 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
             <EuiFlexGroup direction="column" gutterSize="s">
               {filteredLeads.map((lead) => (
                 <EuiFlexItem key={lead.id}>
-                  <LeadListItem lead={lead} onClick={onSelectLead} onInfoClick={onInfoClick} />
+                  <LeadListItem lead={lead} onClick={onSelectLead} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
@@ -143,18 +140,10 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
 interface LeadListItemProps {
   lead: HuntingLead;
   onClick: (lead: HuntingLead) => void;
-  onInfoClick?: (lead: HuntingLead) => void;
 }
 
-const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick }) => {
+const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick }) => {
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
-  const handleInfoClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onInfoClick?.(lead);
-    },
-    [onInfoClick, lead]
-  );
 
   const relativeTime = useMemo(() => {
     const diff = Date.now() - new Date(lead.timestamp).getTime();
@@ -198,16 +187,6 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick 
             {relativeTime}
           </EuiText>
         </EuiFlexItem>
-        {onInfoClick && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="iInCircle"
-              aria-label={i18n.VIEW_LEAD_DETAILS}
-              onClick={handleInfoClick}
-              data-test-subj={`leadListInfoButton-${lead.id}`}
-            />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
