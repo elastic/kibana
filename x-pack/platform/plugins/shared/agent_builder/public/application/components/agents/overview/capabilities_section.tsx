@@ -7,12 +7,19 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { CapabilityCard } from './capability_card';
 import skillsImage from './assets/connected-power-plug.svg';
 import pluginsImage from './assets/projects-folder.svg';
 import toolsImage from './assets/wrench_gear.svg';
 const { agentOverview: overviewLabels } = labels;
+
+const capabilitiesScrollRegionCss = css`
+  height: 360px;
+  overflow-y: auto;
+  overflow-x: hidden;
+`;
 
 export interface CapabilitiesSectionProps {
   skillsCount: number;
@@ -47,11 +54,12 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
   onNavigateToTools,
 }) => (
   <>
-    <EuiTitle size="s">
-      <h2>{overviewLabels.capabilitiesTitle}</h2>
-    </EuiTitle>
-    <EuiSpacer size="l" />
-    <EuiFlexGroup gutterSize="m" alignItems="stretch" wrap>
+    <div css={capabilitiesScrollRegionCss} data-test-subj="agentOverviewCapabilitiesScrollRegion">
+      <EuiTitle size="s">
+        <h2>{overviewLabels.capabilitiesTitle}</h2>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup gutterSize="m" alignItems="stretch" wrap>
       <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
         <CapabilityCard
           dataTestSubj="agentOverviewCapabilityCardSkills"
@@ -94,5 +102,6 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
         />
       </EuiFlexItem>
     </EuiFlexGroup>
+    </div>
   </>
 );

@@ -116,7 +116,7 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   /**
    * Returns the icon type to display for the attachment.
    */
-  getIcon?: () => IconType;
+  getIcon?: (attachment: TAttachment) => IconType;
   /**
    * Optional custom click handler for attachment pills.
    * When provided, pills will invoke this instead of the default behavior.

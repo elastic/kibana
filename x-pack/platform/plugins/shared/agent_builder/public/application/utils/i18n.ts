@@ -2114,6 +2114,34 @@ export const labels = {
         defaultMessage: 'Control how your agent behaves.',
       }
     ),
+    nightshiftTitle: i18n.translate('xpack.agentBuilder.overview.customizations.nightshiftTitle', {
+      defaultMessage: 'Nightshift',
+    }),
+    nightshiftDescription: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.nightshiftDescription',
+      {
+        defaultMessage:
+          'When enabled, the observability starting screen is available in new conversations, including blast radius and significant events. Turn off to use the standard welcome instead.',
+      }
+    ),
+    nightshiftSwitchAriaLabel: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.nightshiftSwitchAriaLabel',
+      {
+        defaultMessage: 'Enable Nightshift observability starting screen',
+      }
+    ),
+    nightshiftToastEnabled: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.nightshiftToastEnabled',
+      {
+        defaultMessage: 'Nightshift mode enabled',
+      }
+    ),
+    nightshiftToastDisabled: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.nightshiftToastDisabled',
+      {
+        defaultMessage: 'Nightshift mode disabled',
+      }
+    ),
     autoIncludeInfoTooltip: i18n.translate(
       'xpack.agentBuilder.overview.customizations.autoIncludeInfoTooltip',
       {

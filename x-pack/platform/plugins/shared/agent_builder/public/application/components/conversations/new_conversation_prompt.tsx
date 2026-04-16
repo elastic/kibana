@@ -8,7 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
+import { observabilityAgentId } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
+import { useObservabilityNightshiftEnabled } from '../../hooks/use_observability_nightshift_enabled';
+import { useAgentId } from '../../hooks/use_conversation';
+import { ObservabilityNightshiftWelcome } from './observability_nightshift/observability_nightshift_welcome';
 import { ConversationInput } from './conversation_input/conversation_input';
 import {
   conversationElementPaddingStyles,
@@ -23,6 +27,12 @@ const titleStyles = css`
 export const NewConversationPrompt: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const { isEmbeddedContext } = useConversationContext();
+  const agentId = useAgentId() ?? '';
+  const isObservabilityAgent = agentId === observabilityAgentId;
+  const [observabilityNightshiftEnabled] = useObservabilityNightshiftEnabled();
+  const welcomeTitle = i18n.translate('xpack.agentBuilder.conversations.newConversationPrompt', {
+    defaultMessage: 'How can I help you?',
+  });
 
   const centerFlexItemStyles = css`
     justify-content: center;
@@ -45,13 +55,13 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       data-test-subj="agentBuilderWelcomePage"
     >
       <EuiFlexItem grow={isEmbeddedContext ? true : false} css={centerFlexItemStyles}>
-        <EuiTitle size="m" css={titleStyles}>
-          <h2>
-            {i18n.translate('xpack.agentBuilder.conversations.newConversationPrompt', {
-              defaultMessage: 'How can I help you?',
-            })}
-          </h2>
-        </EuiTitle>
+        {isObservabilityAgent && observabilityNightshiftEnabled ? (
+          <ObservabilityNightshiftWelcome state="critical" />
+        ) : (
+          <EuiTitle size="m" css={titleStyles}>
+            <h2>{welcomeTitle}</h2>
+          </EuiTitle>
+        )}
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}

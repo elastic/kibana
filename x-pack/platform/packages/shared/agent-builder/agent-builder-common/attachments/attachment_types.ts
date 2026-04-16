@@ -45,6 +45,10 @@ export interface EsqlAttachmentData {
 
 export const textAttachmentDataSchema = z.object({
   content: z.string(),
+  /** Short label for attachment chips in the composer (optional). */
+  label: z.string().optional(),
+  /** EUI icon name for attachment chips (optional). */
+  icon_type: z.string().optional(),
 });
 
 /**
@@ -53,6 +57,10 @@ export const textAttachmentDataSchema = z.object({
 export interface TextAttachmentData {
   /** text content of the attachment */
   content: string;
+  /** Optional short label for attachment chips; defaults to a truncated line of content. */
+  label?: string;
+  /** Optional EUI icon name for attachment chips (e.g. indexClose). */
+  icon_type?: string;
 }
 
 export const screenContextTimeRangeSchema = z.object({

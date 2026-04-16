@@ -21,8 +21,19 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
+import { NightshiftCustomizationCard } from './nightshift_customization_card';
 
 const { agentOverview: overviewLabels } = labels;
+
+/** Fixed row height for Customization cards (three columns). */
+const CUSTOMIZATION_CARD_HEIGHT_PX = 360;
+
+const customizationCardFixedHeightCss = css`
+  height: ${CUSTOMIZATION_CARD_HEIGHT_PX}px;
+  max-height: ${CUSTOMIZATION_CARD_HEIGHT_PX}px;
+  overflow-y: auto;
+  min-height: 0;
+`;
 
 const settingRowStyles = css`
   width: 100%;
@@ -35,6 +46,9 @@ export interface SettingsSectionProps {
   workflowIds: string[];
   canEditAgent: boolean;
   onOpenEditFlyout: () => void;
+  showNightshiftCustomization?: boolean;
+  observabilityNightshiftEnabled?: boolean;
+  onObservabilityNightshiftEnabledChange?: (enabled: boolean) => void;
 }
 
 export const SettingsSection: React.FC<SettingsSectionProps> = ({
@@ -44,6 +58,9 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   workflowIds,
   canEditAgent,
   onOpenEditFlyout,
+  showNightshiftCustomization = false,
+  observabilityNightshiftEnabled = false,
+  onObservabilityNightshiftEnabledChange,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -61,9 +78,9 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup gutterSize="m" alignItems="stretch">
+      <EuiFlexGroup gutterSize="m" alignItems="stretch" responsive={true} wrap>
         {/* Custom Instructions Card */}
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
           <EuiCard
             hasBorder
             display="plain"
@@ -85,17 +102,19 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                 </EuiButtonEmpty>
               ) : undefined
             }
-            css={css`
-              height: 100%;
-              .euiCard__content p {
-                color: ${euiTheme.colors.textSubdued};
-              }
-            `}
+            css={[
+              customizationCardFixedHeightCss,
+              css`
+                .euiCard__content p {
+                  color: ${euiTheme.colors.textSubdued};
+                }
+              `,
+            ]}
           />
         </EuiFlexItem>
 
         {/* Agent Settings Card */}
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
           <EuiCard
             hasBorder
             display="plain"
@@ -186,14 +205,26 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                 )}
               </EuiFlexGroup>
             }
-            css={css`
-              height: 100%;
-              .euiCard__content p {
-                color: ${euiTheme.colors.textSubdued};
-              }
-            `}
+            css={[
+              customizationCardFixedHeightCss,
+              css`
+                .euiCard__content p {
+                  color: ${euiTheme.colors.textSubdued};
+                }
+              `,
+            ]}
           />
         </EuiFlexItem>
+
+        {showNightshiftCustomization && onObservabilityNightshiftEnabledChange ? (
+          <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
+            <NightshiftCustomizationCard
+              enabled={observabilityNightshiftEnabled}
+              onEnabledChange={onObservabilityNightshiftEnabledChange}
+              heightPx={CUSTOMIZATION_CARD_HEIGHT_PX}
+            />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </>
   );

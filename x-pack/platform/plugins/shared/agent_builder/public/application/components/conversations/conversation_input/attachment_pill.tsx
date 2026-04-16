@@ -31,6 +31,9 @@ export interface AttachmentPillProps {
 
 const DEFAULT_ICON = 'document';
 
+/** Max width before label truncation and ellipsis apply (must match flex item cap in `attachment_pills_row`). */
+export const ATTACHMENT_PILL_MAX_WIDTH_PX = 160;
+
 export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
@@ -42,25 +45,42 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
 
   const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
   const canRemoveAttachment = Boolean(onRemoveAttachment);
-  const iconType = uiDefinition?.getIcon?.() ?? DEFAULT_ICON;
+  const iconType = uiDefinition?.getIcon?.(attachment) ?? DEFAULT_ICON;
 
   const iconContainerStyles = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    width: ${euiTheme.size.xl};
-    height: ${euiTheme.size.xl};
+    width: ${euiTheme.size.l};
+    height: ${euiTheme.size.l};
     border-radius: ${euiTheme.border.radius.small};
     background-color: ${euiTheme.colors.backgroundBasePrimary};
   `;
 
-  const titleStyles = css`
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+  const labelTruncateStyles = css`
+    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
-    word-break: break-word;
+    white-space: nowrap;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    font-weight: ${euiTheme.font.weight.bold};
+  `;
+
+  const textCellStyles = css`
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  `;
+
+  const flexGroupMinWidthStyles = css`
+    min-width: 0;
+  `;
+
+  const flexItemLabelStyles = css`
+    min-width: 0;
+    flex-basis: 0;
   `;
 
   return (
@@ -68,24 +88,34 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       hasShadow={false}
       hasBorder
       color="subdued"
-      paddingSize="s"
+      paddingSize="xs"
       css={css`
-        max-width: 200px;
+        width: 100%;
+        max-width: ${ATTACHMENT_PILL_MAX_WIDTH_PX}px;
+        min-width: 0;
+        box-sizing: border-box;
         border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        className={flexGroupMinWidthStyles}
+      >
         <EuiFlexItem grow={false}>
           <div className={iconContainerStyles}>
-            <EuiIcon type={iconType} size="m" color="primary" />
+            <EuiIcon type={iconType} size="s" color="primary" />
           </div>
         </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 0 }}>
-          <EuiText size="xs" className={titleStyles}>
-            <strong>{displayName}</strong>
+        <EuiFlexItem grow className={flexItemLabelStyles}>
+          <EuiText size="xs" className={textCellStyles}>
+            <span className={labelTruncateStyles} title={displayName}>
+              {displayName}
+            </span>
           </EuiText>
         </EuiFlexItem>
         {canRemoveAttachment && isHovered && (
