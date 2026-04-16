@@ -117,8 +117,8 @@ describe('GroupBySelect', () => {
 
     // Find and click the "Models" option
     const options = document.querySelectorAll('[role="option"]');
-    const modelsOption = Array.from(options).find((option) =>
-      option.textContent?.trim() === 'Model'
+    const modelsOption = Array.from(options).find(
+      (option) => option.textContent?.trim() === 'Model'
     );
 
     expect(modelsOption).toBeDefined();
@@ -210,8 +210,8 @@ describe('GroupBySelect', () => {
 
     // Select an option
     const options = document.querySelectorAll('[role="option"]');
-    const modelsOption = Array.from(options).find((option) =>
-      option.textContent?.trim() === 'Model'
+    const modelsOption = Array.from(options).find(
+      (option) => option.textContent?.trim() === 'Model'
     );
 
     if (modelsOption) {
@@ -242,8 +242,8 @@ describe('GroupBySelect', () => {
 
     // Check that the "Models" option is marked as checked
     const options = document.querySelectorAll('[role="option"]');
-    const modelsOption = Array.from(options).find((option) =>
-      option.textContent?.trim() === 'Model'
+    const modelsOption = Array.from(options).find(
+      (option) => option.textContent?.trim() === 'Model'
     ) as HTMLElement;
 
     expect(modelsOption).toBeDefined();
