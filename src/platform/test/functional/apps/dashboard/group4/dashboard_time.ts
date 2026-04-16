@@ -58,6 +58,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           storeTimeWithDashboard: true,
           saveAsNew: false,
         });
+        await dashboard.expectUnsavedChangesListingDoesNotExist(dashboardName);
+        const time = await timePicker.getTimeConfig();
+        expect(time.start).to.equal(timePicker.defaultStartTime);
+        expect(time.end).to.equal(timePicker.defaultEndTime);
       });
 
       it('sets time on open', async function () {
@@ -65,6 +69,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Jan 1, 2019 @ 00:00:00.000',
           'Jan 2, 2019 @ 00:00:00.000'
         );
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
+        // reset the dashboard to its last saved state by clearing session storage
+        await browser.clearSessionStorage();
         await dashboard.loadSavedDashboard(dashboardName);
         const time = await timePicker.getTimeConfig();
         expect(time.start).to.equal(timePicker.defaultStartTime);
