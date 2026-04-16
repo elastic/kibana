@@ -98,23 +98,6 @@ export async function executeAsReasoningAgent(
   } = options;
   const startTime = Date.now();
 
-  // Create a timeout-based AbortSignal for the inference client.prompt calls
-  // This ensures individual API calls respect the maxDurationMs timeout.
-  let effectiveAbortSignal = abortSignal;
-  if (maxDurationMs !== undefined) {
-    const timeoutSignal = AbortSignal.timeout(maxDurationMs);
-    if (abortSignal) {
-      // If there's already an abort signal, create one that aborts if either signal aborts
-      const controller = new AbortController();
-      const cleanup = () => controller.abort();
-      abortSignal.addEventListener('abort', cleanup);
-      timeoutSignal.addEventListener('abort', cleanup);
-      effectiveAbortSignal = controller.signal;
-    } else {
-      effectiveAbortSignal = timeoutSignal;
-    }
-  }
-
   async function callTools(toolCalls: ToolCall[]): Promise<ToolMessage[]> {
     return await Promise.all(
       toolCalls.map(async (toolCall): Promise<ToolMessage> => {
@@ -272,7 +255,7 @@ export async function executeAsReasoningAgent(
       stream: false,
       temperature,
       toolChoice,
-      abortSignal: effectiveAbortSignal,
+      abortSignal,
       prevMessages: formatMessages({
         messages: prevMessages,
         power,

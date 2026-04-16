@@ -218,7 +218,7 @@ export async function suggestProcessingPipeline({
       throw new Error(
         i18n.translate('xpack.streams.ai.suggestProcessingPipeline.timeoutError', {
           defaultMessage:
-            'Pipeline suggestion generation took too long and was stopped. Try with fewer or simpler log samples.',
+            'Pipeline suggestion generation took too long and was stopped. Try with fewer or simpler log samples, or select a different LLM model.',
         })
       );
     }
