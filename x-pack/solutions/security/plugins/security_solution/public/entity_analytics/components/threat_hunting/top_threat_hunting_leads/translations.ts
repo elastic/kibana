@@ -68,51 +68,6 @@ export const ALL_HUNTING_LEADS_TITLE = i18n.translate(
   { defaultMessage: 'All Hunting Leads' }
 );
 
-export const LEAD_PROVENANCE_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.title',
-  { defaultMessage: 'Lead Details' }
-);
-
-export const DESCRIPTION_SECTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.description',
-  { defaultMessage: 'Description' }
-);
-
-export const ENTITIES_SECTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.entities',
-  { defaultMessage: 'Entities' }
-);
-
-export const OBSERVATIONS_SECTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.observations',
-  { defaultMessage: 'Observations' }
-);
-
-export const TAGS_SECTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.tags',
-  { defaultMessage: 'Tags' }
-);
-
-export const CHAT_RECOMMENDATIONS_SECTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.chatRecommendations',
-  { defaultMessage: 'Chat Recommendations' }
-);
-
-export const INVESTIGATE_IN_CHAT = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.investigateInChat',
-  { defaultMessage: 'Investigate in Chat' }
-);
-
-export const DISMISS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.dismiss',
-  { defaultMessage: 'Dismiss' }
-);
-
-export const CLOSE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.close',
-  { defaultMessage: 'Close' }
-);
-
 export const GENERATE_SUCCESS = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateSuccess',
   { defaultMessage: 'Lead generation started successfully' }
@@ -157,39 +112,6 @@ export const LOADING = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.loading',
   { defaultMessage: 'Loading...' }
 );
-
-export const VIEW_LEAD_DETAILS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.viewLeadDetails',
-  { defaultMessage: 'View lead details' }
-);
-
-export const MODULE_RISK_ANALYSIS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.module.riskAnalysis',
-  { defaultMessage: 'Risk Analysis' }
-);
-
-export const MODULE_TEMPORAL_STATE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.module.temporalState',
-  { defaultMessage: 'Temporal State Analysis' }
-);
-
-export const MODULE_BEHAVIORAL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.module.behavioral',
-  { defaultMessage: 'Alert Analysis' }
-);
-
-export const getModuleLabel = (moduleId: string): string => {
-  switch (moduleId) {
-    case 'risk_analysis':
-      return MODULE_RISK_ANALYSIS;
-    case 'temporal_state_analysis':
-      return MODULE_TEMPORAL_STATE;
-    case 'behavioral_analysis':
-      return MODULE_BEHAVIORAL;
-    default:
-      return moduleId;
-  }
-};
 
 export const AUTO_REFRESH = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.autoRefresh',

@@ -28,6 +28,7 @@ export interface DocLinks {
   readonly aiAssistantSettings: string;
   readonly elasticStackGetStarted: string;
   readonly apiReference: string;
+  readonly releaseNotes: string;
   readonly serverlessReleaseNotes: string;
   readonly hostedCloudReleaseNotes: string;
   readonly upgrade: {
