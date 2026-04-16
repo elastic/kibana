@@ -29,7 +29,66 @@ components:
         removed:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RemovedOrUndefined'
     UpdateSavedQueryResponse:
+        description: 'The response for updating a saved query.'
         type: object
-        properties: { }
+        properties:
+          data:
+            description: 'The updated saved query.'
+            type: object
+            properties:
+              saved_object_id:
+                description: 'The saved object ID of the saved query.'
+                type: string
+              id:
+                description: 'The saved query ID.'
+                type: string
+              description:
+                description: 'The saved query description.'
+                type: string
+              query:
+                description: 'The SQL query.'
+                type: string
+              interval:
+                description: 'The query interval in seconds.'
+                type: string
+              timeout:
+                description: 'The query timeout in seconds.'
+                type: integer
+              snapshot:
+                description: 'Whether the query is a snapshot query.'
+                type: boolean
+              removed:
+                description: 'Whether to include results for removed processes.'
+                type: boolean
+              platform:
+                description: 'The target platform(s).'
+                type: string
+              version:
+                description: 'The minimum osquery version.'
+                type: string
+              ecs_mapping:
+                description: 'The ECS mapping configuration.'
+                type: object
+              updated_at:
+                description: 'The last update timestamp.'
+                type: string
+              updated_by:
+                description: 'The user who last updated the saved query.'
+                type: string
         example:
-            data: { }
+          data:
+            saved_object_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+            id: "updated_my_saved_query_name"
+            description: "Saved query description"
+            query: "select * from uptime;"
+            platform: "linux,darwin"
+            version: "2.8.0"
+            interval: "60"
+            timeout: 120
+            snapshot: true
+            removed: false
+            ecs_mapping:
+              host.uptime:
+                field: "total_seconds"
+            updated_at: "2022-07-26T10:15:00.000Z"
+            updated_by: "elastic"

@@ -596,43 +596,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.FeatureFeedbackButton",
-        "type": "Function",
-        "tags": [],
-        "label": "FeatureFeedbackButton",
-        "description": [],
-        "signature": [
-          "({ formUrl, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, nodeType, surveyButtonText, }: FeatureFeedbackButtonProps) => React.JSX.Element | null"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-        "lineNumber": 94,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.FeatureFeedbackButton.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  formUrl,\n  'data-test-subj': dts,\n  onClickCapture,\n  defaultButton,\n  kibanaVersion,\n  isCloudEnv,\n  isServerlessEnv,\n  sanitizedPath,\n  nodeType,\n  surveyButtonText = FEEDBACK_BUTTON_DEFAULT_TEXT,\n}",
-            "description": [],
-            "signature": [
-              "FeatureFeedbackButtonProps"
-            ],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-            "lineNumber": 94,
-            "columnNumber": 39,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-public.FieldValueSelection",
         "type": "Function",
         "tags": [],
@@ -770,7 +733,7 @@
                     "section": "def-public.Trigger",
                     "text": "Trigger"
                   },
-                  "; readonly registerAction: <Context extends object>(definition: ",
+                  "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -778,31 +741,7 @@
                     "section": "def-public.ActionDefinition",
                     "text": "ActionDefinition"
                   },
-                  "<Context, {}>) => ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Action",
-                    "text": "Action"
-                  },
-                  "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinition",
-                    "text": "ActionDefinition"
-                  },
-                  "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinition",
-                    "text": "ActionDefinition"
-                  },
-                  "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+                  "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -877,169 +816,6 @@
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
                 "lineNumber": 23,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
-        "id": "def-public.getSurveyFeedbackURL",
-        "type": "Function",
-        "tags": [],
-        "label": "getSurveyFeedbackURL",
-        "description": [],
-        "signature": [
-          "({ formUrl, kibanaVersion, sanitizedPath, isCloudEnv, isServerlessEnv, nodeType, }: { formUrl: string; kibanaVersion?: string | undefined; deploymentType?: string | undefined; sanitizedPath?: string | undefined; mlJobType?: string | undefined; isCloudEnv?: boolean | undefined; isServerlessEnv?: boolean | undefined; nodeType?: ",
-          "NodeType",
-          " | undefined; }) => string"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-        "lineNumber": 40,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.getSurveyFeedbackURL.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  formUrl,\n  kibanaVersion,\n  sanitizedPath,\n  isCloudEnv,\n  isServerlessEnv,\n  nodeType,\n}",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-            "lineNumber": 47,
-            "columnNumber": 4,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.formUrl",
-                "type": "string",
-                "tags": [],
-                "label": "formUrl",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 48,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.kibanaVersion",
-                "type": "string",
-                "tags": [],
-                "label": "kibanaVersion",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 49,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.deploymentType",
-                "type": "string",
-                "tags": [],
-                "label": "deploymentType",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 50,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.sanitizedPath",
-                "type": "string",
-                "tags": [],
-                "label": "sanitizedPath",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 51,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.mlJobType",
-                "type": "string",
-                "tags": [],
-                "label": "mlJobType",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 52,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.isCloudEnv",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "isCloudEnv",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 53,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.isServerlessEnv",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "isServerlessEnv",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 54,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.nodeType",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "nodeType",
-                "description": [],
-                "signature": [
-                  "NodeType",
-                  " | undefined"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 55,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
