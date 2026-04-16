@@ -11,7 +11,7 @@ import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { streamExplorationSkill } from './skills/stream_exploration_skill';
+import { streamsManagementSkill } from './skills/streams_management_skill';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 
 export const registerStreamsAgentBuilder = async ({
@@ -28,14 +28,13 @@ export const registerStreamsAgentBuilder = async ({
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
+  agentBuilder.skills.register(streamsManagementSkill);
 
   const getMemoryService = () =>
     new MemoryServiceImpl({
       logger: logger.get('memory'),
       esClient: server.core.elasticsearch.client.asInternalUser,
     });
-
-  agentBuilder.skills.register(streamExplorationSkill);
 
   // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
   // This avoids exposing the skill to the agent when memory is not configured.
