@@ -117,7 +117,13 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
 
     public async clickCommonlyUsedTimeRange(time: CommonlyUsed) {
       log.debug('clickCommonlyUsedTimeRange', time);
-      await testSubjects.click(`superDatePickerCommonlyUsed_${time}`);
+      const testSubj = `superDatePickerCommonlyUsed_${time}`;
+      await retry.try(async () => {
+        if (!(await testSubjects.exists(testSubj, { timeout: 1000 }))) {
+          await this.openDatePickerQuickMenu();
+        }
+        await testSubjects.click(testSubj);
+      });
     }
 
     public async clickToggleHidePanelTitle() {
