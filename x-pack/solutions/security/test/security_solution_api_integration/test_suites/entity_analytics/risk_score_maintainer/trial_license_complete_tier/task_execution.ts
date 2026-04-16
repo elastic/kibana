@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @serverlessQA Risk Score Maintainer Task Lifecycle', function () {
     this.tags(['esGate']);
 
-    context('with auditbeat data', () => {
+    context('with maintainer test logs data', () => {
       const indexListOfDocuments = indexListOfDocumentsFactory({ es, log, index: testLogsIndex });
       const maintainerScenario = riskScoreMaintainerScenarioFactory({
         indexListOfDocuments,
@@ -117,20 +117,30 @@ export default ({ getService }: FtrProviderContext): void => {
         const preRestartScores = await readRiskScores(es);
         const preRestartCount = preRestartScores.length;
 
-        // Wait for the maintainer to finish its first run before stopping it.
-        // Otherwise, stopMaintainer's document update will cause a 409 version conflict
-        // when the task tries to save its state, wedging the task permanently.
+        // Wait for the maintainer to be fully idle before stopping it.
+        // Stopping while taskStatus is still running can cause a Task Manager
+        // version conflict and wedge the task document in serverless runs.
         await retry.waitForWithTimeout('maintainer to finish first run', 30_000, async () => {
           const response = await maintainerRoutes.getMaintainers(200, ['risk-score']);
           const maintainer = response.body.maintainers.find(
-            (m: { id: string; runs: number }) => m.id === 'risk-score'
+            (m: { id: string; runs: number; taskStatus: string }) => m.id === 'risk-score'
           );
-          return maintainer !== undefined && maintainer.runs >= 1;
+          return (
+            maintainer !== undefined &&
+            maintainer.runs >= 1 &&
+            maintainer.taskStatus.toLowerCase() !== 'running'
+          );
         });
 
         await maintainerRoutes.stopMaintainer('risk-score');
         await maintainerRoutes.startMaintainer('risk-score');
-        await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
+        await waitForMaintainerRun({
+          retry,
+          routes: maintainerRoutes,
+          minRuns: 1,
+          triggerRun: false,
+          timeoutMs: 90_000,
+        });
 
         await waitForRiskScoresToBePresent({ es, log, scoreCount: preRestartCount + 1 });
         const postRestartScores = await readRiskScores(es);
