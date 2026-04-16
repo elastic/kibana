@@ -14,9 +14,19 @@ import { warningsSchema } from '../warnings_schema';
 
 export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
-    id: schema.string({ meta: { description: 'The unique ID of the dashboard, as returned by the create or search endpoints.' } }),
+    id: schema.string({
+      meta: {
+        description:
+          'The unique ID of the dashboard, as returned by the create or search endpoints.',
+      },
+    }),
     data: getDashboardStateSchema(isDashboardAppRequest),
     meta: asCodeMetaSchema,
-    warnings: schema.maybe(warningsSchema, { meta: { description: 'Panels dropped because their type is not supported by the API. Present only when one or more panels could not be returned.' } }),
+    warnings: schema.maybe(warningsSchema, {
+      meta: {
+        description:
+          'Panels dropped because their type is not supported by the API. Present only when one or more panels could not be returned.',
+      },
+    }),
   });
 }

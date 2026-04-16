@@ -75,7 +75,12 @@ export const searchResponseBodySchema = schema.object({
       }),
       meta: asCodeMetaSchema,
     }),
-    { meta: { description: 'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.' } }
+    {
+      meta: {
+        description:
+          'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
+      },
+    }
   ),
   total: schema.number({
     meta: { description: 'The total number of dashboards matching the query.' },

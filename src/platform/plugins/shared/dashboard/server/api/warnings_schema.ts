@@ -13,8 +13,12 @@ import { referenceSchema } from '@kbn/content-management-utils';
 const droppedPanelWarningSchema = schema.object(
   {
     type: schema.literal('dropped_panel', { meta: { description: 'The warning type.' } }),
-    message: schema.string({ meta: { description: 'Human-readable explanation of why the panel was dropped.' } }),
-    panel_type: schema.string({ meta: { description: 'The type identifier of the dropped panel.' } }),
+    message: schema.string({
+      meta: { description: 'Human-readable explanation of why the panel was dropped.' },
+    }),
+    panel_type: schema.string({
+      meta: { description: 'The type identifier of the dropped panel.' },
+    }),
     panel_config: schema.object(
       {},
       {
@@ -33,7 +37,8 @@ const droppedPanelWarningSchema = schema.object(
     meta: {
       id: 'kbn-dashboard-dropped-panel-warning',
       title: 'Dropped panel',
-      description: 'A panel that was excluded from the response because its type is not supported by the API.',
+      description:
+        'A panel that was excluded from the response because its type is not supported by the API.',
     },
   }
 );
