@@ -9,75 +9,26 @@
 
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
+import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { ContextApp, type ContextAppProps } from './context_app';
-import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
-import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 import { LoadingStatus } from './services/context_query_state';
 import { useContextAppFetch } from './hooks/use_context_app_fetch';
 import { useContextAppState } from './hooks/use_context_app_state';
 import type { AppState, GetStateReturn, GlobalState } from './services/context_state';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 
 jest.mock('./hooks/use_context_app_fetch');
 jest.mock('./hooks/use_context_app_state');
 
-jest.mock('./context_app_content', () => ({
-  ContextAppContent: ({
-    addFilter,
-  }: {
-    addFilter: (field: string, value: unknown, operation: '+' | '-') => Promise<void> | void;
-  }) => (
-    <div data-test-subj="contextAppContentMock">
-      <button
-        data-test-subj="contextAppAddFilterButton"
-        onClick={() => void addFilter('message', '2021-06-08T07:52:19.000Z', '+')}
-      >
-        Add filter
-      </button>
-    </div>
-  ),
-}));
-
-interface MockTopNavMenuProps {
-  appName: string;
-  showSearchBar: boolean;
-  showQueryInput: boolean;
-  showFilterBar: boolean;
-  showDatePicker: boolean;
-  indexPatterns: Array<{ id?: string }>;
-  useDefaultBehaviors: boolean;
-}
-
-const mockTopNavMenu = ({
-  appName,
-  showSearchBar,
-  showQueryInput,
-  showFilterBar,
-  showDatePicker,
-  indexPatterns,
-  useDefaultBehaviors,
-}: MockTopNavMenuProps) => (
-  <div
-    data-test-subj="mockTopNavMenu"
-    data-app-name={appName}
-    data-show-search-bar={String(showSearchBar)}
-    data-show-query-input={String(showQueryInput)}
-    data-show-filter-bar={String(showFilterBar)}
-    data-show-date-picker={String(showDatePicker)}
-    data-index-pattern-ids={indexPatterns.map(({ id }) => id).join(',')}
-    data-use-default-behaviors={String(useDefaultBehaviors)}
-  />
-);
-
-const mockNavigationPlugin = {
-  ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
-} as unknown as NavigationPublicStart;
 const services = createDiscoverServicesMock();
 const addFiltersMock = jest.spyOn(services.filterManager, 'addFilters');
 const updateSavedObjectMock = jest.spyOn(services.dataViews, 'updateSavedObject');
@@ -113,7 +64,7 @@ const anchorRecord = buildDataTableRecord(
     _id: 'anchor-record',
     _index: 'the-index',
     _score: 1,
-    _source: { message: 'anchor' },
+    _source: { extension: 'jpg', message: 'anchor' },
   },
   dataViewMock
 );
@@ -123,23 +74,26 @@ const settledVoidResults: [PromiseSettledResult<void>, PromiseSettledResult<void
   { status: 'fulfilled', value: undefined },
 ];
 
-services.navigation = mockNavigationPlugin;
-services.uiSettings = uiSettingsMock;
+const setDocViewerRegistry = (render: (props: DocViewRenderProps) => React.ReactElement) => {
+  const registry = new DocViewsRegistry();
+
+  registry.add({
+    id: 'doc_view_table',
+    title: 'Table',
+    order: 10,
+    render,
+  });
+
+  setUnifiedDocViewerServices({
+    ...mockUnifiedDocViewerServices,
+    unifiedDocViewer: { registry },
+  });
+};
 
 describe('ContextApp test', () => {
   const defaultProps: ContextAppProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
-  };
-
-  const topNavProps = {
-    appName: 'context',
-    showSearchBar: true,
-    showQueryInput: false,
-    showFilterBar: true,
-    showDatePicker: false,
-    indexPatterns: [dataViewMock],
-    useDefaultBehaviors: true,
   };
 
   const renderComponent = () => {
@@ -152,6 +106,8 @@ describe('ContextApp test', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    setDocViewerRegistry(() => <div data-test-subj="docViewTableMock" />);
 
     mockUseContextAppState.mockReturnValue({
       appState,
@@ -181,37 +137,43 @@ describe('ContextApp test', () => {
   it('renders correctly', async () => {
     renderComponent();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('contextAppContentMock')).toBeInTheDocument();
-      expect(screen.getByTestId('mockTopNavMenu')).toBeInTheDocument();
-    });
-
-    const topNav = screen.getByTestId('mockTopNavMenu');
-    expect(topNav).toHaveAttribute('data-app-name', topNavProps.appName);
-    expect(topNav).toHaveAttribute('data-show-search-bar', String(topNavProps.showSearchBar));
-    expect(topNav).toHaveAttribute('data-show-query-input', String(topNavProps.showQueryInput));
-    expect(topNav).toHaveAttribute('data-show-filter-bar', String(topNavProps.showFilterBar));
-    expect(topNav).toHaveAttribute('data-show-date-picker', String(topNavProps.showDatePicker));
-    expect(topNav).toHaveAttribute('data-index-pattern-ids', dataViewMock.id);
-    expect(topNav).toHaveAttribute(
-      'data-use-default-behaviors',
-      String(topNavProps.useDefaultBehaviors)
+    expect(await screen.findByTestId('discoverDocTable')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverContextAppTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('contextDocumentSurroundingHeader')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverContextAppTitle')).toHaveTextContent(
+      'Documents surrounding #mocked_anchor_id'
+    );
+    expect(screen.getByTestId('contextDocumentSurroundingHeader')).toHaveTextContent(
+      'Documents surrounding #mocked_anchor_id'
     );
   });
 
   it('should set filters correctly', async () => {
     const user = userEvent.setup();
 
+    setDocViewerRegistry(({ filter }) => (
+      <button
+        data-test-subj="docViewFilterButton"
+        onClick={() => void filter?.('extension', 'jpg', '+')}
+      >
+        Add filter
+      </button>
+    ));
+
     renderComponent();
 
-    await user.click(screen.getByTestId('contextAppAddFilterButton'));
+    await user.click(await screen.findByTestId('docTableExpandToggleColumn'));
+
+    expect(await screen.findByTestId('docViewerFlyout')).toBeInTheDocument();
+
+    await user.click(await screen.findByTestId('docViewFilterButton'));
 
     expect(addFiltersMock).toHaveBeenCalledTimes(1);
     expect(addFiltersMock).toHaveBeenCalledWith([
       {
         $state: { store: 'appState' },
         meta: { alias: null, disabled: false, index: 'the-data-view-id', negate: false },
-        query: { match_phrase: { message: '2021-06-08T07:52:19.000Z' } },
+        query: { match_phrase: { extension: 'jpg' } },
       },
     ]);
     expect(updateSavedObjectMock).toHaveBeenCalledTimes(1);
