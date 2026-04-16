@@ -15,7 +15,8 @@ exports[`rendering renders correctly 1`] = `
 >
   <EuiPanel
     borderRadius="none"
-    color="subdued"
+    color="transparent"
+    css="unknown styles"
     paddingSize="none"
   >
     <header
