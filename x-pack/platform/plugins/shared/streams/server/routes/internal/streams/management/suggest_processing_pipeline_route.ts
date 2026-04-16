@@ -130,8 +130,8 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         const abortController = new AbortController();
 
         // Create a timeout-based AbortSignal for grok/dissect and pipeline suggestions
-        // 5 minute timeout for the entire operation
-        const OPERATION_TIMEOUT_MS = 5 * 60 * 1000;
+        // TODO: TEMPORARY - 3 second timeout for testing
+        const OPERATION_TIMEOUT_MS = 3000;
         const timeoutSignal = AbortSignal.timeout(OPERATION_TIMEOUT_MS);
         const timeoutAbortController = new AbortController();
         const cleanup = () => timeoutAbortController.abort();
