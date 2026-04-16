@@ -24,7 +24,7 @@ import {
   stripUndefined,
 } from '../utils';
 import type { HeatmapState } from '../../../schema';
-import { fromColorByValueLensStateToAPI } from '../../coloring';
+import { AUTO_COLOR, fromColorByValueLensStateToAPI } from '../../coloring';
 import { type LensAttributes } from '../../../types';
 import {
   buildDataSourceStateESQL,
@@ -105,15 +105,17 @@ function reverseBuildVisualizationState(
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
     axes: getGridConfigProps(visualization.gridConfig, xAxisScale),
-    cells: {
-      labels: { visible: visualization.gridConfig.isCellLabelVisible },
+    styling: {
+      cells: {
+        labels: { visible: visualization.gridConfig.isCellLabelVisible },
+      },
     },
   } satisfies Partial<HeatmapState>;
 
   const paletteProps = {
-    ...(visualization.palette && {
-      color: fromColorByValueLensStateToAPI(visualization.palette),
-    }),
+    color: visualization.palette
+      ? fromColorByValueLensStateToAPI(visualization.palette)
+      : AUTO_COLOR,
   } satisfies Partial<HeatmapState['metric']>;
 
   if (isTextBasedLayer(layer)) {

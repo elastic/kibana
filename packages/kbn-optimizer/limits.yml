@@ -44,7 +44,7 @@ pageLoadAssetSize:
   dataVisualizer: 32727
   developerToolbar: 4467
   devTools: 8109
-  discover: 31186
+  discover: 30501
   discoverEnhanced: 5509
   discoverShared: 2322
   elasticAssistant: 301540
@@ -57,7 +57,7 @@ pageLoadAssetSize:
   esql: 21193
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 34345
+  evals: 5743
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -115,7 +115,7 @@ pageLoadAssetSize:
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44950
-  ml: 89000
+  ml: 102091
   mockIdpPlugin: 7463
   monitoring: 28983
   navigation: 11814
@@ -123,7 +123,7 @@ pageLoadAssetSize:
   noDataPage: 1749
   observability: 107797
   observabilityAgentBuilder: 10178
-  observabilityAIAssistant: 63200
+  observabilityAIAssistant: 71481
   observabilityAIAssistantApp: 17100
   observabilityAiAssistantManagement: 7126
   observabilityLogsExplorer: 4918
@@ -151,10 +151,10 @@ pageLoadAssetSize:
   savedSearch: 11000
   screenshotMode: 2351
   screenshotting: 3252
-  searchAssistant: 6150
+  searchAssistant: 7079
   searchGettingStarted: 6678
   searchHomepage: 9005
-  searchInferenceEndpoints: 9400
+  searchInferenceEndpoints: 10345
   searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
@@ -184,7 +184,7 @@ pageLoadAssetSize:
   timelines: 131503
   transform: 16515
   triggersActionsUi: 123512
-  uiActions: 35278
+  uiActions: 35180
   unifiedDocViewer: 15000
   unifiedSearch: 19500
   upgradeAssistant: 6898
@@ -210,5 +210,5 @@ pageLoadAssetSize:
   visualizations: 52210
   watcher: 10485
   workflowsExtensions: 38894
-  workflowsManagement: 31215
+  workflowsManagement: 35010
   workplaceAIApp: 14056
