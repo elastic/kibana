@@ -12,7 +12,7 @@ import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { streamExplorationSkill } from './skills/stream_exploration_skill';
+import { streamsManagementSkill } from './skills/streams_management_skill';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { knowledgeIndicatorsManagementSkill } from './skills/knowledge_indicators_management_skill';
 
@@ -32,15 +32,14 @@ export const registerStreamsAgentBuilder = async ({
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  agentBuilder.skills.register(streamsManagementSkill);
+  agentBuilder.skills.register(knowledgeIndicatorsManagementSkill);
 
   const getMemoryService = () =>
     new MemoryServiceImpl({
       logger: logger.get('memory'),
       esClient: server.core.elasticsearch.client.asInternalUser,
     });
-
-  agentBuilder.skills.register(streamExplorationSkill);
-  agentBuilder.skills.register(knowledgeIndicatorsManagementSkill);
 
   // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
   // This avoids exposing the skill to the agent when memory is not configured.
