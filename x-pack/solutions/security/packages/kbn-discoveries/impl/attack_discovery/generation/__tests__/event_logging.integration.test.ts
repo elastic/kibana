@@ -87,7 +87,7 @@ describe('Event Logging Integration', () => {
 
   const baseWorkflowConfig = {
     alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
-    default_alert_retrieval_mode: 'custom_query' as const,
+    alert_retrieval_mode: 'custom_query' as const,
     validation_workflow_id: 'default',
   };
 
@@ -193,7 +193,7 @@ describe('Event Logging Integration', () => {
         startedAt: '2024-01-01T00:00:00Z',
         stepExecutionIndex: 0,
         stepId: 'retrieve_alerts',
-        stepType: 'attack-discovery.defaultAlertRetrieval',
+        stepType: 'security.attack-discovery.defaultAlertRetrieval',
         topologicalIndex: 0,
         workflowId: 'workflow-default-alert-retrieval',
         workflowRunId: 'alert-retrieval-run-id',
@@ -242,7 +242,7 @@ describe('Event Logging Integration', () => {
         startedAt: '2024-01-01T00:00:00Z',
         stepExecutionIndex: 0,
         stepId: 'generate',
-        stepType: 'attack-discovery.generate',
+        stepType: 'security.attack-discovery.generate',
         topologicalIndex: 0,
         workflowId: 'workflow-generation',
         workflowRunId: 'generation-run-id',
@@ -283,7 +283,7 @@ describe('Event Logging Integration', () => {
         status: ExecutionStatus.COMPLETED,
         stepExecutionIndex: 0,
         stepId: 'persist_discoveries',
-        stepType: 'attack-discovery.persistDiscoveries',
+        stepType: 'security.attack-discovery.persistDiscoveries',
         topologicalIndex: 0,
         workflowId: 'workflow-validate',
         workflowRunId: 'validation-run-id',

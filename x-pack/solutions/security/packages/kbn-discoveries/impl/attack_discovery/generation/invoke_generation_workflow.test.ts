@@ -106,7 +106,7 @@ describe('invokeGenerationWorkflow', () => {
     workflowId,
     workflowConfig: {
       alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
-      default_alert_retrieval_mode: 'custom_query' as const,
+      alert_retrieval_mode: 'custom_query' as const,
       validation_workflow_id: 'attack-discovery-validation',
     },
     workflowsManagementApi: mockWorkflowsManagementApi,
@@ -160,7 +160,7 @@ describe('invokeGenerationWorkflow', () => {
         status: ExecutionStatus.COMPLETED,
         stepExecutionIndex: 0,
         stepId: 'generate_discoveries',
-        stepType: 'attack-discovery.generate',
+        stepType: 'security.attack-discovery.generate',
         topologicalIndex: 0,
         workflowId,
         workflowRunId: 'workflow-run-id',
@@ -297,7 +297,7 @@ describe('invokeGenerationWorkflow', () => {
         'default',
         expect.objectContaining({
           alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
-          default_alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'attack-discovery-validation',
         }),
         mockRequest

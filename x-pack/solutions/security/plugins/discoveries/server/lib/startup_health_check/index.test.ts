@@ -59,7 +59,7 @@ describe('logStartupHealthCheck', () => {
 
   it('logs WARN when some workflow steps failed to register', () => {
     logStartupHealthCheck({
-      failedStepIds: ['attack-discovery.generate', 'attack-discovery.run'],
+      failedStepIds: ['security.attack-discovery.generate', 'security.attack-discovery.run'],
       logger: mockLogger,
       registeredStepCount: 4,
       workflowsManagementApiAvailable: true,
@@ -69,14 +69,14 @@ describe('logStartupHealthCheck', () => {
       expect.stringContaining('2 workflow step(s) failed to register')
     );
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('attack-discovery.generate')
+      expect.stringContaining('security.attack-discovery.generate')
     );
     expect(mockLogger.info).not.toHaveBeenCalled();
   });
 
   it('logs WARN with all issues when multiple checks fail', () => {
     logStartupHealthCheck({
-      failedStepIds: ['attack-discovery.generate'],
+      failedStepIds: ['security.attack-discovery.generate'],
       logger: mockLogger,
       registeredStepCount: 5,
       workflowsManagementApiAvailable: false,

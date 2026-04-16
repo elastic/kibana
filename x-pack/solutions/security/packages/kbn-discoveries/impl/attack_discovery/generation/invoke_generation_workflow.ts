@@ -37,7 +37,7 @@ import type {
 } from './types';
 
 /** Step type identifier used by the generation step in the workflow engine */
-const GENERATION_STEP_TYPE = 'attack-discovery.generate';
+const GENERATION_STEP_TYPE = 'security.attack-discovery.generate';
 
 /**
  * Result returned from the generation workflow.
@@ -177,7 +177,7 @@ const buildWorkflowInputs = ({
     end: end ?? undefined,
     esql_query: workflowConfig.esql_query,
     filter: filter ?? undefined,
-    default_alert_retrieval_mode: workflowConfig.default_alert_retrieval_mode,
+    alert_retrieval_mode: workflowConfig.alert_retrieval_mode,
     replacements: alertRetrievalResult.replacements,
     validation_workflow_id: workflowConfig.validation_workflow_id,
     size: size ?? 100,
@@ -265,7 +265,11 @@ const extractGenerationWorkflowResult = ({
   return {
     alertsContextCount: output.alerts_context_count ?? 0,
     attackDiscoveries: output.attack_discoveries ?? [],
-    executionUuid: output.execution_uuid ?? executionUuid,
+    // Always use the orchestration UUID passed to invokeGenerationWorkflow, not the
+    // workflow run ID that the generate step emits as output.execution_uuid. The
+    // orchestration UUID is what the event log and the UI both track, so it must
+    // flow through to the persisted discovery documents as ALERT_RULE_EXECUTION_UUID.
+    executionUuid,
     replacements: parsedReplacements,
   };
 };
@@ -347,6 +351,8 @@ const writeGenerateStepStartedEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
+  providedAlerts,
+  source,
   spaceId,
   startTime,
   workflowId,
@@ -360,6 +366,13 @@ const writeGenerateStepStartedEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
+  /**
+   * Pre-provided alert strings for 'provided' mode. Stored in event.reference
+   * so the pipeline_data route can surface them during the running state, before
+   * the workflow engine populates step.input.
+   */
+  providedAlerts?: string[];
+  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowId: string;
@@ -377,6 +390,8 @@ const writeGenerateStepStartedEvent = async ({
       eventLogIndex,
       executionUuid,
       message: `Attack discovery generate step ${executionUuid} started`,
+      providedAlerts,
+      source,
       spaceId,
       start: startTime,
       workflowId,
@@ -404,6 +419,7 @@ const writeGenerateStepSucceededEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
+  source,
   spaceId,
   startTime,
   workflowId,
@@ -418,6 +434,7 @@ const writeGenerateStepSucceededEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
+  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowId: string;
@@ -438,6 +455,7 @@ const writeGenerateStepSucceededEvent = async ({
       executionUuid,
       message: `Attack discovery generate step ${executionUuid} succeeded`,
       outcome: 'success',
+      source,
       spaceId,
       workflowId,
       workflowExecutions,
@@ -465,6 +483,7 @@ const writeGenerateStepFailedEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
+  source,
   spaceId,
   startTime,
   workflowId,
@@ -480,6 +499,7 @@ const writeGenerateStepFailedEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
+  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowId: string;
@@ -501,6 +521,7 @@ const writeGenerateStepFailedEvent = async ({
       message: `Attack discovery generate step ${executionUuid} failed`,
       outcome: 'failure',
       reason: errorMessage,
+      source,
       spaceId,
       workflowId,
       workflowExecutions,
@@ -586,7 +607,7 @@ export const invokeGenerationWorkflow = async ({
             action_type_id: apiConfig.action_type_id,
             connector_id: apiConfig.connector_id,
           },
-          defaultAlertRetrievalMode: workflowConfig.default_alert_retrieval_mode,
+          alertRetrievalMode: workflowConfig.alert_retrieval_mode,
           end,
           filter: filter ? 'present' : 'absent',
           size,
@@ -626,7 +647,9 @@ export const invokeGenerationWorkflow = async ({
 
     logger.info(`Generation workflow started (workflowRunId: ${workflowRunId})`);
 
-    // Write generate-step-started event (best-effort)
+    // Write generate-step-started event (best-effort).
+    // For 'provided' mode, include the alert strings so the pipeline_data route
+    // can surface them during the running state (before step.input is populated).
     generateStepStartTime = new Date();
     await writeGenerateStepStartedEvent({
       alertsContextCount: alertRetrievalResult.alertsContextCount,
@@ -636,6 +659,11 @@ export const invokeGenerationWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      ...(workflowConfig.alert_retrieval_mode === 'provided' &&
+      alertRetrievalResult.alerts.length > 0
+        ? { providedAlerts: alertRetrievalResult.alerts }
+        : {}),
+      source,
       spaceId,
       startTime: generateStepStartTime,
       workflowId,
@@ -691,6 +719,7 @@ export const invokeGenerationWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime: generateStepStartTime ?? startTime,
       workflowId,
@@ -765,6 +794,7 @@ export const invokeGenerationWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime: generateStepStartTime ?? startTime,
       workflowId,

@@ -70,8 +70,8 @@ const baseParams = {
   request: {} as never,
   spaceId: 'default',
   workflowConfig: {
+    alert_retrieval_mode: 'custom_query' as const,
     alert_retrieval_workflow_ids: [],
-    default_alert_retrieval_mode: 'custom_query' as const,
     validation_workflow_id: 'default',
   },
   workflowsManagementApi: {} as never,

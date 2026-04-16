@@ -171,7 +171,7 @@ describe('pollForWorkflowCompletion', () => {
 
     it('returns immediately when terminal and isReady returns true on first poll', async () => {
       const executionWithSteps = createExecution('completed', [
-        createStepExecution('attack-discovery.defaultAlertRetrieval'),
+        createStepExecution('security.attack-discovery.defaultAlertRetrieval'),
       ]);
 
       const workflowsManagementApi: WorkflowsManagementApi = {
@@ -182,7 +182,7 @@ describe('pollForWorkflowCompletion', () => {
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
         exec.stepExecutions.some(
-          (step) => step.stepType === 'attack-discovery.defaultAlertRetrieval'
+          (step) => step.stepType === 'security.attack-discovery.defaultAlertRetrieval'
         );
 
       const result = await pollForWorkflowCompletion({
@@ -201,7 +201,7 @@ describe('pollForWorkflowCompletion', () => {
     it('re-polls when terminal but isReady returns false, then returns when isReady passes', async () => {
       const terminalWithoutSteps = createExecution('completed');
       const terminalWithSteps = createExecution('completed', [
-        createStepExecution('attack-discovery.defaultAlertRetrieval'),
+        createStepExecution('security.attack-discovery.defaultAlertRetrieval'),
       ]);
 
       const workflowsManagementApi: WorkflowsManagementApi = {
@@ -216,7 +216,7 @@ describe('pollForWorkflowCompletion', () => {
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
         exec.stepExecutions.some(
-          (step) => step.stepType === 'attack-discovery.defaultAlertRetrieval'
+          (step) => step.stepType === 'security.attack-discovery.defaultAlertRetrieval'
         );
 
       const promise = pollForWorkflowCompletion({
@@ -304,7 +304,7 @@ describe('pollForWorkflowCompletion', () => {
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
         exec.stepExecutions.some(
-          (step) => step.stepType === 'attack-discovery.defaultAlertRetrieval'
+          (step) => step.stepType === 'security.attack-discovery.defaultAlertRetrieval'
         );
 
       const result = await pollForWorkflowCompletion({
@@ -322,7 +322,7 @@ describe('pollForWorkflowCompletion', () => {
     it('uses a shorter polling interval during readiness re-polls', async () => {
       const terminalWithoutSteps = createExecution('completed');
       const terminalWithSteps = createExecution('completed', [
-        createStepExecution('attack-discovery.defaultAlertRetrieval'),
+        createStepExecution('security.attack-discovery.defaultAlertRetrieval'),
       ]);
 
       const workflowsManagementApi: WorkflowsManagementApi = {
@@ -336,7 +336,7 @@ describe('pollForWorkflowCompletion', () => {
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
         exec.stepExecutions.some(
-          (step) => step.stepType === 'attack-discovery.defaultAlertRetrieval'
+          (step) => step.stepType === 'security.attack-discovery.defaultAlertRetrieval'
         );
 
       const promise = pollForWorkflowCompletion({

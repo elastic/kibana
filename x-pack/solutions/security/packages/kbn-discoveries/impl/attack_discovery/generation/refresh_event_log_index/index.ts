@@ -21,8 +21,12 @@ export const refreshEventLogIndex = async ({
   request: KibanaRequest;
 }): Promise<void> => {
   /**
-   * TEMPORARY FIX: Manually refresh the event log index so the event becomes searchable immediately
-   * TODO: Replace with proper dataClient.refreshEventLogIndex() call
+   * Refreshes the event log index so newly written events are immediately searchable.
+   *
+   * We intentionally use the request-scoped (asCurrentUser) client — or the
+   * pre-authenticated alerting-framework client for scheduled runs — rather than
+   * an internal/elevated client. The operation must stay within the privilege
+   * boundary of the authenticated user / rule API key.
    */
   try {
     const esClient =

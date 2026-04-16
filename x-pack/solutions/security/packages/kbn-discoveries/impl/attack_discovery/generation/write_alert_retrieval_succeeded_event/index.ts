@@ -10,6 +10,7 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import {
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED,
   writeAttackDiscoveryEvent,
+  type AttackDiscoverySource,
 } from '../../persistence/event_logging';
 import { getDurationNanoseconds } from '../../../lib/persistence';
 
@@ -24,6 +25,7 @@ export const writeAlertRetrievalSucceededEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
+  source,
   spaceId,
   startTime,
   workflowExecutions,
@@ -38,6 +40,7 @@ export const writeAlertRetrievalSucceededEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
+  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowExecutions: WorkflowExecutionsTracking;
@@ -58,6 +61,7 @@ export const writeAlertRetrievalSucceededEvent = async ({
       executionUuid,
       message: `Attack discovery alert retrieval ${executionUuid} succeeded`,
       outcome: 'success',
+      source,
       spaceId,
       workflowExecutions,
       workflowId,

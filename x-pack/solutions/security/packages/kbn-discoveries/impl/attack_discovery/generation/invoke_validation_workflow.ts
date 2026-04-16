@@ -16,6 +16,7 @@ import {
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED,
+  type AttackDiscoverySource,
   type ValidationSummary,
   writeAttackDiscoveryEvent,
 } from '../persistence/event_logging';
@@ -68,8 +69,8 @@ export interface InvokeValidationParams {
   logger: Logger;
   generationResult: GenerationWorkflowResult;
   maxWaitMs?: number;
-  persist?: boolean;
   request: KibanaRequest;
+  source?: AttackDiscoverySource;
   spaceId: string;
   withReplacements: boolean;
   workflowConfig: WorkflowConfig;
@@ -129,7 +130,7 @@ const validateWorkflow = (
 
 /**
  * Determines which validation workflow ID to use.
- * Uses the default if 'default' is specified.
+ * Uses the default if 'default' or empty string is specified.
  */
 const getValidationWorkflowId = ({
   defaultValidationWorkflowId,
@@ -138,9 +139,11 @@ const getValidationWorkflowId = ({
   defaultValidationWorkflowId: string;
   workflowConfig: WorkflowConfig;
 }): string => {
-  return workflowConfig.validation_workflow_id === 'default'
+  const { validation_workflow_id: configuredId } = workflowConfig;
+
+  return configuredId === '' || configuredId === 'default'
     ? defaultValidationWorkflowId
-    : workflowConfig.validation_workflow_id;
+    : configuredId;
 };
 
 /**
@@ -150,13 +153,13 @@ const buildWorkflowInputs = ({
   alertRetrievalResult,
   enableFieldRendering,
   generationResult,
-  persist,
+  source,
   withReplacements,
 }: {
   alertRetrievalResult: AlertRetrievalResult;
   enableFieldRendering: boolean;
   generationResult: GenerationWorkflowResult;
-  persist?: boolean;
+  source?: AttackDiscoverySource;
   withReplacements: boolean;
 }): Record<string, unknown> => ({
   alerts_context_count: alertRetrievalResult.alertsContextCount,
@@ -170,13 +173,13 @@ const buildWorkflowInputs = ({
   connector_name: alertRetrievalResult.connectorName,
   enable_field_rendering: enableFieldRendering,
   generation_uuid: generationResult.executionUuid,
-  ...(persist != null ? { persist } : {}),
   replacements: generationResult.replacements,
+  source,
   with_replacements: withReplacements,
 });
 
-const VALIDATION_STEP_TYPE = 'attack-discovery.defaultValidation';
-const PERSIST_STEP_TYPE = 'attack-discovery.persistDiscoveries';
+const VALIDATION_STEP_TYPE = 'security.attack-discovery.defaultValidation';
+const PERSIST_STEP_TYPE = 'security.attack-discovery.persistDiscoveries';
 
 /**
  * Extracts validated_discoveries from workflow outputs or step output.
@@ -394,6 +397,7 @@ const writeValidationStartedEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
+  source,
   spaceId,
   startTime,
   workflowId,
@@ -406,6 +410,7 @@ const writeValidationStartedEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
+  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowId: string;
@@ -422,6 +427,7 @@ const writeValidationStartedEvent = async ({
       eventLogIndex,
       executionUuid,
       message: `Attack discovery validation ${executionUuid} started`,
+      source,
       spaceId,
       start: startTime,
       workflowId,
@@ -448,6 +454,7 @@ const writeValidationSucceededEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
+  source,
   spaceId,
   startTime,
   validationSummary,
@@ -462,6 +469,7 @@ const writeValidationSucceededEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
+  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   validationSummary: ValidationSummary;
@@ -483,6 +491,7 @@ const writeValidationSucceededEvent = async ({
       message: `Attack discovery validation ${executionUuid} succeeded: ${validationSummary.persistedCount} discoveries stored`,
       newAlerts: validationSummary.persistedCount,
       outcome: 'success',
+      source,
       spaceId,
       validationSummary,
       workflowId,
@@ -510,6 +519,7 @@ const writeValidationFailedEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
+  source,
   spaceId,
   startTime,
   workflowId,
@@ -524,6 +534,7 @@ const writeValidationFailedEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
+  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowId: string;
@@ -544,6 +555,7 @@ const writeValidationFailedEvent = async ({
       message: `Attack discovery validation ${executionUuid} failed`,
       outcome: 'failure',
       reason: errorMessage,
+      source,
       spaceId,
       workflowId,
       workflowExecutions,
@@ -581,8 +593,8 @@ export const invokeValidationWorkflow = async ({
   logger,
   generationResult,
   maxWaitMs,
-  persist,
   request,
+  source,
   spaceId,
   withReplacements,
   workflowConfig,
@@ -608,7 +620,7 @@ export const invokeValidationWorkflow = async ({
       alertRetrievalResult,
       enableFieldRendering,
       generationResult,
-      persist,
+      source,
       withReplacements,
     });
 
@@ -663,6 +675,7 @@ export const invokeValidationWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime,
       workflowId,
@@ -713,6 +726,7 @@ export const invokeValidationWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime,
       validationSummary: extractedResult.validationSummary,
@@ -761,6 +775,7 @@ export const invokeValidationWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime,
       workflowId,
