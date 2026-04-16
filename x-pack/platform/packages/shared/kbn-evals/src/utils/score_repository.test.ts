@@ -571,7 +571,7 @@ describe('EvaluationScoreRepository', () => {
   });
 
   describe('indexSingleScore', () => {
-    it('creates a single document with deterministic id and refresh: false', async () => {
+    it('creates a single document with deterministic id and refresh: wait_for', async () => {
       const doc = createMockScoreDocument();
       await repository.indexSingleScore(doc);
 
@@ -579,7 +579,7 @@ describe('EvaluationScoreRepository', () => {
         index: 'kibana-evaluations',
         id: 'run-123-unknown-suite-gpt-4-dataset-1-example-1-Correctness-0',
         document: doc,
-        refresh: false,
+        refresh: 'wait_for',
       });
     });
 
