@@ -37,5 +37,7 @@
     "@kbn/controls-constants",
     "@kbn/es-ui-shared-plugin",
     "@kbn/react-query",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types"
   ]
 }

@@ -35,7 +35,7 @@ export const DragHandle = ({ isEditable, controlTitle = '', ...rest }: DragHandl
       })}
       css={dragHandleStyles}
     >
-      <EuiIcon type="grabHorizontal" />
+      <EuiIcon type="grabHorizontal" aria-hidden={true} />
     </button>
   );
 };

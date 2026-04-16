@@ -30,7 +30,7 @@
   },
   {
     "name": "elastic_agent",
-    "version": "2.7.3"
+    "version": "2.7.6"
   },
   {
     "name": "endpoint",
@@ -38,7 +38,7 @@
   },
   {
     "name": "fleet_server",
-    "version": "1.6.0"
+    "version": "1.6.1"
   },
   {
     "name": "profiler_symbolizer",
@@ -56,7 +56,7 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "9.3.5"
+    "version": "9.3.8"
   },
   {
     "name": "security_ai_prompts",

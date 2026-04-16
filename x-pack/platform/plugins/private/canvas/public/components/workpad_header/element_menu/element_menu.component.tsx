@@ -158,7 +158,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
       if (elementList.length > 1) {
         return {
           name,
-          icon: <EuiIcon type={icon} size="m" />,
+          icon: <EuiIcon type={icon} size="m" aria-hidden={true} />,
           panel: {
             id: getId('element-type'),
             title: name,
@@ -185,7 +185,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
           name: strings.getMyElementsMenuItemLabel(),
           className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
           'data-test-subj': 'saved-elements-menu-option',
-          icon: <EuiIcon type="empty" size="m" />,
+          icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
           onClick: () => {
             showSavedElementsModal();
             closePopover();
@@ -193,7 +193,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
         },
         {
           name: strings.getAssetsMenuItemLabel(),
-          icon: <EuiIcon type="empty" size="m" />,
+          icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
           onClick: () => {
             showAssetModal();
             closePopover();

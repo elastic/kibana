@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-12T10:42:25.906Z",
-  "sha1": "7198419fca7906645293bebd821068ad6fa3506e",
+  "sha1": "50f57c0ad9b4addbe1b24ddfb43c75c31e65c211",
   "tests": [
     {
       "id": "01827b5a57152a5-eaaf5032684392c",
@@ -40,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
-        "line": 70,
+        "line": 64,
         "column": 7
       }
     },
@@ -54,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
-        "line": 111,
+        "line": 102,
         "column": 7
       }
     },

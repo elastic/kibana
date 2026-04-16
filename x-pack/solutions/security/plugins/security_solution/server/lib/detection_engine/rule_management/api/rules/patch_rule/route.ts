@@ -79,6 +79,8 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             rulePayload: request.body,
             spaceId: securitySolutionCtx.getSpaceId(),
             existingRule,
+            checkOsqueryResponseActionAuthz:
+              securitySolutionCtx.getCheckOsqueryResponseActionAuthz(),
           });
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
