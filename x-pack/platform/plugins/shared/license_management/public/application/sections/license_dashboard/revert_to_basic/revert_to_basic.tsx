@@ -17,12 +17,24 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EXTERNAL_LINKS } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
+import type { LicenseType } from '@kbn/licensing-types';
+import { EXTERNAL_LINKS } from '../../../../../common/constants';
+import type { UploadStatusState } from '../../../store/types';
 
-export class RevertToBasic extends React.PureComponent {
+export interface Props {
+  shouldShowRevertToBasicLicense: boolean;
+  licenseType?: LicenseType;
+  needsAcknowledgement: boolean;
+  messages?: string[];
+  startBasicLicense: (currentLicenseType: string, ack?: boolean) => void;
+  cancelStartBasicLicense: () => void;
+  uploadLicenseStatus?: (status: UploadStatusState) => void;
+}
+
+export class RevertToBasic extends React.PureComponent<Props> {
   cancel = () => {
-    this.props.uploadLicenseStatus({});
+    this.props.uploadLicenseStatus?.({});
   };
 
   acknowledgeModal() {
@@ -44,7 +56,7 @@ export class RevertToBasic extends React.PureComponent {
           { defaultMessage: 'Confirm Revert to Basic License' }
         )}
         onCancel={cancelStartBasicLicense}
-        onConfirm={() => startBasicLicense(licenseType, true)}
+        onConfirm={() => startBasicLicense(licenseType ?? '', true)}
         cancelButtonText={
           <FormattedMessage
             id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModal.cancelButtonLabel"
@@ -82,7 +94,7 @@ export class RevertToBasic extends React.PureComponent {
       <span>
         <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.revertToBasic.revertToFreeFeaturesDescription"
-          defaultMessage="You’ll revert to our free features and lose access to
+          defaultMessage="You'll revert to our free features and lose access to
           machine learning, advanced security, and other {subscriptionFeaturesLinkText}."
           values={{
             subscriptionFeaturesLinkText: (
@@ -113,7 +125,7 @@ export class RevertToBasic extends React.PureComponent {
           footer={
             <EuiButton
               data-test-subj="revertToBasicButton"
-              onClick={() => startBasicLicense(licenseType)}
+              onClick={() => startBasicLicense(licenseType ?? '')}
             >
               <FormattedMessage
                 id="xpack.licenseMgmt.licenseDashboard.revertToBasic.acknowledgeModal.revertToBasicButtonLabel"

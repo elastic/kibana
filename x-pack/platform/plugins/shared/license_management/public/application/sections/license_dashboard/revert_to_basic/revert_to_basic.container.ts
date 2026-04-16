@@ -15,8 +15,9 @@ import {
   getStartBasicMessages,
 } from '../../../store/reducers/license_management';
 import { startBasicLicense, cancelStartBasicLicense } from '../../../store/actions/start_basic';
+import type { LicenseManagementState } from '../../../store/types';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: LicenseManagementState) => {
   return {
     shouldShowRevertToBasicLicense: shouldShowRevertToBasicLicense(state),
     licenseType: getLicenseType(state),

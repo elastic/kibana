@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { Action } from 'redux-actions';
 import { handleActions } from 'redux-actions';
 
 import { addUploadErrorMessage } from '../actions/add_error_message';
 
-export const uploadErrorMessage = handleActions(
+export const uploadErrorMessage = handleActions<string, string>(
   {
-    [addUploadErrorMessage](state, { payload }) {
+    [String(addUploadErrorMessage)](_state: string, { payload }: Action<string>) {
       return payload;
     },
   },

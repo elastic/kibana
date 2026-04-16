@@ -6,12 +6,17 @@
  */
 
 import React from 'react';
+import type { FC } from 'react';
 
 import { EuiFlexItem, EuiCard, EuiLink, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
 
-export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
+export interface Props {
+  shouldShowRequestTrialExtension: boolean;
+}
+
+export const RequestTrialExtension: FC<Props> = ({ shouldShowRequestTrialExtension }) => {
   if (!shouldShowRequestTrialExtension) {
     return null;
   }
@@ -19,7 +24,7 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
     <span>
       <FormattedMessage
         id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.howToContinueUsingPluginsDescription"
-        defaultMessage="If you’d like to continue using machine learning, advanced security, and our
+        defaultMessage="If you'd like to continue using machine learning, advanced security, and our
         other awesome {subscriptionFeaturesLinkText}, request an extension now."
         values={{
           subscriptionFeaturesLinkText: (

@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import type { FC } from 'react';
 import { EuiPageSection, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { StartTrial } from './start_trial';
@@ -13,8 +14,14 @@ import { LicensePageHeader } from './license_page_header';
 import { AddLicense } from './add_license';
 import { RevertToBasic } from './revert_to_basic';
 import { RequestTrialExtension } from './request_trial_extension';
+import type { TelemetryPluginStart } from '../../lib/telemetry';
 
-export const LicenseDashboard = ({ setBreadcrumb, telemetry } = { setBreadcrumb: () => {} }) => {
+export interface Props {
+  setBreadcrumb: (section: 'dashboard' | 'upload') => void;
+  telemetry?: TelemetryPluginStart;
+}
+
+export const LicenseDashboard: FC<Props> = ({ setBreadcrumb = () => {}, telemetry }) => {
   useEffect(() => {
     setBreadcrumb('dashboard');
   });

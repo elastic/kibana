@@ -9,8 +9,9 @@ import { connect } from 'react-redux';
 
 import { RequestTrialExtension as PresentationComponent } from './request_trial_extension';
 import { shouldShowRequestTrialExtension } from '../../../store/reducers/license_management';
+import type { LicenseManagementState } from '../../../store/types';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: LicenseManagementState) => {
   return {
     shouldShowRequestTrialExtension: shouldShowRequestTrialExtension(state),
   };

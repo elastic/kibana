@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import type { Action } from 'redux-actions';
 import { handleActions } from 'redux-actions';
 
 import { uploadLicenseStatus } from '../actions/upload_license';
+import type { UploadStatusState } from '../types';
 
-export const uploadStatus = handleActions(
+export const uploadStatus = handleActions<UploadStatusState, UploadStatusState>(
   {
-    [uploadLicenseStatus](state, { payload }) {
+    [String(uploadLicenseStatus)](
+      state: UploadStatusState,
+      { payload }: Action<UploadStatusState>
+    ) {
       return payload;
     },
   },
