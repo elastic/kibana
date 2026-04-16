@@ -16,7 +16,7 @@ import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
-import { changeAlertsFilter } from '../../tasks/alerts';
+import { changeAlertsFilter, waitForDetectionAlerts } from '../../tasks/alerts';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
@@ -51,8 +51,7 @@ const getRoleWithoutResponseActionsHistory = () => {
   };
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/263671
-describe.skip(
+describe(
   'Automated Response Actions',
   {
     // skipped in serverless for now since custom roles are not yet supported, and this test relies on a custom role
@@ -115,6 +114,19 @@ describe.skip(
     it('should not show the response when no action history privilege', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       toggleRuleOffAndOn(ruleName);
+
+      // Wait for the rule to execute and generate detection alerts before navigating to the UI
+      waitForDetectionAlerts(
+        {
+          bool: {
+            filter: [
+              { term: { 'kibana.alert.rule.uuid': ruleId } },
+              { term: { 'process.name': 'sshd' } },
+            ],
+          },
+        },
+        120000
+      );
 
       visitRuleAlerts(ruleName);
       closeAllToasts();

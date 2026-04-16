@@ -14,14 +14,13 @@ import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
-import { changeAlertsFilter } from '../../tasks/alerts';
+import { changeAlertsFilter, waitForDetectionAlerts } from '../../tasks/alerts';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-// Failing: See https://github.com/elastic/kibana/issues/207773
-describe.skip(
+describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
@@ -80,6 +79,19 @@ describe.skip(
     it('should have been called against a created host', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       toggleRuleOffAndOn(ruleName);
+
+      // Wait for the rule to execute and generate detection alerts before navigating to the UI
+      waitForDetectionAlerts(
+        {
+          bool: {
+            filter: [
+              { term: { 'kibana.alert.rule.uuid': ruleId } },
+              { term: { 'process.name': 'sshd' } },
+            ],
+          },
+        },
+        120000
+      );
 
       visitRuleAlerts(ruleName);
       closeAllToasts();
