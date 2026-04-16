@@ -65,7 +65,6 @@ spaceTest.describe('Workflow management CRUD edge cases', { tag: tags.stateful.c
   let workflowsApi: WorkflowsApiService;
 
   spaceTest.beforeAll(async ({ apiServices }) => {
-    spaceTest.setTimeout(120_000);
     workflowsApi = apiServices.workflowsApi;
   });
 
@@ -74,7 +73,7 @@ spaceTest.describe('Workflow management CRUD edge cases', { tag: tags.stateful.c
   });
 
   spaceTest('update workflow definition while execution is running', async () => {
-    spaceTest.setTimeout(120_000);
+    spaceTest.setTimeout(120_000); // long-running: waits for execution start + cancellation
     const workflow = await workflowsApi.create(LONG_RUNNING_YAML);
 
     const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});

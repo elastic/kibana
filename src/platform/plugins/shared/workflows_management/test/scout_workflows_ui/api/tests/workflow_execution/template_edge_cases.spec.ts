@@ -136,7 +136,6 @@ spaceTest.describe('Template engine edge cases', { tag: tags.stateful.classic },
   let workflowsApi: WorkflowsApiService;
 
   spaceTest.beforeAll(async ({ apiServices }) => {
-    spaceTest.setTimeout(60_000);
     workflowsApi = apiServices.workflowsApi;
   });
 
