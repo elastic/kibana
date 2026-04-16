@@ -6,6 +6,7 @@
  */
 
 import pMap from 'p-map';
+import { escapeKuery } from '@kbn/es-query';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
@@ -719,10 +720,11 @@ export async function syncNamespaceTemplates({
       // in JS, to avoid scanning every policy in large deployments.
       // For 'default' we must also match policies where the namespace attribute is absent,
       // because those are treated as 'default' throughout the codebase.
+      const escapedNamespace = escapeKuery(namespace);
       const namespaceFilter =
         namespace === 'default'
-          ? `(${savedObjectType}.attributes.namespace:default OR NOT ${savedObjectType}.attributes.namespace:*)`
-          : `${savedObjectType}.attributes.namespace:${namespace}`;
+          ? `(${savedObjectType}.attributes.namespace:${escapedNamespace} OR NOT ${savedObjectType}.attributes.namespace:*)`
+          : `${savedObjectType}.attributes.namespace:${escapedNamespace}`;
       const policiesForNamespace = await soClient.find<PackagePolicySOAttributes>({
         type: savedObjectType,
         filter: namespaceFilter,
