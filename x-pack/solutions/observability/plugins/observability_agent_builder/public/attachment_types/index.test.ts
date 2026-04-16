@@ -29,7 +29,7 @@ describe('registerAttachmentUiDefinitions', () => {
     jest.clearAllMocks();
   });
 
-  it('registers all ten attachment types', () => {
+  it('registers all nine attachment types', () => {
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
     });
