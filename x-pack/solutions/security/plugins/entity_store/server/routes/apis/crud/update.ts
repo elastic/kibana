@@ -13,7 +13,11 @@ import { ALL_ENTITY_TYPES, API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../..
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { BadCRUDRequestError, EntityNotFoundError } from '../../../domain/errors';
+import {
+  BadCRUDRequestError,
+  EntityNotFoundError,
+  EntityStoreNotInstalledError,
+} from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
 const paramsSchema = z
@@ -58,6 +62,9 @@ export function registerCRUDUpdate(router: EntityStorePluginRouter) {
         try {
           await crudClient.updateEntity(req.params.entityType, req.body, req.query.force);
         } catch (error) {
+          if (error instanceof EntityStoreNotInstalledError) {
+            return res.badRequest({ body: error });
+          }
           if (error instanceof BadCRUDRequestError) {
             return res.badRequest({ body: error });
           }

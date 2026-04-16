@@ -27,6 +27,8 @@ export const DynamicSettingsAttributesCodec = t.intersection([
     defaultEmail: DefaultEmailCodec,
     defaultStatusRuleEnabled: t.boolean,
     defaultTLSRuleEnabled: t.boolean,
+    useAllRemoteClusters: t.boolean,
+    selectedRemoteClusters: t.array(t.string),
   }),
 ]);
 
