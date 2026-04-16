@@ -60,22 +60,19 @@ const secretRefSchema = schema.oneOf([
  * Shared sub-schemas (extracted to avoid type explosion when variants become named components)
  */
 
-const OutputSslSchema = schema.object(
-  {
-    certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-    certificate: schema.maybe(schema.string()),
-    key: schema.maybe(schema.string()),
-    verification_mode: schema.maybe(
-      schema.oneOf([
-        schema.literal(kafkaVerificationModes.Full),
-        schema.literal(kafkaVerificationModes.None),
-        schema.literal(kafkaVerificationModes.Certificate),
-        schema.literal(kafkaVerificationModes.Strict),
-      ])
-    ),
-  },
-  { meta: { id: 'output_ssl' } }
-);
+const OutputSslSchema = schema.object({
+  certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+  certificate: schema.maybe(schema.string()),
+  key: schema.maybe(schema.string()),
+  verification_mode: schema.maybe(
+    schema.oneOf([
+      schema.literal(kafkaVerificationModes.Full),
+      schema.literal(kafkaVerificationModes.None),
+      schema.literal(kafkaVerificationModes.Certificate),
+      schema.literal(kafkaVerificationModes.Strict),
+    ])
+  ),
+});
 
 /**
  * Base schemas
