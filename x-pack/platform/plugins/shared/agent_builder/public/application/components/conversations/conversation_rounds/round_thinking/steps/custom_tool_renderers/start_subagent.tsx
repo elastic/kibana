@@ -7,25 +7,15 @@
 
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
-import { EuiLink, EuiText, EuiCode } from '@elastic/eui';
+import { EuiLink, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ThinkingItemLayout } from '../thinking_item_layout';
-import { ToolProgressDisplay } from '../tool_progress_display';
-import { ToolResultDisplay } from '../tool_result_display';
-import { FlyoutResultItem } from '../flyout_result_item';
 import { SubAgentExecutionFlyout } from '../sub_agent_execution_flyout';
+import { ToolResponseFlyout } from '../tool_response_flyout';
+import { ToolResultDisplay } from '../tool_result_display';
 import type { ItemFactoryEntry } from '../tool_call_thinking';
-
-const mainThinkingResultTypes: string[] = [
-  ToolResultType.query,
-  ToolResultType.esqlResults,
-  ToolResultType.error,
-];
-
-const disabledToolResultIconTypes: string[] = [ToolResultType.error, ToolResultType.query];
 
 /**
  * Extract the sub-agent execution ID from tool results or progress metadata.
@@ -48,7 +38,6 @@ const getExecutionId = (step: ToolCallStep): string | undefined => {
 export const getSubAgentThinkingItems = ({
   step,
   stepIndex,
-  openFlyout,
 }: {
   step: ToolCallStep;
   stepIndex: number;
@@ -71,58 +60,14 @@ export const getSubAgentThinkingItems = ({
     ),
   });
 
-  // Progression items (skip internal metadata-only progress)
-  step.progression
-    ?.filter((p) => p.metadata?.internal !== 'true')
-    .forEach((progress, progressIndex) => {
-      items.push({
-        key: `step-${stepIndex}-${step.tool_id}-progress-${progressIndex}`,
-        factory: (icon, textColor) => (
-          <ToolProgressDisplay
-            key={`step-${stepIndex}-${step.tool_id}-progress-${progressIndex}`}
-            progress={progress}
-            icon={icon}
-            textColor={textColor}
-          />
-        ),
-      });
-    });
-
-  // Main thinking result items
-  step.results
-    .filter((result: ToolResult) => mainThinkingResultTypes.includes(result.type))
-    .forEach((result: ToolResult, resultIndex) => {
-      items.push({
-        key: `step-${stepIndex}-${step.tool_id}-result-${resultIndex}`,
-        factory: (icon, textColor) => {
-          const shouldDisableIcon = disabledToolResultIconTypes.includes(result.type);
-          return (
-            <ThinkingItemLayout
-              key={`step-${stepIndex}-${step.tool_id}-result-${resultIndex}`}
-              icon={shouldDisableIcon ? undefined : icon}
-              textColor={textColor}
-            >
-              <ToolResultDisplay toolResult={result} />
-            </ThinkingItemLayout>
-          );
-        },
-      });
-    });
-
-  // Flyout result items
-  const flyoutResultItems = step.results.filter(
-    (result: ToolResult) => !mainThinkingResultTypes.includes(result.type)
-  );
-  if (flyoutResultItems.length > 0) {
+  // For synchronous (foreground) executions, show a "completed" item with inspect link
+  if (hasResults && !isBackgroundExecution(step)) {
     items.push({
-      key: `step-${stepIndex}-${step.tool_id}-result-flyout`,
+      key: `step-${stepIndex}-${step.tool_id}-result`,
       factory: (icon, textColor) => (
-        <FlyoutResultItem
-          key={`step-${stepIndex}-${step.tool_id}-result-flyout`}
+        <SubAgentResultDisplay
+          key={`step-${stepIndex}-${step.tool_id}-result`}
           step={step}
-          stepIndex={stepIndex}
-          flyoutResultItems={flyoutResultItems}
-          onOpenFlyout={openFlyout}
           icon={icon}
           textColor={textColor}
         />
@@ -133,9 +78,12 @@ export const getSubAgentThinkingItems = ({
   return items;
 };
 
+const isBackgroundExecution = (step: ToolCallStep): boolean => {
+  return step.results.some((r) => (r.data as any)?.mode === 'background');
+};
+
 /**
  * Display component for start_subagent tool calls — includes "Watch" button and flyout.
- * Manages its own flyout state internally.
  */
 const SubAgentToolCallDisplay: React.FC<{
   step: ToolCallStep;
@@ -144,6 +92,8 @@ const SubAgentToolCallDisplay: React.FC<{
 }> = ({ step, icon, textColor }) => {
   const [watchExecutionId, setWatchExecutionId] = useState<string | null>(null);
   const executionId = getExecutionId(step);
+  const isBackground = isBackgroundExecution(step);
+  const description = (step.params as { description?: string })?.description;
 
   return (
     <>
@@ -153,28 +103,37 @@ const SubAgentToolCallDisplay: React.FC<{
         textColor={textColor}
         loading={step.results.length === 0}
       >
-        <EuiText size="s">
-          <p role="status">
-            <FormattedMessage
-              id="xpack.agentBuilder.thinking.subAgentToolCall"
-              defaultMessage="Calling tool {tool}"
-              values={{
-                tool: <EuiCode>{step.tool_id}</EuiCode>,
-              }}
-            />
-            {executionId && (
-              <>
-                {' · '}
-                <EuiLink onClick={() => setWatchExecutionId(executionId)} role="button">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow>
+            <EuiText size="s">
+              <p role="status">
+                {isBackground ? (
                   <FormattedMessage
-                    id="xpack.agentBuilder.thinking.watchSubAgent"
-                    defaultMessage="Watch"
+                    id="xpack.agentBuilder.thinking.subAgentToolCallBackground"
+                    defaultMessage='Started background agent: "{description}"'
+                    values={{ description }}
                   />
-                </EuiLink>
-              </>
-            )}
-          </p>
-        </EuiText>
+                ) : (
+                  <FormattedMessage
+                    id="xpack.agentBuilder.thinking.subAgentToolCall"
+                    defaultMessage='Started agent: "{description}"'
+                    values={{ description }}
+                  />
+                )}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          {executionId && (
+            <EuiFlexItem grow={false}>
+              <EuiLink onClick={() => setWatchExecutionId(executionId)} role="button">
+                <FormattedMessage
+                  id="xpack.agentBuilder.thinking.watchSubAgent"
+                  defaultMessage="Watch"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </ThinkingItemLayout>
       {watchExecutionId && (
         <SubAgentExecutionFlyout
@@ -182,6 +141,49 @@ const SubAgentToolCallDisplay: React.FC<{
           onClose={() => setWatchExecutionId(null)}
         />
       )}
+    </>
+  );
+};
+
+/**
+ * Result display for synchronous sub-agent executions — "Subagent execution completed [Inspect response]"
+ */
+const SubAgentResultDisplay: React.FC<{
+  step: ToolCallStep;
+  icon?: ReactNode;
+  textColor?: string;
+}> = ({ step, icon, textColor }) => {
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  return (
+    <>
+      <ThinkingItemLayout icon={icon} textColor={textColor}>
+        <EuiText size="s">
+          <p role="status">
+            <FormattedMessage
+              id="xpack.agentBuilder.thinking.subAgentCompleted"
+              defaultMessage="Subagent execution completed. {inspectResponse}"
+              values={{
+                inspectResponse: (
+                  <EuiLink onClick={() => setIsFlyoutOpen(true)} role="button">
+                    <FormattedMessage
+                      id="xpack.agentBuilder.thinking.inspectSubAgentResponse"
+                      defaultMessage="Inspect response"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
+      </ThinkingItemLayout>
+      <ToolResponseFlyout isOpen={isFlyoutOpen} onClose={() => setIsFlyoutOpen(false)}>
+        {step.results.map((result: ToolResult, index) => (
+          <ThinkingItemLayout key={`subagent-result-${index}`}>
+            <ToolResultDisplay toolResult={result} />
+          </ThinkingItemLayout>
+        ))}
+      </ToolResponseFlyout>
     </>
   );
 };
