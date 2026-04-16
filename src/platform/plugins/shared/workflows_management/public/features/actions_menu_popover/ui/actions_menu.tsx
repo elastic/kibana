@@ -359,11 +359,12 @@ export function ActionsMenu({
       }}
       listProps={{
         showIcons: false,
-        // Virtualization requires uniform row heights, but the menu mixes tall
-        // step-option rows (~64px) with compact command/jump rows (~36px).
-        // The total item count is bounded (max 7 visible steps + a few commands
-        // + jump entries), so non-virtualized rendering is safe here.
-        isVirtualized: false,
+        // Normal mode mixes tall action rows (~76px) with compact command/jump
+        // rows (~36px) and has at most ~15 items, so virtualization is off.
+        // "Steps:" mode shows the full step catalog (uniform action rows) and
+        // benefits from virtualization to avoid DOM bloat.
+        isVirtualized: searchTerm.startsWith(STEPS_PREFIX),
+        ...(searchTerm.startsWith(STEPS_PREFIX) && { rowHeight: 76 }),
       }}
       renderOption={renderActionOption}
       css={styles.selectable}
