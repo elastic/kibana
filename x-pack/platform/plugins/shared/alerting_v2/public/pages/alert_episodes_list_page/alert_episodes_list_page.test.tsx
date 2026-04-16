@@ -6,12 +6,20 @@
  */
 
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_ALERT_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
+import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
+import { fetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/apis/fetch_episode_actions';
+import { fetchGroupActions } from '@kbn/alerting-v2-episodes-ui/apis/fetch_group_actions';
+import { fetchAlertActionTagSuggestions } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alert_action_tag_suggestions';
+import { fetchEpisodeTagOptions } from '@kbn/alerting-v2-episodes-ui/apis/fetch_episode_tag_options';
+import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/actions/bulk_snooze_modal', () => ({
   BulkSnoozeModal: jest.fn(({ onClose, onApplySnooze }) => (
@@ -36,51 +44,22 @@ jest.mock('@kbn/unified-data-table', () => ({
   UnifiedDataTable: jest.fn(() => null),
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query', () => ({
-  useFetchAlertingEpisodesQuery: jest.fn().mockReturnValue({
-    data: [
-      { 'episode.id': 'ep1', 'rule.id': 'rule1', group_hash: 'gh1' },
-      { 'episode.id': 'ep2', 'rule.id': 'rule2', group_hash: 'gh2' },
-      { 'episode.id': 'ep3', 'rule.id': 'rule3', group_hash: 'gh1' }, // same group as ep1
-    ],
-    dataView: { timeFieldName: '@timestamp' },
-    isLoading: false,
-    refetch: jest.fn(),
-  }),
-}));
+jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
+jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_episode_actions');
+jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_group_actions');
+jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alert_action_tag_suggestions');
+jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_episode_tag_options');
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions', () => ({
-  useFetchEpisodeActions: jest.fn().mockReturnValue({ data: new Map() }),
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions', () => ({
-  useFetchGroupActions: jest.fn().mockReturnValue({ data: new Map() }),
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => ({
-  useAlertingRulesCache: jest.fn().mockReturnValue({ rulesCache: {}, loading: false }),
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alert_episode_tag_suggestions', () => ({
-  useFetchAlertEpisodeTagSuggestions: jest.fn().mockReturnValue({ data: [], isLoading: false }),
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_create_alert_action', () => ({
-  useCreateAlertAction: jest.fn().mockReturnValue({ mutate: jest.fn(), isLoading: false }),
-}));
+// useAlertingEpisodesDataView uses react-use/useAsync internally with getEsqlDataView,
+// which requires heavy Kibana data-view infra. Mock the hook so useFetchAlertingEpisodesQuery
+// gets a ready dataView without going through the full data-view construction path.
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view');
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
 
 jest.mock('react-use/lib/useObservable', () =>
   jest.fn().mockReturnValue({ from: 'now-24h', to: 'now' })
 );
-
-const mockBulkMutate = jest.fn();
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_bulk_create_alert_actions', () => ({
-  useBulkCreateAlertActions: jest.fn().mockImplementation(() => ({ mutate: mockBulkMutate })),
-}));
-
-const mockUnifiedDataTable = jest.mocked(UnifiedDataTable);
 
 const mockHttp = httpServiceMock.createStartContract();
 
@@ -114,54 +93,113 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn().mockImplementation(() => ({ services: mockServices })),
 }));
 
+const mockUnifiedDataTable = jest.mocked(UnifiedDataTable);
+
+const mockDataView = {
+  fields: { forEach: jest.fn() },
+  setFieldCustomLabel: jest.fn(),
+  setFieldFormat: jest.fn(),
+  addRuntimeField: jest.fn(),
+  timeFieldName: '@timestamp',
+};
+
+const mockEpisodes = [
+  {
+    'episode.id': 'ep1',
+    'rule.id': 'rule1',
+    group_hash: 'gh1',
+    '@timestamp': '2026-01-01T00:00:00Z',
+  },
+  {
+    'episode.id': 'ep2',
+    'rule.id': 'rule2',
+    group_hash: 'gh2',
+    '@timestamp': '2026-01-01T00:00:00Z',
+  },
+  {
+    'episode.id': 'ep3',
+    'rule.id': 'rule3',
+    group_hash: 'gh1',
+    '@timestamp': '2026-01-01T00:00:00Z',
+  },
+];
+
+// jest.clearAllMocks() only resets call history, not implementations, so these stable
+// return values are set once at module scope and persist across all tests.
+jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+jest.mocked(fetchEpisodeActions).mockResolvedValue([]);
+jest.mocked(fetchGroupActions).mockResolvedValue([]);
+jest.mocked(fetchAlertActionTagSuggestions).mockResolvedValue([]);
+jest.mocked(fetchEpisodeTagOptions).mockResolvedValue([]);
+mockHttp.get.mockResolvedValue({ items: [] });
+mockHttp.post.mockResolvedValue({ processed: 1, total: 1 });
+
 const getCapturedBulkActions = (): CustomBulkActions => {
   const calls = mockUnifiedDataTable.mock.calls;
   const lastCall = calls[calls.length - 1][0];
   return lastCall.customBulkActions as CustomBulkActions;
 };
 
+const renderPage = () => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <AlertEpisodesListPage />
+    </QueryClientProvider>
+  );
+};
+
 describe('AlertEpisodesListPage bulk actions', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
-    render(<AlertEpisodesListPage />);
+    renderPage();
+    // Wait for episodes to load so bulk action handlers have access to episode data
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBeGreaterThan(0);
+    });
   });
 
   it('passes 7 customBulkActions to UnifiedDataTable', () => {
     expect(getCapturedBulkActions()).toHaveLength(7);
   });
 
-  it('acknowledge sends ack items for all selected episodes', () => {
-    const actions = getCapturedBulkActions();
-    const ack = actions.find((a) => a.key === 'acknowledge')!;
-    ack.onClick({ selectedDocIds: ['0', '1'] });
+  it('acknowledge sends ack items for all selected episodes', async () => {
+    const ack = getCapturedBulkActions().find((a) => a.key === 'acknowledge')!;
+    act(() => {
+      ack.onClick({ selectedDocIds: ['0', '1'] });
+    });
 
-    expect(mockBulkMutate).toHaveBeenCalledWith(
-      [
-        { group_hash: 'gh1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK, episode_id: 'ep1' },
-        { group_hash: 'gh2', action_type: ALERT_EPISODE_ACTION_TYPE.ACK, episode_id: 'ep2' },
-      ],
-      expect.any(Object)
-    );
+    await waitFor(() => {
+      expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_ALERT_API_PATH}/action/_bulk`, {
+        body: JSON.stringify([
+          { group_hash: 'gh1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK, episode_id: 'ep1' },
+          { group_hash: 'gh2', action_type: ALERT_EPISODE_ACTION_TYPE.ACK, episode_id: 'ep2' },
+        ]),
+      });
+    });
   });
 
-  it('unsnooze deduplicates by group_hash', () => {
-    const actions = getCapturedBulkActions();
-    const unsnooze = actions.find((a) => a.key === 'unsnooze')!;
-    // rows 0 and 2 share group_hash 'gh1'
-    unsnooze.onClick({ selectedDocIds: ['0', '1', '2'] });
+  it('unsnooze deduplicates by group_hash', async () => {
+    const unsnooze = getCapturedBulkActions().find((a) => a.key === 'unsnooze')!;
+    act(() => {
+      // rows 0 and 2 share group_hash 'gh1'
+      unsnooze.onClick({ selectedDocIds: ['0', '1', '2'] });
+    });
 
-    expect(mockBulkMutate).toHaveBeenCalledWith(
-      [
-        { group_hash: 'gh1', action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
-        { group_hash: 'gh2', action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
-      ],
-      expect.any(Object)
-    );
+    await waitFor(() => {
+      expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_ALERT_API_PATH}/action/_bulk`, {
+        body: JSON.stringify([
+          { group_hash: 'gh1', action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
+          { group_hash: 'gh2', action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
+        ]),
+      });
+    });
   });
 
   it('snooze sets pendingBulkAction — renders BulkSnoozeModal', () => {
-    const actions = getCapturedBulkActions();
-    const snooze = actions.find((a) => a.key === 'snooze')!;
+    const snooze = getCapturedBulkActions().find((a) => a.key === 'snooze')!;
     act(() => {
       snooze.onClick({ selectedDocIds: ['0'] });
     });
@@ -169,47 +207,41 @@ describe('AlertEpisodesListPage bulk actions', () => {
   });
 
   it('edit-tags sets pendingBulkAction — renders BulkTagsModal', () => {
-    const actions = getCapturedBulkActions();
-    const editTags = actions.find((a) => a.key === 'edit-tags')!;
+    const editTags = getCapturedBulkActions().find((a) => a.key === 'edit-tags')!;
     act(() => {
       editTags.onClick({ selectedDocIds: ['0'] });
     });
     expect(screen.getByTestId('bulkTagsModal')).toBeInTheDocument();
   });
 
-  it('shows success toast when all episodes are updated', () => {
-    const actions = getCapturedBulkActions();
-    const unsnooze = actions.find((a) => a.key === 'unsnooze')!;
-    unsnooze.onClick({ selectedDocIds: ['0'] });
+  it('shows success toast when all episodes are updated', async () => {
+    const unsnooze = getCapturedBulkActions().find((a) => a.key === 'unsnooze')!;
+    act(() => {
+      unsnooze.onClick({ selectedDocIds: ['0'] });
+    });
 
-    // Extract the onSuccess callback passed to bulkMutate
-    const [, { onSuccess }] = mockBulkMutate.mock.calls[0];
-    act(() => onSuccess({ processed: 1, total: 1 }));
-
-    expect(mockToastNotifications.addSuccess).toHaveBeenCalled();
+    await waitFor(() => expect(mockToastNotifications.addSuccess).toHaveBeenCalled());
     expect(mockToastNotifications.addWarning).not.toHaveBeenCalled();
   });
 
-  it('shows warning toast when only some episodes are updated', () => {
-    const actions = getCapturedBulkActions();
-    const unsnooze = actions.find((a) => a.key === 'unsnooze')!;
-    unsnooze.onClick({ selectedDocIds: ['0'] });
+  it('shows warning toast when only some episodes are updated', async () => {
+    mockHttp.post.mockResolvedValueOnce({ processed: 1, total: 3 });
+    const unsnooze = getCapturedBulkActions().find((a) => a.key === 'unsnooze')!;
+    act(() => {
+      unsnooze.onClick({ selectedDocIds: ['0'] });
+    });
 
-    const [, { onSuccess }] = mockBulkMutate.mock.calls[0];
-    act(() => onSuccess({ processed: 1, total: 3 }));
-
-    expect(mockToastNotifications.addWarning).toHaveBeenCalled();
+    await waitFor(() => expect(mockToastNotifications.addWarning).toHaveBeenCalled());
     expect(mockToastNotifications.addSuccess).not.toHaveBeenCalled();
   });
 
-  it('shows error toast when the bulk mutation fails', () => {
-    const actions = getCapturedBulkActions();
-    const unsnooze = actions.find((a) => a.key === 'unsnooze')!;
-    unsnooze.onClick({ selectedDocIds: ['0'] });
+  it('shows error toast when the bulk mutation fails', async () => {
+    mockHttp.post.mockRejectedValueOnce(new Error('API error'));
+    const unsnooze = getCapturedBulkActions().find((a) => a.key === 'unsnooze')!;
+    act(() => {
+      unsnooze.onClick({ selectedDocIds: ['0'] });
+    });
 
-    const [, { onError }] = mockBulkMutate.mock.calls[0];
-    act(() => onError());
-
-    expect(mockToastNotifications.addDanger).toHaveBeenCalled();
+    await waitFor(() => expect(mockToastNotifications.addDanger).toHaveBeenCalled());
   });
 });
