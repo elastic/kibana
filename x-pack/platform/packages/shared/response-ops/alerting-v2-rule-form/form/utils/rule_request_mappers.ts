@@ -12,6 +12,7 @@ import type {
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
 
 const createRunbookArtifactId = () =>
@@ -73,19 +74,20 @@ const mapRecoveryPolicy = (recoveryPolicy: FormValues['recoveryPolicy']) => {
 export const deriveAlertDelayModeFromStateTransition = (
   stateTransition?: StateTransition | null
 ): FormValues['stateTransitionAlertDelayMode'] => {
-  if (stateTransition?.pendingTimeframe != null) return 'duration';
-  if (stateTransition?.pendingCount != null && stateTransition.pendingCount > 0) return 'breaches';
-  return 'immediate';
+  if (stateTransition?.pendingTimeframe != null) return DELAY_MODE.duration;
+  if (stateTransition?.pendingCount != null && stateTransition.pendingCount > 0)
+    return DELAY_MODE.breaches;
+  return DELAY_MODE.immediate;
 };
 
 /** Derives recovery-delay mode from persisted `state_transition` (same rules as `RecoveryDelayField`). */
 export const deriveRecoveryDelayModeFromStateTransition = (
   stateTransition?: StateTransition | null
 ): FormValues['stateTransitionRecoveryDelayMode'] => {
-  if (stateTransition?.recoveringTimeframe != null) return 'duration';
+  if (stateTransition?.recoveringTimeframe != null) return DELAY_MODE.duration;
   if (stateTransition?.recoveringCount != null && stateTransition.recoveringCount > 0)
-    return 'recoveries';
-  return 'immediate';
+    return DELAY_MODE.recoveries;
+  return DELAY_MODE.immediate;
 };
 
 const mapStateTransition = (formValues: FormValues) => {
@@ -101,11 +103,11 @@ const mapStateTransition = (formValues: FormValues) => {
 
   const out: NonNullable<RuleRequestCommon['state_transition']> = {};
 
-  if (alertMode === 'immediate') {
+  if (alertMode === DELAY_MODE.immediate) {
     out.pending_count = 0;
-  } else if (alertMode === 'breaches' && stateTransition?.pendingCount != null) {
+  } else if (alertMode === DELAY_MODE.breaches && stateTransition?.pendingCount != null) {
     out.pending_count = stateTransition.pendingCount;
-  } else if (alertMode === 'duration') {
+  } else if (alertMode === DELAY_MODE.duration) {
     if (stateTransition?.pendingTimeframe != null) {
       out.pending_timeframe = stateTransition.pendingTimeframe;
     }
@@ -114,11 +116,11 @@ const mapStateTransition = (formValues: FormValues) => {
     }
   }
 
-  if (recoveryMode === 'immediate') {
+  if (recoveryMode === DELAY_MODE.immediate) {
     out.recovering_count = 0;
-  } else if (recoveryMode !== 'duration' && stateTransition?.recoveringCount != null) {
+  } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
     out.recovering_count = stateTransition.recoveringCount;
-  } else if (recoveryMode === 'duration') {
+  } else if (recoveryMode === DELAY_MODE.duration) {
     if (stateTransition?.recoveringTimeframe != null) {
       out.recovering_timeframe = stateTransition.recoveringTimeframe;
     }

@@ -15,6 +15,14 @@ const IMMEDIATE_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.immediateVa
   defaultMessage: 'Immediate',
 });
 
+const AND_OPERATOR_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.delayConnectorAnd', {
+  defaultMessage: 'and',
+});
+
+const OR_OPERATOR_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.delayConnectorOr', {
+  defaultMessage: 'or',
+});
+
 /**
  * Builds a human-readable delay string from a count, timeframe, and operator.
  *
@@ -39,14 +47,7 @@ const formatDelay = ({
   const hasTimeframe = timeframe != null;
 
   if (hasCount && hasTimeframe) {
-    const connector =
-      operator === 'AND'
-        ? i18n.translate('xpack.alertingV2.ruleDetails.delayConnectorAnd', {
-            defaultMessage: 'and',
-          })
-        : i18n.translate('xpack.alertingV2.ruleDetails.delayConnectorOr', {
-            defaultMessage: 'or',
-          });
+    const connector = operator === 'AND' ? AND_OPERATOR_LABEL : OR_OPERATOR_LABEL;
 
     return i18n.translate('xpack.alertingV2.ruleDetails.delayCountAndTimeframe', {
       defaultMessage: 'After {countPart} {connector} {timeframePart}',
