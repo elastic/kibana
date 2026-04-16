@@ -18,7 +18,7 @@ interface ApiKeyRuleProperties {
   apiKey: string | null;
   apiKeyOwner: string | null;
   apiKeyCreatedByUser: boolean | null;
-  uiamApiKey?: string | null;
+  uiamApiKey: string | null;
 }
 
 const encodeApiKey = (id?: string, key?: string): string | null => {
@@ -35,6 +35,7 @@ const getApiKeyRuleProperties = (
       apiKeyOwner: null,
       apiKey: null,
       apiKeyCreatedByUser: null,
+      uiamApiKey: null,
     };
   }
 
@@ -56,7 +57,7 @@ const getApiKeyRuleProperties = (
     apiKeyOwner: username,
     apiKey: encodedApiKey,
     apiKeyCreatedByUser: createdByUser,
-    ...(encodedUiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
+    uiamApiKey: encodedUiamApiKey,
   };
 };
 
