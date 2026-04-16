@@ -44,6 +44,7 @@ function findSubjects() {
 async function renderAndFindSubjects(
   props: Omit<DiscoverNoResultsProps, 'onDisableFilters' | 'data' | 'isTimeBased'>
 ) {
+  const user = userEvent.setup();
   const isTimeBased = props.dataView.isTimeBased();
   const toolkit = getDiscoverInternalStateMock({ services });
 
@@ -64,6 +65,7 @@ async function renderAndFindSubjects(
   });
 
   return {
+    user,
     subjects: findSubjects(),
   };
 }
@@ -134,18 +136,17 @@ describe('DiscoverNoResults', () => {
       });
 
       test('should handle no results after the button is pressed', async () => {
-        const user = userEvent.setup();
         searchMock.mockReturnValue(
           of({
             rawResponse: {},
           })
         );
-        const result = await renderAndFindSubjects({
+        const { subjects, user } = await renderAndFindSubjects({
           dataView: stubDataView,
           query: { language: 'lucene', query: '' },
           filters: [],
         });
-        expect(result.subjects).toMatchInlineSnapshot(`
+        expect(subjects).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
             "adjustSearch": false,
@@ -181,7 +182,6 @@ describe('DiscoverNoResults', () => {
       });
 
       test('should handle timeout after the button is pressed', async () => {
-        const user = userEvent.setup();
         searchMock.mockReturnValue(
           of({
             rawResponse: {
@@ -189,12 +189,12 @@ describe('DiscoverNoResults', () => {
             },
           })
         );
-        const result = await renderAndFindSubjects({
+        const { subjects, user } = await renderAndFindSubjects({
           dataView: stubDataView,
           query: { language: 'lucene', query: '' },
           filters: [],
         });
-        expect(result.subjects).toMatchInlineSnapshot(`
+        expect(subjects).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
             "adjustSearch": false,
@@ -230,7 +230,6 @@ describe('DiscoverNoResults', () => {
       });
 
       test('should handle failures after the button is pressed', async () => {
-        const user = userEvent.setup();
         searchMock.mockReturnValue(
           of({
             rawResponse: {
@@ -249,12 +248,12 @@ describe('DiscoverNoResults', () => {
             },
           })
         );
-        const result = await renderAndFindSubjects({
+        const { subjects, user } = await renderAndFindSubjects({
           dataView: stubDataView,
           query: { language: 'lucene', query: '' },
           filters: [],
         });
-        expect(result.subjects).toMatchInlineSnapshot(`
+        expect(subjects).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
             "adjustSearch": false,
@@ -290,8 +289,7 @@ describe('DiscoverNoResults', () => {
       });
 
       test('passes strict_date_optional_time format to range query', async () => {
-        const user = userEvent.setup();
-        await renderAndFindSubjects({
+        const { user } = await renderAndFindSubjects({
           dataView: stubDataView,
           query: { language: 'lucene', query: '' },
           filters: [],
@@ -347,18 +345,17 @@ describe('DiscoverNoResults', () => {
       });
 
       test('should handle no results when having filters and after the button is pressed', async () => {
-        const user = userEvent.setup();
         searchMock.mockReturnValue(
           of({
             rawResponse: {},
           })
         );
-        const result = await renderAndFindSubjects({
+        const { subjects, user } = await renderAndFindSubjects({
           dataView: stubDataView,
           query: { language: 'lucene', query: 'css*' },
           filters: [{} as Filter],
         });
-        expect(result.subjects).toMatchInlineSnapshot(`
+        expect(subjects).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": true,
             "adjustSearch": true,
