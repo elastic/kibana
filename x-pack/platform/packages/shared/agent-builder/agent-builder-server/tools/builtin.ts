@@ -14,6 +14,7 @@ import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/e
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerFn } from './handler';
 
 /**
@@ -71,11 +72,19 @@ export interface ToolAvailabilityConfig {
 
 export type ToolConfirmationPolicyMode = 'once' | 'always' | 'never';
 
+export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
+
 export interface ToolConfirmationPolicy {
   /**
    * If true, will prompt the user for confirmation when the agent wants to execute the tool, before the actual execution.
    */
   askUser?: ToolConfirmationPolicyMode;
+  /**
+   * If set, will be used to get the confirmation
+   */
+  getConfirmation?: (opts: {
+    toolParams: Record<string, unknown>;
+  }) => MaybePromise<ToolPolicyConfirmationDefinition>;
 }
 
 export interface BuiltInToolSpecificConfig {

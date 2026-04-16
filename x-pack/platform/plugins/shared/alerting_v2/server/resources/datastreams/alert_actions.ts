@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
-export const ALERT_ACTIONS_DATA_STREAM_VERSION = 1;
+export const ALERT_ACTIONS_DATA_STREAM_VERSION = 2;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
 export const ALERT_ACTIONS_ILM_POLICY_NAME = '.alert-actions-ilm-policy';
 
@@ -39,11 +39,13 @@ const mappings: MappingsDefinition = {
     action_type: { type: 'keyword' },
     group_hash: { type: 'keyword' },
     episode_id: { type: 'keyword' },
+    episode_status: { type: 'keyword' },
     rule_id: { type: 'keyword' },
     tags: { type: 'keyword' },
     notification_group_id: { type: 'keyword' },
     source: { type: 'keyword' },
     reason: { type: 'text' },
+    space_id: { type: 'keyword' },
   },
 };
 
@@ -55,11 +57,13 @@ export const alertActionSchema = z.object({
   actor: z.string().nullable(),
   action_type: z.string(),
   episode_id: z.string().optional(),
+  episode_status: z.string().optional(),
   rule_id: z.string(),
   notification_group_id: z.string().optional(),
   source: z.string().optional(),
   tags: z.array(z.string()).optional(),
   reason: z.string().optional(),
+  space_id: z.string(),
 });
 
 export type AlertAction = z.infer<typeof alertActionSchema>;

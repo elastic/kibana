@@ -13,7 +13,7 @@ import type {
   DashboardAttachmentData,
   DashboardSection,
 } from '@kbn/dashboard-agent-common';
-import { panelGridSchema } from '@kbn/dashboard-agent-common';
+import { panelGridSchema, sectionGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { toEmbeddablePanel } from '@kbn/dashboard-agent-common';
@@ -45,7 +45,7 @@ export const addMarkdownOperationSchema = z.object({
     .string()
     .optional()
     .describe(
-      'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+      'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
     ),
 });
 
@@ -54,10 +54,6 @@ const attachmentWithGridSchema = z.object({
   grid: panelGridSchema.describe(
     'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
   ),
-});
-
-const sectionGridSchema = z.object({
-  y: z.number().int().min(0).describe('Section position in outer dashboard grid coordinates.'),
 });
 
 export const addPanelsFromAttachmentsOperationSchema = z.object({
@@ -69,7 +65,7 @@ export const addPanelsFromAttachmentsOperationSchema = z.object({
           .string()
           .optional()
           .describe(
-            'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+            'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
           ),
       })
     )
@@ -117,7 +113,7 @@ export const addSectionOperationSchema = z.object({
 
 export const removeSectionOperationSchema = z.object({
   operation: z.literal('remove_section'),
-  uid: z.string().describe('Section uid to remove.'),
+  id: z.string().describe('Section id to remove.'),
   panelAction: z
     .enum(['promote', 'delete'])
     .describe('How to handle section panels: promote to top-level or delete them.'),
@@ -133,7 +129,7 @@ const createVisualizationPanelSchema = visualizationPanelInputSchema.extend({
     .string()
     .optional()
     .describe(
-      'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+      'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
     ),
 });
 
@@ -143,7 +139,7 @@ export const createVisualizationPanelsOperationSchema = z.object({
 });
 
 const editVisualizationPanelSchema = z.object({
-  panelId: z.string().describe('Existing panel uid to update.'),
+  panelId: z.string().describe('Existing panel id to update.'),
   query: z
     .string()
     .describe('A natural language query describing how to update the visualization.'),
@@ -161,17 +157,21 @@ const editVisualizationPanelSchema = z.object({
     ),
 });
 
-export const editVisualizationPanelsOperationSchema = z.object({
-  operation: z.literal('edit_visualization_panels'),
-  panels: z.array(editVisualizationPanelSchema).min(1),
-});
+export const editVisualizationPanelsOperationSchema = z
+  .object({
+    operation: z.literal('edit_visualization_panels'),
+    panels: z.array(editVisualizationPanelSchema).min(1),
+  })
+  .describe(
+    'Update existing ES|QL-backed Lens visualization panels by panelId. DSL, form-based, and other non-ES|QL panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
+  );
 
 export const updatePanelLayoutsOperationSchema = z.object({
   operation: z.literal('update_panel_layouts'),
   panels: z
     .array(
       z.object({
-        panelId: z.string().describe('UID of the panel to update.'),
+        panelId: z.string().describe('ID of the panel to update.'),
         grid: panelGridSchema
           .optional()
           .describe('New grid position/size. Omit to keep the current grid.'),
@@ -180,7 +180,7 @@ export const updatePanelLayoutsOperationSchema = z.object({
           .nullable()
           .optional()
           .describe(
-            'Move panel to an existing section by its uid. The section must already exist (use add_section first). null promotes to top level. Omit to keep the current location.'
+            'Move panel to an existing section by its id. The section must already exist (use add_section first). null promotes to top level. Omit to keep the current location.'
           ),
       })
     )
@@ -591,7 +591,7 @@ export const executeDashboardOperations = async ({
 
       case 'add_section': {
         let nextSection: DashboardSection = {
-          uid: uuidv4(),
+          id: uuidv4(),
           title: operation.title,
           collapsed: false,
           grid: operation.grid,
@@ -622,9 +622,9 @@ export const executeDashboardOperations = async ({
       }
 
       case 'remove_section': {
-        const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.uid);
+        const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.id);
         if (sectionIndex === -1) {
-          throw new Error(`Section "${operation.uid}" not found.`);
+          throw new Error(`Section "${operation.id}" not found.`);
         }
 
         const sectionToRemove = nextDashboardData.panels[sectionIndex] as DashboardSection;

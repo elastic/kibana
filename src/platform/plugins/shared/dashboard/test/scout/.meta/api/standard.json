@@ -1,5 +1,5 @@
 {
-  "sha1": "2f4f9a3d03259ae9c5d68ddf23b0a9528df6af5d",
+  "sha1": "cbd22a1f88226e7aa74deccde26bc668f32eb436",
   "tests": [
     {
       "id": "65fe2f541b6ad11-864f48536870f42",
@@ -23,33 +23,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 37,
-        "column": 10
-      }
-    },
-    {
-      "id": "65fe2f541b6ad11-199709156bcdd3f",
-      "title": "dashboards - create can create a dashboard with a specific id",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 55,
+        "line": 31,
         "column": 10
       }
     },
@@ -75,85 +49,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 75,
-        "column": 10
-      }
-    },
-    {
-      "id": "65fe2f541b6ad11-e1850999201863d",
-      "title": "dashboards - create return error if provided id already exists",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 93,
-        "column": 10
-      }
-    },
-    {
-      "id": "65fe2f541b6ad11-967f24ae200a1e9",
-      "title": "dashboards - create validation - returns error when id is too long",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 111,
-        "column": 10
-      }
-    },
-    {
-      "id": "65fe2f541b6ad11-6593cb89ca9fca7",
-      "title": "dashboards - create validation - returns error when id contains invalid characters",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 131,
+        "line": 50,
         "column": 10
       }
     },
@@ -179,7 +75,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 154,
+        "line": 68,
         "column": 10
       }
     },
@@ -205,7 +101,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 170,
+        "line": 84,
         "column": 10
       }
     },
@@ -231,7 +127,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 189,
+        "line": 103,
         "column": 10
       }
     },
@@ -574,8 +470,8 @@
       }
     },
     {
-      "id": "2e698b8125bdc32-c7b1636b298cd21",
-      "title": "dashboards - update should return 200 with an updated dashboard",
+      "id": "2e698b8125bdc32-18ea69a143e22e5",
+      "title": "dashboards - upsert should update existing dashboard",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -600,8 +496,8 @@
       }
     },
     {
-      "id": "2e698b8125bdc32-1e425d53d08dff0",
-      "title": "dashboards - update should return 404 when updating a non-existent dashboard",
+      "id": "2e698b8125bdc32-7c00458123792e5",
+      "title": "dashboards - upsert should create new dashboard",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -626,8 +522,8 @@
       }
     },
     {
-      "id": "2e698b8125bdc32-9fabebf4da42d14",
-      "title": "dashboards - update validation - returns error when object is not provided",
+      "id": "2e698b8125bdc32-0b4e483f285c872",
+      "title": "dashboards - upsert validation - returns 400 when body is not empty",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -652,8 +548,8 @@
       }
     },
     {
-      "id": "2e698b8125bdc32-8b330e6d0053d14",
-      "title": "dashboards - update validation - returns error when access_control is provided",
+      "id": "2e698b8125bdc32-3a01e7d01b4e606",
+      "title": "dashboards - upsert validation - returns 400 when access_control is provided",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -678,8 +574,8 @@
       }
     },
     {
-      "id": "2e698b8125bdc32-7e1b6c03b8cfb6a",
-      "title": "dashboards - update validation - returns error if panels is not an array",
+      "id": "2e698b8125bdc32-f107d039a7ee45f",
+      "title": "dashboards - upsert validation - returns 400 if panels is not an array",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -699,13 +595,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 110,
+        "line": 107,
         "column": 10
       }
     },
     {
-      "id": "2e698b8125bdc32-19cff49d1b8bc8b",
-      "title": "dashboards - update validation - returns error if user does not have permission to update a dashboard",
+      "id": "2e698b8125bdc32-2d61d99873e8e38",
+      "title": "dashboards - upsert validation - returns 403 if user does not have permission to update a dashboard",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -725,7 +621,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 129,
+        "line": 123,
         "column": 10
       }
     }

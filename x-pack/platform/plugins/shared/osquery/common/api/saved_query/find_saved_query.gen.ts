@@ -16,8 +16,103 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * A paginated list of saved queries.
+ */
 export type FindSavedQueryResponse = z.infer<typeof FindSavedQueryResponse>;
-export const FindSavedQueryResponse = z.object({});
+export const FindSavedQueryResponse = z.object({
+  /**
+   * The current page number.
+   */
+  page: z.number().int().optional(),
+  /**
+   * The number of results per page.
+   */
+  per_page: z.number().int().optional(),
+  /**
+   * The total number of saved queries.
+   */
+  total: z.number().int().optional(),
+  /**
+   * The list of saved queries.
+   */
+  data: z.array(z.object({})).optional(),
+});
 
+/**
+ * The details of a single saved query.
+ */
 export type FindSavedQueryDetailResponse = z.infer<typeof FindSavedQueryDetailResponse>;
-export const FindSavedQueryDetailResponse = z.object({});
+export const FindSavedQueryDetailResponse = z.object({
+  /**
+   * The saved query details.
+   */
+  data: z
+    .object({
+      /**
+       * The saved object ID.
+       */
+      saved_object_id: z.string().optional(),
+      /**
+       * The saved query ID.
+       */
+      id: z.string().optional(),
+      /**
+       * The saved query description.
+       */
+      description: z.string().optional(),
+      /**
+       * The SQL query.
+       */
+      query: z.string().optional(),
+      /**
+       * The query interval in seconds.
+       */
+      interval: z.string().optional(),
+      /**
+       * The query timeout in seconds.
+       */
+      timeout: z.number().int().optional(),
+      /**
+       * Whether the query is a snapshot query.
+       */
+      snapshot: z.boolean().optional(),
+      /**
+       * Whether to include results for removed processes.
+       */
+      removed: z.boolean().optional(),
+      /**
+       * The target platform(s).
+       */
+      platform: z.string().optional(),
+      /**
+       * The minimum osquery version.
+       */
+      version: z.string().optional(),
+      /**
+       * The ECS mapping configuration.
+       */
+      ecs_mapping: z.object({}).optional(),
+      /**
+       * The creation timestamp.
+       */
+      created_at: z.string().optional(),
+      /**
+       * The user who created the saved query.
+       */
+      created_by: z.string().optional(),
+      /**
+       * The last update timestamp.
+       */
+      updated_at: z.string().optional(),
+      /**
+       * The user who last updated the saved query.
+       */
+      updated_by: z.string().optional(),
+      /**
+       * Whether this is a prebuilt saved query.
+       */
+      prebuilt: z.boolean().optional(),
+    })
+    .optional(),
+});

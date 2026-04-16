@@ -109,7 +109,6 @@ export const DissectPatternAISuggestions = ({
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 aiFeatures={aiFeatures}
-                iconType="refresh"
                 size="s"
                 onClick={(connectorId) => {
                   refreshSuggestions({
@@ -231,32 +230,34 @@ export function DissectPatternSuggestion({
         alignItems="flexStart"
         direction="column"
       >
-        <EuiFlexItem grow={false}>
-          <EuiBadgeGroup>
-            <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.dissectPatternSuggestion.matchRateBadge',
-                {
-                  defaultMessage: '{percentage}% Matched',
-                  values: {
-                    percentage: (processorMetrics.parsed_rate * 100).toFixed(),
-                  },
-                }
-              )}
-            </EuiBadge>
-            <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.dissectPatternSuggestion.fieldCountBadge',
-                {
-                  defaultMessage: '{count} Fields',
-                  values: {
-                    count: processorMetrics.detected_fields.length,
-                  },
-                }
-              )}
-            </EuiBadge>
-          </EuiBadgeGroup>
-        </EuiFlexItem>
+        {processorMetrics && (
+          <EuiFlexItem grow={false}>
+            <EuiBadgeGroup>
+              <EuiBadge color="hollow">
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.dissectPatternSuggestion.matchRateBadge',
+                  {
+                    defaultMessage: '{percentage}% Matched',
+                    values: {
+                      percentage: (processorMetrics.parsed_rate * 100).toFixed(),
+                    },
+                  }
+                )}
+              </EuiBadge>
+              <EuiBadge color="hollow">
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.dissectPatternSuggestion.fieldCountBadge',
+                  {
+                    defaultMessage: '{count} Fields',
+                    values: {
+                      count: processorMetrics.detected_fields.length,
+                    },
+                  }
+                )}
+              </EuiBadge>
+            </EuiBadgeGroup>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButton
             iconType="check"

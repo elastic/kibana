@@ -48,3 +48,10 @@ export const TAB_STATE_URL_KEY = '_tab'; // `_t` is already used by Kibana for t
  */
 export const TRACES_PRODUCT_FEATURE_ID = 'discover:traces';
 export const METRICS_EXPERIENCE_PRODUCT_FEATURE_ID = 'discover:metrics-experience';
+
+/**
+ * When enabled, Discover search embeddable uses transformIn/transformOut to convert between
+ * API format (DiscoverSessionEmbeddableState) and stored format (StoredSearchEmbeddableState).
+ * When disabled, panel state is stored and loaded as-is (pre-transform behavior).
+ */
+export const EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY = 'discover.embeddableTransforms';

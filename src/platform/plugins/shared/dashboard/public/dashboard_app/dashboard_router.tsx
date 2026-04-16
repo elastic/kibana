@@ -202,7 +202,7 @@ export async function mountApp({
     coreServices.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
   render(app, element);

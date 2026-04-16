@@ -16,7 +16,11 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
 import { isFormBasedLayer, operationFromColumn } from '../../../utils';
 import { getValueApiColumn } from '../../../columns/esql_column';
-import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '../../../coloring';
+import {
+  AUTO_COLOR,
+  fromColorByValueLensStateToAPI,
+  fromColorMappingLensStateToAPI,
+} from '../../../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
 import { isMetricColumnESQL, isMetricColumnNoESQL, colorModeToApplyColorTo } from '../helpers';
 import { stripUndefined } from '../../utils';
@@ -63,7 +67,7 @@ function buildColorProps(
     };
   }
 
-  return { apply_color_to: applyColorTo };
+  return { apply_color_to: applyColorTo, color: AUTO_COLOR };
 }
 
 type APIMetricProps = APIMetricRowCommonProps &
@@ -108,9 +112,10 @@ function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
     ...(colorMode && colorMode !== 'none'
       ? {
           apply_color_to: colorModeToApplyColorTo(colorMode),
-          ...(colorMapping || palette
-            ? { color: fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput) }
-            : {}),
+          color:
+            colorMapping || palette
+              ? fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
+              : AUTO_COLOR,
         }
       : {}),
   };

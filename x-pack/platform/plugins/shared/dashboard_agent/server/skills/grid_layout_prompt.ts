@@ -15,10 +15,13 @@ Every \`add_panels_from_attachments\` item requires \`grid: { x, y, w, h }\`. Th
 
 Use these sizes — **do not make metric or gauge panels full-width**:
 
-- **Metric / Gauge** → \`w: 8–16, h: 5–6\`. These are single-number panels — keep them **small**. Fit 3–6 per row.
+- **Metric** → \`w: 8–16, h: 5–6\`. These are single-number panels — keep them **small**. Fit 3–6 per row.
   - 6 metrics in a row: each \`w: 8, h: 5\`
   - 4 metrics in a row: each \`w: 12, h: 5\`
   - 3 metrics in a row: each \`w: 16, h: 6\`
+- **Gauge** → \`w: 12–16, h: 9–12\`. Gauges need extra vertical space for the dial, but should still stay compact. Fit 3–4 per row.
+  - 4 gauges in a row: each \`w: 12, h: 9\`
+  - 3 gauges in a row: each \`w: 16, h: 10–12\`
 - **XY (line / area / bar)** → \`w: 24, h: 10–12\` (half-width) or \`w: 48, h: 14–16\` (full-width for primary time series).
 - **Heatmap** → \`w: 24–48, h: 10–12\`. Needs height for the color matrix.
 - **Tagcloud** → \`w: 24, h: 8–10\`.

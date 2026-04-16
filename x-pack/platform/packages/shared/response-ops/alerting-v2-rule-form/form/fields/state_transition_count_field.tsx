@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { MAX_CONSECUTIVE_BREACHES } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { NumberInput } from './number_input';
+import { useRuleFormMeta } from '../contexts';
 
 const DEFAULT_COUNT = 2;
 
@@ -41,21 +42,16 @@ export const StateTransitionCountField = ({
   prependLabel,
   variant = 'pending',
 }: StateTransitionCountFieldProps) => {
-  const { control, getValues, setValue } = useFormContext<FormValues>();
+  const { control } = useFormContext<FormValues>();
+  const { layout } = useRuleFormMeta();
   const fieldName = FIELD_NAMES[variant];
   const testSubj = TEST_SUBJS[variant];
-
-  useEffect(() => {
-    const currentCount = getValues(fieldName);
-    if (currentCount == null) {
-      setValue(fieldName, DEFAULT_COUNT);
-    }
-  }, [getValues, setValue, fieldName]);
 
   return (
     <Controller
       name={fieldName}
       control={control}
+      defaultValue={DEFAULT_COUNT}
       rules={{
         required: i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countRequiredError', {
           defaultMessage: 'Consecutive breaches is required.',
@@ -83,6 +79,7 @@ export const StateTransitionCountField = ({
           isInvalid={!!error}
           data-test-subj={testSubj}
           fullWidth
+          compressed={layout === 'flyout'}
           prepend={prependLabel ? [prependLabel] : undefined}
         />
       )}

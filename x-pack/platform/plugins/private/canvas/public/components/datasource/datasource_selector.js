@@ -17,7 +17,7 @@ export const DatasourceSelector = ({ onSelect, datasources, current }) => (
         title={d.displayName}
         titleElement="h5"
         titleSize="xs"
-        icon={<EuiIcon type={d.image} size="l" />}
+        icon={<EuiIcon type={d.image} size="l" aria-hidden />}
         description={d.help}
         layout="horizontal"
         className="canvasDataSource__card"

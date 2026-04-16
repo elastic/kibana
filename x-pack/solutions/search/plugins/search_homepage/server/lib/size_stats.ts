@@ -16,23 +16,29 @@ export const fetchSizeStats = async (
 ): Promise<StatsResponse> => {
   if (isServerless) {
     // This API is only available on Serverless.
-    const {
-      _total: { size_in_bytes: sizeInBytes, num_docs: numDocs },
-    } = await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
+    const value = await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
       method: 'GET',
       path: '/_metering/stats',
     });
 
+    const {
+      _total: { size_in_bytes: sizeInBytes },
+      indices,
+    } = value;
+    const documentsCountExcludingHiddenIndices = indices
+      .filter((index) => !index.name.startsWith('.'))
+      .reduce((acc, index) => index.num_docs + acc, 0);
+
     return {
       sizeStats: {
         size: new ByteSizeValue(sizeInBytes).toString(),
-        documents: numDocs,
+        documents: documentsCountExcludingHiddenIndices,
       },
     };
   } else {
     // Hosted/Self managed
     const { _all: stats } = await client.asCurrentUser.indices.stats({
-      expand_wildcards: ['hidden', 'all'],
+      expand_wildcards: ['open', 'closed'],
       forbid_closed_indices: false,
       metric: ['docs', 'store'],
     });

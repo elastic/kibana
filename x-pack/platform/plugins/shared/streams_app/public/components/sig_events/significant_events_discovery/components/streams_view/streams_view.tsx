@@ -6,42 +6,36 @@
  */
 
 import type { EuiSearchBarProps, Query } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSearchBar,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { TaskStatus } from '@kbn/streams-schema';
+import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { TableRow } from './utils';
-import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { useIndexPatternsConfig } from '../../../../../hooks/use_index_patterns_config';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useInsightsDiscoveryApi } from '../../../../../hooks/sig_events/use_insights_discovery_api';
+import { useConnectorConfig } from '../../../../../hooks/sig_events/use_connector_config';
+import type { ScheduleOnboardingOptions } from '../../../../../hooks/use_onboarding_api';
 import { useOnboardingApi } from '../../../../../hooks/use_onboarding_api';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useTaskPolling } from '../../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
+import { GenerateSplitButton } from './generate_split_button';
+import { InsightsSplitButton } from './insights_split_button';
 import {
-  DISCOVER_INSIGHTS_BUTTON_LABEL,
   getInsightsCompleteToastTitle,
   INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON,
   INSIGHTS_SCHEDULING_FAILURE_TITLE,
   NO_INSIGHTS_TOAST_TITLE,
   ONBOARDING_FAILURE_TITLE,
   ONBOARDING_SCHEDULING_FAILURE_TITLE,
-  RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
@@ -71,6 +65,20 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const [isWaitingForInsightsTask, setIsWaitingForInsightsTask] = useState(false);
   const { filterStreamsByIndexPatterns } = useIndexPatternsConfig();
 
+  const {
+    featuresConnectors,
+    queriesConnectors,
+    discoveryConnectors,
+    allConnectors,
+    connectorError,
+    isConnectorCatalogUnavailable,
+    discoveryConnectorOverride,
+    setDiscoveryConnectorOverride,
+    displayDiscoveryConnectorId,
+    onboardingConfig,
+    setOnboardingConfig,
+  } = useConnectorConfig();
+
   const streamsListFetch = useFetchStreams({
     select: (result) => {
       return {
@@ -88,7 +96,6 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     Record<string, TaskResult<OnboardingResult>>
   >({});
   const router = useStreamsAppRouter();
-  const aiFeatures = useAIFeatures();
   const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi();
   const { scheduleInsightsDiscoveryTask, getInsightsDiscoveryTaskStatus } =
     useInsightsDiscoveryApi();
@@ -105,7 +112,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     const streamNames =
       selectedStreams.length > 0 ? selectedStreams.map((row) => row.stream.name) : undefined;
     try {
-      await scheduleInsightsDiscoveryTask(streamNames);
+      await scheduleInsightsDiscoveryTask(streamNames, discoveryConnectorOverride);
       setIsWaitingForInsightsTask(true);
       await getInsightsTaskStatus();
     } catch (error) {
@@ -114,7 +121,13 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
       });
       throw error;
     }
-  }, [scheduleInsightsDiscoveryTask, selectedStreams, toasts, getInsightsTaskStatus]);
+  }, [
+    scheduleInsightsDiscoveryTask,
+    selectedStreams,
+    discoveryConnectorOverride,
+    toasts,
+    getInsightsTaskStatus,
+  ]);
 
   // When we started the insights task from this view and it completes, show toast
   useEffect(() => {
@@ -211,45 +224,75 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     });
   }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.data]);
 
-  const bulkScheduleOnboardingTask = async (streamList: string[]) => {
-    try {
-      await pMap(
-        streamList,
-        async (streamName) => {
-          await scheduleOnboardingTask(streamName);
-        },
-        { concurrency: 10 }
-      );
-    } catch (error) {
-      toasts.addError(getFormattedError(error), {
-        title: ONBOARDING_SCHEDULING_FAILURE_TITLE,
+  const isStreamActionable = useCallback(
+    (streamName: string) => {
+      const result = streamOnboardingResultMap[streamName];
+      if (!result) return false;
+      return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status);
+    },
+    [streamOnboardingResultMap]
+  );
+
+  const getActionableStreamNames = useCallback(
+    () =>
+      selectedStreams
+        .filter((item) => isStreamActionable(item.stream.name))
+        .map((item) => item.stream.name),
+    [selectedStreams, isStreamActionable]
+  );
+
+  const bulkScheduleOnboardingTask = useCallback(
+    async (streamList: string[], options?: ScheduleOnboardingOptions) => {
+      try {
+        await pMap(
+          streamList,
+          async (streamName) => {
+            await scheduleOnboardingTask(streamName, options);
+          },
+          { concurrency: 10 }
+        );
+      } catch (error) {
+        toasts.addError(getFormattedError(error), { title: ONBOARDING_SCHEDULING_FAILURE_TITLE });
+      }
+
+      streamList.forEach((streamName) => {
+        onboardingStatusUpdateQueue.add(streamName);
       });
-    }
-  };
+      processStatusUpdateQueue();
+    },
+    [scheduleOnboardingTask, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
+  );
 
-  const onBulkOnboardStreamsClick = async () => {
-    const streamList = selectedStreams
-      .filter((item) => {
-        const onboardingResult = streamOnboardingResultMap[item.stream.name];
-
-        return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(onboardingResult.status);
-      })
-      .map((item) => item.stream.name);
-
+  const onBulkOnboardStreamsClick = useCallback(async () => {
+    const streamList = getActionableStreamNames();
     setSelectedStreams([]);
+    await bulkScheduleOnboardingTask(streamList, onboardingConfig);
+  }, [getActionableStreamNames, bulkScheduleOnboardingTask, onboardingConfig]);
 
-    await bulkScheduleOnboardingTask(streamList);
-    streamList.forEach((streamName) => {
-      onboardingStatusUpdateQueue.add(streamName);
-    });
-    processStatusUpdateQueue();
-  };
+  const onBulkOnboardStep = useCallback(
+    async (step: OnboardingStep) => {
+      const streamList = getActionableStreamNames();
+      setSelectedStreams([]);
+      await bulkScheduleOnboardingTask(streamList, {
+        steps: [step],
+        connectors: onboardingConfig.connectors,
+      });
+    },
+    [getActionableStreamNames, bulkScheduleOnboardingTask, onboardingConfig.connectors]
+  );
+
+  const onBulkOnboardFeaturesOnly = useCallback(
+    () => onBulkOnboardStep(OnboardingStep.FeaturesIdentification),
+    [onBulkOnboardStep]
+  );
+
+  const onBulkOnboardQueriesOnly = useCallback(
+    () => onBulkOnboardStep(OnboardingStep.QueriesGeneration),
+    [onBulkOnboardStep]
+  );
 
   const onOnboardStreamActionClick = async (streamName: string) => {
     await bulkScheduleOnboardingTask([streamName]);
-
-    onboardingStatusUpdateQueue.add(streamName);
-    processStatusUpdateQueue();
   };
 
   const onStopOnboardingActionClick = (streamName: string) => {
@@ -273,39 +316,51 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           <EuiFlexItem grow={false} css={datePickerStyle}>
             <StreamsAppSearchBar showDatePicker />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <GenerateSplitButton
+              config={onboardingConfig}
+              allConnectors={allConnectors}
+              connectorError={connectorError}
+              featuresResolvedConnectorId={featuresConnectors.resolvedConnectorId}
+              queriesResolvedConnectorId={queriesConnectors.resolvedConnectorId}
+              onConfigChange={setOnboardingConfig}
+              onRun={onBulkOnboardStreamsClick}
+              onRunFeaturesOnly={onBulkOnboardFeaturesOnly}
+              onRunQueriesOnly={onBulkOnboardQueriesOnly}
+              isRunDisabled={
+                selectedStreams.length === 0 ||
+                isConnectorCatalogUnavailable ||
+                featuresConnectors.loading ||
+                queriesConnectors.loading
+              }
+              isConfigDisabled={selectedStreams.length === 0}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <InsightsSplitButton
+              allConnectors={allConnectors}
+              connectorError={connectorError}
+              resolvedConnectorId={discoveryConnectors.resolvedConnectorId}
+              displayConnectorId={displayDiscoveryConnectorId}
+              onConnectorChange={setDiscoveryConnectorOverride}
+              onRun={scheduleInsightsTask}
+              isLoading={isSchedulingInsights || isWaitingForInsightsTask}
+              isDisabled={isConnectorCatalogUnavailable || discoveryConnectors.loading}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiText size="s">
-            {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
-              {
-                defaultMessage: '{count} streams',
-                values: { count: streamsListFetch.data?.streams.length ?? 0 },
-              }
-            )}
-          </EuiText>
-
-          <EuiButtonEmpty
-            onClick={onBulkOnboardStreamsClick}
-            iconType="radar"
-            disabled={selectedStreams.length === 0}
-          >
-            {RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL}
-          </EuiButtonEmpty>
-
-          <EuiButtonEmpty
-            iconType="crosshair"
-            onClick={() => scheduleInsightsTask()}
-            disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
-            isLoading={isSchedulingInsights || isWaitingForInsightsTask}
-            data-test-subj="significant_events_discover_insights_button"
-          >
-            {DISCOVER_INSIGHTS_BUTTON_LABEL}
-          </EuiButtonEmpty>
-        </EuiFlexGroup>
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
+            {
+              defaultMessage: '{count} streams',
+              values: { count: streamsListFetch.data?.streams.length ?? 0 },
+            }
+          )}
+        </EuiText>
       </EuiFlexItem>
 
       <EuiFlexItem>
@@ -314,7 +369,11 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           streamOnboardingResultMap={streamOnboardingResultMap}
           loading={streamsListFetch.isLoading}
           searchQuery={searchQuery}
-          selection={{ selected: selectedStreams, onSelectionChange: setSelectedStreams }}
+          selection={{
+            selected: selectedStreams,
+            onSelectionChange: setSelectedStreams,
+            selectable: (row) => isStreamActionable(row.stream.name),
+          }}
           onOnboardStreamActionClick={onOnboardStreamActionClick}
           onStopOnboardingActionClick={onStopOnboardingActionClick}
         />

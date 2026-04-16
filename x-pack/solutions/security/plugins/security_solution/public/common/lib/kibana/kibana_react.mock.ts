@@ -278,6 +278,7 @@ export const createStartServicesMock = (
     alerting,
     siemMigrations,
     sessionStorage,
+    aiRuleCreation: jest.fn(),
     plugins: { onStart: jest.fn() },
   } as unknown as StartServices;
 };

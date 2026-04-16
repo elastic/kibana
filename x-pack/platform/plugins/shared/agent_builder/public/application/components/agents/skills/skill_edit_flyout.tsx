@@ -32,6 +32,7 @@ import { useTools } from '../../../hooks/tools/use_tools';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { FLYOUT_WIDTH } from '../common/constants';
+import type { SkillFormData } from '../../skills/skill_form_validation';
 import { SkillForm } from './skill_form';
 
 interface SkillEditFlyoutProps {
@@ -69,6 +70,7 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
         description: skill.description,
         content: skill.content,
         tool_ids: skill.tool_ids ?? [],
+        referenced_content: skill.referenced_content ?? [],
       });
     }
   }, [skill, reset]);
@@ -79,12 +81,13 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
   );
 
   const onSubmit = useCallback(
-    async (data: { name: string; description: string; content: string; tool_ids: string[] }) => {
+    async (data: SkillFormData) => {
       await editSkill({
         name: data.name,
         description: data.description,
         content: data.content,
         tool_ids: data.tool_ids,
+        referenced_content: data.referenced_content,
       });
     },
     [editSkill]

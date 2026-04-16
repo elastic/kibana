@@ -179,7 +179,11 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiSpacer size="l" />
-              <EuiLoadingLogo logo="logoObservability" size="l" />
+              <EuiLoadingLogo
+                logo="logoObservability"
+                size="l"
+                data-test-subj="apmMainTemplateServiceAgentLoader"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (

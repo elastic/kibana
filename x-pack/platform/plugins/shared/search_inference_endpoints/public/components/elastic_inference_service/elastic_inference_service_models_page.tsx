@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiSpacer,
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -103,16 +104,18 @@ export const ElasticInferenceServiceModelsPage = () => {
 
   return (
     <>
+      <EuiSpacer size="l" />
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="flexStart">
+            <EuiFlexItem grow={true}>
               <EuiFieldSearch
                 placeholder={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder',
                   { defaultMessage: 'Search models...' }
                 )}
                 value={searchQuery}
+                fullWidth={true}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchbar',
@@ -120,6 +123,7 @@ export const ElasticInferenceServiceModelsPage = () => {
                     defaultMessage: 'Find Elastic Inference Service models',
                   }
                 )}
+                data-test-subj="eisModelsSearchBar"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -142,6 +146,7 @@ export const ElasticInferenceServiceModelsPage = () => {
                     isSelected={selectedTaskTypes.has(category)}
                     isToggle
                     onClick={() => toggleTaskType(category)}
+                    data-test-subj={`eisTaskTypeFilter-${category}`}
                   >
                     {label}
                   </EuiFilterButton>
@@ -153,6 +158,7 @@ export const ElasticInferenceServiceModelsPage = () => {
         <EuiFlexItem>
           {filtered.length === 0 ? (
             <EuiEmptyPrompt
+              data-test-subj="eisNoModelsFound"
               title={
                 <h3>
                   {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.noResults', {
@@ -162,7 +168,7 @@ export const ElasticInferenceServiceModelsPage = () => {
               }
             />
           ) : (
-            <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3}>
+            <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3} data-test-subj="eisModelCards">
               {filtered.map((m) => (
                 <EuiFlexItem key={`${m.service}::${m.modelName}`}>
                   <ModelCard

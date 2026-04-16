@@ -922,7 +922,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/new_chat_by_title/index.tsx",
-        "lineNumber": 82,
+        "lineNumber": 73,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

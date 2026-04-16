@@ -34,3 +34,7 @@ Learn how users can export and import prebuilt rules:
 
 - [Test plan: exporting prebuilt rules](./prebuilt_rule_export.md)
 - [Test plan: importing prebuilt rules](./prebuilt_rule_import.md)
+
+Learn how deprecated prebuilt rules are handled:
+
+- [Test plan: deprecated prebuilt rules](./prebuilt_rule_deprecation.md)

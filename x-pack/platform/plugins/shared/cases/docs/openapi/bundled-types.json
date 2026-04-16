@@ -73,7 +73,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -104,7 +104,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -114,7 +114,7 @@
           {
             "label": "curl",
             "lang": "curl",
-            "source": "curl \\\n  --request DELETE 'https://localhost:5601/api/cases?ids=%5B%22030e6e34-6470-4001-864f-b229511ad188%22%2C%22e662ff34-0493-4538-b9d1-6706ced02ff2%22%5D' \\\n  --header \"Authorization: $API_KEY\" \\\n  --header \"Content-Type: application/json\"\n  --header \"kbn-xsrf: true\"\n"
+            "source": "curl \\\n  --request DELETE 'https://localhost:5601/api/cases?ids=%5B%22030e6e34-6470-4001-864f-b229511ad188%22%2C%22e662ff34-0493-4538-b9d1-6706ced02ff2%22%5D' \\\n  --header \"Authorization: $API_KEY\" \\\n  --header \"Content-Type: application/json\" \\\n  --header \"kbn-xsrf: true\"\n"
           },
           {
             "label": "Console",
@@ -173,7 +173,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -287,7 +287,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -321,22 +321,20 @@
                   "type": "array",
                   "maxItems": 10000,
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "The case identifier."
-                      },
-                      "title": {
-                        "type": "string",
-                        "description": "The case title."
-                      }
-                    }
+                    "$ref": "#/components/schemas/related_case"
                   },
                   "example": [
                     {
                       "id": "06116b80-e1c3-11ec-be9b-9b1838238ee6",
-                      "title": "security_case"
+                      "title": "security_case",
+                      "description": "Investigating suspicious activity",
+                      "status": "open",
+                      "createdAt": "2020-02-19T23:06:33.798Z",
+                      "totals": {
+                        "alerts": 1,
+                        "events": 0,
+                        "userComments": 0
+                      }
                     }
                   ]
                 }
@@ -348,7 +346,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -360,7 +358,7 @@
       "get": {
         "summary": "Get case settings",
         "operationId": "getCaseConfigurationDefaultSpace",
-        "description": "Get setting details such as the closure type, custom fields, templatse, and the default connector for cases. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.\n",
+        "description": "Get setting details such as the closure type, custom fields, templates, and the default connector for cases. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.\n",
         "tags": [
           "cases"
         ],
@@ -574,7 +572,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -809,7 +807,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1049,7 +1047,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1121,7 +1119,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1167,7 +1165,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1179,16 +1177,13 @@
       "get": {
         "summary": "Get case information",
         "operationId": "getCaseDefaultSpace",
-        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.\n",
+        "description": "Returns case details. The response does not include a comments property;  use the find case comments API to retrieve comments. The totalComment field  reflects the actual number of user comments on the case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.\n",
         "tags": [
           "cases"
         ],
         "parameters": [
           {
             "$ref": "#/components/parameters/case_id"
-          },
-          {
-            "$ref": "#/components/parameters/includeComments"
           }
         ],
         "responses": {
@@ -1197,13 +1192,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/case_response_properties"
+                  "$ref": "#/components/schemas/case_response_get_case"
                 },
                 "examples": {
                   "getDefaultCaseResponse": {
                     "$ref": "#/components/examples/get_case_response"
                   },
-                  "getDefaultObservabilityCaseReponse": {
+                  "getDefaultObservabilityCaseResponse": {
                     "$ref": "#/components/examples/get_case_observability_response"
                   }
                 }
@@ -1215,7 +1210,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1261,7 +1256,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1321,7 +1316,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1352,7 +1347,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1410,7 +1405,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1420,7 +1415,7 @@
     },
     "/api/cases/{caseId}/comments/_find": {
       "get": {
-        "summary": "Find case comments and alerts",
+        "summary": "Find case comments",
         "operationId": "findCaseCommentsDefaultSpace",
         "description": "Retrieves a paginated list of comments for a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.\n",
         "tags": [
@@ -1446,7 +1441,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/case_response_properties"
+                  "$ref": "#/components/schemas/find_comments_response"
+                },
+                "examples": {
+                  "findCaseCommentsResponse": {
+                    "$ref": "#/components/examples/find_case_comments_response"
+                  }
                 }
               }
             }
@@ -1456,7 +1456,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1492,7 +1492,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1542,7 +1542,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1600,7 +1600,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1611,7 +1611,7 @@
     "/api/cases/{caseId}/user_actions/_find": {
       "get": {
         "summary": "Find case activity",
-        "description": "Retrives a paginated list of user activity for a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.\n",
+        "description": "Retrieves a paginated list of user activity for a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.\n",
         "operationId": "findCaseActivityDefaultSpace",
         "tags": [
           "cases"
@@ -1672,7 +1672,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1748,7 +1748,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -1803,7 +1803,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
+                  "$ref": "#/components/schemas/response_4xx"
                 }
               }
             }
@@ -2077,16 +2077,6 @@
         "schema": {
           "type": "string",
           "example": "9c235210-6834-11ea-a78c-6ffb38a34414"
-        }
-      },
-      "includeComments": {
-        "in": "query",
-        "name": "includeComments",
-        "description": "Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.",
-        "deprecated": true,
-        "schema": {
-          "type": "boolean",
-          "default": true
         }
       },
       "comment_id": {
@@ -2551,6 +2541,11 @@
             "description": "Turns alert syncing on or off.",
             "type": "boolean",
             "example": true
+          },
+          "extractObservables": {
+            "description": "When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.\n",
+            "type": "boolean",
+            "example": false
           }
         }
       },
@@ -2562,8 +2557,7 @@
           "high",
           "low",
           "medium"
-        ],
-        "default": "low"
+        ]
       },
       "case_tags": {
         "description": "The words and phrases that help categorize cases. It can be an empty array.\n",
@@ -2721,6 +2715,88 @@
           "username"
         ]
       },
+      "actions_comment_response_properties": {
+        "title": "Case response properties for actions comments",
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "actions": {
+            "type": "object",
+            "properties": {
+              "targets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "endpointId": {
+                      "type": "string",
+                      "example": 1
+                    },
+                    "hostname": {
+                      "type": "string",
+                      "example": "host-01"
+                    }
+                  }
+                }
+              },
+              "type": {
+                "type": "string",
+                "example": "isolate"
+              }
+            }
+          },
+          "comment": {
+            "type": "string",
+            "example": "Isolating the host from the case UI."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-05-13T09:16:17.416Z"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/case_response_created_by_properties"
+          },
+          "id": {
+            "type": "string",
+            "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owner"
+          },
+          "pushed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": null
+          },
+          "pushed_by": {
+            "$ref": "#/components/schemas/case_response_pushed_by_properties"
+          },
+          "type": {
+            "type": "string",
+            "example": "actions",
+            "enum": [
+              "actions"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": null
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/case_response_updated_by_properties"
+          },
+          "version": {
+            "type": "string",
+            "example": "WzIwNDMxLDFd"
+          }
+        }
+      },
       "alert_comment_response_properties": {
         "title": "Add case comment response properties for alerts",
         "type": "object",
@@ -2825,11 +2901,13 @@
               "id": {
                 "description": "The rule identifier.",
                 "type": "string",
+                "nullable": true,
                 "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
               },
               "name": {
                 "description": "The rule name.",
                 "type": "string",
+                "nullable": true,
                 "example": "security_rule"
               }
             }
@@ -2879,6 +2957,73 @@
           "version": {
             "type": "string",
             "example": "WzMwNDgsMV0="
+          }
+        }
+      },
+      "event_comment_response_properties": {
+        "title": "Case response properties for event comments",
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-05-13T09:16:17.416Z"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/case_response_created_by_properties"
+          },
+          "eventId": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "7605e6a6f9f4f990ad9f8f6901e5f082f1f1f1665cbaf2f0f2c6f8f6b0d8a39f"
+            }
+          },
+          "id": {
+            "type": "string",
+            "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+          },
+          "index": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": ".internal.alerts-security.alerts-default-000001"
+            }
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owner"
+          },
+          "pushed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": null
+          },
+          "pushed_by": {
+            "$ref": "#/components/schemas/case_response_pushed_by_properties"
+          },
+          "type": {
+            "type": "string",
+            "example": "event",
+            "enum": [
+              "event"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": null
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/case_response_updated_by_properties"
+          },
+          "version": {
+            "type": "string",
+            "example": "WzIwNDMxLDFd"
           }
         }
       },
@@ -3081,6 +3226,55 @@
           }
         }
       },
+      "case_observable": {
+        "title": "Case observable",
+        "description": "A single observable attached to a case.",
+        "type": "object",
+        "required": [
+          "id",
+          "typeKey",
+          "value",
+          "description",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The observable identifier.",
+            "example": "df927ab8-54ed-47d6-be07-9948c255c097"
+          },
+          "typeKey": {
+            "type": "string",
+            "description": "The observable type key.",
+            "example": "observable-type-ipv4"
+          },
+          "value": {
+            "type": "string",
+            "description": "The observable value.",
+            "example": "10.0.0.8"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "An optional description for the observable.",
+            "example": "Source IP"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the observable was created.",
+            "example": "2024-11-14T10:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the observable was last updated.",
+            "example": "2024-11-14T10:00:00.000Z"
+          }
+        }
+      },
       "case_status": {
         "type": "string",
         "description": "The status of the case.",
@@ -3104,6 +3298,7 @@
           "duration",
           "external_service",
           "id",
+          "observables",
           "owner",
           "settings",
           "severity",
@@ -3112,6 +3307,7 @@
           "title",
           "totalAlerts",
           "totalComment",
+          "total_observables",
           "updated_at",
           "updated_by",
           "version"
@@ -3141,7 +3337,13 @@
             "items": {
               "oneOf": [
                 {
+                  "$ref": "#/components/schemas/actions_comment_response_properties"
+                },
+                {
                   "$ref": "#/components/schemas/alert_comment_response_properties"
+                },
+                {
+                  "$ref": "#/components/schemas/event_comment_response_properties"
                 },
                 {
                   "$ref": "#/components/schemas/user_comment_response_properties"
@@ -3150,7 +3352,9 @@
               "discriminator": {
                 "propertyName": "type",
                 "mapping": {
+                  "actions": "#/components/schemas/actions_comment_response_properties",
                   "alert": "#/components/schemas/alert_comment_response_properties",
+                  "event": "#/components/schemas/event_comment_response_properties",
                   "user": "#/components/schemas/user_comment_response_properties"
                 }
               }
@@ -3254,6 +3458,13 @@
             "type": "string",
             "example": "66b9aa00-94fa-11ea-9f74-e7e108796192"
           },
+          "observables": {
+            "type": "array",
+            "description": "Observables attached to the case.",
+            "items": {
+              "$ref": "#/components/schemas/case_observable"
+            }
+          },
           "owner": {
             "$ref": "#/components/schemas/owner"
           },
@@ -3287,6 +3498,17 @@
             "type": "integer",
             "example": 0
           },
+          "total_observables": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The number of observables attached to the case.",
+            "example": 0
+          },
+          "totalEvents": {
+            "type": "integer",
+            "description": "The number of events attached to the case.",
+            "example": 0
+          },
           "updated_at": {
             "type": "string",
             "format": "date-time",
@@ -3301,7 +3523,7 @@
           }
         }
       },
-      "4xx_response": {
+      "response_4xx": {
         "type": "object",
         "title": "Unsuccessful cases API response",
         "properties": {
@@ -3478,6 +3700,68 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/searchFieldsType"
+        }
+      },
+      "attachment_totals": {
+        "title": "Attachment totals",
+        "description": "Counts of alerts, events, and user comments attached to a case.",
+        "type": "object",
+        "required": [
+          "alerts",
+          "events",
+          "userComments"
+        ],
+        "properties": {
+          "alerts": {
+            "type": "integer",
+            "description": "Number of alert attachments on the case."
+          },
+          "events": {
+            "type": "integer",
+            "description": "Number of event attachments on the case."
+          },
+          "userComments": {
+            "type": "integer",
+            "description": "Number of user comment attachments on the case."
+          }
+        }
+      },
+      "related_case": {
+        "title": "Related case",
+        "description": "Summary of a case returned when listing cases that contain a given alert. This is a subset of the full case response.\n",
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "status",
+          "createdAt",
+          "totals"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The case identifier."
+          },
+          "title": {
+            "type": "string",
+            "description": "The case title."
+          },
+          "description": {
+            "type": "string",
+            "description": "The case description."
+          },
+          "status": {
+            "$ref": "#/components/schemas/case_status"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the case was created."
+          },
+          "totals": {
+            "$ref": "#/components/schemas/attachment_totals"
+          }
         }
       },
       "closure_types": {
@@ -3822,6 +4106,215 @@
           }
         }
       },
+      "case_response_get_case": {
+        "title": "Get case response",
+        "description": "Case details returned by the get case API. The comments property is not included in the response. Use the find case comments API to retrieve comments. totalComment reflects the actual number of user comments.\n",
+        "type": "object",
+        "required": [
+          "closed_at",
+          "closed_by",
+          "connector",
+          "created_at",
+          "created_by",
+          "description",
+          "duration",
+          "external_service",
+          "id",
+          "observables",
+          "owner",
+          "settings",
+          "severity",
+          "status",
+          "tags",
+          "title",
+          "totalAlerts",
+          "totalComment",
+          "total_observables",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
+        "properties": {
+          "assignees": {
+            "$ref": "#/components/schemas/assignees"
+          },
+          "category": {
+            "type": "string",
+            "description": "The case category.",
+            "nullable": true
+          },
+          "closed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closed_by": {
+            "$ref": "#/components/schemas/case_response_closed_by_properties"
+          },
+          "connector": {
+            "title": "Case response properties for connectors",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/connector_properties_none"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_cases_webhook"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_jira"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_resilient"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_servicenow"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_servicenow_sir"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_swimlane"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                ".none": "#/components/schemas/connector_properties_none",
+                ".cases-webhook": "#/components/schemas/connector_properties_cases_webhook",
+                ".jira": "#/components/schemas/connector_properties_jira",
+                ".resilient": "#/components/schemas/connector_properties_resilient",
+                ".servicenow": "#/components/schemas/connector_properties_servicenow",
+                ".servicenow-sir": "#/components/schemas/connector_properties_servicenow_sir",
+                ".swimlane": "#/components/schemas/connector_properties_swimlane"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-05-13T09:16:17.416Z"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/case_response_created_by_properties"
+          },
+          "customFields": {
+            "type": "array",
+            "description": "Custom field values for the case.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "description": "The unique identifier for the custom field. The key value must exist in the case configuration settings.\n",
+                  "type": "string"
+                },
+                "type": {
+                  "description": "The custom field type. It must match the type specified in the case configuration settings.\n",
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "toggle"
+                  ]
+                },
+                "value": {
+                  "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n",
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "nullable": true
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "description": {
+            "type": "string",
+            "example": "A case description."
+          },
+          "duration": {
+            "type": "integer",
+            "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
+            "nullable": true,
+            "example": 120
+          },
+          "external_service": {
+            "$ref": "#/components/schemas/external_service"
+          },
+          "id": {
+            "type": "string",
+            "example": "66b9aa00-94fa-11ea-9f74-e7e108796192"
+          },
+          "observables": {
+            "type": "array",
+            "description": "Observables attached to the case.",
+            "items": {
+              "$ref": "#/components/schemas/case_observable"
+            }
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owner"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/settings"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/case_severity"
+          },
+          "status": {
+            "$ref": "#/components/schemas/case_status"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "tag-1"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "example": "Case title 1"
+          },
+          "totalAlerts": {
+            "type": "integer",
+            "example": 0
+          },
+          "totalComment": {
+            "type": "integer",
+            "description": "The number of user comments on the case. Use the find case comments API to retrieve comment content.",
+            "example": 1
+          },
+          "total_observables": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The number of observables attached to the case.",
+            "example": 0
+          },
+          "totalEvents": {
+            "type": "integer",
+            "description": "The number of events attached to the case.",
+            "example": 0
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/case_response_updated_by_properties"
+          },
+          "version": {
+            "type": "string",
+            "example": "WzUzMiwxXQ=="
+          }
+        }
+      },
       "alert_response_properties": {
         "type": "object",
         "properties": {
@@ -4080,6 +4573,37 @@
           }
         }
       },
+      "find_comments_response": {
+        "title": "Find case comments response",
+        "type": "object",
+        "required": [
+          "comments",
+          "page",
+          "per_page",
+          "total"
+        ],
+        "properties": {
+          "comments": {
+            "type": "array",
+            "description": "Paginated list of user comments for the case.",
+            "items": {
+              "$ref": "#/components/schemas/user_comment_response_properties"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "description": "The current page index."
+          },
+          "per_page": {
+            "type": "integer",
+            "description": "The number of items per page."
+          },
+          "total": {
+            "type": "integer",
+            "description": "The total number of comments."
+          }
+        }
+      },
       "actions": {
         "type": "string",
         "enum": [
@@ -4134,11 +4658,13 @@
                   "id": {
                     "description": "The rule identifier.",
                     "type": "string",
+                    "nullable": true,
                     "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
                   },
                   "name": {
                     "description": "The rule name.",
                     "type": "string",
+                    "nullable": true,
                     "example": "security_rule"
                   }
                 }
@@ -4646,7 +5172,8 @@
             }
           },
           "settings": {
-            "syncAlerts": true
+            "syncAlerts": true,
+            "extractObservables": false
           },
           "owner": "cases",
           "customFields": [
@@ -4662,7 +5189,10 @@
         "summary": "The create case API returns a JSON object that contains details about the case.",
         "value": {
           "comments": [],
+          "observables": [],
           "totalAlerts": 0,
+          "totalEvents": 0,
+          "total_observables": 0,
           "id": "66b9aa00-94fa-11ea-9f74-e7e108796192",
           "version": "WzUzMiwxXQ==",
           "totalComment": 0,
@@ -4673,7 +5203,8 @@
           "assignees": [],
           "description": "A case description.",
           "settings": {
-            "syncAlerts": true
+            "syncAlerts": true,
+            "extractObservables": false
           },
           "owner": "cases",
           "customFields": [
@@ -4737,7 +5268,8 @@
                 "tag-1"
               ],
               "settings": {
-                "syncAlerts": true
+                "syncAlerts": true,
+                "extractObservables": false
               },
               "customFields": [
                 {
@@ -4762,14 +5294,18 @@
             "id": "66b9aa00-94fa-11ea-9f74-e7e108796192",
             "version": "WzU0OCwxXQ==",
             "comments": [],
+            "observables": [],
             "totalComment": 0,
             "totalAlerts": 0,
+            "totalEvents": 0,
+            "total_observables": 0,
             "title": "Case title 1",
             "tags": [
               "tag-1"
             ],
             "settings": {
-              "syncAlerts": true
+              "syncAlerts": true,
+              "extractObservables": false
             },
             "owner": "cases",
             "description": "A case description.",
@@ -4843,15 +5379,19 @@
               "id": "abed3a70-71bd-11ea-a0b2-c51ea50a58e2",
               "version": "WzExMCwxXQ==",
               "comments": [],
+              "observables": [],
               "totalComment": 1,
               "totalAlerts": 0,
+              "totalEvents": 0,
+              "total_observables": 0,
               "title": "Case title",
               "tags": [
                 "tag-1"
               ],
               "description": "Case description",
               "settings": {
-                "syncAlerts": true
+                "syncAlerts": true,
+                "extractObservables": false
               },
               "owner": "cases",
               "customFields": [
@@ -5237,38 +5777,21 @@
         ]
       },
       "get_case_response": {
-        "summary": "Retrieves information about a case including its comments.",
+        "summary": "Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.",
         "value": {
           "id": "31cdada0-02c1-11ed-85f2-4f7c222ca2fa",
           "version": "WzM2LDFd",
-          "comments": [
-            {
-              "id": "2134c1d0-02c2-11ed-85f2-4f7c222ca2fa",
-              "version": "WzM3LDFd",
-              "type": "user",
-              "owner": "cases",
-              "comment": "A new comment",
-              "created_at": "2023-10-13T15:40:32.335Z",
-              "created_by": {
-                "email": null,
-                "full_name": null,
-                "username": "elastic",
-                "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
-              },
-              "pushed_at": null,
-              "pushed_by": null,
-              "updated_at": null,
-              "updated_by": null
-            }
-          ],
           "totalComment": 1,
-          "totalAlerts": 0,
+          "totalAlerts": 1,
+          "totalEvents": 0,
+          "total_observables": 0,
           "title": "Case title 1",
           "tags": [
             "tag 1"
           ],
           "settings": {
-            "syncAlerts": true
+            "syncAlerts": true,
+            "extractObservables": false
           },
           "owner": "cases",
           "category": null,
@@ -5284,6 +5807,7 @@
               "value": null
             }
           ],
+          "observables": [],
           "description": "A case description",
           "duration": null,
           "severity": "low",
@@ -5319,12 +5843,13 @@
         }
       },
       "get_case_observability_response": {
-        "summary": "Retrieves information about an Observability case including its alerts and comments.",
+        "summary": "Get case response (Observability). Comments are not included; use the find case comments API. totalComment reflects the actual count.",
         "value": {
           "description": "An Observability case description.",
           "owner": "observability",
           "settings": {
-            "syncAlerts": false
+            "syncAlerts": false,
+            "extractObservables": false
           },
           "tags": [
             "observability",
@@ -5333,6 +5858,7 @@
           "title": "Observability case title 1",
           "category": null,
           "customFields": [],
+          "observables": [],
           "assignees": [
             {
               "uid": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
@@ -5367,53 +5893,8 @@
           "version": "WzI0NywyXQ==",
           "totalComment": 1,
           "totalAlerts": 1,
-          "comments": [
-            {
-              "alertId": [
-                "a6e12ac4-7bce-457b-84f6-d7ce8deb8446"
-              ],
-              "index": [
-                ".internal.alerts-observability.logs.alerts-default-000001"
-              ],
-              "type": "alert",
-              "rule": {
-                "id": "03e4eb87-62ca-4e5d-9570-3d7625e9669d",
-                "name": "Observability rule"
-              },
-              "owner": "observability",
-              "created_at": "2023-11-06T19:29:38.424Z",
-              "created_by": {
-                "email": null,
-                "full_name": null,
-                "username": "elastic",
-                "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
-              },
-              "pushed_at": null,
-              "pushed_by": null,
-              "updated_at": null,
-              "updated_by": null,
-              "id": "59d438d0-79a9-4864-8d4b-e63adacebf6e",
-              "version": "WzY3LDJd"
-            },
-            {
-              "comment": "The first comment.",
-              "type": "user",
-              "owner": "observability",
-              "created_at": "2023-11-06T19:29:57.812Z",
-              "created_by": {
-                "email": null,
-                "full_name": null,
-                "username": "elastic",
-                "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
-              },
-              "pushed_at": null,
-              "pushed_by": null,
-              "updated_at": null,
-              "updated_by": null,
-              "id": "d99342d3-3aa3-4b80-90ec-a702607604f5",
-              "version": "WzcyLDJd"
-            }
-          ]
+          "totalEvents": 0,
+          "total_observables": 0
         }
       },
       "get_case_alerts_response": {
@@ -5452,7 +5933,10 @@
               }
             }
           ],
+          "observables": [],
           "totalAlerts": 0,
+          "totalEvents": 0,
+          "total_observables": 0,
           "id": "293f1bc0-74f6-11ea-b83a-553aecdb28b6",
           "version": "WzIzMzgsMV0=",
           "totalComment": 1,
@@ -5546,6 +6030,7 @@
             }
           ],
           "totalAlerts": 0,
+          "totalEvents": 0,
           "id": "293f1bc0-74f6-11ea-b83a-553aecdb28b6",
           "version": "WzIwNjM2LDFd",
           "totalComment": 1,
@@ -5600,6 +6085,34 @@
           "external_service": null
         }
       },
+      "find_case_comments_response": {
+        "summary": "Paginated list of user comments for a case",
+        "value": {
+          "page": 1,
+          "per_page": 20,
+          "total": 1,
+          "comments": [
+            {
+              "id": "8048b460-fe2b-11ec-b15d-779a7c8bbcc3",
+              "version": "WzIzLDFd",
+              "type": "user",
+              "owner": "cases",
+              "comment": "A new comment",
+              "created_at": "2023-10-07T19:32:13.104Z",
+              "created_by": {
+                "email": null,
+                "full_name": null,
+                "username": "elastic",
+                "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+              },
+              "pushed_at": null,
+              "pushed_by": null,
+              "updated_at": null,
+              "updated_by": null
+            }
+          ]
+        }
+      },
       "get_comment_response": {
         "summary": "A single user comment retrieved from a case",
         "value": {
@@ -5627,15 +6140,19 @@
           "id": "b917f300-0ed9-11ed-bd18-65557fe66949",
           "version": "WzE3NjgsM10=",
           "comments": [],
+          "observables": [],
           "totalComment": 0,
           "totalAlerts": 0,
+          "totalEvents": 0,
+          "total_observables": 0,
           "description": "A case description.",
           "title": "Case title 1",
           "tags": [
             "tag 1"
           ],
           "settings": {
-            "syncAlerts": true
+            "syncAlerts": true,
+            "extractObservables": false
           },
           "owner": "cases",
           "duration": null,

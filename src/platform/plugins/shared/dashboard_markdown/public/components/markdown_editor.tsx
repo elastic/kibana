@@ -12,11 +12,14 @@ import { EuiMarkdownEditor, EuiMarkdownEditorHelpButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import React, { useLayoutEffect, useRef } from 'react';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { BehaviorSubject } from 'rxjs';
 import { SHORT_CONTAINER_QUERY, FOOTER_HELP_TEXT, MarkdownFooter } from './markdown_footer';
 import { MarkdownRenderer } from './markdown_renderer';
+import { MarkdownEditorSettingsPopover } from './markdown_editor_settings_popover';
+import type { MarkdownSettingsState } from '../../server/schemas';
 
 interface EuiMarkdownEditorRef {
   textarea: HTMLTextAreaElement;
@@ -67,31 +70,44 @@ const strings = {
   }),
 };
 export interface MarkdownEditorProps {
+  parsingPluginList?: EuiMarkdownEditorProps['parsingPluginList'];
   processingPluginList: EuiMarkdownFormatProps['processingPluginList'];
   content: string;
   onCancel: () => void;
   onSave: (value: string) => Promise<void>;
   isPreview$: PublishingSubject<boolean>;
+  settings$: BehaviorSubject<MarkdownSettingsState>;
   uiPlugins?: EuiMarkdownEditorProps['uiPlugins'];
 }
 
 export const MarkdownEditor = ({
+  parsingPluginList,
   processingPluginList,
   content,
   onCancel,
   onSave,
   isPreview$,
+  settings$,
   uiPlugins = [],
 }: MarkdownEditorProps) => {
   const styles = useMemoCss(componentStyles);
-  const isPreview = useStateFromPublishingSubject(isPreview$);
-  const [value, onChange] = React.useState(content);
+  const [isPreview, settings] = useBatchedPublishingSubjects(isPreview$, settings$);
+  const [value, onChange] = useState(content);
 
   const editorRef = useRef<EuiMarkdownEditorRef>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
   useCaretPosition(editorRef, !isPreview);
-  const isSaveable = Boolean(value === '' || value !== content);
+  const [haveSettingsChanged, setHaveSettingsChanged] = useState(false);
+  const isSaveable = Boolean(value === '' || value !== content || haveSettingsChanged);
+
+  const updateSettings = useCallback(
+    (nextSettings: Partial<MarkdownSettingsState>) => {
+      settings$.next({ ...settings, ...nextSettings } as MarkdownSettingsState);
+      setHaveSettingsChanged(true);
+    },
+    [settings, settings$]
+  );
 
   return (
     <div css={styles.rootContainer}>
@@ -108,19 +124,36 @@ export const MarkdownEditor = ({
           onChange={onChange}
           aria-label={strings.ariaLabel}
           placeholder={strings.placeholder}
+          parsingPluginList={parsingPluginList}
           processingPluginList={processingPluginList}
+          uiPlugins={uiPlugins}
           height="full"
           ref={editorRef}
           css={styles.editorStyles}
           aria-describedby={FOOTER_HELP_TEXT}
           showFooter={false}
           toolbarProps={{
-            right: <EuiMarkdownEditorHelpButton uiPlugins={uiPlugins} />,
+            right: (
+              <>
+                <MarkdownEditorSettingsPopover
+                  settings={settings}
+                  updateSettings={updateSettings}
+                />
+                <EuiMarkdownEditorHelpButton
+                  uiPlugins={uiPlugins}
+                  tooltipProps={{ position: 'bottom', delay: 'regular' }}
+                />
+              </>
+            ),
           }}
         />
       </div>
       {isPreview && (
-        <MarkdownRenderer processingPluginList={processingPluginList} content={value} />
+        <MarkdownRenderer
+          parsingPluginList={parsingPluginList}
+          processingPluginList={processingPluginList}
+          content={value}
+        />
       )}
       <MarkdownFooter
         onCancel={onCancel}

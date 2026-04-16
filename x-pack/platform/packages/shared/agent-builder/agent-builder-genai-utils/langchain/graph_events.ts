@@ -136,13 +136,19 @@ export const createMessageEvent = (
 
 export const createReasoningEvent = (
   reasoning: string,
-  { transient }: { transient?: boolean } = {}
+  {
+    transient,
+    toolCallId,
+    toolCallGroupId,
+  }: { transient?: boolean; toolCallId?: string; toolCallGroupId?: string } = {}
 ): ReasoningEvent => {
   return {
     type: ChatEventType.reasoning,
     data: {
       reasoning,
       transient,
+      tool_call_id: toolCallId,
+      tool_call_group_id: toolCallGroupId,
     },
   };
 };

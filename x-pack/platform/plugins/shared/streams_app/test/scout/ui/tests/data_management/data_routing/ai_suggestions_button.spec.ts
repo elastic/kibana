@@ -42,14 +42,14 @@ test.describe('Stream data routing - AI suggestions button', { tag: tags.statefu
   test('should show button when AI features are enabled', async ({ page }) => {
     const button = page.getByTestId('streamsAppGenerateSuggestionButton');
     await expect(button).toBeVisible();
-    await expect(button).toContainText('Suggest partitions');
+    await expect(button).toContainText('Get partitions suggestions');
   });
 
   test('should disable button when no connector is selected', async ({ page }) => {
-    await page.route('**/internal/streams/connectors', async (route) => {
+    await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
       await route.fulfill({
         status: 200,
-        body: JSON.stringify({ connectors: [] }),
+        body: JSON.stringify({ connectors: [], allConnectors: [], soEntryFound: false }),
       });
     });
 
@@ -60,22 +60,32 @@ test.describe('Stream data routing - AI suggestions button', { tag: tags.statefu
   });
 
   test('should show connector dropdown when multiple connectors exist', async ({ page }) => {
-    await page.route('**/internal/streams/connectors', async (route) => {
+    await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
       await route.fulfill({
         status: 200,
         body: JSON.stringify({
-          connectors: [
+          connectors: [],
+          allConnectors: [
             {
-              id: 'test-connector-1',
+              connectorId: 'test-connector-1',
               name: 'Test Connector 1',
-              actionTypeId: '.gen-ai',
+              type: '.gen-ai',
+              config: {},
+              capabilities: {},
+              isPreconfigured: false,
+              isInferenceEndpoint: false,
             },
             {
-              id: 'test-connector-2',
+              connectorId: 'test-connector-2',
               name: 'Test Connector 2',
-              actionTypeId: '.gen-ai',
+              type: '.gen-ai',
+              config: {},
+              capabilities: {},
+              isPreconfigured: false,
+              isInferenceEndpoint: false,
             },
           ],
+          soEntryFound: false,
         }),
       });
     });

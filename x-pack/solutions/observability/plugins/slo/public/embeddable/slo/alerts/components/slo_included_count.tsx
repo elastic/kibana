@@ -11,24 +11,28 @@ import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import type { SloItem } from '../types';
 
 export function SloIncludedCount({ slos }: { slos: SloItem[] }) {
+  const uniqueSloCount = new Set(slos.map((s) => s.slo_id)).size;
   const { data: sloList } = useFetchSloList({
-    kqlQuery: slos.map((slo) => `slo.id:${slo.id}`).join(' or '),
+    kqlQuery: [...new Set(slos.map((s) => s.slo_id))].map((id) => `slo.id:${id}`).join(' or '),
     perPage: 0,
   });
+
+  const instanceCount = sloList?.total ?? 0;
+  const instances =
+    instanceCount > 1
+      ? i18n.translate('xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel.instancesCount', {
+          defaultMessage: ' ({count, number} {count, plural, one {Instance} other {Instances}})',
+          values: { count: instanceCount },
+        })
+      : '';
 
   return (
     <FormattedMessage
       id="xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel.withInstances"
       defaultMessage="{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}}{instances} included"
       values={{
-        numOfSlos: slos.length,
-        instances: i18n.translate(
-          'xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel.instancesCount',
-          {
-            defaultMessage: ' ({count, number} {count, plural, one {Instance} other {Instances}})',
-            values: { count: sloList?.total ?? 0 },
-          }
-        ),
+        numOfSlos: uniqueSloCount,
+        instances,
       }}
     />
   );
