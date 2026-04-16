@@ -21,7 +21,11 @@ const createMockDataView = (indexPattern: string, ipFields: Array<{ name: string
   fields: { getByType: (type: string) => (type === 'ip' ? ipFields : []) },
 });
 
-const createProvider = (cellRendererFn?: (fieldName: string) => FunctionComponent | undefined) => {
+const createProvider = (
+  cellRendererFn?: (
+    fieldName: string
+  ) => FunctionComponent<DataGridCellValueElementProps> | undefined
+) => {
   const services = createProfileProviderSharedServicesMock();
   jest.spyOn(services.discoverShared.features.registry, 'getById').mockReturnValue(
     cellRendererFn
@@ -35,7 +39,9 @@ const createProvider = (cellRendererFn?: (fieldName: string) => FunctionComponen
 };
 
 const resolveSecurityContext = async (
-  cellRendererFn?: (fieldName: string) => FunctionComponent | undefined
+  cellRendererFn?: (
+    fieldName: string
+  ) => FunctionComponent<DataGridCellValueElementProps> | undefined
 ) => {
   const provider = createProvider(cellRendererFn);
   const result = await provider.resolve({ solutionNavId: SolutionType.Security });
