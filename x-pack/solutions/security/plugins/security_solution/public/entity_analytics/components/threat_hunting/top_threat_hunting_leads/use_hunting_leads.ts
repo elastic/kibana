@@ -64,7 +64,7 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
       abortCtrl.current = new AbortController();
       const { signal } = abortCtrl.current;
 
-      await generateLeadsApi({ params: {} });
+      await generateLeadsApi({ params: {}, signal });
 
       if (signal.aborted) return;
       await delay(INDEX_REFRESH_DELAY_MS);
