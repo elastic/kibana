@@ -96,7 +96,7 @@
         "tags": [],
         "label": "StorageIndexAdapter",
         "description": [
-          "\nAdapter for writing and reading documents to/from Elasticsearch,\nusing plain indices.\n\nTODO:\n- Schema upgrades w/ fallbacks"
+          "\nAdapter for writing and reading documents to/from Elasticsearch,\nusing plain indices.\n\nIndex management is lazy — no resources are created at construction time.\n\n- **Writes** (`index`, `bulk`): ensure the index template, backing index,\n  and mappings all exist and are up-to-date before executing.\n- **Reads** (`search`, `get`): ensure mappings are up-to-date before\n  executing.\n\nMapping updates are applied in-place via `putMapping` on the existing\nwrite index — no rollover is performed. This supports additive schema\nchanges (new fields, new sub-fields) but not incompatible ones\n(type changes, field removal).\n\nTODO:\n- Schema upgrades w/ fallbacks (rollover + reindex for incompatible changes)"
         ],
         "signature": [
           {
@@ -125,7 +125,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-            "lineNumber": 128,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -141,7 +141,7 @@
                   "ElasticsearchClient"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-                "lineNumber": 129,
+                "lineNumber": 143,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -164,7 +164,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-                "lineNumber": 130,
+                "lineNumber": 144,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -181,7 +181,7 @@
                   "TStorageSettings"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-                "lineNumber": 131,
+                "lineNumber": 145,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -199,7 +199,7 @@
                   "<TApplicationType>"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-                "lineNumber": 132,
+                "lineNumber": 146,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -227,7 +227,7 @@
               "<TApplicationType>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-            "lineNumber": 580,
+            "lineNumber": 635,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
