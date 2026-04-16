@@ -92,8 +92,8 @@ export const ModelSettings: React.FC = () => {
     if (pendingLocation) {
       const url =
         http.basePath.prepend(pendingLocation.pathname) +
-        pendingLocation.hash +
-        pendingLocation.search;
+        pendingLocation.search +
+        pendingLocation.hash;
       application.navigateToUrl(url, { state: pendingLocation.state });
     }
     setPendingLocation(null);
