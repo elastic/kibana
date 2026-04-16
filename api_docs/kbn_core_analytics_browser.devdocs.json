@@ -806,6 +806,14 @@
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/settings_context_menu/settings_context_menu.tsx"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/components/announcement/agent_builder_announcement_modal_controller.tsx"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/components/announcement/agent_builder_announcement_modal_controller.tsx"
+              },
+              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/operators/continue_conversation.ts"
               },
@@ -1294,6 +1302,10 @@
                 "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_client.ts"
               },
@@ -1436,6 +1448,10 @@
               {
                 "plugin": "observabilityOnboarding",
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/cloudforwarder/index.tsx"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
                 "plugin": "searchPlayground",
@@ -1928,10 +1944,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/microsoft/defender/endpoint/ms_defender_endpoint_actions_client.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
                 "plugin": "@kbn/esql-editor",
