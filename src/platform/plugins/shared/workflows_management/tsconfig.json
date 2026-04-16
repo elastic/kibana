@@ -97,7 +97,8 @@
     "@kbn/use-observable",
     "@kbn/cloud-plugin",
     "@kbn/kbn-client",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }
