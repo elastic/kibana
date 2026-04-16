@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCodeBlock } from '@elastic/eui';
+import { EuiCodeBlock, type IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TextAttachment } from '@kbn/agent-builder-common/attachments';
 import {
@@ -33,11 +33,20 @@ const TextInlineContent: React.FC<AttachmentRenderProps<TextAttachment>> = ({ at
  * UI definition for text attachments
  */
 export const textAttachmentDefinition: AttachmentUIDefinition<TextAttachment> = {
-  getLabel: () =>
-    i18n.translate('xpack.agentBuilderPlatform.attachments.text.label', {
+  getLabel: (attachment) => {
+    const explicit = attachment.data.label?.trim();
+    if (explicit) {
+      return explicit;
+    }
+    const firstLine = attachment.data.content.split('\n')[0]?.trim();
+    if (firstLine) {
+      return firstLine;
+    }
+    return i18n.translate('xpack.agentBuilderPlatform.attachments.text.label', {
       defaultMessage: 'Text',
-    }),
-  getIcon: () => 'document',
+    });
+  },
+  getIcon: (attachment) => (attachment.data.icon_type as IconType | undefined) ?? 'document',
   renderInlineContent: (props) => <TextInlineContent {...props} />,
   getActionButtons: ({ attachment }) => [
     {

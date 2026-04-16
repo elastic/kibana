@@ -41,6 +41,30 @@ export const labels = {
       }
     ),
   },
+  embeddableSidebar: {
+    nightshiftTitle: i18n.translate('xpack.agentBuilder.embeddableSidebar.nightshiftTitle', {
+      defaultMessage: 'Nightshift mode',
+    }),
+    nightshiftDescription: i18n.translate(
+      'xpack.agentBuilder.embeddableSidebar.nightshiftDescription',
+      {
+        defaultMessage:
+          'Shows, system health, blast radius summary & significant events on the main chat page for faster remediation.',
+      }
+    ),
+    nightshiftTurnOn: i18n.translate('xpack.agentBuilder.embeddableSidebar.nightshiftTurnOn', {
+      defaultMessage: 'Turn on',
+    }),
+    nightshiftEnabledBadge: i18n.translate(
+      'xpack.agentBuilder.embeddableSidebar.nightshiftEnabledBadge',
+      {
+        defaultMessage: 'On',
+      }
+    ),
+    nightshiftToastEnabled: i18n.translate('xpack.agentBuilder.embeddableSidebar.nightshiftToastEnabled', {
+      defaultMessage: 'Nightshift mode enabled',
+    }),
+  },
   tools: {
     // Landing page
     libraryTitle: i18n.translate('xpack.agentBuilder.tools.libraryTitle', {
@@ -2112,6 +2136,34 @@ export const labels = {
       'xpack.agentBuilder.overview.customizations.agentSettingsSubtitle',
       {
         defaultMessage: 'Control how your agent behaves.',
+      }
+    ),
+    nightshiftTitle: i18n.translate('xpack.agentBuilder.overview.customizations.nightshiftTitle', {
+      defaultMessage: 'Nightshift overview',
+    }),
+    nightshiftDescription: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.nightshiftDescription',
+      {
+        defaultMessage:
+          'When enabled, the observability starting screen is available in new conversations, including blast radius and significant events. Turn off to use the standard welcome instead.',
+      }
+    ),
+    nightshiftSwitchAriaLabel: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.nightshiftSwitchAriaLabel',
+      {
+        defaultMessage: 'Enable Nightshift observability starting screen',
+      }
+    ),
+    nightshiftToastEnabled: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.nightshiftToastEnabled',
+      {
+        defaultMessage: 'Nightshift mode enabled',
+      }
+    ),
+    nightshiftToastDisabled: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.nightshiftToastDisabled',
+      {
+        defaultMessage: 'Nightshift mode disabled',
       }
     ),
     autoIncludeInfoTooltip: i18n.translate(

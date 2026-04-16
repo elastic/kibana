@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -15,7 +15,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { canChangeAgentVisibility, defaultAgentToolIds } from '@kbn/agent-builder-common';
+import {
+  canChangeAgentVisibility,
+  defaultAgentToolIds,
+  observabilityAgentId,
+} from '@kbn/agent-builder-common';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
@@ -35,6 +39,10 @@ import { EditDetailsFlyout } from './edit_details_flyout';
 import { SettingsSection } from './settings_section';
 import { PageWrapper } from '../common/page_wrapper';
 import { getActiveTools } from '../../../utils/tool_selection_utils';
+import { labels } from '../../../utils/i18n';
+import { useObservabilityNightshiftEnabled } from '../../../hooks/use_observability_nightshift_enabled';
+
+const { agentOverview: overviewLabels } = labels;
 
 export const AgentOverview: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
@@ -44,7 +52,7 @@ export const AgentOverview: React.FC = () => {
 
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const {
-    services: { uiSettings },
+    services: { uiSettings, notifications },
   } = useKibana();
 
   const { isAdmin } = useUiPrivileges();
@@ -56,6 +64,21 @@ export const AgentOverview: React.FC = () => {
   const { tools: allTools, isLoading: toolsLoading } = useToolsService();
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const canEditAgent = useCanEditAgent({ agent });
+
+  const [observabilityNightshiftEnabled, setObservabilityNightshiftEnabled] =
+    useObservabilityNightshiftEnabled();
+
+  const onObservabilityNightshiftEnabledChange = useCallback(
+    (enabled: boolean) => {
+      setObservabilityNightshiftEnabled(enabled);
+      notifications.toasts.addSuccess({
+        title: enabled
+          ? overviewLabels.nightshiftToastEnabled
+          : overviewLabels.nightshiftToastDisabled,
+      });
+    },
+    [notifications.toasts, setObservabilityNightshiftEnabled]
+  );
 
   const canChangeVisibility = useMemo(() => {
     if (!isExperimentalFeaturesEnabled || !agent) return false;
@@ -183,6 +206,9 @@ export const AgentOverview: React.FC = () => {
           workflowIds={agent.configuration?.workflow_ids ?? []}
           canEditAgent={canEditAgent}
           onOpenEditFlyout={() => setIsEditFlyoutOpen(true)}
+          showNightshiftCustomization={agent.id === observabilityAgentId}
+          observabilityNightshiftEnabled={observabilityNightshiftEnabled}
+          onObservabilityNightshiftEnabledChange={onObservabilityNightshiftEnabledChange}
         />
 
         {isEditFlyoutOpen && agent && (

@@ -23,6 +23,11 @@ export enum AgentType {
 export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 
 /**
+ * ID of the built-in Observability agent (Agent Builder)
+ */
+export const observabilityAgentId = 'observability.agent';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {

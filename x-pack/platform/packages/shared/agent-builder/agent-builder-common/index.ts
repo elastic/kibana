@@ -101,6 +101,7 @@ export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
+  observabilityAgentId,
   AgentType,
   AgentVisibility,
   VISIBILITY_ICON,

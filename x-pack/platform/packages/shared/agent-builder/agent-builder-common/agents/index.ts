@@ -8,6 +8,7 @@
 export {
   AgentType,
   agentBuilderDefaultAgentId,
+  observabilityAgentId,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,

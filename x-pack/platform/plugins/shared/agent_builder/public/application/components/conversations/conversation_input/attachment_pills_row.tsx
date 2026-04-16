@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { AttachmentPill } from './attachment_pill';
+import { ATTACHMENT_PILL_MAX_WIDTH_PX, AttachmentPill } from './attachment_pill';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 export interface AttachmentPillsRowProps {
@@ -49,7 +49,14 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
         const attachmentId = attachment.id ?? `${attachment.type}-${index}`;
 
         return (
-          <EuiFlexItem key={attachmentId} grow={false}>
+          <EuiFlexItem
+            key={attachmentId}
+            grow={false}
+            style={{
+              minWidth: 0,
+              maxWidth: ATTACHMENT_PILL_MAX_WIDTH_PX,
+            }}
+          >
             <AttachmentPill
               attachment={{
                 id: attachmentId,
