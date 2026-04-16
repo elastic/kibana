@@ -13,11 +13,13 @@ import {
   getStreamTypeFromDefinition,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
 } from '@kbn/streams-schema';
+import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import { formatInferenceProviderError } from '../../../utils/create_connector_sse_error';
 import {
   MS_PER_DAY,
   identifyInferredFeatures,
@@ -140,6 +142,16 @@ const identifyInferredFeaturesRoute = createServerRoute({
           iterationResults.length
         } completed iterations: ${error instanceof Error ? error.message : String(error)}`
       );
+
+      if (isInferenceProviderError(error)) {
+        const connector = await inferenceClient
+          .getConnectorById(connectorId)
+          .catch(() => undefined);
+        if (connector) {
+          throw new Error(formatInferenceProviderError(error, connector));
+        }
+      }
+
       throw error;
     }
   },
