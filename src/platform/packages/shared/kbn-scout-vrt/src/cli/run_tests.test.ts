@@ -32,11 +32,14 @@ const promptMock = jest.mocked(inquirer.prompt);
 
 describe('parseVisualRunTestsArgs', () => {
   it('allows bare runs so the CLI can list VRT-enabled configs', () => {
-    expect(parseVisualRunTestsArgs(['--arch', 'stateful', '--domain=classic'])).toEqual({
+    expect(
+      parseVisualRunTestsArgs(['--arch', 'stateful', '--domain=classic', '--update-baselines'])
+    ).toEqual({
       configPath: undefined,
       forwardedArgs: ['--arch', 'stateful', '--domain=classic'],
       helpRequested: false,
       testFilesList: undefined,
+      updateBaselines: true,
     });
   });
 
@@ -54,6 +57,7 @@ describe('parseVisualRunTestsArgs', () => {
       forwardedArgs: ['--arch', 'stateful', '--domain=classic'],
       helpRequested: false,
       testFilesList: undefined,
+      updateBaselines: false,
     });
   });
 
@@ -73,6 +77,7 @@ describe('parseVisualRunTestsArgs', () => {
       forwardedArgs: ['--location', 'cloud', '--arch', 'stateful', '--domain', 'classic'],
       helpRequested: false,
       testFilesList: 'src/plugin/test/scout/ui/tests/example.spec.ts',
+      updateBaselines: false,
     });
   });
 

@@ -100,7 +100,7 @@ describe('createVisualRegressionManifest', () => {
           stepTitle: 'step 1',
           stepIndex: 1,
           snapshotName: '01_step_1.png',
-          status: 'captured',
+          status: 'updated',
           imagePath: 'pkg/second-test-local/01_step_1.png',
           source: {
             file: 'b.spec.ts',
@@ -115,7 +115,7 @@ describe('createVisualRegressionManifest', () => {
           stepTitle: 'step 2',
           stepIndex: 2,
           snapshotName: '02_step_2.png',
-          status: 'captured',
+          status: 'updated',
           imagePath: 'pkg/second-test-local/02_step_2.png',
           source: {
             file: 'b.spec.ts',
@@ -129,7 +129,8 @@ describe('createVisualRegressionManifest', () => {
     expect(summarizeVisualRegressionManifest(manifest)).toEqual({
       tests: 2,
       checkpoints: 4,
-      captured: 4,
+      captured: 2,
+      updated: 2,
     });
   });
 
@@ -143,7 +144,7 @@ describe('createVisualRegressionManifest', () => {
           stepTitle: 'step 1',
           stepIndex: 1,
           snapshotName: '01_step_1.png',
-          status: 'captured',
+          status: 'updated',
           imagePath: 'advancedSettings/first-test-local/01_step_1.png',
           source: {
             file: 'a.spec.ts',
@@ -157,7 +158,7 @@ describe('createVisualRegressionManifest', () => {
     const initialRunManifest = upsertVisualRegressionRunManifest({
       manifest: initialManifest,
       packageStatus: 'passed',
-      mode: 'capture',
+      mode: 'update-baselines',
       startedAt: '2026-03-20T18:00:00.000Z',
       completedAt: '2026-03-20T18:00:10.000Z',
     });
@@ -229,7 +230,8 @@ describe('createVisualRegressionManifest', () => {
       summary: {
         tests: 2,
         checkpoints: 2,
-        captured: 2,
+        captured: 1,
+        updated: 1,
       },
       packages: [
         {
@@ -248,7 +250,8 @@ describe('createVisualRegressionManifest', () => {
           summary: {
             tests: 1,
             checkpoints: 1,
-            captured: 1,
+            captured: 0,
+            updated: 1,
           },
         },
         {
@@ -268,6 +271,7 @@ describe('createVisualRegressionManifest', () => {
             tests: 1,
             checkpoints: 1,
             captured: 1,
+            updated: 0,
           },
         },
       ],

@@ -62,11 +62,14 @@ Usage:
   node scripts/scout_vrt run-tests
   node scripts/scout_vrt run-tests --arch stateful --domain classic --config <playwright_config_path>
   node scripts/scout_vrt run-tests --arch stateful --domain classic --testFiles <spec_path_or_directory>
+  node scripts/scout_vrt run-tests --arch stateful --domain classic --config <playwright_config_path> --update-baselines
+
+Options:
+  --update-baselines  Refresh the local baseline cache for the selected visual suites
 
 All other flags are forwarded to 'node scripts/scout run-tests'.
 Visual specs are discovered by following each spec's local imports until a dependency on '@kbn/scout-vrt' is found.
-Run without '--config' or '--testFiles' to select a VRT-enabled Scout config in interactive shells, or list them otherwise.
-This command captures visual artifacts and manifests for the selected suites; baseline generation and comparison are added in follow-on CI work.`;
+Run without '--config' or '--testFiles' to select a VRT-enabled Scout config in interactive shells, or list them otherwise.`;
 
 export const runVisualTestsCommand = async (rawArgs: string[]) => {
   const parsedArgs = parseVisualRunTestsArgs(rawArgs);

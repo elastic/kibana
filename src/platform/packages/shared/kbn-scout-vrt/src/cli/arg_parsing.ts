@@ -16,6 +16,7 @@ export interface ParsedVisualRunTestsArgs {
   forwardedArgs: string[];
   helpRequested: boolean;
   testFilesList?: string;
+  updateBaselines: boolean;
 }
 
 const parseFlagValue = (rawValue: string | undefined, flagName: string): string => {
@@ -31,12 +32,29 @@ export const parseVisualRunTestsArgs = (rawArgs: string[]): ParsedVisualRunTests
   let configPath: string | undefined;
   let testFilesList: string | undefined;
   let helpRequested = false;
+  let updateBaselines = false;
 
   for (let index = 0; index < rawArgs.length; index++) {
     const arg = rawArgs[index];
 
     if (HELP_FLAGS.has(arg)) {
       helpRequested = true;
+      continue;
+    }
+
+    if (arg === '--update-baselines') {
+      updateBaselines = true;
+      continue;
+    }
+
+    if (arg.startsWith('--update-baselines=')) {
+      const rawValue = arg.slice('--update-baselines='.length).trim().toLowerCase();
+
+      if (!['1', 'true', 'yes'].includes(rawValue)) {
+        throw createFlagError(`'--update-baselines' does not take a value of '${rawValue}'`);
+      }
+
+      updateBaselines = true;
       continue;
     }
 
@@ -88,5 +106,6 @@ export const parseVisualRunTestsArgs = (rawArgs: string[]): ParsedVisualRunTests
     forwardedArgs,
     helpRequested,
     testFilesList,
+    updateBaselines,
   };
 };

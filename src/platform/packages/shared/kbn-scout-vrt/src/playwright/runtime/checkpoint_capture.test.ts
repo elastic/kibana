@@ -15,6 +15,11 @@ import { captureVisualCheckpoint } from './checkpoint_capture';
 import type { VisualRegressionContext } from './types';
 
 let mockTempRoot = '';
+let mockUpdateBaselinesEnabled = false;
+
+jest.mock('./environment', () => ({
+  isUpdateBaselinesEnabled: () => mockUpdateBaselinesEnabled,
+}));
 
 jest.mock('./paths', () => {
   const nodePath = jest.requireActual<typeof import('node:path')>('node:path');
@@ -35,6 +40,8 @@ jest.mock('./paths', () => {
         testKey,
         snapshotName
       ),
+    getVisualRegressionBaselinePath: (packageId: string, testKey: string, snapshotName: string) =>
+      nodePath.join(mockTempRoot, 'baselines', packageId, testKey, snapshotName),
     getVisualRegressionImagePath: (packageId: string, testKey: string, snapshotName: string) =>
       nodePath.join(packageId, testKey, snapshotName),
     toRepoRelativePath: (filePath: string) =>
@@ -49,6 +56,7 @@ describe('captureVisualCheckpoint', () => {
 
   beforeEach(() => {
     mockTempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-vrt-checkpoint-'));
+    mockUpdateBaselinesEnabled = false;
 
     page = {
       evaluate: jest.fn(async () => undefined),
@@ -76,6 +84,35 @@ describe('captureVisualCheckpoint', () => {
       packageId: 'advancedSettings',
       testKey: 'renders-useful-state-local',
     };
+  });
+
+  it('updates the local baseline cache in update mode', async () => {
+    mockUpdateBaselinesEnabled = true;
+
+    const result = await captureVisualCheckpoint(context, {
+      stepTitle: 'advanced settings page is visible',
+      stepIndex: 1,
+      mask: [],
+      source: {
+        file: 'src/plugin/test.scout.spec.ts',
+        line: 20,
+        column: 4,
+      },
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.record.status).toBe('updated');
+    expect(
+      fs.readFileSync(
+        path.join(
+          mockTempRoot,
+          'baselines',
+          'advancedSettings',
+          'renders-useful-state-local',
+          '01_advanced_settings_page_is_visible.png'
+        )
+      )
+    ).toEqual(screenshotBuffer);
   });
 
   it('captures the actual image into the run artifact tree', async () => {

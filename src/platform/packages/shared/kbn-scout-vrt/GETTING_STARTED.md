@@ -1,12 +1,13 @@
 # Getting Started with @kbn/scout-vrt
 
-This guide covers the foundation workflow:
+This guide covers the first two rollout stages:
 
 1. author a visual Scout suite
 2. run VRT capture locally
-3. inspect the resulting artifacts and manifests
+3. generate local baselines
+4. inspect the resulting artifacts and manifests
 
-This stage is intentionally capture-only. Baseline generation, publication, and PR comparison are introduced in later rollout stages.
+This guide is still intentionally local-first. PR comparison and review-site reporting are introduced in the next stage.
 
 ## 1. Opt a Scout Suite into VRT
 
@@ -83,7 +84,28 @@ If you run the command without `--config` or `--testFiles`, it will:
 - prompt for a VRT-enabled config in an interactive shell
 - or list the discovered VRT-enabled configs otherwise
 
-## 4. Inspect the Output
+## 4. Generate Local Baselines
+
+Use the same command with `--update-baselines` when you want to treat the current screenshots as the local baseline set for the selected suites.
+
+Example:
+
+```bash
+node scripts/scout_vrt run-tests \
+  --location local \
+  --arch stateful \
+  --domain classic \
+  --config src/platform/plugins/private/advanced_settings/test/scout/ui/playwright.config.ts \
+  --update-baselines
+```
+
+That writes baseline PNGs to:
+
+- `.scout/baselines/vrt/<packageId>/<testKey>/<stepKey>.png`
+
+The run manifest for that execution will record `mode: "update-baselines"`, and each checkpoint record will use `status: "updated"`.
+
+## 5. Inspect the Output
 
 After a run, inspect:
 
@@ -103,12 +125,22 @@ The run manifest tells you:
 
 The package manifest tells you:
 
-- which checkpoints were captured
+- which checkpoints were captured or updated
 - their stable `testKey`
 - their shared `imagePath`
 - the source file and line that created the checkpoint
 
-## 5. Recommended Validation
+## 6. Publish Canonical `main` Baselines
+
+Publishing to remote storage is intentionally handled by CI, not by the local runtime. The on-merge baseline publisher reruns the same baseline-update mode on merged `main`, then packages and uploads the resulting baselines plus manifests.
+
+See [CI_INTEGRATION.md](CI_INTEGRATION.md) for:
+
+- the Buildkite step that publishes canonical `main` baselines
+- the published GCS layout
+- manual seeding instructions for a branch or demo environment
+
+## 7. Recommended Validation
 
 Before handing work off or pushing a branch:
 
@@ -118,11 +150,9 @@ yarn test:type_check --project src/platform/packages/shared/kbn-scout-vrt/tsconf
 node scripts/check_changes.ts
 ```
 
-## 6. What Comes Next
+## 8. What Comes Next
 
 Later rollout stages add:
 
-- local baseline generation
-- CI baseline publication
 - PR comparison against published baselines
 - static review-site generation

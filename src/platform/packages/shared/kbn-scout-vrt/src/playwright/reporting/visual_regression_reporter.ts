@@ -24,7 +24,10 @@ import {
   type VisualRegressionRunManifest,
   upsertVisualRegressionRunManifest,
 } from './manifest';
-import { SCOUT_VISUAL_REGRESSION_ATTACHMENT_NAME } from '../runtime/environment';
+import {
+  SCOUT_VISUAL_REGRESSION_ATTACHMENT_NAME,
+  isUpdateBaselinesEnabled,
+} from '../runtime/environment';
 import {
   getVisualRegressionManifestPath,
   getVisualRegressionRunManifestPath,
@@ -146,7 +149,7 @@ export class ScoutVisualRegressionReporter implements Reporter {
       existing: existingRunManifest,
       manifest: this.manifest,
       packageStatus: _result.status,
-      mode: 'capture',
+      mode: isUpdateBaselinesEnabled() ? 'update-baselines' : 'capture',
       startedAt: this.startedAt ?? completedAt,
       completedAt,
     });

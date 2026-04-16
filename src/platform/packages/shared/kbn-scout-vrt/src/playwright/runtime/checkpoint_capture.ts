@@ -9,8 +9,10 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { isUpdateBaselinesEnabled } from './environment';
 import {
   getVisualRegressionActualPath,
+  getVisualRegressionBaselinePath,
   getVisualRegressionImagePath,
   toRepoRelativePath,
 } from './paths';
@@ -30,18 +32,38 @@ export const captureVisualCheckpoint = async (
   const snapshotName = createVisualSnapshotName(options.stepIndex, options.stepTitle);
   const actualOutputPath = getVisualRegressionActualPath(runId, packageId, testKey, snapshotName);
   const imagePath = getVisualRegressionImagePath(packageId, testKey, snapshotName);
+  const baselineOutputPath = getVisualRegressionBaselinePath(packageId, testKey, snapshotName);
 
   fs.mkdirSync(path.dirname(actualOutputPath), { recursive: true });
 
   await waitForVisualStability(page);
 
-  await page.screenshot({
+  const actualBuffer = await page.screenshot({
     path: actualOutputPath,
     animations: 'disabled',
     caret: 'hide',
     mask: options.mask,
     scale: 'css',
   });
+
+  if (isUpdateBaselinesEnabled()) {
+    fs.mkdirSync(path.dirname(baselineOutputPath), { recursive: true });
+    fs.writeFileSync(baselineOutputPath, actualBuffer);
+
+    return {
+      record: {
+        testFile: toRepoRelativePath(testInfo.file),
+        testTitle: testInfo.title,
+        testKey,
+        stepTitle: options.stepTitle,
+        stepIndex: options.stepIndex,
+        snapshotName,
+        status: 'updated',
+        imagePath,
+        source: options.source,
+      },
+    };
+  }
 
   return {
     record: {

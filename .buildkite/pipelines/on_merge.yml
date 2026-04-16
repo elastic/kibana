@@ -306,6 +306,24 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/scout_vrt/publish_main_baselines.sh
+    label: 'Publish Main VRT Baselines'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
+    key: vrt_main_baselines
+    depends_on:
+      - build
+    timeout_in_minutes: 90
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: .buildkite/scripts/steps/openapi_publishing/publish_oas_docs.sh
     label: 'Publish OAS docs to bump.sh'
     agents:

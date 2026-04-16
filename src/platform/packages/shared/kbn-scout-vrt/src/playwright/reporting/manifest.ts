@@ -44,9 +44,10 @@ export interface VisualRegressionManifestSummary {
   tests: number;
   checkpoints: number;
   captured: number;
+  updated: number;
 }
 
-export type VisualRegressionRunMode = 'capture';
+export type VisualRegressionRunMode = 'capture' | 'update-baselines';
 export type VisualRegressionRunStatus = 'passed' | 'failed' | 'timedout' | 'interrupted';
 
 export interface VisualRegressionRunManifestPackage {
@@ -111,6 +112,7 @@ const createEmptySummary = (): VisualRegressionManifestSummary => ({
   tests: 0,
   checkpoints: 0,
   captured: 0,
+  updated: 0,
 });
 
 const getDurationMs = (startedAt: string, completedAt: string): number => {
@@ -155,6 +157,9 @@ export const summarizeVisualRegressionManifest = (
       case 'captured':
         summary.captured += 1;
         break;
+      case 'updated':
+        summary.updated += 1;
+        break;
     }
 
   }
@@ -192,6 +197,7 @@ const summarizeRunPackages = (
       tests: summary.tests + currentPackage.summary.tests,
       checkpoints: summary.checkpoints + currentPackage.summary.checkpoints,
       captured: summary.captured + currentPackage.summary.captured,
+      updated: summary.updated + currentPackage.summary.updated,
     }),
     createEmptySummary()
   );

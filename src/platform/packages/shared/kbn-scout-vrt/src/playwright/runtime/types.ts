@@ -22,7 +22,7 @@ export interface VisualCheckpointRecord {
   stepTitle: string;
   stepIndex: number;
   snapshotName: string;
-  status: 'captured';
+  status: 'captured' | 'updated';
   imagePath: string;
   source: VisualSourceLocation;
 }

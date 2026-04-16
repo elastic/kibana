@@ -12,7 +12,11 @@ import path from 'path';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { generateTestRunId } from '@kbn/scout-reporting';
-import { ensureVisualRegressionRunId, SCOUT_VISUAL_REGRESSION_ENABLED_ENV } from '../playwright/runtime/environment';
+import {
+  ensureVisualRegressionRunId,
+  SCOUT_VISUAL_REGRESSION_ENABLED_ENV,
+  SCOUT_VISUAL_REGRESSION_UPDATE_BASELINES_ENV,
+} from '../playwright/runtime/environment';
 import type { ParsedVisualRunTestsArgs } from './arg_parsing';
 import type { VisualRunSelection } from './visual_test_discovery';
 
@@ -29,6 +33,7 @@ const createVisualRunEnvironment = (
   return {
     TEST_RUN_ID: runId,
     [SCOUT_VISUAL_REGRESSION_ENABLED_ENV]: 'true',
+    [SCOUT_VISUAL_REGRESSION_UPDATE_BASELINES_ENV]: String(parsedArgs.updateBaselines),
   };
 };
 
