@@ -6,27 +6,11 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { SecurityGroupName, SecurityPageName } from '../constants';
-import { SecurityLinkGroup } from '../link_groups';
+import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
 export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
-  id: SecurityGroupName.entityAnalytics,
+  id: SecurityPageName.entityAnalyticsHomePage,
   icon: 'chartBarVerticalStack',
-  title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
-  renderAs: 'panelOpener',
-  children: [
-    {
-      id: SecurityPageName.entityAnalyticsOverview,
-      link: securityLink(SecurityPageName.entityAnalyticsOverview),
-    },
-    {
-      id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
-      link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
-    },
-    {
-      id: SecurityPageName.entityAnalyticsHomePage,
-      link: securityLink(SecurityPageName.entityAnalyticsHomePage),
-    },
-  ],
+  link: securityLink(SecurityPageName.entityAnalyticsHomePage),
 });

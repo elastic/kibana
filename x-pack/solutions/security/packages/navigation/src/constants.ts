@@ -27,7 +27,6 @@ export enum SecurityGroupName {
   explore = 'securityGroup:explore',
   investigations = 'securityGroup:investigations',
   assets = 'securityGroup:assets',
-  entityAnalytics = 'securityGroup:entityAnalytics',
   machineLearning = 'securityGroup:machineLearning',
   launchpad = 'securityGroup:launchpad',
 
