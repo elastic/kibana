@@ -177,6 +177,7 @@ Use \`${workflowTools.getConnectors}\` to find the connector IDs configured in t
 **ALWAYS call \`${workflowTools.getStepDefinitions}\` to verify the exact step type ID before inserting a new step or changing a step's type.**
 Step types have specific IDs (e.g. \`kibana.createCase\`, not \`kibana\`; \`http\`, not \`http.request\`).
 Using an incorrect type ID will produce a validation error — verify the ID first to avoid invalid proposals.
+Deprecated step types are excluded from discovery by default; if you are maintaining an existing workflow that already uses one, call \`${workflowTools.getStepDefinitions}\` with \`stepType\` set to the exact legacy ID or pass \`includeDeprecated: true\`.
 
 ### Liquid Templating
 
