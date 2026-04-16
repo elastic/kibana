@@ -128,6 +128,16 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         }
 
         const abortController = new AbortController();
+
+        // Create a timeout-based AbortSignal for grok/dissect and pipeline suggestions
+        // 5 minute timeout for the entire operation
+        const OPERATION_TIMEOUT_MS = 5 * 60 * 1000;
+        const timeoutSignal = AbortSignal.timeout(OPERATION_TIMEOUT_MS);
+        const timeoutAbortController = new AbortController();
+        const cleanup = () => timeoutAbortController.abort();
+        abortController.signal.addEventListener('abort', cleanup);
+        timeoutSignal.addEventListener('abort', cleanup);
+
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
 
         const fieldName = getDefaultTextField(params.body.documents, PRIORITIZED_CONTENT_FIELDS);
@@ -160,7 +170,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
-              signal: abortController.signal,
+              signal: timeoutAbortController.signal,
               logger: log,
             })
           );
@@ -177,7 +187,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
-              signal: abortController.signal,
+              signal: timeoutAbortController.signal,
               logger: log,
             })
           );
@@ -284,7 +294,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           agentPipelineSchema,
           maxSteps,
           maxDurationMs: 180_000, // 3 minutes - surface errors faster than infrastructure timeout
-          signal: abortController.signal,
+          signal: timeoutAbortController.signal,
           documents: documentsForAgent,
           esClient: scopedClusterClient.asCurrentUser,
           fieldsMetadataClient,
