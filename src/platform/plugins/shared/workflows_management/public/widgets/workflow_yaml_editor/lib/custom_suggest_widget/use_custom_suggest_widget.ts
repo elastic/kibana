@@ -69,11 +69,31 @@ export const useCustomSuggestWidget = (
       if (payload.items.length === 0) return;
 
       itemsRef.current = payload.items;
-      filterTextRef.current = '';
       selectedIndexRef.current = 0;
       anchorPositionRef.current = payload.anchorPosition;
-      isVisibleRef.current = true;
 
+      // Compute initial filterText: the user may have typed characters between
+      // the async provider trigger and this callback. Read the text from the
+      // anchor column to the current cursor to capture what was typed.
+      const pos = editor.getPosition();
+      const model = editor.getModel();
+      if (pos && model && pos.lineNumber === payload.anchorPosition.lineNumber) {
+        const typed = model.getValueInRange({
+          startLineNumber: pos.lineNumber,
+          startColumn: payload.anchorPosition.column,
+          endLineNumber: pos.lineNumber,
+          endColumn: pos.column,
+        });
+        filterTextRef.current = typed;
+      } else {
+        filterTextRef.current = '';
+      }
+
+      // Check if any items match the initial filter — if not, don't show
+      const filtered = getFilteredItems(payload.items, filterTextRef.current);
+      if (filtered.length === 0) return;
+
+      isVisibleRef.current = true;
       ctxKeyRef.current.set(true);
       widgetRef.current.setAnchorPosition(payload.anchorPosition);
       render();

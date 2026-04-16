@@ -10,13 +10,14 @@
 import { useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import { fuzzyMatch, highlightSegments } from './fuzzy_match';
+import { fuzzyMatch, getLabelHighlightIndices, highlightSegments } from './fuzzy_match';
 import { getSuggestWidgetStyles } from './suggest_widget_styles';
 import type { EnrichedSuggestionItem, SuggestionCategory } from './types';
 
 export interface FilteredItem {
   item: EnrichedSuggestionItem;
-  matchIndices: number[];
+  /** Highlight indices on the label (not filterText) for rendering */
+  labelHighlightIndices: number[];
   score: number;
 }
 
@@ -48,16 +49,23 @@ export const getFilteredItems = (
   filterText: string
 ): FilteredItem[] => {
   if (!filterText) {
-    return items.map((item) => ({ item, matchIndices: [], score: 0 }));
+    return items.map((item) => ({ item, labelHighlightIndices: [], score: 0 }));
   }
 
   return items
     .map((item) => {
-      const text = item.filterText ?? item.label;
-      const result = fuzzyMatch(filterText, text);
-      return { item, matchIndices: result.indices, score: result.score, matches: result.matches };
+      // Score against filterText (or label if no filterText) — same as Monaco
+      const scoreText = item.filterText ?? item.label;
+      const result = fuzzyMatch(filterText, scoreText);
+      if (!result.matches) return null;
+
+      // Get highlight indices for the LABEL (which is what's rendered).
+      // When filterText differs from label, re-score against label for highlights.
+      const labelIndices = getLabelHighlightIndices(filterText, item.label, item.filterText);
+
+      return { item, labelHighlightIndices: labelIndices, score: result.score };
     })
-    .filter((entry) => entry.matches)
+    .filter((entry): entry is FilteredItem => entry !== null)
     .sort((a, b) => b.score - a.score);
 };
 
@@ -99,9 +107,9 @@ export const SuggestListPanel: React.FC<SuggestListPanelProps> = ({
     <div css={styles.listPanel}>
       <div css={styles.listHeader}>{'Suggested'}</div>
       <div css={styles.listScroll} ref={listRef}>
-        {filteredItems.map(({ item, matchIndices }, i) => {
+        {filteredItems.map(({ item, labelHighlightIndices }, i) => {
           const isSelected = i === selectedIndex;
-          const segments = highlightSegments(item.label, matchIndices);
+          const segments = highlightSegments(item.label, labelHighlightIndices);
 
           return (
             <div
