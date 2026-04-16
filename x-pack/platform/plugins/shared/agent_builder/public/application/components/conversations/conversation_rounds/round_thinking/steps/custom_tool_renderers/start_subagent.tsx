@@ -17,14 +17,25 @@ import { ToolResponseFlyout } from '../tool_response_flyout';
 import { ToolResultDisplay } from '../tool_result_display';
 import type { ItemFactoryEntry } from '../tool_call_thinking';
 
+/** Shape of the `data` field in sub-agent tool results. */
+interface SubAgentResultData {
+  agent_execution_id?: string;
+  mode?: 'background';
+  status?: string;
+  response?: { message: string };
+}
+
+const getResultData = (result: ToolResult): SubAgentResultData | undefined => {
+  return result.data as SubAgentResultData | undefined;
+};
+
 /**
  * Extract the sub-agent execution ID from tool results or progress metadata.
  */
 const getExecutionId = (step: ToolCallStep): string | undefined => {
   // Try results first (available after tool completes)
-  const fromResults = (step.results.find((r) => (r.data as any)?.agent_execution_id)?.data as any)
-    ?.agent_execution_id;
-  if (fromResults) return fromResults;
+  const fromResults = step.results.find((r) => getResultData(r)?.agent_execution_id);
+  if (fromResults) return getResultData(fromResults)!.agent_execution_id;
 
   // Fall back to progress metadata (available during execution)
   const fromProgress = step.progression?.find((p) => p.metadata?.agent_execution_id)?.metadata
@@ -41,7 +52,6 @@ export const getSubAgentThinkingItems = ({
 }: {
   step: ToolCallStep;
   stepIndex: number;
-  openFlyout: (results: ToolResult[]) => void;
 }): ItemFactoryEntry[] => {
   const items: ItemFactoryEntry[] = [];
   const hasResults = step.results.length > 0;
@@ -79,7 +89,7 @@ export const getSubAgentThinkingItems = ({
 };
 
 const isBackgroundExecution = (step: ToolCallStep): boolean => {
-  return step.results.some((r) => (r.data as any)?.mode === 'background');
+  return step.results.some((r) => getResultData(r)?.mode === 'background');
 };
 
 /**
