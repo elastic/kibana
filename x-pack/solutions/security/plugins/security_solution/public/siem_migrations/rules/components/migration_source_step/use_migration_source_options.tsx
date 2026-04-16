@@ -24,9 +24,7 @@ export const useMigrationSourceOptions = () => {
   if (isQradarEnabled) {
     options.push({
       value: MigrationSource.QRADAR,
-      inputDisplay: (
-        <span>{MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.QRADAR]}</span>
-      ),
+      inputDisplay: <span>{MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.QRADAR]}</span>,
       'data-test-subj': `migrationSourceOption-${MigrationSource.QRADAR}`,
     });
   }
