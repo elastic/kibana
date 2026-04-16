@@ -162,7 +162,7 @@ export const optionsSchema = schema.object(
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.auto_apply_filters,
       meta: {
         description:
-          'When `true`, control filter changes are applied automatically. Defaults to `true`.',
+          'When `true`, control filter changes are applied automatically. When `false`, control filter changes are applied manually through the dashboard's search update button. Defaults to `true`.',
       },
     }),
     hide_panel_titles: schema.boolean({
