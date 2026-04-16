@@ -101,9 +101,7 @@ describe('QueryIdField', () => {
       fireEvent.click(screen.getByText('Submit'));
 
       await waitFor(() => {
-        expect(
-          screen.getByText('Characters must be alphanumeric, _, or -')
-        ).toBeInTheDocument();
+        expect(screen.getByText('Characters must be alphanumeric, _, or -')).toBeInTheDocument();
       });
     });
   });
