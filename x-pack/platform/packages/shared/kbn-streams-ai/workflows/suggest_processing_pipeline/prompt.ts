@@ -27,6 +27,8 @@ export const SuggestIngestPipelinePrompt = createPrompt({
      * Empty when the agent may propose grok/dissect (full pipeline schema).
      */
     upstream_extraction_context: z.string(),
+    /** Conditional field examples for ECS or OTel, injected into system prompt based on stream type */
+    field_examples: z.string(),
   }),
 })
   .version({

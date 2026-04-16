@@ -41,6 +41,7 @@ export async function suggestProcessingPipeline({
   inferenceClient,
   agentPipelineSchema,
   maxSteps,
+  maxDurationMs,
   signal,
   simulatePipeline,
   documents,
@@ -54,6 +55,7 @@ export async function suggestProcessingPipeline({
   inferenceClient: BoundInferenceClient;
   agentPipelineSchema: SuggestPipelineAgentSchema;
   maxSteps?: number | undefined;
+  maxDurationMs?: number | undefined;
   signal: AbortSignal;
   simulatePipeline(pipeline: StreamlangDSL): Promise<ProcessingSimulationResponse>;
   documents: FlattenRecord[];
@@ -84,6 +86,11 @@ export async function suggestProcessingPipeline({
 
   const isOtel = isOtelStream(definition);
 
+  // Conditionally include field examples based on stream type to reduce LLM decision space
+  const fieldExamples = isOtel
+    ? `**OTel:** \`severity_text\`, \`resource.attributes.service.name\`, \`body.text\`, \`attributes.*\``
+    : `**ECS:** \`log.level\`, \`service.name\`, \`host.name\`, \`@timestamp\``;
+
   const input = {
     stream: definition,
     fields_schema: isOtel
@@ -94,6 +101,7 @@ export async function suggestProcessingPipeline({
     pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(agentPipelineSchema)),
     initial_dataset_analysis: initialDatasetAnalysisJson,
     upstream_extraction_context: upstreamSeedParsingContextMarkdown ?? '',
+    field_examples: fieldExamples,
   };
 
   // Invoke the reasoning agent to suggest the ingest pipeline
@@ -102,6 +110,7 @@ export async function suggestProcessingPipeline({
     prompt: SuggestIngestPipelinePrompt,
     input,
     maxSteps: effectiveMaxSteps,
+    maxDurationMs,
     // `low` skips injecting `reason` / `complete` planning tools (only `simulate_pipeline` +
     // `commit_pipeline` from the prompt). `ReasoningPower` is `'low' | 'medium' | 'high'` only.
     power: 'low',
