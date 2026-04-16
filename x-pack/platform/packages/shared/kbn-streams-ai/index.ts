@@ -11,7 +11,10 @@ export {
   suggestProcessingPipeline,
   type SuggestProcessingPipelineResult,
 } from './workflows/suggest_processing_pipeline';
-export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
+export {
+  generateSignificantEvents,
+  type ExistingQuerySummary,
+} from './src/significant_events/generate_significant_events';
 export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,

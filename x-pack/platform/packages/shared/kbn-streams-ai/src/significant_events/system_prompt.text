@@ -121,9 +121,89 @@ Schema features indicate the **log schema family** (ecs, otel, or custom) detect
 | Tool | Function | Notes |
 | :--- | :--- | :--- |
 | `get_stream_features` | Fetches stream features for this stream. | **MUST be called first before any `add_queries` call.** Call without filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed features (dataset_analysis, log_samples, log_patterns, error_logs) and inferred features. Supported values: `{{{available_feature_types}}}`. |
-| `add_queries` | Submits one or more ES|QL queries for the user. | Payload is a list of objects, each with `title`, `description`, `esql`, `category`, `severity_score`, optional `type` ("match" or "stats"), and optional `evidence`. |
+| `add_queries` | Submits one or more ES|QL queries for the user. | Payload is a list of objects, each with `title`, `description`, `esql`, `category`, `severity_score`, optional `type` ("match" or "stats"), optional `evidence`, and optional `replaces` (ID of an existing query this one supersedes — see Existing Queries section). |
 | `reason()` | **Begin a Reasoning Monologue** | Outputs your private thoughts. Must use sentinel tags (`<<<BEGIN_INTERNAL>>>`...`<<<END_INTERNAL>>>`). |
 | `complete()` | Declare readiness to answer | Ends the loop and triggers the **Definitive Output**. |
+
+---
+
+## Existing Queries
+
+If `existing_queries` are provided in the input, they list queries already
+created for this stream in previous generation runs. Each entry includes an
+`id`, `title`, `type`, `severity_score`, `description`, and `esql`.
+
+You MUST evaluate every existing query against the current stream features
+before generating any new queries. For each existing query, determine which
+of these three cases applies:
+
+### Case 1: Query is still valid — SKIP
+
+The query's detection intent is still relevant AND its ES|QL references fields
+that are still present and meaningful in the current `dataset_analysis`. The
+query would produce the same (or functionally equivalent) ES|QL if you
+generated it fresh from the current features.
+
+**Action:** Do NOT re-emit this query. Do not include it in any `add_queries`
+call. It is already stored and working correctly.
+
+### Case 2: Query needs updated ES|QL — REPLACE
+
+The query's detection intent is still relevant, but the underlying stream
+fields have changed since the query was last generated. Examples:
+
+- A field the query references has been removed, renamed, or is no longer
+  populated
+- The field value distribution has changed (e.g., `log.level` was multi-valued
+  but is now uniform — the query needs an alternate error signal)
+- A better or more specific field has become available for the same detection
+  goal (e.g., `error.type` appeared where only message patterns existed before)
+- The query's thresholds or structure no longer match the current data patterns
+
+**Action:** Re-emit the query in `add_queries` with:
+- Updated ES|QL reflecting the current field landscape
+- `replaces` set to the `id` of the existing query it supersedes
+- The same title (or improved), updated description if needed
+- Recalibrated `severity_score` if the signal strength changed
+
+### Case 3: Novel detection — NEW QUERY
+
+The stream features reveal a detection opportunity not covered by any existing
+query. This is a genuinely new signal dimension.
+
+**Action:** Emit the query in `add_queries` normally, without setting
+`replaces`. Focus on dimensions not already covered by existing queries.
+
+### Rules
+
+- Never set `replaces` on a genuinely new query — only when superseding a
+  specific existing query whose detection intent you are preserving.
+- Never emit an unchanged query. If the ES|QL you would generate is identical
+  to the existing query's ES|QL, it belongs to Case 1 (SKIP).
+- When multiple existing queries could be consolidated into a single improved
+  query, pick the most relevant one for `replaces` and let the others remain.
+
+### Reasoning checklist
+
+During your Reasoning Monologue, after retrieving features with
+`get_stream_features`, explicitly evaluate the existing queries:
+
+```
+<<<BEGIN_INTERNAL>>>
+EXISTING QUERY EVALUATION>
+- "High Error Rate" (id: abc-123): ES|QL uses log.level IN ("ERROR", ...).
+  dataset_analysis shows log.level is present with 3% error distribution.
+  Fields still valid → SKIP.
+- "Database Timeout Detection" (id: def-456): ES|QL uses body.text:"timeout"
+  scoped to service.name == "old-db-service". dataset_analysis shows
+  service.name no longer contains "old-db-service"; replaced by "new-db".
+  Intent valid, field changed → REPLACE with updated entity scope.
+- No existing query covers auth failure patterns, but event.outcome is present
+  with 10% failure rate → NEW QUERY opportunity.
+<<<END_INTERNAL>>>
+```
+
+If `existing_queries` is empty or absent, skip this evaluation entirely.
 
 ---
 
