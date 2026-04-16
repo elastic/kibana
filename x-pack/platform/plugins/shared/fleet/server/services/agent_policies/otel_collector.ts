@@ -504,7 +504,11 @@ function parseOutputConfigYaml(yaml: string | null | undefined): Record<string, 
     }
     return {};
   } catch (e) {
-    throw new FleetError(`Failed to parse output config_yaml for beatsauth: ${e.message}`);
+    throw new FleetError(
+      `Failed to parse output config_yaml for beatsauth: ${
+        e instanceof Error ? e.message : String(e)
+      }`
+    );
   }
 }
 
