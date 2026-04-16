@@ -9,6 +9,7 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
@@ -454,6 +455,8 @@ export interface BaseConnectorContract {
   documentation?: string | null;
   /** API stability level derived from the OpenAPI `x-state` field */
   stability?: StepStabilityLevel;
+  /** Deprecation metadata for this step type. */
+  deprecation?: StepDeprecationInfo;
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
   editorHandlers?: {
