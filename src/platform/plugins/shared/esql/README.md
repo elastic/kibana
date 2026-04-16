@@ -38,5 +38,42 @@ It is also part of the:
 - ML data visualizer
 - Alerts
 
+## Plugin setup contract
+
+The `esql` plugin exposes a setup contract (`EsqlPluginSetup`) that other plugins can use during their own setup lifecycle.
+
+### `registerSourceEnricher(enricher)`
+
+Register a function to enrich the list of ES|QL source autocomplete suggestions. Multiple plugins may register enrichers; they are chained in registration order.
+
+**Signature:**
+
+```ts
+registerSourceEnricher(
+  enricher: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>
+): void;
+```
+
+The enricher receives the current list of `ESQLSourceResult` objects and must return a (potentially modified) list. Each result can be augmented with:
+- `title` – display label (overrides `name` in the suggestion list)
+- `description` – markdown text shown in the autocomplete detail popup
+- `links` – array of `{ label, url }` shown as links in the detail popup
+- `type` – one of `SOURCES_TYPES.*` (e.g. `WIRED_STREAM`, `CLASSIC_STREAM`) for visual differentiation
+
+**Example (plugin setup):**
+
+```ts
+setup(core, { esql }) {
+  esql?.registerSourceEnricher(async (sources) => {
+    return sources.map((source) => ({
+      ...source,
+      description: 'Custom description for ' + source.name,
+    }));
+  });
+}
+```
+
+Add `esql` to your plugin's `optionalPlugins` list in `kibana.jsonc` and declare `esql?: EsqlPluginSetup` in your setup dependencies type.
+
 ## Want to add support for a new command?
 Follow this [guide](ADD_COMMAND_GUIDE.md).

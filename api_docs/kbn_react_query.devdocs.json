@@ -14457,15 +14457,15 @@
               },
               {
                 "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_fetch_discovery_queries_occurrences.ts"
+              },
+              {
+                "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_unbacked_queries_count.ts"
               },
               {
                 "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_fetch_features.ts"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/use_fetch_discovery_queries_occurrences.ts"
               },
               {
                 "plugin": "streamsApp",
@@ -14530,6 +14530,10 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/hooks/use_metrics_explorer_views.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_modal.tsx"
               },
               {
                 "plugin": "searchPlayground",
@@ -14778,10 +14782,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/management/services/policies/hooks.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_modal.tsx"
               },
               {
                 "plugin": "@kbn/alerts-ui-shared",
