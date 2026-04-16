@@ -687,9 +687,10 @@ components:
         - updated_at
         - updatedAt
       type: string
-    FindRulesWithFacetsAggregations:
-      additionalProperties: false
-      description: |
+    GapFillStatus:
+      enum:
+        - unfilled
+        - in_progress
         - filled
         - error
       type: string
