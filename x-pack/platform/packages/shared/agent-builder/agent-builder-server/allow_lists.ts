@@ -108,6 +108,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Streams
   'streams-exploration',
   'significant-events-memory',
+  'knowledge-indicators-management',
 
   // Platform – Workflows
   'workflow-authoring',

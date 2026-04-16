@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
+import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { StreamsServer } from '../../types';
 import type { GetScopedClients } from '../../routes/types';
 import { createListStreamsTool } from './list_streams';
@@ -20,6 +21,14 @@ import {
   createSearchKnowledgeIndicatorsTool,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
 } from './search_knowledge_indicators/tool';
+import {
+  createFeatureKnowledgeIndicatorTool,
+  STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID,
+} from './create_feature_knowledge_indicator/tool';
+import {
+  createQueryKnowledgeIndicatorTool,
+  STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID,
+} from './create_query_knowledge_indicator/tool';
 
 export {
   STREAMS_TOOL_IDS,
@@ -33,17 +42,23 @@ export {
 } from './tool_ids';
 
 export { STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID };
+export {
+  STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID,
+  STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID,
+};
 
 export function registerAgentBuilderTools({
   agentBuilder,
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): void {
   if (!agentBuilder) {
     return;
@@ -61,6 +76,18 @@ export function registerAgentBuilderTools({
       getScopedClients,
       server,
       logger: logger.get('search_kis_tool'),
+    }),
+    createFeatureKnowledgeIndicatorTool({
+      getScopedClients,
+      server,
+      logger: logger.get('create_feature_ki_tool'),
+      telemetry,
+    }),
+    createQueryKnowledgeIndicatorTool({
+      getScopedClients,
+      server,
+      logger: logger.get('create_query_ki_tool'),
+      telemetry,
     }),
   ];
 
