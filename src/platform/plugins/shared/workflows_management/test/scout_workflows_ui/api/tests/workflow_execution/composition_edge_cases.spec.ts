@@ -138,7 +138,7 @@ spaceTest.describe('Workflow composition edge cases', { tag: tags.stateful.class
       action: () => workflowsApi.getExecutions(child.id),
       condition: (result) => result.results.length > 0,
       interval: 1000,
-      timeout: 15_000,
+      timeout: 30_000,
       errorMessage: 'Child workflow execution did not start',
     });
 

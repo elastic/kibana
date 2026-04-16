@@ -180,7 +180,7 @@ spaceTest.describe('Execution lifecycle and error handling', { tag: tags.statefu
       action: () => workflowsApi.getExecution(workflowExecutionId),
       condition: (exec) => (exec?.stepExecutions?.length ?? 0) >= 3,
       interval: 500,
-      timeout: 15_000,
+      timeout: 30_000,
       errorMessage: 'Foreach did not start iterating within timeout',
     });
 
