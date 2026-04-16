@@ -153,7 +153,6 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
   };
 
   const primaryChart = chartRenderers[chartLayout.primary](true);
-  const secondaryCharts = chartLayout.secondary.map((chartId) => chartRenderers[chartId](false));
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -169,8 +168,8 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
             {primaryChart}
             <EuiSpacer size="s" />
             <EuiFlexGroup direction="row" gutterSize="s">
-              {secondaryCharts.map((chart, index) => (
-                <React.Fragment key={index}>{chart}</React.Fragment>
+              {chartLayout.secondary.map((chartId) => (
+                <React.Fragment key={chartId}>{chartRenderers[chartId](false)}</React.Fragment>
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>

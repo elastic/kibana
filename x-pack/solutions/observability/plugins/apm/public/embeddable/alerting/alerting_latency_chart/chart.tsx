@@ -68,7 +68,7 @@ export function APMAlertingLatencyChart({
       setTransactionType={setTransactionType}
       comparisonEnabled={false}
       offset={''}
-      alertEvalThreshold={latencyThresholdInMicroseconds}
+      customAlertEvaluationThreshold={latencyThresholdInMicroseconds}
       kuery={kuery}
       filters={filters}
     />

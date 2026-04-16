@@ -7,7 +7,7 @@
 /* Error Rate */
 
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { RecursivePartial } from '@elastic/eui';
 import {
   EuiFlexItem,
@@ -16,25 +16,21 @@ import {
   EuiTitle,
   EuiIconTip,
   useEuiTheme,
-  transparentize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { Theme } from '@elastic/charts';
-import { AlertActiveTimeRangeAnnotation, AlertAnnotation } from '@kbn/observability-alert-details';
-import { ALERT_END, ALERT_EVALUATION_THRESHOLD, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import moment from 'moment';
-import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
+import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import * as get_timeseries_color from '../../../shared/charts/helper/get_timeseries_color';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import { getThresholdAnnotations, isFailedTransactionRateRuleType, yLabelFormat } from './helpers';
+import { getChartAlertAnnotations, isFailedTransactionRateRuleType, yLabelFormat } from './helpers';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
@@ -68,7 +64,7 @@ export function FailedTransactionChart({
   timeZone,
   kuery = '',
   filters,
-  alertEvalThreshold: alertEvalThresholdOverride,
+  customAlertEvaluationThreshold,
   threshold,
   ruleTypeId,
 }: {
@@ -85,7 +81,7 @@ export function FailedTransactionChart({
   timeZone: string;
   kuery?: string;
   filters?: BoolQuery;
-  alertEvalThreshold?: number;
+  customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
   ruleTypeId?: string;
 }) {
@@ -93,6 +89,7 @@ export function FailedTransactionChart({
   const {
     services: { uiSettings },
   } = useKibana();
+
   const { currentPeriodColor: currentPeriodColorErrorRate } =
     get_timeseries_color.getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
 
@@ -145,6 +142,21 @@ export function FailedTransactionChart({
       filters,
     ]
   );
+
+  const dateFormat = (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;
+
+  const alertAnnotations = useMemo(
+    () =>
+      getChartAlertAnnotations({
+        alert,
+        customAlertEvaluationThreshold,
+        isMatchingRuleType: isFailedTransactionRateRuleType,
+        dangerColor: euiTheme.colors.danger,
+        dateFormat,
+      }),
+    [alert, customAlertEvaluationThreshold, euiTheme.colors.danger, dateFormat]
+  );
+
   const timeseriesErrorRate = [
     {
       data: dataErrorRate.currentPeriod.timeseries,
@@ -155,43 +167,9 @@ export function FailedTransactionChart({
       }),
     },
   ];
+
   const showTransactionTypeSelect = setTransactionType && transactionTypes;
 
-  const alertEvalThreshold = alertEvalThresholdOverride ?? alert.fields[ALERT_EVALUATION_THRESHOLD];
-
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
-
-  const alertEvalThresholdChartData = getThresholdAnnotations(
-    alertEvalThreshold,
-    euiTheme.colors.danger
-  );
-
-  const getFailedTransactionChartAdditionalData = () => {
-    if (
-      isFailedTransactionRateRuleType(alert.fields[ALERT_RULE_TYPE_ID]) ||
-      alertEvalThresholdOverride
-    ) {
-      return [
-        <AlertActiveTimeRangeAnnotation
-          alertStart={alert.start}
-          alertEnd={alertEnd}
-          color={transparentize(euiTheme.colors.danger, 0.2)}
-          id={'alertActiveRect'}
-          key={'alertActiveRect'}
-        />,
-        <AlertAnnotation
-          key={'alertAnnotationStart'}
-          id={'alertAnnotationStart'}
-          alertStart={alert.start}
-          color={euiTheme.colors.danger}
-          dateFormat={
-            (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT
-          }
-        />,
-        ...alertEvalThresholdChartData,
-      ];
-    }
-  };
   return (
     <EuiFlexItem>
       <EuiPanel hasBorder={true}>
@@ -237,7 +215,7 @@ export function FailedTransactionChart({
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
           {!!threshold && (
-            <EuiFlexItem style={{ minWidth: 180 }} grow={1}>
+            <EuiFlexItem style={{ minWidth: THRESHOLD_SIDEBAR_MIN_WIDTH }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
@@ -246,7 +224,7 @@ export function FailedTransactionChart({
               id="errorRate"
               height={200}
               showAnnotations={true}
-              annotations={getFailedTransactionChartAdditionalData()}
+              annotations={alertAnnotations}
               fetchStatus={status}
               timeseries={timeseriesErrorRate}
               yLabelFormat={yLabelFormat}

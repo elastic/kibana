@@ -29,9 +29,7 @@ export const DEFAULT_LAYOUT: ChartLayout = {
 };
 
 export const RULE_TYPE_CHART_LAYOUTS: Record<string, ChartLayout> = {
-  // Latency Threshold
   [ApmRuleType.TransactionDuration]: DEFAULT_LAYOUT,
-  // Failed Transaction Rate Threshold
   [ApmRuleType.TransactionErrorRate]: {
     primary: 'failedTransactionRate',
     secondary: ['throughput', 'latency'],
