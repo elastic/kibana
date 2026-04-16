@@ -10,6 +10,7 @@ plugins:
     - cloud_security_posture
     - console
     - custom_branding
+    - data
     - dashboard
     - dashboard_markdown
     - data_views
