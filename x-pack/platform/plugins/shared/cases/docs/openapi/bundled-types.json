@@ -74,6 +74,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -105,6 +110,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -174,6 +184,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -288,6 +303,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -322,21 +342,26 @@
                   "maxItems": 10000,
                   "items": {
                     "$ref": "#/components/schemas/related_case"
-                  },
-                  "example": [
-                    {
-                      "id": "06116b80-e1c3-11ec-be9b-9b1838238ee6",
-                      "title": "security_case",
-                      "description": "Investigating suspicious activity",
-                      "status": "open",
-                      "createdAt": "2020-02-19T23:06:33.798Z",
-                      "totals": {
-                        "alerts": 1,
-                        "events": 0,
-                        "userComments": 0
+                  }
+                },
+                "examples": {
+                  "getCasesByAlertResponse": {
+                    "summary": "Cases associated with a given alert.",
+                    "value": [
+                      {
+                        "id": "06116b80-e1c3-11ec-be9b-9b1838238ee6",
+                        "title": "security_case",
+                        "description": "Investigating suspicious activity",
+                        "status": "open",
+                        "createdAt": "2020-02-19T23:06:33.798Z",
+                        "totals": {
+                          "alerts": 1,
+                          "events": 0,
+                          "userComments": 0
+                        }
                       }
-                    }
-                  ]
+                    ]
+                  }
                 }
               }
             }
@@ -347,6 +372,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -592,6 +622,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -846,6 +881,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1105,6 +1145,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1177,6 +1222,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1223,6 +1273,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1268,6 +1323,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1314,6 +1374,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1374,6 +1439,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1405,6 +1475,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1475,6 +1550,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1526,6 +1606,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1562,6 +1647,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1624,6 +1714,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1688,6 +1783,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1760,6 +1860,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1836,6 +1941,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -1865,6 +1975,14 @@
             "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/add_case_file_request"
+              },
+              "examples": {
+                "addCaseFileRequest": {
+                  "summary": "Attach a plain text file named \"my_attachment\".",
+                  "value": {
+                    "filename": "my_attachment"
+                  }
+                }
               }
             }
           }
@@ -1891,6 +2009,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
                 }
               }
             }
@@ -5382,6 +5505,14 @@
             }
           },
           "external_service": null
+        }
+      },
+      "response_401": {
+        "summary": "Authorization information is missing or invalid.",
+        "value": {
+          "error": "Unauthorized",
+          "message": "Unable to authenticate with the provided credentials.",
+          "statusCode": 401
         }
       },
       "update_case_request": {

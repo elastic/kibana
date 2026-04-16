@@ -49,6 +49,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
     delete:
       summary: Delete cases
       operationId: deleteCaseDefaultSpace
@@ -68,6 +71,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
       x-code-samples:
         - label: curl
           lang: curl
@@ -116,6 +122,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/_find:
     get:
       summary: Search cases
@@ -175,6 +184,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/alerts/{alertId}:
     get:
       summary: Get cases for an alert
@@ -197,22 +209,28 @@ paths:
                 maxItems: 10000
                 items:
                   $ref: '#/components/schemas/related_case'
-                example:
-                  - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
-                    title: security_case
-                    description: Investigating suspicious activity
-                    status: open
-                    createdAt: '2020-02-19T23:06:33.798Z'
-                    totals:
-                      alerts: 1
-                      events: 0
-                      userComments: 0
+              examples:
+                getCasesByAlertResponse:
+                  summary: Cases associated with a given alert.
+                  value:
+                    - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
+                      title: security_case
+                      description: Investigating suspicious activity
+                      status: open
+                      createdAt: '2020-02-19T23:06:33.798Z'
+                      totals:
+                        alerts: 1
+                        events: 0
+                        userComments: 0
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/configure:
     get:
       summary: Get case settings
@@ -390,6 +408,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
     post:
       summary: Add case settings
       operationId: setCaseConfigurationDefaultSpace
@@ -572,6 +593,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/configure/{configurationId}:
     patch:
       summary: Update case settings
@@ -756,6 +780,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/reporters:
     get:
       summary: Get case creators
@@ -805,6 +832,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/tags:
     get:
       summary: Get case tags
@@ -834,6 +864,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}:
     get:
       summary: Get case information
@@ -862,6 +895,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/alerts:
     get:
       summary: Get all alerts for a case
@@ -891,6 +927,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/comments:
     post:
       summary: Add a case comment or alert
@@ -927,6 +966,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
     delete:
       summary: Delete all case comments and alerts
       operationId: deleteCaseCommentsDefaultSpace
@@ -946,6 +988,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
       x-codeSamples:
         - label: curl
           lang: curl
@@ -993,6 +1038,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/comments/_find:
     get:
       summary: Find case comments
@@ -1022,6 +1070,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/comments/{commentId}:
     delete:
       summary: Delete a case comment or alert
@@ -1043,6 +1094,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
       x-codeSamples:
         - label: curl
           lang: curl
@@ -1083,6 +1137,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/connector/{connectorId}/_push:
     post:
       summary: Push a case to an external service
@@ -1121,6 +1178,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/user_actions/_find:
     get:
       summary: Find case activity
@@ -1163,6 +1223,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/configure/connectors/_find:
     get:
       summary: Get case connectors
@@ -1213,6 +1276,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/files:
     post:
       summary: Attach a file to a case
@@ -1232,6 +1298,11 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/add_case_file_request'
+            examples:
+              addCaseFileRequest:
+                summary: Attach a plain text file named "my_attachment".
+                value:
+                  filename: my_attachment
       responses:
         '200':
           description: Indicates a successful call.
@@ -1248,6 +1319,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
       x-codeSamples:
         - label: curl
           lang: curl
@@ -2423,10 +2497,10 @@ components:
             discriminator:
               propertyName: type
               mapping:
-                actions: actions_comment_response_properties.yaml
-                alert: alert_comment_response_properties.yaml
-                event: event_comment_response_properties.yaml
-                user: user_comment_response_properties.yaml
+                actions: '#/components/schemas/actions_comment_response_properties'
+                alert: '#/components/schemas/alert_comment_response_properties'
+                event: '#/components/schemas/event_comment_response_properties'
+                user: '#/components/schemas/user_comment_response_properties'
         connector:
           title: Case response properties for connectors
           oneOf:
@@ -2440,13 +2514,13 @@ components:
           discriminator:
             propertyName: type
             mapping:
-              .none: connector_properties_none.yaml
-              .cases-webhook: connector_properties_cases_webhook.yaml
-              .jira: connector_properties_jira.yaml
-              .resilient: connector_properties_resilient.yaml
-              .servicenow: connector_properties_servicenow.yaml
-              .servicenow-sir: connector_properties_servicenow_sir.yaml
-              .swimlane: connector_properties_swimlane.yaml
+              .none: '#/components/schemas/connector_properties_none'
+              .cases-webhook: '#/components/schemas/connector_properties_cases_webhook'
+              .jira: '#/components/schemas/connector_properties_jira'
+              .resilient: '#/components/schemas/connector_properties_resilient'
+              .servicenow: '#/components/schemas/connector_properties_servicenow'
+              .servicenow-sir: '#/components/schemas/connector_properties_servicenow_sir'
+              .swimlane: '#/components/schemas/connector_properties_swimlane'
         created_at:
           type: string
           format: date-time
@@ -3041,13 +3115,13 @@ components:
           discriminator:
             propertyName: type
             mapping:
-              .none: connector_properties_none.yaml
-              .cases-webhook: connector_properties_cases_webhook.yaml
-              .jira: connector_properties_jira.yaml
-              .resilient: connector_properties_resilient.yaml
-              .servicenow: connector_properties_servicenow.yaml
-              .servicenow-sir: connector_properties_servicenow_sir.yaml
-              .swimlane: connector_properties_swimlane.yaml
+              .none: '#/components/schemas/connector_properties_none'
+              .cases-webhook: '#/components/schemas/connector_properties_cases_webhook'
+              .jira: '#/components/schemas/connector_properties_jira'
+              .resilient: '#/components/schemas/connector_properties_resilient'
+              .servicenow: '#/components/schemas/connector_properties_servicenow'
+              .servicenow-sir: '#/components/schemas/connector_properties_servicenow_sir'
+              .swimlane: '#/components/schemas/connector_properties_swimlane'
         created_at:
           type: string
           format: date-time
@@ -3253,8 +3327,8 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          alert: add_alert_comment_request_properties.yaml
-          user: add_user_comment_request_properties.yaml
+          alert: '#/components/schemas/add_alert_comment_request_properties'
+          user: '#/components/schemas/add_user_comment_request_properties'
     update_alert_comment_request_properties:
       title: Update case comment request properties for alerts
       description: Defines properties for case comment requests when type is alert.
@@ -3335,8 +3409,8 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          alert: update_alert_comment_request_properties.yaml
-          user: update_user_comment_request_properties.yaml
+          alert: '#/components/schemas/update_alert_comment_request_properties'
+          user: '#/components/schemas/update_user_comment_request_properties'
     find_comments_response:
       title: Find case comments response
       type: object
@@ -3812,6 +3886,12 @@ components:
             parent: null
             priority: High
         external_service: null
+    response_401:
+      summary: Authorization information is missing or invalid.
+      value:
+        error: Unauthorized
+        message: Unable to authenticate with the provided credentials.
+        statusCode: 401
     update_case_request:
       summary: Update the case description, tags, and connector.
       value:
