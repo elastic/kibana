@@ -18,6 +18,8 @@ import type { ReactElement, ReactNode } from 'react';
 export enum AppMenuActionId {
   new = 'new',
   open = 'open',
+  // Must match APP_MENU_SHARE_ID from @kbn/core-chrome-app-menu-components.
+  // Chrome auto-promotes app menu items with this id to a global action button.
   share = 'share',
   export = 'export',
   alerts = 'alerts',
