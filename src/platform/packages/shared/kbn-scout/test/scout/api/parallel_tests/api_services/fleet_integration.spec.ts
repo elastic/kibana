@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest } from '../../../../../src/playwright';
+import { apiTest, tags } from '../../../../../src/playwright';
 import { expect } from '../../../../../api';
 
 apiTest.describe(
