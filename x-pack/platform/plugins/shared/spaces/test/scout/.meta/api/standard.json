@@ -1,7 +1,344 @@
 {
-  "lastModified": "2026-02-12T10:42:02.215Z",
-  "sha1": "d3ee1cfe7b16f41263dce33a9771668fa27be778",
+  "sha1": "05e2afb85f2a99e9071ceefb0a5f5529b7cb0138",
   "tests": [
+    {
+      "id": "cea249672d0d325-f99b36e4e77ecfa",
+      "title": "Get active space returns the default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/active_space.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "cea249672d0d325-93d1e6bdb7e0c38",
+      "title": "Get active space returns the default space when explicitly referenced",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/active_space.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "cea249672d0d325-89fb3d7c9a5cb64",
+      "title": "Get active space returns the foo space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/active_space.spec.ts",
+        "line": 59,
+        "column": 12
+      }
+    },
+    {
+      "id": "cea249672d0d325-9db92bcfda4a30b",
+      "title": "Get active space returns 404 when the space is not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/active_space.spec.ts",
+        "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "ef19cedcf8f7012-3b80201af785490",
+      "title": "Spaces CRUD should allow us to create a space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/crud.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "ef19cedcf8f7012-ed11dfecbf0bebb",
+      "title": "Spaces CRUD should not allow us to create a space with disabled features",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/crud.spec.ts",
+        "line": 53,
+        "column": 12
+      }
+    },
+    {
+      "id": "ef19cedcf8f7012-d58aeb46a6a7d16",
+      "title": "Spaces CRUD should allow us to get a space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/crud.spec.ts",
+        "line": 65,
+        "column": 12
+      }
+    },
+    {
+      "id": "ef19cedcf8f7012-62b6008d441f055",
+      "title": "Spaces CRUD should allow us to get all spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/crud.spec.ts",
+        "line": 80,
+        "column": 12
+      }
+    },
+    {
+      "id": "ef19cedcf8f7012-59797567ae59805",
+      "title": "Spaces CRUD should allow us to update a space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/crud.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "ef19cedcf8f7012-758c13ccabd0ba0",
+      "title": "Spaces CRUD should not allow us to update a space with disabled features",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/crud.spec.ts",
+        "line": 119,
+        "column": 12
+      }
+    },
+    {
+      "id": "ef19cedcf8f7012-b0b6b602848788b",
+      "title": "Spaces CRUD should allow us to delete a space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/crud.spec.ts",
+        "line": 139,
+        "column": 12
+      }
+    },
+    {
+      "id": "af9b98839de7714-b525ea512c95436",
+      "title": "Spaces route access #getActiveSpace requires internal header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/route_access.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "af9b98839de7714-24c9e25bc281a13",
+      "title": "Spaces route access #copyToSpace requires internal header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/route_access.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "af9b98839de7714-d1199f6890b32cc",
+      "title": "Spaces route access #resolveCopyToSpaceErrors requires internal header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/route_access.spec.ts",
+        "line": 80,
+        "column": 12
+      }
+    },
+    {
+      "id": "af9b98839de7714-5e9ef0b13131d30",
+      "title": "Spaces route access #updateObjectsSpaces requires internal header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/route_access.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "af9b98839de7714-3f94d0a50d6fa6c",
+      "title": "Spaces route access #getShareableReferences requires internal header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/route_access.spec.ts",
+        "line": 136,
+        "column": 12
+      }
+    },
+    {
+      "id": "af9b98839de7714-859940a34e716be",
+      "title": "Spaces route access #disableLegacyUrlAliases is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/serverless_only/route_access.spec.ts",
+        "line": 157,
+        "column": 12
+      }
+    },
     {
       "id": "9ed5a2598c1c91a-911908fadbaff38",
       "title": "_import API with multiple spaces should import and export saved objects across different spaces",
