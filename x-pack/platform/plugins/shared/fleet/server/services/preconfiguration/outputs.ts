@@ -22,7 +22,9 @@ import type {
   SOSecret,
   KafkaOutput,
   NewRemoteElasticsearchOutput,
+  NewElasticsearchOutput,
 } from '../../../common/types';
+import { outputType } from '../../../common/constants';
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
 import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT, ECH_AGENTLESS_OUTPUT_ID } from '../../constants';
@@ -395,6 +397,16 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       preconfiguredOutput.ca_trusted_fingerprint
     ) ||
     isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
+    (existingOutput.type === outputType.Elasticsearch &&
+      preconfiguredOutput.type === outputType.Elasticsearch &&
+      (isDifferent(
+        (existingOutput as NewElasticsearchOutput).otel_exporter_config_yaml,
+        (preconfiguredOutput as Partial<NewElasticsearchOutput>).otel_exporter_config_yaml
+      ) ||
+        isDifferent(
+          (existingOutput as NewElasticsearchOutput).otel_disable_beatsauth,
+          (preconfiguredOutput as Partial<NewElasticsearchOutput>).otel_disable_beatsauth
+        ))) ||
     isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
     isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
     (preconfiguredOutput.preset &&
