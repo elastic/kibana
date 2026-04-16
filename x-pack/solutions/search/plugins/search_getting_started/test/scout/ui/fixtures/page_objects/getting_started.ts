@@ -19,27 +19,6 @@ export class GettingStarted {
     return this.page.testSubj.locator('gettingStartedHeader');
   }
 
-  async getAddDataButton() {
-    return this.page.testSubj.locator('gettingStartedAddDataButton');
-  }
-
-  async clickAddDataButton() {
-    await this.page.testSubj.locator('gettingStartedAddDataButton').click();
-  }
-
-  async selectAddDataOption(optionTestSubj: string) {
-    await this.clickAddDataButton();
-    await this.page.testSubj.locator(optionTestSubj).click();
-  }
-
-  async getSkipAndGoHomeButton() {
-    return this.page.testSubj.locator('skipAndGoHomeBtn');
-  }
-
-  async clickSkipAndGoHomeButton() {
-    await this.page.testSubj.locator('skipAndGoHomeBtn').click();
-  }
-
   async getKibanaVersionBadge() {
     return this.page.testSubj.locator('kibana-version-badge');
   }
@@ -80,6 +59,46 @@ export class GettingStarted {
     return this.page.testSubj.locator('connectionDetailsTabBtn-apiKeys');
   }
 
+  async getAgentInstallLaunchBtn() {
+    return this.page.testSubj.locator('agentInstallLaunchBtn');
+  }
+
+  async clickAgentInstallLaunchBtn() {
+    await this.page.testSubj.locator('agentInstallLaunchBtn').click();
+  }
+
+  async getPromptModalCopyBtn() {
+    return this.page.testSubj.locator('promptModalCopyBtn');
+  }
+
+  async getAgentInstallOpenInAgentBuilderBtn() {
+    return this.page.testSubj.locator('agentInstallOpenInAgentBuilder');
+  }
+
+  async clickAgentInstallOpenInAgentBuilderBtn() {
+    await this.page.testSubj.locator('agentInstallOpenInAgentBuilder').click();
+  }
+
+  async getAgentBuilderSidebarPanel() {
+    return this.page.testSubj.locator('sidebarPanel');
+  }
+
+  async getUploadFilesButton() {
+    return this.page.testSubj.locator('uploadFilesButton');
+  }
+
+  async clickUploadFilesButton() {
+    await this.page.testSubj.locator('uploadFilesButton').click();
+  }
+
+  async getViewSampleDataButton() {
+    return this.page.testSubj.locator('viewSampleDataButton');
+  }
+
+  async clickViewSampleDataButton() {
+    await this.page.testSubj.locator('viewSampleDataButton').click();
+  }
+
   async getTutorialCard(tutorialId: string) {
     return this.page.testSubj.locator(`console_tutorials_${tutorialId}`);
   }
@@ -98,27 +117,6 @@ export class GettingStarted {
     await card.click();
   }
 
-  async getLanguageSelector() {
-    return this.page.testSubj.locator('codeExampleLanguageSelect');
-  }
-
-  async selectCodingLanguage(language: string) {
-    await this.page.testSubj.locator('codeExampleLanguageSelect').click();
-    await this.page.testSubj.locator(`lang-option-${language}`).click();
-  }
-
-  async getCodeSample() {
-    return this.page.testSubj.locator('gettingStartedExampleCode');
-  }
-
-  async getFooterLink(linkId: string) {
-    return this.page.testSubj.locator(`gettingStarted${linkId}-btn`);
-  }
-
-  async getNoApiKeysAccessMessage() {
-    return this.page.locator("text=You don't have access to manage API keys");
-  }
-
   async getEmbeddedConsoleControlBar() {
     return this.page.testSubj.locator('consoleEmbeddedControlBar');
   }
@@ -129,5 +127,9 @@ export class GettingStarted {
 
   async getEmbeddedConsole() {
     return this.page.testSubj.locator('consoleEmbeddedBody');
+  }
+
+  async getNoApiKeysAccessMessage() {
+    return this.page.locator("text=You don't have access to manage API keys");
   }
 }
