@@ -56,7 +56,6 @@ import { MappingsFilter } from './details_page_filter_fields';
 
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
 import { updateIndexMappings, useUserPrivileges } from '../../../../services/api';
-import { notificationService } from '../../../../services/notification';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
@@ -81,6 +80,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     config,
     overlays,
     history,
+    services: { notificationService },
   } = useAppContext();
   const { data: userPrivilege } = useUserPrivileges(index.name);
   const hasUpdateMappingsPrivilege = userPrivilege?.privileges?.canManageIndex === true;

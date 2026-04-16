@@ -77,6 +77,7 @@ components:
 
     PackName:
       description: 'The pack name.'
+      example: 'my_pack'
       type: string
 
     SavedQueryId:
@@ -156,6 +157,26 @@ components:
 
     ECSMappingOrUndefined:
       $ref: '#/components/schemas/ECSMapping'
+      nullable: true
+
+    ECSMappingArrayItem:
+      description: 'ECS mapping item in saved-object storage format (key-value pair).'
+      type: object
+      properties:
+        key:
+          description: 'The ECS field name.'
+          type: string
+        value:
+          $ref: '#/components/schemas/ECSMappingItem'
+
+    ECSMappingArray:
+      description: 'ECS mapping in saved-object storage format (array of key-value pairs). The find and copy pack endpoints return this format. The read endpoint returns object format (ECSMapping).'
+      type: array
+      items:
+        $ref: '#/components/schemas/ECSMappingArrayItem'
+
+    ECSMappingArrayOrUndefined:
+      $ref: '#/components/schemas/ECSMappingArray'
       nullable: true
 
     ArrayQueriesItem:
@@ -262,3 +283,4 @@ components:
     DefaultSuccessResponse:
       type: object
       properties: { }
+      example: { }

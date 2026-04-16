@@ -29,6 +29,7 @@ const defaultContext: ColumnBuilderContext = {
     selection: true,
     tags: false,
     starred: false,
+    userProfiles: false,
   },
 };
 
@@ -81,6 +82,7 @@ describe('updated at column builder', () => {
           selection: true,
           tags: false,
           starred: false,
+          userProfiles: false,
         },
       };
 
