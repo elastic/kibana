@@ -126,7 +126,8 @@ async function runPreflight(
       (f) => f !== '@timestamp' && !existingFields.includes(f)
     );
 
-    if (missing.length === definition.requiredFields.filter((f) => f !== '@timestamp').length) {
+    const requiredWithoutTimestamp = definition.requiredFields.filter((f) => f !== '@timestamp');
+    if (requiredWithoutTimestamp.length > 0 && missing.length === requiredWithoutTimestamp.length) {
       return { confidence: 'NOT_ASSESSABLE', missingFields: missing };
     }
     if (missing.length > 0) {
