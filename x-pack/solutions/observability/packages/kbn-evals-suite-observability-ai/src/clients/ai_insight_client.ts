@@ -23,6 +23,11 @@ export interface ErrorInsightParams {
   environment?: string;
 }
 
+export interface LogInsightParams {
+  index: string;
+  id: string;
+}
+
 export class AiInsightClient {
   constructor(private readonly fetch: HttpHandler) {}
 
@@ -35,6 +40,13 @@ export class AiInsightClient {
 
   async getErrorInsight(params: ErrorInsightParams): Promise<AiInsightResponse> {
     return this.fetch('/internal/observability_agent_builder/ai_insights/error', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }) as Promise<AiInsightResponse>;
+  }
+
+  async getLogInsight(params: LogInsightParams): Promise<AiInsightResponse> {
+    return this.fetch('/internal/observability_agent_builder/ai_insights/log', {
       method: 'POST',
       body: JSON.stringify(params),
     }) as Promise<AiInsightResponse>;

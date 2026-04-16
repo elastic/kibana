@@ -44,3 +44,13 @@ export interface ApmErrorIdSearchFields {
 export interface AlertScenario extends BaseScenario {
   alertRule: AlertRuleConfig;
 }
+
+export interface LogQuery {
+  messagePattern: string;
+  serviceName: string;
+  index: string;
+}
+
+export interface LogScenario extends BaseScenario {
+  logQuery: LogQuery;
+}

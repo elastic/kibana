@@ -11,7 +11,7 @@ This package is separate from [`@kbn/evals-suite-obs-ai-assistant`](../kbn-evals
 
 | Directory | Client | Description |
 |---|---|---|
-| `evals/ai_insights/` | `AiInsightClient` | Correctness of LLM-generated insight summaries for alerts and APM errors |
+| `evals/ai_insights/` | `AiInsightClient` | Correctness of LLM-generated insight summaries for alerts, APM errors, and logs |
 | `evals/observability_agent/` | `AgentBuilderClient` | Observability Agent chat behavior |
 
 ## Prerequisites
