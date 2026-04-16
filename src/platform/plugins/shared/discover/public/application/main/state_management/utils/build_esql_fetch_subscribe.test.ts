@@ -712,6 +712,44 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
+  test('changing an ES|QL query that returns empty results should clear columns', async () => {
+    const { replaceUrlState, dataState, tabId } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next(msgComplete);
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      query: { esql: 'from the-data-view-title | where field1 = "no-match"' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: [] },
+    });
+  });
+
+  test('same ES|QL query returning empty results should not clear columns', async () => {
+    const { replaceUrlState, dataState } = await setupTest({});
+    const documents$ = dataState.data$.documents$;
+
+    documents$.next(msgComplete);
+    expect(replaceUrlState).toHaveBeenCalledTimes(1);
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      query,
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+  });
+
   it('should call setProfileStateFieldsToReset correctly when columns change', async () => {
     const { toolkit, dataState } = await setupTest({});
     const documents$ = dataState.data$.documents$;

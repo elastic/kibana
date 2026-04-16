@@ -115,6 +115,7 @@ export const buildEsqlFetchSubscribe = ({
 
     let nextAllColumns = prevEsqlData.allColumns;
     let nextDefaultColumns = prevEsqlData.defaultColumns;
+    const hasQueryChanged = nextQuery.esql !== prevEsqlData.query;
 
     if (next.result?.length) {
       nextAllColumns = Object.keys(next.result[0].raw);
@@ -127,6 +128,8 @@ export const buildEsqlFetchSubscribe = ({
       } else {
         nextDefaultColumns = [];
       }
+    } else if (hasQueryChanged && next.result?.length === 0) {
+      nextDefaultColumns = [];
     }
 
     if (prevEsqlData.initialFetch) {
