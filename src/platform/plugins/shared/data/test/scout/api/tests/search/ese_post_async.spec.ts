@@ -91,6 +91,7 @@ apiTest.describe(
               body: {},
             });
             if (!pollResponse.body.isRunning && !pollResponse.body.isPartial) {
+              // eslint-disable-next-line playwright/no-conditional-expect
               expect(pollResponse.body.id).toBeDefined();
               return true;
             }
