@@ -98,15 +98,15 @@ export const permissionsPolicyViolationReportSchema = schema.object(
          */
         featureId: schema.maybe(schema.string()),
         /**
-         * If known, the file where the violation occured, or null otherwise.
+         * If known, the file where the violation occurred, or null otherwise.
          */
         sourceFile: schema.maybe(schema.string()),
         /**
-         * If known, the line number in sourceFile where the violation occured, or null otherwise.
+         * If known, the line number in sourceFile where the violation occurred, or null otherwise.
          */
         lineNumber: schema.maybe(schema.number()),
         /**
-         * If known, the column number in sourceFile where the violation occured, or null otherwise.
+         * If known, the column number in sourceFile where the violation occurred, or null otherwise.
          */
         columnNumber: schema.maybe(schema.number()),
         /**
