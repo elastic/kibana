@@ -107,7 +107,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
               <EuiButtonEmpty
                 href={docsUrl}
                 target="_blank"
-                iconType="documents"
+                iconType="question"
                 size="s"
                 data-test-subj="agentOverviewDocsLink"
               >
