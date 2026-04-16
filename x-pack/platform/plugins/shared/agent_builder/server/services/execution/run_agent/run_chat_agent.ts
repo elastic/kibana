@@ -6,16 +6,28 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { filter, finalize, from, merge, ReplaySubject, shareReplay } from 'rxjs';
+import { filter, finalize, from, merge, Observable, ReplaySubject, shareReplay } from 'rxjs';
+import type { Subscriber } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import {
   isStreamEvent,
   reverseMap,
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, ChatAgentEvent, Conversation, ConversationRound, ConversationRoundStep, RoundInput } from '@kbn/agent-builder-common';
+import {
+  isToolCallEvent,
+  isToolResultEvent,
+  isToolProgressEvent,
+  isReasoningEvent,
+  isToolCallStep,
+  isReasoningStep,
+  memoryTools,
+} from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
@@ -300,6 +312,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       compactionResult,
     }),
     evictInternalEvents(),
+    evictMemoryToolEvents(),
     shareReplay()
   );
 
@@ -311,6 +324,47 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
+
+  // Fire-and-forget: trigger post-round memory extraction for every completed round.
+  // Runs async — never blocks the response to the user.
+  if (round.status === ConversationRoundStatus.completed) {
+    triggerPostRoundMemoryExtraction({
+      request,
+      round,
+      conversationId: conversation?.id ?? runId,
+      conversation,
+      logger,
+    }).catch(() => {
+      // errors already logged inside
+    });
+  }
+
+  // When showMemoryToolCalls is false, strip memory tool steps and their
+  // associated reasoning steps from the round so the UI doesn't show them.
+  if (!_showMemoryToolCalls) {
+    const memoryToolIds = new Set(Object.values(memoryTools));
+    const memoryToolCallIds = new Set<string>();
+
+    // Collect tool_call_ids of memory tool steps
+    for (const step of round.steps) {
+      if (isToolCallStep(step) && memoryToolIds.has(step.tool_id)) {
+        memoryToolCallIds.add(step.tool_call_id);
+      }
+    }
+
+    if (memoryToolCallIds.size > 0) {
+      round.steps = round.steps.filter((step: ConversationRoundStep) => {
+        if (isToolCallStep(step) && memoryToolIds.has(step.tool_id)) {
+          return false;
+        }
+        if (isReasoningStep(step) && step.tool_call_id && memoryToolCallIds.has(step.tool_call_id)) {
+          return false;
+        }
+        return true;
+      });
+    }
+  }
+
   return {
     round,
   };
@@ -372,4 +426,102 @@ const getRecursionLimit = (cycleLimit: number): number => {
   // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
   // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
   return cycleLimit * 2 + 8;
+};
+
+let _showMemoryToolCalls = true;
+
+export const setShowMemoryToolCalls = (show: boolean): void => {
+  _showMemoryToolCalls = show;
+};
+
+/**
+ * RxJS operator that filters out memory tool events from the stream
+ * when _showMemoryToolCalls is false. This prevents checkpoint, remember,
+ * and reinforce tool calls from appearing in the UI during streaming.
+ */
+const evictMemoryToolEvents = () => {
+  const memoryToolIds = new Set(Object.values(memoryTools));
+  const hiddenToolCallIds = new Set<string>();
+
+  return (source: Observable<ChatAgentEvent>) =>
+    new Observable<ChatAgentEvent>((subscriber: Subscriber<ChatAgentEvent>) => {
+      return source.subscribe({
+        next: (event: ChatAgentEvent) => {
+          if (_showMemoryToolCalls) {
+            subscriber.next(event);
+            return;
+          }
+
+          if (isToolCallEvent(event) && memoryToolIds.has(event.data.tool_id)) {
+            hiddenToolCallIds.add(event.data.tool_call_id);
+            return;
+          }
+
+          if (isToolResultEvent(event) && hiddenToolCallIds.has(event.data.tool_call_id)) {
+            return;
+          }
+
+          if (isToolProgressEvent(event) && hiddenToolCallIds.has(event.data.tool_call_id)) {
+            return;
+          }
+
+          if (isReasoningEvent(event) && event.data.tool_call_id && hiddenToolCallIds.has(event.data.tool_call_id)) {
+            return;
+          }
+
+          subscriber.next(event);
+        },
+        error: (err: Error) => subscriber.error(err),
+        complete: () => subscriber.complete(),
+      });
+    });
+};
+
+/**
+ * Fire-and-forget post-round memory extraction.
+ *
+ * This is a no-op stub that gets replaced at runtime by the memory system's
+ * registration in plugin.ts. The indirection avoids a direct import from
+ * the memory module (which would create a circular dependency between the
+ * execution layer and the memory service layer).
+ */
+let _memoryExtractionCallback:
+  | ((params: {
+      request: KibanaRequest;
+      round: ConversationRound;
+      conversationId: string;
+      conversation?: Conversation;
+    }) => Promise<void>)
+  | undefined;
+
+export const setMemoryExtractionCallback = (
+  cb: NonNullable<typeof _memoryExtractionCallback>
+): void => {
+  _memoryExtractionCallback = cb;
+};
+
+const triggerPostRoundMemoryExtraction = async (params: {
+  request: KibanaRequest;
+  round: ConversationRound;
+  conversationId: string;
+  conversation?: Conversation;
+  logger: Logger;
+}): Promise<void> => {
+  if (!_memoryExtractionCallback) {
+    params.logger.info('memory: extraction callback not registered — skipping post-round extraction');
+    return;
+  }
+  params.logger.info(
+    `memory: triggering post-round extraction for conversation=${params.conversationId}, round=${params.round.id}`
+  );
+  try {
+    await _memoryExtractionCallback({
+      request: params.request,
+      round: params.round,
+      conversationId: params.conversationId,
+      conversation: params.conversation,
+    });
+  } catch (err) {
+    params.logger.warn(`memory: post-round extraction failed: ${(err as Error).message}`);
+  }
 };

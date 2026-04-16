@@ -26,7 +26,14 @@ const rememberSchema = z.object({
     .string()
     .min(1)
     .max(128)
-    .describe('The unique ID of the memory node to retrieve in full.'),
+    .optional()
+    .describe('The unique ID of a specific memory node to retrieve. Provide either memory_id or query, not both.'),
+  query: z
+    .string()
+    .min(1)
+    .max(500)
+    .optional()
+    .describe('A text query to search memories by content. Returns the top matching memory and its neighbors. Provide either memory_id or query, not both.'),
   full: z
     .boolean()
     .describe(
@@ -65,14 +72,24 @@ export const createRememberTool = ({
   id: MEMORY_REMEMBER_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Retrieve a specific memory by ID, with optional full content and neighboring memories. ' +
-    'Use this to expand on a memory that was surfaced during retrieval but needs more detail. ' +
+    'Retrieve a memory by ID or search by text query, with optional full content and neighboring memories. ' +
+    'Use this to expand on a memory surfaced during retrieval, or to search for memories by topic. ' +
+    'Provide either memory_id (for a specific memory) or query (to search by content). ' +
     'Returns the memory content and up to 5 related memories from the knowledge graph. ' +
-    'Applying full=true returns the complete memory content (up to ~500 tokens) and records a ' +
-    'stronger reinforcement signal. Capped at 10 calls per round.',
+    'full=true returns complete content (~500 tokens) with stronger reinforcement. Capped at 10 calls per round.',
   schema: rememberSchema,
   tags: ['memory', 'system'],
-  handler: async ({ memory_id: memoryId, full }, context) => {
+  handler: async ({ memory_id: memoryId, query, full }, context) => {
+    if (!memoryId && !query) {
+      return {
+        results: [
+          createErrorResult({
+            message: 'Either memory_id or query must be provided.',
+          }),
+        ],
+      };
+    }
+
     const activeSet = getActiveMemorySet();
 
     // Enforce per-round call cap
@@ -91,25 +108,60 @@ export const createRememberTool = ({
     const memoryService = getMemoryService();
     const memoryClient = await memoryService.getScopedClient({ request: context.request });
 
-    // Fetch the target memory
-    let memory;
-    try {
-      memory = await memoryClient.get(memoryId);
-    } catch (err) {
-      return {
-        results: [
-          createErrorResult({
-            message: `Memory not found: ${memoryId}`,
-            metadata: { memory_id: memoryId },
-          }),
-        ],
-      };
+    // Resolve the target memory — either by ID or by search query
+    let memory: MemoryNode;
+    if (memoryId) {
+      try {
+        memory = await memoryClient.get(memoryId);
+      } catch (err) {
+        return {
+          results: [
+            createErrorResult({
+              message: `Memory not found: ${memoryId}`,
+              metadata: { memory_id: memoryId },
+            }),
+          ],
+        };
+      }
+    } else {
+      try {
+        const searchResults = await memoryClient.search(query!, {
+          status: ['candidate', 'provisional', 'established', 'consolidated'],
+          size: 1,
+        });
+        if (searchResults.length === 0) {
+          return {
+            results: [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.other,
+                data: {
+                  memory: null,
+                  related: [],
+                  message: `No memories found matching query: "${query}"`,
+                },
+              },
+            ],
+          };
+        }
+        memory = searchResults[0];
+      } catch (err) {
+        return {
+          results: [
+            createErrorResult({
+              message: `Memory search failed: ${(err as Error).message}`,
+              metadata: { query },
+            }),
+          ],
+        };
+      }
     }
 
     // Apply access bump (best-effort)
+    const resolvedId = memory.id;
     const now = new Date().toISOString();
     const updatePayload: Parameters<typeof memoryClient.update>[0] = {
-      id: memoryId,
+      id: resolvedId,
       access_count: (memory.access_count ?? 0) + 1,
       recency: now,
       last_used_at: now,
@@ -124,25 +176,25 @@ export const createRememberTool = ({
     }
 
     memoryClient.update(updatePayload).catch((err: Error) => {
-      context.logger.warn(`memory.remember: access bump failed for ${memoryId}: ${err.message}`);
+      context.logger.warn(`memory.remember: access bump failed for ${resolvedId}: ${err.message}`);
     });
 
     // Mark as used in the active set and add to retrieved
     activeSet.addRetrieved(memory);
-    activeSet.markUsed(memoryId);
+    activeSet.markUsed(resolvedId);
 
     // Fetch up to 5 graph neighbors for context expansion
     const graphService = createGraphTraversalService({ client: memoryClient, logger: context.logger });
     let neighbors: MemoryNode[];
     try {
-      neighbors = await graphService.getNeighbors(memoryId, {
+      neighbors = await graphService.getNeighbors(resolvedId, {
         depth: 1,
         maxResults: 5,
         includeFull: false,
       });
     } catch (err) {
       context.logger.warn(
-        `memory.remember: neighbor fetch failed for ${memoryId}: ${(err as Error).message}`
+        `memory.remember: neighbor fetch failed for ${resolvedId}: ${(err as Error).message}`
       );
       neighbors = [];
     }

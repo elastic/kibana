@@ -44,7 +44,11 @@ import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { createMemoryTools } from './services/memory/create_memory_tools';
 import { registerMemoryBeforeAgentHook } from './services/memory/hooks/before_agent_hook';
-import { registerMemoryAfterRoundHook } from './services/memory/hooks/after_round_hook';
+import { createMemoryExtractionCallback } from './services/memory/hooks/after_round_hook';
+import {
+  setMemoryExtractionCallback,
+  setShowMemoryToolCalls,
+} from './services/execution/run_agent/run_chat_agent';
 import {
   registerMemoryConsolidationTaskDefinition,
   scheduleMemoryConsolidationTask,
@@ -204,30 +208,36 @@ export class AgentBuilderPlugin
 
     registerSkillToolsLoaderHook(serviceSetups);
 
-    // Register memory hooks: before-agent injection and after-round extraction
-    registerMemoryBeforeAgentHook(serviceSetups, {
-      logger: this.logger,
-      getInternalServices,
-    });
+    if (this.config.memory.enabled) {
+      setShowMemoryToolCalls(this.config.memory.showToolCalls);
 
-    registerMemoryAfterRoundHook(serviceSetups, {
-      logger: this.logger,
-      inference: setupDeps.inference,
-      getStartServices: coreSetup.getStartServices,
-      getInternalServices,
-    });
+      registerMemoryBeforeAgentHook(serviceSetups, {
+        logger: this.logger,
+        roundStartRetrieval: this.config.memory.roundStartRetrieval,
+        getInternalServices,
+      });
 
-    // Register memory consolidation task definition (nightly batch)
-    registerMemoryConsolidationTaskDefinition({
-      taskManager: setupDeps.taskManager,
-      getConsolidationDeps: async () => {
-        const [coreStart] = await coreSetup.getStartServices();
-        return {
-          elasticsearch: coreStart.elasticsearch,
-          logger: this.logger.get('services.memory.consolidation'),
-        };
-      },
-    });
+      setMemoryExtractionCallback(
+        createMemoryExtractionCallback({
+          logger: this.logger,
+          config: this.config,
+          getInternalServices,
+        })
+      );
+
+      registerMemoryConsolidationTaskDefinition({
+        taskManager: setupDeps.taskManager,
+        getConsolidationDeps: async () => {
+          const [coreStart] = await coreSetup.getStartServices();
+          return {
+            elasticsearch: coreStart.elasticsearch,
+            logger: this.logger.get('services.memory.consolidation'),
+          };
+        },
+      });
+    } else {
+      this.logger.info('Memory system disabled via config');
+    }
 
     const smlTools = createSmlTools({
       getSmlService: () => {
@@ -252,18 +262,20 @@ export class AgentBuilderPlugin
       serviceSetups.tools.register(tool);
     });
 
-    const memoryTools = createMemoryTools({
-      getMemoryService: () => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('Memory service not available — plugin has not started');
-        }
-        return services.memory;
-      },
-    });
-    memoryTools.forEach((tool) => {
-      serviceSetups.tools.register(tool);
-    });
+    if (this.config.memory.enabled) {
+      const memoryTools = createMemoryTools({
+        getMemoryService: () => {
+          const services = this.serviceManager.internalStart;
+          if (!services) {
+            throw new Error('Memory service not available — plugin has not started');
+          }
+          return services.memory;
+        },
+      });
+      memoryTools.forEach((tool) => {
+        serviceSetups.tools.register(tool);
+      });
+    }
 
     // Register connector lifecycle listener to index connectors into SML
     // when they are created/deleted. The handler checks the connectors-enabled

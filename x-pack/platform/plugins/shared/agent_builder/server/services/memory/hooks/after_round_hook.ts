@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
-import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ConversationRound } from '@kbn/agent-builder-common';
-import type { InternalSetupServices, InternalStartServices } from '../../types';
-import { MEMORY_CHECKPOINT_TOOL_ID } from '../tools';
-import { MemoryExtractor, buildExtractionInputFromRound } from '../extraction/memory_extractor';
+import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
+import type { AgentBuilderConfig } from '../../../config';
+import type { InternalStartServices } from '../../types';
+import { buildExtractionInputFromRound } from '../extraction/memory_extractor';
+import { createExtractionStrategy } from '../extraction/extractor_factory';
 import { CandidatePipeline } from '../extraction/candidate_pipeline';
 import type { ReinforcementSignal } from '../active_memory_set';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { createEmbeddingService } from '../embeddings';
-import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
 import type { MemoryClient } from '../client';
 
 /**
@@ -31,6 +27,7 @@ export interface AfterRoundExtractionContext {
   conversationId: string;
   roundId: string;
   round: ConversationRound;
+  conversation?: Conversation;
   reinforcementSignals: ReinforcementSignal[];
   memoryClient: MemoryClient;
   connectorId: string;
@@ -42,12 +39,7 @@ export interface AfterRoundExtractionContext {
  */
 export interface RegisterMemoryAfterRoundHookDeps {
   logger: Logger;
-  inference: InferenceServerStart;
-  /**
-   * Lazy getter for core start services (uiSettings, savedObjects).
-   * The return type is left broad to avoid coupling to a specific CoreSetup generic.
-   */
-  getStartServices: () => Promise<[{ uiSettings: UiSettingsServiceStart; savedObjects: SavedObjectsServiceStart }, ...unknown[]]>;
+  config: AgentBuilderConfig;
   getInternalServices: () => InternalStartServices;
 }
 
@@ -67,37 +59,50 @@ export interface RegisterMemoryAfterRoundHookDeps {
  */
 export const runAfterRoundExtractionPipeline = async (
   context: AfterRoundExtractionContext,
-  deps: RegisterMemoryAfterRoundHookDeps
+  deps: RegisterMemoryAfterRoundHookDeps & { inference: InferenceServerStart }
 ): Promise<void> => {
-  const { logger, inference } = deps;
+  const { logger } = deps;
+  const inference = deps.inference;
   const log = logger.get('afterRound');
 
   log.debug(
     `afterRound: starting extraction for conversation=${context.conversationId}, round=${context.roundId}`
   );
 
-  // Step 1: Extract candidates using LLM
-  const extractor = new MemoryExtractor({
+  // Step 1: Extract candidates using configured strategy (LLM or chunking)
+  const extractor = createExtractionStrategy({
+    config: deps.config,
+    logger: log.get('extractor'),
     inference,
     connectorId: context.connectorId,
     request: context.request,
-    logger: log.get('extractor'),
   });
 
-  const extractionInput = buildExtractionInputFromRound(context.round);
+  const extractionInput = buildExtractionInputFromRound(context.round, context.conversation);
   const extraction = await extractor.extract(extractionInput);
 
   const totalCandidates =
     extraction.semantic.length + extraction.episodic.length + extraction.procedural.length;
 
   if (totalCandidates === 0 && context.reinforcementSignals.length === 0) {
-    log.debug(`afterRound: nothing to process for round=${context.roundId}`);
+    log.info(`afterRound: no memory candidates extracted for round=${context.roundId}`);
     return;
   }
 
-  log.debug(
-    `afterRound: extracted ${totalCandidates} candidates (semantic=${extraction.semantic.length}, episodic=${extraction.episodic.length}, procedural=${extraction.procedural.length})`
+  log.info(
+    `afterRound: extracted ${totalCandidates} memory candidates ` +
+      `(semantic=${extraction.semantic.length}, episodic=${extraction.episodic.length}, procedural=${extraction.procedural.length}) ` +
+      `for round=${context.roundId}`
   );
+
+  if (totalCandidates < 10) {
+    const allCandidates = [
+      ...extraction.semantic.map((c) => `  [semantic] ${c.summary} (confidence: ${c.confidence.toFixed(2)})`),
+      ...extraction.episodic.map((c) => `  [episodic] ${c.summary} (confidence: ${c.confidence.toFixed(2)})`),
+      ...extraction.procedural.map((c) => `  [procedural] ${c.summary} (confidence: ${c.confidence.toFixed(2)})`),
+    ];
+    log.info(`afterRound: extracted memories:\n${allCandidates.join('\n')}`);
+  }
 
   // Step 2+3: Dedup, persist, and process reinforcement signals.
   // Use a noop embedding service (BM25-only mode) since we don't have the
@@ -137,134 +142,82 @@ export const runAfterRoundExtractionPipeline = async (
 };
 
 /**
- * Register the memory after-round hook with the hooks service.
+ * Create a callback that runs post-round memory extraction.
  *
- * This hook fires non-blocking when the agent calls checkpoint(final=true),
- * which signals the end of the round. It triggers the async memory extraction
- * pipeline without blocking response delivery.
+ * Called directly from run_chat_agent.ts after every completed round,
+ * regardless of which tools were called. This ensures memory extraction
+ * happens even when the agent doesn't call checkpoint.
  *
- * Integration point: afterToolCall hook (nonBlocking) listening for
- * memory.checkpoint with final=true.
- *
- * The tool handler context may expose (if set by the memory tools):
- * - conversation_id / round_id: round provenance
- * - round: the full ConversationRound (for extraction input)
- * - active_memory_set: the ActiveMemorySet for reinforcement signals
+ * The callback is fire-and-forget — it never blocks the response.
  */
-export const registerMemoryAfterRoundHook = (
-  serviceSetups: InternalSetupServices,
+export const createMemoryExtractionCallback = (
   deps: RegisterMemoryAfterRoundHookDeps
-): void => {
+): ((params: {
+  request: KibanaRequest;
+  round: ConversationRound;
+  conversationId: string;
+  conversation?: Conversation;
+}) => Promise<void>) => {
   const logger = deps.logger.get('memory.afterRound');
 
-  serviceSetups.hooks.register({
-    id: 'memory-after-round-extraction',
-    hooks: {
-      [HookLifecycle.afterToolCall]: {
-        mode: HookExecutionMode.nonBlocking,
-        handler: async (context: AfterToolCallHookContext) => {
-          // Only trigger on memory.checkpoint with final=true
-          if (context.toolId !== MEMORY_CHECKPOINT_TOOL_ID) {
-            return;
-          }
+  return async ({ request, round, conversationId, conversation }) => {
+    const roundId = round.id;
+    logger.info(
+      `afterRound: starting extraction pipeline, method=${deps.config.memory.extraction.method}, round=${roundId}`
+    );
 
-          const params = context.toolParams as { final?: boolean };
-          if (!params.final) {
-            return;
-          }
+    // Resolve the connector for LLM-based extraction.
+    // For chunking mode, connectorId is not required — the factory will handle it.
+    let services: InternalStartServices;
+    try {
+      services = deps.getInternalServices();
+    } catch (err) {
+      logger.info(`afterRound: services not available — ${(err as Error).message}`);
+      return;
+    }
 
-          // Extract round data from the tool handler context
-          const handlerContext = (context.toolHandlerContext as unknown) as
-            | Record<string, unknown>
-            | undefined;
+    let connectorId: string | undefined;
+    if (deps.config.memory.extraction.method === 'llm') {
+      // Prefer explicit config connector ID
+      connectorId = deps.config.memory.extraction.connectorId;
 
-          if (!handlerContext) {
-            logger.debug('afterRound: no tool handler context available — skipping extraction');
-            return;
-          }
+      if (!connectorId) {
+        logger.info('afterRound: no connectorId configured for LLM extraction — skipping');
+        return;
+      }
 
-          // Get the active memory set signals from the handler context
-          const activeMemorySet = handlerContext.active_memory_set as
-            | { getSignals: () => ReinforcementSignal[] }
-            | undefined;
-          const reinforcementSignals: ReinforcementSignal[] = activeMemorySet?.getSignals() ?? [];
+      logger.info(`afterRound: using connector=${connectorId} for LLM extraction`);
+    }
 
-          // Get conversation/round context from handler context
-          const conversationId =
-            (handlerContext.conversation_id as string | undefined) ??
-            (handlerContext.conversationId as string | undefined);
-          const roundId =
-            (handlerContext.round_id as string | undefined) ??
-            (handlerContext.roundId as string | undefined);
-          const round = handlerContext.round as ConversationRound | undefined;
+    const space = getCurrentSpaceId({ request, spaces: services.spaces });
 
-          if (!conversationId || !roundId || !round) {
-            logger.debug(
-              `afterRound: missing round context — skipping extraction ` +
-                `(conversationId=${conversationId ?? 'missing'}, roundId=${roundId ?? 'missing'}, round=${!!round})`
-            );
-            return;
-          }
+    let memoryClient: MemoryClient;
+    try {
+      memoryClient = await services.memory.getScopedClient({ request });
+    } catch (err) {
+      logger.info(`afterRound: could not create memory client — ${(err as Error).message}`);
+      return;
+    }
 
-          // Resolve the connector for extraction LLM calls
-          // Use lazy getStartServices to get uiSettings + savedObjects
-          let connectorId: string | undefined;
-          try {
-            const [coreStart] = await deps.getStartServices();
-            connectorId = await resolveSelectedConnectorId({
-              request: context.request,
-              inference: deps.inference,
-              uiSettings: coreStart.uiSettings,
-              savedObjects: coreStart.savedObjects,
-            });
-          } catch (err) {
-            logger.debug(`afterRound: could not resolve connector — ${(err as Error).message}`);
-          }
+    const extractionContext: AfterRoundExtractionContext = {
+      request,
+      conversationId,
+      roundId,
+      round,
+      conversation,
+      reinforcementSignals: [],
+      memoryClient,
+      connectorId: connectorId ?? '',
+      space,
+    };
 
-          if (!connectorId) {
-            logger.debug('afterRound: no connector available — skipping extraction');
-            return;
-          }
+    logger.info(
+      `afterRound: inference available=${!!services.inference}, hasGetClient=${typeof services.inference?.getClient}`
+    );
 
-          // Get services for memory client and space resolution
-          let services: InternalStartServices;
-          try {
-            services = deps.getInternalServices();
-          } catch (err) {
-            logger.warn(`afterRound: services not available — ${(err as Error).message}`);
-            return;
-          }
-
-          const space = getCurrentSpaceId({ request: context.request, spaces: services.spaces });
-
-          // Get a scoped memory client — handles user+space isolation
-          let memoryClient: MemoryClient;
-          try {
-            memoryClient = await services.memory.getScopedClient({ request: context.request });
-          } catch (err) {
-            logger.warn(`afterRound: could not create memory client — ${(err as Error).message}`);
-            return;
-          }
-
-          const extractionContext: AfterRoundExtractionContext = {
-            request: context.request,
-            conversationId,
-            roundId,
-            round,
-            reinforcementSignals,
-            memoryClient,
-            connectorId,
-            space,
-          };
-
-          // Non-blocking: fire-and-forget the extraction pipeline
-          runAfterRoundExtractionPipeline(extractionContext, deps).catch((err) => {
-            logger.warn(`afterRound: extraction pipeline error — ${(err as Error).message}`);
-          });
-        },
-      },
-    },
-  });
-
-  logger.debug('Memory after-round extraction hook registered');
+    await runAfterRoundExtractionPipeline(extractionContext, {
+      ...deps,
+      inference: services.inference,
+    });
+  };
 };

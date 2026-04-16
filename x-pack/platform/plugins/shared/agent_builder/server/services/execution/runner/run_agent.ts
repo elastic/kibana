@@ -55,9 +55,12 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
 
+  const memoryToolsAvailable = toolManager.list().some((t) => t.name.startsWith('memory_'));
   const experimentalFeatures: ExperimentalFeatures = {
     filestore: true,
     skills: true,
+    memory: memoryToolsAvailable,
+    showMemoryToolCalls: true,
   };
 
   return {

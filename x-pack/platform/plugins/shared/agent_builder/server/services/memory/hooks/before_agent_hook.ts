@@ -16,12 +16,46 @@ import { ActiveMemorySet } from '../active_memory_set';
 import type { ScoredMemoryNode } from '../retrieval/scoring';
 import { scoreMemoryNode, DEFAULT_RETRIEVAL_CONFIG } from '../retrieval/scoring';
 import { getTokenBudgetForStage } from '../retrieval/retrieval_service';
+import type { MemoryClient } from '../client';
+
+/**
+ * Run round-start retrieval using the configured method.
+ * New methods can be added here as additional cases.
+ */
+const runRetrieval = async (
+  method: string,
+  memoryClient: MemoryClient,
+  query: string,
+  logger: Logger
+): Promise<MemoryNode[]> => {
+  switch (method) {
+    case 'bm25':
+      return memoryClient.search(query, {
+        stage: 'round_start',
+        size: 20,
+        status: ['candidate', 'provisional', 'established', 'consolidated'],
+      });
+    default:
+      logger.warn(`memory.beforeAgent: unknown retrieval method "${method}", falling back to bm25`);
+      return memoryClient.search(query, {
+        stage: 'round_start',
+        size: 20,
+        status: ['candidate', 'provisional', 'established', 'consolidated'],
+      });
+  }
+};
 
 /**
  * Deps needed to register the before-agent memory injection hook.
  */
+export interface RoundStartRetrievalConfig {
+  enabled: boolean;
+  method: string;
+}
+
 export interface RegisterMemoryBeforeAgentHookDeps {
   logger: Logger;
+  roundStartRetrieval: RoundStartRetrievalConfig;
   getInternalServices: () => InternalStartServices;
 }
 
@@ -140,7 +174,14 @@ export const runMemoryBeforeAgentHook = async (
   context: BeforeAgentHookContext,
   deps: RegisterMemoryBeforeAgentHookDeps
 ): Promise<void | HookHandlerResult<HookLifecycle.beforeAgent>> => {
-  const { logger, getInternalServices } = deps;
+  const { logger, roundStartRetrieval, getInternalServices } = deps;
+
+  if (!roundStartRetrieval.enabled) {
+    logger.info('memory.beforeAgent: round-start retrieval disabled via config');
+    return;
+  }
+
+  logger.info(`memory.beforeAgent: using retrieval method="${roundStartRetrieval.method}"`);
 
   let services: InternalStartServices;
   try {
@@ -155,9 +196,11 @@ export const runMemoryBeforeAgentHook = async (
   const query = context.nextInput.message;
 
   if (!query) {
-    logger.debug('memory.beforeAgent: no message in nextInput, skipping retrieval');
+    logger.info('memory.beforeAgent: no message in nextInput, skipping retrieval');
     return;
   }
+
+  const startTime = Date.now();
 
   // Get a scoped memory client — this handles user + space isolation internally
   let memoryClient;
@@ -170,39 +213,44 @@ export const runMemoryBeforeAgentHook = async (
 
   let retrievedNodes: MemoryNode[] = [];
   try {
-    retrievedNodes = await memoryClient.search(query, {
-      stage: 'round_start',
-      size: 20, // Retrieve more candidates for re-ranking
-      status: ['provisional', 'established', 'consolidated'],
-    });
+    retrievedNodes = await runRetrieval(roundStartRetrieval.method, memoryClient, query, logger);
   } catch (err) {
     logger.warn(`memory.beforeAgent: retrieval failed — ${(err as Error).message}`);
     return;
   }
 
+  const searchDuration = Date.now() - startTime;
+
   if (retrievedNodes.length === 0) {
-    logger.debug('memory.beforeAgent: no memories retrieved for this round');
+    logger.info(`memory.beforeAgent: no memories found (search took ${searchDuration}ms)`);
     return;
   }
+
+  logger.info(
+    `memory.beforeAgent: found ${retrievedNodes.length} memories in ${searchDuration}ms`
+  );
 
   // Score and apply token budget
   const scoredNodes = scoreAndBudgetNodes(retrievedNodes, 1.0, logger);
 
   if (scoredNodes.length === 0) {
-    logger.debug('memory.beforeAgent: all memories exceeded token budget, skipping injection');
+    logger.info('memory.beforeAgent: all memories exceeded token budget, skipping injection');
     return;
   }
 
   // Format the memory bundle as text
   const memoryBundle = formatMemoryInjection(scoredNodes);
 
-  // Inject memory block into the user message
+  const totalDuration = Date.now() - startTime;
+  const space = getCurrentSpaceId({ request: context.request, spaces });
+  logger.info(
+    `memory.beforeAgent: injected ${scoredNodes.length} memories into message (total ${totalDuration}ms, space=${space})`
+  );
+
+  // Inject memory context by prepending to the user message.
+  // The agent sees both the memory context and the original message.
   const enrichedMessage = injectMemoryIntoMessage(query, memoryBundle);
 
-  const space = getCurrentSpaceId({ request: context.request, spaces });
-  logger.debug(`memory.beforeAgent: injected ${scoredNodes.length} memories, space=${space}`);
-
-  // Return updated nextInput with enriched message
   return {
     nextInput: {
       ...context.nextInput,

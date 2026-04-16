@@ -10,8 +10,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
-import type { ToolCallWithResult } from '@kbn/agent-builder-common';
-import { isToolCallStep } from '@kbn/agent-builder-common';
+import type { ToolCallWithResult, Conversation } from '@kbn/agent-builder-common';
+import { isToolCallStep, isReasoningStep } from '@kbn/agent-builder-common';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 
 // ---------------------------------------------------------------------------
@@ -51,11 +51,8 @@ const MAX_PROCEDURAL_PER_ROUND = 3;
 /** Minimum confidence threshold — candidates below this are discarded */
 const MIN_CONFIDENCE_THRESHOLD = 0.4;
 
-/** Maximum number of tool results to include (summarized) in extraction input */
-const MAX_TOOL_RESULTS_SUMMARY = 5;
-
-/** Maximum characters for tool result summaries */
-const MAX_TOOL_RESULT_CHARS = 300;
+/** Maximum characters for individual tool call param/result summaries */
+const MAX_TOOL_RESULT_CHARS = 500;
 
 // ---------------------------------------------------------------------------
 // Extraction prompt
@@ -65,8 +62,9 @@ const EXTRACTION_SYSTEM_PROMPT = `You are a memory extraction assistant. Your jo
 
 You will receive:
 - The user's message
+- The assistant's reasoning steps (internal thought process)
+- Tool calls with their parameters and results
 - The assistant's final response
-- Key tool results (summarized)
 
 Extract memories in three categories:
 
@@ -122,6 +120,9 @@ export interface ExtractionInput {
   userMessage: string;
   assistantResponse: string;
   toolCalls?: ToolCallWithResult[];
+  reasoningSteps?: string[];
+  /** Full conversation for context. Not used by current extractors. */
+  conversation?: Conversation;
 }
 
 // ---------------------------------------------------------------------------
@@ -194,35 +195,39 @@ export class MemoryExtractor {
     const parts: string[] = [];
 
     parts.push(`**User message:**\n${input.userMessage}`);
-    parts.push(`**Assistant response:**\n${input.assistantResponse}`);
+
+    if (input.reasoningSteps && input.reasoningSteps.length > 0) {
+      parts.push(`**Agent reasoning steps:**\n${input.reasoningSteps.join('\n')}`);
+    }
 
     if (input.toolCalls && input.toolCalls.length > 0) {
       const summaries = input.toolCalls
-        .slice(0, MAX_TOOL_RESULTS_SUMMARY)
         .map((tc) => this.summarizeToolCall(tc))
         .filter((s) => s.length > 0);
 
       if (summaries.length > 0) {
-        parts.push(`**Key tool results:**\n${summaries.join('\n')}`);
+        parts.push(`**Tool calls and results:**\n${summaries.join('\n')}`);
       }
     }
+
+    parts.push(`**Assistant response:**\n${input.assistantResponse}`);
 
     return parts.join('\n\n');
   }
 
   private summarizeToolCall(tc: ToolCallWithResult): string {
+    const paramsText = Object.keys(tc.params).length > 0
+      ? ` params=${JSON.stringify(tc.params).slice(0, MAX_TOOL_RESULT_CHARS)}`
+      : '';
+
     const resultText = tc.results
       .map((r) => {
         const text = typeof r.data === 'string' ? r.data : JSON.stringify(r.data);
-        return text.slice(0, MAX_TOOL_RESULT_CHARS);
+        return text.slice(0, MAX_TOOL_RESULT_CHARS * 2);
       })
       .join(' | ');
 
-    if (!resultText) {
-      return '';
-    }
-
-    return `[${tc.tool_id}]: ${resultText}`;
+    return `[${tc.tool_id}]${paramsText} → ${resultText || '(no result)'}`;
   }
 
   private parseAndFilter(raw: string): ExtractionResult {
@@ -357,9 +362,13 @@ const emptyResult = (): ExtractionResult => ({
 
 /**
  * Build an ExtractionInput from a ConversationRound.
- * Extracts user message, assistant response, and tool calls.
+ * Extracts user message, assistant response, reasoning steps, and all tool calls.
+ * Optionally includes previous rounds for context.
  */
-export const buildExtractionInputFromRound = (round: ConversationRound): ExtractionInput => {
+export const buildExtractionInputFromRound = (
+  round: ConversationRound,
+  conversation?: Conversation
+): ExtractionInput => {
   const userMessage = round.input.message ?? '';
   const assistantResponse = round.response.message ?? '';
 
@@ -367,9 +376,16 @@ export const buildExtractionInputFromRound = (round: ConversationRound): Extract
     .filter(isToolCallStep)
     .map((step) => step as unknown as ToolCallWithResult);
 
+  const reasoningSteps: string[] = round.steps
+    .filter(isReasoningStep)
+    .filter((step) => !step.transient && step.reasoning?.trim())
+    .map((step) => step.reasoning.trim());
+
   return {
     userMessage,
     assistantResponse,
     toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+    reasoningSteps: reasoningSteps.length > 0 ? reasoningSteps : undefined,
+    conversation,
   };
 };

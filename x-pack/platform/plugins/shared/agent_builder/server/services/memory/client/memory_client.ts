@@ -344,7 +344,7 @@ class MemoryClientImpl implements MemoryClient {
   async search(query: string, opts: MemorySearchOptions = {}): Promise<MemoryNode[]> {
     const {
       type,
-      status = ['provisional', 'established', 'consolidated'] as MemoryStatus[],
+      status = ['candidate', 'provisional', 'established', 'consolidated'] as MemoryStatus[],
       size = 10,
     } = opts;
 

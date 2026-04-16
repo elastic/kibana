@@ -266,6 +266,7 @@ export class ServiceManager {
       plugins,
       consumption,
       memory,
+      inference,
     };
 
     return this.internalStart;

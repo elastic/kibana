@@ -78,6 +78,12 @@ export const editableToolTypes: ToolType[] = [
   ToolType.mcp,
 ];
 
+export const memoryTools = {
+  checkpoint: 'memory.checkpoint',
+  remember: 'memory.remember',
+  reinforce: 'memory.reinforce',
+} as const;
+
 export const defaultAgentToolIds = [
   platformCoreTools.search,
   platformCoreTools.listIndices,
@@ -87,6 +93,9 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  memoryTools.checkpoint,
+  memoryTools.remember,
+  memoryTools.reinforce,
 ];
 
 /**
