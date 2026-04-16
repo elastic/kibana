@@ -18,7 +18,6 @@ import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
 } from './settings/dynamic_settings';
-import { createGetCCSSettingsRoute, createPutCCSSettingsRoute } from './settings/ccs_settings';
 import { getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
@@ -107,8 +106,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getConnectorTypesRoute,
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
-  createGetCCSSettingsRoute,
-  createPutCCSSettingsRoute,
   syntheticsGetPingHeatmapRoute,
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,
