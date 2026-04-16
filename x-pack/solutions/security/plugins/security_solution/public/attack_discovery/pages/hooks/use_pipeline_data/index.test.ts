@@ -245,6 +245,20 @@ describe('usePipelineData', () => {
     });
   });
 
+  describe('refetch', () => {
+    it('exposes a refetch function in the return value', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);
+
+      const { result } = renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.data).toEqual(mockPipelineDataResponse);
+      });
+
+      expect(typeof result.current.refetch).toBe('function');
+    });
+  });
+
   describe('response typing', () => {
     it('returns all snake_case fields in the response', async () => {
       (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);

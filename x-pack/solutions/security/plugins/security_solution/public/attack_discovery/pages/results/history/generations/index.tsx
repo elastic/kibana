@@ -13,6 +13,7 @@ import React, { useMemo } from 'react';
 
 import { getApproximateFutureTime } from './get_approximate_future_time';
 import { getConnectorNameFromId } from '../../../utils/get_connector_name_from_id';
+import { getGenAiConfig } from '../../../use_attack_discovery/helpers';
 import { LoadingCallout } from '../../../loading_callout';
 
 const N_LATEST_NON_DISMISSED_GENERATIONS = 5; // show only the latest n non-dismissed generations
@@ -53,6 +54,7 @@ const GenerationsComponent: React.FC<Props> = ({
             loading_message: loadingMessage,
             persisted_count: persistedCount,
             reason,
+            source_metadata: sourceMetadata,
             start,
             status,
             step_event_actions: stepEventActions,
@@ -66,6 +68,10 @@ const GenerationsComponent: React.FC<Props> = ({
           // to undefined so classifyFailure will use regex classification instead.
           const errorCategory = errorCategoryRaw as ErrorCategory | undefined;
 
+          const connector = aiConnectors?.find((c) => c.id === connectorId);
+          const connectorActionTypeId = connector?.actionTypeId;
+          const connectorModel = getGenAiConfig(connector)?.defaultModel;
+
           return (
             <div data-test-subj="generations" key={executionUuid}>
               <LoadingCallout
@@ -78,6 +84,8 @@ const GenerationsComponent: React.FC<Props> = ({
                 averageSuccessfulDurationNanoseconds={
                   connectorStats?.average_successful_duration_nanoseconds
                 }
+                connectorActionTypeId={connectorActionTypeId}
+                connectorModel={connectorModel}
                 connectorName={getConnectorNameFromId({
                   aiConnectors,
                   connectorId,
@@ -97,6 +105,7 @@ const GenerationsComponent: React.FC<Props> = ({
                 persistedCount={persistedCount}
                 refetchGenerations={refetchGenerations}
                 reason={reason}
+                sourceMetadata={sourceMetadata}
                 status={status}
                 successfulGenerations={connectorStats?.successful_generations}
                 workflowId={workflowId}

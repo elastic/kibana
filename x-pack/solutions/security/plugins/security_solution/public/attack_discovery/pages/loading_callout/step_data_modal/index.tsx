@@ -33,12 +33,17 @@ import {
 } from './workflow_alerts_summary_line';
 import * as i18n from './translations';
 
-export type ExtractionStrategy = 'custom_workflow' | 'default_custom_query' | 'default_esql';
+export type ExtractionStrategy =
+  | 'custom_workflow'
+  | 'default_custom_query'
+  | 'default_esql'
+  | 'provided';
 
 const EXTRACTION_STRATEGY_BADGE_LABELS: Record<ExtractionStrategy, string> = {
   custom_workflow: i18n.CUSTOM_WORKFLOW,
   default_custom_query: i18n.CUSTOM_QUERY,
   default_esql: i18n.ESQL,
+  provided: i18n.PROVIDED,
 };
 
 export type StepDataType = 'alerts' | 'discoveries' | 'validated_discoveries';

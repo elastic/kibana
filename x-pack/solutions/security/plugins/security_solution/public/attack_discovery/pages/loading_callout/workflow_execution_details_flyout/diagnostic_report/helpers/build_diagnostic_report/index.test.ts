@@ -256,6 +256,46 @@ describe('buildDiagnosticReport', () => {
       expect(report).toContain('## Pipeline Timeline');
     });
 
+    it('includes Workflow Name column header in the pipeline timeline section', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({ steps: [makeStep()] }),
+      });
+
+      expect(report).toContain('Workflow Name');
+    });
+
+    it('shows the workflow name in the pipeline timeline when available', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({
+          steps: [makeStep({ workflowId: 'wf-gen-1', workflowName: 'Generation Workflow' })],
+        }),
+      });
+
+      expect(report).toContain('Generation Workflow');
+    });
+
+    it('shows dash for workflow name when workflowName is undefined in the pipeline timeline', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({
+          steps: [makeStep({ workflowName: undefined })],
+        }),
+      });
+
+      // Isolate the Pipeline Timeline section to check the workflow name cell is a dash
+      const afterTimeline = report.split('## Pipeline Timeline')[1];
+      const timelineSection = afterTimeline.split('##')[0];
+      const dataRows = timelineSection
+        .split('\n')
+        .filter(
+          (line) => line.startsWith('|') && !line.startsWith('| Phase') && !line.startsWith('|---')
+        );
+
+      expect(dataRows[0]).toContain('| - |');
+    });
+
     it('groups steps by workflowRunId and shows one row per group', () => {
       const steps = [
         makeStep({ workflowRunId: 'run-1', stepId: 'a' }),
@@ -333,6 +373,101 @@ describe('buildDiagnosticReport', () => {
     });
   });
 
+  describe('configuration section', () => {
+    const mockDiagnosticsContextWithConfig = {
+      config: {
+        alertRetrievalMode: 'default_esql',
+        alertRetrievalWorkflowCount: 2,
+        connectorType: '.gen-ai',
+        hasCustomValidation: true,
+      },
+      preExecutionChecks: [],
+      workflowIntegrity: {
+        repaired: [],
+        status: 'all_intact' as const,
+        unrepairableErrors: [],
+      },
+    };
+
+    it('omits the configuration section when diagnosticsContext is undefined', () => {
+      const report = buildDiagnosticReport(defaultParams);
+
+      expect(report).not.toContain('## Configuration');
+    });
+
+    it('includes the configuration section header when diagnosticsContext is provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        diagnosticsContext: mockDiagnosticsContextWithConfig,
+      });
+
+      expect(report).toContain('## Configuration');
+    });
+
+    it('shows alertRetrievalMode in the configuration section', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        diagnosticsContext: mockDiagnosticsContextWithConfig,
+      });
+
+      expect(report).toContain('default_esql');
+    });
+
+    it('shows alertRetrievalWorkflowCount in the configuration section', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        diagnosticsContext: mockDiagnosticsContextWithConfig,
+      });
+
+      expect(report).toContain('Alert Retrieval Workflow Count');
+    });
+
+    it('shows connectorType in the configuration section', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        diagnosticsContext: mockDiagnosticsContextWithConfig,
+      });
+
+      expect(report).toContain('.gen-ai');
+    });
+
+    it('shows hasCustomValidation as true in the configuration section', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        diagnosticsContext: mockDiagnosticsContextWithConfig,
+      });
+
+      expect(report).toContain('true');
+    });
+
+    it('shows hasCustomValidation as false in the configuration section', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        diagnosticsContext: {
+          ...mockDiagnosticsContextWithConfig,
+          config: { ...mockDiagnosticsContextWithConfig.config, hasCustomValidation: false },
+        },
+      });
+
+      expect(report).toContain('false');
+    });
+
+    it('appears after Pre-Execution Checks and before Pipeline Timeline', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({ steps: [makeStep()] }),
+        diagnosticsContext: mockDiagnosticsContextWithConfig,
+      });
+
+      const preExecPos = report.indexOf('## Pre-Execution Checks');
+      const configPos = report.indexOf('## Configuration');
+      const timelinePos = report.indexOf('## Pipeline Timeline');
+
+      expect(configPos).toBeGreaterThan(preExecPos);
+      expect(configPos).toBeLessThan(timelinePos);
+    });
+  });
+
   describe('step execution details section', () => {
     it('omits the step execution details section when steps array is empty', () => {
       const report = buildDiagnosticReport(defaultParams);
@@ -401,6 +536,47 @@ describe('buildDiagnosticReport', () => {
       });
 
       expect(report).toContain('step failed with timeout');
+    });
+
+    it('shows workflow description in the step execution details when available', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({
+          steps: [
+            makeStep({
+              workflowDescription: 'Retrieves alerts for analysis',
+            }),
+          ],
+        }),
+      });
+
+      expect(report).toContain('Retrieves alerts for analysis');
+    });
+
+    it('does not include workflowDescription text when workflowDescription is undefined', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({
+          steps: [
+            makeStep({
+              workflowDescription: undefined,
+              workflowName: 'My Workflow',
+            }),
+          ],
+        }),
+      });
+
+      // The workflow cell should just show the name without any description separator
+      const afterDetails = report.split('## Step Execution Details')[1];
+      const detailsSection = afterDetails.split('##')[0];
+      const dataRows = detailsSection
+        .split('\n')
+        .filter(
+          (line) =>
+            line.startsWith('|') && !line.startsWith('| Step ID') && !line.startsWith('|---')
+        );
+
+      expect(dataRows[0]).not.toContain('—');
     });
   });
 
@@ -536,6 +712,90 @@ describe('buildDiagnosticReport', () => {
 
       expect(report).toContain('Validation');
       expect(report).toContain('wf-val');
+    });
+
+    it('includes Workflow Name column header in the configured workflows section', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({
+          workflowExecutions: {
+            generation: { workflowId: 'wf-gen', workflowRunId: 'run-gen' },
+          },
+        }),
+      });
+
+      // Isolate the Configured Workflows section
+      const afterSection = report.split('## Configured Workflows')[1];
+      const sectionContent = afterSection.split('##')[0];
+
+      expect(sectionContent).toContain('Workflow Name');
+    });
+
+    it('shows resolved workflow name for alert retrieval in configured workflows', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({
+          steps: [
+            makeStep({ workflowId: 'wf-retrieval', workflowName: 'Alert Retrieval Workflow' }),
+          ],
+          workflowExecutions: {
+            alertRetrieval: [{ workflowId: 'wf-retrieval', workflowRunId: 'run-r1' }],
+          },
+        }),
+      });
+
+      expect(report).toContain('Alert Retrieval Workflow');
+    });
+
+    it('shows resolved workflow name for generation in configured workflows', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({
+          steps: [makeStep({ workflowId: 'wf-gen', workflowName: 'Generation Workflow' })],
+          workflowExecutions: {
+            generation: { workflowId: 'wf-gen', workflowRunId: 'run-gen' },
+          },
+        }),
+      });
+
+      expect(report).toContain('Generation Workflow');
+    });
+
+    it('shows resolved workflow name for validation in configured workflows', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({
+          steps: [makeStep({ workflowId: 'wf-val', workflowName: 'Validation Workflow' })],
+          workflowExecutions: {
+            validation: { workflowId: 'wf-val', workflowRunId: 'run-val' },
+          },
+        }),
+      });
+
+      expect(report).toContain('Validation Workflow');
+    });
+
+    it('shows dash for workflow name in configured workflows when workflowId is not found in steps', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        aggregatedExecution: makeAggregatedExecution({
+          steps: [],
+          workflowExecutions: {
+            generation: { workflowId: 'wf-gen-unknown', workflowRunId: 'run-gen' },
+          },
+        }),
+      });
+
+      // Isolate the Configured Workflows section to check the name cell
+      const afterSection = report.split('## Configured Workflows')[1];
+      const sectionContent = afterSection.split('##')[0];
+      const dataRows = sectionContent
+        .split('\n')
+        .filter(
+          (line) => line.startsWith('|') && !line.startsWith('| Role') && !line.startsWith('|---')
+        );
+
+      expect(dataRows[0]).toContain('| - |');
     });
   });
 
@@ -834,6 +1094,627 @@ describe('buildDiagnosticReport', () => {
       expect(summaryPos).toBeGreaterThan(-1);
       expect(preExecPos).toBeGreaterThan(summaryPos);
       expect(timelinePos).toBeGreaterThan(preExecPos);
+    });
+  });
+
+  describe('execution summary — new rows', () => {
+    it('includes Connector Type row when connectorActionTypeId is provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        connectorActionTypeId: '.gen-ai',
+      });
+
+      expect(report).toContain('Connector Type');
+    });
+
+    it('shows the connectorActionTypeId value in the Connector Type row', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        connectorActionTypeId: '.gen-ai',
+      });
+
+      expect(report).toContain('.gen-ai');
+    });
+
+    it('omits Connector Type row when connectorActionTypeId is undefined', () => {
+      const report = buildDiagnosticReport(defaultParams);
+
+      expect(report).not.toContain('Connector Type');
+    });
+
+    it('includes Connector Model row when connectorModel is provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        connectorModel: 'gpt-4o',
+      });
+
+      expect(report).toContain('Connector Model');
+    });
+
+    it('shows the connectorModel value in the Connector Model row', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        connectorModel: 'gpt-4o',
+      });
+
+      expect(report).toContain('gpt-4o');
+    });
+
+    it('omits Connector Model row when connectorModel is undefined', () => {
+      const report = buildDiagnosticReport(defaultParams);
+
+      expect(report).not.toContain('Connector Model');
+    });
+
+    it('includes Average Successful Duration row when averageSuccessfulDurationMs is provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        averageSuccessfulDurationMs: 12345,
+      });
+
+      expect(report).toContain('Average Successful Duration');
+    });
+
+    it('shows the averageSuccessfulDurationMs value formatted as ms', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        averageSuccessfulDurationMs: 12345,
+      });
+
+      expect(report).toContain('12345 ms');
+    });
+
+    it('omits Average Successful Duration row when averageSuccessfulDurationMs is undefined', () => {
+      const report = buildDiagnosticReport(defaultParams);
+
+      expect(report).not.toContain('Average Successful Duration');
+    });
+
+    it('includes Date Range row when both dateRangeStart and dateRangeEnd are provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        dateRangeEnd: '2024-01-02T00:00:00Z',
+        dateRangeStart: '2024-01-01T00:00:00Z',
+      });
+
+      expect(report).toContain('Date Range');
+    });
+
+    it('shows start and end dates in the Date Range row', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        dateRangeEnd: '2024-01-02T00:00:00Z',
+        dateRangeStart: '2024-01-01T00:00:00Z',
+      });
+
+      expect(report).toContain('2024-01-01T00:00:00Z');
+    });
+
+    it('omits Date Range row when neither dateRangeStart nor dateRangeEnd is provided', () => {
+      const report = buildDiagnosticReport(defaultParams);
+
+      expect(report).not.toContain('Date Range');
+    });
+
+    it('includes Configured Max Alerts row when configuredMaxAlerts is provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        configuredMaxAlerts: 100,
+      });
+
+      expect(report).toContain('Configured Max Alerts');
+    });
+
+    it('shows the configuredMaxAlerts value in the Configured Max Alerts row', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        configuredMaxAlerts: 100,
+      });
+
+      expect(report).toContain('100');
+    });
+
+    it('omits Configured Max Alerts row when configuredMaxAlerts is undefined', () => {
+      const report = buildDiagnosticReport(defaultParams);
+
+      expect(report).not.toContain('Configured Max Alerts');
+    });
+  });
+
+  describe('quality metrics section', () => {
+    it('omits Quality Metrics section when no quality metrics params are provided', () => {
+      const report = buildDiagnosticReport(defaultParams);
+
+      expect(report).not.toContain('## Quality Metrics');
+    });
+
+    it('includes Quality Metrics section when generatedCount is provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        generatedCount: 5,
+      });
+
+      expect(report).toContain('## Quality Metrics');
+    });
+
+    it('includes Quality Metrics section when hallucinationsFilteredCount is provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        hallucinationsFilteredCount: 2,
+      });
+
+      expect(report).toContain('## Quality Metrics');
+    });
+
+    it('includes Quality Metrics section when duplicatesDroppedCount is provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        duplicatesDroppedCount: 1,
+      });
+
+      expect(report).toContain('## Quality Metrics');
+    });
+
+    it('includes Quality Metrics section when persistedCount is provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        persistedCount: 3,
+      });
+
+      expect(report).toContain('## Quality Metrics');
+    });
+
+    it('shows Discoveries Generated row with the generatedCount value', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        generatedCount: 7,
+      });
+
+      expect(report).toContain('Discoveries Generated');
+    });
+
+    it('shows the generatedCount value in the Discoveries Generated row', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        generatedCount: 7,
+      });
+
+      expect(report).toContain('7');
+    });
+
+    it('shows Hallucinations Filtered row with the hallucinationsFilteredCount value', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        hallucinationsFilteredCount: 3,
+      });
+
+      expect(report).toContain('Hallucinations Filtered');
+    });
+
+    it('shows the hallucinationsFilteredCount value in the Hallucinations Filtered row', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        hallucinationsFilteredCount: 3,
+      });
+
+      expect(report).toContain('3');
+    });
+
+    it('shows Duplicates Dropped row with the duplicatesDroppedCount value', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        duplicatesDroppedCount: 2,
+      });
+
+      expect(report).toContain('Duplicates Dropped');
+    });
+
+    it('shows the duplicatesDroppedCount value in the Duplicates Dropped row', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        duplicatesDroppedCount: 2,
+      });
+
+      expect(report).toContain('2');
+    });
+
+    it('shows Discoveries Persisted row with the persistedCount value', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        persistedCount: 4,
+      });
+
+      expect(report).toContain('Discoveries Persisted');
+    });
+
+    it('shows the persistedCount value in the Discoveries Persisted row', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        persistedCount: 4,
+      });
+
+      expect(report).toContain('4');
+    });
+
+    it('omits Quality Metrics section when all quality metric params are undefined', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        duplicatesDroppedCount: undefined,
+        generatedCount: undefined,
+        hallucinationsFilteredCount: undefined,
+        persistedCount: undefined,
+      });
+
+      expect(report).not.toContain('## Quality Metrics');
+    });
+
+    it('shows all four metric rows when all params are provided', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        duplicatesDroppedCount: 1,
+        generatedCount: 5,
+        hallucinationsFilteredCount: 2,
+        persistedCount: 3,
+      });
+
+      const afterSection = report.split('## Quality Metrics')[1];
+      const sectionContent = afterSection.split('##')[0];
+
+      expect(sectionContent).toContain('Discoveries Generated');
+      expect(sectionContent).toContain('Hallucinations Filtered');
+      expect(sectionContent).toContain('Duplicates Dropped');
+      expect(sectionContent).toContain('Discoveries Persisted');
+    });
+
+    it('shows only present metric rows when some params are undefined', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        generatedCount: 5,
+      });
+
+      const afterSection = report.split('## Quality Metrics')[1];
+      const sectionContent = afterSection.split('##')[0];
+
+      expect(sectionContent).not.toContain('Hallucinations Filtered');
+    });
+  });
+
+  describe('per-workflow alert retrieval section', () => {
+    it('omits the Per-Workflow Alert Retrieval section when perWorkflowAlertRetrieval is undefined', () => {
+      const report = buildDiagnosticReport(defaultParams);
+
+      expect(report).not.toContain('## Per-Workflow Alert Retrieval');
+    });
+
+    it('omits the Per-Workflow Alert Retrieval section when perWorkflowAlertRetrieval is an empty array', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [],
+      });
+
+      expect(report).not.toContain('## Per-Workflow Alert Retrieval');
+    });
+
+    it('includes the Per-Workflow Alert Retrieval section when perWorkflowAlertRetrieval has entries', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          {
+            alertsContextCount: 42,
+            extractionStrategy: 'esql',
+            workflowId: 'wf-retrieval-1',
+            workflowName: 'Alert Retrieval Workflow',
+            workflowRunId: 'run-r1',
+          },
+        ],
+      });
+
+      expect(report).toContain('## Per-Workflow Alert Retrieval');
+    });
+
+    it('shows one row per workflow in the Per-Workflow Alert Retrieval table', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          {
+            alertsContextCount: 10,
+            workflowId: 'wf-r1',
+            workflowName: 'Workflow A',
+            workflowRunId: 'run-r1',
+          },
+          {
+            alertsContextCount: 20,
+            workflowId: 'wf-r2',
+            workflowName: 'Workflow B',
+            workflowRunId: 'run-r2',
+          },
+        ],
+      });
+
+      const afterSection = report.split('## Per-Workflow Alert Retrieval')[1];
+      const sectionContent = afterSection.split('##')[0];
+      const dataRows = sectionContent
+        .split('\n')
+        .filter(
+          (line) =>
+            line.startsWith('|') && !line.startsWith('| Workflow Name') && !line.startsWith('|---')
+        );
+
+      // Two workflow rows + one Combined row
+      expect(dataRows).toHaveLength(3);
+    });
+
+    it('shows the workflow name in each row of the Per-Workflow Alert Retrieval table', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          {
+            alertsContextCount: 10,
+            workflowId: 'wf-r1',
+            workflowName: 'My Retrieval Workflow',
+            workflowRunId: 'run-r1',
+          },
+        ],
+      });
+
+      expect(report).toContain('My Retrieval Workflow');
+    });
+
+    it('shows the workflowId as fallback when workflowName is absent', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          {
+            alertsContextCount: 10,
+            workflowId: 'wf-r1',
+            workflowRunId: 'run-r1',
+          },
+        ],
+      });
+
+      const afterSection = report.split('## Per-Workflow Alert Retrieval')[1];
+      const sectionContent = afterSection.split('##')[0];
+
+      expect(sectionContent).toContain('wf-r1');
+    });
+
+    it('shows the alertsContextCount in the Alerts column', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          {
+            alertsContextCount: 42,
+            workflowId: 'wf-r1',
+            workflowRunId: 'run-r1',
+          },
+        ],
+      });
+
+      const afterSection = report.split('## Per-Workflow Alert Retrieval')[1];
+      const sectionContent = afterSection.split('##')[0];
+
+      expect(sectionContent).toContain('42');
+    });
+
+    it('shows dash for alertsContextCount when it is null', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          {
+            alertsContextCount: null,
+            workflowId: 'wf-r1',
+            workflowRunId: 'run-r1',
+          },
+        ],
+      });
+
+      const afterSection = report.split('## Per-Workflow Alert Retrieval')[1];
+      const sectionContent = afterSection.split('##')[0];
+      const dataRows = sectionContent
+        .split('\n')
+        .filter(
+          (line) =>
+            line.startsWith('|') && !line.startsWith('| Workflow') && !line.startsWith('|---')
+        );
+
+      expect(dataRows[0]).toContain('| - |');
+    });
+
+    it('shows the extractionStrategy in the Strategy column', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          {
+            alertsContextCount: 10,
+            extractionStrategy: 'esql',
+            workflowId: 'wf-r1',
+            workflowRunId: 'run-r1',
+          },
+        ],
+      });
+
+      const afterSection = report.split('## Per-Workflow Alert Retrieval')[1];
+      const sectionContent = afterSection.split('##')[0];
+
+      expect(sectionContent).toContain('esql');
+    });
+
+    it('shows dash for extractionStrategy when it is undefined', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          {
+            alertsContextCount: 10,
+            workflowId: 'wf-r1',
+            workflowRunId: 'run-r1',
+          },
+        ],
+      });
+
+      const afterSection = report.split('## Per-Workflow Alert Retrieval')[1];
+      const sectionContent = afterSection.split('##')[0];
+      const dataRows = sectionContent
+        .split('\n')
+        .filter(
+          (line) =>
+            line.startsWith('|') && !line.startsWith('| Workflow') && !line.startsWith('|---')
+        );
+
+      expect(dataRows[0]).toContain('| - |');
+    });
+
+    it('shows the workflowId in the Workflow ID column', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          {
+            alertsContextCount: 10,
+            workflowId: 'wf-retrieval-xyz',
+            workflowRunId: 'run-r1',
+          },
+        ],
+      });
+
+      const afterSection = report.split('## Per-Workflow Alert Retrieval')[1];
+      const sectionContent = afterSection.split('##')[0];
+
+      expect(sectionContent).toContain('wf-retrieval-xyz');
+    });
+
+    it('shows a Combined row with the sum of all alertsContextCounts', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          { alertsContextCount: 10, workflowId: 'wf-r1', workflowRunId: 'run-r1' },
+          { alertsContextCount: 20, workflowId: 'wf-r2', workflowRunId: 'run-r2' },
+        ],
+      });
+
+      const afterSection = report.split('## Per-Workflow Alert Retrieval')[1];
+      const sectionContent = afterSection.split('##')[0];
+
+      expect(sectionContent).toContain('Combined');
+      expect(sectionContent).toContain('30');
+    });
+
+    it('shows dash in Combined row alerts cell when all counts are null', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        perWorkflowAlertRetrieval: [
+          { alertsContextCount: null, workflowId: 'wf-r1', workflowRunId: 'run-r1' },
+        ],
+      });
+
+      const afterSection = report.split('## Per-Workflow Alert Retrieval')[1];
+      const sectionContent = afterSection.split('##')[0];
+      const combinedRow = sectionContent.split('\n').find((line) => line.includes('Combined'));
+
+      expect(combinedRow).toContain('| - |');
+    });
+  });
+
+  describe('execution trigger section', () => {
+    it('omits the Execution Trigger section when sourceMetadata is undefined', () => {
+      const report = buildDiagnosticReport(defaultParams);
+
+      expect(report).not.toContain('## Execution Trigger');
+    });
+
+    it('includes the Execution Trigger section when sourceMetadata is null', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        sourceMetadata: null,
+      });
+
+      expect(report).toContain('## Execution Trigger');
+    });
+
+    it('shows Manual trigger type when sourceMetadata is null', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        sourceMetadata: null,
+      });
+
+      expect(report).toContain('Manual');
+    });
+
+    it('includes the Execution Trigger section when sourceMetadata is an empty object', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        sourceMetadata: {},
+      });
+
+      expect(report).toContain('## Execution Trigger');
+    });
+
+    it('shows Manual trigger type when sourceMetadata is an empty object', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        sourceMetadata: {},
+      });
+
+      expect(report).toContain('Manual');
+    });
+
+    it('shows Scheduled trigger type when sourceMetadata has a rule_id', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        sourceMetadata: { rule_id: 'rule-abc', rule_name: 'My Schedule' },
+      });
+
+      expect(report).toContain('Scheduled');
+    });
+
+    it('shows the rule_name as Schedule Name when sourceMetadata has rule_name', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        sourceMetadata: { rule_id: 'rule-abc', rule_name: 'My Schedule' },
+      });
+
+      expect(report).toContain('My Schedule');
+    });
+
+    it('shows the rule_id as Schedule ID when sourceMetadata has rule_id', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        sourceMetadata: { rule_id: 'rule-abc', rule_name: 'My Schedule' },
+      });
+
+      expect(report).toContain('rule-abc');
+    });
+
+    it('omits Schedule Name and Schedule ID rows when sourceMetadata has no rule metadata', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        sourceMetadata: null,
+      });
+
+      const afterSection = report.split('## Execution Trigger')[1];
+      const sectionContent = afterSection.split('##')[0];
+
+      expect(sectionContent).not.toContain('Schedule Name');
+      expect(sectionContent).not.toContain('Schedule ID');
+    });
+
+    it('shows Workflow Step trigger type when sourceMetadata has action_execution_uuid but no rule_id', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        sourceMetadata: { action_execution_uuid: 'exec-uuid-xyz' },
+      });
+
+      expect(report).toContain('Workflow Step');
+    });
+
+    it('shows the action_execution_uuid in the Execution Trigger section', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        sourceMetadata: { action_execution_uuid: 'exec-uuid-xyz' },
+      });
+
+      const afterSection = report.split('## Execution Trigger')[1];
+      const sectionContent = afterSection.split('##')[0];
+
+      expect(sectionContent).toContain('exec-uuid-xyz');
     });
   });
 });

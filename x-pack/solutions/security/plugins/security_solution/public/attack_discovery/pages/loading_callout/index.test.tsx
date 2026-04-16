@@ -12,6 +12,7 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { LoadingCallout } from '.';
 import { useKibana } from '../../../common/lib/kibana';
+import { WorkflowExecutionDetailsFlyout } from './workflow_execution_details_flyout';
 
 jest.mock('@kbn/react-kibana-context-theme', () => ({
   useKibanaIsDarkMode: jest.fn(() => false),
@@ -30,6 +31,10 @@ jest.mock('./workflow_execution_details_flyout', () => ({
 }));
 
 jest.mock('../../../common/lib/kibana');
+
+const MockWorkflowExecutionDetailsFlyout = WorkflowExecutionDetailsFlyout as jest.MockedFunction<
+  typeof WorkflowExecutionDetailsFlyout
+>;
 
 describe('LoadingCallout', () => {
   const defaultProps = {
@@ -341,6 +346,209 @@ describe('LoadingCallout', () => {
         const detailsButton = screen.queryByTestId('detailsButton');
         expect(detailsButton).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('prop forwarding to WorkflowExecutionDetailsFlyout', () => {
+    const flyoutProps = {
+      ...defaultProps,
+      end: '2025-01-15T10:00:00.000Z',
+      start: '2025-01-14T10:00:00.000Z',
+      workflowId: 'workflow-prop-fwd',
+      workflowRunId: 'run-prop-fwd',
+    };
+
+    const openFlyout = async () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          http: {},
+          telemetry: { reportEvent: jest.fn() },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+    };
+
+    beforeEach(async () => {
+      MockWorkflowExecutionDetailsFlyout.mockClear();
+      await openFlyout();
+    });
+
+    it('passes averageSuccessfulDurationMs (converted from nanoseconds) to WorkflowExecutionDetailsFlyout', async () => {
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} averageSuccessfulDurationNanoseconds={2_000_000_000} />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ averageSuccessfulDurationMs: 2000 }),
+        expect.anything()
+      );
+    });
+
+    it('passes configuredMaxAlerts (parsed from string) to WorkflowExecutionDetailsFlyout', async () => {
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} localStorageAttackDiscoveryMaxAlerts="100" />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ configuredMaxAlerts: 100 }),
+        expect.anything()
+      );
+    });
+
+    it('passes connectorActionTypeId to WorkflowExecutionDetailsFlyout', async () => {
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} connectorActionTypeId=".gen-ai" />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorActionTypeId: '.gen-ai' }),
+        expect.anything()
+      );
+    });
+
+    it('passes connectorModel to WorkflowExecutionDetailsFlyout', async () => {
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} connectorModel="gpt-4o" />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorModel: 'gpt-4o' }),
+        expect.anything()
+      );
+    });
+
+    it('passes dateRangeEnd (from end prop) to WorkflowExecutionDetailsFlyout', async () => {
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ dateRangeEnd: '2025-01-15T10:00:00.000Z' }),
+        expect.anything()
+      );
+    });
+
+    it('passes dateRangeStart (from start prop) to WorkflowExecutionDetailsFlyout', async () => {
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ dateRangeStart: '2025-01-14T10:00:00.000Z' }),
+        expect.anything()
+      );
+    });
+
+    it('passes duplicatesDroppedCount to WorkflowExecutionDetailsFlyout', async () => {
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} duplicatesDroppedCount={3} />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ duplicatesDroppedCount: 3 }),
+        expect.anything()
+      );
+    });
+
+    it('passes generatedCount to WorkflowExecutionDetailsFlyout', async () => {
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} generatedCount={10} />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ generatedCount: 10 }),
+        expect.anything()
+      );
+    });
+
+    it('passes hallucinationsFilteredCount to WorkflowExecutionDetailsFlyout', async () => {
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} hallucinationsFilteredCount={2} />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ hallucinationsFilteredCount: 2 }),
+        expect.anything()
+      );
+    });
+
+    it('passes persistedCount to WorkflowExecutionDetailsFlyout', async () => {
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} persistedCount={7} />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ persistedCount: 7 }),
+        expect.anything()
+      );
+    });
+
+    it('passes sourceMetadata to WorkflowExecutionDetailsFlyout', async () => {
+      const sourceMetadata = { rule_id: 'rule-1', rule_name: 'My Rule' };
+
+      render(
+        <TestProviders>
+          <LoadingCallout {...flyoutProps} sourceMetadata={sourceMetadata} />
+        </TestProviders>
+      );
+
+      await waitFor(() => screen.getByTestId('detailsButton'));
+      await userEvent.click(screen.getByTestId('detailsButton'));
+
+      expect(MockWorkflowExecutionDetailsFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ sourceMetadata }),
+        expect.anything()
+      );
     });
   });
 });

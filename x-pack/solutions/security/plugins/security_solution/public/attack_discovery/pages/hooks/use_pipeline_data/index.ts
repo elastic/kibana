@@ -10,7 +10,11 @@ import type { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@kbn/react-query';
 
 /** Extraction strategy used to retrieve alerts from a workflow execution. */
-export type ExtractionStrategy = 'custom_workflow' | 'default_custom_query' | 'default_esql';
+export type ExtractionStrategy =
+  | 'custom_workflow'
+  | 'default_custom_query'
+  | 'default_esql'
+  | 'provided';
 
 /** Pre-execution check result — mirrors server-side DiagnosticsPreExecutionCheck. */
 export interface DiagnosticsPreExecutionCheck {
@@ -89,6 +93,13 @@ export interface PipelineDataResponse {
 
 interface UsePipelineDataProps {
   executionId: string;
+  /**
+   * Fallback generation workflow run ID. In provided mode the orchestrator
+   * workflow ID is unknown, but the generation workflow run ID is available
+   * from the generation API response. Pass it here so the server can fetch
+   * generation data before the event log is indexed (~10-15 s delay).
+   */
+  generationWorkflowRunId?: string | null;
   http: HttpSetup;
   /** Whether the query should be enabled (starts fetching when true) */
   isEnabled: boolean;
@@ -107,6 +118,7 @@ interface UsePipelineDataResult {
   error: unknown;
   isError: boolean;
   isLoading: boolean;
+  refetch: () => void;
 }
 
 const PIPELINE_DATA_QUERY_KEY = 'GET_PIPELINE_DATA';
@@ -131,6 +143,7 @@ const PIPELINE_DATA_QUERY_KEY = 'GET_PIPELINE_DATA';
  */
 export const usePipelineData = ({
   executionId,
+  generationWorkflowRunId,
   http,
   isEnabled,
   refetchIntervalMs,
@@ -142,21 +155,25 @@ export const usePipelineData = ({
   const queryFn = useCallback(async () => {
     abortController.current = new AbortController();
 
-    const response = await http.fetch<PipelineDataResponse>(
-      `/internal/attack_discovery/workflow/${encodeURIComponent(
-        workflowId
-      )}/execution/${encodeURIComponent(executionId)}`,
-      {
-        method: 'GET',
-        signal: abortController.current.signal,
-        version: '1',
-      }
-    );
+    const basePath = `/internal/attack_discovery/workflow/${encodeURIComponent(
+      workflowId
+    )}/execution/${encodeURIComponent(executionId)}`;
+
+    const url =
+      generationWorkflowRunId != null
+        ? `${basePath}?generation_workflow_run_id=${encodeURIComponent(generationWorkflowRunId)}`
+        : basePath;
+
+    const response = await http.fetch<PipelineDataResponse>(url, {
+      method: 'GET',
+      signal: abortController.current.signal,
+      version: '1',
+    });
 
     return response;
-  }, [executionId, http, workflowId]);
+  }, [executionId, generationWorkflowRunId, http, workflowId]);
 
-  const { data, error, isError, isFetching, isLoading } = useQuery(
+  const { data, error, isError, isFetching, isLoading, refetch } = useQuery(
     [PIPELINE_DATA_QUERY_KEY, executionId],
     queryFn,
     {
@@ -173,5 +190,6 @@ export const usePipelineData = ({
     error,
     isError,
     isLoading: isLoading && isFetching,
+    refetch,
   };
 };
