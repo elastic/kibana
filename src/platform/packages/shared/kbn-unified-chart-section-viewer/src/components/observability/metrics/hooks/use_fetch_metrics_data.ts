@@ -51,7 +51,9 @@ export function useFetchMetricsData({
   );
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
-    async (signal: AbortSignal): Promise<ParsedMetrics | null> => {
+    async (
+      signal: AbortSignal
+    ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
       const result = await executeEsqlQuery<MetricsESQLResponse>({
         esqlQuery: metricsInfoQuery,
         search: services.data.search.search,
@@ -81,7 +83,10 @@ export function useFetchMetricsData({
         trackMetricsInfo(parsed.telemetry);
       }
 
-      return sortedMetrics;
+      return {
+        ...sortedMetrics,
+        activeDimensions: selectedDimensionNames ?? [],
+      };
     },
     [
       metricsInfoQuery,
@@ -92,6 +97,7 @@ export function useFetchMetricsData({
       services.data.search.search,
       services.uiSettings,
       trackMetricsInfo,
+      selectedDimensionNames,
     ]
   );
 
@@ -120,5 +126,6 @@ export function useFetchMetricsData({
     error: error ?? null,
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],
+    activeDimensions: value?.activeDimensions ?? [],
   };
 }
