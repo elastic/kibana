@@ -26,7 +26,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10300
-  core: 547151
+  core: 604282
   cps: 9209
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -42,7 +42,7 @@ pageLoadAssetSize:
   dataViewManagement: 6250
   dataViews: 66000
   dataVisualizer: 32727
-  developerToolbar: 4467
+  developerToolbar: 15000
   devTools: 8109
   discover: 30501
   discoverEnhanced: 5509
@@ -79,7 +79,7 @@ pageLoadAssetSize:
   fleet: 209495
   genAiSettings: 5663
   globalSearch: 6890
-  globalSearchBar: 26122
+  globalSearchBar: 31178
   globalSearchProviders: 4646
   graph: 9924
   grokdebugger: 5469
@@ -173,7 +173,7 @@ pageLoadAssetSize:
   share: 58677
   slo: 40437
   snapshotRestore: 22068
-  spaces: 28871
+  spaces: 36639
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 12500

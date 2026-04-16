@@ -11,33 +11,37 @@ exports[`Both modes should render the side navigation 1`] = `
       class="kbnChromeNav-root css-vka7tb-getNavWrapperStyles"
     >
       <div
-        class="css-1ja8ujo-wrapperStyles"
-        data-test-subj="kbnChromeNav-logoWrapper"
+        class="css-yp66ul-getTopSectionStyles"
       >
-        <a
-          aria-label="Solution homepage"
-          class="css-r2tafp-buttonStyles"
-          data-highlighted="false"
-          data-menu-item="true"
-          data-test-subj="kbnChromeNav-logo"
-          href="/"
-          id="home"
+        <div
+          class="css-36kal1-wrapperStyles"
+          data-test-subj="kbnChromeNav-logoWrapper"
         >
-          <div
-            class="kbnChromeNav-iconWrapper"
+          <a
+            aria-label="Solution homepage"
+            class="css-r2tafp-buttonStyles"
+            data-highlighted="false"
+            data-menu-item="true"
+            data-test-subj="kbnChromeNav-logo"
+            href="/"
+            id="home"
           >
-            <span
-              aria-hidden="true"
-              color="currentColor"
-              data-euiicon-type="logoElastic"
-            />
-          </div>
-          <div
-            class="euiText emotion-euiText-m-euiTextAlign-center-textStyles-labelStyles"
-          >
-            Solution
-          </div>
-        </a>
+            <div
+              class="kbnChromeNav-iconWrapper"
+            >
+              <span
+                aria-hidden="true"
+                color="currentColor"
+                data-euiicon-type="logoElastic"
+              />
+            </div>
+            <div
+              class="euiText emotion-euiText-m-euiTextAlign-center-textStyles-labelStyles"
+            >
+              Solution
+            </div>
+          </a>
+        </div>
       </div>
       <p
         class="emotion-euiScreenReaderOnly"
@@ -175,9 +179,9 @@ exports[`Both modes should render the side navigation 1`] = `
       >
         You are in the main navigation footer menu. Use Up and Down arrow keys to navigate the menu.
       </p>
-      <footer
-        aria-label="Side navigation"
-        class="css-18gcnxt-root"
+      <nav
+        aria-label="Footer navigation"
+        class="css-q2ubd0-getFooterNavWrapperStyles"
         data-test-subj="kbnChromeNav-footer"
       >
         <div
@@ -363,9 +367,13 @@ exports[`Both modes should render the side navigation 1`] = `
             </span>
           </div>
         </div>
-        <hr
-          class="euiHorizontalRule emotion-euiHorizontalRule-full-xs-collapseDivider"
-        />
+      </nav>
+      <div
+        aria-label="Side navigation tools"
+        class="css-4egb9v-getFooterToolbarWrapperStyles"
+        data-test-subj="kbnChromeNav-footerToolbar"
+        role="group"
+      >
         <div
           class="sideNavCollapseButtonWrapper css-1y5smli-sideNavCollapseButtonWrapper"
         >
@@ -376,7 +384,6 @@ exports[`Both modes should render the side navigation 1`] = `
             aria-pressed="true"
             class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-sideNavCollapseButton"
             data-test-subj="sideNavCollapseButton"
-            tabindex="-1"
             type="button"
           >
             <span
@@ -387,7 +394,7 @@ exports[`Both modes should render the side navigation 1`] = `
             />
           </button>
         </div>
-      </footer>
+      </div>
     </div>
   </div>
 </div>

@@ -225,29 +225,37 @@ export class AIAssistantManagementPlugin
       isUntouchedUiSetting &&
       (isObservabilityAIAssistantEnabled || isSecurityAIAssistantEnabled || isAiAgentsEnabled)
     ) {
-      coreStart.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            coreStart.rendering.addContext(
-              <NavControlInitiator
-                isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
-                isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
-                coreStart={coreStart}
-                triggerOpenChat={(selection: AIExperienceSelection) =>
-                  openChatSubject.next(selection)
-                }
-                spaces={spaces}
-              />
-            ),
-            element
-          );
+      const mountAiPicker = (element: HTMLElement) => {
+        ReactDOM.render(
+          coreStart.rendering.addContext(
+            <NavControlInitiator
+              isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
+              isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
+              coreStart={coreStart}
+              triggerOpenChat={(selection: AIExperienceSelection) =>
+                openChatSubject.next(selection)
+              }
+              spaces={spaces}
+            />
+          ),
+          element
+        );
 
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        // before the user profile
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      };
+
+      coreStart.chrome.navControls.registerRight({
+        mount: mountAiPicker,
         order: 1001,
+      });
+
+      // TODO: Chrome-Next hack — dual registration needed because Chrome Next doesn't render
+      // HeaderNavControls (registerRight mount points). Remove the registerRight call once
+      // Chrome Next is the only chrome. See https://github.com/elastic/kibana/issues/260010
+      coreStart.chrome.next.aiButton.register({
+        content: mountAiPicker,
       });
     }
   }

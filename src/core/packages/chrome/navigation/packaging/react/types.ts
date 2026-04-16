@@ -26,10 +26,11 @@ export type BadgeType = 'beta' | 'techPreview' | 'new';
 
 /**
  * A navigation item within a secondary/nested menu.
+ * At least one of `href` or `onClick` must be provided.
  */
 export interface SecondaryMenuItem {
   /** URL or hash for navigation. */
-  href: string;
+  href?: string;
   /** Unique identifier for this item. */
   id: string;
   /** Display text for the menu item. */
@@ -40,6 +41,8 @@ export interface SecondaryMenuItem {
   badgeType?: BadgeType;
   /** If true, opens link in a new tab with an external icon. */
   isExternal?: boolean;
+  /** Click handler for action items (e.g. opening a flyout or modal). */
+  onClick?: () => void;
 }
 
 /**
@@ -75,10 +78,38 @@ export interface MenuItem {
 }
 
 /**
- * The complete navigation structure containing primary and footer items.
+ * A chrome tool control (search, help, etc.) — not a primary navigation destination.
+ *
+ * At least one of `iconType` or `renderContent` must be provided.
+ * When `renderPopover` is present, it takes precedence over `sections`.
+ */
+export interface ToolItem {
+  id: string;
+  label: string;
+  iconType?: string;
+  renderContent?: (state: { isCollapsed: boolean }) => ReactNode;
+  renderPopover?: (closePopover: () => void) => ReactNode;
+  onClick?: () => void;
+  sections?: SecondaryMenuSection[];
+  popoverWidth?: number | string;
+  badgeType?: BadgeType;
+  'data-test-subj'?: string;
+  shortcutKey?: string;
+}
+
+/**
+ * Optional tool groupings for the sidenav header and footer toolbars.
+ */
+export interface ToolSlots {
+  headerTools?: ToolItem[];
+  footerTools?: ToolItem[];
+}
+
+/**
+ * Navigable sidenav structure: primary rail and footer links.
  */
 export interface NavigationStructure {
-  /** Items displayed in the footer area of the navigation. */
+  /** Items displayed in the footer navigation area. */
   footerItems: MenuItem[];
   /** Items displayed in the primary/main area of the navigation. */
   primaryItems: MenuItem[];
@@ -94,8 +125,12 @@ export interface SideNavLogo {
   href: string;
   /** The label for the logo, typically the product name. */
   label: string;
+  /** When `true`, the label is not shown under the icon while expanded; still used for accessibility and collapsed tooltip. */
+  hideLabel?: boolean;
   /** The logo type, e.g. `appObservability`, `appSecurity`, etc. */
   iconType: string;
+  /** Optional color of the logo icon. `'default'` uses brand colors; `'text'` renders monochromatically. */
+  iconColor?: 'default' | 'text';
   /** Optional `data-test-subj` attribute. */
   'data-test-subj'?: string;
 }
@@ -108,13 +143,15 @@ export interface NavigationProps {
   activeItemId?: string;
   /** Whether the navigation is collapsed. */
   isCollapsed: boolean;
-  /** The navigation structure containing primary, secondary, and footer items. */
+  /** Navigable items (primary and footer links). */
   items: NavigationStructure;
+  /** Optional header/footer tool controls (search, help, etc.). */
+  tools?: ToolSlots;
   /** The logo object containing the route ID, href, label, and type. */
   logo: SideNavLogo;
   /** Required by the grid layout to set the width of the navigation slot. */
   setWidth: (width: number) => void;
-  /** Callback fired when a navigation item is clicked. */
+  /** Callback fired when a navigable item or the logo is activated. */
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /** Callback fired when the collapse button is toggled. Omit to hide the toggle button. */
   onToggleCollapsed?: (isCollapsed: boolean) => void;

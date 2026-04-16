@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -15,75 +13,40 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 import { AppearanceModal } from './appearance_modal';
-import { useAppearance } from './use_appearance_hook';
 
-interface Props {
-  security: SecurityPluginStart;
+interface OpenAppearanceModalParams {
   core: CoreStart;
-  closePopover: () => void;
+  security: SecurityPluginStart;
   isServerless: boolean;
 }
 
-export const AppearanceSelector = ({ security, core, closePopover, isServerless }: Props) => {
-  return (
-    <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-      <AppearanceSelectorUI
-        core={core}
-        security={security}
-        closePopover={closePopover}
-        isServerless={isServerless}
-      />
-    </UserProfilesKibanaProvider>
-  );
-};
+let appearanceModalRef: OverlayRef | null = null;
 
-function AppearanceSelectorUI({ security, core, closePopover, isServerless }: Props) {
-  const { isVisible } = useAppearance({
-    uiSettingsClient: core.uiSettings,
-    defaultColorMode: 'space_default',
-    defaultContrastMode: 'standard',
-  });
-
-  const modalRef = useRef<OverlayRef | null>(null);
-
-  const closeModal = () => {
-    modalRef.current?.close();
-    modalRef.current = null;
-  };
-
-  const openModal = () => {
-    modalRef.current = core.overlays.openModal(
-      toMountPoint(
-        <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-          <AppearanceModal
-            closeModal={closeModal}
-            uiSettingsClient={core.uiSettings}
-            isServerless={isServerless}
-          />
-        </UserProfilesKibanaProvider>,
-        core
-      ),
-      { 'data-test-subj': 'appearanceModal', maxWidth: 600 }
-    );
-  };
-
-  if (!isVisible) {
-    return null;
+export const openAppearanceModal = ({
+  core,
+  security,
+  isServerless,
+}: OpenAppearanceModalParams) => {
+  if (appearanceModalRef) {
+    return;
   }
 
-  return (
-    <EuiContextMenuItem
-      icon="brush"
-      size="s"
-      onClick={() => {
-        openModal();
-        closePopover();
-      }}
-      data-test-subj="appearanceSelector"
-    >
-      {i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceLinkText', {
-        defaultMessage: 'Appearance',
-      })}
-    </EuiContextMenuItem>
+  const closeModal = () => {
+    appearanceModalRef?.close();
+    appearanceModalRef = null;
+  };
+
+  appearanceModalRef = core.overlays.openModal(
+    toMountPoint(
+      <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
+        <AppearanceModal
+          closeModal={closeModal}
+          uiSettingsClient={core.uiSettings}
+          isServerless={isServerless}
+        />
+      </UserProfilesKibanaProvider>,
+      core
+    ),
+    { 'data-test-subj': 'appearanceModal', maxWidth: 600 }
   );
-}
+};

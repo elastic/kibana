@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormLabel,
   EuiHeaderSectionItemButton,
   EuiIcon,
-  EuiText,
-  EuiLoadingSpinner,
   EuiSelectableTemplateSitewide,
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
@@ -22,72 +17,28 @@ import {
   mathWithUnits,
   useEuiMinBreakpoint,
 } from '@elastic/eui';
-import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { apm } from '@elastic/apm-rum';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { useCallback, useRef, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
-import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
-import type { Subscription } from 'rxjs';
 import { isMac } from '@kbn/shared-ux-utility';
-import { blurEvent, sort } from '.';
-import { resultToOption, suggestionToOption } from '../lib';
-import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
-import type { SearchSuggestion } from '../suggestions';
-import { getSuggestions } from '../suggestions';
-import { PopoverFooter } from './popover_footer';
-import { PopoverPlaceholder } from './popover_placeholder';
+import { SearchFooter } from './search_footer';
+import { SearchPlaceholder } from './search_placeholder';
+import { useSearchState } from '../hooks/use_search_state';
+import { EmptyMessage } from './empty_message';
+import { CharLimitExceededMessage } from './char_limit_exceeded_message';
+import { blurEvent } from '.';
 import type { SearchBarProps } from './types';
 
-const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
-  const charLimitMessage = (
-    <>
-      <EuiText size="m">
-        <p data-test-subj="searchCharLimitExceededMessageHeading">
-          <FormattedMessage
-            id="xpack.globalSearchBar.searchBar.searchCharLimitExceededHeading"
-            defaultMessage="Search character limit exceeded"
-          />
-        </p>
-      </EuiText>
-      <p>
-        <FormattedMessage
-          id="xpack.globalSearchBar.searchBar.searchCharLimitExceeded"
-          defaultMessage="Try searching for applications, dashboards, visualizations, and more."
-        />
-      </p>
-    </>
-  );
-
-  return (
-    <PopoverPlaceholder basePath={props.basePathUrl} customPlaceholderMessage={charLimitMessage} />
-  );
-};
-
-const EmptyMessage = () => (
-  <EuiFlexGroup
-    direction="column"
-    justifyContent="center"
-    css={css`
-      min-height: 300px;
-    `}
-  >
-    <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="xl" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-export const SearchBar: FC<SearchBarProps> = (opts) => {
-  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
-
-  const isMounted = useMountedState();
+export const SearchBar = ({
+  globalSearch,
+  taggingApi,
+  navigateToUrl,
+  reportEvent,
+  chromeStyle$,
+  basePathUrl,
+}: SearchBarProps) => {
   const { euiTheme } = useEuiTheme();
   const chromeStyle = useObservable(chromeStyle$);
 
@@ -95,18 +46,32 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [isVisible, setIsVisible] = useState(false);
   const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  // General hooks
-  const [initialLoad, setInitialLoad] = useState(false);
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
-  const searchSubscription = useRef<Subscription | null>(null);
-  const [options, setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
-  const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
   const [showAppend, setShowAppend] = useState<boolean>(true);
-  const UNKNOWN_TAG_ID = '__unknown__';
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
+
+  const {
+    searchValue,
+    setSearchValue,
+    options,
+    isLoading,
+    searchCharLimitExceeded,
+    onChange,
+    setSearchRef,
+    searchRef,
+    triggerInitialLoad,
+  } = useSearchState({
+    globalSearch,
+    taggingApi,
+    navigateToUrl,
+    reportEvent,
+    onResultSelect: () => {
+      (document.activeElement as HTMLElement).blur();
+      if (searchRef.current) {
+        setSearchValue('');
+        searchRef.current.dispatchEvent(blurEvent);
+      }
+    },
+  });
 
   const styles = css({
     [useEuiBreakpoint(['m', 'l'])]: {
@@ -116,130 +81,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
     },
   });
-  // Initialize searchableTypes data
-  useEffect(() => {
-    if (initialLoad) {
-      const fetch = async () => {
-        const types = await globalSearch.getSearchableTypes();
-        setSearchableTypes(types);
-      };
-      fetch();
-    }
-  }, [globalSearch, initialLoad]);
-
-  // Whenever searchValue changes, isLoading = true
-  useEffect(() => {
-    setIsLoading(true);
-  }, [searchValue]);
-
-  const loadSuggestions = useCallback(
-    (term: string) => {
-      return getSuggestions({
-        searchTerm: term,
-        searchableTypes,
-        tagCache: taggingApi?.cache,
-      });
-    },
-    [taggingApi, searchableTypes]
-  );
-
-  const setDecoratedOptions = useCallback(
-    (
-      _options: GlobalSearchResult[],
-      suggestions: SearchSuggestion[],
-      searchTagIds: string[] = []
-    ) => {
-      setOptions([
-        ...suggestions.map(suggestionToOption),
-        ..._options.map((option) =>
-          resultToOption(
-            option,
-            searchTagIds?.filter((id) => id !== UNKNOWN_TAG_ID) ?? [],
-            taggingApi?.ui.getTagList
-          )
-        ),
-      ]);
-    },
-    [setOptions, taggingApi]
-  );
-
-  useDebounce(
-    () => {
-      if (initialLoad) {
-        // cancel pending search if not completed yet
-        if (searchSubscription.current) {
-          searchSubscription.current.unsubscribe();
-          searchSubscription.current = null;
-        }
-
-        if (searchValue.length > globalSearch.searchCharLimit) {
-          // setting this will display an error message to the user
-          setSearchCharLimitExceeded(true);
-          return;
-        } else {
-          setSearchCharLimitExceeded(false);
-        }
-
-        const suggestions = loadSuggestions(searchValue.toLowerCase());
-
-        let aggregatedResults: GlobalSearchResult[] = [];
-
-        if (searchValue.length !== 0) {
-          reportEvent.searchRequest();
-        }
-
-        const rawParams = parseSearchParams(searchValue.toLowerCase(), searchableTypes);
-        let tagIds: string[] | undefined;
-        if (taggingApi && rawParams.filters.tags) {
-          tagIds = rawParams.filters.tags.map(
-            (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
-          );
-        } else {
-          tagIds = undefined;
-        }
-        const searchParams: GlobalSearchFindParams = {
-          term: rawParams.term,
-          types: rawParams.filters.types,
-          tags: tagIds,
-        };
-
-        searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
-          next: ({ results }) => {
-            if (!isMounted()) {
-              return;
-            }
-
-            if (searchValue.length > 0) {
-              aggregatedResults = [...results, ...aggregatedResults].sort(sort.byScore);
-              setDecoratedOptions(aggregatedResults, suggestions, searchParams.tags);
-              return;
-            }
-
-            // if searchbar is empty, filter to only applications and sort alphabetically
-            results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
-            aggregatedResults = [...results, ...aggregatedResults].sort(sort.byTitle);
-            setDecoratedOptions(aggregatedResults, suggestions, searchParams.tags);
-          },
-          error: (err) => {
-            setIsLoading(false);
-
-            // Not doing anything on error right now because it'll either just show the previous
-            // results or empty results which is basically what we want anyways
-            apm.captureError(err, {
-              labels: {
-                SearchValue: searchValue,
-              },
-            });
-          },
-          complete: () => {
-            setIsLoading(false);
-          },
-        });
-      }
-    },
-    350,
-    [searchValue, loadSuggestions, searchableTypes, initialLoad]
-  );
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -248,8 +89,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         reportEvent.shortcutUsed();
         if (chromeStyle === 'project' && !isVisible) {
           visibilityButtonRef.current?.click();
-        } else if (searchRef) {
-          searchRef.focus();
+        } else if (searchRef.current) {
+          searchRef.current.focus();
         } else if (buttonRef) {
           (buttonRef.children[0] as HTMLButtonElement).click();
         }
@@ -257,81 +98,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     },
     [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
   );
-
-  const onChange = useCallback(
-    (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
-      let selectedRank: number | null = null;
-      const selected = selection.find(({ checked }, rank) => {
-        const isChecked = checked === 'on';
-        if (isChecked) {
-          selectedRank = rank + 1;
-        }
-        return isChecked;
-      });
-
-      if (!selected) {
-        return;
-      }
-
-      const selectedLabel = selected.label ?? null;
-
-      // @ts-ignore - ts error is "union type is too complex to express"
-      const { url, type, suggestion } = selected;
-
-      // if the type is a suggestion, we change the query on the input and trigger a new search
-      // by setting the searchValue (only setting the field value does not trigger a search)
-      if (type === '__suggestion__') {
-        setSearchValue(suggestion);
-        return;
-      }
-
-      // errors in tracking should not prevent selection behavior
-      try {
-        if (type === 'application') {
-          const key = selected.key ?? 'unknown';
-          const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
-          reportEvent.navigateToApplication({
-            application,
-            searchValue,
-            selectedLabel,
-            selectedRank,
-          });
-        } else {
-          reportEvent.navigateToSavedObject({
-            type,
-            searchValue,
-            selectedLabel,
-            selectedRank,
-          });
-        }
-      } catch (err) {
-        apm.captureError(err, {
-          labels: {
-            SearchValue: searchValue,
-          },
-        });
-        // eslint-disable-next-line no-console
-        console.log('Error trying to track searchbar metrics', err);
-      }
-
-      if (event.shiftKey) {
-        window.open(url);
-      } else if (event.ctrlKey || event.metaKey) {
-        window.open(url, '_blank');
-      } else {
-        navigateToUrl(url);
-      }
-
-      (document.activeElement as HTMLElement).blur();
-      if (searchRef) {
-        clearField();
-        searchRef.dispatchEvent(blurEvent);
-      }
-    },
-    [reportEvent, navigateToUrl, searchRef, searchValue]
-  );
-
-  const clearField = () => setSearchValue('');
 
   const keyboardShortcutTooltip = `${i18nStrings.keyboardShortcutTooltip.prefix}: ${
     isMac ? i18nStrings.keyboardShortcutTooltip.onMac : i18nStrings.keyboardShortcutTooltip.onNotMac
@@ -411,7 +177,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         placeholder: i18nStrings.placeholderText,
         onFocus: () => {
           reportEvent.searchFocus();
-          setInitialLoad(true);
+          triggerInitialLoad();
           setShowAppend(false);
         },
         onBlur: () => {
@@ -421,9 +187,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         fullWidth: true,
         append: getAppendForChromeStyle(),
       }}
-      errorMessage={searchCharLimitExceeded ? <SearchCharLimitExceededMessage {...props} /> : null}
+      errorMessage={
+        searchCharLimitExceeded ? <CharLimitExceededMessage basePathUrl={basePathUrl} /> : null
+      }
       emptyMessage={<EmptyMessage />}
-      noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
+      noMatchesMessage={<SearchPlaceholder basePath={basePathUrl} />}
       popoverProps={{
         zIndex: Number(euiTheme.levels.navigation),
         'data-test-subj': 'nav-search-popover',
@@ -437,7 +205,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           <EuiIcon type="magnify" size="m" aria-hidden={true} />
         </EuiHeaderSectionItemButton>
       }
-      popoverFooter={<PopoverFooter />}
+      popoverFooter={<SearchFooter />}
     />
   );
 };

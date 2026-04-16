@@ -31,6 +31,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
+import type { ChromeNextHeaderGlobalActions } from '@kbn/core-chrome-browser';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -116,6 +117,11 @@ export function InternalDashboardTopNav({
     dashboardApi.unpublishedTimeslice$,
     dashboardInternalApi.publishedEsqlVariables$,
     dashboardInternalApi.unpublishedEsqlVariables$
+  );
+
+  const chromeNextHeaderFavoriteGlobalAction = useMemo(
+    () => (lastSavedId ? <DashboardFavoriteButton dashboardId={lastSavedId} /> : undefined),
+    [lastSavedId]
   );
 
   const hasUnpublishedFilters = useMemo(() => {
@@ -298,12 +304,31 @@ export function InternalDashboardTopNav({
     [redirectTo]
   );
 
-  const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    isLabsShown,
-    setIsLabsShown,
-    maybeRedirect,
-    showResetChange,
-  });
+  const { viewModeTopNavConfig, editModeTopNavConfig, chromeNextHeaderShareGlobalAction } =
+    useDashboardMenuItems({
+      isLabsShown,
+      setIsLabsShown,
+      maybeRedirect,
+      showResetChange,
+    });
+
+  useEffect(() => {
+    const globalActions: ChromeNextHeaderGlobalActions = {};
+    if (chromeNextHeaderShareGlobalAction) {
+      globalActions.share = chromeNextHeaderShareGlobalAction;
+    }
+    if (chromeNextHeaderFavoriteGlobalAction) {
+      globalActions.favorite = chromeNextHeaderFavoriteGlobalAction;
+    }
+
+    coreServices.chrome.next.header.set({
+      title: title ?? '',
+      globalActions: Object.keys(globalActions).length > 0 ? globalActions : undefined,
+    });
+    return () => {
+      coreServices.chrome.next.header.set(undefined);
+    };
+  }, [title, chromeNextHeaderShareGlobalAction, chromeNextHeaderFavoriteGlobalAction]);
 
   UseUnmount(() => {
     dashboardApi.clearOverlays();
@@ -325,11 +350,11 @@ export function InternalDashboardTopNav({
           const badgeButton = <EuiBadge {...badgeProps}>{badgeText}</EuiBadge>;
           return (
             <EuiPopover
+              aria-label={dashboardManagedBadge.getBadgeAriaLabel()}
               button={badgeButton}
               isOpen={isPopoverOpen}
               closePopover={() => setIsPopoverOpen(false)}
               panelStyle={{ maxWidth: 250 }}
-              aria-label={dashboardManagedBadge.getBadgeAriaLabel()}
             >
               <FormattedMessage
                 id="dashboard.managedContentPopoverButton"

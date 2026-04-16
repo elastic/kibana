@@ -39,6 +39,7 @@ describe('Serialization utils', () => {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
       getEmbeddableTransformsEnabled: jest.fn(() => false),
+      getIsNextChrome: jest.fn(() => false),
     },
   } satisfies DiscoverServices;
 

@@ -14,6 +14,8 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-type
 
 import { BehaviorSubject } from 'rxjs';
 import type { DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+import { DeveloperToolbarItem } from '@kbn/developer-toolbar';
+import { ChromeNextToggle } from '@kbn/core-chrome-feature-flags';
 
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
@@ -41,6 +43,9 @@ export class DeveloperToolbarPlugin
     (core.chrome as InternalChromeStart).setGlobalFooter(
       <Suspense>
         <LazyToolbar items$={this.items$} envInfo={this.context.env} />
+        <DeveloperToolbarItem id="chromeNext">
+          <ChromeNextToggle featureFlags={core.featureFlags} />
+        </DeveloperToolbarItem>
       </Suspense>
     );
 

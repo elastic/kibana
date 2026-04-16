@@ -24,7 +24,8 @@ export const HideTabsBar: FC<{
   children: ReactNode;
 }> = ({ customizationContext, children }) => {
   const dispatch = useInternalStateDispatch();
-  const { chrome } = useDiscoverServices();
+  const { chrome, discoverFeatureFlags } = useDiscoverServices();
+  const isNextChrome = discoverFeatureFlags.getIsNextChrome();
   const topNavMenuItems = useTopNavMenuItems();
 
   useEffect(() => {
@@ -34,13 +35,22 @@ export const HideTabsBar: FC<{
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    if (isNextChrome && customizationContext.displayMode === 'standalone' && topNavMenuItems) {
+      chrome.next.header.set({ appMenu: topNavMenuItems });
+      return () => {
+        chrome.next.header.set(undefined);
+      };
+    }
+  }, [isNextChrome, customizationContext.displayMode, topNavMenuItems, chrome.next.header]);
+
   return (
     <>
       {
         /**
          * The tabs bar renders the app menu, but it still needs to be shown when tabs are hidden
          */
-        customizationContext.displayMode === 'standalone' && topNavMenuItems && (
+        !isNextChrome && customizationContext.displayMode === 'standalone' && topNavMenuItems && (
           <AppMenu config={topNavMenuItems} setAppMenu={chrome.setAppMenu} />
         )
       }

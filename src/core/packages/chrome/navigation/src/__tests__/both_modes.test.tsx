@@ -1251,6 +1251,7 @@ describe('Both modes', () => {
         const serviceInventoryLink = within(sidePanel).getByTestId(
           sidePanelItemId('service-inventory')
         );
+        const collapseButton = screen.getByTestId('sideNavCollapseButton');
 
         act(() => {
           solutionLogo.focus();
@@ -1268,7 +1269,10 @@ describe('Both modes', () => {
 
         expect(gettingStartedLink).toHaveFocus();
 
-        // Tab to side panel - should land on first focusable item (Service inventory)
+        await user.tab();
+
+        expect(collapseButton).toHaveFocus();
+
         await user.tab();
 
         expect(serviceInventoryLink).toHaveFocus();

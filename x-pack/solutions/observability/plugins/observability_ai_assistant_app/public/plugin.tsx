@@ -129,25 +129,33 @@ export class ObservabilityAIAssistantAppPlugin
     const isEnabled = appService.isEnabled();
 
     if (isEnabled) {
-      coreStart.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <NavControlInitiator
-              appService={appService}
-              coreStart={coreStart}
-              pluginsStart={pluginsStart}
-              isServerless={this.isServerless}
-            />,
-            element,
-            () => {}
-          );
+      const mountObsAiAssistant = (element: HTMLElement) => {
+        ReactDOM.render(
+          <NavControlInitiator
+            appService={appService}
+            coreStart={coreStart}
+            pluginsStart={pluginsStart}
+            isServerless={this.isServerless}
+          />,
+          element,
+          () => {}
+        );
 
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        // right before the user profile
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      };
+
+      coreStart.chrome.navControls.registerRight({
+        mount: mountObsAiAssistant,
         order: 1001,
+      });
+
+      // TODO: Chrome-Next hack — dual registration needed because Chrome Next doesn't render
+      // HeaderNavControls (registerRight mount points). Remove the registerRight call once
+      // Chrome Next is the only chrome. See https://github.com/elastic/kibana/issues/260010
+      coreStart.chrome.next.aiButton.register({
+        content: mountObsAiAssistant,
       });
     }
 

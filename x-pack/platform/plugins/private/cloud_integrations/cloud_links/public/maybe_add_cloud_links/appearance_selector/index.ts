@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { AppearanceSelector } from './appearance_selector';
+export { openAppearanceModal } from './appearance_selector';

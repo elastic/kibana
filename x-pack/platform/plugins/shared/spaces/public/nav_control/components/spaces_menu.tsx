@@ -54,6 +54,7 @@ interface Props {
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
   isLoading: boolean;
+  width?: number | string;
 }
 class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
   public render() {
@@ -107,7 +108,9 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
           options={spaceOptions}
           singleSelection={'always'}
           css={css`
-            width: 400px;
+            width: ${typeof this.props.width === 'number'
+              ? `${this.props.width}px`
+              : this.props.width ?? '400px'};
           `}
           onChange={this.spaceSelectionChange}
           listProps={{

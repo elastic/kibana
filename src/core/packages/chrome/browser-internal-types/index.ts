@@ -15,6 +15,12 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
+  ChromeNext,
+  ChromeNextAiButton,
+  ChromeNextHeaderConfig,
+  ChromeNextGlobalSearchConfig,
+  ChromeNextSpaceSelectorConfig,
+  ChromeNextUserMenuConfig,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
@@ -103,5 +109,27 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+  };
+
+  /** @internal Extends public `next` with `get$` for Chrome layout components. */
+  next: InternalChromeNext;
+}
+
+/** @internal */
+export interface InternalChromeNext extends ChromeNext {
+  header: ChromeNext['header'] & {
+    get$(): Observable<ChromeNextHeaderConfig | undefined>;
+  };
+  aiButton: ChromeNext['aiButton'] & {
+    get$(): Observable<ChromeNextAiButton[]>;
+  };
+  globalSearch: ChromeNext['globalSearch'] & {
+    get$(): Observable<ChromeNextGlobalSearchConfig | undefined>;
+  };
+  userMenu: ChromeNext['userMenu'] & {
+    get$(): Observable<ChromeNextUserMenuConfig | undefined>;
+  };
+  spaceSelector: ChromeNext['spaceSelector'] & {
+    get$(): Observable<ChromeNextSpaceSelectorConfig | undefined>;
   };
 }

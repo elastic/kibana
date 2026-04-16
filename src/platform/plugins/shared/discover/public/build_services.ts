@@ -65,6 +65,7 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -95,6 +96,7 @@ export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
   getEmbeddableTransformsEnabled: () => boolean;
+  getIsNextChrome: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -212,6 +214,7 @@ export const buildServices = ({
         core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
       getEmbeddableTransformsEnabled: () =>
         core.featureFlags.getBooleanValue(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, true),
+      getIsNextChrome: () => isNextChrome(core.featureFlags),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,

@@ -61,24 +61,32 @@ export class SearchAssistantPlugin
       return {};
     }
 
-    coreStart.chrome.navControls.registerRight({
-      mount: (element) => {
-        ReactDOM.render(
-          <NavControlInitiator
-            appService={appService}
-            coreStart={coreStart}
-            pluginsStart={pluginsStart}
-          />,
-          element,
-          () => {}
-        );
+    const mountSearchAssistant = (element: HTMLElement) => {
+      ReactDOM.render(
+        <NavControlInitiator
+          appService={appService}
+          coreStart={coreStart}
+          pluginsStart={pluginsStart}
+        />,
+        element,
+        () => {}
+      );
 
-        return () => {
-          ReactDOM.unmountComponentAtNode(element);
-        };
-      },
-      // right before the user profile
+      return () => {
+        ReactDOM.unmountComponentAtNode(element);
+      };
+    };
+
+    coreStart.chrome.navControls.registerRight({
+      mount: mountSearchAssistant,
       order: 1001,
+    });
+
+    // TODO: Chrome-Next hack — dual registration needed because Chrome Next doesn't render
+    // HeaderNavControls (registerRight mount points). Remove the registerRight call once
+    // Chrome Next is the only chrome. See https://github.com/elastic/kibana/issues/260010
+    coreStart.chrome.next.aiButton.register({
+      content: mountSearchAssistant,
     });
 
     return {};

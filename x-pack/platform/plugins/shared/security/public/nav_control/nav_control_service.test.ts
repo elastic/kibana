@@ -45,10 +45,13 @@ const validLicense = {
 
 const authc = authenticationMock.createStart();
 
-const mockApiClients = (http: ReturnType<typeof httpServiceMock.createStartContract>) => ({
-  userProfiles: new UserProfileAPIClient(http),
-  users: new UserAPIClient(http),
-});
+const mockApiClients = (http: ReturnType<typeof httpServiceMock.createStartContract>) => {
+  http.get.mockResolvedValue({});
+  return {
+    userProfiles: new UserProfileAPIClient(http),
+    users: new UserAPIClient(http),
+  };
+};
 
 describe('SecurityNavControlService', () => {
   it('registers a ReactNode content for the nav control', () => {

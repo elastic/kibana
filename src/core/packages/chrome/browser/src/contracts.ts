@@ -10,6 +10,7 @@
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { ChromeNext } from './chrome_next/chrome_next';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -321,6 +322,9 @@ export interface ChromeStart {
    * Get the id of the currently active project navigation synchronously.
    */
   getActiveSolutionNavId(): SolutionId | null;
+
+  /** {@inheritdoc ChromeNext} */
+  next: ChromeNext;
 
   /**
    * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers

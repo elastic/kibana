@@ -9,6 +9,7 @@
 
 import React, { type ReactNode } from 'react';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs';
+import type { ChromeNextAiButton } from '@kbn/core-chrome-browser';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
@@ -18,11 +19,13 @@ import type { ChromeState } from './state/chrome_state';
 import type { NavControlsService } from './services/nav_controls';
 import type { NavLinksService } from './services/nav_links';
 import type { ProjectNavigationService } from './services/project_navigation';
+import type { NextHeaderService } from './services/next_header';
 import type { DocTitleService } from './services/doc_title';
 
 type NavControlsStart = ReturnType<NavControlsService['start']>;
 type NavLinksStart = ReturnType<NavLinksService['start']>;
 type ProjectNavigationStart = ReturnType<ProjectNavigationService['start']>;
+type NextHeaderStart = ReturnType<NextHeaderService['start']>;
 type DocTitleStart = ReturnType<DocTitleService['start']>;
 type RecentlyAccessedStart = ReturnType<RecentlyAccessedService['start']>;
 
@@ -34,6 +37,7 @@ export interface ChromeApiDeps {
     recentlyAccessed: RecentlyAccessedStart;
     docTitle: DocTitleStart;
     projectNavigation: ProjectNavigationStart;
+    nextHeader: NextHeaderStart;
   };
   sidebar: SidebarStart;
 }
@@ -166,6 +170,39 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
       >,
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
+
+    next: {
+      header: {
+        get$: services.nextHeader.get$,
+        set: services.nextHeader.set,
+      },
+      aiButton: {
+        get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
+        register: (button: ChromeNextAiButton) => {
+          state.aiButton.update((prev) => new Set([...prev, button]));
+          return () => {
+            state.aiButton.update((prev) => {
+              const next = new Set(prev);
+              next.delete(button);
+              return next;
+            });
+          };
+        },
+      },
+      globalSearch: {
+        get$: () => state.globalSearch.$,
+        set: state.globalSearch.set,
+      },
+      userMenu: {
+        get$: () => state.userMenu.$,
+        set: state.userMenu.set,
+      },
+      spaceSelector: {
+        get$: () => state.spaceSelector.$,
+        set: state.spaceSelector.set,
+      },
+    },
+
     sidebar,
   };
 

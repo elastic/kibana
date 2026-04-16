@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
 
 export type BadgeType = 'beta' | 'techPreview' | 'new';
 
 /**
  * A navigation item within a secondary/nested menu.
- * Secondary items appear when a primary menu item with sections is clicked or hovered.
+ * Secondary items appear when a top-level navigation item with sections is clicked or hovered.
+ *
+ * At least one of `href` or `onClick` must be provided.
  */
 export interface SecondaryMenuItem {
   /**
-   * The URL for the menu item link.
+   * (optional) The URL for the menu item link.
    */
-  href: string;
+  href?: string;
   /**
    * The unique identifier of the menu item.
    */
@@ -40,6 +43,10 @@ export interface SecondaryMenuItem {
    * (optional) Whether the link opens in a new tab.
    */
   isExternal?: boolean;
+  /**
+   * (optional) Click handler for action items (e.g. opening a flyout or modal).
+   */
+  onClick?: () => void;
 }
 
 /**
@@ -63,7 +70,7 @@ export interface SecondaryMenuSection {
 
 /**
  * A primary navigation menu item that appears in the main navigation sidebar.
- * Can optionally contain nested secondary menu sections.
+ * Primary items must always be navigable links.
  */
 export interface MenuItem {
   /**
@@ -97,12 +104,43 @@ export interface MenuItem {
 }
 
 /**
- * The complete navigation structure containing primary and footer menu items.
- * This is the main data structure passed to the Navigation component.
+ * A chrome tool control (search, help, profile, etc.) — not a navigation destination.
+ * Tool items can perform an action via `onClick` or expose submenu content via `sections`.
+ *
+ * At least one of `iconType` or `renderContent` must be provided.
+ * When both are present, `renderContent` takes precedence for the trigger visual.
+ *
+ * When `renderPopover` is present, it takes precedence over `sections` for the
+ * popover body content. They are not combined.
+ */
+export interface ToolItem {
+  id: string;
+  label: string;
+  iconType?: IconType;
+  renderContent?: (state: { isCollapsed: boolean }) => ReactNode;
+  renderPopover?: (closePopover: () => void) => ReactNode;
+  onClick?: () => void;
+  sections?: SecondaryMenuSection[];
+  popoverWidth?: number | string;
+  badgeType?: BadgeType;
+  'data-test-subj'?: string;
+  shortcutKey?: string;
+}
+
+/**
+ * Optional groupings of tool controls for the sidenav header and footer toolbars.
+ */
+export interface ToolSlots {
+  headerTools?: ToolItem[];
+  footerTools?: ToolItem[];
+}
+
+/**
+ * Navigable sidenav content: primary rail and footer links.
  */
 export interface NavigationStructure {
   /**
-   * The items to be displayed in the navigation footer.
+   * The items to be displayed in the navigation footer (navigable links).
    */
   footerItems: MenuItem[];
   /**
@@ -140,9 +178,19 @@ export interface SideNavLogo {
    */
   label: string;
   /**
+   * When `true`, the label is not rendered under the icon while the navigation is expanded.
+   * The logo link still uses `label` for `aria-label` and for the collapsed-mode tooltip.
+   */
+  hideLabel?: boolean;
+  /**
    * The logo type, e.g. `appObservability`, `appSecurity`, etc.
    */
   iconType: string;
+  /**
+   * (optional) Color of the logo icon. `'default'` renders the icon in its brand colors;
+   * `'text'` renders it monochromatically using the current text color.
+   */
+  iconColor?: 'default' | 'text';
   /**
    * (optional) `data-test-subj` attribute for testing and tracking purposes.
    */

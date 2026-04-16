@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiImage, EuiText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-interface PopoverPlaceholderProps {
+interface SearchPlaceholderProps {
   basePath: string;
   customPlaceholderMessage?: React.ReactNode;
 }
 
-export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({
+export const SearchPlaceholder = ({
   basePath,
   customPlaceholderMessage,
-}) => {
+}: SearchPlaceholderProps) => {
   const { colorMode } = useEuiTheme();
 
   return (

@@ -59,3 +59,19 @@ export type {
   SidebarSetup,
   SidebarStart,
 } from './sidebar';
+
+export type {
+  ChromeNext,
+  ChromeNextAiButton,
+  ChromeNextGlobalSearchConfig,
+  ChromeNextHeaderBack,
+  ChromeNextHeaderBadge,
+  ChromeNextHeaderCallout,
+  ChromeNextHeaderConfig,
+  ChromeNextHeaderGlobalActions,
+  ChromeNextHeaderMetadataSlotItem,
+  ChromeNextHeaderTab,
+  ChromeNextSpaceSelectorConfig,
+  ChromeNextUserMenuConfig,
+  ChromeNextUserMenuItem,
+} from './chrome_next';

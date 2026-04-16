@@ -114,6 +114,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
+  - '@kbn/core-chrome-browser'
   - '@kbn/test-jest-helpers'
   - '@kbn/scout'
   - '@kbn/cps-utils'
@@ -126,6 +127,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/lens-common'
+  - '@kbn/core-chrome-browser'
 tags:
   - plugin
   - prod

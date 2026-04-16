@@ -9,7 +9,14 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import type {
+  ChromeBadge,
+  ChromeBreadcrumb,
+  ChromeNextHeaderConfig,
+  ChromeNextGlobalSearchConfig,
+  ChromeNextSpaceSelectorConfig,
+  ChromeNextUserMenuConfig,
+} from '@kbn/core-chrome-browser';
 import type {
   InternalChromeSetup,
   InternalChromeStart,
@@ -24,6 +31,15 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 };
 
 const createStartContractMock = () => {
+  const nextHeaderState$ = new BehaviorSubject<ChromeNextHeaderConfig | undefined>(undefined);
+  const nextGlobalSearchState$ = new BehaviorSubject<ChromeNextGlobalSearchConfig | undefined>(
+    undefined
+  );
+  const nextUserMenuState$ = new BehaviorSubject<ChromeNextUserMenuConfig | undefined>(undefined);
+  const nextSpaceSelectorState$ = new BehaviorSubject<ChromeNextSpaceSelectorConfig | undefined>(
+    undefined
+  );
+
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
     withProvider: jest.fn((children) => children),
     sidebar: lazyObject(sidebarServiceMock.createStartContract()),
@@ -97,6 +113,36 @@ const createStartContractMock = () => {
       getBreadcrumbs$: jest.fn().mockReturnValue(new BehaviorSubject([])),
       getNavigation$: jest.fn().mockReturnValue(new BehaviorSubject({} as any)),
       getProjectHome$: jest.fn().mockReturnValue(of('/')),
+    }),
+    next: lazyObject({
+      header: lazyObject({
+        get$: jest.fn().mockReturnValue(nextHeaderState$),
+        set: jest.fn((config?: ChromeNextHeaderConfig) => {
+          nextHeaderState$.next(config);
+        }),
+      }),
+      aiButton: lazyObject({
+        get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+        register: jest.fn().mockReturnValue(() => {}),
+      }),
+      globalSearch: lazyObject({
+        get$: jest.fn().mockReturnValue(nextGlobalSearchState$),
+        set: jest.fn((config?: ChromeNextGlobalSearchConfig) => {
+          nextGlobalSearchState$.next(config);
+        }),
+      }),
+      userMenu: lazyObject({
+        get$: jest.fn().mockReturnValue(nextUserMenuState$),
+        set: jest.fn((config?: ChromeNextUserMenuConfig) => {
+          nextUserMenuState$.next(config);
+        }),
+      }),
+      spaceSelector: lazyObject({
+        get$: jest.fn().mockReturnValue(nextSpaceSelectorState$),
+        set: jest.fn((config?: ChromeNextSpaceSelectorConfig) => {
+          nextSpaceSelectorState$.next(config);
+        }),
+      }),
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
