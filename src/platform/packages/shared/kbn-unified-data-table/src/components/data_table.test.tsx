@@ -42,7 +42,7 @@ import {
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { defaultTimeColumnWidth } from '../constants';
@@ -235,6 +235,18 @@ describe('UnifiedDataTable', () => {
       component = await getComponent();
     });
 
+    const copySelectedDocumentsAsText = async (wrapper: ReactWrapper<UnifiedDataTableProps>) => {
+      findTestSubject(wrapper, 'unifiedDataTableSelectionBtn').simulate('click');
+      findTestSubject(wrapper, 'unifiedDataTableCopyRowsAsText').simulate('click');
+      // wait for async copy action to avoid act warning
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+      return (navigator.clipboard.writeText as jest.Mock).mock.calls.at(-1)![0];
+    };
+
+    afterEach(() => {
+      component?.unmount();
+    });
+
     test(
       'no documents are selected initially',
       async () => {
@@ -352,13 +364,45 @@ describe('UnifiedDataTable', () => {
       async () => {
         await toggleDocSelection(component, esHitsMock[2]);
         await toggleDocSelection(component, esHitsMock[1]);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
-        // wait for async copy action to avoid act warning
-        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        const copiedText = await copySelectedDocumentsAsText(component);
+        expect(copiedText).toBe(
           '"\'@timestamp"\t"_index"\t"_score"\tbytesDisplayName\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
         );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    test(
+      'copying selected documents to clipboard stays stable after sorting',
+      async () => {
+        const hits = generateEsHits(dataViewMock, 10);
+        component = await getComponent({
+          ...getProps(),
+          isPlainRecord: true,
+          columns: ['message'],
+          rows: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+        });
+
+        // Select a document
+        await toggleDocSelection(component, hits[0]);
+
+        // Copy the selected documents as text
+        const clipboardTextBeforeSorting = await copySelectedDocumentsAsText(component);
+
+        // Sort by message column
+        await act(async () => {
+          findTestSubject(component, 'dataGridHeaderCellActionButton-message').simulate('click');
+        });
+        component.update();
+        await waitForEuiPopoverOpen();
+        const actionGroup = await screen.findByTestId('dataGridHeaderCellActionGroup-message');
+        const sortButtons = within(actionGroup).getAllByRole('button', { name: /Sort/ });
+        await userEvent.click(sortButtons[1]);
+
+        // Copy the selected documents as text
+        const clipboardTextAfterSorting = await copySelectedDocumentsAsText(component);
+
+        expect(clipboardTextAfterSorting).toBe(clipboardTextBeforeSorting);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -372,11 +416,8 @@ describe('UnifiedDataTable', () => {
         });
         await toggleDocSelection(component, esHitsMock[2]);
         await toggleDocSelection(component, esHitsMock[1]);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
-        // wait for async copy action to avoid act warning
-        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        const copiedText = await copySelectedDocumentsAsText(component);
+        expect(copiedText).toBe(
           '"\'@timestamp"\tdate\textension\tname\n-\t"2020-20-01T12:12:12.124"\tjpg\ttest2\n-\t"2020-20-01T12:12:12.124"\tgif\ttest3'
         );
       },
