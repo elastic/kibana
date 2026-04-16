@@ -106,7 +106,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   const descriptionListItems = [
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelAuthorLabel', {
-        defaultMessage: 'Model author',
+        defaultMessage: 'Model family',
       }),
       description: modelAuthor,
     },

@@ -24,7 +24,7 @@ test.describe(
       await unmockInferenceEndpoints(page);
     });
 
-    test('opens flyout with model details, task badges, and author', async ({ pageObjects }) => {
+    test('opens flyout with model details, task badges, and family', async ({ pageObjects }) => {
       const { eisModels } = pageObjects;
 
       await test.step('click a model card to open the flyout', async () => {
@@ -41,8 +41,8 @@ test.describe(
         await expect(eisModels.flyoutTaskBadges).toContainText('completion');
       });
 
-      await test.step('flyout body shows model author', async () => {
-        await expect(eisModels.flyoutModelDetails).toContainText('Model author');
+      await test.step('flyout body shows model family', async () => {
+        await expect(eisModels.flyoutModelDetails).toContainText('Model family');
         await expect(eisModels.flyoutModelDetails).toContainText('Anthropic');
       });
     });
