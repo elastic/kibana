@@ -357,7 +357,6 @@ export interface IdentifyInferredFeaturesResult {
   hasDocuments: boolean;
   docsCount: number;
   docIds: string[];
-  iterationResult?: IterationResult;
   state: AccumulatedIterationState;
 }
 
@@ -456,7 +455,6 @@ export async function identifyInferredFeatures({
       hasDocuments: true,
       docsCount,
       docIds,
-      iterationResult: failedResult,
       state: {
         discoveredFeatures: prevState.discoveredFeatures,
         iterationResults: [...prevState.iterationResults, failedResult],
@@ -506,7 +504,6 @@ export async function identifyInferredFeatures({
     hasDocuments: true,
     docsCount,
     docIds,
-    iterationResult: successResult,
     state: {
       discoveredFeatures: nextDiscovered,
       iterationResults: [...prevState.iterationResults, successResult],

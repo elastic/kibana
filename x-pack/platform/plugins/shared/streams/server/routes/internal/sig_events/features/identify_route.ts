@@ -145,7 +145,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
 
       telemetry.trackFeaturesIdentified({
         run_id: runId,
-        iteration: iterationResults.length,
+        iteration: iterationResults.length + 1,
         stream_name: streamName,
         stream_type: getStreamTypeFromDefinition(stream),
         state: 'failure',
