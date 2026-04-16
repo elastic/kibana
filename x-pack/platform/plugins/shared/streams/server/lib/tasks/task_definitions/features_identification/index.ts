@@ -26,7 +26,7 @@ import {
   identifyInferredFeatures,
   identifyComputedFeatures,
   type AccumulatedIterationState,
-} from '../../../sig_events/features/features_identification_service';
+} from '../../../sig_events/features';
 
 export interface FeaturesIdentificationTaskParams {
   start: number;
