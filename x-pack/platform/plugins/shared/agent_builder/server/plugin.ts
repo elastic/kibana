@@ -50,6 +50,7 @@ import {
   setShowMemoryToolCalls,
 } from './services/execution/run_agent/run_chat_agent';
 import { registerMemoryAutoRetrievalHook, consumeUndeliveredMemories } from './services/memory/hooks/auto_retrieval_hook';
+import { initMemoryPreloader } from './services/memory/preload/memory_preloader';
 import { setGetUndeliveredMemoriesFn } from './services/execution/run_agent/graph';
 import { formatMemoryInjection } from './services/memory/hooks/before_agent_hook';
 import {
@@ -213,6 +214,13 @@ export class AgentBuilderPlugin
 
     if (this.config.memory.enabled) {
       setShowMemoryToolCalls(this.config.memory.showToolCalls);
+
+      if (this.config.memory.preload.enabled) {
+        initMemoryPreloader({
+          logger: this.logger.get('memory.preload'),
+          maxMemories: this.config.memory.preload.maxMemories,
+        });
+      }
 
       registerMemoryAutoRetrievalHook(serviceSetups, {
         logger: this.logger,

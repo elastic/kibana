@@ -265,6 +265,28 @@ export const MemoryDetailFlyout: React.FC<MemoryDetailFlyoutProps> = ({
                   ]}
                 />
                 <EuiSpacer size="m" />
+
+                {memory.params && Object.keys(memory.params).length > 0 && (
+                  <>
+                    <EuiDescriptionList
+                      listItems={[
+                        {
+                          title: i18n.translate('xpack.agentBuilder.memory.detail.paramsLabel', {
+                            defaultMessage: 'Properties',
+                          }),
+                          description: (
+                            <EuiText size="s">
+                              <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.85em' }}>
+                                {JSON.stringify(memory.params, null, 2)}
+                              </pre>
+                            </EuiText>
+                          ),
+                        },
+                      ]}
+                    />
+                    <EuiSpacer size="m" />
+                  </>
+                )}
               </>
             )}
 

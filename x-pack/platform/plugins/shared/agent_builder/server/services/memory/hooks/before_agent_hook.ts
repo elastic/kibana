@@ -18,6 +18,7 @@ import { scoreMemoryNode, DEFAULT_RETRIEVAL_CONFIG } from '../retrieval/scoring'
 import type { AgentBuilderConfig } from '../../../config';
 import { getTokenBudgetForStage } from '../retrieval/retrieval_service';
 import { runRetrieval } from '../retrieval/run_retrieval';
+import { getMemoryPreloader } from '../preload/memory_preloader';
 
 /**
  * Deps needed to register the before-agent memory injection hook.
@@ -186,45 +187,63 @@ export const runMemoryBeforeAgentHook = async (
     return;
   }
 
-  let retrievedNodes: MemoryNode[] = [];
-  try {
-    const space = getCurrentSpaceId({ request: context.request, spaces });
-
-    const convClient = await conversations.getScopedClient({ request: context.request });
-
-    retrievedNodes = await runRetrieval(retrieval.method, memoryClient, query, logger, {
-      stage: 'round_start',
-      size: 20,
-      esClient: services.elasticsearch.client.asInternalUser,
-      space,
-      userName: '',
-      config: deps.config,
-      inference,
-      request: context.request,
-      connectorId: deps.config.memory.extraction.connectorId,
-      loadConversation: async (id: string) => {
-        try {
-          return await convClient.get(id);
-        } catch {
-          return undefined;
-        }
-      },
-    });
-  } catch (err) {
-    logger.warn(`memory.beforeAgent: retrieval failed — ${(err as Error).message}`);
-    return;
+  // Check for preloaded memories first (instant, no search needed)
+  const preloader = getMemoryPreloader();
+  let preloadedNodes: MemoryNode[] = [];
+  if (preloader) {
+    // Try to get user identifier for cache lookup
+    const userName = (context.request.headers?.['x-forwarded-user'] as string) ?? '';
+    preloadedNodes = preloader.consume(userName);
+    if (preloadedNodes.length > 0) {
+      logger.info(
+        `memory.beforeAgent: using ${preloadedNodes.length} preloaded memories (0ms)`
+      );
+    }
   }
 
-  const searchDuration = Date.now() - startTime;
+  let retrievedNodes: MemoryNode[] = preloadedNodes;
 
+  // If no preloaded memories, do a live search
   if (retrievedNodes.length === 0) {
-    logger.info(`memory.beforeAgent: no memories found (search took ${searchDuration}ms)`);
-    return;
-  }
+    try {
+      const space = getCurrentSpaceId({ request: context.request, spaces });
 
-  logger.info(
-    `memory.beforeAgent: found ${retrievedNodes.length} memories in ${searchDuration}ms`
-  );
+      const convClient = await conversations.getScopedClient({ request: context.request });
+
+      retrievedNodes = await runRetrieval(retrieval.method, memoryClient, query, logger, {
+        stage: 'round_start',
+        size: 20,
+        esClient: services.elasticsearch.client.asInternalUser,
+        space,
+        userName: '',
+        config: deps.config,
+        inference,
+        request: context.request,
+        connectorId: deps.config.memory.extraction.connectorId,
+        loadConversation: async (id: string) => {
+          try {
+            return await convClient.get(id);
+          } catch {
+            return undefined;
+          }
+        },
+      });
+    } catch (err) {
+      logger.warn(`memory.beforeAgent: retrieval failed — ${(err as Error).message}`);
+      return;
+    }
+
+    const searchDuration = Date.now() - startTime;
+
+    if (retrievedNodes.length === 0) {
+      logger.info(`memory.beforeAgent: no memories found (search took ${searchDuration}ms)`);
+      return;
+    }
+
+    logger.info(
+      `memory.beforeAgent: found ${retrievedNodes.length} memories in ${searchDuration}ms`
+    );
+  }
 
   // Score and apply token budget
   const scoredNodes = scoreAndBudgetNodes(retrievedNodes, 1.0, logger);

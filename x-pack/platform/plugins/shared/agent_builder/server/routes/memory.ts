@@ -17,6 +17,7 @@ import {
   scheduleMemoryConsolidationTask,
   MEMORY_CONSOLIDATION_TASK_ID,
 } from '../services/memory/consolidation';
+import { getMemoryPreloader } from '../services/memory/preload/memory_preloader';
 
 const MEMORY_BASE_PATH = `${internalApiPath}/memory`;
 
@@ -602,6 +603,35 @@ export function registerMemoryRoutes({
           memory_id: memoryId,
           review_item_id: id,
         },
+      });
+    })
+  );
+
+  // POST /internal/agent_builder/memory/preload — preload memories for the current user
+  router.post(
+    {
+      path: `${MEMORY_BASE_PATH}/preload`,
+      validate: {},
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_READ_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const preloader = getMemoryPreloader();
+      if (!preloader) {
+        return response.ok({ body: { preloaded: 0, message: 'Preloader not initialized' } });
+      }
+
+      const { memory } = getInternalServices();
+      const memoryClient = await memory.getScopedClient({ request });
+
+      // Extract username from scoped client context
+      const userName = request.headers?.['x-forwarded-user'] as string ?? 'unknown';
+
+      await preloader.preload(memoryClient, userName);
+      const memories = preloader.get(userName);
+
+      return response.ok({
+        body: { preloaded: memories.length },
       });
     })
   );

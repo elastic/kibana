@@ -92,6 +92,10 @@ export const configSchema = schema.object({
         }),
       }),
     }),
+    preload: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      maxMemories: schema.number({ defaultValue: 10, min: 1, max: 50 }),
+    }),
     nightly: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       interval: schema.string({ defaultValue: '15m' }),
