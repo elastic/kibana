@@ -72,7 +72,9 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             title={overviewLabels.customInstructionsTitle}
             titleElement="h3"
             titleSize="xs"
-            description={currentInstructions ? undefined : overviewLabels.customInstructionsOnboardingText}
+            description={
+              currentInstructions ? undefined : overviewLabels.customInstructionsOnboardingText
+            }
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
             footer={
