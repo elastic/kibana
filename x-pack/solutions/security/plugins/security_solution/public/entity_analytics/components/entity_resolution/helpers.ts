@@ -47,7 +47,6 @@ export const getEntityRiskScore = (entity: Record<string, unknown>): number | un
 /** Row data type for the resolution group table. Defined here to avoid ESLint false positives. */
 export interface TableEntityRow {
   entity: Record<string, unknown>;
-  isSummary: boolean;
 }
 
 export const truncatedCellCss = css`
@@ -56,6 +55,11 @@ export const truncatedCellCss = css`
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+
+export const getEntityLastSeen = (entity: Record<string, unknown>): string | undefined => {
+  const value = getEntityField(entity, 'entity.lifecycle.last_seen');
+  return typeof value === 'string' ? value : undefined;
+};
 
 export const getResolutionRiskScore = (entity: Record<string, unknown>): number | undefined => {
   const score = getEntityField(
