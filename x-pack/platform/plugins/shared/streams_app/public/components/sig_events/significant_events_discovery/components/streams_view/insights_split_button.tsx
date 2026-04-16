@@ -12,9 +12,12 @@ import {
   DISCOVER_INSIGHTS_BUTTON_LABEL,
   DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL,
 } from './translations';
-import { buildConnectorMenuItem, buildConnectorSelectionPanel } from './context_menu_helpers';
-import { ContextMenuSplitButton } from './context_menu_split_button';
-import type { MenuHelpers } from './context_menu_split_button';
+import {
+  buildConnectorMenuItem,
+  buildConnectorSelectionPanel,
+} from '../shared/context_menu_helpers';
+import { ContextMenuSplitButton } from '../shared/context_menu_split_button';
+import type { MenuHelpers } from '../shared/context_menu_split_button';
 
 interface InsightsSplitButtonProps {
   allConnectors: InferenceConnector[];

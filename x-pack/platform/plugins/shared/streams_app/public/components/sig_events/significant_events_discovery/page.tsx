@@ -25,7 +25,10 @@ import { useUnbackedQueriesCount } from '../../../hooks/sig_events/use_unbacked_
 import { useDiscoverySettings } from './context';
 import { RedirectTo } from '../../redirect_to';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { KnowledgeIndicatorsTable } from './components/knowledge_indicators_table';
+import {
+  KnowledgeIndicatorsTable,
+  KiGenerationProvider,
+} from './components/knowledge_indicators_table';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
@@ -182,14 +185,16 @@ export function SignificantEventsDiscoveryPage() {
         }
         tabs={tabs}
       />
-      <StreamsAppPageTemplate.Body grow>
-        {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
-        {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
-        {tab === 'queries' && <QueriesTable />}
-        {tab === 'significant_events' && <InsightsTab />}
-        {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
-        {tab === 'settings' && <SettingsTab />}
-      </StreamsAppPageTemplate.Body>
+      <KiGenerationProvider>
+        <StreamsAppPageTemplate.Body grow>
+          {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
+          {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
+          {tab === 'queries' && <QueriesTable />}
+          {tab === 'significant_events' && <InsightsTab />}
+          {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
+          {tab === 'settings' && <SettingsTab />}
+        </StreamsAppPageTemplate.Body>
+      </KiGenerationProvider>
     </>
   );
 }

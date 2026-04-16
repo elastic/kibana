@@ -297,6 +297,12 @@ export function useKnowledgeIndicatorsTable() {
 
   const isOperationInProgress = isDeleting || isBulkOperationInProgress || isRowActionInProgress;
 
+  const hasOnlyHiddenComputedFeatures = useMemo(() => {
+    if (!hideComputedTypes || knowledgeIndicators.length === 0) return false;
+    if (filteredKnowledgeIndicators.length > 0) return false;
+    return knowledgeIndicators.some((ki) => ki.kind === 'feature' && isComputedFeature(ki.feature));
+  }, [hideComputedTypes, knowledgeIndicators, filteredKnowledgeIndicators]);
+
   const { selectionContainsNonExcludable, isSelectionActionsDisabled } = useMemo(() => {
     const containsQueries = selectedKnowledgeIndicators.some((ki) => ki.kind === 'query');
     const containsComputed = selectedKnowledgeIndicators.some(
@@ -313,6 +319,7 @@ export function useKnowledgeIndicatorsTable() {
     occurrencesByQueryId,
     isLoading,
     isEmpty,
+    refetch,
     filteredKnowledgeIndicators,
     selectedKnowledgeIndicator,
     selectedKnowledgeIndicatorId,
@@ -326,6 +333,7 @@ export function useKnowledgeIndicatorsTable() {
     isOperationInProgress,
     selectionContainsNonExcludable,
     isSelectionActionsDisabled,
+    hasOnlyHiddenComputedFeatures,
     tableSearchValue,
     debouncedSearchTerm,
     statusFilter,

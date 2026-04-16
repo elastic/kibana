@@ -7,19 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export {
-  GENERATE_FEATURES_BUTTON_LABEL,
-  GENERATE_QUERIES_BUTTON_LABEL,
-  CONNECTOR_LOAD_ERROR,
-  GENERATE_CONFIG_ARIA_LABEL,
-  GENERATE_BUTTON_LABEL,
-  MODEL_SELECTION_PANEL_TITLE,
-  MODEL_SETTINGS_LABEL,
-  DEFAULT_MODEL_BADGE_LABEL,
-  GENERATE_FEATURES_TOOLTIP,
-  GENERATE_QUERIES_TOOLTIP,
-  ONBOARDING_SCHEDULING_FAILURE_TITLE,
-} from '../shared/translations';
+export { CONNECTOR_LOAD_ERROR } from '../shared/translations';
 
 export const NAME_COLUMN_HEADER = i18n.translate('xpack.streams.streamsTreeTable.nameColumnName', {
   defaultMessage: 'Name',

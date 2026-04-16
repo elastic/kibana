@@ -6,23 +6,28 @@
  */
 
 import {
-  EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiInMemoryTable,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import React from 'react';
-import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AssetImage } from '../../../../asset_image';
 import { LoadingPanel } from '../../../../loading_panel';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
 import { DeleteTableItemsModal } from '../../../stream_detail_significant_events_view/delete_table_items_modal';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
+import { GenerateSplitButton } from '../shared/generate_split_button';
+import { StreamPicker } from '../shared/stream_picker';
+import { useKiGeneration } from './ki_generation_context';
 import { useKnowledgeIndicatorsTable } from './use_knowledge_indicators_table';
 import { useKnowledgeIndicatorsColumns } from './use_knowledge_indicators_columns';
 import { KnowledgeIndicatorsToolbar } from './knowledge_indicators_toolbar';
@@ -31,19 +36,68 @@ import {
   NO_ITEMS_MESSAGE,
   EMPTY_STATE_TITLE,
   EMPTY_STATE_DESCRIPTION,
-  EMPTY_STATE_GO_TO_STREAMS,
   DELETE_MODAL_TITLE,
+  HIDDEN_COMPUTED_FEATURES_HINT,
+  GENERATION_IN_PROGRESS_TITLE,
+  getGenerationInProgressDescription,
 } from './translations';
 
 export function KnowledgeIndicatorsTable() {
-  const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
+
+  const [generationStreamNames, setGenerationStreamNames] = useState<string[]>([]);
+
+  const {
+    generatingStreamNames,
+    isGenerating,
+    isScheduling,
+    generationCompletedAt,
+    onboardingConfig,
+    setOnboardingConfig,
+    allConnectors,
+    connectorError,
+    featuresConnectors,
+    queriesConnectors,
+    isConnectorCatalogUnavailable,
+    bulkOnboardAll,
+    bulkOnboardFeaturesOnly,
+    bulkOnboardQueriesOnly,
+  } = useKiGeneration();
+
+  const runAndClearPicker = useCallback(
+    (action: (names: string[]) => Promise<void>) => {
+      void action(generationStreamNames);
+      setGenerationStreamNames([]);
+    },
+    [generationStreamNames]
+  );
+
+  const onRunGeneration = useCallback(
+    () => runAndClearPicker(bulkOnboardAll),
+    [runAndClearPicker, bulkOnboardAll]
+  );
+  const onRunFeaturesOnly = useCallback(
+    () => runAndClearPicker(bulkOnboardFeaturesOnly),
+    [runAndClearPicker, bulkOnboardFeaturesOnly]
+  );
+  const onRunQueriesOnly = useCallback(
+    () => runAndClearPicker(bulkOnboardQueriesOnly),
+    [runAndClearPicker, bulkOnboardQueriesOnly]
+  );
+
+  const isRunDisabled =
+    generationStreamNames.length === 0 ||
+    isConnectorCatalogUnavailable ||
+    featuresConnectors.loading ||
+    queriesConnectors.loading ||
+    isScheduling;
 
   const {
     knowledgeIndicators,
     occurrencesByQueryId,
     isLoading,
     isEmpty,
+    refetch,
     filteredKnowledgeIndicators,
     selectedKnowledgeIndicator,
     selectedKnowledgeIndicatorId,
@@ -57,6 +111,7 @@ export function KnowledgeIndicatorsTable() {
     isOperationInProgress,
     selectionContainsNonExcludable,
     isSelectionActionsDisabled,
+    hasOnlyHiddenComputedFeatures,
     tableSearchValue,
     debouncedSearchTerm,
     statusFilter,
@@ -76,6 +131,17 @@ export function KnowledgeIndicatorsTable() {
     deleteKnowledgeIndicatorsInBulk,
   } = useKnowledgeIndicatorsTable();
 
+  const lastHandledGenerationCompletedAt = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (
+      generationCompletedAt !== undefined &&
+      generationCompletedAt !== lastHandledGenerationCompletedAt.current
+    ) {
+      lastHandledGenerationCompletedAt.current = generationCompletedAt;
+      refetch();
+    }
+  }, [generationCompletedAt, refetch]);
+
   const columns = useKnowledgeIndicatorsColumns({
     occurrencesByQueryId,
     selectedKnowledgeIndicatorId,
@@ -83,11 +149,56 @@ export function KnowledgeIndicatorsTable() {
     setKnowledgeIndicatorsToDelete,
   });
 
+  const generationRow = (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem>
+        <StreamPicker
+          selectedStreamNames={generationStreamNames}
+          onSelectedStreamNamesChange={setGenerationStreamNames}
+          excludedStreamNames={generatingStreamNames}
+          isDisabled={isScheduling}
+          fullWidth
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <GenerateSplitButton
+          config={onboardingConfig}
+          allConnectors={allConnectors}
+          connectorError={connectorError}
+          featuresResolvedConnectorId={featuresConnectors.resolvedConnectorId}
+          queriesResolvedConnectorId={queriesConnectors.resolvedConnectorId}
+          onConfigChange={setOnboardingConfig}
+          onRun={onRunGeneration}
+          onRunFeaturesOnly={onRunFeaturesOnly}
+          onRunQueriesOnly={onRunQueriesOnly}
+          isRunDisabled={isRunDisabled}
+          isConfigDisabled={generationStreamNames.length === 0}
+          isLoading={isScheduling}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const generationProgressCallout = isGenerating ? (
+    <>
+      <EuiSpacer size="m" />
+      <EuiCallOut
+        size="s"
+        color="primary"
+        iconType={EuiLoadingSpinner}
+        title={GENERATION_IN_PROGRESS_TITLE}
+        announceOnMount
+      >
+        <p>{getGenerationInProgressDescription(generatingStreamNames)}</p>
+      </EuiCallOut>
+    </>
+  ) : null;
+
   if (isLoading) {
     return <LoadingPanel size="l" />;
   }
 
-  if (isEmpty) {
+  if (isEmpty && !isGenerating) {
     return (
       <EuiEmptyPrompt
         aria-live="polite"
@@ -95,17 +206,16 @@ export function KnowledgeIndicatorsTable() {
         icon={<AssetImage type="knowledgeIndicatorsEmptyState" />}
         title={<h2>{EMPTY_STATE_TITLE}</h2>}
         body={<p>{EMPTY_STATE_DESCRIPTION}</p>}
-        actions={
-          <EuiButtonEmpty href={router.link('/_discovery/{tab}', { path: { tab: 'streams' } })}>
-            {EMPTY_STATE_GO_TO_STREAMS}
-          </EuiButtonEmpty>
-        }
+        actions={generationRow}
       />
     );
   }
 
   return (
     <EuiPanel hasBorder={false} hasShadow={true}>
+      {generationRow}
+      {generationProgressCallout}
+      <EuiSpacer size="m" />
       <KnowledgeIndicatorsToolbar
         knowledgeIndicators={knowledgeIndicators}
         filteredCount={filteredKnowledgeIndicators.length}
@@ -138,6 +248,17 @@ export function KnowledgeIndicatorsTable() {
           height: ${euiTheme.border.width.thick};
         `}
       />
+      {hasOnlyHiddenComputedFeatures && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="primary"
+            title={HIDDEN_COMPUTED_FEATURES_HINT}
+            announceOnMount={false}
+          />
+        </>
+      )}
       <EuiPanel
         color="transparent"
         hasShadow={false}
