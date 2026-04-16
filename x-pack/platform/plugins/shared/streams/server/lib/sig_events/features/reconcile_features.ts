@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
+import type { Logger } from '@kbn/logging';
 import {
   type Feature,
   type BaseFeature,
@@ -65,43 +66,19 @@ export function reconcileComputedFeatures({
   }));
 }
 
-export function reconcileInferredFeatures({
-  rawFeatures,
-  allKnownFeatures,
-  discoveredSet,
-  storedSet,
-  ignoredFeatures,
-  excludedFeatures,
-  featureTtlDays,
-  logger: log,
-}: {
-  rawFeatures: BaseFeature[];
-  allKnownFeatures: Feature[];
-  discoveredSet: ReadonlySet<string>;
-  storedSet: ReadonlySet<string>;
-  ignoredFeatures: IgnoredFeature[];
-  excludedFeatures: ReadonlyArray<Feature>;
-  featureTtlDays?: number;
-  logger: { debug: (msg: string | (() => string)) => void };
-}): { newFeatures: Feature[]; updatedFeatures: Feature[]; codeIgnoredCount: number } {
-  const metadata = createFeatureMetadata(featureTtlDays);
-  const newFeatures: Feature[] = [];
-  const updatedFeatures: Feature[] = [];
-
-  for (const ignored of ignoredFeatures) {
-    log.debug(
-      () =>
-        `LLM ignored feature "${ignored.feature_id}" (matched excluded "${ignored.excluded_feature_id}"): ${ignored.reason}`
-    );
-  }
-
+function filterExcluded(
+  rawFeatures: ReadonlyArray<BaseFeature>,
+  excludedFeatures: ReadonlyArray<Feature>,
+  logger: Logger
+): { nonExcluded: BaseFeature[]; codeIgnoredCount: number } {
   const excludedByLowerId = new Set(excludedFeatures.map((f) => f.id.toLowerCase()));
-
   let codeIgnoredCount = 0;
+
   const nonExcluded = rawFeatures.filter((feature) => {
-    if (excludedByLowerId.has(feature.id.toLowerCase())) {
+    const lowerId = feature.id.toLowerCase();
+    if (excludedByLowerId.has(lowerId)) {
       codeIgnoredCount++;
-      log.debug(() => `Dropping inferred feature [${feature.id}] matches excluded feature by ID`);
+      logger.debug(`Dropping inferred feature [${feature.id}] matches excluded feature by ID`);
       return false;
     }
     const fingerprintMatch = excludedFeatures.find((excluded) =>
@@ -109,15 +86,47 @@ export function reconcileInferredFeatures({
     );
     if (fingerprintMatch) {
       codeIgnoredCount++;
-      log.debug(
-        () =>
-          `Dropping inferred feature [${feature.id}] because it matches excluded feature [${fingerprintMatch.id}] by fingerprint`
+      logger.debug(
+        `Dropping inferred feature [${feature.id}] because it matches excluded feature [${fingerprintMatch.id}] by fingerprint`
       );
       return false;
     }
     return true;
   });
 
+  return { nonExcluded, codeIgnoredCount };
+}
+
+export function reconcileInferredFeatures({
+  rawFeatures,
+  allKnownFeatures,
+  discoveredFeatures,
+  ignoredFeatures,
+  excludedFeatures,
+  featureTtlDays,
+  logger,
+}: {
+  rawFeatures: BaseFeature[];
+  allKnownFeatures: Feature[];
+  discoveredFeatures: ReadonlyArray<Feature>;
+  ignoredFeatures: IgnoredFeature[];
+  excludedFeatures: ReadonlyArray<Feature>;
+  featureTtlDays?: number;
+  logger: Logger;
+}): { newFeatures: Feature[]; updatedFeatures: Feature[]; codeIgnoredCount: number } {
+  const metadata = createFeatureMetadata(featureTtlDays);
+  const newFeatures: Feature[] = [];
+  const updatedFeatures: Feature[] = [];
+
+  for (const ignored of ignoredFeatures) {
+    logger.debug(
+      `LLM ignored feature "${ignored.feature_id}" (matched excluded "${ignored.excluded_feature_id}"): ${ignored.reason}`
+    );
+  }
+
+  const { nonExcluded, codeIgnoredCount } = filterExcluded(rawFeatures, excludedFeatures, logger);
+
+  const discoveredSet = new Set(discoveredFeatures.map((f) => f.uuid));
   const byLowerId = new Map<string, Feature>();
   for (const f of allKnownFeatures) {
     byLowerId.set(f.id.toLowerCase(), f);
@@ -129,7 +138,7 @@ export function reconcileInferredFeatures({
       allKnownFeatures.find((f) => isDuplicateFeature(f, raw));
 
     if (match) {
-      if (storedSet.has(match.uuid) && !discoveredSet.has(match.uuid)) {
+      if (!discoveredSet.has(match.uuid)) {
         updatedFeatures.push({ ...raw, ...metadata, uuid: match.uuid });
       } else {
         const merged = mergeFeature(match, raw);

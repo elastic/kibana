@@ -10,7 +10,7 @@ import { isInferenceProviderError, type InferenceConnector } from '@kbn/inferenc
 import { type IdentifyFeaturesResult, getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { LogMeta } from '@kbn/logging';
+import type { Logger, LogMeta } from '@kbn/logging';
 import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import { parseError } from '../../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
@@ -20,6 +20,7 @@ import type { TaskParams } from '../../types';
 import { cancellableTask } from '../../cancellable_task';
 import { isDefinitionNotFoundError } from '../../../streams/errors/definition_not_found_error';
 import {
+  buildTelemetry,
   createEmptyAccumulatedState,
   deriveSuccessCount,
   deriveTotalTokensUsed,
@@ -45,6 +46,14 @@ function isCancellationError(message: string): boolean {
   return message.includes('ERR_CANCELED') || message.includes('Request was aborted');
 }
 
+function buildTaskResult(state: AccumulatedIterationState, durationMs: number) {
+  return {
+    durationMs,
+    iterations: state.iterationResults,
+    totalTokensUsed: deriveTotalTokensUsed(state.iterationResults),
+  };
+}
+
 async function runFeaturesIdentification(
   taskContext: TaskContext,
   runContext: Parameters<typeof cancellableTask>[1]
@@ -61,32 +70,26 @@ async function runFeaturesIdentification(
     connectorId: connectorIdOverride,
     _task,
   } = runContext.taskInstance.params as TaskParams<FeaturesIdentificationTaskParams>;
+  const taskParams = { start, end, streamName, connectorId: connectorIdOverride };
 
   const taskDurationMs = () => Date.now() - new Date(_task.created_at).getTime();
 
   const runId = uuid();
+  const emptyTelemetryCtx = {
+    run_id: runId,
+    iteration: 0,
+    stream_name: streamName,
+    stream_type: 'unknown' as const,
+    docs_count: 0,
+    excluded_features_count: 0,
+    total_filters: 0,
+    filters_capped: false,
+    has_filtered_documents: false,
+  };
   const trackEmptyTelemetry = (telemetryState: 'canceled' | 'failure') => {
-    taskContext.telemetry.trackFeaturesIdentified({
-      run_id: runId,
-      iteration: 0,
-      stream_name: streamName,
-      stream_type: 'unknown',
-      state: telemetryState,
-      docs_count: 0,
-      features_new: 0,
-      features_updated: 0,
-      input_tokens_used: 0,
-      output_tokens_used: 0,
-      total_tokens_used: 0,
-      cached_tokens_used: 0,
-      duration_ms: 0,
-      total_filters: 0,
-      filters_capped: false,
-      has_filtered_documents: false,
-      excluded_features_count: 0,
-      llm_ignored_count: 0,
-      code_ignored_count: 0,
-    });
+    taskContext.telemetry.trackFeaturesIdentified(
+      buildTelemetry(emptyTelemetryCtx, 0, { state: telemetryState })
+    );
   };
 
   const {
@@ -99,17 +102,19 @@ async function runFeaturesIdentification(
     tuningConfig,
   } = await taskContext.getScopedClients({ request: fakeRequest });
 
-  const featureClient = await getFeatureClient();
-
   const taskLogger = taskContext.logger.get('features_identification', streamName);
-  const connectorId =
-    connectorIdOverride ??
-    (await resolveConnectorForFeature({
-      searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-      featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-      featureName: 'knowledge indicator extraction',
-      request: fakeRequest,
-    }));
+
+  const [featureClient, connectorId] = await Promise.all([
+    getFeatureClient(),
+    connectorIdOverride
+      ? Promise.resolve(connectorIdOverride)
+      : resolveConnectorForFeature({
+          searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+          featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+          featureName: 'knowledge indicator extraction',
+          request: fakeRequest,
+        }),
+  ]);
   taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
   let hasTrackedIteration = false;
@@ -199,13 +204,8 @@ async function runFeaturesIdentification(
 
     await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
       _task,
-      { start, end, streamName, connectorId: connectorIdOverride },
-      {
-        features: allFeatures,
-        durationMs: taskDurationMs(),
-        iterations: state.iterationResults,
-        totalTokensUsed: deriveTotalTokensUsed(state.iterationResults),
-      }
+      taskParams,
+      { ...buildTaskResult(state, taskDurationMs()), features: allFeatures }
     );
   } catch (error) {
     if (isDefinitionNotFoundError(error)) {
@@ -230,14 +230,9 @@ async function runFeaturesIdentification(
 
     await taskClient.fail<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
       _task,
-      { start, end, streamName, connectorId: connectorIdOverride },
+      taskParams,
       errorMessage,
-      {
-        features: [],
-        durationMs: taskDurationMs(),
-        iterations: state.iterationResults,
-        totalTokensUsed: deriveTotalTokensUsed(state.iterationResults),
-      }
+      { ...buildTaskResult(state, taskDurationMs()), features: [] }
     );
 
     if (!hasTrackedIteration) {
@@ -252,7 +247,7 @@ async function resolveErrorMessage(
   error: unknown,
   inferenceClient: { getConnectorById: (id: string) => Promise<InferenceConnector> },
   connectorId: string,
-  logger: { warn: (msg: string) => void }
+  logger: Logger
 ): Promise<string> {
   if (!isInferenceProviderError(error)) {
     return parseError(error).message;

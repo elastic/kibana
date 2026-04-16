@@ -13,9 +13,10 @@ export {
 } from './iteration_state';
 export type { AccumulatedIterationState } from './iteration_state';
 
-export { identifyInferredFeatures } from './identify_inferred_features';
+export { identifyInferredFeatures, buildTelemetry } from './identify_inferred_features';
 export type {
   FeaturesIdentifiedTelemetry,
+  TelemetryContext,
   IdentifyInferredFeaturesOptions,
   IdentifyInferredFeaturesResult,
 } from './identify_inferred_features';
