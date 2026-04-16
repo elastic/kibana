@@ -211,11 +211,14 @@ async function runWatchBuild(
     const cleanupStaleHotUpdates = (newHash: string) => {
       const keepHash = previousBuildHash;
       previousBuildHash = newHash;
-      if (!keepHash) return;
       Fs.readdir(compiler.outputPath, (err, files) => {
         if (err) return;
         for (const file of files) {
-          if (/\.hot-update\.(js|json)(\.map)?$/.test(file) && !file.includes(keepHash)) {
+          if (
+            /\.hot-update\.(js|json)(\.map)?$/.test(file) &&
+            !file.includes(newHash) &&
+            (!keepHash || !file.includes(keepHash))
+          ) {
             Fs.unlink(Path.join(compiler.outputPath, file), () => {});
           }
         }

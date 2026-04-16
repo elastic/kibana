@@ -64,6 +64,7 @@ delete the legacy branch/assertions and keep only the rspack assertions.
 - [ ] `packages/kbn-ci-stats-shipper-cli/ship_ci_stats_cli.test.ts`: Delete the "does not include kbn-rspack-optimizer" test case that asserts the legacy update command. The rspack update command test becomes the only case.
 - [ ] `packages/kbn-plugin-helpers/src/integration_tests/build.test.ts`: Delete the original "builds a generated plugin into a viable archive" test (legacy webpack path). The "[rspack-transition]" rspack build test becomes the sole build test. Remove `KBN_USE_RSPACK` env override (it will be the default).
 - [ ] `x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts`: Delete the legacy `else` branch (`toStrictEqual` for webpack-only labels) and `RSPACK_ONLY_BUNDLE_LABELS`; keep a single assertion set for unified RSPack bundles only.
+- [ ] `src/platform/packages/shared/kbn-test/src/functional_tests/run_tests/run_tests.ts`: Remove the `[rspack-transition]` conditional; keep only the rspack build script reference (`node scripts/build_rspack_bundles`, or its successor name after the package rename).
 
 ## Package rename
 
