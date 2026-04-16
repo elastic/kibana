@@ -115,6 +115,28 @@ export const DUPLICATE_AND_DELETE_RULE = i18n.translate(
   }
 );
 
+export const DUPLICATE_AND_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.duplicateAndDeleteConfirmationTitle',
+  {
+    defaultMessage: 'Duplicate and delete this rule?',
+  }
+);
+
+export const DUPLICATE_AND_DELETE_CONFIRMATION_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.duplicateAndDeleteConfirmationDescription',
+  {
+    defaultMessage:
+      'The original deprecated rule will be permanently deleted after duplication. Choose what to include in the duplicate:',
+  }
+);
+
+export const DUPLICATE_AND_DELETE_CONFIRM_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.duplicateAndDeleteConfirmButton',
+  {
+    defaultMessage: 'Duplicate and delete',
+  }
+);
+
 export const DEPRECATION_REASON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.deprecation.reasonLabel',
   {

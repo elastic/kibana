@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -16,6 +16,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
 import { usePrebuiltRulesDeprecationReview } from '../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review';
 import { DeprecatedRulesCallout } from './deprecated_rules_callout';
+import { DeprecatedRuleDuplicateConfirmation } from './deprecated_rule_duplicate_confirmation';
 import * as i18n from './translations';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common';
 import {
@@ -26,13 +27,11 @@ import {
 interface UseDeprecatedRuleDetailsCalloutProps {
   rule: RuleResponse | null;
   confirmDeletion: () => Promise<boolean>;
-  showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
 }
 
 export const useDeprecatedRuleDetailsCallout = ({
   rule,
   confirmDeletion,
-  showBulkDuplicateExceptionsConfirmation,
 }: UseDeprecatedRuleDetailsCalloutProps) => {
   const {
     application: { navigateToApp },
@@ -49,6 +48,26 @@ export const useDeprecatedRuleDetailsCallout = ({
     { enabled: isFeatureEnabled && isPrebuiltRule }
   );
   const { executeBulkAction } = useExecuteBulkAction();
+
+  const [isDuplicateConfirmVisible, setIsDuplicateConfirmVisible] = useState(false);
+  const duplicateConfirmResolveRef = useRef<(option: string | null) => void>();
+
+  const showDuplicateConfirmation = useCallback((): Promise<string | null> => {
+    setIsDuplicateConfirmVisible(true);
+    return new Promise<string | null>((resolve) => {
+      duplicateConfirmResolveRef.current = resolve;
+    }).finally(() => {
+      setIsDuplicateConfirmVisible(false);
+    });
+  }, []);
+
+  const handleDuplicateConfirmCancel = useCallback(() => {
+    duplicateConfirmResolveRef.current?.(null);
+  }, []);
+
+  const handleDuplicateConfirmConfirm = useCallback((option: string) => {
+    duplicateConfirmResolveRef.current?.(option);
+  }, []);
 
   const navigateToRulesPage = useCallback(() => {
     navigateToApp(APP_UI_ID, {
@@ -76,16 +95,13 @@ export const useDeprecatedRuleDetailsCallout = ({
       return;
     }
 
-    // Show the exceptions confirmation modal if user has exceptions privileges,
-    // otherwise duplicate without exceptions
     const duplicateOption = canEditExceptions
-      ? await showBulkDuplicateExceptionsConfirmation()
+      ? await showDuplicateConfirmation()
       : DuplicateOptions.withoutExceptions;
     if (duplicateOption === null) {
       return;
     }
 
-    // Duplicate the rule
     const duplicateResult = await executeBulkAction({
       type: BulkActionTypeEnum.duplicate,
       ids: [rule.id],
@@ -102,29 +118,20 @@ export const useDeprecatedRuleDetailsCallout = ({
     const createdRules = duplicateResult?.attributes?.results?.created;
     const newRuleId = createdRules?.[0]?.id;
 
-    // Only proceed with delete if the duplicate was actually created
     if (!newRuleId) {
       return;
     }
 
-    // Delete the original deprecated rule
     await executeBulkAction({
       type: BulkActionTypeEnum.delete,
       ids: [rule.id],
     });
 
-    // Navigate to the new rule's details page
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(newRuleId),
     });
-  }, [
-    rule,
-    canEditExceptions,
-    showBulkDuplicateExceptionsConfirmation,
-    executeBulkAction,
-    navigateToApp,
-  ]);
+  }, [rule, canEditExceptions, showDuplicateConfirmation, executeBulkAction, navigateToApp]);
 
   const deprecatedRule = data?.rules?.[0];
 
@@ -133,30 +140,38 @@ export const useDeprecatedRuleDetailsCallout = ({
   }
 
   return (
-    <DeprecatedRulesCallout
-      title={i18n.DEPRECATION_DETAILS_CALLOUT_TITLE}
-      description={i18n.DEPRECATION_DETAILS_CALLOUT_DESCRIPTION}
-      reason={deprecatedRule.deprecated_reason}
-      buttons={[
-        <EuiButton
-          color="warning"
-          onClick={handleDelete}
-          disabled={!canEditRules}
-          data-test-subj="deprecated-rule-delete-button"
-          fill
-        >
-          {i18n.DELETE_RULE}
-        </EuiButton>,
-        <EuiButton
-          color="warning"
-          onClick={handleDuplicateAndDelete}
-          disabled={!canEditRules}
-          data-test-subj="deprecated-rule-duplicate-and-delete-button"
-        >
-          {i18n.DUPLICATE_AND_DELETE_RULE}
-        </EuiButton>,
-      ]}
-      dataTestSubj="deprecated-rule-details-callout"
-    />
+    <>
+      <DeprecatedRulesCallout
+        title={i18n.DEPRECATION_DETAILS_CALLOUT_TITLE}
+        description={i18n.DEPRECATION_DETAILS_CALLOUT_DESCRIPTION}
+        reason={deprecatedRule.deprecated_reason}
+        buttons={[
+          <EuiButton
+            color="warning"
+            onClick={handleDelete}
+            disabled={!canEditRules}
+            data-test-subj="deprecated-rule-delete-button"
+            fill
+          >
+            {i18n.DELETE_RULE}
+          </EuiButton>,
+          <EuiButton
+            color="warning"
+            onClick={handleDuplicateAndDelete}
+            disabled={!canEditRules}
+            data-test-subj="deprecated-rule-duplicate-and-delete-button"
+          >
+            {i18n.DUPLICATE_AND_DELETE_RULE}
+          </EuiButton>,
+        ]}
+        dataTestSubj="deprecated-rule-details-callout"
+      />
+      {isDuplicateConfirmVisible && (
+        <DeprecatedRuleDuplicateConfirmation
+          onCancel={handleDuplicateConfirmCancel}
+          onConfirm={handleDuplicateConfirmConfirm}
+        />
+      )}
+    </>
   );
 };
