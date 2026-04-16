@@ -8,7 +8,7 @@
  */
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
@@ -18,7 +18,7 @@ import { useChartSectionInspector } from '../../../../context/chart_section_insp
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
-import { mergeDimensions } from '../utils/merge_dimensions';
+import { useAccumulatedDimensions } from './use_accumulated_dimensions';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -55,31 +55,19 @@ export function useFetchMetricsData({
 
   // Accumulate dimensions across filtered fetches so that selecting additional
   // breakdown dimensions does not remove previously-available dimensions from
-  // the picker. Reset when anything other than the selected dimensions changes
-  // the data context (query, time range, Discover filters, ES|QL variables),
-  // since those changes can legitimately remove dimensions from the result.
-  const accumulatedDimensionsRef = useRef<Dimension[]>([]);
-  const dataContextKey = useMemo(
-    () =>
-      JSON.stringify({
-        esql,
-        timeRange: fetchParams.timeRange,
-        filters: fetchParams.filters,
-        esqlVariables: fetchParams.esqlVariables,
-      }),
-    [esql, fetchParams.timeRange, fetchParams.filters, fetchParams.esqlVariables]
-  );
-  const previousDataContextKeyRef = useRef<string | undefined>(dataContextKey);
+  // the picker. Reset on any data-context change (query, time range, Discover
+  // filters, ES|QL variables), since those can legitimately remove dimensions.
+  const mergeAccumulatedDimensions = useAccumulatedDimensions([
+    esql,
+    fetchParams.timeRange,
+    fetchParams.filters,
+    fetchParams.esqlVariables,
+  ]);
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (
       signal: AbortSignal
     ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
-      if (dataContextKey !== previousDataContextKeyRef.current) {
-        accumulatedDimensionsRef.current = [];
-        previousDataContextKeyRef.current = dataContextKey;
-      }
-
       const documents = await trackRequest(
         'Grid of metrics',
         'This request queries Elasticsearch to fetch metrics info for the grid.',
@@ -115,18 +103,10 @@ export function useFetchMetricsData({
       const parsed = parseMetricsWithTelemetry(documents, getFieldType);
 
       // Merge newly-fetched dimensions with the accumulated set so that
-      // dimensions from the unfiltered response are not lost when a
-      // WHERE filter narrows the result set. Skip the ref write when this
-      // fetch has been aborted: a newer fetch may have already reset the ref
-      // for a new data context, and writing stale dimensions here would
-      // corrupt its accumulator.
-      const mergedDimensions = mergeDimensions(
-        accumulatedDimensionsRef.current,
-        parsed.allDimensions
-      );
-      if (!signal.aborted) {
-        accumulatedDimensionsRef.current = mergedDimensions;
-      }
+      // dimensions from the unfiltered response are not lost when a WHERE
+      // filter narrows the result set. Pass signal.aborted so the hook can
+      // skip persisting dimensions from a fetch whose data context is gone.
+      const mergedDimensions = mergeAccumulatedDimensions(parsed.allDimensions, signal.aborted);
 
       const sortedMetrics: ParsedMetrics = {
         metricItems: [...parsed.metricItems].sort((a, b) =>
@@ -146,7 +126,7 @@ export function useFetchMetricsData({
     },
     [
       metricsInfoQuery,
-      dataContextKey,
+      mergeAccumulatedDimensions,
       trackRequest,
       fetchParams.dataView,
       fetchParams.timeRange,
