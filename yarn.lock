@@ -12255,10 +12255,10 @@
     leven "^3.1.0"
     picocolors "^1.1.1"
 
-"@readme/openapi-parser@^5.4.0":
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/@readme/openapi-parser/-/openapi-parser-5.5.0.tgz#ec34e46811ddc1bbda6ae0f99e0a3b69968ea761"
-  integrity sha512-uY9+3ouf6NWd/ck5PzlhcRwvRFLDd9ajRsMzZPp/iqdReGgPR7m8xEXtCYbLTGXJZcrDgYyNsHUL7e87Wsh+ew==
+"@readme/openapi-parser@^6.0.0":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@readme/openapi-parser/-/openapi-parser-6.0.1.tgz#6227167da7128a96b1ef12501077092c16e578e2"
+  integrity sha512-uMtwMPVv86Xr5Y6A+QFrxLwWW1irJp3TIz7R3Zs2WaX383MPYX5kaQemPBsaHCu58ZULd+bosNIGUoFW8KM5Ew==
   dependencies:
     "@apidevtools/json-schema-ref-parser" "^14.1.1"
     "@readme/better-ajv-errors" "^2.3.2"
@@ -25705,10 +25705,10 @@ jsonify@^0.0.1:
   resolved "https://registry.yarnpkg.com/jsonify/-/jsonify-0.0.1.tgz#2aa3111dae3d34a0f151c63f3a45d995d9420978"
   integrity sha512-2/Ki0GcmuqSrgFyelQq9M05y7PS0mEwuIzrf3f1fPqkVDVRvZrPZtVSMHxdgo8Aq0sxAOb/cr2aqqA3LeWHVPg==
 
-jsonpath-plus@^10.0.0:
-  version "10.3.0"
-  resolved "https://registry.yarnpkg.com/jsonpath-plus/-/jsonpath-plus-10.3.0.tgz#59e22e4fa2298c68dfcd70659bb47f0cad525238"
-  integrity sha512-8TNmfeTCk2Le33A3vRRwtuworG/L5RrgMvdjhKZxvyShO+mBu2fP50OWUjRLNtvw344DdDarFh9buFAZs5ujeA==
+jsonpath-plus@^10.4.0:
+  version "10.4.0"
+  resolved "https://registry.yarnpkg.com/jsonpath-plus/-/jsonpath-plus-10.4.0.tgz#73cf545c231afda21452150b7a2a58e48e109702"
+  integrity sha512-T92WWatJXmhBbKsgH/0hl+jxjdXrifi5IKeMY02DWggRxX0UElcbVzPlmgLTbvsPeW1PasQ6xE2Q75stkhGbsA==
   dependencies:
     "@jsep-plugin/assignment" "^1.3.0"
     "@jsep-plugin/regex" "^1.0.4"
@@ -28168,19 +28168,20 @@ oas-validator@^5.0.8:
     should "^13.2.1"
     yaml "^1.10.0"
 
-oas@28.7.0:
-  version "28.7.0"
-  resolved "https://registry.yarnpkg.com/oas/-/oas-28.7.0.tgz#97c0453721d4faf6fc3cec5402d757c0efbd24da"
-  integrity sha512-9lX/qThyOYs6DURDW8C7JUUn0jsI/fZY3QPlG3kmmCg1svlYTnC5xTvj9sShRuIboEL+oaVvHQ+iyLleeacSrg==
+oas@32.1.3:
+  version "32.1.3"
+  resolved "https://registry.yarnpkg.com/oas/-/oas-32.1.3.tgz#719375510c13e0c197e0d468be38a6a5261e0fb5"
+  integrity sha512-SxUbz7l6uzOvUlnnCwlNXuCrOymvH2062MHn66hJkhRWaOsY/T+M4TScVlfjbcF0SiVyy8tc5II9vZhx2fskQg==
   dependencies:
-    "@readme/openapi-parser" "^5.4.0"
+    "@apidevtools/json-schema-ref-parser" "^14.1.1"
+    "@readme/openapi-parser" "^6.0.0"
     "@types/json-schema" "^7.0.11"
     json-schema-merge-allof "^0.8.1"
-    jsonpath-plus "^10.0.0"
+    jsonpath-plus "^10.4.0"
     jsonpointer "^5.0.0"
     memoizee "^0.4.16"
     openapi-types "^12.1.1"
-    path-to-regexp "^8.1.0"
+    path-to-regexp "^8.4.0"
     remove-undefined-objects "^7.0.0"
 
 object-assign@^4, object-assign@^4.0.1, object-assign@^4.1.1:
@@ -29039,10 +29040,10 @@ path-to-regexp@^6.3.0:
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-6.3.0.tgz#2b6a26a337737a8e1416f9272ed0766b1c0389f4"
   integrity sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==
 
-path-to-regexp@^8.0.0, path-to-regexp@^8.1.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-8.2.0.tgz#73990cc29e57a3ff2a0d914095156df5db79e8b4"
-  integrity sha512-TdrF7fW9Rphjq4RjrW0Kp2AW0Ahwu9sRGTkS6bvDi0SCwZlEZYmcfDbEsTz8RVk0EHIS/Vd1bv3JhG+1xZuAyQ==
+path-to-regexp@^8.0.0, path-to-regexp@^8.4.0:
+  version "8.4.2"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-8.4.2.tgz#795c420c4f7ca45c5b887366f622ee0c9852cccd"
+  integrity sha512-qRcuIdP69NPm4qbACK+aDogI5CBDMi1jKe0ry5rSQJz8JVLsC7jV8XpiJjGRLLol3N+R5ihGYcrPLTno6pAdBA==
 
 path-to-regexp@~0.1.12:
   version "0.1.13"
