@@ -12,6 +12,7 @@ paths:
       operationId: OsqueryGetUnifiedHistory
       x-codegen-enabled: true
       x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
       parameters:
         - name: pageSize
           in: query

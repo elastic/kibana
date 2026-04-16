@@ -13,6 +13,7 @@ paths:
       operationId: OsqueryGetScheduledActionResults
       x-codegen-enabled: true
       x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
       parameters:
         - name: scheduleId
           in: path
@@ -79,7 +80,12 @@ paths:
                       queryName: 'uptime'
                       queryText: 'select * from uptime;'
                       timestamp: '2024-07-26T09:00:00.000Z'
-                    edges: [{}]
+                    edges:
+                      - _id: 'result-001'
+                        fields:
+                          agent_id: '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                          status: 'success'
+                          rows_count: 5
                     total: 10
                     currentPage: 0
                     pageSize: 20
@@ -100,6 +106,7 @@ paths:
       operationId: OsqueryGetScheduledQueryResults
       x-codegen-enabled: true
       x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
       parameters:
         - name: scheduleId
           in: path
@@ -168,4 +175,12 @@ paths:
                   value:
                     data:
                       total: 2
-                      edges: [{}, {}]
+                      edges:
+                        - _id: 'row-001'
+                          fields:
+                            host.uptime:
+                              - '12345'
+                        - _id: 'row-002'
+                          fields:
+                            host.uptime:
+                              - '67890'
