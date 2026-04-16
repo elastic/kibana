@@ -74,13 +74,6 @@ export const validateSearchRulesRequestBody = (body: SearchRulesRequestBodyInput
   const hasGapRangeStart = Boolean(body.gaps_range_start);
   const hasGapRangeEnd = Boolean(body.gaps_range_end);
 
-  const gapParamsSet = new Set([hasGapFilters, hasGapRangeStart, hasGapRangeEnd]);
-  if (gapParamsSet.size > 1) {
-    errors.push(
-      '"gap_fill_statuses", "gaps_range_start" and "gaps_range_end" must be specified together'
-    );
-  }
-
   const hasSearchAfter = body.search_after != null && body.search_after.length > 0;
   if (hasSearchAfter && hasGapFilters && hasGapRangeStart && hasGapRangeEnd) {
     errors.push(

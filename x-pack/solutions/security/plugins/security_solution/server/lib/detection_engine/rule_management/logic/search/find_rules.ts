@@ -35,7 +35,7 @@ export interface FindRuleOptions {
   searchAfter?: SortResults;
   hasReference?: HasReferences | undefined;
   ruleIds?: string[] | undefined;
-  aggregations?: AggregationsAggregationContainer;
+  aggregations?: Record<string, AggregationsAggregationContainer>;
 }
 
 export const findRules = ({

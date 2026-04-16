@@ -64,7 +64,6 @@ const resolveGapPreFilter = async ({
   page,
   perPage,
 }: {
-  body: SearchRulesRequestBody;
   rulesClient: Parameters<typeof getGapFilteredRuleIds>[0]['rulesClient'];
   filter: string | undefined;
   sortField: SearchRulesRequestBody['sort_field'];
@@ -119,9 +118,7 @@ const resolveGapPreFilter = async ({
   return { ruleIds: gapRuleIds, warnings };
 };
 
-const resolveEffectiveFields = (
-  fields: SearchRulesField[] | undefined
-): string[] | undefined =>
+const resolveEffectiveFields = (fields: SearchRulesField[] | undefined): string[] | undefined =>
   fields?.length ? Array.from(new Set([...fields, ...REQUIRED_TRANSFORM_FIELDS])) : undefined;
 
 /**
@@ -194,7 +191,6 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: L
             : undefined;
 
           const gapPreFilter = await resolveGapPreFilter({
-            body: request.body,
             rulesClient,
             filter: combinedKql,
             sortField,

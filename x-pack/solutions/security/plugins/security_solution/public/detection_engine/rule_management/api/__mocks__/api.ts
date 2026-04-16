@@ -19,6 +19,7 @@ import type {
   FetchRulesResponse,
   FetchSearchRulesProps,
   FetchRulesProps,
+  FetchSearchRulesResponse,
 } from '../../logic/types';
 
 export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
@@ -59,7 +60,7 @@ export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse
 
 export const fetchSearchRules = async (
   _: FetchSearchRulesProps
-): Promise<FetchRulesResponse> => Promise.resolve(rulesMock);
+): Promise<FetchSearchRulesResponse> => Promise.resolve(rulesMock);
 
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
   Promise.resolve(['elastic', 'love', 'quality', 'code']);
