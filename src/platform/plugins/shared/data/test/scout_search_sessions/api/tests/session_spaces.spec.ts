@@ -45,7 +45,7 @@ apiTest.describe(
       };
 
       // Run search in the space
-      const searchRes = await apiClient.post(`s/${spaceId}/${ESE_API_PATH}`, {
+      const searchRes = await apiClient.post(`s/${spaceId}${ESE_API_PATH}`, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: { sessionId, params: searchParams, requestHash: randomHash() },
       });
@@ -53,7 +53,7 @@ apiTest.describe(
       const { id } = searchRes.body;
 
       // Persist session in the space
-      await apiClient.post(`s/${spaceId}/${SESSION_API_PATH}`, {
+      await apiClient.post(`s/${spaceId}${SESSION_API_PATH}`, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: {
           sessionId,
@@ -65,7 +65,7 @@ apiTest.describe(
       });
 
       // Run search to persist into session
-      await apiClient.post(`s/${spaceId}/${ESE_API_PATH}/${id}`, {
+      await apiClient.post(`s/${spaceId}${ESE_API_PATH}/${id}`, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: {
           sessionId,
@@ -78,7 +78,7 @@ apiTest.describe(
       // Wait for search to be persisted
       await waitFor(
         async () => {
-          const resp = await apiClient.get(`s/${spaceId}/${SESSION_API_PATH}/${sessionId}`, {
+          const resp = await apiClient.get(`s/${spaceId}${SESSION_API_PATH}/${sessionId}`, {
             headers: { ...COMMON_HEADERS, ...cookieHeader },
           });
           if (resp.statusCode !== 200) return false;
@@ -92,7 +92,7 @@ apiTest.describe(
       // Wait for session to complete
       await waitFor(
         async () => {
-          const resp = await apiClient.get(`s/${spaceId}/${SESSION_API_PATH}/${sessionId}/status`, {
+          const resp = await apiClient.get(`s/${spaceId}${SESSION_API_PATH}/${sessionId}/status`, {
             headers: { ...COMMON_HEADERS, ...cookieHeader },
           });
           return resp.body.status;
